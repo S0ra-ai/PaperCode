@@ -1,0 +1,94 @@
+id: task-003-import-opencode
+title: Import OpenCode release snapshot as product hard fork
+status: todo
+priority: critical
+owner: codex
+tags:
+- opencode
+- migration
+- upstream
+depends_on:
+- task-002-legacy-archive
+description: Confirm the official OpenCode upstream release, import a source snapshot
+  into the repository, and record upstream provenance. This is a product-level hard
+  fork rather than a plugin-only integration.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-003-step-01-confirm-upstream
+  title: Confirm OpenCode upstream release
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Use official upstream sources to identify the release URL, tag, commit,
+    and license file that will be imported.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-003-step-02-import-source-snapshot
+  title: Import OpenCode source snapshot
+  status: todo
+  owner: codex
+  depends_on:
+  - task-003-step-01-confirm-upstream
+  description: Import source, docs, tests, package files, and configuration while
+    excluding .git, node_modules, caches, build output, and downloaded archives.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-003-step-03-protect-project-paths
+  title: Preserve paper_fucker project paths
+  status: todo
+  owner: codex
+  depends_on:
+  - task-003-step-02-import-source-snapshot
+  description: Ensure legacy/, .plan/, NOTICE.md, README.md, CHANGELOG, and future
+    research-tools paths are not overwritten by upstream files.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-003-step-04-upstream-manifest
+  title: Record OpenCode upstream manifest
+  status: todo
+  owner: codex
+  depends_on:
+  - task-003-step-02-import-source-snapshot
+  description: Create upstream manifest with URL, tag, commit, license, import date,
+    and filtering decisions.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: file
+  path: upstream/opencode-manifest.json
+  description: OpenCode upstream provenance manifest
+- type: directory
+  path: opencode-upstream
+  description: Imported OpenCode source snapshot or equivalent root integration
+- type: file
+  path: NOTICE.md
+  description: Updated third-party OpenCode notice
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-08T01:23:44.019572'
+  updated_at: '2026-05-08T01:23:44.019572'
+  version: '1'

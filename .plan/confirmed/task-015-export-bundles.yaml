@@ -1,0 +1,115 @@
+id: task-015-export-bundles
+title: Implement final and forced draft export bundles
+status: todo
+priority: high
+owner: codex
+tags:
+- export
+- markdown
+- latex
+- pdf
+- docx
+depends_on:
+- task-006-python-tool-bridge
+- task-008-preview-runtime
+- task-010-template-resolve
+- task-013-writing-claim-ledger
+- task-014-verification-gate
+description: Implement export bundles for Markdown, LaTeX, PDF, and DOCX. Final export
+  requires authenticity gate success. If the gate fails, users may force a draft export,
+  but it must be clearly marked as forced draft and include failed checks.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-015-step-01-export-schema
+  title: Define ExportBundle and manifest schema
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Define ExportBundle, file manifest, final vs forced-draft status, verification
+    summary, tool versions, and source artifact refs.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-015-step-02-markdown-latex-export
+  title: Implement Markdown and LaTeX export
+  status: todo
+  owner: codex
+  depends_on:
+  - task-015-step-01-export-schema
+  description: Export Markdown fact draft and apply TemplateSpec to produce LaTeX
+    with references, figures, tables, and diagnostics.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-015-step-03-pdf-docx-export
+  title: Implement PDF and DOCX export
+  status: todo
+  owner: codex
+  depends_on:
+  - task-015-step-02-markdown-latex-export
+  description: Use configured external tools/Python bridge to render PDF and DOCX,
+    recording versions, logs, warnings, and output paths.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-015-step-04-forced-draft-export
+  title: Implement forced draft export policy
+  status: todo
+  owner: codex
+  depends_on:
+  - task-015-step-03-pdf-docx-export
+  description: Allow user-forced draft export after gate failure, mark it clearly
+    as forced draft, include failed checks, and never label it final.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-015-step-05-export-tests
+  title: Verify export scenarios
+  status: todo
+  owner: codex
+  depends_on:
+  - task-015-step-04-forced-draft-export
+  description: Test final export success, gate failure blocking final, forced draft
+    export, missing external tool diagnostics, and manifest completeness.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: artifact
+  path: ExportBundle
+  description: Final or forced draft export artifact
+- type: directory
+  path: exports
+  description: Generated Markdown/LaTeX/PDF/DOCX bundles
+- type: report
+  path: reports/export-bundles.md
+  description: Export verification report
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-08T01:26:19.912255'
+  updated_at: '2026-05-08T01:26:19.912255'
+  version: '1'

@@ -1,0 +1,110 @@
+id: task-008-preview-runtime
+title: Build realtime read-only research preview
+status: todo
+priority: high
+owner: codex
+tags:
+- preview
+- web
+- rendering
+- annotations
+depends_on:
+- task-005-research-runtime
+- task-006-python-tool-bridge
+- task-017-core-contract
+description: Implement the localhost token-protected read-only web preview that streams
+  Markdown, LaTeX, PDF, DOCX, annotations, diagnostics, and render status while all
+  mutations remain in the TUI/OpenCode runtime.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-008-step-01-preview-protocol
+  title: Define preview protocol and security
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Define localhost-only preview server, one-time token URL, read-only
+    endpoints, render event stream, and run binding.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-008-step-02-preview-ui
+  title: Implement preview web UI
+  status: todo
+  owner: codex
+  depends_on:
+  - task-008-step-01-preview-protocol
+  description: Build tabs or panes for Markdown, LaTeX, PDF, DOCX, annotations, diagnostics,
+    render status, and source locations.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-008-step-03-render-queue
+  title: Implement realtime render queue
+  status: todo
+  owner: codex
+  depends_on:
+  - task-008-step-01-preview-protocol
+  description: Stream Markdown immediately and queue automatic LaTeX/PDF/DOCX rebuilds,
+    cancelling stale render jobs when newer content arrives.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-008-step-04-annotation-linking
+  title: Implement LSP-like annotation linking
+  status: todo
+  owner: codex
+  depends_on:
+  - task-008-step-02-preview-ui
+  description: Display claim, citation, template, experiment, reviewer, cost, and
+    agent diagnostics with source ranges and links back to the TUI context.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-008-step-05-preview-smoke
+  title: Verify preview smoke behavior
+  status: todo
+  owner: codex
+  depends_on:
+  - task-008-step-03-render-queue
+  - task-008-step-04-annotation-linking
+  description: Start a run preview, verify token access, verify no write operations
+    are exposed, and verify realtime updates across Markdown and derived render artifacts.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: directory
+  path: packages/preview
+  description: Read-only local preview UI/server integration
+- type: report
+  path: reports/preview-smoke.md
+  description: Realtime preview verification report
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-08T01:24:45.484328'
+  updated_at: '2026-05-08T05:59:22.501703'
+  version: '1'

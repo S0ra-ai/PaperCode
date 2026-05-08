@@ -1,0 +1,116 @@
+id: task-011-literature-data
+title: Implement open-source literature and data discovery
+status: todo
+priority: high
+owner: codex
+tags:
+- literature
+- data
+- sources
+- licenses
+depends_on:
+- task-006-python-tool-bridge
+- task-009-auto-orchestrator
+description: Implement open-source-first literature and dataset discovery for CS/AI
+  experimental papers. Sources must be recorded with license, version, URL, hash where
+  applicable, and verification status.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-011-step-01-source-policy
+  title: Define source policy and artifact schemas
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Define LiteratureMap, DataPlan, DatasetCard, SourceRecord, license
+    metadata, version metadata, and verification status.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-011-step-02-literature-discovery
+  title: Implement literature discovery and clustering
+  status: todo
+  owner: codex
+  depends_on:
+  - task-011-step-01-source-policy
+  description: Search and cluster literature from arXiv, OpenAlex, Crossref, Semantic
+    Scholar, DBLP, and related open sources.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-011-step-03-dataset-discovery
+  title: Implement dataset discovery and license checks
+  status: todo
+  owner: codex
+  depends_on:
+  - task-011-step-01-source-policy
+  description: Find datasets from HuggingFace, Kaggle, GitHub, paper official pages,
+    and benchmark sources; record licenses and access constraints.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-011-step-04-direction-feasibility
+  title: Implement feasibility and automatic turn policy
+  status: todo
+  owner: codex
+  depends_on:
+  - task-011-step-02-literature-discovery
+  - task-011-step-03-dataset-discovery
+  description: Assess whether the user topic can support an experimental paper; in
+    Full Access automatically turn to a nearby feasible direction while recording
+    rationale and rollback data.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-011-step-05-discovery-tests
+  title: Verify literature/data discovery scenarios
+  status: todo
+  owner: codex
+  depends_on:
+  - task-011-step-04-direction-feasibility
+  description: Test enough-literature success, missing dataset turn, license conflict
+    pause, and source verification failure diagnostics.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: artifact
+  path: LiteratureMap
+  description: Literature discovery artifact
+- type: artifact
+  path: DataPlan
+  description: Data acquisition plan artifact
+- type: artifact
+  path: DatasetCard
+  description: Dataset metadata artifact
+- type: report
+  path: reports/literature-data-discovery.md
+  description: Discovery verification report
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-08T01:25:26.635370'
+  updated_at: '2026-05-08T01:25:26.635370'
+  version: '1'
