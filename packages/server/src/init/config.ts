@@ -3,6 +3,7 @@ import path from "path"
 import { mkdir, readFile } from "fs/promises"
 import { existsSync } from "fs"
 import { writeJsonAtomic } from "../research/runtime/state"
+import { DEFAULT_MODEL_ROLE_CONFIG, type ModelRoleConfig } from "../paper/model-router"
 
 export const INIT_CONFIG_VERSION = "config.v1" as const
 export const INIT_SECRETS_VERSION = "secrets.v1" as const
@@ -25,6 +26,9 @@ export type PaperFuckerConfig = {
   models: {
     default_endpoint?: string
     endpoints: ModelEndpointConfig[]
+  }
+  model_roles: ModelRoleConfig & {
+    strategy: "opencode_provider_agnostic"
   }
   workspace: {
     default_root?: string
@@ -109,6 +113,7 @@ export function defaultConfig(input: {
   budgets?: PaperFuckerConfig["budgets"]
   preview?: Partial<PaperFuckerConfig["preview"]>
   models?: PaperFuckerConfig["models"]
+  model_roles?: Partial<ModelRoleConfig>
 }): PaperFuckerConfig {
   const mode = input.access?.mode ?? "full_access"
   const acknowledged = input.access?.full_access_acknowledged ?? false
@@ -132,6 +137,11 @@ export function defaultConfig(input: {
           api_key_secret: "DEEPSEEK_API_KEY",
         },
       ],
+    },
+    model_roles: {
+      strategy: "opencode_provider_agnostic",
+      default_model: input.model_roles?.default_model ?? DEFAULT_MODEL_ROLE_CONFIG.default_model,
+      roles: input.model_roles?.roles ?? {},
     },
     workspace: {
       default_root: input.workspace,

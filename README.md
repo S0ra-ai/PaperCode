@@ -1,6 +1,6 @@
 # paper_fucker
 
-Current version: <!-- version:start -->0.1.18-dev<!-- version:end -->
+Current version: <!-- version:start -->0.1.19-dev<!-- version:end -->
 
 `paper_fucker` is a private-first, OpenCode-derived closed-loop paper system. It turns a topic, codebase, dataset, experiment log, or paper material set into a verifiable academic-paper bundle with research planning, source discovery, code understanding, experiment/reproduction support, ClaimLedger-first writing, authenticity gates, profile-aware formatting, preview, and export.
 
@@ -12,11 +12,12 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - The product direction is a deep OpenCode transformation, not a thin wrapper: OpenCode remains the substrate for providers/models, agents/sessions, tools, MCP, skills, TUI, permissions, and plugins.
 - paper_fucker owns the paper domain: intake, paper profiles, model roles, capability registry, paper orchestration, authoring loop, authenticity gates, and export bundles.
 - Supported input modes are topic-to-paper, code-to-paper, data-to-paper, experiment-log-to-paper, and mixed-materials-to-paper.
+- Model selection is role-based and OpenCode-provider-agnostic. The paper workflow resolves planner, literature researcher, code analyst, experiment designer, writer, reviewer, citation checker, and cheap summarizer roles from OpenCode `provider/model` ids.
 - The authoritative research contracts and server-side paper_fucker runtime live under `packages/server`.
 - Research runs are stored workspace-first under `<workspace>/.paper_fucker/runs/<run-id>`, with `~/.paper_fucker/runs/<run-id>` as the fallback.
 - Runtime operations are automatic API calls, not workflows that require users to keep typing shell commands.
 - Initialization writes config, linked tool paths, and encrypted secrets under `~/.paper_fucker`; it does not write credentials to `.env` or repository files.
-- The default language is Chinese (`zh-CN`). DeepSeek with API model id `deepseek-v4-pro` is the default sample endpoint, but paper_fucker is provider-agnostic and must support every provider/model that OpenCode supports.
+- The default language is Chinese (`zh-CN`). DeepSeek with OpenCode model id `deepseek/deepseek-v4-pro` is the default sample endpoint, but paper_fucker is provider-agnostic and must support every provider/model that OpenCode supports.
 - Exa is configured as a remote MCP search connector for source discovery through `.paper_fucker/paper_fucker.jsonc`.
 - MCP servers and skills are first-class research capabilities. Literature search, code analysis, experiments, paper profiles, statistical checks, figures, and export helpers should be registered as capabilities instead of bypassing OpenCode.
 - The automatic orchestrator now owns the default topic-to-paper stage graph and proceeds stage-by-stage unless a pause condition is raised.
