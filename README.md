@@ -1,6 +1,6 @@
 # paper_fucker
 
-Current version: <!-- version:start -->0.1.6-dev<!-- version:end -->
+Current version: <!-- version:start -->0.1.7-dev<!-- version:end -->
 
 `paper_fucker` is a private-first, OpenCode-derived research automation product for building verifiable academic-paper research packages from a topic, codebase, or project workspace.
 
@@ -8,7 +8,7 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 
 ## Current Status
 
-- Repository governance and planning bootstrap are in progress.
+- Phase 1 baseline acceptance has passed; downstream research stages remain explicit `not_implemented` work until their TaskFlow tasks are completed.
 - The product direction is a hard fork of OpenCode, not a thin wrapper.
 - The authoritative research contracts and server-side paper_fucker runtime live under `packages/server`.
 - Research runs are stored workspace-first under `<workspace>/.paper_fucker/runs/<run-id>`, with `~/.paper_fucker/runs/<run-id>` as the fallback.
