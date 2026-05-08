@@ -1,0 +1,33 @@
+{% extends "_base.j2" %}
+{% block body %}
+You are drafting ONE section of an IEEE-style literature survey.
+
+Domain: {{ domain.domain }}
+
+Section: {{ section.name }}
+Target length: {{ target_words }} words (± 15 %). Do NOT exceed {{ (target_words * 1.2) | int }} words.
+{% if section.get('description') %}Scope: {{ section.get('description') }}{% endif %}
+{% if section.get('bullets') %}Planned bullets:
+{% for b in section.get('bullets') %}- {{ b }}
+{% endfor %}{% endif %}
+
+{% if extra_note %}NOTE: {{ extra_note }}{% endif %}
+
+Rules (hard constraints):
+* Every factual or attributed claim MUST be backed by a citation in
+  the form ``[CITE:<corpus_key>]`` where ``<corpus_key>`` comes from
+  the list below. Do NOT invent keys. If you lack evidence for a
+  sentence, write a shorter sentence, or frame it as a limitation of
+  existing work (still no un-cited claims).
+* Write polished IEEE English. No first-person voice.
+* No markdown headings. Plain paragraphs only.
+* No references section here — references are assembled later.
+
+Corpus you may cite in this section ({{ corpus_slice | length }} items):
+{% for item in corpus_slice %}
+- {{ item.key }} — {{ item.authors[0] if item.authors else "Anon" }} et al., {{ item.year or "n.d." }}:
+  "{{ item.title }}"
+  abstract: {{ (item.abstract or "")[:500] | replace("\n", " ") }}
+  {% if item.full_text %}excerpt: {{ item.full_text[:600] | replace("\n", " ") }}{% endif %}
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "_base.j2" %}
+{% block body %}
+You are an independent fact checker. Decide whether the SOURCE supports
+the CLAIM as stated. Be strict: paraphrase is allowed, fabrication or
+contradiction is not.
+
+CLAIM (cited as \cite{ {{- source_id -}} }):
+"{{ claim }}"
+
+SOURCE [{{ source_id }}]:
+{{ source_text }}
+
+Respond with a single JSON object on one line, no surrounding prose:
+{"supports": true|false, "reason": "<one short sentence>"}
+{% endblock %}

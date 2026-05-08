@@ -1,0 +1,22 @@
+{% extends "_base.j2" %}
+{% block body %}
+Draft an outline for an academic paper.
+
+Topic: {{ topic }}
+Target venue: {{ format_spec.venue_label }} ({{ format_spec.display_name }})
+Target language: {{ format_spec.language }}
+Target length: {{ length_pages }} pages, {{ format_spec.columns }}-column.
+Required sections (in order): {{ format_spec.section_order | join(", ") }}
+
+Return strict JSON of shape:
+{
+  "title": "<paper title>",
+  "abstract_brief": "<one-sentence pitch>",
+  "keywords": ["kw1", "kw2", ...],
+  "sections": [
+     { "name": "<must match a required section>", "bullets": ["sub-claim 1", "sub-claim 2", ...] },
+     ...
+  ]
+}
+Output ONLY the JSON.
+{% endblock %}

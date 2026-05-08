@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "venue_label": "IEEE",
+  "display_name": "IEEE Conference / Transactions (two-column)",
+  "language": "en",
+  "page_size": "Letter",
+  "columns": 2,
+  "margins": { "top_mm": 19.05, "bottom_mm": 25.4, "left_mm": 19.05, "right_mm": 19.05 },
+  "font": { "body_family": "Times New Roman", "body_size_pt": 10.0 },
+  "citation_style": "numeric",
+  "bibliography_style": "IEEEtran",
+  "section_order": [
+    "Abstract", "Introduction", "Related Work", "Method",
+    "Experiments", "Discussion", "Conclusion", "References"
+  ],
+  "figure_caption": { "position": "below", "label_format": "Fig. {n}. {caption}" },
+  "abstract_max_words": 250,
+  "keywords_required": true,
+  "template_hint": "ieee.tex.j2",
+  "source": "builtin"
+}

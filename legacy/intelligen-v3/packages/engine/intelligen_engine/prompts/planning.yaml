@@ -1,0 +1,51 @@
+# 大纲规划提示词 — OutlinePlanner 使用
+
+generate_system: "You are an expert academic research planner."
+
+generate_human: |
+  Generate a detailed outline for an academic research report on the topic:
+  "{{ topic }}"{{ req_block }}{{ evidence_block }}{{ word_count_block }}
+
+  Requirements:
+  - Create 5-8 sections appropriate for this specific topic
+  - Each section should have a clear title, detailed writing instruction, target word count, and 2-3 search keywords
+  - search_queries should be concrete academic search phrases that can be used directly with academic search APIs
+  - Write section titles in Chinese
+  - Include an introduction section at the beginning and a conclusion + references section at the end
+  - Do NOT use generic/hardcoded section titles — tailor them to the topic
+  - Avoid duplicate or overlapping sections
+
+  Return JSON matching the schema.
+
+from_outline_system: "You are an expert academic writing planner."
+
+from_outline_human: |
+  Convert the following outline into a structured report plan.
+
+  Topic: "{{ topic }}"
+
+  User's outline:
+  {{ outline_text }}
+
+  For each section, provide:
+  - A number (1, 2, 3, ...)
+  - The title (keep original language)
+  - A detailed writing instruction
+  - Target word count (1000-2000 per section)
+  - 2-3 search keywords relevant to that section
+
+  Return JSON matching the schema.
+
+from_template_system: "You are an expert academic writing planner."
+
+from_template_human: |
+  Based on the following template, create a structured outline for a report on "{{ topic }}".
+
+  Template content:
+  {{ template_content }}
+  {{ req_block }}
+
+  Adapt the template's structure to the specific topic. For each section provide:
+  - number, title, instruction, target_words, search_queries
+
+  Return JSON matching the schema.

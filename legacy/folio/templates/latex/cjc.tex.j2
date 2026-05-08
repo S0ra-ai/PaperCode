@@ -1,0 +1,47 @@
+{# CJC (Chinese Journal of Computers) template — GB/T 7714 citation
+   style via biblatex-gb7714-2015. Requires CJK / xelatex. #}
+\documentclass[{{ font_size_pt }}pt,{{ paper }}paper{% if columns == 2 %},twocolumn{% endif %}]{article}
+
+\usepackage{xeCJK}
+\usepackage[
+  top={{ margins.top_mm }}mm,
+  bottom={{ margins.bottom_mm }}mm,
+  left={{ margins.left_mm }}mm,
+  right={{ margins.right_mm }}mm
+]{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath, amssymb}
+\usepackage{hyperref}
+{% if has_bibliography %}
+\usepackage[backend=biber, style=gb7714-2015]{biblatex}
+\addbibresource{references.bib}
+{% endif %}
+
+\setCJKmainfont{ {{ font.body_family }} }
+
+\title{ {{ draft.title | latex_escape }} }
+\author{ {{ author | latex_escape }} }
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+{{ draft.abstract_brief | latex_escape }}
+\end{abstract}
+
+{% if keywords %}
+\noindent\textbf{关键词：} {{ keywords | join("；") | latex_escape }}
+{% endif %}
+
+{% for sec in draft.sections %}
+\section{ {{ sec.name | latex_escape }} }
+{{ sec.text }}
+
+{% endfor %}
+
+{% if has_bibliography %}
+\printbibliography[title={参考文献}]
+{% endif %}
+
+\end{document}
