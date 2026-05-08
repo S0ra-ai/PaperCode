@@ -1,6 +1,6 @@
 id: task-022-model-router
 title: Add provider-agnostic model role router
-status: todo
+status: done
 priority: high
 owner: codex
 tags:
@@ -19,7 +19,7 @@ execution:
 steps:
 - id: task-022-step-01-red-router-test
   title: Add failing model router tests
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: Test default role resolution, per-role overrides, OpenCode provider/model
@@ -28,12 +28,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T22:17:50.058598'
+      level: info
+      message: Starting TDD red step for provider-agnostic model role routing with
+        DeepSeek as default sample only.
+      agent: codex
+    - timestamp: '2026-05-08T22:18:25.594253'
+      level: info
+      message: 'Added packages/server/test/paper/model-router.test.ts and verified
+        RED: test fails because PAPER_MODEL_ROLES and model router exports do not
+        exist yet.'
+      agent: codex
+    last_run: '2026-05-08T22:18:25.594253'
+    attempt_count: 2
   meta: {}
 - id: task-022-step-02-router-implementation
   title: Implement ModelRoleRouter
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-022-step-01-red-router-test
@@ -43,12 +55,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T22:18:30.960518'
+      level: info
+      message: Implementing ModelRoleRouter, OpenCode model id parsing, defaults,
+        per-role overrides, and diagnostics.
+      agent: codex
+    - timestamp: '2026-05-08T22:19:07.785194'
+      level: info
+      message: 'Implemented ModelRoleRouter with OpenCode provider/model parsing,
+        role list, default DeepSeek sample model, per-role overrides, invalid-id diagnostics,
+        and passing targeted tests: 4 pass, 0 fail.'
+      agent: codex
+    last_run: '2026-05-08T22:19:07.785194'
+    attempt_count: 2
   meta: {}
 - id: task-022-step-03-config-integration
   title: Integrate config defaults
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-022-step-02-router-implementation
@@ -58,12 +82,26 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T22:19:21.109022'
+      level: info
+      message: 'Adding config integration test first: init config should expose provider-agnostic
+        model_roles defaults using OpenCode model ids while keeping DeepSeek as the
+        sample default.'
+      agent: codex
+    - timestamp: '2026-05-08T22:20:08.915889'
+      level: info
+      message: Integrated model_roles into init config and wizard. Init config now
+        records opencode_provider_agnostic strategy and default OpenCode model id
+        deepseek/deepseek-v4-pro; init test passes 2 pass/0 fail and model router
+        test passes 4 pass/0 fail.
+      agent: codex
+    last_run: '2026-05-08T22:20:08.915889'
+    attempt_count: 2
   meta: {}
 - id: task-022-step-04-doc-version
   title: Update docs and version 0.1.19-dev
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-022-step-03-config-integration
@@ -72,12 +110,23 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T22:20:14.496588'
+      level: info
+      message: Updating README and CHANGELOG to 0.1.19-dev for provider-agnostic model
+        role routing.
+      agent: codex
+    - timestamp: '2026-05-08T22:21:26.771303'
+      level: info
+      message: Updated README/CHANGELOG to 0.1.19-dev, added reports/model-router.md,
+        and backfilled CHANGELOG with implementation commit 60227c0.
+      agent: codex
+    last_run: '2026-05-08T22:21:26.771303'
+    attempt_count: 2
   meta: {}
 - id: task-022-step-05-verify
   title: Run verification
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-022-step-04-doc-version
@@ -86,8 +135,20 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T22:21:31.695926'
+      level: info
+      message: 'Running final model-router verification: targeted tests, server typecheck,
+        README/CHANGELOG version check, and TaskFlow validation.'
+      agent: codex
+    - timestamp: '2026-05-08T22:22:02.211360'
+      level: info
+      message: 'Final verification passed: model router + init tests 6 pass/0 fail/26
+        expects; server typecheck passed; README version 0.1.19-dev matches CHANGELOG
+        latest version; TaskFlow validate_task passed with no warnings.'
+      agent: codex
+    last_run: '2026-05-08T22:22:02.211360'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -101,5 +162,5 @@ trace:
   attempt_count: 0
 meta:
   created_at: '2026-05-08T22:08:51.902207'
-  updated_at: '2026-05-08T22:08:51.902207'
+  updated_at: '2026-05-08T22:22:08.217311'
   version: '1'
