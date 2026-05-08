@@ -4,8 +4,14 @@ version = "0.1.0"
 description = "Python MCP and CLI research helpers for paper_fucker."
 requires-python = ">=3.11"
 dependencies = [
+    "mcp>=1,<2",
     "pydantic>=2,<3",
+    "pypdf>=5,<7",
+    "python-docx>=1,<2",
 ]
+
+[project.scripts]
+paper-fucker-tools = "paper_fucker_tools.cli:main"
 
 [build-system]
 requires = ["hatchling"]
