@@ -1,6 +1,6 @@
 # paper_fucker
 
-Current version: <!-- version:start -->0.1.15-dev<!-- version:end -->
+Current version: <!-- version:start -->0.1.16-dev<!-- version:end -->
 
 `paper_fucker` is a private-first, OpenCode-derived research automation product for building verifiable academic-paper research packages from a topic, codebase, or project workspace.
 
@@ -23,6 +23,7 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - ClaimLedger-first writing now binds claims to citations before Markdown draft generation, streams draft chunks, annotates unsupported claims, and records diff/rollback metadata.
 - The final authenticity gate now blocks invalid references, unsupported claims, dataset license failures, and failed container reproduction while preserving non-blocking reviewer warnings.
 - Export bundles now produce Markdown/LaTeX/PDF/DOCX manifests, block final exports when the authenticity gate fails, and allow clearly marked forced drafts with failed checks attached.
+- The repository root is paper_fucker-first; upstream localized OpenCode README files are preserved under `upstream/opencode-readmes/`.
 - The imported OpenCode package remains the upstream-derived agent/CLI substrate while paper_fucker runtime surfaces are extracted into first-party packages.
 - Python is reserved for per-run MCP and CLI research tools.
 - Project configuration and run indexes use `~/.paper_fucker`.
@@ -40,9 +41,11 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - `packages/server/src/research/writing/`: ClaimLedger-first writing, citation binding, streamed Markdown draft composition, checkpoint guidance application, and rollback diffs.
 - `packages/server/src/research/verification/`: final authenticity gate, blocking reports, review reports, reference/claim/data/reproduction checks, and multi-model review aggregation.
 - `packages/server/src/research/export/`: final and forced-draft export bundle creation, manifest generation, missing renderer diagnostics, and export fact recording.
+- `packages/server/src/research/README.md`: first-party research runtime boundary guide; domain logic belongs in this runtime and only uses `packages/opencode` through deliberate substrate adapters.
 - `packages/preview/`: first-party localhost read-only research preview package with token-checked snapshot/SSE endpoints and static Markdown/LaTeX/PDF/DOCX/annotation/diagnostics UI.
 - `research-tools/`: Python MCP/CLI tool package. It provides structured MCP-style diagnostics/probe/document helpers, one-shot conversion commands, external tool discovery/linking for pandoc and LaTeX engines, and generated Pydantic v2 models for tool-side validation.
 - `legacy/references/`: reference-project manifests and adopt/defer/reject analysis. These files are design guidance only and do not authorize code import.
+- `upstream/opencode-readmes/`: localized README files imported from the OpenCode snapshot, retained for provenance and translation reference instead of root-level project documentation.
 - `packages/opencode/`: imported OpenCode-derived agent and CLI substrate retained during migration; new paper_fucker domain code should not be added here unless it is a deliberate compatibility adapter.
 
 ## Planning Source
