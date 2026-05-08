@@ -2,10 +2,30 @@
 :author        s0ra (https://github.com/S0ra-ai)
 :repo          
 :desc          记录项目的重大变更和版本历史
-:version       0.1.19-dev
+:version       0.1.20-dev
 :last_update   2026/05/09
 
 :history
+
+    0.1.20-dev - 2026/05/09 (pending) [develop]
+    :brief 新增 MCP/Skill/Tool/Python 论文能力总线
+        - feat(paper): 新增 ResearchCapabilityRegistry, 支持能力注册、重复注册诊断、stage/type 过滤与 trace metadata
+        - feat(mcp): 默认注册 Exa remote MCP 为 literature/data/verification 能力
+        - feat(opencode): 默认注册 read/grep/glob/task/shell 等 OpenCode substrate 能力
+        - feat(skills): 默认注册 nature-paper 与 jupyter-notebook skill 能力入口
+        - feat(python): 默认注册 experiment log parse 与 dataset metadata probe Python research tools
+        - docs(readme): 版本更新为 0.1.20-dev, 明确 orchestrator 通过 ResearchCapabilityRegistry 调度 MCP/skills/tools
+        - test(paper): 覆盖 stage surface、默认能力、stage/type filtering、重复注册和 trace metadata
+    :src
+        - packages/server/src/paper/capabilities.ts - research capability registry and defaults
+        - packages/server/src/paper/index.ts - paper capability registry export
+        - packages/server/test/paper/capabilities.test.ts - capability registry tests
+        - reports/research-skill-mcp-bus.md - capability bus implementation report
+    :verification
+        - npx --yes bun@1.3.13 --cwd packages/server test test/paper/capabilities.test.ts passed: 4 pass, 0 fail, 11 expects
+        - npx --yes bun@1.3.13 run --cwd packages/server typecheck pending
+        - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 pending
+        - TaskFlow validate_task task-023-research-skill-mcp-bus pending
 
     0.1.19-dev - 2026/05/09 (60227c0) [develop]
     :brief 新增 OpenCode provider-agnostic 模型角色路由
