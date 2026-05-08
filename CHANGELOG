@@ -7,7 +7,7 @@
 
 :history
 
-0.1.7-dev - 2026/05/09 (pending) [develop]
+0.1.7-dev - 2026/05/09 (9bae52d) [develop]
     :brief 通过 Phase 1 验收并补齐真实性守卫
         - feat(runtime): 新增 phaseOneStageStubs, 将模板/文献/数据/实验/写作/验证/导出显式标记为 not_implemented
         - feat(runtime): 新增 assertAuthenticResearchOutput, 阻止 stub/synthetic/fake 输出进入研究事实
