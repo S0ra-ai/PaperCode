@@ -1,0 +1,579 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://paper-fucker.local/schemas/research/v1.schema.json",
+  "title": "paper_fucker research contracts v1",
+  "description": "Authoritative JSON Schema source for paper_fucker research run facts, events, artifacts, and indexes.",
+  "$defs": {
+    "SchemaVersion": {
+      "const": "research.v1"
+    },
+    "Identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "Timestamp": {
+      "type": "string",
+      "minLength": 20,
+      "maxLength": 64,
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?Z$"
+    },
+    "Metadata": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "Locator": {
+      "type": "object",
+      "properties": {
+        "uri": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "line_start": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "line_end": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "page": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "selector": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "anyOf": [
+        {
+          "required": ["uri"]
+        },
+        {
+          "required": ["path"]
+        }
+      ]
+    },
+    "Run": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "$ref": "#/$defs/SchemaVersion"
+        },
+        "run_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "topic": {
+          "type": "string",
+          "minLength": 1
+        },
+        "workspace": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": ["initialized", "running", "succeeded", "failed", "cancelled"]
+        },
+        "created_at": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "updated_at": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "storage": {
+          "$ref": "#/$defs/StorageLayout"
+        },
+        "metadata": {
+          "$ref": "#/$defs/Metadata"
+        }
+      },
+      "required": ["schema_version", "run_id", "topic", "workspace", "status", "created_at", "updated_at", "storage"],
+      "additionalProperties": false
+    },
+    "StorageLayout": {
+      "type": "object",
+      "properties": {
+        "facts": {
+          "type": "object",
+          "properties": {
+            "run": {
+              "const": "run.json"
+            },
+            "events": {
+              "const": "events.jsonl"
+            },
+            "artifacts": {
+              "const": "artifacts.jsonl"
+            },
+            "sources": {
+              "const": "sources.jsonl"
+            },
+            "tool_traces": {
+              "const": "tool-traces.jsonl"
+            },
+            "claims": {
+              "const": "claims.jsonl"
+            },
+            "drafts": {
+              "const": "drafts.jsonl"
+            },
+            "reviews": {
+              "const": "reviews.jsonl"
+            },
+            "exports": {
+              "const": "exports.jsonl"
+            },
+            "checkpoints": {
+              "const": "checkpoints.jsonl"
+            }
+          },
+          "required": [
+            "run",
+            "events",
+            "artifacts",
+            "sources",
+            "tool_traces",
+            "claims",
+            "drafts",
+            "reviews",
+            "exports",
+            "checkpoints"
+          ],
+          "additionalProperties": false
+        },
+        "run_index": {
+          "const": "index.sqlite"
+        },
+        "global_index": {
+          "const": "~/.paper_fucker/index.sqlite"
+        },
+        "index_rebuildable": {
+          "const": true
+        }
+      },
+      "required": ["facts", "run_index", "global_index", "index_rebuildable"],
+      "additionalProperties": false
+    },
+    "Event": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "$ref": "#/$defs/SchemaVersion"
+        },
+        "event_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "run_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "type": {
+          "type": "string",
+          "minLength": 3,
+          "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9]*)+$"
+        },
+        "created_at": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "actor": {
+          "enum": ["system", "user", "agent", "tool"]
+        },
+        "payload": {
+          "$ref": "#/$defs/Metadata"
+        }
+      },
+      "required": ["schema_version", "event_id", "run_id", "type", "created_at", "actor", "payload"],
+      "additionalProperties": false
+    },
+    "Artifact": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "$ref": "#/$defs/SchemaVersion"
+        },
+        "artifact_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "run_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "kind": {
+          "enum": ["source_snapshot", "outline", "draft", "review", "export", "table", "figure", "log"]
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "mime_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-fA-F0-9]{64}$"
+        },
+        "source_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Identifier"
+          },
+          "uniqueItems": true
+        },
+        "created_at": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "metadata": {
+          "$ref": "#/$defs/Metadata"
+        }
+      },
+      "required": ["schema_version", "artifact_id", "run_id", "kind", "path", "mime_type", "source_ids", "created_at"],
+      "additionalProperties": false
+    },
+    "Source": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "$ref": "#/$defs/SchemaVersion"
+        },
+        "source_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "run_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "kind": {
+          "enum": ["paper", "code", "web", "dataset", "user_note", "tool_output"]
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "locator": {
+          "$ref": "#/$defs/Locator"
+        },
+        "created_at": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "metadata": {
+          "$ref": "#/$defs/Metadata"
+        }
+      },
+      "required": ["schema_version", "source_id", "run_id", "kind", "title", "locator", "created_at"],
+      "additionalProperties": false
+    },
+    "ToolTrace": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "$ref": "#/$defs/SchemaVersion"
+        },
+        "trace_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "run_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "tool_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": ["queued", "running", "succeeded", "failed"]
+        },
+        "started_at": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "ended_at": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "input": {
+          "$ref": "#/$defs/Metadata"
+        },
+        "output": {
+          "$ref": "#/$defs/Metadata"
+        },
+        "error": {
+          "type": "string"
+        }
+      },
+      "required": ["schema_version", "trace_id", "run_id", "tool_name", "status", "started_at", "input"],
+      "additionalProperties": false
+    },
+    "Claim": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "$ref": "#/$defs/SchemaVersion"
+        },
+        "claim_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "run_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": ["proposed", "supported", "contradicted", "needs_evidence"]
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "source_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Identifier"
+          },
+          "uniqueItems": true
+        },
+        "artifact_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Identifier"
+          },
+          "uniqueItems": true
+        },
+        "created_at": {
+          "$ref": "#/$defs/Timestamp"
+        }
+      },
+      "required": [
+        "schema_version",
+        "claim_id",
+        "run_id",
+        "text",
+        "status",
+        "confidence",
+        "source_ids",
+        "artifact_ids",
+        "created_at"
+      ],
+      "additionalProperties": false
+    },
+    "Draft": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "$ref": "#/$defs/SchemaVersion"
+        },
+        "draft_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "run_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "format": {
+          "enum": ["markdown", "latex", "docx", "pdf", "html"]
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "claim_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Identifier"
+          },
+          "uniqueItems": true
+        },
+        "artifact_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Identifier"
+          },
+          "uniqueItems": true
+        },
+        "created_at": {
+          "$ref": "#/$defs/Timestamp"
+        }
+      },
+      "required": ["schema_version", "draft_id", "run_id", "title", "format", "path", "claim_ids", "artifact_ids", "created_at"],
+      "additionalProperties": false
+    },
+    "Review": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "$ref": "#/$defs/SchemaVersion"
+        },
+        "review_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "run_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "target_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "target_kind": {
+          "enum": ["draft", "export", "artifact", "claim"]
+        },
+        "status": {
+          "enum": ["open", "resolved"]
+        },
+        "findings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "severity": {
+                "enum": ["info", "warning", "error", "blocker"]
+              },
+              "message": {
+                "type": "string",
+                "minLength": 1
+              },
+              "source_ids": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/Identifier"
+                },
+                "uniqueItems": true
+              }
+            },
+            "required": ["severity", "message", "source_ids"],
+            "additionalProperties": false
+          }
+        },
+        "created_at": {
+          "$ref": "#/$defs/Timestamp"
+        }
+      },
+      "required": ["schema_version", "review_id", "run_id", "target_id", "target_kind", "status", "findings", "created_at"],
+      "additionalProperties": false
+    },
+    "Export": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "$ref": "#/$defs/SchemaVersion"
+        },
+        "export_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "run_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "draft_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "format": {
+          "enum": ["pdf", "docx", "html", "latex", "markdown"]
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artifact_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Identifier"
+          },
+          "uniqueItems": true
+        },
+        "created_at": {
+          "$ref": "#/$defs/Timestamp"
+        }
+      },
+      "required": ["schema_version", "export_id", "run_id", "draft_id", "format", "path", "artifact_ids", "created_at"],
+      "additionalProperties": false
+    },
+    "Checkpoint": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "$ref": "#/$defs/SchemaVersion"
+        },
+        "checkpoint_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "run_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "stage": {
+          "enum": ["ingest", "analyze", "outline", "draft", "review", "export"]
+        },
+        "status": {
+          "enum": ["pending", "running", "succeeded", "failed"]
+        },
+        "summary": {
+          "type": "string"
+        },
+        "event_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Identifier"
+          },
+          "uniqueItems": true
+        },
+        "artifact_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Identifier"
+          },
+          "uniqueItems": true
+        },
+        "created_at": {
+          "$ref": "#/$defs/Timestamp"
+        }
+      },
+      "required": [
+        "schema_version",
+        "checkpoint_id",
+        "run_id",
+        "stage",
+        "status",
+        "summary",
+        "event_ids",
+        "artifact_ids",
+        "created_at"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/Run"
+    },
+    {
+      "$ref": "#/$defs/Event"
+    },
+    {
+      "$ref": "#/$defs/Artifact"
+    },
+    {
+      "$ref": "#/$defs/Source"
+    },
+    {
+      "$ref": "#/$defs/ToolTrace"
+    },
+    {
+      "$ref": "#/$defs/Claim"
+    },
+    {
+      "$ref": "#/$defs/Draft"
+    },
+    {
+      "$ref": "#/$defs/Review"
+    },
+    {
+      "$ref": "#/$defs/Export"
+    },
+    {
+      "$ref": "#/$defs/Checkpoint"
+    }
+  ]
+}
