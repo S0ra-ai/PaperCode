@@ -7,7 +7,7 @@
 
 :history
 
-0.1.10-dev - 2026/05/09 (pending) [develop]
+    0.1.10-dev - 2026/05/09 (385fe8e) [develop]
     :brief 实现可信模板解析与 Markdown-to-LaTeX 应用
         - feat(templates): 新增 TemplateSpec.v1, 包含 source evidence、trust、license status、confidence、required files、conflict flags
         - feat(templates): 新增 trusted template resolver, 内置 IEEE/ACM official candidates 与 CJC fallback
