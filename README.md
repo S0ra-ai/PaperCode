@@ -1,6 +1,6 @@
 # paper_fucker
 
-Current version: <!-- version:start -->0.1.16-dev<!-- version:end -->
+Current version: <!-- version:start -->0.1.17-dev<!-- version:end -->
 
 `paper_fucker` is a private-first, OpenCode-derived research automation product for building verifiable academic-paper research packages from a topic, codebase, or project workspace.
 
@@ -8,7 +8,7 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 
 ## Current Status
 
-- Phase 1 baseline acceptance has passed; downstream research stages remain explicit `not_implemented` work until their TaskFlow tasks are completed.
+- End-to-end fixture acceptance now covers the first-party research pipeline from topic intake through template resolution, literature/data discovery, experiments, ClaimLedger writing, verification gate, final export, and forced draft failure behavior.
 - The product direction is a hard fork of OpenCode, not a thin wrapper.
 - The authoritative research contracts and server-side paper_fucker runtime live under `packages/server`.
 - Research runs are stored workspace-first under `<workspace>/.paper_fucker/runs/<run-id>`, with `~/.paper_fucker/runs/<run-id>` as the fallback.
@@ -64,6 +64,7 @@ Important early tasks:
 - `task-007-init-wizard`: initialization, diagnostics, external tool discovery, encrypted secrets, and Full Access acknowledgement.
 - `task-008-preview-runtime`: localhost token-protected read-only research preview with realtime render status and annotation display.
 - `task-018-phase-1-acceptance`: Windows-native phase 1 acceptance gate.
+- `task-020-end-to-end-acceptance`: fixture-topic end-to-end acceptance for final/forced export behavior and research pipeline integration.
 
 ## Branching
 
