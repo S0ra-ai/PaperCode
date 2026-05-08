@@ -10,10 +10,18 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 
 - Repository governance and planning bootstrap are in progress.
 - The product direction is a hard fork of OpenCode, not a thin wrapper.
-- The authoritative research runtime lives in the paper_fucker TypeScript server derived from the OpenCode runtime.
+- The authoritative research contracts and server-side paper_fucker runtime live under `packages/server`.
+- The imported OpenCode package remains the upstream-derived agent/CLI substrate while paper_fucker runtime surfaces are extracted into first-party packages.
 - Python is reserved for per-run MCP and CLI research tools.
 - Project configuration and run indexes use `~/.paper_fucker`.
 - The default target is Windows-native operation.
+
+## Project Structure
+
+- `schemas/research/`: JSON Schema source of truth for research runs, events, artifacts, sources, tool traces, claims, drafts, reviews, exports, and checkpoints.
+- `packages/server/`: first-party paper_fucker TypeScript server/runtime package. It owns AJV validation, OpenTelemetry span hooks, generated TypeScript contract types, and rebuildable SQLite indexes.
+- `research-tools/`: Python MCP/CLI tool package. Generated Pydantic v2 models mirror the JSON Schema contracts for tool-side validation.
+- `packages/opencode/`: imported OpenCode-derived agent and CLI substrate retained during migration; new paper_fucker domain code should not be added here unless it is a deliberate compatibility adapter.
 
 ## Planning Source
 
