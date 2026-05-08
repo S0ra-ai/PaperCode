@@ -1,0 +1,159 @@
+id: task-001-repo-governance
+title: Establish paper_fucker repository governance
+status: done
+priority: critical
+owner: codex
+tags:
+- governance
+- taskflow
+- git
+- license
+depends_on:
+- task-000-docs-sync-and-cleanup
+description: 'Initialize the repository governance baseline for paper_fucker: TaskFlow-first
+  planning, Git Flow, private-first licensing, upstream notice policy, and project
+  documentation. This task makes the repository safe to use as the long-term GitHub
+  home for the OpenCode-derived research product.'
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-001-step-01-runtime-and-git-baseline
+  title: Verify TaskFlow runtime and Git baseline
+  status: done
+  owner: codex
+  depends_on: []
+  description: Verify TaskFlow is bound to E:\Project\paper_fucker\.plan, inspect
+    current branch/remotes, and record the dirty worktree items before making governance
+    edits.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-08T05:57:31.897814'
+      level: info
+      message: Verified TaskFlow bound to E:\Project\paper_fucker\.plan and git repo
+        on main with origin https://github.com/S0ra-ai/paper_fucker.git before branch
+        setup.
+      agent: codex
+    - timestamp: '2026-05-08T05:57:38.126247'
+      level: info
+      message: 'Baseline recorded: repo root E:\Project\paper_fucker, initial branch
+        main at f06df3d, remote origin configured, dirty items were untracked .plan/,
+        README.md, docs/ and tracked LICENSE modification after governance work began.'
+      agent: codex
+    last_run: '2026-05-08T05:57:38.126247'
+    attempt_count: 2
+  meta: {}
+- id: task-001-step-02-gitflow-baseline
+  title: Create develop branch governance
+  status: done
+  owner: codex
+  depends_on:
+  - task-001-step-01-runtime-and-git-baseline
+  description: Create or confirm the develop branch, configure future TaskFlow work
+    to branch from develop, and document that main and develop are protected integration
+    branches.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-08T05:57:42.264077'
+      level: info
+      message: Creating develop branch and switching governance work to feature/repository-governance.
+      agent: codex
+    - timestamp: '2026-05-08T05:57:46.439490'
+      level: info
+      message: Created develop from main, pushed origin/develop, and switched to feature/repository-governance
+        for governance implementation.
+      agent: codex
+    last_run: '2026-05-08T05:57:46.439490'
+    attempt_count: 2
+  meta: {}
+- id: task-001-step-03-private-license-notice
+  title: Apply private-first license and notice policy
+  status: done
+  owner: codex
+  depends_on:
+  - task-001-step-01-runtime-and-git-baseline
+  description: Replace MIT project licensing with private/all-rights-reserved project
+    policy, add NOTICE.md for third-party sources, and record that OpenCode license
+    data must come from the imported release snapshot.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-08T05:57:51.978951'
+      level: info
+      message: Replacing root MIT project license with private-first policy and adding
+        NOTICE.md for third-party license provenance.
+      agent: codex
+    - timestamp: '2026-05-08T05:58:36.524117'
+      level: info
+      message: Updated LICENSE to private/all-rights-reserved project policy and added
+        NOTICE.md requiring imported OpenCode and other third-party provenance/license
+        records.
+      agent: codex
+    last_run: '2026-05-08T05:58:36.524117'
+    attempt_count: 2
+  meta: {}
+- id: task-001-step-04-docs-and-changelog
+  title: Update README and CHANGELOG baseline
+  status: done
+  owner: codex
+  depends_on:
+  - task-001-step-02-gitflow-baseline
+  - task-001-step-03-private-license-notice
+  description: Update README to name paper_fucker as the product and repository, describe
+    OpenCode hard-fork direction, create CHANGELOG using the project's colon metadata
+    and :history style, set the initial version to 0.1.0-dev, and add a version check
+    so README always matches the latest CHANGELOG entry.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-08T05:58:41.225647'
+      level: info
+      message: Updating README, CHANGELOG baseline, and README-to-CHANGELOG version
+        check.
+      agent: codex
+    - timestamp: '2026-05-08T05:58:45.663600'
+      level: info
+      message: Updated README as the paper_fucker project entrypoint with version
+        marker 0.1.0-dev, created CHANGELOG as the only version source using colon
+        metadata and :history format, and added scripts/check-readme-version.ps1.
+        The check passed.
+      agent: codex
+    last_run: '2026-05-08T05:58:45.663600'
+    attempt_count: 2
+  meta: {}
+outputs:
+- type: file
+  path: .plan/preferences.yaml
+  description: TaskFlow repository execution preferences
+- type: file
+  path: LICENSE
+  description: Private-first project license policy
+- type: file
+  path: NOTICE.md
+  description: Third-party source and license notice policy
+- type: file
+  path: README.md
+  description: Updated project entrypoint
+- type: file
+  path: CHANGELOG
+  description: TaskFlow changelog baseline
+- type: file
+  path: scripts/check-readme-version.ps1
+  description: README to CHANGELOG version consistency check
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-08T01:23:18.354270'
+  updated_at: '2026-05-08T06:11:23.830009'
+  version: '1'

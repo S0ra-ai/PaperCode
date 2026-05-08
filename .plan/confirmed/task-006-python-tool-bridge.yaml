@@ -1,0 +1,109 @@
+id: task-006-python-tool-bridge
+title: Create Python MCP and CLI research tool bridge
+status: todo
+priority: high
+owner: codex
+tags:
+- python
+- mcp
+- cli
+- tools
+depends_on:
+- task-005-research-runtime
+- task-017-core-contract
+description: Create a Python research-tools layer that provides structured MCP tools
+  and one-shot CLI utilities for PDF/DOCX/LaTeX/data/experiment support. OpenCode
+  runtime remains the authority and records all tool outputs as artifacts/events.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-006-step-01-tool-boundaries
+  title: Define Python tool boundaries
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Separate structured MCP tools from one-shot CLI scripts and define
+    the rule that Python tools never own final state.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-006-step-02-python-project
+  title: Create research-tools Python project
+  status: todo
+  owner: codex
+  depends_on:
+  - task-006-step-01-tool-boundaries
+  description: Create Python 3.11 + uv project for research-tools with MCP SDK, document
+    conversion dependencies, and test scaffolding.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-006-step-03-mcp-tools
+  title: Implement structured MCP tools
+  status: todo
+  owner: codex
+  depends_on:
+  - task-006-step-02-python-project
+  description: Implement initial MCP tools for tool diagnostics, PDF parsing, dataset
+    metadata probing, experiment log parsing, and DOCX generation stubs.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-006-step-04-cli-tools
+  title: Implement conversion CLI tools
+  status: todo
+  owner: codex
+  depends_on:
+  - task-006-step-02-python-project
+  description: Implement CLI utilities for Markdown to LaTeX, LaTeX to PDF orchestration,
+    and Markdown/LaTeX to DOCX conversion.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-006-step-05-bridge-smoke
+  title: Verify OpenCode to Python bridge smoke
+  status: todo
+  owner: codex
+  depends_on:
+  - task-006-step-03-mcp-tools
+  - task-006-step-04-cli-tools
+  description: From the OpenCode runtime, call a Python MCP tool and a CLI tool, then
+    record their outputs as run events/artifacts.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: directory
+  path: research-tools
+  description: Python MCP and CLI tool project
+- type: report
+  path: reports/python-tool-bridge-smoke.md
+  description: Bridge smoke verification report
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-08T01:24:19.864239'
+  updated_at: '2026-05-08T05:59:22.407197'
+  version: '1'

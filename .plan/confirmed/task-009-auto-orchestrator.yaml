@@ -1,0 +1,113 @@
+id: task-009-auto-orchestrator
+title: Implement automatic topic-to-paper orchestrator
+status: todo
+priority: critical
+owner: codex
+tags:
+- orchestrator
+- autonomy
+- tui
+depends_on:
+- task-005-research-runtime
+- task-007-init-wizard
+- task-008-preview-runtime
+description: 'Implement the default automatic main flow: user provides a CS/AI topic,
+  Full Access proceeds automatically through research checkpoints, and TUI guidance
+  is queued to the next checkpoint. Slash commands are escape hatches, not the primary
+  workflow.'
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-009-step-01-stage-graph
+  title: Define automatic research stage graph
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Define stages from intake through template, literature, data, experiments,
+    writing, verification, and export with checkpoint boundaries.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-009-step-02-full-access-policy
+  title: Implement Full Access automatic policy
+  status: todo
+  owner: codex
+  depends_on:
+  - task-009-step-01-stage-graph
+  description: Automatically proceed under Full Access and Unlimited Research except
+    for safety, authenticity, cost anomaly, external tool missing, or source/license
+    conflict pauses.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-009-step-03-guidance-queue
+  title: Implement checkpoint guidance queue
+  status: todo
+  owner: codex
+  depends_on:
+  - task-009-step-01-stage-graph
+  description: Store user TUI guidance as Guidance artifacts and apply it at the next
+    checkpoint without interrupting current streaming work.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-009-step-04-tui-run-controls
+  title: Implement automatic run controls in TUI
+  status: todo
+  owner: codex
+  depends_on:
+  - task-009-step-02-full-access-policy
+  - task-009-step-03-guidance-queue
+  description: Expose observe, pause, stop, resume, rollback, diagnostics, cost, tools,
+    models, template, preview, and export controls without requiring users to drive
+    every stage.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-009-step-05-orchestrator-smoke
+  title: Verify orchestrator smoke path
+  status: todo
+  owner: codex
+  depends_on:
+  - task-009-step-04-tui-run-controls
+  description: Run a fixture topic through the automatic stage graph with stubbed
+    downstream stages and verify events, guidance queueing, preview startup, and pause
+    conditions.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: directory
+  path: packages/server/src/research/orchestrator
+  description: Automatic research orchestrator
+- type: report
+  path: reports/orchestrator-smoke.md
+  description: Automatic flow smoke report
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-08T01:24:59.388186'
+  updated_at: '2026-05-08T01:24:59.388186'
+  version: '1'
