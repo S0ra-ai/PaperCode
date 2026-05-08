@@ -1,0 +1,172 @@
+id: task-021-architecture-reframe
+title: Reframe paper_fucker as OpenCode-based closed-loop paper system
+status: done
+priority: high
+owner: codex
+tags:
+- architecture
+- opencode
+- paper-system
+depends_on:
+- task-020-end-to-end-acceptance
+description: Reframe the product from a DeepSeek-centered research pipeline into an
+  OpenCode-substrate paper_fucker domain system for topic/code/data/materials-to-paper
+  workflows. Establish packages/server/src/paper as the paper domain entrypoint and
+  update README/CHANGELOG to describe OpenCode providers, MCP, skills, tools, TUI,
+  and paper_fucker domain runtime boundaries.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-021-step-01-red-architecture-test
+  title: Add failing architecture boundary tests
+  status: done
+  owner: codex
+  depends_on: []
+  description: Add tests that assert the paper domain entrypoint exists, exposes product
+    positioning metadata, and does not frame DeepSeek as the only model provider.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-08T22:10:48.162422'
+      level: info
+      message: 'Starting TDD red step for paper architecture boundary: tests will
+        require a paper domain entrypoint that frames OpenCode as substrate, paper_fucker
+        as domain runtime, and DeepSeek as only one supported model option.'
+      agent: codex
+    - timestamp: '2026-05-08T22:11:24.060896'
+      level: info
+      message: 'Added packages/server/test/paper/architecture.test.ts and verified
+        RED: bun test fails because ''@/paper'' does not exist yet, proving the new
+        paper domain entrypoint is required.'
+      agent: codex
+    last_run: '2026-05-08T22:11:24.060896'
+    attempt_count: 2
+  meta: {}
+- id: task-021-step-02-paper-domain-entrypoint
+  title: Add paper domain entrypoint
+  status: done
+  owner: codex
+  depends_on:
+  - task-021-step-01-red-architecture-test
+  description: Create packages/server/src/paper exports for architecture positioning
+    and paper system capabilities.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-08T22:11:27.979014'
+      level: info
+      message: Implementing the minimal paper domain entrypoint required by the architecture
+        boundary tests.
+      agent: codex
+    - timestamp: '2026-05-08T22:12:02.824131'
+      level: info
+      message: 'Added packages/server/src/paper architecture entrypoint and package
+        export. Targeted architecture test now passes: 3 pass, 0 fail.'
+      agent: codex
+    last_run: '2026-05-08T22:12:02.824131'
+    attempt_count: 2
+  meta: {}
+- id: task-021-step-03-docs-positioning
+  title: Update README and architecture report
+  status: done
+  owner: codex
+  depends_on:
+  - task-021-step-02-paper-domain-entrypoint
+  description: Rewrite README positioning around OpenCode substrate plus paper_fucker
+    domain runtime and document task chain.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-08T22:12:20.423082'
+      level: info
+      message: Updating README and architecture report to frame paper_fucker as an
+        OpenCode-substrate, provider-agnostic, MCP/skills-driven closed-loop paper
+        system.
+      agent: codex
+    - timestamp: '2026-05-08T22:13:03.818219'
+      level: info
+      message: Updated README positioning and added reports/architecture-reframe.md.
+        The product is now documented as an OpenCode-substrate closed-loop paper system
+        with provider-agnostic model support and MCP/skills as first-class research
+        capabilities.
+      agent: codex
+    last_run: '2026-05-08T22:13:03.818219'
+    attempt_count: 2
+  meta: {}
+- id: task-021-step-04-version-changelog
+  title: Advance version to 0.1.18-dev
+  status: done
+  owner: codex
+  depends_on:
+  - task-021-step-03-docs-positioning
+  description: Update CHANGELOG colon-history and README version for architecture
+    reframe.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-08T22:13:11.433865'
+      level: info
+      message: Advanced README/CHANGELOG to 0.1.18-dev with a pending changelog hash;
+        it will be backfilled after the implementation commit is created.
+      agent: codex
+    - timestamp: '2026-05-08T22:14:16.913092'
+      level: info
+      message: Advanced version to 0.1.18-dev and backfilled CHANGELOG with implementation
+        commit b8fabeb.
+      agent: codex
+    last_run: '2026-05-08T22:14:16.913092'
+    attempt_count: 2
+  meta: {}
+- id: task-021-step-05-verify
+  title: Run verification
+  status: done
+  owner: codex
+  depends_on:
+  - task-021-step-04-version-changelog
+  description: Run server tests, server typecheck, README version check, and TaskFlow
+    validation.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-08T22:14:21.178174'
+      level: info
+      message: 'Running final task verification: architecture test, server typecheck,
+        README/CHANGELOG version check, and TaskFlow task validation.'
+      agent: codex
+    - timestamp: '2026-05-08T22:14:49.318017'
+      level: info
+      message: 'Final verification passed: architecture test 3 pass/0 fail/6 expects;
+        server typecheck passed; README version 0.1.18-dev matches CHANGELOG latest
+        version; TaskFlow validate_task passed with no warnings.'
+      agent: codex
+    last_run: '2026-05-08T22:14:49.318017'
+    attempt_count: 2
+  meta: {}
+outputs:
+- type: file
+  path: packages/server/src/paper/index.ts
+  description: Paper domain entrypoint
+- type: file
+  path: packages/server/test/paper/architecture.test.ts
+  description: Architecture boundary tests
+- type: report
+  path: reports/architecture-reframe.md
+  description: Architecture reframe report
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-08T22:08:41.403623'
+  updated_at: '2026-05-08T22:14:53.817478'
+  version: '1'

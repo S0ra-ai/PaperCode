@@ -1,0 +1,106 @@
+id: task-023-research-skill-mcp-bus
+title: Add research capability registry for MCP, skills, tools, and Python tools
+status: todo
+priority: high
+owner: codex
+tags:
+- mcp
+- skills
+- capabilities
+- opencode
+depends_on:
+- task-022-model-router
+description: Add a ResearchCapabilityRegistry that treats MCP servers, OpenCode skills,
+  built-in tools, first-party paper tools, and Python research tools as the capability
+  bus for paper stages. The registry records schemas, trust, cost/network requirements,
+  and allowed stages, and writes tool trace metadata for orchestrator usage.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-023-step-01-red-capability-test
+  title: Add failing capability registry tests
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Test registration, stage filtering, trust/network metadata, and default
+    Exa/Python/builtin capabilities.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-023-step-02-registry-implementation
+  title: Implement capability registry
+  status: todo
+  owner: codex
+  depends_on:
+  - task-023-step-01-red-capability-test
+  description: Add ResearchCapability types and registry implementation under paper
+    domain.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-023-step-03-default-capabilities
+  title: Register default capabilities
+  status: todo
+  owner: codex
+  depends_on:
+  - task-023-step-02-registry-implementation
+  description: Add default capabilities for Exa MCP, read/grep/glob/task/shell, skills,
+    and Python tools.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-023-step-04-doc-version
+  title: Update docs and version 0.1.20-dev
+  status: todo
+  owner: codex
+  depends_on:
+  - task-023-step-03-default-capabilities
+  description: Document MCP/skill capability bus and update CHANGELOG/README.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-023-step-05-verify
+  title: Run verification
+  status: todo
+  owner: codex
+  depends_on:
+  - task-023-step-04-doc-version
+  description: Run tests, typecheck, README check, and TaskFlow validation.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: file
+  path: packages/server/src/paper/capabilities.ts
+  description: Research capability registry
+- type: file
+  path: packages/server/test/paper/capabilities.test.ts
+  description: Capability registry tests
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-08T22:09:02.031345'
+  updated_at: '2026-05-08T22:09:02.031345'
+  version: '1'

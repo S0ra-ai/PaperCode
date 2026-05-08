@@ -1,0 +1,47 @@
+import { describe, expect, test } from "bun:test"
+import {
+  PAPER_FUCKER_ARCHITECTURE,
+  SUPPORTED_PAPER_INPUT_MODES,
+  describePaperSystem,
+} from "@/paper"
+
+describe("paper_fucker paper system architecture", () => {
+  test("frames OpenCode as the substrate and paper_fucker as the paper domain system", () => {
+    expect(PAPER_FUCKER_ARCHITECTURE.layers).toEqual([
+      {
+        id: "opencode_substrate",
+        owns: ["providers", "models", "agents", "sessions", "tools", "mcp", "skills", "tui", "permissions"],
+      },
+      {
+        id: "research_runtime",
+        owns: ["run_storage", "events", "artifacts", "claims", "verification", "exports"],
+      },
+      {
+        id: "paper_domain",
+        owns: ["intake", "paper_profiles", "model_roles", "capability_registry", "paper_orchestrator", "authoring_loop"],
+      },
+    ])
+  })
+
+  test("supports topic, codebase, data, experiment log, and paper material intake", () => {
+    expect(SUPPORTED_PAPER_INPUT_MODES).toEqual([
+      "topic_to_paper",
+      "code_to_paper",
+      "data_to_paper",
+      "experiment_log_to_paper",
+      "materials_to_paper",
+    ])
+  })
+
+  test("does not treat DeepSeek as the only model path", () => {
+    const system = describePaperSystem()
+
+    expect(system.default_model_sample).toEqual({
+      provider_id: "deepseek",
+      model_id: "deepseek-v4-pro",
+    })
+    expect(system.model_strategy).toBe("opencode_provider_agnostic")
+    expect(system.supports_all_opencode_models).toBe(true)
+    expect(system.core_capability_sources).toEqual(["opencode_tools", "opencode_mcp", "opencode_skills", "paper_fucker_tools"])
+  })
+})

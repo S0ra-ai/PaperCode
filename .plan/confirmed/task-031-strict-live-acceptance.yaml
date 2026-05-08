@@ -1,0 +1,110 @@
+id: task-031-strict-live-acceptance
+title: Add strict live acceptance for complete paper system
+status: todo
+priority: high
+owner: codex
+tags:
+- acceptance
+- live
+- strict
+depends_on:
+- task-030-paper-authoring-loop
+description: 'Add strict live acceptance that validates the complete paper_fucker
+  system: all TaskFlow tasks, README/CHANGELOG version sync, tracked secret scan,
+  server/preview/Python/typecheck tests, TUI smoke, at least one OpenCode live provider
+  call, Exa live search, Nature profile smoke, pandoc conversion, LaTeX PDF generation,
+  DOCX generation, topic-to-paper live run, and code-to-paper live run.'
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-031-step-01-red-acceptance-test
+  title: Add failing strict acceptance script tests
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Test strict acceptance script composition, secret scan behavior, and
+    required check inventory.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-031-step-02-strict-script
+  title: Implement strict acceptance script
+  status: todo
+  owner: codex
+  depends_on:
+  - task-031-step-01-red-acceptance-test
+  description: Add scripts/strict-acceptance.ps1 with all required checks and clear
+    diagnostics.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-031-step-03-live-smoke-harness
+  title: Add live smoke harness
+  status: todo
+  owner: codex
+  depends_on:
+  - task-031-step-02-strict-script
+  description: Add controlled live smoke helpers for provider call, Exa search, Nature
+    profile, renderers, topic-to-paper, and code-to-paper.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-031-step-04-doc-version
+  title: Update docs and version 0.2.0-dev
+  status: todo
+  owner: codex
+  depends_on:
+  - task-031-step-03-live-smoke-harness
+  description: Document strict acceptance and update CHANGELOG/README to 0.2.0-dev.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-031-step-05-verify
+  title: Run final verification
+  status: todo
+  owner: codex
+  depends_on:
+  - task-031-step-04-doc-version
+  description: Run strict live acceptance, TaskFlow validation, branch cleanup checks,
+    and version checks.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: file
+  path: scripts/strict-acceptance.ps1
+  description: Strict live acceptance script
+- type: report
+  path: reports/strict-live-acceptance.md
+  description: Strict live acceptance report
+- type: file
+  path: packages/server/test/paper/strict-acceptance.test.ts
+  description: Strict acceptance script tests
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-08T22:10:32.984319'
+  updated_at: '2026-05-08T22:10:32.984319'
+  version: '1'

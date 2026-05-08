@@ -1,0 +1,110 @@
+id: task-030-paper-authoring-loop
+title: Add run-bound paper authoring, preview, review, and export loop
+status: todo
+priority: high
+owner: codex
+tags:
+- authoring
+- preview
+- export
+- review
+depends_on:
+- task-029-tui-paper-workbench
+description: 'Bind preview to live run artifacts and complete the authoring loop:
+  ClaimLedger-first writing, profile-aware section revision, citation/source annotations,
+  reviewer critique, revision diff/rollback, final/forced export, supplementary bundle,
+  and code/data availability bundle.'
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-030-step-01-red-authoring-test
+  title: Add failing authoring loop tests
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Test run-bound preview snapshot, profile-aware revision, reviewer critique,
+    supplementary bundle, and forced draft markers.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-030-step-02-authoring-adapter
+  title: Implement authoring loop adapter
+  status: todo
+  owner: codex
+  depends_on:
+  - task-030-step-01-red-authoring-test
+  description: Add paper authoring orchestration around existing writing/verification/export
+    modules.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-030-step-03-preview-binding
+  title: Bind preview to run artifacts
+  status: todo
+  owner: codex
+  depends_on:
+  - task-030-step-02-authoring-adapter
+  description: Add adapter that creates PreviewSnapshot from current paper run artifacts
+    and diagnostics.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-030-step-04-doc-version
+  title: Update docs and version 0.1.27-dev
+  status: todo
+  owner: codex
+  depends_on:
+  - task-030-step-03-preview-binding
+  description: Document authoring loop and update CHANGELOG/README.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-030-step-05-verify
+  title: Run verification
+  status: todo
+  owner: codex
+  depends_on:
+  - task-030-step-04-doc-version
+  description: Run authoring/preview/export tests, preview tests, typecheck, README
+    check, and TaskFlow validation.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: file
+  path: packages/server/src/paper/authoring.ts
+  description: Paper authoring loop adapter
+- type: file
+  path: packages/server/src/paper/preview.ts
+  description: Run-bound preview adapter
+- type: file
+  path: packages/server/test/paper/authoring.test.ts
+  description: Authoring loop tests
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-08T22:10:20.524656'
+  updated_at: '2026-05-08T22:10:20.524656'
+  version: '1'

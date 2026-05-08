@@ -13,7 +13,8 @@
     "./research/contracts": "./src/research/contracts.ts",
     "./research/runtime": "./src/research/runtime/index.ts",
     "./research/storage": "./src/research/storage.ts",
-    "./research/generated/contracts": "./src/research/generated/contracts.ts"
+    "./research/generated/contracts": "./src/research/generated/contracts.ts",
+    "./paper": "./src/paper/index.ts"
   },
   "dependencies": {
     "@opentelemetry/api": "1.9.0",
