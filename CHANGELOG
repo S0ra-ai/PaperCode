@@ -7,7 +7,7 @@
 
 :history
 
-    0.1.12-dev - 2026/05/09 (pending) [develop]
+    0.1.12-dev - 2026/05/09 (d7bf542) [develop]
     :brief 实现实验循环与容器复现门禁
         - feat(experiments): 新增 ExperimentPlan.v1, ExperimentRun.v1, ResultReport.v1 领域 payload schema
         - feat(planning): 新增 planExperiments, 默认规划 proposed method、3 个 baseline、关键 ablation、primary metric 和资源预算
