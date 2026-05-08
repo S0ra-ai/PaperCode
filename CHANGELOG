@@ -7,7 +7,7 @@
 
 :history
 
-    0.1.11-dev - 2026/05/09 (pending) [develop]
+    0.1.11-dev - 2026/05/09 (ee88ff1) [develop]
     :brief 实现开放文献与数据发现
         - feat(sources): 新增 SourceRecord.v1, LiteratureMap.v1, DataPlan.v1, DatasetCard.v1, DirectionFeasibility.v1 领域 payload schema
         - feat(literature): 新增 discoverLiterature, 记录 provider/source/license/version/verification 并按主题聚类
