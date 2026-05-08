@@ -1,6 +1,6 @@
 # paper_fucker
 
-Current version: <!-- version:start -->0.1.1-dev<!-- version:end -->
+Current version: <!-- version:start -->0.1.2-dev<!-- version:end -->
 
 `paper_fucker` is a private-first, OpenCode-derived research automation product for building verifiable academic-paper research packages from a topic, codebase, or project workspace.
 
@@ -56,7 +56,7 @@ README must expose the same version as the latest `CHANGELOG` entry. Run this ch
 .\scripts\check-readme-version.ps1
 ```
 
-Development versions advance as `<major>.<minor>.<patch>-dev`; each completed TaskFlow change records a distinct dev version such as `0.1.1-dev`.
+Development versions advance as `<major>.<minor>.<patch>-dev`; each completed TaskFlow change records a distinct dev version such as `0.1.2-dev`.
 
 ## License
 

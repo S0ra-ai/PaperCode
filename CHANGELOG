@@ -2,10 +2,40 @@
 :author        s0ra (https://github.com/S0ra-ai)
 :repo          
 :desc          记录项目的重大变更和版本历史
-:version       0.1.1-dev
+:version       0.1.2-dev
 :last_update   2026/05/08
 
 :history
+
+0.1.2-dev - 2026/05/08 (b95a0cb) [develop]
+    :brief 建立 paper_fucker research contract/server 包
+        - feat(server): 新增 @paper-fucker/server 作为 first-party paper_fucker server/runtime 契约包
+        - feat(schema): 新增 schemas/research/v1.schema.json, 固化 run/event/artifact/source/tool_trace/claim/draft/review/export/checkpoint 契约
+        - feat(validation): 使用 AJV 2020 校验 JSON Schema, 对缺失/旧版/不兼容 schema_version 抛出明确迁移错误
+        - feat(storage): 定义 JSON/JSONL 事实文件与 rebuildable run-local/global SQLite index 契约
+        - feat(otel): 接入 @opentelemetry/api, 为 contract validation 与 index rebuild 增加 paper_fucker.research spans
+        - feat(python): 新增 research-tools Python 包与 generated Pydantic v2 models
+        - docs(readme): 明确 packages/server 为 paper_fucker 权威 research runtime, packages/opencode 仅保留 upstream-derived CLI/agent substrate
+        - chore(taskflow): 完成 task-017-core-contract 并记录 contract validation report
+    :src
+        - schemas/research/v1.schema.json - JSON Schema source of truth
+        - packages/server/package.json - @paper-fucker/server workspace package
+        - packages/server/src/research/generated/contracts.ts - generated TypeScript contract types
+        - packages/server/src/research/contracts.ts - AJV validation and schema_version migration failures
+        - packages/server/src/research/storage.ts - JSON/JSONL fact loading and rebuildable SQLite indexes
+        - packages/server/src/research/telemetry.ts - OpenTelemetry API span wrapper
+        - research-tools/src/paper_fucker_tools/generated/research_contracts.py - generated Pydantic v2 models
+        - reports/core-contract-validation.md - validation and architecture report
+    :doc
+        - README.md - project structure updated to separate packages/server from packages/opencode
+        - .plan/confirmed/task-017-core-contract.yaml - TaskFlow execution logs and architecture correction
+    :verification
+        - npx --yes bun@1.3.13 install passed
+        - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
+        - npx --yes bun@1.3.13 --cwd packages/server test test/research/contracts.test.ts passed: 3 pass, 0 fail
+        - Python generated Pydantic import smoke passed with Python 3.11.7 and pydantic 2.11.3
+        - npx --yes bun@1.3.13 run typecheck passed across workspace: 13 successful tasks
+        - TaskFlow validate_task task-017-core-contract passed
 
 0.1.1-dev - 2026/05/08 (c8da1ae) [develop]
     :brief OpenCode fork 品牌与运行时命名迁移为 paper_fucker
