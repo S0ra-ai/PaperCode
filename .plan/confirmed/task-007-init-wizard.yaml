@@ -1,6 +1,6 @@
 id: task-007-init-wizard
 title: Build full initialization and diagnostics wizard
-status: todo
+status: done
 priority: high
 owner: codex
 tags:
@@ -20,7 +20,7 @@ execution:
 steps:
 - id: task-007-step-01-config-schema
   title: Define configuration and secret schema
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: Define ~/.paper_fucker config files, secrets.enc format, model endpoint
@@ -30,12 +30,27 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T16:51:59.137596'
+      level: info
+      message: Starting init diagnostics wizard on feature/init-diagnostics. The flow
+        will write ~/.paper_fucker/config.json, ~/.paper_fucker/tools.json, and ~/.paper_fucker/secrets.enc;
+        external tools are auto-discovered with optional user links; secrets never
+        go into .env or repository files.
+      agent: codex
+    - timestamp: '2026-05-08T16:55:18.312399'
+      level: info
+      message: Defined ~/.paper_fucker/config.json, ~/.paper_fucker/tools.json, and
+        ~/.paper_fucker/secrets.enc schemas in packages/server/src/init. Config covers
+        model endpoints, workspace default, preview preference, budgets, and Full
+        Access/bounded access settings.
+      agent: codex
+    last_run: '2026-05-08T16:55:18.312399'
+    attempt_count: 2
   meta: {}
 - id: task-007-step-02-external-tool-discovery
   title: Implement external tool discovery and linking
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-007-step-01-config-schema
@@ -45,12 +60,26 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T16:55:18.504862'
+      level: info
+      message: Implementing external tool discovery for pandoc, LaTeX engines, Docker,
+        Python, Git, Chrome, and Edge via config links, PAPER_FUCKER_TOOL_* env vars,
+        PATH, and common Windows locations.
+      agent: codex
+    - timestamp: '2026-05-08T16:55:30.133387'
+      level: info
+      message: Implemented tool discovery in packages/server/src/init/discovery.ts.
+        It scans user links, PAPER_FUCKER_TOOL_* env vars, PATH/PATHEXT, and common
+        Windows paths for pandoc, latexmk, xelatex, pdflatex, lualatex, tectonic,
+        docker, python, git, chrome, and edge.
+      agent: codex
+    last_run: '2026-05-08T16:55:30.133387'
+    attempt_count: 2
   meta: {}
 - id: task-007-step-03-encrypted-secrets
   title: Implement encrypted secret storage
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-007-step-01-config-schema
@@ -60,12 +89,25 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T16:55:18.697614'
+      level: info
+      message: Implementing AES-256-GCM secrets.enc storage with PBKDF2-SHA256 key
+        derivation. Secrets are written only to ~/.paper_fucker/secrets.enc, not .env
+        or repository files.
+      agent: codex
+    - timestamp: '2026-05-08T16:55:30.324602'
+      level: info
+      message: Implemented secrets.enc in packages/server/src/init/secrets.ts using
+        AES-256-GCM and PBKDF2-SHA256. Tests assert plaintext secrets are absent from
+        config.json and secrets.enc and decrypt only with the provided passphrase.
+      agent: codex
+    last_run: '2026-05-08T16:55:30.324602'
+    attempt_count: 2
   meta: {}
 - id: task-007-step-04-init-ui
   title: Implement TUI/CLI initialization flow
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-007-step-02-external-tool-discovery
@@ -76,12 +118,25 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T16:55:30.518708'
+      level: info
+      message: Implementing non-interactive CLI initialization and diagnostics flow
+        with --yes, --tool name=path, --secret name=value, budget, preview, bounded/full-access
+        flags, and diagnostics output.
+      agent: codex
+    - timestamp: '2026-05-08T16:57:27.706668'
+      level: info
+      message: Implemented init CLI flow in packages/server/src/init/cli.ts. It supports
+        init --yes, --home, --workspace, --tool name=path, --secret name=value, --secrets-passphrase,
+        --full-access-ack, --bounded, budget, preview flags, and diagnostics output.
+      agent: codex
+    last_run: '2026-05-08T16:57:27.706668'
+    attempt_count: 2
   meta: {}
 - id: task-007-step-05-init-smoke
   title: Verify init and diagnostics smoke
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-007-step-04-init-ui
@@ -91,8 +146,22 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T16:57:27.909315'
+      level: info
+      message: Running init smoke in temporary HOME/config directories and verifying
+        config, tools, encrypted secrets, diagnostics, and missing-tool reporting
+        behavior.
+      agent: codex
+    - timestamp: '2026-05-08T16:57:36.349483'
+      level: info
+      message: Init smoke passed. Verified packages/server init tests (2 pass, 0 fail,
+        15 expects), CLI init/diagnostics in a temporary HOME, combined init/research
+        server tests (9 pass, 0 fail, 60 expects), and root typecheck (13 successful
+        tasks). Evidence recorded in reports/init-diagnostics-smoke.md.
+      agent: codex
+    last_run: '2026-05-08T16:57:36.349483'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: artifact
@@ -106,5 +175,5 @@ trace:
   attempt_count: 0
 meta:
   created_at: '2026-05-08T01:24:33.298424'
-  updated_at: '2026-05-08T01:24:33.298424'
+  updated_at: '2026-05-08T16:57:50.594957'
   version: '1'

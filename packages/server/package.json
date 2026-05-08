@@ -8,6 +8,7 @@
     "test": "bun test --timeout 30000"
   },
   "exports": {
+    "./init": "./src/init/index.ts",
     "./research": "./src/research/index.ts",
     "./research/contracts": "./src/research/contracts.ts",
     "./research/runtime": "./src/research/runtime/index.ts",
