@@ -1,5 +1,6 @@
 export * from "./contracts"
 export * as ResearchContracts from "./contracts"
+export * as ResearchExperiments from "./experiments"
 export * as ResearchOrchestrator from "./orchestrator"
 export * as ResearchStorage from "./storage"
 export * as ResearchSources from "./sources"
