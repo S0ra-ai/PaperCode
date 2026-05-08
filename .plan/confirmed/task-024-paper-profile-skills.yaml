@@ -1,6 +1,6 @@
 id: task-024-paper-profile-skills
 title: Add paper profile system and first-party nature-paper skill
-status: todo
+status: in_progress
 priority: high
 owner: codex
 tags:
@@ -21,7 +21,7 @@ execution:
 steps:
 - id: task-024-step-01-red-profile-test
   title: Add failing paper profile tests
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: Test profile registry, Nature skill metadata, and profile check output
@@ -30,12 +30,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T22:39:33.873708'
+      level: info
+      message: Starting TDD RED step for paper profile registry, built-in profile
+        ids, Nature profile metadata, profile check output, and first-party nature-paper
+        skill file.
+      agent: codex
+    - timestamp: '2026-05-08T22:40:07.758378'
+      level: info
+      message: 'Added packages/server/test/paper/profiles.test.ts. RED verified: test
+        fails because defaultPaperProfiles is not exported from packages/server/src/paper/index.ts.'
+      agent: codex
+    last_run: '2026-05-08T22:40:07.758378'
+    attempt_count: 2
   meta: {}
 - id: task-024-step-02-profile-implementation
   title: Implement paper profiles
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-024-step-01-red-profile-test
@@ -45,12 +57,25 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T22:40:14.190274'
+      level: info
+      message: Implementing PaperProfile/PaperProfileCheck registry and built-in profile
+        definitions.
+      agent: codex
+    - timestamp: '2026-05-08T22:41:29.488224'
+      level: info
+      message: Implemented packages/server/src/paper/profiles.ts and exported it.
+        Profile registry tests now pass for built-in ids, runtime-refreshed Nature
+        metadata, and PaperProfileCheck output; remaining failure is the expected
+        missing .paper_fucker/skills/nature-paper/SKILL.md for step 03.
+      agent: codex
+    last_run: '2026-05-08T22:41:29.488224'
+    attempt_count: 2
   meta: {}
 - id: task-024-step-03-nature-skill
   title: Create first-party nature-paper skill
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-024-step-02-profile-implementation
@@ -60,12 +85,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T22:41:35.686180'
+      level: info
+      message: Creating first-party .paper_fucker/skills/nature-paper/SKILL.md with
+        runtime official-guidance refresh policy and PaperProfile.v1 output contract.
+      agent: codex
+    - timestamp: '2026-05-08T22:42:40.154135'
+      level: info
+      message: 'Created .paper_fucker/skills/nature-paper/SKILL.md and wired Nature
+        profile official-source refresh URLs. Profile tests now pass: 4 pass, 0 fail,
+        12 expects.'
+      agent: codex
+    last_run: '2026-05-08T22:42:40.154135'
+    attempt_count: 2
   meta: {}
 - id: task-024-step-04-doc-version
   title: Update docs and version 0.1.21-dev
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-024-step-03-nature-skill
@@ -75,12 +112,23 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T22:42:48.861693'
+      level: info
+      message: Updating README/CHANGELOG to 0.1.21-dev and adding paper profile/Nature
+        skill report.
+      agent: codex
+    - timestamp: '2026-05-08T22:43:35.630982'
+      level: info
+      message: README updated to 0.1.21-dev, CHANGELOG colon-history entry added with
+        pending hash, and reports/paper-profile-skills.md added.
+      agent: codex
+    last_run: '2026-05-08T22:43:35.630982'
+    attempt_count: 2
   meta: {}
 - id: task-024-step-05-verify
   title: Run verification
-  status: todo
+  status: in_progress
   owner: codex
   depends_on:
   - task-024-step-04-doc-version
@@ -89,8 +137,14 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T22:43:41.540752'
+      level: info
+      message: Running profile tests, server typecheck, README/CHANGELOG version check
+        after hash backfill, and TaskFlow validation.
+      agent: codex
+    last_run: '2026-05-08T22:43:41.540752'
+    attempt_count: 1
   meta: {}
 outputs:
 - type: file
@@ -105,7 +159,10 @@ outputs:
 trace:
   logs: []
   attempt_count: 0
+lock:
+  by: codex
+  at: '2026-05-08T22:38:58.822751'
 meta:
   created_at: '2026-05-08T22:09:14.515241'
-  updated_at: '2026-05-08T22:09:14.515241'
+  updated_at: '2026-05-08T22:43:41.540752'
   version: '1'
