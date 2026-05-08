@@ -2,10 +2,41 @@
 :author        s0ra (https://github.com/S0ra-ai)
 :repo          
 :desc          记录项目的重大变更和版本历史
-:version       0.1.3-dev
+:version       0.1.4-dev
 :last_update   2026/05/08
 
 :history
+
+0.1.4-dev - 2026/05/08 (760d1d4) [develop]
+    :brief 接入 Python MCP/CLI research tool bridge
+        - feat(tools): 新增 research-tools CLI 入口 paper-fucker-tools 与 python -m paper_fucker_tools
+        - feat(mcp): 新增 tool_diagnostics/pdf_probe/dataset_metadata_probe/experiment_log_parse/docx_generation_stub 结构化 MCP-style tools
+        - feat(mcp-server): 新增 FastMCP adapter, 安装 MCP SDK 后可复用同一工具 registry
+        - feat(cli): 新增 diagnostics/link-tool/mcp-call/md-to-latex/latex-to-pdf/convert-docx/serve-mcp 命令
+        - feat(discovery): pandoc/latexmk/xelatex/pdflatex/lualatex/tectonic 自动从 ~/.paper_fucker/tools.json、PAPER_FUCKER_TOOL_*、PATH 寻找
+        - feat(server/runtime): 新增 python-bridge.ts, server runtime 自动调用 Python structured tool/CLI 并记录 log artifact 与 python.tool/python.cli event
+        - docs(readme): 明确 research-tools 外部工具发现、链接配置和 server runtime bridge 边界
+        - chore(taskflow): 完成 task-006-python-tool-bridge 并记录 bridge smoke report
+    :src
+        - research-tools/src/paper_fucker_tools/external_tools.py - external tool discovery and user link config
+        - research-tools/src/paper_fucker_tools/mcp_tools.py - structured tool registry
+        - research-tools/src/paper_fucker_tools/cli.py - one-shot CLI commands
+        - research-tools/src/paper_fucker_tools/mcp_server.py - FastMCP adapter
+        - packages/server/src/research/runtime/python-bridge.ts - TypeScript runtime to Python bridge
+        - packages/server/test/research/python-bridge.test.ts - bridge smoke test
+        - research-tools/tests/test_tools.py - Python tool tests
+        - reports/python-tool-bridge-smoke.md - verification report
+    :doc
+        - README.md - version 0.1.4-dev and Python bridge structure
+        - .plan/confirmed/task-006-python-tool-bridge.yaml - TaskFlow execution logs and server-runtime wording correction
+    :verification
+        - python -m unittest discover -s research-tools/tests passed: 4 tests
+        - python -m paper_fucker_tools diagnostics --json passed
+        - python -m paper_fucker_tools md-to-latex <sample.md> -o <sample.tex> --allow-fallback passed
+        - npx --yes bun@1.3.13 --cwd packages/server test test/research/python-bridge.test.ts passed: 1 pass, 0 fail, 6 expects
+        - npx --yes bun@1.3.13 --cwd packages/server test test/research/contracts.test.ts test/research/runtime.test.ts test/research/python-bridge.test.ts passed: 7 pass, 0 fail, 45 expects
+        - npx --yes bun@1.3.13 run typecheck passed across workspace: 13 successful tasks
+        - TaskFlow validate_task task-006-python-tool-bridge passed
 
 0.1.3-dev - 2026/05/08 (d873f97) [develop]
     :brief 建立 first-party research runtime
