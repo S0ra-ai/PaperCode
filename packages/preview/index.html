@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>paper_fucker Preview</title>
+    <link rel="stylesheet" href="/assets/style.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <section>
+          <p class="eyebrow">localhost read-only preview</p>
+          <h1 id="run-title">paper_fucker run</h1>
+        </section>
+        <section class="status-strip" aria-label="Render status">
+          <span id="connection-state" class="pill">connecting</span>
+          <span id="render-state" class="pill muted">render idle</span>
+          <span id="updated-at" class="timestamp">not synced</span>
+        </section>
+      </header>
+
+      <nav class="tabs" aria-label="Preview sections">
+        <button data-tab="markdown" class="active">Markdown</button>
+        <button data-tab="latex">LaTeX</button>
+        <button data-tab="pdf">PDF</button>
+        <button data-tab="docx">DOCX</button>
+        <button data-tab="annotations">Annotations</button>
+        <button data-tab="diagnostics">Diagnostics</button>
+      </nav>
+
+      <section class="workspace">
+        <article class="pane active" id="tab-markdown">
+          <pre id="markdown-content"></pre>
+        </article>
+        <article class="pane" id="tab-latex">
+          <pre id="latex-content"></pre>
+        </article>
+        <article class="pane" id="tab-pdf">
+          <div class="artifact-view" id="pdf-content"></div>
+        </article>
+        <article class="pane" id="tab-docx">
+          <div class="artifact-view" id="docx-content"></div>
+        </article>
+        <article class="pane" id="tab-annotations">
+          <div id="annotation-list" class="annotation-list"></div>
+        </article>
+        <article class="pane" id="tab-diagnostics">
+          <pre id="diagnostics-content"></pre>
+        </article>
+      </section>
+    </main>
+    <a class="deerflow-mark" href="https://deerflow.tech" target="_blank" rel="noreferrer">Created By Deerflow</a>
+    <script type="module" src="/assets/client.js"></script>
+  </body>
+</html>

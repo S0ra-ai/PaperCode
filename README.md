@@ -14,6 +14,7 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - Research runs are stored workspace-first under `<workspace>/.paper_fucker/runs/<run-id>`, with `~/.paper_fucker/runs/<run-id>` as the fallback.
 - Runtime operations are automatic API calls, not workflows that require users to keep typing shell commands.
 - Initialization writes config, linked tool paths, and encrypted secrets under `~/.paper_fucker`; it does not write credentials to `.env` or repository files.
+- The default language is Chinese (`zh-CN`), and the default model endpoint is DeepSeek with API model id `deepseek-v4-pro`.
 - The imported OpenCode package remains the upstream-derived agent/CLI substrate while paper_fucker runtime surfaces are extracted into first-party packages.
 - Python is reserved for per-run MCP and CLI research tools.
 - Project configuration and run indexes use `~/.paper_fucker`.
@@ -24,6 +25,7 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - `schemas/research/`: JSON Schema source of truth for research runs, events, artifacts, sources, tool traces, claims, drafts, reviews, exports, and checkpoints.
 - `packages/server/`: first-party paper_fucker TypeScript server/runtime package. It owns AJV validation, OpenTelemetry span hooks, generated TypeScript contract types, run/event/artifact runtime APIs, permission/resource/cost/final-gate state, Python tool bridge calls, and rebuildable SQLite indexes.
 - `packages/server/src/init/`: first-party initialization and diagnostics flow for `~/.paper_fucker/config.json`, `tools.json`, encrypted `secrets.enc`, external tool discovery, and Full Access acknowledgement.
+- `packages/preview/`: first-party localhost read-only research preview package with token-checked snapshot/SSE endpoints and static Markdown/LaTeX/PDF/DOCX/annotation/diagnostics UI.
 - `research-tools/`: Python MCP/CLI tool package. It provides structured MCP-style diagnostics/probe/document helpers, one-shot conversion commands, external tool discovery/linking for pandoc and LaTeX engines, and generated Pydantic v2 models for tool-side validation.
 - `packages/opencode/`: imported OpenCode-derived agent and CLI substrate retained during migration; new paper_fucker domain code should not be added here unless it is a deliberate compatibility adapter.
 
@@ -41,6 +43,7 @@ Important early tasks:
 - `task-005-research-runtime`: first-party research run, event, artifact, permission, resource, cost, resume, and final gate runtime.
 - `task-006-python-tool-bridge`: Python MCP-style and CLI research tools invoked automatically by the server runtime.
 - `task-007-init-wizard`: initialization, diagnostics, external tool discovery, encrypted secrets, and Full Access acknowledgement.
+- `task-008-preview-runtime`: localhost token-protected read-only research preview with realtime render status and annotation display.
 - `task-018-phase-1-acceptance`: Windows-native phase 1 acceptance gate.
 
 ## Branching

@@ -1,6 +1,6 @@
 id: task-008-preview-runtime
 title: Build realtime read-only research preview
-status: todo
+status: done
 priority: high
 owner: codex
 tags:
@@ -14,14 +14,14 @@ depends_on:
 - task-017-core-contract
 description: Implement the localhost token-protected read-only web preview that streams
   Markdown, LaTeX, PDF, DOCX, annotations, diagnostics, and render status while all
-  mutations remain in the TUI/OpenCode runtime.
+  mutations remain in the first-party server/runtime.
 execution:
   mode: sequential
   retry: 0
 steps:
 - id: task-008-step-01-preview-protocol
   title: Define preview protocol and security
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: Define localhost-only preview server, one-time token URL, read-only
@@ -30,12 +30,26 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T17:06:31.789327'
+      level: info
+      message: Starting read-only preview implementation on feature/research-preview.
+        The preview will live in first-party packages/preview, serve only on localhost
+        with token-checked GET endpoints, expose an SSE render stream, and reject
+        write methods.
+      agent: codex
+    - timestamp: '2026-05-08T17:08:51.375497'
+      level: info
+      message: 'Defined packages/preview protocol and localhost security: preview.v1
+        snapshot, render stream events, token generation, read-only method enforcement,
+        token-checked snapshot/event endpoints, and localhost Bun server.'
+      agent: codex
+    last_run: '2026-05-08T17:08:51.375497'
+    attempt_count: 2
   meta: {}
 - id: task-008-step-02-preview-ui
   title: Implement preview web UI
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-008-step-01-preview-protocol
@@ -45,12 +59,25 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T17:08:51.588685'
+      level: info
+      message: Implementing static index.html preview UI with Markdown, LaTeX, PDF,
+        DOCX, annotations, diagnostics, and render status tabs.
+      agent: codex
+    - timestamp: '2026-05-08T17:18:18.985334'
+      level: info
+      message: Implemented packages/preview/index.html plus static JS/CSS workbench
+        UI with Markdown, LaTeX, PDF, DOCX, annotations, diagnostics, and render status
+        tabs. Browser smoke confirmed the UI loads nonblank with live status and Markdown
+        content.
+      agent: codex
+    last_run: '2026-05-08T17:18:18.985334'
+    attempt_count: 2
   meta: {}
 - id: task-008-step-03-render-queue
   title: Implement realtime render queue
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-008-step-01-preview-protocol
@@ -60,12 +87,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T17:08:51.787429'
+      level: info
+      message: Implementing realtime render queue with immediate Markdown snapshot
+        updates, derived artifact rendering, SSE publish, and stale job cancellation.
+      agent: codex
+    - timestamp: '2026-05-08T17:18:19.185946'
+      level: info
+      message: Implemented PreviewRenderQueue with immediate Markdown snapshot updates,
+        derived artifact render jobs, SSE publish, and cancellation of stale jobs.
+        Tests verify newest Markdown wins after stale job cancellation.
+      agent: codex
+    last_run: '2026-05-08T17:18:19.185946'
+    attempt_count: 2
   meta: {}
 - id: task-008-step-04-annotation-linking
   title: Implement LSP-like annotation linking
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-008-step-02-preview-ui
@@ -75,12 +114,25 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T17:18:19.406109'
+      level: info
+      message: Implementing annotation display for claim, citation, template, experiment,
+        reviewer, cost, and agent diagnostics with source labels/ranges and TUI references.
+      agent: codex
+    - timestamp: '2026-05-08T17:18:27.994689'
+      level: info
+      message: Implemented preview annotation model and UI rendering for claim/citation/template/experiment/reviewer/cost/agent
+        diagnostics with severity, source label/path/range, and optional TUI reference.
+        Browser smoke confirmed annotation tab is available and the current snapshot
+        renders Markdown content.
+      agent: codex
+    last_run: '2026-05-08T17:18:27.994689'
+    attempt_count: 2
   meta: {}
 - id: task-008-step-05-preview-smoke
   title: Verify preview smoke behavior
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-008-step-03-render-queue
@@ -91,8 +143,23 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T17:18:36.350088'
+      level: info
+      message: 'Running preview smoke verification: token access, read-only rejection,
+        render queue stale cancellation, package typecheck, browser snapshot/screenshot,
+        and root workspace typecheck.'
+      agent: codex
+    - timestamp: '2026-05-08T17:20:44.263680'
+      level: info
+      message: Preview smoke passed. Verified package install, packages/preview tests
+        (2 pass, 0 fail, 9 expects), packages/preview typecheck, combined server init/research
+        tests (9 pass, 0 fail, 60 expects), browser smoke with nonblank live UI, screenshot
+        at reports/preview-browser-smoke.png, and root typecheck across 14 tasks.
+        Evidence recorded in reports/preview-smoke.md.
+      agent: codex
+    last_run: '2026-05-08T17:20:44.263680'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: directory
@@ -106,5 +173,5 @@ trace:
   attempt_count: 0
 meta:
   created_at: '2026-05-08T01:24:45.484328'
-  updated_at: '2026-05-08T05:59:22.501703'
+  updated_at: '2026-05-08T17:21:16.097537'
   version: '1'

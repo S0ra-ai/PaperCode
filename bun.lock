@@ -489,6 +489,16 @@
         "@opentui/solid",
       ],
     },
+    "packages/preview": {
+      "name": "@paper-fucker/preview",
+      "version": "0.1.0",
+      "devDependencies": {
+        "@tsconfig/bun": "catalog:",
+        "@types/bun": "catalog:",
+        "@typescript/native-preview": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
     "packages/script": {
       "name": "@opencode-ai/script",
       "dependencies": {
@@ -1751,6 +1761,8 @@
     "@pagefind/windows-arm64": ["@pagefind/windows-arm64@1.5.2", "", { "os": "win32", "cpu": "arm64" }, "sha512-hN9Nh90fNW61nNRCW9ZyQrAj/mD0eRvmJ8NlTUzkbuW8kIzGJUi3cxjFkEcMZ5h/8FsKWD/VcouZl4yo1F7B6g=="],
 
     "@pagefind/windows-x64": ["@pagefind/windows-x64@1.5.2", "", { "os": "win32", "cpu": "x64" }, "sha512-Fa2Iyw7kaDRzGMfNYNUXNW2zbL5FQVDgSOcbDHdzBrDEdpqOqg8TcZ68F22ol6NJ9IGzvUdmeyZypLW5dyhqsg=="],
+
+    "@paper-fucker/preview": ["@paper-fucker/preview@workspace:packages/preview"],
 
     "@paper-fucker/server": ["@paper-fucker/server@workspace:packages/server"],
 
