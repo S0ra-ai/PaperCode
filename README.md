@@ -21,8 +21,8 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 ## Project Structure
 
 - `schemas/research/`: JSON Schema source of truth for research runs, events, artifacts, sources, tool traces, claims, drafts, reviews, exports, and checkpoints.
-- `packages/server/`: first-party paper_fucker TypeScript server/runtime package. It owns AJV validation, OpenTelemetry span hooks, generated TypeScript contract types, run/event/artifact runtime APIs, permission/resource/cost/final-gate state, and rebuildable SQLite indexes.
-- `research-tools/`: Python MCP/CLI tool package. Generated Pydantic v2 models mirror the JSON Schema contracts for tool-side validation.
+- `packages/server/`: first-party paper_fucker TypeScript server/runtime package. It owns AJV validation, OpenTelemetry span hooks, generated TypeScript contract types, run/event/artifact runtime APIs, permission/resource/cost/final-gate state, Python tool bridge calls, and rebuildable SQLite indexes.
+- `research-tools/`: Python MCP/CLI tool package. It provides structured MCP-style diagnostics/probe/document helpers, one-shot conversion commands, external tool discovery/linking for pandoc and LaTeX engines, and generated Pydantic v2 models for tool-side validation.
 - `packages/opencode/`: imported OpenCode-derived agent and CLI substrate retained during migration; new paper_fucker domain code should not be added here unless it is a deliberate compatibility adapter.
 
 ## Planning Source
@@ -37,6 +37,7 @@ Important early tasks:
 - `task-004-brand-paper-fucker`: rebrand command, config, and user-facing surfaces.
 - `task-017-core-contract`: schema, storage, event, artifact, and generated type contracts.
 - `task-005-research-runtime`: first-party research run, event, artifact, permission, resource, cost, resume, and final gate runtime.
+- `task-006-python-tool-bridge`: Python MCP-style and CLI research tools invoked automatically by the server runtime.
 - `task-018-phase-1-acceptance`: Windows-native phase 1 acceptance gate.
 
 ## Branching
