@@ -1,0 +1,105 @@
+id: task-025-research-intake
+title: Add multi-input research intake
+status: todo
+priority: high
+owner: codex
+tags:
+- intake
+- topic
+- code
+- materials
+depends_on:
+- task-024-paper-profile-skills
+description: Add ResearchIntakeRequest and ResearchBrief support for topic-to-paper,
+  code-to-paper, and mixed-material paper workflows. Intake must normalize topics,
+  workspace/code paths, paper files, datasets, experiment logs, target profile, language,
+  and model role overrides.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-025-step-01-red-intake-test
+  title: Add failing intake tests
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Test topic-only, code-grounded, and mixed material intake normalization
+    plus risk output.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-025-step-02-intake-types
+  title: Implement intake types and normalizer
+  status: todo
+  owner: codex
+  depends_on:
+  - task-025-step-01-red-intake-test
+  description: Add ResearchIntakeRequest, ResearchBrief, and intake normalization
+    under paper domain.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-025-step-03-runtime-recording
+  title: Record intake artifacts
+  status: todo
+  owner: codex
+  depends_on:
+  - task-025-step-02-intake-types
+  description: Write ResearchBrief.v1 artifacts and intake events into research runs.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-025-step-04-doc-version
+  title: Update docs and version 0.1.22-dev
+  status: todo
+  owner: codex
+  depends_on:
+  - task-025-step-03-runtime-recording
+  description: Document multi-input intake and update CHANGELOG/README.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-025-step-05-verify
+  title: Run verification
+  status: todo
+  owner: codex
+  depends_on:
+  - task-025-step-04-doc-version
+  description: Run intake tests, typecheck, README check, and TaskFlow validation.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: file
+  path: packages/server/src/paper/intake.ts
+  description: Research intake implementation
+- type: file
+  path: packages/server/test/paper/intake.test.ts
+  description: Research intake tests
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-08T22:09:24.013354'
+  updated_at: '2026-05-08T22:09:24.013354'
+  version: '1'

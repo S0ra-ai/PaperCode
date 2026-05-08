@@ -1,0 +1,105 @@
+id: task-022-model-router
+title: Add provider-agnostic model role router
+status: todo
+priority: high
+owner: codex
+tags:
+- models
+- opencode
+- roles
+depends_on:
+- task-021-architecture-reframe
+description: Add a paper_fucker model role router that supports all OpenCode provider/model
+  identifiers and treats DeepSeek only as a default sample provider. It maps planning,
+  literature, code analysis, experiments, writing, review, citation, and summarization
+  roles to OpenCode model ids with per-role overrides.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-022-step-01-red-router-test
+  title: Add failing model router tests
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Test default role resolution, per-role overrides, OpenCode provider/model
+    parsing, and DeepSeek fallback semantics.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-022-step-02-router-implementation
+  title: Implement ModelRoleRouter
+  status: todo
+  owner: codex
+  depends_on:
+  - task-022-step-01-red-router-test
+  description: Add model role types, resolver, validation, and diagnostics under paper
+    domain.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-022-step-03-config-integration
+  title: Integrate config defaults
+  status: todo
+  owner: codex
+  depends_on:
+  - task-022-step-02-router-implementation
+  description: Wire router defaults to init config without hard-coding DeepSeek as
+    the only provider.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-022-step-04-doc-version
+  title: Update docs and version 0.1.19-dev
+  status: todo
+  owner: codex
+  depends_on:
+  - task-022-step-03-config-integration
+  description: Document model role routing and update CHANGELOG/README.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-022-step-05-verify
+  title: Run verification
+  status: todo
+  owner: codex
+  depends_on:
+  - task-022-step-04-doc-version
+  description: Run targeted tests, server typecheck, README check, and TaskFlow validation.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: file
+  path: packages/server/src/paper/model-router.ts
+  description: Model role router
+- type: file
+  path: packages/server/test/paper/model-router.test.ts
+  description: Model router tests
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-08T22:08:51.902207'
+  updated_at: '2026-05-08T22:08:51.902207'
+  version: '1'

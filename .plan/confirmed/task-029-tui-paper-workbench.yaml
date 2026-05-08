@@ -1,0 +1,107 @@
+id: task-029-tui-paper-workbench
+title: Deeply refactor OpenCode TUI into paper workbench
+status: todo
+priority: high
+owner: codex
+tags:
+- tui
+- opencode
+- workbench
+depends_on:
+- task-028-experiment-mcp-loop
+description: Refactor OpenCode TUI so the default paper_fucker experience is a Chinese
+  paper research workbench. It supports topic/code/material intake, model role display,
+  MCP/skills/toolchain health, run stage graph, live events, source ledger, claim
+  ledger, experiments, diagnostics, pause questions, preview, and export controls.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-029-step-01-red-tui-state-test
+  title: Add failing TUI state tests
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Test paper workbench state mapping and Chinese labels independent of
+    renderer.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-029-step-02-workbench-state
+  title: Implement TUI workbench state adapter
+  status: todo
+  owner: codex
+  depends_on:
+  - task-029-step-01-red-tui-state-test
+  description: Add TuiResearchRunState and adapter from paper runtime status.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-029-step-03-home-and-run-views
+  title: Implement home and run views
+  status: todo
+  owner: codex
+  depends_on:
+  - task-029-step-02-workbench-state
+  description: Update OpenCode TUI home and add paper run view for stage graph, ledgers,
+    diagnostics, and controls.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-029-step-04-doc-version
+  title: Update docs and version 0.1.26-dev
+  status: todo
+  owner: codex
+  depends_on:
+  - task-029-step-03-home-and-run-views
+  description: Document TUI workbench behavior and update CHANGELOG/README.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-029-step-05-verify
+  title: Run verification
+  status: todo
+  owner: codex
+  depends_on:
+  - task-029-step-04-doc-version
+  description: Run TUI-related tests, typecheck, README check, and TaskFlow validation.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: file
+  path: packages/server/src/paper/tui-state.ts
+  description: Paper TUI state adapter
+- type: file
+  path: packages/opencode/src/cli/cmd/tui/routes/home.tsx
+  description: Paper workbench home
+- type: file
+  path: packages/server/test/paper/tui-state.test.ts
+  description: TUI state tests
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-08T22:10:08.904231'
+  updated_at: '2026-05-08T22:10:08.904231'
+  version: '1'

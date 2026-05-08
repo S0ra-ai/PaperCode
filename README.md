@@ -1,21 +1,24 @@
 # paper_fucker
 
-Current version: <!-- version:start -->0.1.17-dev<!-- version:end -->
+Current version: <!-- version:start -->0.1.18-dev<!-- version:end -->
 
-`paper_fucker` is a private-first, OpenCode-derived research automation product for building verifiable academic-paper research packages from a topic, codebase, or project workspace.
+`paper_fucker` is a private-first, OpenCode-derived closed-loop paper system. It turns a topic, codebase, dataset, experiment log, or paper material set into a verifiable academic-paper bundle with research planning, source discovery, code understanding, experiment/reproduction support, ClaimLedger-first writing, authenticity gates, profile-aware formatting, preview, and export.
 
 The repository is governed by TaskFlow. The active implementation plan lives in `.plan/confirmed/`; historical planning drafts are not an execution source.
 
 ## Current Status
 
 - End-to-end fixture acceptance now covers the first-party research pipeline from topic intake through template resolution, literature/data discovery, experiments, ClaimLedger writing, verification gate, final export, and forced draft failure behavior.
-- The product direction is a hard fork of OpenCode, not a thin wrapper.
+- The product direction is a deep OpenCode transformation, not a thin wrapper: OpenCode remains the substrate for providers/models, agents/sessions, tools, MCP, skills, TUI, permissions, and plugins.
+- paper_fucker owns the paper domain: intake, paper profiles, model roles, capability registry, paper orchestration, authoring loop, authenticity gates, and export bundles.
+- Supported input modes are topic-to-paper, code-to-paper, data-to-paper, experiment-log-to-paper, and mixed-materials-to-paper.
 - The authoritative research contracts and server-side paper_fucker runtime live under `packages/server`.
 - Research runs are stored workspace-first under `<workspace>/.paper_fucker/runs/<run-id>`, with `~/.paper_fucker/runs/<run-id>` as the fallback.
 - Runtime operations are automatic API calls, not workflows that require users to keep typing shell commands.
 - Initialization writes config, linked tool paths, and encrypted secrets under `~/.paper_fucker`; it does not write credentials to `.env` or repository files.
-- The default language is Chinese (`zh-CN`), and the default model endpoint is DeepSeek with API model id `deepseek-v4-pro`.
+- The default language is Chinese (`zh-CN`). DeepSeek with API model id `deepseek-v4-pro` is the default sample endpoint, but paper_fucker is provider-agnostic and must support every provider/model that OpenCode supports.
 - Exa is configured as a remote MCP search connector for source discovery through `.paper_fucker/paper_fucker.jsonc`.
+- MCP servers and skills are first-class research capabilities. Literature search, code analysis, experiments, paper profiles, statistical checks, figures, and export helpers should be registered as capabilities instead of bypassing OpenCode.
 - The automatic orchestrator now owns the default topic-to-paper stage graph and proceeds stage-by-stage unless a pause condition is raised.
 - Trusted template resolution now records `TemplateSpec.v1`, adopts clear high-confidence official templates automatically, and falls back to a CJC default when no venue is known.
 - Open literature and dataset discovery now records `SourceRecord.v1`, `LiteratureMap.v1`, `DataPlan.v1`, `DatasetCard.v1`, and direction feasibility artifacts with license and verification diagnostics.
@@ -34,6 +37,7 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - `schemas/research/`: JSON Schema source of truth for research runs, events, artifacts, sources, tool traces, claims, drafts, reviews, exports, and checkpoints.
 - `packages/server/`: first-party paper_fucker TypeScript server/runtime package. It owns AJV validation, OpenTelemetry span hooks, generated TypeScript contract types, run/event/artifact runtime APIs, permission/resource/cost/final-gate state, Python tool bridge calls, and rebuildable SQLite indexes.
 - `packages/server/src/init/`: first-party initialization and diagnostics flow for `~/.paper_fucker/config.json`, `tools.json`, encrypted `secrets.enc`, external tool discovery, and Full Access acknowledgement.
+- `packages/server/src/paper/`: first-party paper domain entrypoint. It defines the OpenCode-substrate architecture, paper input modes, and future model/capability/profile/orchestrator/authoring surfaces.
 - `packages/server/src/research/orchestrator/`: automatic topic-to-paper stage graph, Full Access pause policy, checkpoint guidance queue, and run controls.
 - `packages/server/src/research/templates/`: trusted template resolution, source evidence/confidence policy, and Markdown-to-LaTeX application through the Python bridge.
 - `packages/server/src/research/sources/`: open-source-first literature and dataset discovery, source verification metadata, license/access checks, and automatic nearby-direction feasibility turns.
@@ -65,6 +69,17 @@ Important early tasks:
 - `task-008-preview-runtime`: localhost token-protected read-only research preview with realtime render status and annotation display.
 - `task-018-phase-1-acceptance`: Windows-native phase 1 acceptance gate.
 - `task-020-end-to-end-acceptance`: fixture-topic end-to-end acceptance for final/forced export behavior and research pipeline integration.
+- `task-021-architecture-reframe`: OpenCode substrate plus paper_fucker paper-domain architecture reframe.
+- `task-022-model-router`: provider-agnostic model role router.
+- `task-023-research-skill-mcp-bus`: MCP/skill/tool/Python capability registry.
+- `task-024-paper-profile-skills`: paper profile registry and first-party `nature-paper` skill.
+- `task-025-research-intake`: multi-input intake for topics, code, data, logs, and materials.
+- `task-026-real-orchestrator`: no-stub paper stage graph.
+- `task-027-code-to-paper`: source-range-grounded codebase-to-paper artifacts.
+- `task-028-experiment-mcp-loop`: MCP-assisted experiment and reproduction loop.
+- `task-029-tui-paper-workbench`: OpenCode TUI refactor into paper workbench.
+- `task-030-paper-authoring-loop`: run-bound preview, review, revision, and export loop.
+- `task-031-strict-live-acceptance`: final strict live acceptance for the complete paper system.
 
 ## Branching
 

@@ -1,0 +1,103 @@
+id: task-027-code-to-paper
+title: Add codebase-to-paper analysis artifacts
+status: todo
+priority: high
+owner: codex
+tags:
+- code-analysis
+- paper
+- opencode-tools
+depends_on:
+- task-026-real-orchestrator
+description: 'Add code-to-paper support using OpenCode read/grep/glob/task/subagent
+  capabilities. Produce code-grounded artifacts with source ranges: CodebaseMap.v1,
+  MethodExtraction.v1, ExperimentSurface.v1, and ReproductionPlan.v1.'
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-027-step-01-red-code-test
+  title: Add failing code-to-paper tests
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Test codebase map, method extraction, experiment surface, reproduction
+    plan, and source range binding.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-027-step-02-code-artifacts
+  title: Implement code research artifacts
+  status: todo
+  owner: codex
+  depends_on:
+  - task-027-step-01-red-code-test
+  description: Add artifact types and extraction helpers for code paths.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-027-step-03-capability-integration
+  title: Integrate code capabilities
+  status: todo
+  owner: codex
+  depends_on:
+  - task-027-step-02-code-artifacts
+  description: Register OpenCode read/grep/glob/task capabilities for code analysis
+    stages.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-027-step-04-doc-version
+  title: Update docs and version 0.1.24-dev
+  status: todo
+  owner: codex
+  depends_on:
+  - task-027-step-03-capability-integration
+  description: Document code-to-paper flow and update CHANGELOG/README.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-027-step-05-verify
+  title: Run verification
+  status: todo
+  owner: codex
+  depends_on:
+  - task-027-step-04-doc-version
+  description: Run code-to-paper tests, typecheck, README check, and TaskFlow validation.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: file
+  path: packages/server/src/paper/code-to-paper.ts
+  description: Code-to-paper artifact generation
+- type: file
+  path: packages/server/test/paper/code-to-paper.test.ts
+  description: Code-to-paper tests
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-08T22:09:46.337768'
+  updated_at: '2026-05-08T22:09:46.337768'
+  version: '1'

@@ -1,0 +1,111 @@
+id: task-024-paper-profile-skills
+title: Add paper profile system and first-party nature-paper skill
+status: todo
+priority: high
+owner: codex
+tags:
+- skills
+- profiles
+- nature
+- writing
+depends_on:
+- task-023-research-skill-mcp-bus
+description: Create a paper profile plugin system and first-party nature-paper skill.
+  The Nature skill must instruct runtime workers to fetch current official Nature
+  Portfolio guidance rather than treating embedded guidance as permanent truth. Add
+  built-in profile ids for nature-paper, ieee-paper, acm-paper, springer-paper, and
+  generic-preprint.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-024-step-01-red-profile-test
+  title: Add failing paper profile tests
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Test profile registry, Nature skill metadata, and profile check output
+    shape.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-024-step-02-profile-implementation
+  title: Implement paper profiles
+  status: todo
+  owner: codex
+  depends_on:
+  - task-024-step-01-red-profile-test
+  description: Add PaperProfile, PaperProfileCheck, registry, and built-in profile
+    definitions.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-024-step-03-nature-skill
+  title: Create first-party nature-paper skill
+  status: todo
+  owner: codex
+  depends_on:
+  - task-024-step-02-profile-implementation
+  description: Create .paper_fucker/skills/nature-paper/SKILL.md and make it discoverable
+    through the capability registry.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-024-step-04-doc-version
+  title: Update docs and version 0.1.21-dev
+  status: todo
+  owner: codex
+  depends_on:
+  - task-024-step-03-nature-skill
+  description: Document paper profiles and Nature skill installation path, then update
+    CHANGELOG/README.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-024-step-05-verify
+  title: Run verification
+  status: todo
+  owner: codex
+  depends_on:
+  - task-024-step-04-doc-version
+  description: Run profile tests, typecheck, README check, and TaskFlow validation.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: file
+  path: packages/server/src/paper/profiles.ts
+  description: Paper profile registry
+- type: file
+  path: .paper_fucker/skills/nature-paper/SKILL.md
+  description: First-party Nature paper skill
+- type: file
+  path: packages/server/test/paper/profiles.test.ts
+  description: Paper profile tests
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-08T22:09:14.515241'
+  updated_at: '2026-05-08T22:09:14.515241'
+  version: '1'

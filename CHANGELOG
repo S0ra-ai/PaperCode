@@ -2,10 +2,29 @@
 :author        s0ra (https://github.com/S0ra-ai)
 :repo          
 :desc          记录项目的重大变更和版本历史
-:version       0.1.17-dev
+:version       0.1.18-dev
 :last_update   2026/05/09
 
 :history
+
+    0.1.18-dev - 2026/05/09 (b8fabeb) [develop]
+    :brief 重定界 OpenCode 底座与 paper_fucker 论文领域内核
+        - feat(paper): 新增 packages/server/src/paper 架构入口, 固化 OpenCode substrate / research runtime / paper domain 三层边界
+        - feat(paper): 声明 topic/code/data/experiment-log/materials-to-paper 输入模式
+        - docs(readme): 改写产品定位, 明确 DeepSeek 只是默认样例, 所有 OpenCode provider/model 都应可接入
+        - docs(readme): 明确 MCP 和 skills 是论文能力总线, 不是附属功能
+        - chore(taskflow): 新增 task-021 到 task-031 完整闭环论文系统任务链
+    :src
+        - packages/server/src/paper/architecture.ts - paper system architecture metadata
+        - packages/server/src/paper/index.ts - paper domain entrypoint
+        - packages/server/test/paper/architecture.test.ts - architecture boundary tests
+        - reports/architecture-reframe.md - architecture reframe report
+        - README.md - product positioning and task chain update
+    :verification
+        - npx --yes bun@1.3.13 --cwd packages/server test test/paper/architecture.test.ts passed: 3 pass, 0 fail, 6 expects
+        - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
+        - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
+        - TaskFlow validate_task task-021-architecture-reframe passed
 
     0.1.17-dev - 2026/05/09 (e214ff4) [develop]
     :brief 补齐端到端研究流水线验收
