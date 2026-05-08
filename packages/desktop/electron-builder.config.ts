@@ -21,13 +21,13 @@ async function signWindows(configuration: { path: string }) {
 }
 
 const channel = (() => {
-  const raw = process.env.OPENCODE_CHANNEL
+  const raw = process.env.PAPER_FUCKER_CHANNEL ?? process.env.OPENCODE_CHANNEL
   if (raw === "dev" || raw === "beta" || raw === "prod") return raw
   return "dev"
 })()
 
 const getBase = (): Configuration => ({
-  artifactName: "opencode-desktop-${os}-${arch}.${ext}",
+  artifactName: "paper_fucker-desktop-${os}-${arch}.${ext}",
   directories: {
     output: "dist",
     buildResources: "resources",
@@ -54,8 +54,8 @@ const getBase = (): Configuration => ({
     sign: true,
   },
   protocols: {
-    name: "OpenCode",
-    schemes: ["opencode"],
+    name: "paper_fucker",
+    schemes: ["paper-fucker"],
   },
   win: {
     icon: `resources/icons/icon.ico`,
@@ -85,29 +85,29 @@ function getConfig() {
     case "dev": {
       return {
         ...base,
-        appId: "ai.opencode.desktop.dev",
-        productName: "OpenCode Dev",
-        rpm: { packageName: "opencode-dev" },
+        appId: "ai.paperfucker.desktop.dev",
+        productName: "paper_fucker Dev",
+        rpm: { packageName: "paper_fucker-dev" },
       }
     }
     case "beta": {
       return {
         ...base,
-        appId: "ai.opencode.desktop.beta",
-        productName: "OpenCode Beta",
-        protocols: { name: "OpenCode Beta", schemes: ["opencode"] },
-        publish: { provider: "github", owner: "anomalyco", repo: "opencode-beta", channel: "latest" },
-        rpm: { packageName: "opencode-beta" },
+        appId: "ai.paperfucker.desktop.beta",
+        productName: "paper_fucker Beta",
+        protocols: { name: "paper_fucker Beta", schemes: ["paper-fucker"] },
+        publish: { provider: "github", owner: "S0ra-ai", repo: "paper_fucker", channel: "beta" },
+        rpm: { packageName: "paper_fucker-beta" },
       }
     }
     case "prod": {
       return {
         ...base,
-        appId: "ai.opencode.desktop",
-        productName: "OpenCode",
-        protocols: { name: "OpenCode", schemes: ["opencode"] },
-        publish: { provider: "github", owner: "anomalyco", repo: "opencode", channel: "latest" },
-        rpm: { packageName: "opencode" },
+        appId: "ai.paperfucker.desktop",
+        productName: "paper_fucker",
+        protocols: { name: "paper_fucker", schemes: ["paper-fucker"] },
+        publish: { provider: "github", owner: "S0ra-ai", repo: "paper_fucker", channel: "latest" },
+        rpm: { packageName: "paper_fucker" },
       }
     }
   }

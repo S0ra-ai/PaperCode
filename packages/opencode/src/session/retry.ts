@@ -7,7 +7,7 @@ export type Err = ReturnType<NamedError["toObject"]>
 
 // This exported message is shared with the TUI upsell detector. Matching on a
 // literal error string kind of sucks, but it is the simplest for now.
-export const GO_UPSELL_MESSAGE = "Free usage exceeded, subscribe to Go https://opencode.ai/go"
+export const GO_UPSELL_MESSAGE = "Free usage exceeded, subscribe to Go https://paper-fucker.local/go"
 
 export const RETRY_INITIAL_DELAY = 2000
 export const RETRY_BACKOFF_FACTOR = 2

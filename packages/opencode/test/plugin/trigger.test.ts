@@ -31,7 +31,7 @@ function withProject<A, E, R>(source: string, self: Effect.Effect<A, E, R>) {
           Effect.promise(() => Bun.write(file, source)),
           Effect.promise(() =>
             Bun.write(
-              path.join(dir, "opencode.json"),
+              path.join(dir, "paper_fucker.json"),
               JSON.stringify(
                 {
                   $schema: "https://opencode.ai/config.json",

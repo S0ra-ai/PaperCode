@@ -40,14 +40,14 @@ export function resource(): { serviceName: string; serviceVersion: string; attri
   })()
 
   return {
-    serviceName: "opencode",
+    serviceName: "paper_fucker",
     serviceVersion: InstallationVersion,
     attributes: {
       ...attributes,
       "deployment.environment.name": InstallationChannel,
-      "opencode.client": Flag.OPENCODE_CLIENT,
-      "opencode.process_role": processMetadata.processRole,
-      "opencode.run_id": processMetadata.runID,
+      "paper_fucker.client": Flag.OPENCODE_CLIENT,
+      "paper_fucker.process_role": processMetadata.processRole,
+      "paper_fucker.run_id": processMetadata.runID,
       "service.instance.id": processID,
     },
   }

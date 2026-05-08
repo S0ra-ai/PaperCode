@@ -10,7 +10,7 @@ if (!raw) {
 
 const ver = raw.replace(/^v/, "")
 const root = path.resolve(import.meta.dir, "../../..")
-const skip = new Set([".git", ".opencode", ".turbo", "dist", "node_modules"])
+const skip = new Set([".git", ".paper_fucker", ".turbo", "dist", "node_modules"])
 const keys = ["@opentui/core", "@opentui/solid"] as const
 
 const files = (await Array.fromAsync(new Bun.Glob("**/package.json").scan({ cwd: root }))).filter(

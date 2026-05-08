@@ -1,5 +1,5 @@
 {
-  description = "OpenCode development flake";
+  description = "paper_fucker development flake";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
@@ -37,16 +37,17 @@
             node_modules = final.callPackage ./nix/node_modules.nix {
               inherit rev;
             };
-            opencode = final.callPackage ./nix/opencode.nix {
+            paper_fucker = final.callPackage ./nix/opencode.nix {
               inherit node_modules;
             };
             desktop = final.callPackage ./nix/desktop.nix {
-              inherit opencode;
+              inherit paper_fucker;
             };
           in
           {
-            inherit opencode;
-            opencode-desktop = desktop;
+            inherit paper_fucker;
+            opencode = paper_fucker;
+            paper_fucker-desktop = desktop;
           };
       };
 
@@ -56,16 +57,17 @@
           node_modules = pkgs.callPackage ./nix/node_modules.nix {
             inherit rev;
           };
-          opencode = pkgs.callPackage ./nix/opencode.nix {
+          paper_fucker = pkgs.callPackage ./nix/opencode.nix {
             inherit node_modules;
           };
           desktop = pkgs.callPackage ./nix/desktop.nix {
-            inherit opencode;
+            inherit paper_fucker;
           };
         in
         {
-          default = opencode;
-          inherit opencode desktop;
+          default = paper_fucker;
+          inherit paper_fucker desktop;
+          opencode = paper_fucker;
           # Updater derivation with fakeHash - build fails and reveals correct hash
           node_modules_updater = node_modules.override {
             hash = pkgs.lib.fakeHash;

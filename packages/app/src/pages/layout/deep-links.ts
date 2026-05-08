@@ -1,7 +1,7 @@
-export const deepLinkEvent = "opencode:deep-link"
+export const deepLinkEvent = "paper-fucker:deep-link"
 
 const parseUrl = (input: string) => {
-  if (!input.startsWith("opencode://")) return
+  if (!input.startsWith("paper-fucker://") && !input.startsWith("opencode://")) return
   if (typeof URL.canParse === "function" && !URL.canParse(input)) return
   try {
     return new URL(input)
@@ -36,15 +36,19 @@ export const collectOpenProjectDeepLinks = (urls: string[]) =>
 export const collectNewSessionDeepLinks = (urls: string[]) =>
   urls.map(parseNewSessionDeepLink).filter((link): link is { directory: string; prompt?: string } => !!link)
 
-type OpenCodeWindow = Window & {
+type PaperFuckerWindow = Window & {
+  __PAPER_FUCKER__?: {
+    deepLinks?: string[]
+  }
   __OPENCODE__?: {
     deepLinks?: string[]
   }
 }
 
-export const drainPendingDeepLinks = (target: OpenCodeWindow) => {
-  const pending = target.__OPENCODE__?.deepLinks ?? []
+export const drainPendingDeepLinks = (target: PaperFuckerWindow) => {
+  const pending = target.__PAPER_FUCKER__?.deepLinks ?? target.__OPENCODE__?.deepLinks ?? []
   if (pending.length === 0) return []
+  if (target.__PAPER_FUCKER__) target.__PAPER_FUCKER__.deepLinks = []
   if (target.__OPENCODE__) target.__OPENCODE__.deepLinks = []
   return pending
 }

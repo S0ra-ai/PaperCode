@@ -205,7 +205,7 @@ function normalizePath(input?: string) {
 
 export const RunCommand = effectCmd({
   command: "run [message..]",
-  describe: "run opencode with a message",
+  describe: "run paper_fucker with a message",
   // --attach connects to a remote server (no local instance needed); the
   // default path runs an in-process server and needs the project instance.
   instance: (args) => !args.attach,
@@ -269,17 +269,17 @@ export const RunCommand = effectCmd({
       })
       .option("attach", {
         type: "string",
-        describe: "attach to a running opencode server (e.g., http://localhost:4096)",
+        describe: "attach to a running paper_fucker server (e.g., http://localhost:4096)",
       })
       .option("password", {
         alias: ["p"],
         type: "string",
-        describe: "basic auth password (defaults to OPENCODE_SERVER_PASSWORD)",
+        describe: "basic auth password (defaults to PAPER_FUCKER_SERVER_PASSWORD)",
       })
       .option("username", {
         alias: ["u"],
         type: "string",
-        describe: "basic auth username (defaults to OPENCODE_SERVER_USERNAME or 'opencode')",
+        describe: "basic auth username (defaults to PAPER_FUCKER_SERVER_USERNAME or 'paper_fucker')",
       })
       .option("dir", {
         type: "string",
@@ -671,7 +671,7 @@ export const RunCommand = effectCmd({
         const request = new Request(input, init)
         return Server.Default().app.fetch(request)
       }) as typeof globalThis.fetch
-      const sdk = createOpencodeClient({ baseUrl: "http://opencode.internal", fetch: fetchFn })
+      const sdk = createOpencodeClient({ baseUrl: "http://paper_fucker.internal", fetch: fetchFn })
       await execute(sdk)
     })
   }),

@@ -1,6 +1,6 @@
-# OpenCode Desktop
+# paper_fucker Desktop
 
-The OpenCode Desktop app, built with Electron.
+The paper_fucker Desktop app, built with Electron.
 
 ## Development
 

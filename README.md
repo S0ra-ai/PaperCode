@@ -1,6 +1,6 @@
 # paper_fucker
 
-Current version: <!-- version:start -->0.1.0-dev<!-- version:end -->
+Current version: <!-- version:start -->0.1.1-dev<!-- version:end -->
 
 `paper_fucker` is a private-first, OpenCode-derived research automation product for building verifiable academic-paper research packages from a topic, codebase, or project workspace.
 
@@ -10,7 +10,7 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 
 - Repository governance and planning bootstrap are in progress.
 - The product direction is a hard fork of OpenCode, not a thin wrapper.
-- The authoritative research runtime will live in the OpenCode TypeScript server.
+- The authoritative research runtime lives in the paper_fucker TypeScript server derived from the OpenCode runtime.
 - Python is reserved for per-run MCP and CLI research tools.
 - Project configuration and run indexes use `~/.paper_fucker`.
 - The default target is Windows-native operation.
@@ -48,10 +48,10 @@ README must expose the same version as the latest `CHANGELOG` entry. Run this ch
 .\scripts\check-readme-version.ps1
 ```
 
-The initial private planning version is `0.1.0-dev`.
+Development versions advance as `<major>.<minor>.<patch>-dev`; each completed TaskFlow change records a distinct dev version such as `0.1.1-dev`.
 
 ## License
 
 This project is private and all rights are reserved unless a later written license change says otherwise.
 
-Third-party source snapshots keep their original licenses. OpenCode provenance and license details must be recorded in `NOTICE.md` when the upstream snapshot is imported.
+Third-party source snapshots keep their original licenses. OpenCode provenance and license details are recorded in `NOTICE.md` for the imported upstream snapshot.

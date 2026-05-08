@@ -298,7 +298,7 @@ export const ProvidersLoginCommand = effectCmd({
   builder: (yargs) =>
     yargs
       .positional("url", {
-        describe: "opencode auth provider",
+        describe: "paper_fucker auth provider",
         type: "string",
       })
       .option("provider", {
@@ -319,7 +319,7 @@ export const ProvidersLoginCommand = effectCmd({
     if (args.url) {
       const url = args.url.replace(/\/+$/, "")
       const wellknown = (yield* cliTry(`Failed to load auth provider metadata from ${url}: `, () =>
-        fetch(`${url}/.well-known/opencode`).then((x) => x.json()),
+        fetch(`${url}/.well-known/paper_fucker`).then((x) => x.json()),
       )) as {
         auth: { command: string[]; env: string }
       }
@@ -443,7 +443,7 @@ export const ProvidersLoginCommand = effectCmd({
       }
 
       yield* Prompt.log.warn(
-        `This only stores a credential for ${provider} - you will need configure it in opencode.json, check the docs for examples.`,
+        `This only stores a credential for ${provider} - you will need configure it in paper_fucker.json, check the docs for examples.`,
       )
     }
 
@@ -452,13 +452,13 @@ export const ProvidersLoginCommand = effectCmd({
         "Amazon Bedrock authentication priority:\n" +
           "  1. Bearer token (AWS_BEARER_TOKEN_BEDROCK or /connect)\n" +
           "  2. AWS credential chain (profile, access keys, IAM roles, EKS IRSA)\n\n" +
-          "Configure via opencode.json options (profile, region, endpoint) or\n" +
+          "Configure via paper_fucker.json options (profile, region, endpoint) or\n" +
           "AWS environment variables (AWS_PROFILE, AWS_REGION, AWS_ACCESS_KEY_ID, AWS_WEB_IDENTITY_TOKEN_FILE).",
       )
     }
 
     if (provider === "opencode") {
-      yield* Prompt.log.info("Create an api key at https://opencode.ai/auth")
+      yield* Prompt.log.info("Create an api key at https://paper-fucker.local/auth")
     }
 
     if (provider === "vercel") {
@@ -467,7 +467,7 @@ export const ProvidersLoginCommand = effectCmd({
 
     if (["cloudflare", "cloudflare-ai-gateway"].includes(provider)) {
       yield* Prompt.log.info(
-        "Cloudflare AI Gateway can be configured with CLOUDFLARE_GATEWAY_ID, CLOUDFLARE_ACCOUNT_ID, and CLOUDFLARE_API_TOKEN environment variables. Read more: https://opencode.ai/docs/providers/#cloudflare-ai-gateway",
+        "Cloudflare AI Gateway can be configured with CLOUDFLARE_GATEWAY_ID, CLOUDFLARE_ACCOUNT_ID, and CLOUDFLARE_API_TOKEN environment variables. Read more: https://github.com/S0ra-ai/paper_fucker",
       )
     }
 
