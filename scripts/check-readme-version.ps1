@@ -22,9 +22,9 @@ if ($changelog -notmatch $metadataPattern) {
 }
 $metadataVersion = $Matches[1].Trim()
 
-$historyPattern = '(?m)^\s{4}([0-9A-Za-z][0-9A-Za-z.-]*)\s+-\s+\d{4}/\d{2}/\d{2}\s+\([0-9a-fA-F]{7,40}\)\s+\[[^\]]+\]\s*$'
+$historyPattern = '(?m)^\s*([0-9A-Za-z][0-9A-Za-z.-]*)\s+-\s+\d{4}/\d{2}/\d{2}\s+\([0-9a-fA-F]{7,40}\)\s+\[[^\]]+\]\s*$'
 if ($changelog -notmatch $historyPattern) {
-    throw "Could not find latest CHANGELOG history entry. Expected: four-space indented VERSION - YYYY/MM/DD (real commit hash) [branch]"
+    throw "Could not find latest CHANGELOG history entry. Expected: VERSION - YYYY/MM/DD (real commit hash) [branch]"
 }
 $latestVersion = $Matches[1].Trim()
 

@@ -1,7 +1,15 @@
-:project paper_fucker - 可验证论文研究自动化系统
-:author s0ra (https://github.com/S0ra-ai)
-:desc 记录项目的重大变更和版本历史
-:version 0.1.0-dev
-:last_update 2026/05/08
+:project       paper_fucker - 可验证论文研究自动化系统
+:author        s0ra (https://github.com/S0ra-ai)
+:repo          
+:desc          记录项目的重大变更和版本历史
+:version       0.1.0-dev
+:last_update   2026/05/08
 
 :history
+
+0.1.0-dev - 2026/05/08 (196557f3) [develop]
+    :brief 初始化 TaskFlow 计划与仓库治理
+        - docs(governance): 建立 TaskFlow-first 计划源、私有优先仓库策略、Git Flow 分支治理和 README 版本追踪
+        - docs(plan): 将 docs/rebuild 规划同步进 .plan/confirmed, 删除旧 docs 作为活跃计划源
+        - docs(contract): 新增 core contract 与 phase 1 acceptance 任务, 固化后续运行时契约门槛
+        - chore(version): 新增 README-to-CHANGELOG 版本一致性检查脚本
