@@ -7,7 +7,7 @@
 
 :history
 
-0.1.9-dev - 2026/05/09 (pending) [develop]
+0.1.9-dev - 2026/05/09 (77f144c) [develop]
     :brief 实现自动 topic-to-paper orchestrator
         - feat(orchestrator): 新增 first-party automatic stage graph, 覆盖 intake/template/literature/data/experiment/writing/verification/export
         - feat(policy): Full Access 默认自动推进, 在 safety/authenticity/cost/tool/license/low-confidence 条件下暂停
