@@ -1,6 +1,6 @@
 id: task-015-export-bundles
 title: Implement final and forced draft export bundles
-status: todo
+status: done
 priority: high
 owner: codex
 tags:
@@ -24,7 +24,7 @@ execution:
 steps:
 - id: task-015-step-01-export-schema
   title: Define ExportBundle and manifest schema
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: Define ExportBundle, file manifest, final vs forced-draft status, verification
@@ -33,12 +33,23 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T19:17:40.430736'
+      level: info
+      message: 'Started ExportBundle/manifest schema implementation after RED test
+        failure: missing @/research/export module.'
+      agent: codex
+    - timestamp: '2026-05-08T19:20:47.488049'
+      level: info
+      message: Added ExportBundle.v1, ExportFile, ExportManifest, ExportRenderer,
+        and final/forced draft verification summary schemas.
+      agent: codex
+    last_run: '2026-05-08T19:20:47.488049'
+    attempt_count: 2
   meta: {}
 - id: task-015-step-02-markdown-latex-export
   title: Implement Markdown and LaTeX export
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-015-step-01-export-schema
@@ -48,12 +59,22 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T19:20:47.765046'
+      level: info
+      message: Starting Markdown and LaTeX export step after implementation.
+      agent: codex
+    - timestamp: '2026-05-08T19:21:00.590568'
+      level: info
+      message: Implemented Markdown export with forced-draft banner and LaTeX export
+        with renderer injection plus internal fallback diagnostics.
+      agent: codex
+    last_run: '2026-05-08T19:21:00.590568'
+    attempt_count: 2
   meta: {}
 - id: task-015-step-03-pdf-docx-export
   title: Implement PDF and DOCX export
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-015-step-02-markdown-latex-export
@@ -63,12 +84,22 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T19:20:48.048384'
+      level: info
+      message: Starting PDF and DOCX export step after implementation.
+      agent: codex
+    - timestamp: '2026-05-08T19:21:00.875456'
+      level: info
+      message: Implemented PDF/DOCX renderer injection and missing external renderer
+        diagnostics in ExportBundle manifest.
+      agent: codex
+    last_run: '2026-05-08T19:21:00.875456'
+    attempt_count: 2
   meta: {}
 - id: task-015-step-04-forced-draft-export
   title: Implement forced draft export policy
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-015-step-03-pdf-docx-export
@@ -78,12 +109,22 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T19:21:01.150331'
+      level: info
+      message: Starting forced draft export policy step after implementation.
+      agent: codex
+    - timestamp: '2026-05-08T19:21:10.726574'
+      level: info
+      message: Implemented FinalExportBlockedError for failed final gates and forced_draft
+        mode that visibly marks Markdown and includes failed checks in verification_summary.
+      agent: codex
+    last_run: '2026-05-08T19:21:10.726574'
+    attempt_count: 2
   meta: {}
 - id: task-015-step-05-export-tests
   title: Verify export scenarios
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-015-step-04-forced-draft-export
@@ -93,8 +134,20 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T19:22:21.997413'
+      level: info
+      message: Running final export tests and typecheck after README/CHANGELOG/report
+        updates.
+      agent: codex
+    - timestamp: '2026-05-08T19:23:05.093113'
+      level: info
+      message: 'Verification passed: npx --yes bun@1.3.13 --cwd packages/server test
+        test/research/export.test.ts => 5 pass, 0 fail, 14 expects; npx --yes bun@1.3.13
+        run --cwd packages/server typecheck => exit 0.'
+      agent: codex
+    last_run: '2026-05-08T19:23:05.093113'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: artifact
@@ -111,5 +164,5 @@ trace:
   attempt_count: 0
 meta:
   created_at: '2026-05-08T01:26:19.912255'
-  updated_at: '2026-05-08T01:26:19.912255'
+  updated_at: '2026-05-08T19:23:14.569672'
   version: '1'
