@@ -7,7 +7,7 @@
 
 :history
 
-    0.1.15-dev - 2026/05/09 (pending) [develop]
+    0.1.15-dev - 2026/05/09 (6e4994e) [develop]
     :brief 实现 final 与 forced-draft export bundle
         - feat(export): 新增 ExportBundle.v1, ExportFile, ExportManifest, ExportRenderer 和 verification summary schema
         - feat(markdown): Markdown export 支持 forced draft banner, 明确标记非 final 输出和 failed checks
