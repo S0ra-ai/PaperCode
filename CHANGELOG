@@ -7,7 +7,7 @@
 
 :history
 
-    0.1.18-dev - 2026/05/09 (pending) [develop]
+    0.1.18-dev - 2026/05/09 (b8fabeb) [develop]
     :brief 重定界 OpenCode 底座与 paper_fucker 论文领域内核
         - feat(paper): 新增 packages/server/src/paper 架构入口, 固化 OpenCode substrate / research runtime / paper domain 三层边界
         - feat(paper): 声明 topic/code/data/experiment-log/materials-to-paper 输入模式
