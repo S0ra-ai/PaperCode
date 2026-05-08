@@ -7,7 +7,7 @@
 
 :history
 
-    0.1.17-dev - 2026/05/09 (pending) [develop]
+    0.1.17-dev - 2026/05/09 (e214ff4) [develop]
     :brief 补齐端到端研究流水线验收
         - test(e2e): 新增 fixture topic acceptance, 串联 template/literature-data/experiment/writing/verification/export
         - test(e2e): 验证 final gate passed 后 final export 产生 markdown/latex/pdf/docx facts/artifacts
