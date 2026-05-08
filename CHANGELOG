@@ -7,7 +7,7 @@
 
 :history
 
-    0.1.16-dev - 2026/05/09 (pending) [develop]
+    0.1.16-dev - 2026/05/09 (2f644e4) [develop]
     :brief 整理项目结构与 first-party 边界
         - chore(structure): 将根目录 21 个 OpenCode 上游本地化 README 移入 upstream/opencode-readmes/
         - docs(upstream): 新增 upstream/opencode-readmes/README.md, 标记这些文件仅作上游 provenance 和翻译参考
