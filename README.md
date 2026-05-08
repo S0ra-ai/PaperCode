@@ -1,6 +1,6 @@
 # paper_fucker
 
-Current version: <!-- version:start -->0.1.2-dev<!-- version:end -->
+Current version: <!-- version:start -->0.1.3-dev<!-- version:end -->
 
 `paper_fucker` is a private-first, OpenCode-derived research automation product for building verifiable academic-paper research packages from a topic, codebase, or project workspace.
 
@@ -11,6 +11,8 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - Repository governance and planning bootstrap are in progress.
 - The product direction is a hard fork of OpenCode, not a thin wrapper.
 - The authoritative research contracts and server-side paper_fucker runtime live under `packages/server`.
+- Research runs are stored workspace-first under `<workspace>/.paper_fucker/runs/<run-id>`, with `~/.paper_fucker/runs/<run-id>` as the fallback.
+- Runtime operations are automatic API calls, not workflows that require users to keep typing shell commands.
 - The imported OpenCode package remains the upstream-derived agent/CLI substrate while paper_fucker runtime surfaces are extracted into first-party packages.
 - Python is reserved for per-run MCP and CLI research tools.
 - Project configuration and run indexes use `~/.paper_fucker`.
@@ -19,7 +21,7 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 ## Project Structure
 
 - `schemas/research/`: JSON Schema source of truth for research runs, events, artifacts, sources, tool traces, claims, drafts, reviews, exports, and checkpoints.
-- `packages/server/`: first-party paper_fucker TypeScript server/runtime package. It owns AJV validation, OpenTelemetry span hooks, generated TypeScript contract types, and rebuildable SQLite indexes.
+- `packages/server/`: first-party paper_fucker TypeScript server/runtime package. It owns AJV validation, OpenTelemetry span hooks, generated TypeScript contract types, run/event/artifact runtime APIs, permission/resource/cost/final-gate state, and rebuildable SQLite indexes.
 - `research-tools/`: Python MCP/CLI tool package. Generated Pydantic v2 models mirror the JSON Schema contracts for tool-side validation.
 - `packages/opencode/`: imported OpenCode-derived agent and CLI substrate retained during migration; new paper_fucker domain code should not be added here unless it is a deliberate compatibility adapter.
 
@@ -34,6 +36,7 @@ Important early tasks:
 - `task-003-import-opencode`: import an OpenCode release snapshot as the product base.
 - `task-004-brand-paper-fucker`: rebrand command, config, and user-facing surfaces.
 - `task-017-core-contract`: schema, storage, event, artifact, and generated type contracts.
+- `task-005-research-runtime`: first-party research run, event, artifact, permission, resource, cost, resume, and final gate runtime.
 - `task-018-phase-1-acceptance`: Windows-native phase 1 acceptance gate.
 
 ## Branching
