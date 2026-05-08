@@ -10,6 +10,7 @@
   "exports": {
     "./research": "./src/research/index.ts",
     "./research/contracts": "./src/research/contracts.ts",
+    "./research/runtime": "./src/research/runtime/index.ts",
     "./research/storage": "./src/research/storage.ts",
     "./research/generated/contracts": "./src/research/generated/contracts.ts"
   },

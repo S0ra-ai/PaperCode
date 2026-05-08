@@ -1,41 +1,58 @@
 id: task-005-research-runtime
-title: Build OpenCode-native research runtime
-status: todo
+title: Build first-party research runtime
+status: done
 priority: critical
 owner: codex
 tags:
 - runtime
-- opencode
+- server
 - artifacts
 - events
 depends_on:
 - task-004-brand-paper-fucker
 - task-017-core-contract
-description: Implement the authoritative research runtime inside the OpenCode-derived
-  TypeScript server. This runtime owns runs, artifacts, event logs, permissions, resources,
-  cost tracking, resume, and final gate state. Python tools may produce results but
-  cannot own truth.
+description: Implement the authoritative research runtime inside the first-party packages/server
+  TypeScript package. This runtime owns runs, artifacts, event logs, permissions,
+  resources, cost tracking, resume, and final gate state. packages/opencode remains
+  the upstream-derived agent/CLI substrate and future adapter surface. Python tools
+  may produce results but cannot own truth.
 execution:
   mode: sequential
   retry: 0
 steps:
 - id: task-005-step-01-runtime-architecture
   title: Define runtime module boundaries
-  status: todo
+  status: done
   owner: codex
   depends_on: []
-  description: Map OpenCode server extension points and define modules for runs, artifacts,
-    events, permissions, resources, costs, and resume.
+  description: Define first-party packages/server module boundaries for runs, artifacts,
+    events, permissions, resources, costs, and resume, with OpenCode integration kept
+    as a later adapter boundary.
   execution:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T16:15:50.295297'
+      level: info
+      message: Starting research runtime implementation on feature/research-runtime.
+        New authoritative modules will remain in packages/server/src/research, with
+        packages/opencode treated only as the upstream-derived CLI/agent substrate
+        and future integration surface.
+      agent: codex
+    - timestamp: '2026-05-08T16:21:10.882170'
+      level: info
+      message: 'Defined first-party runtime module boundaries under packages/server/src/research/runtime:
+        paths, policy, state, run-store, artifact-store, and runtime index exports.
+        packages/opencode remains only the upstream-derived substrate and future adapter
+        surface.'
+      agent: codex
+    last_run: '2026-05-08T16:21:10.882170'
+    attempt_count: 2
   meta: {}
 - id: task-005-step-02-run-store
   title: Implement run storage and index
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-005-step-01-runtime-architecture
@@ -45,12 +62,26 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T16:21:11.210607'
+      level: info
+      message: Implemented workspace-first run root selection, run.json/runtime-state.json
+        creation, JSONL fact initialization, resume/status APIs, and rebuildable run/global
+        SQLite index refresh in packages/server/src/research/runtime/run-store.ts.
+      agent: codex
+    - timestamp: '2026-05-08T16:23:44.580167'
+      level: info
+      message: Implemented workspace-first run storage under <workspace>/.paper_fucker/runs/<run-id>,
+        home fallback under ~/.paper_fucker/runs, run.json plus runtime-state.json,
+        resume/status APIs, and run/global SQLite index refresh. Verified by packages/server
+        runtime tests.
+      agent: codex
+    last_run: '2026-05-08T16:23:44.580167'
+    attempt_count: 2
   meta: {}
 - id: task-005-step-03-artifact-event-store
   title: Implement artifact and event store
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-005-step-02-run-store
@@ -60,12 +91,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T16:23:52.979046'
+      level: info
+      message: Implementing append-only event and artifact fact stores in packages/server/src/research/runtime.
+      agent: codex
+    - timestamp: '2026-05-08T16:24:03.493420'
+      level: info
+      message: Implemented append-only event facts and artifact writes with deterministic
+        normalized data hashing, versioned artifact paths, supersedes metadata, and
+        locked artifact protection. Verified with runtime tests covering supersede
+        and lock rejection.
+      agent: codex
+    last_run: '2026-05-08T16:24:03.493420'
+    attempt_count: 2
   meta: {}
 - id: task-005-step-04-permission-resource-cost
   title: Implement permissions, resources, and cost state
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-005-step-02-run-store
@@ -75,12 +118,25 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T16:23:53.308283'
+      level: info
+      message: Implementing runtime policy, resource detection, cost budget alerting,
+        and final gate state in packages/server/src/research/runtime.
+      agent: codex
+    - timestamp: '2026-05-08T16:24:03.711802'
+      level: info
+      message: Implemented Full Access/Unlimited default policy, bounded 3h/24h policy
+        validation, automatic resource snapshot, soft LLM/API/total budget alerts,
+        and final gate state updates. Runtime operations emit OpenTelemetry spans
+        through the existing paper_fucker.research tracer wrapper.
+      agent: codex
+    last_run: '2026-05-08T16:24:03.711802'
+    attempt_count: 2
   meta: {}
 - id: task-005-step-05-runtime-smoke
   title: Verify runtime smoke behavior
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-005-step-03-artifact-event-store
@@ -91,13 +147,27 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T16:24:03.942489'
+      level: info
+      message: Running runtime smoke verification for create/resume/status, expected
+        directories, events, artifact state, permissions, resources, and cost/final
+        gate state.
+      agent: codex
+    - timestamp: '2026-05-08T16:26:30.300871'
+      level: info
+      message: 'Runtime smoke passed. Verified: packages/server runtime tests (3 pass,
+        0 fail, 28 expects); combined contracts/runtime tests (6 pass, 0 fail, 39
+        expects); packages/server typecheck passed; root bun turbo typecheck passed
+        across 13 tasks. Evidence recorded in reports/research-runtime-smoke.md.'
+      agent: codex
+    last_run: '2026-05-08T16:26:30.300871'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: directory
   path: packages/server/src/research
-  description: OpenCode-native research runtime modules
+  description: First-party research runtime modules
 - type: report
   path: reports/research-runtime-smoke.md
   description: Runtime smoke verification report
@@ -106,5 +176,5 @@ trace:
   attempt_count: 0
 meta:
   created_at: '2026-05-08T01:24:07.936744'
-  updated_at: '2026-05-08T05:59:22.302600'
+  updated_at: '2026-05-08T16:26:44.552113'
   version: '1'
