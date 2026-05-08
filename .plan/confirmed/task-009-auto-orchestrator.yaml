@@ -1,6 +1,6 @@
 id: task-009-auto-orchestrator
 title: Implement automatic topic-to-paper orchestrator
-status: todo
+status: done
 priority: critical
 owner: codex
 tags:
@@ -21,7 +21,7 @@ execution:
 steps:
 - id: task-009-step-01-stage-graph
   title: Define automatic research stage graph
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: Define stages from intake through template, literature, data, experiments,
@@ -30,12 +30,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T18:04:18.213570'
+      level: info
+      message: Implementing first-party automatic research stage graph and checkpoint
+        model.
+      agent: codex
+    - timestamp: '2026-05-08T18:09:15.853084'
+      level: info
+      message: Implemented AUTOMATIC_STAGE_GRAPH with intake, template, literature,
+        data, experiment, writing, verification, and export checkpoint stages plus
+        snapshot helpers.
+      agent: codex
+    last_run: '2026-05-08T18:09:15.853084'
+    attempt_count: 2
   meta: {}
 - id: task-009-step-02-full-access-policy
   title: Implement Full Access automatic policy
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-009-step-01-stage-graph
@@ -46,12 +58,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T18:09:16.082787'
+      level: info
+      message: Implementing automatic proceed/pause policy for Full Access and Unlimited
+        Research.
+      agent: codex
+    - timestamp: '2026-05-08T18:09:28.617577'
+      level: info
+      message: Implemented decideAutomaticStagePolicy. Full Access proceeds automatically
+        unless safety, authenticity, cost anomaly, external tool missing, source/license
+        conflict, or low confidence conditions occur.
+      agent: codex
+    last_run: '2026-05-08T18:09:28.617577'
+    attempt_count: 2
   meta: {}
 - id: task-009-step-03-guidance-queue
   title: Implement checkpoint guidance queue
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-009-step-01-stage-graph
@@ -61,12 +85,22 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T18:09:16.329462'
+      level: info
+      message: Implementing TUI guidance queue artifacts and checkpoint application.
+      agent: codex
+    - timestamp: '2026-05-08T18:09:28.881143'
+      level: info
+      message: Implemented GuidanceQueue.v1 artifact storage with queueGuidance and
+        applyQueuedGuidance, applying queued TUI guidance at the next eligible checkpoint.
+      agent: codex
+    last_run: '2026-05-08T18:09:28.881143'
+    attempt_count: 2
   meta: {}
 - id: task-009-step-04-tui-run-controls
   title: Implement automatic run controls in TUI
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-009-step-02-full-access-policy
@@ -78,12 +112,23 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T18:09:29.155025'
+      level: info
+      message: Implementing stable run controls for observe, pause, stop, resume,
+        rollback, diagnostics, cost, tools, models, template, preview, and export.
+      agent: codex
+    - timestamp: '2026-05-08T18:09:37.822601'
+      level: info
+      message: Implemented ORCHESTRATOR_CONTROLS and runOrchestratorControl, emitting
+        dot-delimited control events and supporting stop -> cancelled run status.
+      agent: codex
+    last_run: '2026-05-08T18:09:37.822601'
+    attempt_count: 2
   meta: {}
 - id: task-009-step-05-orchestrator-smoke
   title: Verify orchestrator smoke path
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-009-step-04-tui-run-controls
@@ -94,8 +139,21 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T18:09:46.233073'
+      level: info
+      message: Running orchestrator smoke tests for automatic stage graph, guidance
+        queueing, preview startup, pause conditions, and run controls.
+      agent: codex
+    - timestamp: '2026-05-08T18:09:53.923654'
+      level: info
+      message: 'Verified orchestrator smoke path. Tests passed: npx --yes bun@1.3.13
+        --cwd packages/server test test/research/orchestrator.test.ts test/research/runtime.test.ts
+        test/research/guards.test.ts => 8 pass, 0 fail, 44 expects. Typecheck passed:
+        npx --yes bun@1.3.13 run --cwd packages/server typecheck.'
+      agent: codex
+    last_run: '2026-05-08T18:09:53.923654'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: directory
@@ -109,5 +167,5 @@ trace:
   attempt_count: 0
 meta:
   created_at: '2026-05-08T01:24:59.388186'
-  updated_at: '2026-05-08T01:24:59.388186'
+  updated_at: '2026-05-08T18:09:59.921293'
   version: '1'
