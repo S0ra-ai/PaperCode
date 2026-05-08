@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: MPL-2.0
+# Clarify answers for the (skeleton) CJC sample. See README.md.
+topic: 关于 n-gram 语言模型的简短综述
+length_pages: 4
+audience: 计算机科学研究生
+language: zh
+style: cjc

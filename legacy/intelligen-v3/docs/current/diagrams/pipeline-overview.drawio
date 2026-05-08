@@ -1,0 +1,126 @@
+<mxGraphModel>
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    
+    <!-- Title -->
+    <mxCell id="title" value="报告生成管线 (Report Generation Pipeline)" style="text;fontSize=18;fontStyle=1;align=center;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+      <mxGeometry x="100" y="10" width="600" height="30" as="geometry"/>
+    </mxCell>
+    
+    <!-- Input -->
+    <mxCell id="input" value="用户输入&#xa;Topic / Template / Files" style="rounded=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="20" y="80" width="140" height="60" as="geometry"/>
+    </mxCell>
+    
+    <!-- Stage 1: Planning -->
+    <mxCell id="stage1-box" value="" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;" vertex="1" parent="1">
+      <mxGeometry x="20" y="180" width="160" height="180" as="geometry"/>
+    </mxCell>
+    <mxCell id="stage1-title" value="① 规划 Planning" style="text;fontSize=13;fontStyle=1;fillColor=none;strokeColor=none;fontColor=#1a4472;" vertex="1" parent="1">
+      <mxGeometry x="30" y="185" width="140" height="25" as="geometry"/>
+    </mxCell>
+    <mxCell id="stage1-outline" value="OutlinePlanner" style="rounded=1;fillColor=#FFFFFF;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="35" y="218" width="130" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="stage1-grounding" value="证据预检索&#xa;Grounding Evidence" style="rounded=1;fillColor=#FFFFFF;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="35" y="256" width="130" height="35" as="geometry"/>
+    </mxCell>
+    <mxCell id="stage1-output" value="ReportOutline&#xa;(章节/搜索词/字数)" style="rounded=1;fillColor=#FFFFFF;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="35" y="300" width="130" height="35" as="geometry"/>
+    </mxCell>
+    
+    <!-- Stage 2: Retrieval -->
+    <mxCell id="stage2-box" value="" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;" vertex="1" parent="1">
+      <mxGeometry x="210" y="180" width="180" height="180" as="geometry"/>
+    </mxCell>
+    <mxCell id="stage2-title" value="② 检索 Retrieval" style="text;fontSize=13;fontStyle=1;fillColor=none;strokeColor=none;fontColor=#2d5a1e;" vertex="1" parent="1">
+      <mxGeometry x="220" y="185" width="160" height="25" as="geometry"/>
+    </mxCell>
+    <mxCell id="stage2-cache" value="EvidenceCache&#xa;缓存命中检查" style="rounded=1;fillColor=#FFFFFF;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="225" y="218" width="150" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="stage2-search" value="UnifiedSearcher&#xa;6 来源 + 本地 FAISS" style="rounded=1;fillColor=#FFFFFF;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="225" y="256" width="150" height="35" as="geometry"/>
+    </mxCell>
+    <mxCell id="stage2-verify" value="SearchVerifier&#xa;分级/交叉/可达验证" style="rounded=1;fillColor=#FFFFFF;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="225" y="300" width="150" height="35" as="geometry"/>
+    </mxCell>
+
+    <!-- Stage 3: Writing -->
+    <mxCell id="stage3-box" value="" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=2;" vertex="1" parent="1">
+      <mxGeometry x="420" y="180" width="170" height="180" as="geometry"/>
+    </mxCell>
+    <mxCell id="stage3-title" value="③ 写作 Writing" style="text;fontSize=13;fontStyle=1;fillColor=none;strokeColor=none;fontColor=#7a5c00;" vertex="1" parent="1">
+      <mxGeometry x="430" y="185" width="150" height="25" as="geometry"/>
+    </mxCell>
+    <mxCell id="stage3-rerank" value="HybridReranker&#xa;关键词+来源+验证" style="rounded=1;fillColor=#FFFFFF;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="435" y="218" width="140" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="stage3-llm" value="LLM 章节生成&#xa;per-section write()" style="rounded=1;fillColor=#FFFFFF;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="435" y="256" width="140" height="35" as="geometry"/>
+    </mxCell>
+    <mxCell id="stage3-antihalluc" value="ContentVerifier&#xa;反幻觉检查" style="rounded=1;fillColor=#FFFFFF;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="435" y="300" width="140" height="35" as="geometry"/>
+    </mxCell>
+
+    <!-- Stage 4: Normalize -->
+    <mxCell id="stage4-box" value="" style="rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=2;" vertex="1" parent="1">
+      <mxGeometry x="620" y="180" width="160" height="180" as="geometry"/>
+    </mxCell>
+    <mxCell id="stage4-title" value="④ 标准化 Normalize" style="text;fontSize=13;fontStyle=1;fillColor=none;strokeColor=none;fontColor=#5c3566;" vertex="1" parent="1">
+      <mxGeometry x="630" y="185" width="140" height="25" as="geometry"/>
+    </mxCell>
+    <mxCell id="stage4-format" value="引用格式化&#xa;ReferenceBuilder" style="rounded=1;fillColor=#FFFFFF;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="635" y="218" width="130" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="stage4-merge" value="章节合并&#xa;Markdown 拼装" style="rounded=1;fillColor=#FFFFFF;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="635" y="256" width="130" height="35" as="geometry"/>
+    </mxCell>
+    <mxCell id="stage4-export" value="导出&#xa;MD / DOCX" style="rounded=1;fillColor=#FFFFFF;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="635" y="300" width="130" height="35" as="geometry"/>
+    </mxCell>
+
+    <!-- Output -->
+    <mxCell id="output" value="最终报告&#xa;Report + References" style="rounded=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="635" y="400" width="140" height="60" as="geometry"/>
+    </mxCell>
+
+    <!-- Arrows: Input → Stage1 -->
+    <mxCell id="e-input-s1" style="endArrow=classic;strokeColor=#666;strokeWidth=2;" edge="1" source="input" target="stage1-box" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Stage1 → Stage2 -->
+    <mxCell id="e-s1-s2" style="endArrow=classic;strokeColor=#333;strokeWidth=2;" edge="1" source="stage1-box" target="stage2-box" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Stage2 → Stage3 -->
+    <mxCell id="e-s2-s3" style="endArrow=classic;strokeColor=#333;strokeWidth=2;" edge="1" source="stage2-box" target="stage3-box" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Stage3 → Stage4 -->
+    <mxCell id="e-s3-s4" style="endArrow=classic;strokeColor=#333;strokeWidth=2;" edge="1" source="stage3-box" target="stage4-box" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Stage4 → Output -->
+    <mxCell id="e-s4-out" style="endArrow=classic;strokeColor=#666;strokeWidth=2;" edge="1" source="stage4-box" target="output" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Cross-cutting: Progress SSE -->
+    <mxCell id="sse-bar" value="📡 SSE 实时进度流 (progress_callback)" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;fontStyle=2;dashed=1;" vertex="1" parent="1">
+      <mxGeometry x="210" y="400" width="380" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="e-s1-sse" style="endArrow=classic;strokeColor=#b85450;dashed=1;strokeWidth=1;" edge="1" source="stage1-box" target="sse-bar" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e-s3-sse" style="endArrow=classic;strokeColor=#b85450;dashed=1;strokeWidth=1;" edge="1" source="stage3-box" target="sse-bar" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Cross-cutting: CitationRegistry -->
+    <mxCell id="citation-bar" value="📚 CitationRegistry (全局引用编号)" style="rounded=1;fillColor=#e6e6e6;strokeColor=#999999;fontSize=11;fontStyle=2;dashed=1;" vertex="1" parent="1">
+      <mxGeometry x="210" y="445" width="380" height="30" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

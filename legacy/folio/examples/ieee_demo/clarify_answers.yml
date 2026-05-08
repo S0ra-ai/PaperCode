@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: MPL-2.0
+# Clarify answers seeded into the M1 pipeline for this sample run.
+# Mirrors the dict used by tests/integration/test_e2e_format_to_paper.py
+# and scripts/build_sample_gallery.py.
+topic: A short note on n-gram language models
+length_pages: 2
+audience: graduate students
+language: en
+style: ieee
