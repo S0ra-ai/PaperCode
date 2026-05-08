@@ -1,6 +1,6 @@
 id: task-018-phase-1-acceptance
 title: Verify phase 1 OpenCode research skeleton acceptance
-status: todo
+status: done
 priority: high
 owner: codex
 tags:
@@ -26,7 +26,7 @@ execution:
 steps:
 - id: task-018-step-01-migration-and-upstream-check
   title: Verify migration and upstream provenance
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: Confirm legacy archives exist, excluded secrets/build outputs are absent,
@@ -35,12 +35,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T17:43:22.378621'
+      level: info
+      message: Checking legacy archive, upstream provenance, ignored local secrets,
+        and NOTICE coverage.
+      agent: codex
+    - timestamp: '2026-05-08T17:43:32.339536'
+      level: info
+      message: Verified legacy archives under legacy/, OpenCode provenance under upstream/opencode-manifest.json,
+        NOTICE.md preserves MIT upstream provenance, and .paper_fucker/local DeepSeek
+        files are ignored by .gitignore.
+      agent: codex
+    last_run: '2026-05-08T17:43:32.339536'
+    attempt_count: 2
   meta: {}
 - id: task-018-step-02-brand-and-config-check
   title: Verify paper_fucker branding and config namespace
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-018-step-01-migration-and-upstream-check
@@ -51,12 +63,23 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T17:43:32.543566'
+      level: info
+      message: Checking paper_fucker user-facing branding and ~/.paper_fucker namespace.
+      agent: codex
+    - timestamp: '2026-05-08T17:47:15.929224'
+      level: info
+      message: Verified paper_fucker and ~/.paper_fucker branding/config namespace
+        in README, init config, runtime paths, research-tools, and generated contracts.
+        No old IntelliGen execution path appears in active first-party runtime surfaces.
+      agent: codex
+    last_run: '2026-05-08T17:47:15.929224'
+    attempt_count: 2
   meta: {}
 - id: task-018-step-03-windows-startup-check
   title: Verify native Windows startup
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-018-step-02-brand-and-config-check
@@ -66,12 +89,23 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T17:47:22.407337'
+      level: info
+      message: Running native Windows startup checks through paper_fucker CLI help/version.
+      agent: codex
+    - timestamp: '2026-05-08T17:47:27.791166'
+      level: info
+      message: 'Native Windows PowerShell smoke passed: npx --yes bun@1.3.13 --cwd
+        packages/opencode src/index.ts --help showed paper_fucker commands; --version
+        returned local.'
+      agent: codex
+    last_run: '2026-05-08T17:47:27.791166'
+    attempt_count: 2
   meta: {}
 - id: task-018-step-04-research-skeleton-check
   title: Verify research runtime skeleton
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-018-step-03-windows-startup-check
@@ -82,12 +116,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T17:47:32.402863'
+      level: info
+      message: Verifying research skeleton state, runtime tests, init diagnostics,
+        and Python bridge.
+      agent: codex
+    - timestamp: '2026-05-08T17:47:37.945522'
+      level: info
+      message: 'Runtime skeleton verified through server tests: run create/resume/status,
+        runtime-state.json, events/artifacts, cost/final gate, init diagnostics, and
+        Python bridge behavior passed. Python unittest passed with PYTHONPATH=research-tools/src.'
+      agent: codex
+    last_run: '2026-05-08T17:47:37.945522'
+    attempt_count: 2
   meta: {}
 - id: task-018-step-05-no-fake-output-check
   title: Verify not_implemented and no fake outputs
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-018-step-04-research-skeleton-check
@@ -98,8 +144,20 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T17:47:42.805231'
+      level: info
+      message: Checking not_implemented stubs and no fake-output guard behavior.
+      agent: codex
+    - timestamp: '2026-05-08T17:47:48.168037'
+      level: info
+      message: Added and tested packages/server/src/research/runtime/guards.ts. It
+        exposes explicit not_implemented stubs for downstream Phase 1 stages and blocks
+        stub/synthetic/fake research outputs plus final export before authenticity
+        gate passes.
+      agent: codex
+    last_run: '2026-05-08T17:47:48.168037'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: report
@@ -110,5 +168,5 @@ trace:
   attempt_count: 0
 meta:
   created_at: '2026-05-08T05:54:24.587835'
-  updated_at: '2026-05-08T05:59:22.591900'
+  updated_at: '2026-05-08T17:48:01.593267'
   version: '1'
