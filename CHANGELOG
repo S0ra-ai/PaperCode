@@ -7,7 +7,7 @@
 
 :history
 
-0.1.8-dev - 2026/05/09 (pending) [develop]
+0.1.8-dev - 2026/05/09 (e876c63) [develop]
     :brief 完成参考项目分析并接入 Exa MCP
         - docs(references): 新增 reference manifest, 记录 OpenCode/Folio/IntelliGen/AI Scientist/PaperOrchestra/AutoResearch/EvoScientist/FARS/AutoRA 来源与 license 状态
         - docs(references): 新增 OpenCode substrate 分析, 明确只通过 opencode-adapter 使用工具/session/MCP/TUI 能力
