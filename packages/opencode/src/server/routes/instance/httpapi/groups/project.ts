@@ -24,7 +24,7 @@ export const ProjectApi = HttpApi.make("project")
           OpenApi.annotations({
             identifier: "project.list",
             summary: "List all projects",
-            description: "Get a list of projects that have been opened with OpenCode.",
+            description: "Get a list of projects that have been opened with paper_fucker.",
           }),
         ),
         HttpApiEndpoint.get("current", `${root}/current`, {
@@ -33,7 +33,7 @@ export const ProjectApi = HttpApi.make("project")
           OpenApi.annotations({
             identifier: "project.current",
             summary: "Get current project",
-            description: "Retrieve the currently active project that OpenCode is working with.",
+            description: "Retrieve the currently active project that paper_fucker is working with.",
           }),
         ),
         HttpApiEndpoint.post("initGit", `${root}/git/init`, {
@@ -70,7 +70,7 @@ export const ProjectApi = HttpApi.make("project")
   )
   .annotateMerge(
     OpenApi.annotations({
-      title: "opencode experimental HttpApi",
+      title: "paper_fucker experimental HttpApi",
       version: "0.0.1",
       description: "Experimental HttpApi surface for selected instance routes.",
     }),

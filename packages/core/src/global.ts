@@ -1,34 +1,76 @@
 import path from "path"
 import fs from "fs/promises"
-import { xdgData, xdgCache, xdgConfig, xdgState } from "xdg-basedir"
 import os from "os"
 import { Context, Effect, Layer } from "effect"
 import { Flock } from "./util/flock"
 import { Flag } from "./flag/flag"
 
-const app = "opencode"
-const data = path.join(xdgData!, app)
-const cache = path.join(xdgCache!, app)
-const config = path.join(xdgConfig!, app)
-const state = path.join(xdgState!, app)
-const tmp = path.join(os.tmpdir(), app)
+const app = "paper_fucker"
+const homeDirName = ".paper_fucker"
+const overrides: Partial<Record<keyof Interface, string>> = {}
+
+function home() {
+  return overrides.home ?? process.env.PAPER_FUCKER_TEST_HOME ?? process.env.OPENCODE_TEST_HOME ?? os.homedir()
+}
+
+function root() {
+  return path.join(home(), homeDirName)
+}
 
 const paths = {
   get home() {
-    return process.env.OPENCODE_TEST_HOME ?? os.homedir()
+    return home()
   },
-  data,
-  bin: path.join(cache, "bin"),
-  log: path.join(data, "log"),
-  cache,
-  config,
-  state,
-  tmp,
+  set home(value: string) {
+    overrides.home = value
+  },
+  get data() {
+    return overrides.data ?? path.join(root(), "data")
+  },
+  set data(value: string) {
+    overrides.data = value
+  },
+  get bin() {
+    return overrides.bin ?? path.join(paths.cache, "bin")
+  },
+  set bin(value: string) {
+    overrides.bin = value
+  },
+  get log() {
+    return overrides.log ?? path.join(paths.data, "log")
+  },
+  set log(value: string) {
+    overrides.log = value
+  },
+  get cache() {
+    return overrides.cache ?? path.join(root(), "cache")
+  },
+  set cache(value: string) {
+    overrides.cache = value
+  },
+  get config() {
+    return overrides.config ?? path.join(root(), "config")
+  },
+  set config(value: string) {
+    overrides.config = value
+  },
+  get state() {
+    return overrides.state ?? path.join(root(), "state")
+  },
+  set state(value: string) {
+    overrides.state = value
+  },
+  get tmp() {
+    return overrides.tmp ?? path.join(os.tmpdir(), app)
+  },
+  set tmp(value: string) {
+    overrides.tmp = value
+  },
 }
 
 export const Path = paths
 
-Flock.setGlobal({ state })
+Flock.setGlobal({ state: Path.state })
 
 await Promise.all([
   fs.mkdir(Path.data, { recursive: true }),

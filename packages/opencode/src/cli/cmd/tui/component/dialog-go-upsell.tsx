@@ -8,7 +8,7 @@ import { Link } from "@tui/ui/link"
 import { GoLogo } from "./logo"
 import { BgPulse, type BgPulseMask } from "./bg-pulse"
 
-const GO_URL = "https://opencode.ai/go"
+const GO_URL = "https://paper-fucker.local/go"
 const PAD_X = 3
 const PAD_TOP_OUTER = 1
 
@@ -102,7 +102,7 @@ export function DialogGoUpsell(props: DialogGoUpsellProps) {
           <box flexDirection="row">
             <text fg={theme.textMuted}>Subscribe to </text>
             <text attributes={TextAttributes.BOLD} fg={theme.textMuted}>
-              OpenCode Go
+              paper_fucker Go
             </text>
             <text fg={theme.textMuted}> for reliable access to the</text>
           </box>

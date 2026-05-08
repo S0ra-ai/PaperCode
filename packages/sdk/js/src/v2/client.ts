@@ -19,12 +19,12 @@ function rewrite(request: Request, values: { directory?: string; workspace?: str
   const url = new URL(request.url)
   let changed = false
 
-  for (const [name, key] of [
-    ["x-opencode-directory", "directory"],
-    ["x-opencode-workspace", "workspace"],
+  for (const [name, legacyName, key] of [
+    ["x-paper-fucker-directory", "x-opencode-directory", "directory"],
+    ["x-paper-fucker-workspace", "x-opencode-workspace", "workspace"],
   ] as const) {
     const value = pick(
-      request.headers.get(name),
+      request.headers.get(name) ?? request.headers.get(legacyName),
       key === "directory" ? values.directory : values.workspace,
       key === "directory" ? encodeURIComponent : undefined,
     )
@@ -38,6 +38,8 @@ function rewrite(request: Request, values: { directory?: string; workspace?: str
   if (!changed) return request
 
   const next = new Request(url, request)
+  next.headers.delete("x-paper-fucker-directory")
+  next.headers.delete("x-paper-fucker-workspace")
   next.headers.delete("x-opencode-directory")
   next.headers.delete("x-opencode-workspace")
   return next
@@ -59,14 +61,14 @@ export function createOpencodeClient(config?: Config & { directory?: string; exp
   if (config?.directory) {
     config.headers = {
       ...config.headers,
-      "x-opencode-directory": encodeURIComponent(config.directory),
+      "x-paper-fucker-directory": encodeURIComponent(config.directory),
     }
   }
 
   if (config?.experimental_workspaceID) {
     config.headers = {
       ...config.headers,
-      "x-opencode-workspace": config.experimental_workspaceID,
+      "x-paper-fucker-workspace": config.experimental_workspaceID,
     }
   }
 
@@ -80,7 +82,9 @@ export function createOpencodeClient(config?: Config & { directory?: string; exp
   client.interceptors.response.use((response) => {
     const contentType = response.headers.get("content-type")
     if (contentType === "text/html")
-      throw new Error("Request is not supported by this version of OpenCode Server (Server responded with text/html)")
+      throw new Error(
+        "Request is not supported by this version of paper_fucker Server (Server responded with text/html)",
+      )
 
     return response
   })
@@ -98,10 +102,10 @@ export function createOpencodeClient(config?: Config & { directory?: string; exp
     if (!isEmpty) return error
     const method = request?.method ?? "?"
     const url = request?.url ?? "?"
-    if (!response) return new Error(`opencode server ${method} ${url}: network error (no response)`)
+    if (!response) return new Error(`paper_fucker server ${method} ${url}: network error (no response)`)
     const status = response.status
     const statusText = response.statusText ? " " + response.statusText : ""
-    return new Error(`opencode server ${method} ${url} → ${status}${statusText}: (empty response body)`)
+    return new Error(`paper_fucker server ${method} ${url} -> ${status}${statusText}: (empty response body)`)
   })
   return new OpencodeClient({ client })
 }
