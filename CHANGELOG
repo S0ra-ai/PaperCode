@@ -2,10 +2,34 @@
 :author        s0ra (https://github.com/S0ra-ai)
 :repo          
 :desc          记录项目的重大变更和版本历史
-:version       0.1.13-dev
+:version       0.1.14-dev
 :last_update   2026/05/09
 
 :history
+
+    0.1.14-dev - 2026/05/09 (pending) [develop]
+    :brief 实现最终真实性 verification gate
+        - feat(verification): 新增 VerificationFinding, BlockingReport.v1, ReviewReport.v1, ModelReviewInput, VerificationGateResult schema
+        - feat(references): 新增 checkReferences, citation source 缺失时阻断 final export
+        - feat(claims): 新增 checkClaimSupport, unsupported/needs_evidence claim 阻断 final export
+        - feat(data): 新增 dataset license conflict 检查, restricted/unclear/conflict 数据集阻断 final export
+        - feat(experiments): 新增 reproduction gate 检查, container reproduction 未通过时阻断 final export
+        - feat(review): 新增 multi-model review aggregation, reviewer warning 不阻断, fail/conflict 进入 blocking report
+        - feat(runtime): 新增 recordVerificationGate, 写入 blocking/review artifacts、review fact 并更新 runtime final_gate
+        - test(verification): 覆盖 invalid reference、unsupported claim、dataset license failure、reproduction failure、reviewer warning、successful final gate
+        - docs(readme): 版本更新为 0.1.14-dev 并记录 verification 模块边界
+        - chore(taskflow): 完成 task-014-verification-gate 并记录 verification report
+    :src
+        - packages/server/src/research/verification/schemas.ts - BlockingReport and ReviewReport schemas
+        - packages/server/src/research/verification/checks.ts - reference, claim, data, and experiment checks
+        - packages/server/src/research/verification/review.ts - multi-model review aggregation
+        - packages/server/src/research/verification/gate.ts - final gate evaluation
+        - packages/server/src/research/verification/recording.ts - final gate runtime recording
+        - packages/server/test/research/verification.test.ts - verification gate tests
+        - reports/verification-gate.md - verification gate report
+    :verification
+        - npx --yes bun@1.3.13 --cwd packages/server test test/research/verification.test.ts passed: 6 pass, 0 fail, 11 expects
+        - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
 
     0.1.13-dev - 2026/05/09 (2b5a38f) [develop]
     :brief 实现 ClaimLedger-first Markdown 写作
