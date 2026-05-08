@@ -1,6 +1,6 @@
 id: task-016-reference-analysis
 title: Analyze reference projects for adopt defer reject decisions
-status: todo
+status: done
 priority: medium
 owner: codex
 tags:
@@ -19,7 +19,7 @@ execution:
 steps:
 - id: task-016-step-01-reference-manifest
   title: Create reference manifest
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: Record requested reference projects, resolved source URLs, commit/tag/license/status,
@@ -28,12 +28,26 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T17:54:34.215344'
+      level: info
+      message: Resolving local and upstream reference sources for OpenCode, Folio,
+        IntelliGen, AI Scientist, PaperOrchestra, AutoResearch, EvoScientist, and
+        FARS.
+      agent: codex
+    - timestamp: '2026-05-08T17:57:21.724192'
+      level: info
+      message: Created legacy/references/manifest.json with OpenCode, Folio, IntelliGen,
+        AI Scientist, PaperOrchestra, AutoResearch, EvoScientist, FARS, and related
+        AutoRA source records. Added Exa remote MCP config to .paper_fucker/paper_fucker.jsonc
+        and ran codex mcp add exa --url https://mcp.exa.ai/mcp.
+      agent: codex
+    last_run: '2026-05-08T17:57:21.724192'
+    attempt_count: 2
   meta: {}
 - id: task-016-step-02-opencode-analysis
   title: Analyze OpenCode as agent substrate
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-016-step-01-reference-manifest
@@ -43,12 +57,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T17:57:30.426996'
+      level: info
+      message: Writing OpenCode substrate analysis for tools, permissions, agents,
+        subagents, LSP, MCP, sessions, and TUI mapping.
+      agent: codex
+    - timestamp: '2026-05-08T17:57:40.233514'
+      level: info
+      message: 'Created legacy/references/analysis/opencode.md. Decision: adopt OpenCode
+        as tools/session/MCP/TUI substrate through a narrow opencode-adapter; reject
+        paper-domain authority inside packages/opencode.'
+      agent: codex
+    last_run: '2026-05-08T17:57:40.233514'
+    attempt_count: 2
   meta: {}
 - id: task-016-step-03-folio-intelligen-analysis
   title: Analyze Folio and old IntelliGen
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-016-step-01-reference-manifest
@@ -59,12 +85,25 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T17:57:30.640375'
+      level: info
+      message: Writing Folio/IntelliGen concept extraction for StageMessage, FormatSpec
+        cache, citation/evidence, export path, provider routing, and pitfalls.
+      agent: codex
+    - timestamp: '2026-05-08T17:57:40.472033'
+      level: info
+      message: 'Created legacy/references/analysis/folio-intelligen.md. Decision:
+        adopt StageMessage discipline, FormatSpec cache concepts, fail-closed citations,
+        evidence UI, and export fallback patterns; reject Python core authority and
+        placeholder citations.'
+      agent: codex
+    last_run: '2026-05-08T17:57:40.472033'
+    attempt_count: 2
   meta: {}
 - id: task-016-step-04-research-agent-analysis
   title: Analyze external research agent projects
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-016-step-01-reference-manifest
@@ -75,12 +114,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T17:57:30.853185'
+      level: info
+      message: Writing external research agent analysis for AI Scientist, PaperOrchestra,
+        AutoResearch, EvoScientist, FARS, and AutoRA.
+      agent: codex
+    - timestamp: '2026-05-08T17:57:40.704334'
+      level: info
+      message: 'Created legacy/references/analysis/research-agents.md. Decision: adopt
+        bounded mechanisms from AI Scientist, PaperOrchestra, AutoResearch, EvoScientist,
+        FARS, and AutoRA; reject scale-first unverified automation.'
+      agent: codex
+    last_run: '2026-05-08T17:57:40.704334'
+    attempt_count: 2
   meta: {}
 - id: task-016-step-05-decision-summary
   title: Write adopt defer reject decision summary
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-016-step-02-opencode-analysis
@@ -92,8 +143,19 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T17:57:47.590923'
+      level: info
+      message: Writing adopt/defer/reject summary and concrete follow-up guidance
+        for downstream implementation tasks.
+      agent: codex
+    - timestamp: '2026-05-08T17:57:54.370532'
+      level: info
+      message: Created legacy/references/analysis/summary.md with adopt/defer/reject
+        table and follow-up mapping to task-009 through task-015.
+      agent: codex
+    last_run: '2026-05-08T17:57:54.370532'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -110,5 +172,5 @@ trace:
   attempt_count: 0
 meta:
   created_at: '2026-05-08T01:26:33.990727'
-  updated_at: '2026-05-08T01:26:33.991255'
+  updated_at: '2026-05-08T17:58:55.962182'
   version: '1'

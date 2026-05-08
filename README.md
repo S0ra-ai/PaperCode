@@ -1,6 +1,6 @@
 # paper_fucker
 
-Current version: <!-- version:start -->0.1.7-dev<!-- version:end -->
+Current version: <!-- version:start -->0.1.8-dev<!-- version:end -->
 
 `paper_fucker` is a private-first, OpenCode-derived research automation product for building verifiable academic-paper research packages from a topic, codebase, or project workspace.
 
@@ -15,6 +15,7 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - Runtime operations are automatic API calls, not workflows that require users to keep typing shell commands.
 - Initialization writes config, linked tool paths, and encrypted secrets under `~/.paper_fucker`; it does not write credentials to `.env` or repository files.
 - The default language is Chinese (`zh-CN`), and the default model endpoint is DeepSeek with API model id `deepseek-v4-pro`.
+- Exa is configured as a remote MCP search connector for source discovery through `.paper_fucker/paper_fucker.jsonc`.
 - The imported OpenCode package remains the upstream-derived agent/CLI substrate while paper_fucker runtime surfaces are extracted into first-party packages.
 - Python is reserved for per-run MCP and CLI research tools.
 - Project configuration and run indexes use `~/.paper_fucker`.
@@ -27,6 +28,7 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - `packages/server/src/init/`: first-party initialization and diagnostics flow for `~/.paper_fucker/config.json`, `tools.json`, encrypted `secrets.enc`, external tool discovery, and Full Access acknowledgement.
 - `packages/preview/`: first-party localhost read-only research preview package with token-checked snapshot/SSE endpoints and static Markdown/LaTeX/PDF/DOCX/annotation/diagnostics UI.
 - `research-tools/`: Python MCP/CLI tool package. It provides structured MCP-style diagnostics/probe/document helpers, one-shot conversion commands, external tool discovery/linking for pandoc and LaTeX engines, and generated Pydantic v2 models for tool-side validation.
+- `legacy/references/`: reference-project manifests and adopt/defer/reject analysis. These files are design guidance only and do not authorize code import.
 - `packages/opencode/`: imported OpenCode-derived agent and CLI substrate retained during migration; new paper_fucker domain code should not be added here unless it is a deliberate compatibility adapter.
 
 ## Planning Source
