@@ -19,6 +19,9 @@ export type PaperFuckerConfig = {
   schema_version: typeof INIT_CONFIG_VERSION
   created_at: string
   updated_at: string
+  language: {
+    default: "zh-CN"
+  }
   models: {
     default_endpoint?: string
     endpoints: ModelEndpointConfig[]
@@ -101,6 +104,7 @@ export async function loadToolLinks(paths: InitPaths) {
 export function defaultConfig(input: {
   now: string
   workspace?: string
+  language?: Partial<PaperFuckerConfig["language"]>
   access?: Partial<PaperFuckerConfig["access"]>
   budgets?: PaperFuckerConfig["budgets"]
   preview?: Partial<PaperFuckerConfig["preview"]>
@@ -115,8 +119,19 @@ export function defaultConfig(input: {
     schema_version: INIT_CONFIG_VERSION,
     created_at: input.now,
     updated_at: input.now,
+    language: {
+      default: "zh-CN",
+    },
     models: input.models ?? {
-      endpoints: [],
+      default_endpoint: "deepseek",
+      endpoints: [
+        {
+          name: "deepseek",
+          base_url: "https://api.deepseek.com/v1",
+          model: "deepseek-v4-pro",
+          api_key_secret: "DEEPSEEK_API_KEY",
+        },
+      ],
     },
     workspace: {
       default_root: input.workspace,
