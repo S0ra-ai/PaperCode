@@ -1,0 +1,114 @@
+id: task-018-phase-1-acceptance
+title: Verify phase 1 OpenCode research skeleton acceptance
+status: todo
+priority: high
+owner: codex
+tags:
+- acceptance
+- phase-1
+- windows
+- governance
+depends_on:
+- task-003-import-opencode
+- task-004-brand-paper-fucker
+- task-005-research-runtime
+- task-006-python-tool-bridge
+- task-007-init-wizard
+description: Translate the old phase-1-acceptance.md into the current paper_fucker
+  TaskFlow roadmap. This checkpoint verifies the private OpenCode-derived product
+  baseline after legacy archive, OpenCode import, rebrand, core contracts, runtime,
+  Python bridge, and init diagnostics are implemented. It must prove Windows-native
+  startup and structured research skeleton behavior without fake papers, fake literature,
+  or fake experiment results.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-018-step-01-migration-and-upstream-check
+  title: Verify migration and upstream provenance
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Confirm legacy archives exist, excluded secrets/build outputs are absent,
+    OpenCode upstream manifest exists, and NOTICE preserves third-party license provenance.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-018-step-02-brand-and-config-check
+  title: Verify paper_fucker branding and config namespace
+  status: todo
+  owner: codex
+  depends_on:
+  - task-018-step-01-migration-and-upstream-check
+  description: Confirm command, TUI title/help, README, diagnostics, config path,
+    run path, and user-facing docs use paper_fucker and ~/.paper_fucker rather than
+    IntelliGen or ~/.intelligen.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-018-step-03-windows-startup-check
+  title: Verify native Windows startup
+  status: todo
+  owner: codex
+  depends_on:
+  - task-018-step-02-brand-and-config-check
+  description: Run version/help/startup smoke checks in native Windows and confirm
+    the OpenCode-derived TUI can start without WSL as the primary path.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-018-step-04-research-skeleton-check
+  title: Verify research runtime skeleton
+  status: todo
+  owner: codex
+  depends_on:
+  - task-018-step-03-windows-startup-check
+  description: Create and resume a run, inspect state.json, events.jsonl, artifacts,
+    permissions, resource/cost snapshots, stage statuses, Python tool bridge health,
+    and init diagnostics.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-018-step-05-no-fake-output-check
+  title: Verify not_implemented and no fake outputs
+  status: todo
+  owner: codex
+  depends_on:
+  - task-018-step-04-research-skeleton-check
+  description: Confirm unimplemented research stages are explicit not_implemented
+    stubs and the system cannot export fake literature, fake experiments, fake claims,
+    fake paper text, or final outputs before verification gates exist.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: report
+  path: reports/phase-1-acceptance.md
+  description: Phase 1 acceptance verification report
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-08T05:54:24.587835'
+  updated_at: '2026-05-08T05:59:22.591900'
+  version: '1'

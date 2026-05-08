@@ -1,0 +1,112 @@
+id: task-013-writing-claim-ledger
+title: Implement Markdown writing and ClaimLedger pipeline
+status: todo
+priority: high
+owner: codex
+tags:
+- writing
+- markdown
+- claims
+- citations
+depends_on:
+- task-010-template-resolve
+- task-011-literature-data
+- task-012-experiment-loop
+description: Implement claim-first writing where Markdown is the draft fact source,
+  ClaimLedger binds claims to evidence, and Full Access applies content changes automatically
+  with versioned diffs and rollback support.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-013-step-01-writing-schema
+  title: Define DraftPaper, ClaimLedger, and citation schemas
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Define Markdown draft artifact, section structure, claim records, citation
+    refs, source refs, risk levels, and required actions.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-013-step-02-claim-first-composer
+  title: Implement claim-first composer
+  status: todo
+  owner: codex
+  depends_on:
+  - task-013-step-01-writing-schema
+  description: Generate or update ClaimLedger before writing Markdown sections, using
+    literature, dataset, experiment, and result artifacts as evidence sources.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-013-step-03-markdown-writer
+  title: Implement streamed Markdown writing
+  status: todo
+  owner: codex
+  depends_on:
+  - task-013-step-02-claim-first-composer
+  description: Stream Markdown sections to run storage and preview while preserving
+    source ranges for annotations and later LaTeX/PDF linking.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-013-step-04-version-diff-rollback
+  title: Implement automatic apply with version diff and rollback
+  status: todo
+  owner: codex
+  depends_on:
+  - task-013-step-03-markdown-writer
+  description: Under Full Access automatically apply writing changes, record diffs,
+    and support TUI rollback or rewrite requests.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-013-step-05-writing-tests
+  title: Verify writing and claim binding scenarios
+  status: todo
+  owner: codex
+  depends_on:
+  - task-013-step-04-version-diff-rollback
+  description: Test claim creation, citation binding, streamed preview, unsupported
+    claim annotation, guidance application at checkpoint, and rollback.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: artifact
+  path: DraftPaper
+  description: Markdown draft artifact
+- type: artifact
+  path: ClaimLedger
+  description: Claim evidence ledger artifact
+- type: report
+  path: reports/writing-claim-ledger.md
+  description: Writing pipeline verification report
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-08T01:25:52.020032'
+  updated_at: '2026-05-08T01:25:52.021036'
+  version: '1'

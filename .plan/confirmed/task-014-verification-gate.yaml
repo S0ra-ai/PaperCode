@@ -1,0 +1,114 @@
+id: task-014-verification-gate
+title: Implement authenticity verification final gate
+status: todo
+priority: critical
+owner: codex
+tags:
+- verification
+- authenticity
+- multi-model
+- gate
+depends_on:
+- task-012-experiment-loop
+- task-013-writing-claim-ledger
+description: Implement final authenticity gates. References, claim support, dataset
+  validity, and experiment reproduction failures block final export. Review quality
+  and minor formatting issues become warnings unless they indicate authenticity failure.
+  Key stages use multi-model review.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-014-step-01-gate-schema
+  title: Define verification and BlockingReport schemas
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Define verification findings, blocking reports, affected claims, required
+    actions, final grade, draft export eligibility, and warning severity.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-014-step-02-reference-and-claim-checks
+  title: Implement reference and claim support checks
+  status: todo
+  owner: codex
+  depends_on:
+  - task-014-step-01-gate-schema
+  description: Verify that citations exist and claims are supported by bound evidence;
+    unsupported or missing evidence blocks final.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-014-step-03-data-experiment-checks
+  title: Implement data and experiment reproduction checks
+  status: todo
+  owner: codex
+  depends_on:
+  - task-014-step-01-gate-schema
+  description: Verify dataset source/license/hash and container reproduction records
+    before allowing experiment-based claims into final.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-014-step-04-multi-model-review
+  title: Implement key-stage multi-model review
+  status: todo
+  owner: codex
+  depends_on:
+  - task-014-step-02-reference-and-claim-checks
+  - task-014-step-03-data-experiment-checks
+  description: Use at least two configured models for direction feasibility, experiment
+    plan, result analysis, and final verification; use a third review when conflicts
+    require escalation.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-014-step-05-gate-tests
+  title: Verify final gate behavior
+  status: todo
+  owner: codex
+  depends_on:
+  - task-014-step-04-multi-model-review
+  description: Test invalid reference, unsupported claim, dataset license failure,
+    reproduction failure, reviewer warning, and successful final gate.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: artifact
+  path: BlockingReport
+  description: Final gate blocking report artifact
+- type: artifact
+  path: ReviewReport
+  description: Review and warning artifact
+- type: report
+  path: reports/verification-gate.md
+  description: Verification gate report
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-08T01:26:05.384735'
+  updated_at: '2026-05-08T01:26:05.384735'
+  version: '1'

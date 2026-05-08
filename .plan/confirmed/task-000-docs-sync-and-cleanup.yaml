@@ -1,0 +1,177 @@
+id: task-000-docs-sync-and-cleanup
+title: Sync rebuild docs into TaskFlow and clean directory
+status: done
+priority: critical
+owner: codex
+tags:
+- governance
+- taskflow
+- docs
+- cleanup
+depends_on: []
+description: Convert the legacy docs/rebuild planning files into TaskFlow execution
+  truth for paper_fucker. Preserve source hashes and synchronization notes in TaskFlow
+  logs, translate outdated IntelliGen decisions to the confirmed paper_fucker architecture,
+  then remove docs/rebuild so .plan is the only active plan source.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-000-step-01-source-inventory
+  title: Inventory rebuild docs and hashes
+  status: done
+  owner: codex
+  depends_on: []
+  description: List every docs/rebuild source file, compute SHA-256 hashes, and record
+    which planning topics each file covers.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-08T05:53:30.268162'
+      level: info
+      message: Started source inventory for docs/rebuild before deletion.
+      agent: codex
+    - timestamp: '2026-05-08T05:53:43.544165'
+      level: info
+      message: 'Inventory complete. Source hashes: architecture.md=2a2de8d3c5ec835e8142c5d232cd29465d917f4e0e7bc45d386a2deacbe4b91b;
+        artifacts-and-stages.md=45ad44777788e8a1a4dbe500fde68b297d9461e4c456234ab430884f9856ec2c;
+        decisions.md=41b58ff4fdeef09bd1e78a1b2d4eaf59b3a5ad3ce658ecb3f71375fc93b9d26c;
+        migration.md=4eda6cfca57c85e3ee07cf8caac9f36fa43ff6c8a1aeeae317551b3abc9be872;
+        phase-1-acceptance.md=ced7e203353256ece299214903e774d0861f309f05bc5704749adfe0f7f18ec2;
+        tui-and-permissions.md=58f12f143456dc2bc5b32c316d9c0f52614819e19cc085bfeac2e318df3e7bd4.'
+      agent: codex
+    last_run: '2026-05-08T05:53:43.544165'
+    attempt_count: 2
+  meta: {}
+- id: task-000-step-02-map-to-taskflow
+  title: Map surviving planning content into tasks
+  status: done
+  owner: codex
+  depends_on:
+  - task-000-step-01-source-inventory
+  description: Map still-valid planning content to confirmed TaskFlow tasks, rewriting
+    outdated IntelliGen, ~/.intelligen, and Python-core-authority decisions to the
+    confirmed paper_fucker OpenCode TypeScript runtime architecture.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-08T05:54:53.198038'
+      level: info
+      message: Mapping old rebuild docs into TaskFlow tasks and rewriting outdated
+        IntelliGen/Python-core authority decisions to paper_fucker/OpenCode TypeScript
+        authority.
+      agent: codex
+    - timestamp: '2026-05-08T05:55:00.377380'
+      level: info
+      message: 'Mapped docs/rebuild content into TaskFlow: architecture and artifacts/stages
+        feed task-017-core-contract plus task-005/006/008; decisions feed task-001
+        through task-016 while replacing IntelliGen with paper_fucker and Python-core
+        authority with OpenCode TypeScript runtime authority; migration feeds task-002/task-003/task-004/task-016;
+        TUI/permissions feed task-004/task-005/task-007/task-008/task-009/task-014;
+        phase-1 acceptance feeds task-018-phase-1-acceptance. Old docs are no longer
+        an active plan source.'
+      agent: codex
+    last_run: '2026-05-08T05:55:00.377380'
+    attempt_count: 2
+  meta: {}
+- id: task-000-step-03-add-core-contract-task
+  title: Add core contract task and dependencies
+  status: done
+  owner: codex
+  depends_on:
+  - task-000-step-02-map-to-taskflow
+  description: Add the schema/storage/event contract task and ensure runtime, Python
+    bridge, and preview tasks depend on it before implementation.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-08T05:55:09.963493'
+      level: info
+      message: Adding core contract task, phase-1 acceptance task, and dependency
+        rewiring.
+      agent: codex
+    - timestamp: '2026-05-08T05:55:15.628193'
+      level: info
+      message: Created task-017-core-contract as the TaskFlow-valid replacement for
+        the planned task-005a role; added task-017-core-contract as a dependency of
+        task-005-research-runtime, task-006-python-tool-bridge, and task-008-preview-runtime.
+        Created task-018-phase-1-acceptance from the old phase-1 acceptance doc.
+      agent: codex
+    last_run: '2026-05-08T05:55:15.628193'
+    attempt_count: 2
+  meta: {}
+- id: task-000-step-04-clean-docs-directory
+  title: Delete synchronized docs directory
+  status: done
+  owner: codex
+  depends_on:
+  - task-000-step-03-add-core-contract-task
+  description: Delete docs/rebuild after synchronization and remove docs if it becomes
+    empty.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-08T05:56:09.567963'
+      level: info
+      message: Deleting docs/rebuild after source hashes and mapping summary were
+        recorded in TaskFlow logs.
+      agent: codex
+    - timestamp: '2026-05-08T05:56:25.596829'
+      level: info
+      message: Removed docs/rebuild and removed docs because it became empty. Source
+        hashes and sync mapping remain in task-000 step logs.
+      agent: codex
+    last_run: '2026-05-08T05:56:25.596829'
+    attempt_count: 2
+  meta: {}
+- id: task-000-step-05-validate-plan
+  title: Validate TaskFlow plan after sync
+  status: done
+  owner: codex
+  depends_on:
+  - task-000-step-04-clean-docs-directory
+  description: Validate the new and modified tasks and confirm the scheduler order
+    reflects the new dependencies.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-08T05:57:10.471591'
+      level: info
+      message: Validating synchronized TaskFlow tasks and dependency changes.
+      agent: codex
+    - timestamp: '2026-05-08T05:57:15.407839'
+      level: info
+      message: Validated task-000, task-001, task-005, task-006, task-008, task-017,
+        and task-018 successfully with no warnings. README has no IntelliGen, ~/.intelligen,
+        python-core, or Python core references. Version check passed.
+      agent: codex
+    last_run: '2026-05-08T05:57:15.407839'
+    attempt_count: 2
+  meta: {}
+outputs:
+- type: file
+  path: .plan/confirmed/task-000-docs-sync-and-cleanup.yaml
+  description: Traceable docs synchronization task
+- type: file
+  path: .plan/confirmed/task-017-core-contract.yaml
+  description: Core schema/storage/event contract task
+- type: directory
+  path: docs/rebuild
+  description: Removed after synchronization
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-08T05:53:16.655932'
+  updated_at: '2026-05-08T05:59:22.115436'
+  version: '1'

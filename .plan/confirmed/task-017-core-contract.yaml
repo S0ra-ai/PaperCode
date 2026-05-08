@@ -1,0 +1,121 @@
+id: task-017-core-contract
+title: Define core research contracts before runtime implementation
+status: todo
+priority: critical
+owner: codex
+tags:
+- schema
+- contracts
+- runtime
+- events
+- artifacts
+depends_on:
+- task-004-brand-paper-fucker
+description: Define the first authoritative paper_fucker research contracts before
+  runtime, tool bridge, or preview implementation. This task implements the planned
+  task-005a role using a TaskFlow-valid ID. It fixes schemas/research/ as the schema
+  source, JSON Schema as the source of truth, generated TypeScript and Python types
+  committed to the repo, schema_version plus runtime migrations, JSON/JSONL files
+  as fact sources, SQLite as rebuildable indexes, and OpenCode TypeScript server ownership
+  of the preview and authoritative runtime.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-017-step-01-schema-scope
+  title: Define schema source and generated outputs
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Create the schemas/research/ contract scope, generated TypeScript path
+    packages/server/src/research/generated/, and generated Python Pydantic v2 path
+    research-tools/src/paper_fucker_tools/generated/.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-017-step-02-storage-contract
+  title: Define storage and index contract
+  status: todo
+  owner: codex
+  depends_on:
+  - task-017-step-01-schema-scope
+  description: Specify run-local JSON/JSONL fact files, run-local index.sqlite, and
+    global ~/.paper_fucker/index.sqlite as rebuildable indexes.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-017-step-03-event-artifact-contract
+  title: Define event and artifact envelopes
+  status: todo
+  owner: codex
+  depends_on:
+  - task-017-step-01-schema-scope
+  description: Define v1 event, artifact, source, tool trace, claim, draft, review,
+    export, and checkpoint contract skeletons with schema_version and migration behavior.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-017-step-04-runtime-validation-contract
+  title: Define runtime validation and migration behavior
+  status: todo
+  owner: codex
+  depends_on:
+  - task-017-step-02-storage-contract
+  - task-017-step-03-event-artifact-contract
+  description: Use AJV for TypeScript runtime validation, Pydantic v2 generated models
+    for Python tools, and explicit runtime migrations for older schema_version values.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-017-step-05-contract-tests
+  title: Verify contract generation and validation
+  status: todo
+  owner: codex
+  depends_on:
+  - task-017-step-04-runtime-validation-contract
+  description: Add focused tests proving schemas validate, generated types import,
+    storage indexes rebuild from JSON/JSONL facts, and incompatible schema versions
+    fail with actionable migration errors.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: directory
+  path: schemas/research
+  description: JSON Schema source contracts
+- type: directory
+  path: packages/server/src/research/generated
+  description: Generated TypeScript contract types
+- type: directory
+  path: research-tools/src/paper_fucker_tools/generated
+  description: Generated Pydantic v2 contract models
+- type: report
+  path: reports/core-contract-validation.md
+  description: Contract validation and generation report
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-08T05:52:59.765639'
+  updated_at: '2026-05-08T05:59:22.674825'
+  version: '1'

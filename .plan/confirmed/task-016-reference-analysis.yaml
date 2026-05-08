@@ -1,0 +1,114 @@
+id: task-016-reference-analysis
+title: Analyze reference projects for adopt defer reject decisions
+status: todo
+priority: medium
+owner: codex
+tags:
+- research
+- references
+- analysis
+depends_on:
+- task-002-legacy-archive
+description: Analyze OpenCode, Folio, old IntelliGen, The AI Scientist, PaperOrchestra,
+  AutoResearch, EvoScientist, and FARS as reference projects. The output is design
+  guidance only; do not directly import their code into the new research runtime unless
+  a later task explicitly approves a source and license.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-016-step-01-reference-manifest
+  title: Create reference manifest
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Record requested reference projects, resolved source URLs, commit/tag/license/status,
+    local source paths, and unresolved ambiguity notes.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-016-step-02-opencode-analysis
+  title: Analyze OpenCode as agent substrate
+  status: todo
+  owner: codex
+  depends_on:
+  - task-016-step-01-reference-manifest
+  description: Analyze OpenCode tools, permissions, agents, subagents, LSP, MCP, session
+    model, and how they map to paper_fucker research runtime needs.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-016-step-03-folio-intelligen-analysis
+  title: Analyze Folio and old IntelliGen
+  status: todo
+  owner: codex
+  depends_on:
+  - task-016-step-01-reference-manifest
+  description: 'Extract useful patterns from Folio and old IntelliGen: StageMessage,
+    FormatSpec cache, citation system, export path, provider routing, and pitfalls
+    to avoid.'
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-016-step-04-research-agent-analysis
+  title: Analyze external research agent projects
+  status: todo
+  owner: codex
+  depends_on:
+  - task-016-step-01-reference-manifest
+  description: Analyze AI Scientist, PaperOrchestra, AutoResearch, EvoScientist, and
+    FARS for agent roles, experiment loops, verification, failure modes, and license
+    risks.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-016-step-05-decision-summary
+  title: Write adopt defer reject decision summary
+  status: todo
+  owner: codex
+  depends_on:
+  - task-016-step-02-opencode-analysis
+  - task-016-step-03-folio-intelligen-analysis
+  - task-016-step-04-research-agent-analysis
+  description: Produce a summary table of adopt/defer/reject decisions and concrete
+    follow-up tasks for useful ideas.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: file
+  path: legacy/references/manifest.json
+  description: Reference project manifest
+- type: directory
+  path: legacy/references/analysis
+  description: Per-project analysis reports
+- type: file
+  path: legacy/references/analysis/summary.md
+  description: Adopt/defer/reject decision summary
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-08T01:26:33.990727'
+  updated_at: '2026-05-08T01:26:33.991255'
+  version: '1'

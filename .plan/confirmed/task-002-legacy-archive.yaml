@@ -1,0 +1,98 @@
+id: task-002-legacy-archive
+title: Archive legacy IntelliGen and Folio references safely
+status: todo
+priority: critical
+owner: codex
+tags:
+- migration
+- legacy
+- archive
+depends_on:
+- task-001-repo-governance
+description: Preserve old IntelliGen, Folio, and existing planning material as legacy/reference
+  inputs without importing their implementation directly into the new OpenCode-derived
+  product. The archive must exclude secrets and regenerated build/cache artifacts.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-002-step-01-inventory-sources
+  title: Inventory legacy source projects
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Inspect E:\Project\IntelliGen and E:\Project\Folio, identify source,
+    docs, screenshots, plans, tests, and generated artifacts worth preserving.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-002-step-02-filter-policy
+  title: Define archive filter policy
+  status: todo
+  owner: codex
+  depends_on:
+  - task-002-step-01-inventory-sources
+  description: Define explicit include/exclude rules for .env, node_modules, .venv,
+    pycache, dist, cache, sandbox outputs, database WAL/SHM, and other regenerated
+    artifacts.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-002-step-03-create-legacy-archives
+  title: Create legacy archives and Folio git bundle
+  status: todo
+  owner: codex
+  depends_on:
+  - task-002-step-02-filter-policy
+  description: Create legacy/intelligen-v3, legacy/folio, and legacy/folio.git.bundle
+    using the filter policy. Do not delete original projects during this task.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-002-step-04-verify-archive
+  title: Verify archive completeness and safety
+  status: todo
+  owner: codex
+  depends_on:
+  - task-002-step-03-create-legacy-archives
+  description: Verify key files exist, secrets and regenerated artifacts are absent,
+    and the Folio git bundle can be inspected.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: directory
+  path: legacy/intelligen-v3
+  description: Filtered old IntelliGen archive
+- type: directory
+  path: legacy/folio
+  description: Filtered Folio archive
+- type: file
+  path: legacy/folio.git.bundle
+  description: Folio git history bundle
+- type: report
+  path: legacy/archive-manifest.md
+  description: Archive manifest and verification report
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-08T01:23:31.243556'
+  updated_at: '2026-05-08T01:23:31.243556'
+  version: '1'

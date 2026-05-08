@@ -1,0 +1,110 @@
+id: task-005-research-runtime
+title: Build OpenCode-native research runtime
+status: todo
+priority: critical
+owner: codex
+tags:
+- runtime
+- opencode
+- artifacts
+- events
+depends_on:
+- task-004-brand-paper-fucker
+- task-017-core-contract
+description: Implement the authoritative research runtime inside the OpenCode-derived
+  TypeScript server. This runtime owns runs, artifacts, event logs, permissions, resources,
+  cost tracking, resume, and final gate state. Python tools may produce results but
+  cannot own truth.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-005-step-01-runtime-architecture
+  title: Define runtime module boundaries
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Map OpenCode server extension points and define modules for runs, artifacts,
+    events, permissions, resources, costs, and resume.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-005-step-02-run-store
+  title: Implement run storage and index
+  status: todo
+  owner: codex
+  depends_on:
+  - task-005-step-01-runtime-architecture
+  description: 'Implement workspace-first run storage: <workspace>/.paper_fucker/runs/<uuid>,
+    with ~/.paper_fucker/runs/<uuid> fallback and a global index.'
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-005-step-03-artifact-event-store
+  title: Implement artifact and event store
+  status: todo
+  owner: codex
+  depends_on:
+  - task-005-step-02-run-store
+  description: Implement append-only events, versioned artifacts, locked/superseded
+    artifact semantics, and hash calculation for normalized artifact data.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-005-step-04-permission-resource-cost
+  title: Implement permissions, resources, and cost state
+  status: todo
+  owner: codex
+  depends_on:
+  - task-005-step-02-run-store
+  description: Implement Full Access, Unlimited Research binding, 24h/3h bounded mode,
+    hardware auto-detection, and soft LLM/API budget alerts.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-005-step-05-runtime-smoke
+  title: Verify runtime smoke behavior
+  status: todo
+  owner: codex
+  depends_on:
+  - task-005-step-03-artifact-event-store
+  - task-005-step-04-permission-resource-cost
+  description: Create/resume/status a run and verify expected directories, state,
+    events, default permissions, and cost/resource snapshots.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: directory
+  path: packages/server/src/research
+  description: OpenCode-native research runtime modules
+- type: report
+  path: reports/research-runtime-smoke.md
+  description: Runtime smoke verification report
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-08T01:24:07.936744'
+  updated_at: '2026-05-08T05:59:22.302600'
+  version: '1'

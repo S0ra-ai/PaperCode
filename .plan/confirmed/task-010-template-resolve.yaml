@@ -1,0 +1,107 @@
+id: task-010-template-resolve
+title: Implement automatic trusted template resolution
+status: todo
+priority: high
+owner: codex
+tags:
+- template
+- opencode-agent
+- latex
+depends_on:
+- task-006-python-tool-bridge
+- task-009-auto-orchestrator
+description: Use OpenCode's agent/tool substrate to find and adopt the most trustworthy
+  journal/conference template automatically. Pause only when official sources conflict,
+  license is unclear, user requirements conflict, or confidence is low.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-010-step-01-template-artifact-schema
+  title: Define TemplateSpec and source evidence schema
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Define TemplateSpec fields, source evidence records, confidence score,
+    license metadata, and conflict flags.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-010-step-02-template-search-agent
+  title: Implement trusted template search agent
+  status: todo
+  owner: codex
+  depends_on:
+  - task-010-step-01-template-artifact-schema
+  description: Use OpenCode web/search/fetch/tool capabilities to find official or
+    highest-trust template sources for the requested venue.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-010-step-03-auto-adoption-policy
+  title: Implement automatic adoption and pause policy
+  status: todo
+  owner: codex
+  depends_on:
+  - task-010-step-02-template-search-agent
+  description: Automatically adopt the most trustworthy template when confidence is
+    sufficient; pause on conflict, unclear license, or low confidence.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-010-step-04-template-application
+  title: Apply TemplateSpec to Markdown to LaTeX pipeline
+  status: todo
+  owner: codex
+  depends_on:
+  - task-010-step-03-auto-adoption-policy
+  description: Connect TemplateSpec to Markdown to LaTeX conversion, preview diagnostics,
+    and render artifacts.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-010-step-05-template-tests
+  title: Verify template resolution scenarios
+  status: todo
+  owner: codex
+  depends_on:
+  - task-010-step-04-template-application
+  description: Test official source success, conflicting sources pause, unclear license
+    pause, and fallback to CJC default.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: artifact
+  path: TemplateSpec
+  description: Template artifact schema and runtime handling
+- type: report
+  path: reports/template-resolution.md
+  description: Template resolution verification report
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-08T01:25:14.115927'
+  updated_at: '2026-05-08T01:25:14.115927'
+  version: '1'

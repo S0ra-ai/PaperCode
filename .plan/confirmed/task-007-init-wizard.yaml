@@ -1,0 +1,110 @@
+id: task-007-init-wizard
+title: Build full initialization and diagnostics wizard
+status: todo
+priority: high
+owner: codex
+tags:
+- init
+- diagnostics
+- secrets
+- tools
+depends_on:
+- task-005-research-runtime
+- task-006-python-tool-bridge
+description: Implement paper_fucker init as a full diagnostic setup flow for models,
+  encrypted secrets, external tools, workspaces, preview preferences, resource/cost
+  budgets, and Full Access risk acknowledgement.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-007-step-01-config-schema
+  title: Define configuration and secret schema
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Define ~/.paper_fucker config files, secrets.enc format, model endpoint
+    configuration, tool paths, preview preferences, budget preferences, and Full Access
+    settings.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-007-step-02-external-tool-discovery
+  title: Implement external tool discovery and linking
+  status: todo
+  owner: codex
+  depends_on:
+  - task-007-step-01-config-schema
+  description: Scan PATH and common Windows locations for LaTeX engines, Pandoc, Docker,
+    Python, Git, and browser availability; support user-specified executable paths.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-007-step-03-encrypted-secrets
+  title: Implement encrypted secret storage
+  status: todo
+  owner: codex
+  depends_on:
+  - task-007-step-01-config-schema
+  description: Store model/API credentials in ~/.paper_fucker/secrets.enc and never
+    write secrets to .env or repo files.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-007-step-04-init-ui
+  title: Implement TUI/CLI initialization flow
+  status: todo
+  owner: codex
+  depends_on:
+  - task-007-step-02-external-tool-discovery
+  - task-007-step-03-encrypted-secrets
+  description: Guide the user through model endpoints, external tools, workspace defaults,
+    preview auto-open preference, budgets, and Full Access risk confirmation.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-007-step-05-init-smoke
+  title: Verify init and diagnostics smoke
+  status: todo
+  owner: codex
+  depends_on:
+  - task-007-step-04-init-ui
+  description: Run init in a temporary HOME/config directory, verify config/secrets/tool
+    paths are written correctly, and verify diagnostics report missing tools cleanly.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: artifact
+  path: paper_fucker init
+  description: Initialization command and TUI flow
+- type: report
+  path: reports/init-diagnostics-smoke.md
+  description: Initialization smoke report
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-08T01:24:33.298424'
+  updated_at: '2026-05-08T01:24:33.298424'
+  version: '1'
