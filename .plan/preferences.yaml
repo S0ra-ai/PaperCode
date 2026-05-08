@@ -1,0 +1,19 @@
+# TaskFlow preferences for this project.
+
+git:
+  branch_model: gitflow
+  remote_mode: pr
+  use_gh: true
+
+changelog:
+  path: CHANGELOG
+  version_policy: extended-semver
+  format: colon-history
+
+execution:
+  max_concurrent_tasks: 1
+  default_retry: 0
+  default_step_timeout: null
+
+watcher:
+  polling: false

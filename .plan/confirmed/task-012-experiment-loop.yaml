@@ -1,0 +1,115 @@
+id: task-012-experiment-loop
+title: Implement experimental loop with container reproduction
+status: todo
+priority: high
+owner: codex
+tags:
+- experiments
+- docker
+- reproducibility
+- gpu
+depends_on:
+- task-006-python-tool-bridge
+- task-011-literature-data
+description: 'Implement the CS/AI experiment loop for core-tier papers: at least 2-3
+  reasonable baselines plus key ablations when feasible. Exploration may use the host
+  environment, but final claims require container reproduction and recorded environment
+  metadata.'
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-012-step-01-experiment-schema
+  title: Define experiment plan and run schemas
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Define ExperimentPlan, ExperimentRun, ResultReport, resource usage,
+    environment, command, metrics, figures, reproducibility hash, and failure categories.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-012-step-02-baseline-planning
+  title: Implement baseline and ablation planning
+  status: todo
+  owner: codex
+  depends_on:
+  - task-012-step-01-experiment-schema
+  description: Plan 2-3 reasonable baselines plus key ablations for core-tier CS/AI
+    papers, with downgrade/turn policy when infeasible.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-012-step-03-host-exploration
+  title: Implement host exploration runner
+  status: todo
+  owner: codex
+  depends_on:
+  - task-012-step-02-baseline-planning
+  description: Use OpenCode command/tool execution for exploratory setup, dependency
+    installation, code generation, and trial runs under Full Access.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-012-step-04-container-reproduction
+  title: Implement container reproduction gate
+  status: todo
+  owner: codex
+  depends_on:
+  - task-012-step-03-host-exploration
+  description: Re-run final experiments in a container, record environment, logs,
+    metrics, artifacts, and failure diagnostics before allowing final claims.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-012-step-05-experiment-tests
+  title: Verify experiment success and failure scenarios
+  status: todo
+  owner: codex
+  depends_on:
+  - task-012-step-04-container-reproduction
+  description: Test successful baseline run, underperforming method, environment failure,
+    resource exceeded, and failed reproduction blocking final.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: artifact
+  path: ExperimentPlan
+  description: Experiment plan artifact
+- type: artifact
+  path: ExperimentRun
+  description: Experiment execution artifact
+- type: artifact
+  path: ResultReport
+  description: Result analysis artifact
+- type: report
+  path: reports/experiment-loop.md
+  description: Experiment loop verification report
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-08T01:25:39.821286'
+  updated_at: '2026-05-08T01:25:39.821286'
+  version: '1'
