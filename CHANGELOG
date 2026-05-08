@@ -2,10 +2,38 @@
 :author        s0ra (https://github.com/S0ra-ai)
 :repo          
 :desc          记录项目的重大变更和版本历史
-:version       0.1.4-dev
+:version       0.1.5-dev
 :last_update   2026/05/08
 
 :history
+
+0.1.5-dev - 2026/05/08 (8e81d99) [develop]
+    :brief 新增初始化与诊断向导
+        - feat(init): 新增 packages/server/src/init first-party 初始化/诊断模块
+        - feat(config): 定义 ~/.paper_fucker/config.json、tools.json、secrets.enc 路径与 schema
+        - feat(discovery): 自动扫描 pandoc、LaTeX engines、Docker、Python、Git、Chrome、Edge, 支持用户链接与 PAPER_FUCKER_TOOL_* env
+        - feat(secrets): secrets.enc 使用 AES-256-GCM + PBKDF2-SHA256 加密, 禁止将凭据写入 .env 或仓库文件
+        - feat(cli): 新增 init --yes 与 diagnostics CLI flow, 支持 workspace/tool/secret/budget/preview/full-access flags
+        - docs(readme): 明确初始化写入 ~/.paper_fucker 且 credentials 不进入 repo
+        - chore(taskflow): 完成 task-007-init-wizard 并记录 init diagnostics smoke report
+    :src
+        - packages/server/src/init/config.ts - config/tools path helpers and config schema
+        - packages/server/src/init/discovery.ts - external tool discovery and linking
+        - packages/server/src/init/secrets.ts - encrypted secrets.enc storage
+        - packages/server/src/init/wizard.ts - init and diagnostics API
+        - packages/server/src/init/cli.ts - non-interactive init/diagnostics CLI
+        - packages/server/test/init/init.test.ts - init smoke tests
+        - reports/init-diagnostics-smoke.md - verification report
+    :doc
+        - README.md - version 0.1.5-dev and initialization structure
+        - .plan/confirmed/task-007-init-wizard.yaml - TaskFlow execution logs
+    :verification
+        - npx --yes bun@1.3.13 --cwd packages/server test test/init/init.test.ts passed: 2 pass, 0 fail, 15 expects
+        - npx --yes bun@1.3.13 --cwd packages/server src/init/cli.ts init --yes ... passed
+        - npx --yes bun@1.3.13 --cwd packages/server src/init/cli.ts diagnostics --home <tmp> passed
+        - npx --yes bun@1.3.13 --cwd packages/server test test/init/init.test.ts test/research/contracts.test.ts test/research/runtime.test.ts test/research/python-bridge.test.ts passed: 9 pass, 0 fail, 60 expects
+        - npx --yes bun@1.3.13 run typecheck passed across workspace: 13 successful tasks
+        - TaskFlow validate_task task-007-init-wizard passed
 
 0.1.4-dev - 2026/05/08 (760d1d4) [develop]
     :brief 接入 Python MCP/CLI research tool bridge
