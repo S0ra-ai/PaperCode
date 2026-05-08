@@ -2,10 +2,41 @@
 :author        s0ra (https://github.com/S0ra-ai)
 :repo          
 :desc          记录项目的重大变更和版本历史
-:version       0.1.2-dev
+:version       0.1.3-dev
 :last_update   2026/05/08
 
 :history
+
+0.1.3-dev - 2026/05/08 (d873f97) [develop]
+    :brief 建立 first-party research runtime
+        - feat(server/runtime): 新增 packages/server/src/research/runtime 作为 paper_fucker 权威运行时模块
+        - feat(run-store): 支持 workspace-first <workspace>/.paper_fucker/runs/<run-id>, ~/.paper_fucker/runs fallback, create/resume/status API
+        - feat(events): 事件写入 append-only events.jsonl, 并刷新 run-local/global SQLite index
+        - feat(artifacts): 支持 artifact 规范化 sha256、逻辑路径版本化、supersedes 元数据和 locked 最新版本保护
+        - feat(policy): 默认 Full Access + Unlimited Research, bounded 模式支持 3h 默认和 24h 上限
+        - feat(resources): 运行时自动记录 platform/arch/hostname/cpu/memory/GPU hint 资源快照
+        - feat(cost): 支持 LLM/API/total soft budget 累计与 budget.alert 事件
+        - feat(gate): 新增 final gate 状态, 支持 open/passed/blocked 与 blockers
+        - feat(otel): create/resume/status/event/artifact/cost/final gate/index refresh 均接入 paper_fucker.research OpenTelemetry spans
+        - docs(readme): 明确运行时自动 API 调用、workspace-first run store 和 packages/opencode adapter 边界
+        - chore(taskflow): 完成 task-005-research-runtime 并记录 runtime smoke report
+    :src
+        - packages/server/src/research/runtime/paths.ts - run directory resolution, workspace/home storage selection, artifact path safety
+        - packages/server/src/research/runtime/run-store.ts - run lifecycle, event append, index refresh, cost/final gate APIs
+        - packages/server/src/research/runtime/artifact-store.ts - artifact writes, versioning, stable hash, locked protection
+        - packages/server/src/research/runtime/policy.ts - permission, bounded mode, resource detection, budget state
+        - packages/server/src/research/runtime/state.ts - runtime-state.json persistence
+        - packages/server/test/research/runtime.test.ts - runtime smoke tests
+        - reports/research-runtime-smoke.md - verification report
+    :doc
+        - README.md - version 0.1.3-dev and first-party runtime structure
+        - .plan/confirmed/task-005-research-runtime.yaml - TaskFlow execution logs and OpenCode wording correction
+    :verification
+        - npx --yes bun@1.3.13 --cwd packages/server test test/research/runtime.test.ts passed: 3 pass, 0 fail, 28 expects
+        - npx --yes bun@1.3.13 --cwd packages/server test test/research/contracts.test.ts test/research/runtime.test.ts passed: 6 pass, 0 fail, 39 expects
+        - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
+        - npx --yes bun@1.3.13 run typecheck passed across workspace: 13 successful tasks
+        - TaskFlow validate_task task-005-research-runtime passed
 
 0.1.2-dev - 2026/05/08 (b95a0cb) [develop]
     :brief 建立 paper_fucker research contract/server 包
