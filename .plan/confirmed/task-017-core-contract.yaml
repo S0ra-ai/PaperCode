@@ -1,6 +1,6 @@
 id: task-017-core-contract
 title: Define core research contracts before runtime implementation
-status: todo
+status: done
 priority: critical
 owner: codex
 tags:
@@ -16,15 +16,15 @@ description: Define the first authoritative paper_fucker research contracts befo
   task-005a role using a TaskFlow-valid ID. It fixes schemas/research/ as the schema
   source, JSON Schema as the source of truth, generated TypeScript and Python types
   committed to the repo, schema_version plus runtime migrations, JSON/JSONL files
-  as fact sources, SQLite as rebuildable indexes, and OpenCode TypeScript server ownership
-  of the preview and authoritative runtime.
+  as fact sources, SQLite as rebuildable indexes, and packages/server ownership of
+  paper_fucker research contracts and server-side runtime surfaces.
 execution:
   mode: sequential
   retry: 0
 steps:
 - id: task-017-step-01-schema-scope
   title: Define schema source and generated outputs
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: Create the schemas/research/ contract scope, generated TypeScript path
@@ -34,12 +34,38 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T15:41:37.071091'
+      level: info
+      message: Starting core research contract implementation on feature/core-research-contracts.
+        JSON Schema will be the source under schemas/research; TypeScript runtime
+        support will live in packages/server/src/research; generated TypeScript output
+        will be written to packages/server/src/research/generated; Python Pydantic
+        v2 models will be generated under research-tools/src/paper_fucker_tools/generated.
+      agent: codex
+    - timestamp: '2026-05-08T15:57:13.120035'
+      level: info
+      message: Created schemas/research/v1.schema.json as the JSON Schema source of
+        truth. Created first-party @paper-fucker/server package under packages/server,
+        with generated TypeScript contracts at packages/server/src/research/generated/contracts.ts.
+        Created generated Pydantic v2 models at research-tools/src/paper_fucker_tools/generated/research_contracts.py
+        and research-tools package metadata. Moved new paper_fucker domain code out
+        of packages/opencode; packages/opencode remains only the upstream-derived
+        CLI/agent substrate.
+      agent: codex
+    - timestamp: '2026-05-08T15:59:42.799591'
+      level: info
+      message: 'Architecture correction after user feedback: the authoritative paper_fucker
+        research contract/runtime package is packages/server, not packages/opencode.
+        packages/opencode remains the upstream-derived CLI/agent substrate only; new
+        domain code is in @paper-fucker/server.'
+      agent: codex
+    last_run: '2026-05-08T15:57:13.120035'
+    attempt_count: 2
   meta: {}
 - id: task-017-step-02-storage-contract
   title: Define storage and index contract
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-017-step-01-schema-scope
@@ -49,12 +75,25 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T15:57:13.373736'
+      level: info
+      message: Defining JSON/JSONL fact files and rebuildable SQLite index behavior
+        in packages/server/src/research/storage.ts.
+      agent: codex
+    - timestamp: '2026-05-08T15:57:24.446640'
+      level: info
+      message: Implemented the storage contract in packages/server/src/research/storage.ts.
+        run.json and JSONL fact files are authoritative; run-local index.sqlite and
+        global ~/.paper_fucker/index.sqlite are rebuildable derived indexes. Tests
+        rebuild both indexes from JSON/JSONL facts and assert SQLite row counts.
+      agent: codex
+    last_run: '2026-05-08T15:57:24.446640'
+    attempt_count: 2
   meta: {}
 - id: task-017-step-03-event-artifact-contract
   title: Define event and artifact envelopes
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-017-step-01-schema-scope
@@ -64,12 +103,25 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T15:57:13.671980'
+      level: info
+      message: Defining v1 run, event, artifact, source, tool trace, claim, draft,
+        review, export, and checkpoint envelopes in schemas/research/v1.schema.json.
+      agent: codex
+    - timestamp: '2026-05-08T15:57:24.800973'
+      level: info
+      message: Implemented v1 contract skeletons in schemas/research/v1.schema.json
+        and generated TypeScript/Pydantic models. Contracts include schema_version,
+        run, event, artifact, source, tool trace, claim, draft, review, export, and
+        checkpoint envelopes.
+      agent: codex
+    last_run: '2026-05-08T15:57:24.800973'
+    attempt_count: 2
   meta: {}
 - id: task-017-step-04-runtime-validation-contract
   title: Define runtime validation and migration behavior
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-017-step-02-storage-contract
@@ -80,12 +132,28 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T15:57:25.129461'
+      level: info
+      message: Implementing AJV runtime validation, explicit schema_version migration
+        failures, Pydantic v2 generated model importability, and OpenTelemetry spans
+        for contract validation/index rebuild operations.
+      agent: codex
+    - timestamp: '2026-05-08T15:57:34.773476'
+      level: info
+      message: Implemented AJV 2020 validation in packages/server/src/research/contracts.ts,
+        explicit ResearchContractMigrationError failures for missing/legacy/unsupported
+        schema_version values, generated Pydantic v2 models under research-tools,
+        and OpenTelemetry API spans through packages/server/src/research/telemetry.ts.
+        Validation and index rebuild functions now emit paper_fucker.research spans
+        when a tracer provider is configured.
+      agent: codex
+    last_run: '2026-05-08T15:57:34.773476'
+    attempt_count: 2
   meta: {}
 - id: task-017-step-05-contract-tests
   title: Verify contract generation and validation
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-017-step-04-runtime-validation-contract
@@ -96,8 +164,21 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T15:57:35.013461'
+      level: info
+      message: Running focused contract tests, Pydantic import smoke, package typecheck,
+        and root workspace typecheck. Recording results in reports/core-contract-validation.md.
+      agent: codex
+    - timestamp: '2026-05-08T15:57:42.673123'
+      level: info
+      message: 'Verification recorded in reports/core-contract-validation.md. Passed:
+        bun install; packages/server typecheck; packages/server research contract
+        tests (3 pass, 0 fail); Pydantic v2 import smoke with Python 3.11.7 and pydantic
+        2.11.3; root bun turbo typecheck across the workspace (13 successful tasks).'
+      agent: codex
+    last_run: '2026-05-08T15:57:42.673123'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: directory
@@ -115,7 +196,10 @@ outputs:
 trace:
   logs: []
   attempt_count: 0
+lock:
+  by: codex
+  at: '2026-05-08T15:41:09.051470'
 meta:
   created_at: '2026-05-08T05:52:59.765639'
-  updated_at: '2026-05-08T05:59:22.674825'
+  updated_at: '2026-05-08T15:59:42.799591'
   version: '1'
