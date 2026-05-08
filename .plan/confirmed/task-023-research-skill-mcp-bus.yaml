@@ -1,6 +1,6 @@
 id: task-023-research-skill-mcp-bus
 title: Add research capability registry for MCP, skills, tools, and Python tools
-status: todo
+status: done
 priority: high
 owner: codex
 tags:
@@ -20,7 +20,7 @@ execution:
 steps:
 - id: task-023-step-01-red-capability-test
   title: Add failing capability registry tests
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: Test registration, stage filtering, trust/network metadata, and default
@@ -29,12 +29,25 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T22:26:17.020558'
+      level: info
+      message: 'Starting TDD RED step: add tests for ResearchCapabilityRegistry registration,
+        stage filtering, default Exa/OpenCode/skill/Python capabilities, and trace
+        metadata.'
+      agent: codex
+    - timestamp: '2026-05-08T22:27:08.712233'
+      level: info
+      message: 'Added packages/server/test/paper/capabilities.test.ts. RED verified
+        with npx --yes bun@1.3.13 --cwd packages/server test test/paper/capabilities.test.ts:
+        failed because PAPER_CAPABILITY_STAGES is not exported from packages/server/src/paper/index.ts.'
+      agent: codex
+    last_run: '2026-05-08T22:27:08.712233'
+    attempt_count: 2
   meta: {}
 - id: task-023-step-02-registry-implementation
   title: Implement capability registry
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-023-step-01-red-capability-test
@@ -44,12 +57,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T22:27:14.163575'
+      level: info
+      message: Implementing minimal ResearchCapabilityRegistry types, registration,
+        lookup, stage filtering, and trace metadata to satisfy the RED test.
+      agent: codex
+    - timestamp: '2026-05-08T22:28:24.323031'
+      level: info
+      message: 'Implemented packages/server/src/paper/capabilities.ts and exported
+        it from packages/server/src/paper/index.ts. GREEN verified for capability
+        registry tests: 4 pass, 0 fail, 11 expects.'
+      agent: codex
+    last_run: '2026-05-08T22:28:24.323031'
+    attempt_count: 2
   meta: {}
 - id: task-023-step-03-default-capabilities
   title: Register default capabilities
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-023-step-02-registry-implementation
@@ -59,12 +84,26 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T22:28:28.987940'
+      level: info
+      message: Validating default Exa MCP, OpenCode builtin tools, nature/Jupyter
+        skills, paper first-party tools, and Python research tool registrations through
+        the GREEN capability tests.
+      agent: codex
+    - timestamp: '2026-05-08T22:28:34.243869'
+      level: info
+      message: 'Default capabilities are registered in defaultResearchCapabilities():
+        Exa MCP, OpenCode read/grep/glob/task/shell, nature-paper and jupyter-notebook
+        skills, paper.claim-ledger/export-bundle first-party tools, and Python experiment/dataset
+        tools.'
+      agent: codex
+    last_run: '2026-05-08T22:28:34.243869'
+    attempt_count: 2
   meta: {}
 - id: task-023-step-04-doc-version
   title: Update docs and version 0.1.20-dev
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-023-step-03-default-capabilities
@@ -73,12 +112,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T22:28:39.267792'
+      level: info
+      message: Updating README/CHANGELOG to version 0.1.20-dev and adding the capability
+        registry verification report.
+      agent: codex
+    - timestamp: '2026-05-08T22:29:20.191486'
+      level: info
+      message: README updated to 0.1.20-dev, CHANGELOG colon-history entry added with
+        pending hash for the feature commit, and reports/research-skill-mcp-bus.md
+        added.
+      agent: codex
+    last_run: '2026-05-08T22:29:20.191486'
+    attempt_count: 2
   meta: {}
 - id: task-023-step-05-verify
   title: Run verification
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-023-step-04-doc-version
@@ -87,8 +138,20 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T22:29:24.523442'
+      level: info
+      message: Running capability tests, server typecheck, README/CHANGELOG version
+        check, and TaskFlow validate_task.
+      agent: codex
+    - timestamp: '2026-05-08T22:32:51.919901'
+      level: info
+      message: 'Verification passed: capability tests 4 pass/0 fail/11 expects; server
+        typecheck passed; README version 0.1.20-dev matches CHANGELOG; TaskFlow validate_task
+        task-023-research-skill-mcp-bus valid with no warnings.'
+      agent: codex
+    last_run: '2026-05-08T22:32:51.919901'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -102,5 +165,5 @@ trace:
   attempt_count: 0
 meta:
   created_at: '2026-05-08T22:09:02.031345'
-  updated_at: '2026-05-08T22:09:02.031345'
+  updated_at: '2026-05-08T22:33:11.439213'
   version: '1'
