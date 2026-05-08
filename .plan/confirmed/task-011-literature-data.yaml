@@ -1,6 +1,6 @@
 id: task-011-literature-data
 title: Implement open-source literature and data discovery
-status: todo
+status: done
 priority: high
 owner: codex
 tags:
@@ -20,7 +20,7 @@ execution:
 steps:
 - id: task-011-step-01-source-policy
   title: Define source policy and artifact schemas
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: Define LiteratureMap, DataPlan, DatasetCard, SourceRecord, license
@@ -29,12 +29,23 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T18:26:30.246981'
+      level: info
+      message: 'Started SourceRecord/LiteratureMap/DataPlan/DatasetCard schema implementation
+        after RED test failure: missing @/research/sources module.'
+      agent: codex
+    - timestamp: '2026-05-08T18:32:11.824513'
+      level: info
+      message: Added SourceRecord.v1, LiteratureMap.v1, DataPlan.v1, DatasetCard.v1,
+        DirectionFeasibility.v1 TypeScript schemas under packages/server/src/research/sources/schemas.ts.
+      agent: codex
+    last_run: '2026-05-08T18:32:11.824513'
+    attempt_count: 2
   meta: {}
 - id: task-011-step-02-literature-discovery
   title: Implement literature discovery and clustering
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-011-step-01-source-policy
@@ -44,12 +55,23 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T18:32:20.539833'
+      level: info
+      message: Starting literature discovery step with implemented module ready for
+        verification.
+      agent: codex
+    - timestamp: '2026-05-08T18:32:29.838817'
+      level: info
+      message: Implemented discoverLiterature with provider/source metadata, verification
+        status, source clustering, summary counts, and failure diagnostics.
+      agent: codex
+    last_run: '2026-05-08T18:32:29.838817'
+    attempt_count: 2
   meta: {}
 - id: task-011-step-03-dataset-discovery
   title: Implement dataset discovery and license checks
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-011-step-01-source-policy
@@ -59,12 +81,23 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T18:32:20.802784'
+      level: info
+      message: Starting dataset discovery step with implemented module ready for verification.
+      agent: codex
+    - timestamp: '2026-05-08T18:32:30.112945'
+      level: info
+      message: Implemented discoverDatasets with DatasetCard normalization, license
+        conflicts, access constraints, verification diagnostics, and open verified
+        dataset filtering.
+      agent: codex
+    last_run: '2026-05-08T18:32:30.112945'
+    attempt_count: 2
   meta: {}
 - id: task-011-step-04-direction-feasibility
   title: Implement feasibility and automatic turn policy
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-011-step-02-literature-discovery
@@ -76,12 +109,22 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T18:32:30.336353'
+      level: info
+      message: Starting feasibility and automatic turn policy verification.
+      agent: codex
+    - timestamp: '2026-05-08T18:32:37.222782'
+      level: info
+      message: Implemented assessDirectionFeasibility with feasible/pause/turned outcomes
+        and Full Access nearby-direction turn policy with rollback metadata.
+      agent: codex
+    last_run: '2026-05-08T18:32:37.222782'
+    attempt_count: 2
   meta: {}
 - id: task-011-step-05-discovery-tests
   title: Verify literature/data discovery scenarios
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-011-step-04-direction-feasibility
@@ -91,8 +134,20 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T18:33:38.927424'
+      level: info
+      message: Running discovery test and typecheck verification after README/CHANGELOG/report
+        updates.
+      agent: codex
+    - timestamp: '2026-05-08T18:34:22.989478'
+      level: info
+      message: 'Verification passed: npx --yes bun@1.3.13 --cwd packages/server test
+        test/research/sources.test.ts => 4 pass, 0 fail, 14 expects; npx --yes bun@1.3.13
+        run --cwd packages/server typecheck => exit 0.'
+      agent: codex
+    last_run: '2026-05-08T18:34:22.989478'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: artifact
@@ -112,5 +167,5 @@ trace:
   attempt_count: 0
 meta:
   created_at: '2026-05-08T01:25:26.635370'
-  updated_at: '2026-05-08T01:25:26.635370'
+  updated_at: '2026-05-08T18:34:29.311496'
   version: '1'
