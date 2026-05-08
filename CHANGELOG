@@ -2,10 +2,45 @@
 :author        s0ra (https://github.com/S0ra-ai)
 :repo          
 :desc          记录项目的重大变更和版本历史
-:version       0.1.5-dev
+:version       0.1.6-dev
 :last_update   2026/05/08
 
 :history
+
+0.1.6-dev - 2026/05/08 (3e2be8c) [develop]
+    :brief 新增只读研究预览与 DeepSeek/中文默认配置
+        - feat(preview): 新增 @paper-fucker/preview first-party package 与 localhost read-only preview
+        - feat(preview/server): token-checked preview/snapshot/SSE endpoints, 非 GET/HEAD/OPTIONS 写方法返回 405
+        - feat(preview/ui): 新增 Markdown/LaTeX/PDF/DOCX/Annotations/Diagnostics tabs 与 render status strip
+        - feat(render): PreviewRenderQueue 支持即时 Markdown 更新、derived render jobs、SSE publish 与 stale job cancellation
+        - feat(annotations): 预览协议支持 claim/citation/template/experiment/reviewer/cost/agent diagnostics 与 source range/TUI ref
+        - feat(init): 默认语言改为 zh-CN, 默认模型 endpoint 改为 DeepSeek deepseek-v4-pro
+        - chore(local): .gitignore 忽略 .paper_fucker/local/, 用于本地未跟踪 API key 与模型默认配置
+        - docs(readme): 记录 packages/preview、中文默认语言、DeepSeek 默认模型与本地预览能力
+        - chore(taskflow): 完成 task-008-preview-runtime 并记录 preview smoke report/browser screenshot
+    :src
+        - packages/preview/index.html - static read-only preview workbench
+        - packages/preview/src/protocol.ts - preview.v1 snapshot and stream event contracts
+        - packages/preview/src/server.ts - localhost token-protected Bun server
+        - packages/preview/src/render-queue.ts - realtime render queue with stale job cancellation
+        - packages/preview/src/client.js - browser snapshot/SSE client
+        - packages/preview/src/style.css - preview workspace UI
+        - packages/preview/test/preview.test.ts - preview server and render queue tests
+        - packages/server/src/init/config.ts - zh-CN and deepseek-v4-pro defaults
+        - reports/preview-smoke.md - verification report
+        - reports/preview-browser-smoke.png - browser smoke screenshot
+    :doc
+        - README.md - version 0.1.6-dev and preview/default model notes
+        - .plan/confirmed/task-008-preview-runtime.yaml - TaskFlow execution logs and server-runtime wording correction
+    :verification
+        - DeepSeek model list fetched from https://api.deepseek.com/v1/models: deepseek-v4-flash, deepseek-v4-pro
+        - npx --yes bun@1.3.13 install passed
+        - npx --yes bun@1.3.13 --cwd packages/preview test passed: 2 pass, 0 fail, 9 expects
+        - npx --yes bun@1.3.13 run --cwd packages/preview typecheck passed
+        - npx --yes bun@1.3.13 --cwd packages/server test test/init/init.test.ts test/research/contracts.test.ts test/research/runtime.test.ts test/research/python-bridge.test.ts passed: 9 pass, 0 fail, 60 expects
+        - Browser smoke loaded localhost preview with live/ready status and Markdown content
+        - npx --yes bun@1.3.13 run typecheck passed across workspace: 14 successful tasks
+        - TaskFlow validate_task task-008-preview-runtime passed
 
 0.1.5-dev - 2026/05/08 (8e81d99) [develop]
     :brief 新增初始化与诊断向导
