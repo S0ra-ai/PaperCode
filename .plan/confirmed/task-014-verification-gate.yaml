@@ -1,6 +1,6 @@
 id: task-014-verification-gate
 title: Implement authenticity verification final gate
-status: todo
+status: done
 priority: critical
 owner: codex
 tags:
@@ -21,7 +21,7 @@ execution:
 steps:
 - id: task-014-step-01-gate-schema
   title: Define verification and BlockingReport schemas
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: Define verification findings, blocking reports, affected claims, required
@@ -30,12 +30,23 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T19:05:14.146451'
+      level: info
+      message: 'Started verification/BlockingReport/ReviewReport schema implementation
+        after RED test failure: missing @/research/verification module.'
+      agent: codex
+    - timestamp: '2026-05-08T19:09:14.434099'
+      level: info
+      message: Added VerificationFinding, BlockingReport.v1, ReviewReport.v1, ModelReviewInput,
+        and VerificationGateResult TypeScript schemas.
+      agent: codex
+    last_run: '2026-05-08T19:09:14.434099'
+    attempt_count: 2
   meta: {}
 - id: task-014-step-02-reference-and-claim-checks
   title: Implement reference and claim support checks
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-014-step-01-gate-schema
@@ -45,12 +56,22 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T19:09:14.993692'
+      level: info
+      message: Starting reference and claim support checks after implementation.
+      agent: codex
+    - timestamp: '2026-05-08T19:09:26.776912'
+      level: info
+      message: Implemented checkReferences and checkClaimSupport. Missing citation
+        sources and non-supported claims produce blocking findings.
+      agent: codex
+    last_run: '2026-05-08T19:09:26.776912'
+    attempt_count: 2
   meta: {}
 - id: task-014-step-03-data-experiment-checks
   title: Implement data and experiment reproduction checks
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-014-step-01-gate-schema
@@ -60,12 +81,22 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T19:09:14.713585'
+      level: info
+      message: Starting data and experiment reproduction checks after implementation.
+      agent: codex
+    - timestamp: '2026-05-08T19:09:27.104067'
+      level: info
+      message: Implemented checkDataAndExperiments. Dataset license conflicts and
+        non-passed container reproduction produce blocking findings.
+      agent: codex
+    last_run: '2026-05-08T19:09:27.104067'
+    attempt_count: 2
   meta: {}
 - id: task-014-step-04-multi-model-review
   title: Implement key-stage multi-model review
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-014-step-02-reference-and-claim-checks
@@ -77,12 +108,23 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T19:09:27.421927'
+      level: info
+      message: Starting multi-model review step after implementation.
+      agent: codex
+    - timestamp: '2026-05-08T19:09:36.063748'
+      level: info
+      message: Implemented runMultiModelReview with pass/warn/fail verdicts, non-blocking
+        reviewer warnings, blocking reviewer failures, and conflict escalation requirement
+        when primary reviewers disagree.
+      agent: codex
+    last_run: '2026-05-08T19:09:36.063748'
+    attempt_count: 2
   meta: {}
 - id: task-014-step-05-gate-tests
   title: Verify final gate behavior
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-014-step-04-multi-model-review
@@ -92,8 +134,20 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T19:10:41.879182'
+      level: info
+      message: Running final verification gate tests and typecheck after README/CHANGELOG/report
+        updates.
+      agent: codex
+    - timestamp: '2026-05-08T19:11:23.038245'
+      level: info
+      message: 'Verification passed: npx --yes bun@1.3.13 --cwd packages/server test
+        test/research/verification.test.ts => 6 pass, 0 fail, 11 expects; npx --yes
+        bun@1.3.13 run --cwd packages/server typecheck => exit 0.'
+      agent: codex
+    last_run: '2026-05-08T19:11:23.038245'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: artifact
@@ -110,5 +164,5 @@ trace:
   attempt_count: 0
 meta:
   created_at: '2026-05-08T01:26:05.384735'
-  updated_at: '2026-05-08T01:26:05.384735'
+  updated_at: '2026-05-08T19:11:32.926486'
   version: '1'
