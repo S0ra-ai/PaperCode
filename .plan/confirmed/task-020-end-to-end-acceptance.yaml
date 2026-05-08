@@ -1,6 +1,6 @@
 id: task-020-end-to-end-acceptance
 title: Add end-to-end research pipeline acceptance
-status: in_progress
+status: done
 priority: high
 owner: codex
 tags:
@@ -103,7 +103,7 @@ steps:
   meta: {}
 - id: task-020-step-04-doc-version
   title: Update docs, changelog, and report
-  status: in_progress
+  status: done
   owner: codex
   depends_on:
   - task-020-step-03-failure-path-test
@@ -120,12 +120,17 @@ steps:
         to 0.1.17-dev. Changelog commit id will be backfilled after the feature commit
         exists.
       agent: codex
-    last_run: '2026-05-08T21:24:52.952149'
-    attempt_count: 1
+    - timestamp: '2026-05-08T21:25:58.181317'
+      level: info
+      message: Updated README current version/status to 0.1.17-dev, added reports/end-to-end-acceptance.md,
+        and backfilled CHANGELOG 0.1.17-dev with implementation commit e214ff4.
+      agent: codex
+    last_run: '2026-05-08T21:25:58.181317'
+    attempt_count: 2
   meta: {}
 - id: task-020-step-05-verify
   title: Run end-to-end verification
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-020-step-04-doc-version
@@ -135,8 +140,21 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T21:26:01.580223'
+      level: info
+      message: 'Running final verification: server e2e test, preview package tests,
+        server typecheck, README/CHANGELOG version check, and TaskFlow task validation.'
+      agent: codex
+    - timestamp: '2026-05-08T21:26:28.000726'
+      level: info
+      message: 'Final verification passed: server e2e test 2 pass/0 fail/18 expects;
+        preview tests 2 pass/0 fail/9 expects; server typecheck passed; README version
+        0.1.17-dev matches CHANGELOG latest version; TaskFlow validate_task passed
+        with no errors or warnings.'
+      agent: codex
+    last_run: '2026-05-08T21:26:28.000726'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -148,10 +166,7 @@ outputs:
 trace:
   logs: []
   attempt_count: 0
-lock:
-  by: codex
-  at: '2026-05-08T21:23:20.335801'
 meta:
   created_at: '2026-05-08T21:20:22.036414'
-  updated_at: '2026-05-08T21:24:52.952149'
+  updated_at: '2026-05-08T21:26:31.187857'
   version: '1'
