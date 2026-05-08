@@ -2,10 +2,31 @@
 :author        s0ra (https://github.com/S0ra-ai)
 :repo          
 :desc          记录项目的重大变更和版本历史
-:version       0.1.6-dev
-:last_update   2026/05/08
+:version       0.1.7-dev
+:last_update   2026/05/09
 
 :history
+
+0.1.7-dev - 2026/05/09 (9bae52d) [develop]
+    :brief 通过 Phase 1 验收并补齐真实性守卫
+        - feat(runtime): 新增 phaseOneStageStubs, 将模板/文献/数据/实验/写作/验证/导出显式标记为 not_implemented
+        - feat(runtime): 新增 assertAuthenticResearchOutput, 阻止 stub/synthetic/fake 输出进入研究事实
+        - feat(runtime): final export 必须等待 authenticity gate passed, gate 未通过时直接阻断
+        - test(runtime): 增加 guards.test.ts 覆盖 not_implemented stubs、假输出阻断、final gate 通过场景
+        - docs(acceptance): 新增 Phase 1 验收报告, 记录 Windows 原生 CLI、runtime、Python bridge、secrets ignored 检查
+        - docs(readme): 版本更新为 0.1.7-dev, 说明 Phase 1 baseline acceptance 已通过
+        - chore(taskflow): 执行 task-018-phase-1-acceptance 并记录 step logs
+    :src
+        - packages/server/src/research/runtime/guards.ts - Phase 1 not_implemented stubs and authenticity output guard
+        - packages/server/src/research/runtime/index.ts - runtime guard exports
+        - packages/server/test/research/guards.test.ts - authenticity guard tests
+        - reports/phase-1-acceptance.md - Phase 1 acceptance evidence
+    :verification
+        - npx --yes bun@1.3.13 --cwd packages/opencode src/index.ts --help passed
+        - npx --yes bun@1.3.13 --cwd packages/opencode src/index.ts --version passed: local
+        - npx --yes bun@1.3.13 --cwd packages/server test test/research/guards.test.ts test/research/runtime.test.ts test/research/python-bridge.test.ts test/init/init.test.ts passed: 9 pass, 0 fail, 54 expects
+        - python -m unittest discover initially failed until research-tools/src was added to PYTHONPATH
+        - PYTHONPATH=research-tools/src python -m unittest discover -s research-tools/tests passed: 4 tests
 
 0.1.6-dev - 2026/05/08 (3e2be8c) [develop]
     :brief 新增只读研究预览与 DeepSeek/中文默认配置
