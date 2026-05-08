@@ -35,7 +35,7 @@ describe("tool.skill", () => {
     provideTmpdirInstance(
       (dir) =>
         Effect.gen(function* () {
-          const skill = path.join(dir, ".opencode", "skill", "tool-skill")
+          const skill = path.join(dir, ".paper_fucker", "skill", "tool-skill")
           yield* Effect.promise(() =>
             Bun.write(
               path.join(skill, "SKILL.md"),

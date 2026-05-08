@@ -48,7 +48,7 @@ export const PtyApi = HttpApi.make("pty")
           OpenApi.annotations({
             identifier: "pty.list",
             summary: "List PTY sessions",
-            description: "Get a list of all active pseudo-terminal (PTY) sessions managed by OpenCode.",
+            description: "Get a list of all active pseudo-terminal (PTY) sessions managed by paper_fucker.",
           }),
         ),
         HttpApiEndpoint.post("create", PtyPaths.create, {
@@ -115,7 +115,7 @@ export const PtyApi = HttpApi.make("pty")
   )
   .annotateMerge(
     OpenApi.annotations({
-      title: "opencode experimental HttpApi",
+      title: "paper_fucker experimental HttpApi",
       version: "0.0.1",
       description: "Experimental HttpApi surface for selected instance routes.",
     }),

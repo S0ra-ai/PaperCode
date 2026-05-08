@@ -6,7 +6,11 @@ import { WorkspaceID } from "@/control-plane/schema"
 
 export function InstanceMiddleware(workspaceID?: WorkspaceID): MiddlewareHandler {
   return async (c, next) => {
-    const raw = c.req.query("directory") || c.req.header("x-opencode-directory") || process.cwd()
+    const raw =
+      c.req.query("directory") ||
+      c.req.header("x-paper-fucker-directory") ||
+      c.req.header("x-opencode-directory") ||
+      process.cwd()
     const directory = AppFileSystem.resolve(
       (() => {
         try {

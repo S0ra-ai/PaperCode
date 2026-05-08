@@ -15,7 +15,7 @@ export function createMenu(deps: Deps) {
 
   const template: Electron.MenuItemConstructorOptions[] = [
     {
-      label: "OpenCode",
+      label: "paper_fucker",
       submenu: [
         { role: "about" },
         {
@@ -120,18 +120,18 @@ export function createMenu(deps: Deps) {
     {
       label: "Help",
       submenu: [
-        { label: "OpenCode Documentation", click: () => shell.openExternal("https://opencode.ai/docs") },
-        { label: "Support Forum", click: () => shell.openExternal("https://discord.com/invite/opencode") },
+        { label: "paper_fucker Documentation", click: () => shell.openExternal("https://github.com/S0ra-ai/paper_fucker") },
+        { label: "Repository", click: () => shell.openExternal("https://github.com/S0ra-ai/paper_fucker") },
         { type: "separator" },
         { type: "separator" },
         {
           label: "Share Feedback",
           click: () =>
-            shell.openExternal("https://github.com/anomalyco/opencode/issues/new?template=feature_request.yml"),
+            shell.openExternal("https://github.com/S0ra-ai/paper_fucker/issues/new"),
         },
         {
           label: "Report a Bug",
-          click: () => shell.openExternal("https://github.com/anomalyco/opencode/issues/new?template=bug_report.yml"),
+          click: () => shell.openExternal("https://github.com/S0ra-ai/paper_fucker/issues/new"),
         },
       ],
     },

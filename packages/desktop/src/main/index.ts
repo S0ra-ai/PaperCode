@@ -18,22 +18,23 @@ try {
   process.chdir(homedir())
 } catch {}
 
+process.env.PAPER_FUCKER_DISABLE_EMBEDDED_WEB_UI = "true"
 process.env.OPENCODE_DISABLE_EMBEDDED_WEB_UI = "true"
 
 const APP_NAMES: Record<string, string> = {
-  dev: "OpenCode Dev",
-  beta: "OpenCode Beta",
-  prod: "OpenCode",
+  dev: "paper_fucker Dev",
+  beta: "paper_fucker Beta",
+  prod: "paper_fucker",
 }
 const APP_IDS: Record<string, string> = {
-  dev: "ai.opencode.desktop.dev",
-  beta: "ai.opencode.desktop.beta",
-  prod: "ai.opencode.desktop",
+  dev: "ai.paperfucker.desktop.dev",
+  beta: "ai.paperfucker.desktop.beta",
+  prod: "ai.paperfucker.desktop",
 }
-const TEST_ONBOARDING = process.env.OPENCODE_TEST_ONBOARDING === "1"
-const appId = app.isPackaged ? APP_IDS[CHANNEL] : "ai.opencode.desktop.dev"
+const TEST_ONBOARDING = (process.env.PAPER_FUCKER_TEST_ONBOARDING ?? process.env.OPENCODE_TEST_ONBOARDING) === "1"
+const appId = app.isPackaged ? APP_IDS[CHANNEL] : "ai.paperfucker.desktop.dev"
 const onboardingTestRoot = setupOnboardingTestEnv()
-app.setName(app.isPackaged ? APP_NAMES[CHANNEL] : "OpenCode Dev")
+app.setName(app.isPackaged ? APP_NAMES[CHANNEL] : "paper_fucker Dev")
 app.setAppUserModelId(appId)
 app.setPath("userData", onboardingTestRoot ? join(onboardingTestRoot, "desktop") : join(app.getPath("appData"), appId))
 if (onboardingTestRoot) app.setPath("sessionData", join(onboardingTestRoot, "session"))
@@ -81,11 +82,12 @@ useSystemCertificates()
 function setupOnboardingTestEnv() {
   if (!TEST_ONBOARDING) return
 
-  const root = join(tmpdir(), `opencode-onboarding-${randomUUID()}`)
+  const root = join(tmpdir(), `paper_fucker-onboarding-${randomUUID()}`)
   rmSync(root, { recursive: true, force: true })
   ;["data", "config", "cache", "state", "desktop", "session"].forEach((dir) =>
     mkdirSync(join(root, dir), { recursive: true }),
   )
+  process.env.PAPER_FUCKER_DB = ":memory:"
   process.env.OPENCODE_DB = ":memory:"
   process.env.XDG_DATA_HOME = join(root, "data")
   process.env.XDG_CONFIG_HOME = join(root, "config")
@@ -116,7 +118,7 @@ function setupApp() {
   preferAppEnv(app.getPath("userData"))
 
   app.on("second-instance", (_event: Event, argv: string[]) => {
-    const urls = argv.filter((arg: string) => arg.startsWith("opencode://"))
+    const urls = argv.filter((arg: string) => arg.startsWith("paper-fucker://") || arg.startsWith("opencode://"))
     if (urls.length) {
       logger.log("deep link received via second-instance", { urls })
       emitDeepLinks(urls)
@@ -146,7 +148,7 @@ function setupApp() {
 
   void app.whenReady().then(async () => {
     if (!TEST_ONBOARDING) migrate()
-    app.setAsDefaultProtocolClient("opencode")
+    app.setAsDefaultProtocolClient("paper-fucker")
     registerRendererProtocol()
     setDockIcon()
     setupAutoUpdater()
@@ -228,7 +230,7 @@ async function initialize() {
     server = listener
     serverReady.resolve({
       url,
-      username: "opencode",
+      username: "paper_fucker",
       password,
     })
 
@@ -344,7 +346,7 @@ function ensureLoopbackNoProxy() {
 }
 
 async function getSidecarPort() {
-  const fromEnv = process.env.OPENCODE_PORT
+  const fromEnv = process.env.PAPER_FUCKER_PORT ?? process.env.OPENCODE_PORT
   if (fromEnv) {
     const parsed = Number.parseInt(fromEnv, 10)
     if (!Number.isNaN(parsed)) return parsed
@@ -367,11 +369,11 @@ async function getSidecarPort() {
 }
 
 function sqliteFileExists() {
-  if (process.env.OPENCODE_DB === ":memory:") return true
+  if (process.env.PAPER_FUCKER_DB === ":memory:" || process.env.OPENCODE_DB === ":memory:") return true
 
   const xdg = process.env.XDG_DATA_HOME
   const base = xdg && xdg.length > 0 ? xdg : join(homedir(), ".local", "share")
-  return existsSync(join(base, "opencode", "opencode.db"))
+  return existsSync(join(base, "paper_fucker", "paper_fucker.db")) || existsSync(join(base, "opencode", "opencode.db"))
 }
 
 function setupAutoUpdater() {

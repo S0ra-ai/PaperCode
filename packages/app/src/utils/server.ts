@@ -3,7 +3,7 @@ import type { ServerConnection } from "@/context/server"
 import { decode64 } from "@/utils/base64"
 
 export function authTokenFromCredentials(input: { username?: string; password: string }) {
-  return btoa(`${input.username ?? "opencode"}:${input.password}`)
+  return btoa(`${input.username ?? "paper_fucker"}:${input.password}`)
 }
 
 export function authFromToken(token: string | null) {
@@ -12,7 +12,7 @@ export function authFromToken(token: string | null) {
   const separator = decoded.indexOf(":")
   if (separator === -1) return
   return {
-    username: decoded.slice(0, separator) || "opencode",
+    username: decoded.slice(0, separator) || "paper_fucker",
     password: decoded.slice(separator + 1),
   }
 }

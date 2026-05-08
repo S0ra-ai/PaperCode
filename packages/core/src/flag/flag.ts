@@ -1,14 +1,28 @@
 import { Config } from "effect"
 import { InstallationChannel } from "../installation/version"
 
+function currentKey(key: string) {
+  if (!key.startsWith("OPENCODE")) return key
+  return `PAPER_FUCKER${key.slice("OPENCODE".length)}`
+}
+
+function envValue(key: string) {
+  return process.env[currentKey(key)] ?? process.env[key]
+}
+
+for (const key of ["OPENCODE_EXPERIMENTAL_FILEWATCHER", "OPENCODE_EXPERIMENTAL_DISABLE_FILEWATCHER"]) {
+  const preferred = currentKey(key)
+  if (process.env[key] === undefined && process.env[preferred] !== undefined) process.env[key] = process.env[preferred]
+}
+
 function truthy(key: string) {
-  const value = process.env[key]?.toLowerCase()
-  return value === "true" || value === "1"
+  const raw = envValue(key)?.toLowerCase()
+  return raw === "true" || raw === "1"
 }
 
 function falsy(key: string) {
-  const value = process.env[key]?.toLowerCase()
-  return value === "false" || value === "0"
+  const raw = envValue(key)?.toLowerCase()
+  return raw === "false" || raw === "0"
 }
 
 // Channels that default to the new effect-httpapi server backend. The legacy
@@ -16,9 +30,9 @@ function falsy(key: string) {
 const HTTPAPI_DEFAULT_ON_CHANNELS = new Set(["dev", "beta", "local"])
 
 function number(key: string) {
-  const value = process.env[key]
-  if (!value) return undefined
-  const parsed = Number(value)
+  const raw = envValue(key)
+  if (!raw) return undefined
+  const parsed = Number(raw)
   return Number.isInteger(parsed) && parsed > 0 ? parsed : undefined
 }
 
@@ -26,7 +40,7 @@ const OPENCODE_EXPERIMENTAL = truthy("OPENCODE_EXPERIMENTAL")
 const OPENCODE_DISABLE_CLAUDE_CODE = truthy("OPENCODE_DISABLE_CLAUDE_CODE")
 const OPENCODE_DISABLE_CLAUDE_CODE_SKILLS =
   OPENCODE_DISABLE_CLAUDE_CODE || truthy("OPENCODE_DISABLE_CLAUDE_CODE_SKILLS")
-const copy = process.env["OPENCODE_EXPERIMENTAL_DISABLE_COPY_ON_SELECT"]
+const copy = envValue("OPENCODE_EXPERIMENTAL_DISABLE_COPY_ON_SELECT")
 
 export const Flag = {
   OTEL_EXPORTER_OTLP_ENDPOINT: process.env["OTEL_EXPORTER_OTLP_ENDPOINT"],
@@ -34,15 +48,14 @@ export const Flag = {
 
   OPENCODE_AUTO_SHARE: truthy("OPENCODE_AUTO_SHARE"),
   OPENCODE_AUTO_HEAP_SNAPSHOT: truthy("OPENCODE_AUTO_HEAP_SNAPSHOT"),
-  OPENCODE_GIT_BASH_PATH: process.env["OPENCODE_GIT_BASH_PATH"],
-  OPENCODE_CONFIG: process.env["OPENCODE_CONFIG"],
-  OPENCODE_CONFIG_CONTENT: process.env["OPENCODE_CONFIG_CONTENT"],
+  OPENCODE_GIT_BASH_PATH: envValue("OPENCODE_GIT_BASH_PATH"),
+  OPENCODE_CONFIG: envValue("OPENCODE_CONFIG"),
   OPENCODE_DISABLE_AUTOUPDATE: truthy("OPENCODE_DISABLE_AUTOUPDATE"),
   OPENCODE_ALWAYS_NOTIFY_UPDATE: truthy("OPENCODE_ALWAYS_NOTIFY_UPDATE"),
   OPENCODE_DISABLE_PRUNE: truthy("OPENCODE_DISABLE_PRUNE"),
   OPENCODE_DISABLE_TERMINAL_TITLE: truthy("OPENCODE_DISABLE_TERMINAL_TITLE"),
   OPENCODE_SHOW_TTFD: truthy("OPENCODE_SHOW_TTFD"),
-  OPENCODE_PERMISSION: process.env["OPENCODE_PERMISSION"],
+  OPENCODE_PERMISSION: envValue("OPENCODE_PERMISSION"),
   OPENCODE_DISABLE_DEFAULT_PLUGINS: truthy("OPENCODE_DISABLE_DEFAULT_PLUGINS"),
   OPENCODE_DISABLE_LSP_DOWNLOAD: truthy("OPENCODE_DISABLE_LSP_DOWNLOAD"),
   OPENCODE_ENABLE_EXPERIMENTAL_MODELS: truthy("OPENCODE_ENABLE_EXPERIMENTAL_MODELS"),
@@ -53,9 +66,9 @@ export const Flag = {
   OPENCODE_DISABLE_CLAUDE_CODE_PROMPT: OPENCODE_DISABLE_CLAUDE_CODE || truthy("OPENCODE_DISABLE_CLAUDE_CODE_PROMPT"),
   OPENCODE_DISABLE_CLAUDE_CODE_SKILLS,
   OPENCODE_DISABLE_EXTERNAL_SKILLS: truthy("OPENCODE_DISABLE_EXTERNAL_SKILLS"),
-  OPENCODE_FAKE_VCS: process.env["OPENCODE_FAKE_VCS"],
-  OPENCODE_SERVER_PASSWORD: process.env["OPENCODE_SERVER_PASSWORD"],
-  OPENCODE_SERVER_USERNAME: process.env["OPENCODE_SERVER_USERNAME"],
+  OPENCODE_FAKE_VCS: envValue("OPENCODE_FAKE_VCS"),
+  OPENCODE_SERVER_PASSWORD: envValue("OPENCODE_SERVER_PASSWORD"),
+  OPENCODE_SERVER_USERNAME: envValue("OPENCODE_SERVER_USERNAME"),
   OPENCODE_ENABLE_QUESTION_TOOL: truthy("OPENCODE_ENABLE_QUESTION_TOOL"),
 
   // Experimental
@@ -77,15 +90,15 @@ export const Flag = {
   OPENCODE_EXPERIMENTAL_LSP_TOOL: OPENCODE_EXPERIMENTAL || truthy("OPENCODE_EXPERIMENTAL_LSP_TOOL"),
   OPENCODE_EXPERIMENTAL_PLAN_MODE: OPENCODE_EXPERIMENTAL || truthy("OPENCODE_EXPERIMENTAL_PLAN_MODE"),
   OPENCODE_EXPERIMENTAL_MARKDOWN: !falsy("OPENCODE_EXPERIMENTAL_MARKDOWN"),
-  OPENCODE_MODELS_URL: process.env["OPENCODE_MODELS_URL"],
-  OPENCODE_MODELS_PATH: process.env["OPENCODE_MODELS_PATH"],
+  OPENCODE_MODELS_URL: envValue("OPENCODE_MODELS_URL"),
+  OPENCODE_MODELS_PATH: envValue("OPENCODE_MODELS_PATH"),
   OPENCODE_DISABLE_EMBEDDED_WEB_UI: truthy("OPENCODE_DISABLE_EMBEDDED_WEB_UI"),
-  OPENCODE_DB: process.env["OPENCODE_DB"],
+  OPENCODE_DB: envValue("OPENCODE_DB"),
   OPENCODE_DISABLE_CHANNEL_DB: truthy("OPENCODE_DISABLE_CHANNEL_DB"),
   OPENCODE_SKIP_MIGRATIONS: truthy("OPENCODE_SKIP_MIGRATIONS"),
   OPENCODE_STRICT_CONFIG_DEPS: truthy("OPENCODE_STRICT_CONFIG_DEPS"),
 
-  OPENCODE_WORKSPACE_ID: process.env["OPENCODE_WORKSPACE_ID"],
+  OPENCODE_WORKSPACE_ID: envValue("OPENCODE_WORKSPACE_ID"),
   // Defaults to true on dev/beta/local channels so internal users exercise the
   // new effect-httpapi server backend. Stable (`prod`/`latest`) installs stay
   // on the legacy hono backend until the rollout is complete. An explicit env
@@ -103,18 +116,21 @@ export const Flag = {
     return truthy("OPENCODE_DISABLE_PROJECT_CONFIG")
   },
   get OPENCODE_TUI_CONFIG() {
-    return process.env["OPENCODE_TUI_CONFIG"]
+    return envValue("OPENCODE_TUI_CONFIG")
+  },
+  get OPENCODE_CONFIG_CONTENT() {
+    return envValue("OPENCODE_CONFIG_CONTENT")
   },
   get OPENCODE_CONFIG_DIR() {
-    return process.env["OPENCODE_CONFIG_DIR"]
+    return envValue("OPENCODE_CONFIG_DIR")
   },
   get OPENCODE_PURE() {
     return truthy("OPENCODE_PURE")
   },
   get OPENCODE_PLUGIN_META_FILE() {
-    return process.env["OPENCODE_PLUGIN_META_FILE"]
+    return envValue("OPENCODE_PLUGIN_META_FILE")
   },
   get OPENCODE_CLIENT() {
-    return process.env["OPENCODE_CLIENT"] ?? "cli"
+    return envValue("OPENCODE_CLIENT") ?? "cli"
   },
 }

@@ -119,7 +119,7 @@ export const McpListCommand = effectCmd({
 
     if (servers.length === 0) {
       prompts.log.warn("No MCP servers configured")
-      prompts.outro("Add servers with: opencode mcp add")
+      prompts.outro("Add servers with: paper_fucker mcp add")
       return
     }
 
@@ -187,7 +187,7 @@ export const McpAuthCommand = effectCmd({
 
     if (servers.length === 0) {
       prompts.log.warn("No OAuth-capable MCP servers configured")
-      prompts.log.info("Remote MCP servers support OAuth by default. Add a remote server in opencode.json:")
+      prompts.log.info("Remote MCP servers support OAuth by default. Add a remote server in paper_fucker.json:")
       prompts.log.info(`
   "mcp": {
     "my-server": {
@@ -397,11 +397,11 @@ export const McpLogoutCommand = effectCmd({
 })
 
 async function resolveConfigPath(baseDir: string, global = false) {
-  // Check for existing config files (prefer .jsonc over .json, check .opencode/ subdirectory too)
-  const candidates = [path.join(baseDir, "opencode.json"), path.join(baseDir, "opencode.jsonc")]
+  // Check for existing config files (prefer .jsonc over .json, check .paper_fucker/ subdirectory too)
+  const candidates = [path.join(baseDir, "paper_fucker.json"), path.join(baseDir, "paper_fucker.jsonc")]
 
   if (!global) {
-    candidates.push(path.join(baseDir, ".opencode", "opencode.json"), path.join(baseDir, ".opencode", "opencode.jsonc"))
+    candidates.push(path.join(baseDir, ".paper_fucker", "paper_fucker.json"), path.join(baseDir, ".paper_fucker", "paper_fucker.jsonc"))
   }
 
   for (const candidate of candidates) {
@@ -410,7 +410,7 @@ async function resolveConfigPath(baseDir: string, global = false) {
     }
   }
 
-  // Default to opencode.json if none exist
+  // Default to paper_fucker.json if none exist
   return candidates[0]
 }
 
@@ -498,7 +498,7 @@ export const McpAddCommand = effectCmd({
       if (type === "local") {
         const command = await prompts.text({
           message: "Enter command to run",
-          placeholder: "e.g., opencode x @modelcontextprotocol/server-filesystem",
+          placeholder: "e.g., paper_fucker x @modelcontextprotocol/server-filesystem",
           validate: (x) => (x && x.length > 0 ? undefined : "Required"),
         })
         if (prompts.isCancel(command)) throw new UI.CancelledError()
@@ -682,7 +682,7 @@ export const McpDebugCommand = effectCmd({
             params: {
               protocolVersion: "2024-11-05",
               capabilities: {},
-              clientInfo: { name: "opencode-debug", version: InstallationVersion },
+              clientInfo: { name: "paper_fucker-debug", version: InstallationVersion },
             },
             id: 1,
           }),
@@ -725,7 +725,7 @@ export const McpDebugCommand = effectCmd({
 
           try {
             const client = new Client({
-              name: "opencode-debug",
+              name: "paper_fucker-debug",
               version: InstallationVersion,
             })
             await client.connect(transport)

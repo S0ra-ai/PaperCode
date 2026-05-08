@@ -150,7 +150,7 @@ export const layer: Layer.Layer<Service, never, AppFileSystem.Service | HttpClie
       const snapshot = yield* loadSnapshot
       if (snapshot) return snapshot
       if (Flag.OPENCODE_DISABLE_MODELS_FETCH) return {}
-      // Flock is cross-process: concurrent opencode CLIs can race on this cache file.
+      // Flock is cross-process: concurrent paper_fucker CLIs can race on this cache file.
       const text = yield* Effect.scoped(
         Effect.gen(function* () {
           yield* Flock.effect(lockKey)
