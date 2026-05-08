@@ -2,10 +2,43 @@
 :author        s0ra (https://github.com/S0ra-ai)
 :repo          
 :desc          记录项目的重大变更和版本历史
-:version       0.1.0-dev
+:version       0.1.1-dev
 :last_update   2026/05/08
 
 :history
+
+0.1.1-dev - 2026/05/08 (c8da1ae) [develop]
+    :brief OpenCode fork 品牌与运行时命名迁移为 paper_fucker
+        - feat(cli): 命令入口、help、serve 输出、安装脚本、构建脚本和 Docker 默认命令迁移为 paper_fucker
+        - feat(config): 项目/全局配置迁移为 .paper_fucker、paper_fucker.json/jsonc、~/.paper_fucker
+        - feat(runtime): 默认数据库、mDNS、HTTP header、SDK server、desktop sidecar 和观测服务名迁移为 paper_fucker
+        - feat(app): Web/TUI/desktop 可见标题、存储 key、manifest、主题名和 deep link 增加 paper_fucker/paper-fucker 命名
+        - feat(github): GitHub agent workflow、命令提示、默认分支和 OIDC audience 改为 paper_fucker 命名
+        - test(runtime): 更新 config/storage/httpapi/cors/app/sdk/desktop 相关测试与品牌冒烟报告
+        - chore(taskflow): 完成 task-004-brand-paper-fucker 并记录品牌迁移验证日志
+    :src
+        - .paper_fucker/ - 项目本地 agent/command/glossary/plugin/theme 配置命名空间
+        - packages/opencode/bin/paper_fucker - 用户可见 CLI bin 入口
+        - packages/core/src/global.ts - paper_fucker 全局路径与测试覆盖路径
+        - packages/core/src/flag/flag.ts - PAPER_FUCKER_* 环境变量优先级与 OPENCODE_* 兼容回退
+        - packages/opencode/src/index.ts - yargs 命令名、运行时环境变量与迁移标记
+        - packages/opencode/src/config/ - .paper_fucker 与 paper_fucker.json/jsonc 配置发现
+        - packages/opencode/src/server/ - paper_fucker HTTP API header、CORS、mDNS、UI fallback 和 auth 标识
+        - packages/app/ - Web app 标题、协议、存储 key、主题预加载与 i18n 文案
+        - packages/desktop/ - Electron app id、protocol、sidecar env、store 与 product 文案
+        - packages/sdk/js/ - SDK server 命令与 x-paper-fucker header
+        - reports/brand-smoke.md - 品牌迁移验证报告
+    :doc
+        - README.md - 版本更新为 0.1.1-dev，并明确 paper_fucker TypeScript runtime 为权威运行时
+        - .plan/confirmed/task-004-brand-paper-fucker.yaml - TaskFlow step 日志与验收结果
+    :verification
+        - npx --yes bun@1.3.13 install passed
+        - packages/core/opencode/app/sdk/js/ui/desktop typecheck passed
+        - packages/core global path test passed: 2 pass, 0 fail
+        - packages/opencode config/storage/httpapi-ui/mcp-headers/cors tests passed: 99 pass, 0 fail
+        - packages/app persisted storage/theme/server/layout tests passed: 328 pass, 0 fail
+        - CLI smoke passed: --help shows paper_fucker commands and paper-fucker.local, --version returned local, serve printed paper_fucker server listening
+        - Old-name scan found no active IntelliGen/Python-core/codex-task naming outside historical or generic contexts
 
 0.1.0-dev - 2026/05/08 (88f63199) [develop]
     :brief 导入 OpenCode v1.14.41 源码快照
