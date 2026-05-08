@@ -7,6 +7,20 @@
 
 :history
 
+0.1.0-dev - 2026/05/08 (0906d17c) [develop]
+    :brief 归档旧 IntelliGen 与 Folio 参考项目
+        - docs(legacy): 归档旧 IntelliGen 过滤快照
+        - docs(legacy): 归档 Folio 过滤快照并生成 git bundle
+        - docs(legacy): 新增 archive manifest 与验证记录
+        - chore(taskflow): 完成 legacy archive 任务状态与步骤日志
+    :src
+        - legacy/intelligen-v3 - filtered old IntelliGen snapshot
+        - legacy/folio - filtered Folio snapshot
+        - legacy/folio.git.bundle - complete Folio git history bundle
+    :verification
+        - Folio bundle verified successfully
+        - Forbidden artifact scan found no real .env, dependency directories, virtualenvs, caches, pycache, sandbox/site/build output, logs, nested archives, or WAL/SHM files
+
 0.1.0-dev - 2026/05/08 (196557f3) [develop]
     :brief 初始化 TaskFlow 计划与仓库治理
         - docs(governance): 建立 TaskFlow-first 计划源、私有优先仓库策略、Git Flow 分支治理和 README 版本追踪
