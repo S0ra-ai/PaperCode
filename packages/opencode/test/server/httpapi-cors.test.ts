@@ -67,12 +67,12 @@ describe("HttpApi CORS", () => {
     Effect.gen(function* () {
       const response = yield* Effect.promise(async () =>
         Server.Legacy().app.request("/global/config", {
-          headers: { origin: "https://app.opencode.ai" },
+          headers: { origin: "https://app.paper-fucker.local" },
         }),
       )
 
       expect(response.status).toBe(401)
-      expect(response.headers.get("access-control-allow-origin")).toBe("https://app.opencode.ai")
+      expect(response.headers.get("access-control-allow-origin")).toBe("https://app.paper-fucker.local")
     }),
   )
 

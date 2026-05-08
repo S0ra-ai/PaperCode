@@ -1,6 +1,6 @@
 id: task-004-brand-paper-fucker
 title: Rebrand OpenCode fork to paper_fucker
-status: todo
+status: done
 priority: critical
 owner: codex
 tags:
@@ -18,7 +18,7 @@ execution:
 steps:
 - id: task-004-step-01-name-inventory
   title: Inventory OpenCode user-facing names
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: Find CLI names, package metadata, TUI titles, help text, config directory
@@ -27,12 +27,28 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T07:18:30.386323'
+      level: info
+      message: Inventorying OpenCode/IntelliGen user-facing identifiers in CLI, package
+        metadata, config paths, docs, diagnostics, and README files.
+      agent: codex
+    - timestamp: '2026-05-08T07:20:40.140441'
+      level: info
+      message: Inventory found primary user-facing OpenCode identifiers in package
+        metadata/bin mapping, packages/opencode/src/index.ts yargs scriptName and
+        migration marker, packages/core/src/global.ts app paths, config path discovery
+        (.opencode/opencode.json), storage DB name, CLI help text, TUI/web titles,
+        app manifest/localStorage keys, Dockerfile command strings, and README wording.
+        IntelliGen references are limited to historical TaskFlow/CHANGELOG/legacy
+        context rather than active runtime code.
+      agent: codex
+    last_run: '2026-05-08T07:20:40.141185'
+    attempt_count: 2
   meta: {}
 - id: task-004-step-02-command-config-rename
   title: Rename command and config namespace
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-004-step-01-name-inventory
@@ -42,12 +58,26 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T07:21:46.680484'
+      level: info
+      message: Renaming the user command to paper_fucker and moving runtime config/data
+        defaults under ~/.paper_fucker, while preserving internal @opencode-ai imports
+        where changing package scope would be a broader dependency migration.
+      agent: codex
+    - timestamp: '2026-05-08T10:07:18.959772'
+      level: info
+      message: Renamed the command/package bin surface to paper_fucker, moved preferred
+        config/data defaults to .paper_fucker, paper_fucker.json/jsonc, ~/.paper_fucker,
+        and paper_fucker.db, and added PAPER_FUCKER_* env/header support while retaining
+        legacy OPENCODE_* fallbacks for compatibility.
+      agent: codex
+    last_run: '2026-05-08T10:07:18.959772'
+    attempt_count: 2
   meta: {}
 - id: task-004-step-03-ui-docs-rename
   title: Rename user-facing UI and docs
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-004-step-01-name-inventory
@@ -57,12 +87,26 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T10:07:59.406907'
+      level: info
+      message: Starting final UI/docs rename recording after implementation and smoke
+        verification.
+      agent: codex
+    - timestamp: '2026-05-08T10:08:20.152278'
+      level: info
+      message: Updated user-facing CLI help, server startup text, TUI/app labels,
+        desktop product strings, README wording, manifests, theme names, installer/build
+        scripts, and SDK visible identifiers to paper_fucker/paper-fucker. README
+        now presents the TypeScript paper_fucker runtime as authoritative and keeps
+        OpenCode only as provenance/upstream context.
+      agent: codex
+    last_run: '2026-05-08T10:08:20.152278'
+    attempt_count: 2
   meta: {}
 - id: task-004-step-04-brand-smoke
   title: Verify brand smoke commands
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-004-step-02-command-config-rename
@@ -73,8 +117,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T10:08:40.635731'
+      level: info
+      message: Running final brand smoke checks and recording report output.
+      agent: codex
+    - timestamp: '2026-05-08T10:09:01.765247'
+      level: info
+      message: 'Brand smoke verification recorded in reports/brand-smoke.md. Fresh
+        checks passed: bun install; typecheck for core, opencode, app, sdk/js, ui,
+        desktop; core global path test (2 pass); opencode config/storage/httpapi-ui/mcp-headers/cors
+        tests (99 pass); app persistence/theme/server/layout tests (328 pass); CLI
+        --help shows paper_fucker commands and paper-fucker.local default; --version
+        returned local; serve printed paper_fucker server listening. Old-name scan
+        found only historical TaskFlow/CHANGELOG/legacy context, generic intelligence/legal
+        text, or accepted upstream compatibility names.'
+      agent: codex
+    last_run: '2026-05-08T10:09:01.765247'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -91,5 +151,5 @@ trace:
   attempt_count: 0
 meta:
   created_at: '2026-05-08T01:23:54.754595'
-  updated_at: '2026-05-08T01:23:54.754595'
+  updated_at: '2026-05-08T10:09:40.044113'
   version: '1'

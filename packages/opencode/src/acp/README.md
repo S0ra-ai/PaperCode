@@ -21,7 +21,7 @@ The implementation follows a clean separation of concerns:
 
 - **`session.ts`** - Session state management
   - Creates and tracks ACP sessions
-  - Maps ACP sessions to internal opencode sessions
+  - Maps ACP sessions to internal paper_fucker sessions
   - Maintains working directory context
   - Handles MCP server configurations
 
@@ -69,7 +69,7 @@ Add to your Zed configuration (`~/.config/zed/settings.json`):
 ```json
 {
   "agent_servers": {
-    "OpenCode": {
+    "paper_fucker": {
       "command": "opencode",
       "args": ["acp"]
     }
@@ -158,7 +158,7 @@ Each component has a single responsibility:
 
 This makes the codebase maintainable and testable.
 
-### Mapping to OpenCode
+### Mapping to paper_fucker
 
 ACP sessions map cleanly to opencode's internal session model:
 

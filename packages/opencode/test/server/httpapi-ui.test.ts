@@ -133,7 +133,7 @@ describe("HttpApi UI fallback", () => {
     expect(response.status).toBe(200)
     expect(response.headers.get("content-type")).toContain("text/html")
     expect(await response.text()).toBe("<html>opencode</html>")
-    expect(proxiedUrl).toBe("https://app.opencode.ai/")
+    expect(proxiedUrl).toBe("https://app.paper-fucker.local/")
   })
 
   test("strips upstream transfer encoding headers from proxied assets", async () => {
@@ -178,7 +178,7 @@ describe("HttpApi UI fallback", () => {
     )
 
     expect(response.status).toBe(200)
-    expect(proxiedUrl).toBe("https://app.opencode.ai/assets/app.js")
+    expect(proxiedUrl).toBe("https://app.paper-fucker.local/assets/app.js")
     expect(response.headers.get("content-encoding")).toBeNull()
     expect(response.headers.get("content-length")).not.toBe("999")
     expect(response.headers.get("content-type")).toContain("text/javascript")
@@ -305,7 +305,7 @@ describe("HttpApi UI fallback", () => {
     Flag.OPENCODE_EXPERIMENTAL_HTTPAPI = true
     Flag.OPENCODE_DISABLE_EMBEDDED_WEB_UI = true
 
-    const response = await uiApp({ password: "secret", username: "opencode" }).request("/")
+    const response = await uiApp({ password: "secret", username: "paper_fucker" }).request("/")
 
     expect(response.status).toBe(401)
     expect(response.headers.get("www-authenticate")).toBe('Basic realm="Secure Area"')
@@ -317,9 +317,9 @@ describe("HttpApi UI fallback", () => {
 
     const response = await uiApp({
       password: "secret",
-      username: "opencode",
+      username: "paper_fucker",
       client: httpClient(new Response("<html>opencode</html>", { headers: { "content-type": "text/html" } })),
-    }).request(`/?auth_token=${btoa("opencode:secret")}`)
+    }).request(`/?auth_token=${btoa("paper_fucker:secret")}`)
 
     expect(response.status).toBe(200)
     expect(await response.text()).toBe("<html>opencode</html>")
@@ -329,8 +329,8 @@ describe("HttpApi UI fallback", () => {
     Flag.OPENCODE_EXPERIMENTAL_HTTPAPI = true
     Flag.OPENCODE_DISABLE_EMBEDDED_WEB_UI = true
 
-    const response = await uiApp({ password: "secret", username: "opencode" }).request("/", {
-      headers: { authorization: `Basic ${btoa("opencode:secret")}` },
+    const response = await uiApp({ password: "secret", username: "paper_fucker" }).request("/", {
+      headers: { authorization: `Basic ${btoa("paper_fucker:secret")}` },
     })
 
     expect(response.status).toBe(200)
@@ -348,7 +348,7 @@ describe("HttpApi UI fallback", () => {
     for (const path of ["/site.webmanifest", "/web-app-manifest-192x192.png", "/web-app-manifest-512x512.png"]) {
       const response = await uiApp({
         password: "secret",
-        username: "opencode",
+        username: "paper_fucker",
         client: httpClient(new Response("ok")),
       }).request(path)
       expect(response.status).not.toBe(401)
@@ -358,7 +358,7 @@ describe("HttpApi UI fallback", () => {
   test("allows web UI preflight without auth", async () => {
     Flag.OPENCODE_EXPERIMENTAL_HTTPAPI = true
 
-    const response = await app({ password: "secret", username: "opencode" }).request("/", {
+    const response = await app({ password: "secret", username: "paper_fucker" }).request("/", {
       method: "OPTIONS",
       headers: {
         origin: "http://localhost:3000",

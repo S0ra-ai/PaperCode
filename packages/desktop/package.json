@@ -4,10 +4,10 @@
   "version": "1.14.41",
   "type": "module",
   "license": "MIT",
-  "homepage": "https://opencode.ai",
+  "homepage": "https://github.com/S0ra-ai/paper_fucker",
   "author": {
-    "name": "OpenCode",
-    "email": "hello@opencode.ai"
+    "name": "s0ra",
+    "email": ""
   },
   "scripts": {
     "typecheck": "tsgo -b",

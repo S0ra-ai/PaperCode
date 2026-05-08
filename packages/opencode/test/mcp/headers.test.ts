@@ -56,7 +56,7 @@ test("headers are passed to transports when oauth is enabled (default)", async (
   await using tmp = await tmpdir({
     init: async (dir) => {
       await Bun.write(
-        `${dir}/opencode.json`,
+        `${dir}/paper_fucker.json`,
         JSON.stringify({
           $schema: "https://opencode.ai/config.json",
           mcp: {

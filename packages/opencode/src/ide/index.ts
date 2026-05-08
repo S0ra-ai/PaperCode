@@ -44,18 +44,25 @@ export function ide() {
 }
 
 export function alreadyInstalled() {
-  return process.env["OPENCODE_CALLER"] === "vscode" || process.env["OPENCODE_CALLER"] === "vscode-insiders"
+  const caller = process.env["PAPER_FUCKER_CALLER"] ?? process.env["OPENCODE_CALLER"]
+  return caller === "vscode" || caller === "vscode-insiders"
 }
 
 export async function install(ide: (typeof SUPPORTED_IDES)[number]["name"]) {
   const cmd = SUPPORTED_IDES.find((i) => i.name === ide)?.cmd
   if (!cmd) throw new Error(`Unknown IDE: ${ide}`)
 
-  const p = await Process.run([cmd, "--install-extension", "sst-dev.opencode"], {
+  const p = await Process.run([cmd, "--install-extension", "sst-dev.paper_fucker"], {
     nothrow: true,
   })
-  const stdout = p.stdout.toString()
-  const stderr = p.stderr.toString()
+  const fallback =
+    p.code === 0
+      ? p
+      : await Process.run([cmd, "--install-extension", "sst-dev.opencode"], {
+          nothrow: true,
+        })
+  const stdout = fallback.stdout.toString()
+  const stderr = fallback.stderr.toString()
 
   log.info("installed", {
     ide,
@@ -63,7 +70,7 @@ export async function install(ide: (typeof SUPPORTED_IDES)[number]["name"]) {
     stderr,
   })
 
-  if (p.code !== 0) {
+  if (fallback.code !== 0) {
     throw new InstallFailedError({ stderr })
   }
   if (stdout.includes("already installed")) {
