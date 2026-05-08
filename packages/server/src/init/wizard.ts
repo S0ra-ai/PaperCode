@@ -9,6 +9,7 @@ import {
   type ModelEndpointConfig,
   type PaperFuckerConfig,
 } from "./config"
+import type { ModelRoleConfig } from "../paper/model-router"
 import { discoverInitTools, type ToolDiscoveryReport } from "./discovery"
 import { writeSecrets } from "./secrets"
 import { withSpan } from "../research/telemetry"
@@ -20,6 +21,7 @@ export type InitWizardInput = {
     default_endpoint?: string
     endpoints?: ModelEndpointConfig[]
   }
+  model_roles?: Partial<ModelRoleConfig>
   tool_links?: Record<string, string>
   secrets?: Record<string, string>
   secrets_passphrase?: string
@@ -53,6 +55,7 @@ export async function runInitWizard(input: InitWizardInput): Promise<InitWizardR
         access: input.access,
         budgets: input.budgets,
         preview: input.preview,
+        model_roles: input.model_roles,
         models: {
           default_endpoint: input.models?.default_endpoint,
           endpoints: input.models?.endpoints ?? [],
