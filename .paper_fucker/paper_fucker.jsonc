@@ -6,7 +6,13 @@
       "packages/opencode/migration/*": "deny",
     },
   },
-  "mcp": {},
+  "mcp": {
+    "exa": {
+      "type": "remote",
+      "url": "https://mcp.exa.ai/mcp",
+      "enabled": true,
+    },
+  },
   "tools": {
     "github-triage": false,
     "github-pr-search": false,
