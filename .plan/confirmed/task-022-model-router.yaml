@@ -1,6 +1,6 @@
 id: task-022-model-router
 title: Add provider-agnostic model role router
-status: in_progress
+status: done
 priority: high
 owner: codex
 tags:
@@ -101,7 +101,7 @@ steps:
   meta: {}
 - id: task-022-step-04-doc-version
   title: Update docs and version 0.1.19-dev
-  status: in_progress
+  status: done
   owner: codex
   depends_on:
   - task-022-step-03-config-integration
@@ -116,12 +116,17 @@ steps:
       message: Updating README and CHANGELOG to 0.1.19-dev for provider-agnostic model
         role routing.
       agent: codex
-    last_run: '2026-05-08T22:20:14.496588'
-    attempt_count: 1
+    - timestamp: '2026-05-08T22:21:26.771303'
+      level: info
+      message: Updated README/CHANGELOG to 0.1.19-dev, added reports/model-router.md,
+        and backfilled CHANGELOG with implementation commit 60227c0.
+      agent: codex
+    last_run: '2026-05-08T22:21:26.771303'
+    attempt_count: 2
   meta: {}
 - id: task-022-step-05-verify
   title: Run verification
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-022-step-04-doc-version
@@ -130,8 +135,20 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T22:21:31.695926'
+      level: info
+      message: 'Running final model-router verification: targeted tests, server typecheck,
+        README/CHANGELOG version check, and TaskFlow validation.'
+      agent: codex
+    - timestamp: '2026-05-08T22:22:02.211360'
+      level: info
+      message: 'Final verification passed: model router + init tests 6 pass/0 fail/26
+        expects; server typecheck passed; README version 0.1.19-dev matches CHANGELOG
+        latest version; TaskFlow validate_task passed with no warnings.'
+      agent: codex
+    last_run: '2026-05-08T22:22:02.211360'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -143,10 +160,7 @@ outputs:
 trace:
   logs: []
   attempt_count: 0
-lock:
-  by: codex
-  at: '2026-05-08T22:17:39.885597'
 meta:
   created_at: '2026-05-08T22:08:51.902207'
-  updated_at: '2026-05-08T22:20:14.496588'
+  updated_at: '2026-05-08T22:22:08.217311'
   version: '1'

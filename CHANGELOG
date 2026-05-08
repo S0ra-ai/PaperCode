@@ -7,7 +7,7 @@
 
 :history
 
-    0.1.19-dev - 2026/05/09 (pending) [develop]
+    0.1.19-dev - 2026/05/09 (60227c0) [develop]
     :brief 新增 OpenCode provider-agnostic 模型角色路由
         - feat(paper): 新增 ModelRoleRouter, 支持 planner/literature/code/experiment/writer/reviewer/citation/summarizer 角色
         - feat(models): 支持任意 OpenCode provider/model id 与 per-role override
