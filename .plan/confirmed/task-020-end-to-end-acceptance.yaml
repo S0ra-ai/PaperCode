@@ -1,0 +1,172 @@
+id: task-020-end-to-end-acceptance
+title: Add end-to-end research pipeline acceptance
+status: done
+priority: high
+owner: codex
+tags:
+- acceptance
+- e2e
+- verification
+- export
+depends_on:
+- task-019-project-structure-cleanup
+description: 'Add a final fixture-topic acceptance task that exercises the implemented
+  first-party research pipeline end to end: template resolution, literature/data discovery,
+  experiment loop, ClaimLedger writing, verification gate, final export, forced draft
+  behavior, and preview package smoke verification. This closes the remaining end-to-end
+  validation gap from the implementation plan.'
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-020-step-01-e2e-scope
+  title: Define end-to-end acceptance scope
+  status: done
+  owner: codex
+  depends_on: []
+  description: Define fixture topic, stage coverage, pass/fail expectations, and acceptance
+    report outputs.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-08T21:20:48.513548'
+      level: info
+      message: 'Defining fixture topic acceptance scope: template resolution, literature/data
+        discovery, experiment loop, writing, verification gate, final export, forced
+        draft failure path, and preview package smoke verification.'
+      agent: codex
+    - timestamp: '2026-05-08T21:23:41.760416'
+      level: info
+      message: 'Scope fixed: fixture topic acceptance covers template resolution,
+        literature/data discovery, experiment loop, ClaimLedger writing, verification
+        gate, final export, forced draft failure path, and preview package smoke verification.'
+      agent: codex
+    last_run: '2026-05-08T21:23:41.760416'
+    attempt_count: 2
+  meta: {}
+- id: task-020-step-02-pipeline-test
+  title: Implement fixture pipeline test
+  status: done
+  owner: codex
+  depends_on:
+  - task-020-step-01-e2e-scope
+  description: Add a server-side end-to-end test that runs the implemented research
+    stages and verifies recorded facts/artifacts/final gate/export behavior.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-08T21:23:50.175360'
+      level: info
+      message: Implementing server-side successful-path fixture pipeline acceptance
+        test.
+      agent: codex
+    - timestamp: '2026-05-08T21:23:54.611642'
+      level: info
+      message: Implemented packages/server/test/research/e2e.test.ts successful-path
+        fixture. It runs the topic through template, literature/data, experiment,
+        ClaimLedger writing, verification, and final export, then asserts final gate/facts/artifacts/export
+        outputs.
+      agent: codex
+    last_run: '2026-05-08T21:23:54.611642'
+    attempt_count: 2
+  meta: {}
+- id: task-020-step-03-failure-path-test
+  title: Implement final/forced export failure path
+  status: done
+  owner: codex
+  depends_on:
+  - task-020-step-02-pipeline-test
+  description: Verify gate failure blocks final export and forced draft export is
+    visibly marked with failed checks.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-08T21:23:58.115467'
+      level: info
+      message: Adding gate-failure and forced-draft export coverage to the same fixture
+        acceptance test.
+      agent: codex
+    - timestamp: '2026-05-08T21:24:02.514270'
+      level: info
+      message: 'Implemented failure-path coverage: final export throws FinalExportBlockedError
+        when the final gate is blocked, while forced draft export succeeds and its
+        Markdown clearly includes forced-draft and failed-check markers.'
+      agent: codex
+    last_run: '2026-05-08T21:24:02.514270'
+    attempt_count: 2
+  meta: {}
+- id: task-020-step-04-doc-version
+  title: Update docs, changelog, and report
+  status: done
+  owner: codex
+  depends_on:
+  - task-020-step-03-failure-path-test
+  description: Add acceptance report, update README status, and advance CHANGELOG/README
+    to 0.1.17-dev.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-08T21:24:52.952149'
+      level: info
+      message: Added reports/end-to-end-acceptance.md and updated README/CHANGELOG
+        to 0.1.17-dev. Changelog commit id will be backfilled after the feature commit
+        exists.
+      agent: codex
+    - timestamp: '2026-05-08T21:25:58.181317'
+      level: info
+      message: Updated README current version/status to 0.1.17-dev, added reports/end-to-end-acceptance.md,
+        and backfilled CHANGELOG 0.1.17-dev with implementation commit e214ff4.
+      agent: codex
+    last_run: '2026-05-08T21:25:58.181317'
+    attempt_count: 2
+  meta: {}
+- id: task-020-step-05-verify
+  title: Run end-to-end verification
+  status: done
+  owner: codex
+  depends_on:
+  - task-020-step-04-doc-version
+  description: Run server e2e test, preview tests, server typecheck, README version
+    check, and TaskFlow validation.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-08T21:26:01.580223'
+      level: info
+      message: 'Running final verification: server e2e test, preview package tests,
+        server typecheck, README/CHANGELOG version check, and TaskFlow task validation.'
+      agent: codex
+    - timestamp: '2026-05-08T21:26:28.000726'
+      level: info
+      message: 'Final verification passed: server e2e test 2 pass/0 fail/18 expects;
+        preview tests 2 pass/0 fail/9 expects; server typecheck passed; README version
+        0.1.17-dev matches CHANGELOG latest version; TaskFlow validate_task passed
+        with no errors or warnings.'
+      agent: codex
+    last_run: '2026-05-08T21:26:28.000726'
+    attempt_count: 2
+  meta: {}
+outputs:
+- type: file
+  path: packages/server/test/research/e2e.test.ts
+  description: End-to-end research pipeline acceptance test
+- type: report
+  path: reports/end-to-end-acceptance.md
+  description: End-to-end acceptance report
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-08T21:20:22.036414'
+  updated_at: '2026-05-08T21:26:31.187857'
+  version: '1'

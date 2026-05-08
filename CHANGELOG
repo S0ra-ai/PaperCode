@@ -2,10 +2,29 @@
 :author        s0ra (https://github.com/S0ra-ai)
 :repo          
 :desc          记录项目的重大变更和版本历史
-:version       0.1.16-dev
+:version       0.1.17-dev
 :last_update   2026/05/09
 
 :history
+
+    0.1.17-dev - 2026/05/09 (e214ff4) [develop]
+    :brief 补齐端到端研究流水线验收
+        - test(e2e): 新增 fixture topic acceptance, 串联 template/literature-data/experiment/writing/verification/export
+        - test(e2e): 验证 final gate passed 后 final export 产生 markdown/latex/pdf/docx facts/artifacts
+        - test(e2e): 验证 final gate blocked 时 final export 被阻断且 forced draft 明确标记 failed checks
+        - docs(readme): 版本更新为 0.1.17-dev 并记录端到端验收状态
+        - chore(taskflow): 新增并完成 task-020-end-to-end-acceptance
+    :src
+        - packages/server/test/research/e2e.test.ts - end-to-end pipeline acceptance test
+        - reports/end-to-end-acceptance.md - end-to-end acceptance report
+        - README.md - version and current status update
+        - CHANGELOG - 0.1.17-dev history entry
+    :verification
+        - npx --yes bun@1.3.13 --cwd packages/server test test/research/e2e.test.ts passed: 2 pass, 0 fail, 18 expects
+        - npx --yes bun@1.3.13 --cwd packages/preview test passed
+        - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
+        - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
+        - TaskFlow validate_task task-020-end-to-end-acceptance passed
 
     0.1.16-dev - 2026/05/09 (2f644e4) [develop]
     :brief 整理项目结构与 first-party 边界
