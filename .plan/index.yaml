@@ -1,11 +1,11 @@
 counts:
-  confirmed: 7
+  confirmed: 6
   ideas: 0
-  done: 12
+  done: 13
 progress:
   total: 19
-  completed: 12
+  completed: 13
   in_progress: 0
-last_updated: '2026-05-08T17:57:54.493206'
+last_updated: '2026-05-08T18:09:54.038097'
 ordering:
   strategy: priority_dependency
