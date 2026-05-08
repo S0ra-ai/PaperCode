@@ -50,6 +50,8 @@ describe("init wizard", () => {
       expect(existsSync(paths.secrets)).toBe(true)
       expect(result.config.access.full_access_acknowledged).toBe(true)
       expect(result.config.workspace.default_root).toBe(workspace)
+      expect(result.config.model_roles.default_model).toBe("deepseek/deepseek-v4-pro")
+      expect(result.config.model_roles.strategy).toBe("opencode_provider_agnostic")
       expect(result.tools.tools.pandoc.status).toBe("available")
       expect(result.tools.tools.pandoc.source).toBe("config")
 

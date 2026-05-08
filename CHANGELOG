@@ -2,10 +2,30 @@
 :author        s0ra (https://github.com/S0ra-ai)
 :repo          
 :desc          记录项目的重大变更和版本历史
-:version       0.1.18-dev
+:version       0.1.19-dev
 :last_update   2026/05/09
 
 :history
+
+    0.1.19-dev - 2026/05/09 (60227c0) [develop]
+    :brief 新增 OpenCode provider-agnostic 模型角色路由
+        - feat(paper): 新增 ModelRoleRouter, 支持 planner/literature/code/experiment/writer/reviewer/citation/summarizer 角色
+        - feat(models): 支持任意 OpenCode provider/model id 与 per-role override
+        - feat(init): 初始化 config 写入 model_roles.strategy=opencode_provider_agnostic 与默认 deepseek/deepseek-v4-pro 样例
+        - docs(readme): 明确 DeepSeek 只是默认样例, 模型选择按 OpenCode provider/model 角色路由
+        - test(paper): 覆盖角色列表、默认样例、跨 provider override 与无效模型 id 诊断
+    :src
+        - packages/server/src/paper/model-router.ts - provider-agnostic model role router
+        - packages/server/test/paper/model-router.test.ts - model role router tests
+        - packages/server/src/init/config.ts - persisted model_roles config
+        - packages/server/src/init/wizard.ts - init wizard model role integration
+        - packages/server/test/init/init.test.ts - init model role config assertion
+    :verification
+        - npx --yes bun@1.3.13 --cwd packages/server test test/paper/model-router.test.ts passed: 4 pass, 0 fail, 9 expects
+        - npx --yes bun@1.3.13 --cwd packages/server test test/init/init.test.ts passed: 2 pass, 0 fail, 17 expects
+        - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
+        - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
+        - TaskFlow validate_task task-022-model-router passed
 
     0.1.18-dev - 2026/05/09 (b8fabeb) [develop]
     :brief 重定界 OpenCode 底座与 paper_fucker 论文领域内核
