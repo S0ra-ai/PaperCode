@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "venue_label": "Nature",
+  "display_name": "Nature (research article)",
+  "language": "en",
+  "page_size": "A4",
+  "columns": 1,
+  "margins": { "top_mm": 25.4, "bottom_mm": 25.4, "left_mm": 25.4, "right_mm": 25.4 },
+  "font": { "body_family": "Times New Roman", "body_size_pt": 10.0 },
+  "citation_style": "superscript",
+  "bibliography_style": "naturemag",
+  "section_order": [
+    "Abstract", "Introduction", "Results", "Discussion",
+    "Methods", "References"
+  ],
+  "figure_caption": { "position": "below", "label_format": "Fig. {n} | {caption}" },
+  "abstract_max_words": 150,
+  "keywords_required": false,
+  "template_hint": "_generic.tex.j2",
+  "source": "builtin"
+}

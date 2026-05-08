@@ -1,0 +1,121 @@
+# IntelliGen — Docker Compose 全栈部署
+#
+# 用法:
+#   cp .env.example .env        # 复制并编辑环境变量
+#   docker compose up -d        # 启动所有服务
+#   docker compose logs -f api  # 查看 API 日志
+#   docker compose down         # 停止所有服务
+#
+# 首次启动后访问 http://localhost:9991 完成初始化向导。
+
+services:
+  # ─── 基础设施 ────────────────────────────────────────────
+
+  postgresql:
+    image: postgres:15-alpine
+    container_name: intelligen-postgresql
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-intelligen}
+      POSTGRES_USER: ${POSTGRES_USER:-intelligen}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-intelligen123}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-intelligen}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: intelligen-redis
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redisdata:/data
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ─── 后端服务 ────────────────────────────────────────────
+
+  api:
+    build: ./packages/api
+    container_name: intelligen-api
+    env_file: .env
+    environment:
+      DATABASE_URL: "postgresql+psycopg2://${POSTGRES_USER:-intelligen}:${POSTGRES_PASSWORD:-intelligen123}@postgresql:5432/${POSTGRES_DB:-intelligen}"
+      REDIS_URL: "redis://redis:6379/0"
+      ENGINE_BASE_URL: "http://engine:9993"
+      FILE_PUBLIC_BASE_URL: "${FILE_PUBLIC_BASE_URL:-http://localhost:${API_PORT:-9992}}"
+      CORS_ALLOWED_ORIGINS: "http://localhost:${WEB_PORT:-9991},http://127.0.0.1:${WEB_PORT:-9991}"
+    ports:
+      - "${API_PORT:-9992}:9992"
+    volumes:
+      - api-uploads:/app/uploads
+      - api-cache:/app/cache
+    depends_on:
+      postgresql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9992/api/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  engine:
+    build: ./packages/engine
+    container_name: intelligen-engine
+    env_file: .env
+    environment:
+      DATABASE_URL: "postgresql+asyncpg://${POSTGRES_USER:-intelligen}:${POSTGRES_PASSWORD:-intelligen123}@postgresql:5432/${POSTGRES_DB:-intelligen}"
+      REDIS_URL: "redis://redis:6379/0"
+      ENGINE_HOST: "0.0.0.0"
+    ports:
+      - "${ENGINE_PORT:-9993}:9993"
+    volumes:
+      - engine-data:/app/data
+      - engine-cache:/app/cache
+    depends_on:
+      postgresql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9993/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  # ─── 前端 ───────────────────────────────────────────────
+
+  web:
+    build: ./packages/web
+    container_name: intelligen-web
+    ports:
+      - "${WEB_PORT:-9991}:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  redisdata:
+  api-uploads:
+  api-cache:
+  engine-data:
+  engine-cache:

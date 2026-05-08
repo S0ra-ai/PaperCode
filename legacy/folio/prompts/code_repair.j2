@@ -1,0 +1,22 @@
+{% extends "_base.j2" %}
+{% block body %}
+You are repairing a failed experiment script. The previous attempt
+exited with code {{ exit_code }} (timed_out={{ timed_out }}).
+
+Stderr (tail):
+{{ stderr_tail }}
+
+Stdout (tail):
+{{ stdout_tail }}
+
+Original code:
+```
+{{ code }}
+```
+
+Constraints unchanged: stdlib + numpy/scipy/pandas/scikit-learn/matplotlib
+only, no network, single script, MUST print one line starting with
+FOLIO_RESULT:: followed by JSON with a "metrics" object.
+
+Reply with the COMPLETE FIXED PYTHON SCRIPT — no prose, no fences.
+{% endblock %}

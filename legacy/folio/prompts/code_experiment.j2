@@ -1,0 +1,26 @@
+{% extends "_base.j2" %}
+{% block body %}
+You are an experienced research engineer. Write a SINGLE self-contained
+Python script (no shell, no installs, no network) that runs an
+experiment for the paper described below and prints its results.
+
+Topic: {{ topic }}
+{% if objective %}Objective: {{ objective }}{% endif %}
+Outline section: {{ section.name }} — {{ section.brief }}
+
+Hard requirements
+- Only stdlib + numpy/scipy/pandas/scikit-learn/matplotlib are
+  available. No `pip install`, no internet, no GPU.
+- Read inputs (if any) from /data (read-only). Write outputs to /work
+  (read-write). Do NOT touch other paths.
+- The script MUST print exactly one line to stdout that begins with
+  the marker FOLIO_RESULT:: followed by a JSON object with a top-level
+  "metrics" mapping of metric_name -> number. Example:
+  FOLIO_RESULT:: {"metrics": {"accuracy": 0.91, "f1": 0.88}}
+- Be deterministic: set numpy/random seeds.
+- Wall time must comfortably fit within {{ timeout_s }} seconds on 1
+  CPU and {{ mem_mb }} MB of RAM.
+- No external assets unless they are generated inside the script.
+
+Reply with ONLY the python source — no prose, no markdown fences.
+{% endblock %}

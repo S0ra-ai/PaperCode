@@ -1,0 +1,21 @@
+{% extends "_base.j2" %}
+{% block body %}
+The user wants to draft a paper. So far you know:
+
+{% if known %}
+{% for k, v in known.items() %}
+- {{ k }}: {{ v }}
+{% endfor %}
+{% else %}
+(nothing known yet)
+{% endif %}
+
+The next field to clarify is **{{ field }}** (expected: {{ expected_type }}).
+
+Ask exactly ONE concise question that would let the user supply this field.
+- One sentence.
+- No preamble, no options unless strictly necessary.
+- If the field is structured (a list, a number), say so plainly.
+
+Return JSON: {"question": "<your question>", "expected_type": "{{ expected_type }}"}
+{% endblock %}

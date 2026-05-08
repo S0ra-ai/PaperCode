@@ -1,0 +1,52 @@
+site_name: Folio
+site_description: TUI-native, vendor-agnostic academic paper generator.
+site_url: http://localhost:8000/
+repo_url: https://github.com/k1d/folio
+docs_dir: docs
+site_dir: site
+
+# Local-preview only — Folio docs are not published. Run:
+#     uv run mkdocs serve
+# and open http://127.0.0.1:8000.
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.expand
+    - content.code.copy
+    - content.code.annotate
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+
+markdown_extensions:
+  - admonition
+  - toc:
+      permalink: true
+  - pymdownx.superfences
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - tables
+
+nav:
+  - Home: index.md
+  - Quickstart: quickstart.md
+  - Stages overview: stages.md
+  - TUI experience: tui.md
+  - Surveys: surveys.md
+  - Testing & cassettes: testing.md

@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "venue_label": "CJC",
+  "display_name": "中国计算机学报 (Chinese Journal of Computers)",
+  "language": "zh",
+  "page_size": "A4",
+  "columns": 2,
+  "margins": { "top_mm": 25.4, "bottom_mm": 25.4, "left_mm": 22.0, "right_mm": 22.0 },
+  "font": { "body_family": "SimSun", "body_size_pt": 10.5, "heading_family": "SimHei" },
+  "citation_style": "gbt_7714",
+  "bibliography_style": "gbt7714",
+  "section_order": [
+    "摘要", "引言", "相关工作", "方法", "实验", "讨论", "结论", "参考文献"
+  ],
+  "figure_caption": { "position": "below", "label_format": "图 {n}  {caption}" },
+  "abstract_max_words": 300,
+  "keywords_required": true,
+  "template_hint": "cjc.tex.j2",
+  "source": "builtin"
+}
