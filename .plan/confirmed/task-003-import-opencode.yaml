@@ -1,6 +1,6 @@
 id: task-003-import-opencode
 title: Import OpenCode release snapshot as product hard fork
-status: todo
+status: done
 priority: critical
 owner: codex
 tags:
@@ -18,7 +18,7 @@ execution:
 steps:
 - id: task-003-step-01-confirm-upstream
   title: Confirm OpenCode upstream release
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: Use official upstream sources to identify the release URL, tag, commit,
@@ -27,12 +27,26 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T06:53:52.292043'
+      level: info
+      message: Confirming official OpenCode upstream release from anomalyco/opencode
+        and opencode.ai official docs.
+      agent: codex
+    - timestamp: '2026-05-08T06:53:58.698085'
+      level: info
+      message: 'Confirmed official upstream: anomalyco/opencode, URL https://github.com/anomalyco/opencode,
+        default branch dev, MIT License, not archived. Latest non-prerelease release
+        from GitHub API: v1.14.41, published 2026-05-07T14:52:13Z, target commit 98e091796b6a293cf20b4187e8fc6a949e0295e4,
+        release URL https://github.com/anomalyco/opencode/releases/tag/v1.14.41, source
+        tarball https://api.github.com/repos/anomalyco/opencode/tarball/v1.14.41.'
+      agent: codex
+    last_run: '2026-05-08T06:53:58.698085'
+    attempt_count: 2
   meta: {}
 - id: task-003-step-02-import-source-snapshot
   title: Import OpenCode source snapshot
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-003-step-01-confirm-upstream
@@ -42,12 +56,25 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T06:54:04.613364'
+      level: info
+      message: Downloading v1.14.41 source snapshot and preparing filtered import.
+      agent: codex
+    - timestamp: '2026-05-08T06:58:19.809312'
+      level: info
+      message: Imported OpenCode v1.14.41 root overlay snapshot from downloaded official
+        tarball. Copied 4,433 normal source files and skipped 62 reparse-point symlinks
+        that are unsafe on Windows. Active upstream .github workflows were not imported
+        to avoid triggering upstream CI. Preserved upstream README, LICENSE, and AGENTS
+        under upstream/.
+      agent: codex
+    last_run: '2026-05-08T06:58:19.809312'
+    attempt_count: 2
   meta: {}
 - id: task-003-step-03-protect-project-paths
   title: Preserve paper_fucker project paths
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-003-step-02-import-source-snapshot
@@ -57,12 +84,25 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T07:02:59.383592'
+      level: info
+      message: Validating protected project paths after OpenCode v1.14.41 root overlay
+        import.
+      agent: codex
+    - timestamp: '2026-05-08T07:03:03.851268'
+      level: info
+      message: Protected-path validation passed. Root README.md remains '# paper_fucker';
+        root LICENSE remains Private License; root CHANGELOG/NOTICE/scripts/.plan/legacy
+        are project-owned. Active upstream .github workflows were not imported. Upstream
+        README/LICENSE/AGENTS are preserved under upstream/.
+      agent: codex
+    last_run: '2026-05-08T07:03:03.851268'
+    attempt_count: 2
   meta: {}
 - id: task-003-step-04-upstream-manifest
   title: Record OpenCode upstream manifest
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-003-step-02-import-source-snapshot
@@ -72,8 +112,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T07:03:07.631858'
+      level: info
+      message: Writing and validating upstream/opencode-manifest.json and NOTICE.md
+        attribution.
+      agent: codex
+    - timestamp: '2026-05-08T07:03:14.246376'
+      level: info
+      message: Created upstream/opencode-manifest.json. Manifest JSON parses successfully
+        and records anomalyco/opencode v1.14.41, release URL, published_at 2026-05-07T14:52:13Z,
+        target commit 98e091796b6a293cf20b4187e8fc6a949e0295e4, tag ref 8ba2a9171597262df9d19516c82a5e14f18f5c63,
+        tarball SHA256 0ef71c6dfecab631771dfefe6918519193df4239ebc55661dc6898d00ecd15a2,
+        MIT license path, protected paths, excluded paths, 4433 imported files, and
+        62 skipped Windows reparse points. NOTICE.md now references the preserved
+        OpenCode license and manifest.
+      agent: codex
+    last_run: '2026-05-08T07:03:14.246376'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -90,5 +146,5 @@ trace:
   attempt_count: 0
 meta:
   created_at: '2026-05-08T01:23:44.019572'
-  updated_at: '2026-05-08T01:23:44.019572'
+  updated_at: '2026-05-08T07:03:34.453670'
   version: '1'
