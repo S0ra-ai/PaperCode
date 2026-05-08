@@ -1,6 +1,6 @@
 id: task-002-legacy-archive
 title: Archive legacy IntelliGen and Folio references safely
-status: todo
+status: done
 priority: critical
 owner: codex
 tags:
@@ -18,7 +18,7 @@ execution:
 steps:
 - id: task-002-step-01-inventory-sources
   title: Inventory legacy source projects
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: Inspect E:\Project\IntelliGen and E:\Project\Folio, identify source,
@@ -27,12 +27,30 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T06:40:46.180810'
+      level: info
+      message: Started inventory of E:\Project\IntelliGen and E:\Project\Folio before
+        creating filtered legacy archives.
+      agent: codex
+    - timestamp: '2026-05-08T06:41:18.686294'
+      level: info
+      message: Inventory complete. E:\Project\IntelliGen exists on branch rebuild
+        with 458 non-.git files; contains docs, packages, README, CHANGELOG.md, docker-compose.yml,
+        .env.example, screenshots, and generated/cache/secret files that must be filtered.
+        E:\Project\Folio exists on branch master with 649 non-.git files; contains
+        README.md, AGENTS.md, PROJECT_CONTEXT.md, plan.md, pyproject.toml, app, docs,
+        tests, templates, scripts, reports, plus dirty/untracked working files and
+        generated caches that must be filtered. Both original worktrees are dirty;
+        archive task will copy filtered snapshots only and will not modify or delete
+        originals.
+      agent: codex
+    last_run: '2026-05-08T06:41:18.686294'
+    attempt_count: 2
   meta: {}
 - id: task-002-step-02-filter-policy
   title: Define archive filter policy
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-002-step-01-inventory-sources
@@ -43,12 +61,27 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T06:41:23.069851'
+      level: info
+      message: Defining include/exclude policy for filtered legacy snapshots.
+      agent: codex
+    - timestamp: '2026-05-08T06:41:31.839876'
+      level: info
+      message: Filter policy defined. Include source code, docs, tests, plans, package/config
+        examples, lockfiles, meaningful screenshots/reports, and project metadata.
+        Exclude .git, real .env files, node_modules, .venv, __pycache__, .pytest_cache,
+        .mypy_cache, .ruff_cache, .playwright-mcp, dist/build/site outputs, sandbox
+        outputs, temporary extraction/build scripts, logs, nested archives such as
+        Folio.7z, database WAL/SHM, and other regenerated cache artifacts. Keep .env.example
+        because it is non-secret template documentation.
+      agent: codex
+    last_run: '2026-05-08T06:41:31.839876'
+    attempt_count: 2
   meta: {}
 - id: task-002-step-03-create-legacy-archives
   title: Create legacy archives and Folio git bundle
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-002-step-02-filter-policy
@@ -58,12 +91,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T06:41:38.482726'
+      level: info
+      message: Creating filtered legacy snapshots and Folio git bundle under legacy/.
+      agent: codex
+    - timestamp: '2026-05-08T06:43:56.332981'
+      level: info
+      message: Created filtered snapshots legacy/intelligen-v3 (570 files) and legacy/folio
+        (256 files). Created legacy/folio.git.bundle (1,308,648 bytes). Removed nested
+        legacy/intelligen-v3/packages/engine.7z after safety scan identified it as
+        an excluded archive artifact. Added legacy/archive-manifest.md.
+      agent: codex
+    last_run: '2026-05-08T06:43:56.332981'
+    attempt_count: 2
   meta: {}
 - id: task-002-step-04-verify-archive
   title: Verify archive completeness and safety
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-002-step-03-create-legacy-archives
@@ -73,8 +118,21 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T06:44:02.487940'
+      level: info
+      message: Verifying archive completeness, forbidden artifact absence, and Folio
+        bundle integrity.
+      agent: codex
+    - timestamp: '2026-05-08T06:44:20.718048'
+      level: info
+      message: Archive verification passed. Folio bundle verifies as complete. Required
+        IntelliGen and Folio files exist. Forbidden artifacts scan found no .env,
+        dependency directories, virtualenvs, caches, pycache, sandbox/site/build output,
+        logs, nested archives, or WAL/SHM files under legacy/. Task validates successfully.
+      agent: codex
+    last_run: '2026-05-08T06:44:20.718048'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: directory
@@ -94,5 +152,5 @@ trace:
   attempt_count: 0
 meta:
   created_at: '2026-05-08T01:23:31.243556'
-  updated_at: '2026-05-08T01:23:31.243556'
+  updated_at: '2026-05-08T06:44:30.050294'
   version: '1'

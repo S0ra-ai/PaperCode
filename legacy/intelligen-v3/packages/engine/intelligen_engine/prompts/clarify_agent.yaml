@@ -1,0 +1,122 @@
+# 渐进式澄清代理提示词 — ClarificationAgent 使用
+
+build_prompt: |
+  You are an academic writing assistant. Based on the user's topic and their previous answers, generate the NEXT clarification question to better understand their requirements.
+
+  Topic: {{ topic }}
+  {{ doc_context }}
+  Previous Q&A:
+  {{ history_text }}
+
+  Current step: {{ current_step }}/{{ max_steps }}
+  Stage guidance: {{ stage_hint }}
+
+  Generate ONE question with 3-5 options. The question should help narrow down:
+  - Paper type (survey, experimental, system design)
+  - Scope and depth
+  - Target audience
+  - Methodology preferences
+  - Key focus areas
+
+  IMPORTANT:
+  - Do NOT ask about something the user already answered.
+  - If document info is provided, skip questions that the document already answers.
+  - Use Chinese if the topic contains Chinese characters, otherwise English.
+  - If you already have enough information to generate a good report, set is_complete=true.
+
+  Output JSON (no markdown fences):
+  {"question": "...", "options": ["A", "B", "C"], "allow_multiple": false, "explanation": "why this question matters", "is_complete": false}
+
+get_summary: |
+  Based on the user's topic and their answers, produce a structured summary.
+
+  Topic: {{ topic }}
+  {{ doc_context }}
+  Conversation:
+  {{ history_text }}
+
+  Output JSON with these keys (fill as many as possible from the conversation):
+  {
+    "topic": "refined topic string",
+    "paper_type": "survey|experimental|system_design|review|other",
+    "scope": "description of scope",
+    "methodology": "preferred methodology or approach",
+    "target_words": 0,
+    "target_audience": "description",
+    "key_focus_areas": ["area1", "area2"],
+    "time_range": "e.g. last 5 years",
+    "comparison_needed": true/false,
+    "additional_requirements": "any other info"
+  }
+  Only output valid JSON, no markdown fences.
+
+extract_document_info: |
+  Analyze this document excerpt and extract key academic information.
+
+  File name: {{ file_name }}
+  Content excerpt:
+  ---
+  {{ excerpt }}
+  ---
+
+  Output JSON:
+  {
+    "title": "document title if found",
+    "abstract": "abstract or summary if found",
+    "keywords": ["keyword1", "keyword2"],
+    "methodology": "research methodology mentioned"
+  }
+  Only output valid JSON, no markdown fences.
+
+# 每步的阶段引导提示
+stage_hints:
+  - "Ask about the TYPE of paper (survey/review, experimental, design, etc.)"
+  - "Ask about SCOPE — how broad or narrow the topic should be"
+  - "Ask about TARGET AUDIENCE and formality level"
+  - "Ask about METHODOLOGY or analytical approach preferences"
+  - "Ask about specific FOCUS AREAS or key aspects to cover"
+  - "Ask about LENGTH, citation style, or any remaining preferences"
+
+# 回退问题 (中文)
+fallback_zh:
+  - question: "这篇报告的类型是什么？"
+    options: ["综述/文献回顾", "实验研究", "系统设计", "对比分析", "其他"]
+    explanation: "了解报告类型有助于确定整体结构和写作风格。"
+  - question: "报告的目标字数大约是多少？"
+    options: ["3000字", "5000字", "8000字", "10000字以上"]
+    explanation: "字数决定了内容的深度和广度。"
+  - question: "研究的时间范围是什么？"
+    options: ["近3年", "近5年", "近10年", "不限"]
+    explanation: "时间范围影响文献检索策略。"
+  - question: "报告的主要读者是谁？"
+    options: ["学术同行", "导师/评审", "企业管理者", "一般读者"]
+    explanation: "目标读者影响语言风格和专业术语的使用程度。"
+  - question: "是否需要对比分析不同方法或观点？"
+    options: ["需要", "不需要", "视情况而定"]
+    explanation: "对比分析可以增强报告的深度和客观性。"
+  - question: "还有其他特殊要求吗？"
+    options: ["无特殊要求"]
+    allow_custom: true
+    explanation: "任何额外的需求都可以帮助我们生成更符合期望的报告。"
+
+# 回退问题 (英文)
+fallback_en:
+  - question: "What type of paper is this?"
+    options: ["Survey/Literature Review", "Experimental Study", "System Design", "Comparative Analysis", "Other"]
+    explanation: "The paper type determines structure and writing style."
+  - question: "What is the target word count?"
+    options: ["3000 words", "5000 words", "8000 words", "10000+ words"]
+    explanation: "Word count determines the depth and breadth of content."
+  - question: "What time range should the research cover?"
+    options: ["Last 3 years", "Last 5 years", "Last 10 years", "No limit"]
+    explanation: "Time range affects literature search strategy."
+  - question: "Who is the intended audience?"
+    options: ["Academic peers", "Supervisor/Reviewer", "Business executives", "General readers"]
+    explanation: "Target audience affects language style and terminology."
+  - question: "Should the report compare different methods or viewpoints?"
+    options: ["Yes", "No", "If relevant"]
+    explanation: "Comparative analysis enhances depth and objectivity."
+  - question: "Any other special requirements?"
+    options: ["No special requirements"]
+    allow_custom: true
+    explanation: "Additional requirements help us tailor the report."

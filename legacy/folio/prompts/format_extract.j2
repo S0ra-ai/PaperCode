@@ -1,0 +1,39 @@
+{% extends "_base.j2" %}
+{% block body %}
+You will be given excerpts of a sample academic paper PDF. Your task is to
+extract a machine-readable description of its formatting conventions and
+return it as **strict JSON** matching this schema (no prose, no Markdown):
+
+{
+  "venue_label": "<short identifier, e.g. IEEE, ACM, CJC, Springer-LNCS, or Custom>",
+  "display_name": "<human-friendly name>",
+  "language": "en" | "zh" | "auto",
+  "page_size": "A4" | "Letter",
+  "columns": 1 | 2,
+  "margins": { "top_mm": <float>, "bottom_mm": <float>, "left_mm": <float>, "right_mm": <float> },
+  "font": { "body_family": "<string>", "body_size_pt": <float>, "heading_family": "<string|null>" },
+  "citation_style": "numeric" | "author_year" | "superscript" | "gbt_7714",
+  "bibliography_style": "<bst or biblatex hint>",
+  "section_order": ["Section 1", "Section 2", ...],
+  "figure_caption": { "position": "above" | "below", "label_format": "Fig. {n}: {caption}" },
+  "abstract_max_words": <int>,
+  "keywords_required": true | false,
+  "template_hint": "<one of: ieee.tex.j2 / cjc.tex.j2 / _generic.tex.j2>"
+}
+
+Rules:
+- If the sample is in Chinese, set language="zh" and prefer "gbt_7714".
+- When uncertain, pick the closest known venue and set venue_label accordingly.
+- Output ONLY the JSON object. No code fences, no commentary.
+
+----- SAMPLE BEGIN -----
+First-page text excerpt:
+{{ first_page_text }}
+
+Detected font-size histogram (pt → count):
+{{ font_histogram }}
+
+Detected page count: {{ page_count }}
+Detected columns (heuristic): {{ columns_hint }}
+----- SAMPLE END -----
+{% endblock %}

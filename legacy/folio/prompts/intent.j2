@@ -1,0 +1,46 @@
+{% extends "_base.j2" %}
+{% block body %}
+The user typed the following request into Folio's interactive prompt:
+
+```
+{{ raw_text }}
+```
+
+Classify what they want and extract the parameters. Folio supports
+three intents:
+
+- **format_to_paper** — user wants to write a single paper. Often
+  mentions a venue ("IEEE", "ACM", "Springer LNCS", "中国计算机学会
+  CJC"), a topic, a length, and/or supplies a sample PDF whose format
+  to mimic.
+- **survey** — user wants a literature survey / review article over a
+  research domain. Usually mentions a domain or set of keywords. Often
+  longer (10k+ words). May still specify a venue style.
+- **chat** — user is asking a question, exploring, or none of the
+  above. Use this when the request is too vague to start a paper.
+
+Return a single JSON object with exactly these keys:
+
+```
+{
+  "intent": "format_to_paper" | "survey" | "chat",
+  "topic": "<short topic in the user's language, or empty string>",
+  "venue": "<canonical venue label like IEEE / ACM / Springer-LNCS / CJC, or empty>",
+  "length_words": <integer, your best estimate of target word count, or 0 if unknown>,
+  "language": "<ISO short code: en | zh | ...>",
+  "pdf_path": "<absolute path if the user explicitly mentions a PDF on disk, else empty>",
+  "rationale": "<one short sentence explaining the classification>"
+}
+```
+
+Rules:
+- Output JSON only — no prose, no code fence.
+- Default `length_words` to {{ default_words }} for surveys when the
+  user does not specify a number; default to 6000 for format_to_paper.
+- Map common Chinese venue names: "IEEE" → "IEEE", "ACM" → "ACM",
+  "Springer" / "LNCS" → "Springer-LNCS", "中国计算机学会" / "CJC" /
+  "中文核心" → "CJC".
+- If the user writes in Chinese, set `language` to `"zh"`.
+- If the request mentions "综述" / "survey" / "review" / "literature",
+  prefer `intent = survey`.
+{% endblock %}

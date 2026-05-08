@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "venue_label": "Springer-LNCS",
+  "display_name": "Springer Lecture Notes in Computer Science",
+  "language": "en",
+  "page_size": "A4",
+  "columns": 1,
+  "margins": { "top_mm": 25.4, "bottom_mm": 25.4, "left_mm": 25.4, "right_mm": 25.4 },
+  "font": { "body_family": "Times New Roman", "body_size_pt": 10.0 },
+  "citation_style": "numeric",
+  "bibliography_style": "splncs04",
+  "section_order": [
+    "Abstract", "Introduction", "Related Work", "Method",
+    "Experiments", "Conclusion", "References"
+  ],
+  "figure_caption": { "position": "below", "label_format": "Fig. {n}. {caption}" },
+  "abstract_max_words": 200,
+  "keywords_required": true,
+  "template_hint": "_generic.tex.j2",
+  "source": "builtin"
+}

@@ -1,0 +1,11 @@
+{% extends "_base.j2" %}
+{% block body %}
+The user wants to draft a paper. The following fields are still missing:
+{% for field in missing_fields %}
+- {{ field }}
+{% endfor %}
+
+Ask exactly ONE concise clarifying question for the **first** missing field.
+Do not preamble. Do not list options unless strictly necessary.
+The question must be answerable in one sentence.
+{% endblock %}

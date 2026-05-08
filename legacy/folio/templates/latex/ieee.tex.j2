@@ -1,0 +1,41 @@
+{# IEEE-style two-column template using the IEEEtran class. Tectonic and
+   modern TeX Live distributions auto-fetch IEEEtran from CTAN, so this is
+   portable while still giving the proper IEEE look. #}
+\documentclass[{{ font_size_pt }}pt,{{ paper }}paper,conference]{IEEEtran}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{amsmath, amssymb}
+\usepackage{cite}
+\usepackage{hyperref}
+
+\title{ {{ draft.title | latex_escape }} }
+\author{ {{ author | latex_escape }} }
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+{{ draft.abstract_brief | latex_escape }}
+\end{abstract}
+
+{% if keywords %}
+\begin{IEEEkeywords}
+{{ keywords | join(", ") | latex_escape }}
+\end{IEEEkeywords}
+{% endif %}
+
+{% for sec in draft.sections %}
+\section{ {{ sec.name | latex_escape }} }
+{{ sec.text }}
+
+{% endfor %}
+
+{% if has_bibliography %}
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+{% endif %}
+
+\end{document}

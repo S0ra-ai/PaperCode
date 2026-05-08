@@ -1,0 +1,86 @@
+# 澄清阶段提示词 — ClarifyService 使用
+generate_questions: |
+  你是一个学术报告生成助手。用户给了一个模糊的需求，你需要生成 3-5 个澄清问题帮助细化需求。
+
+  {{ context }}
+
+  请严格以 JSON 数组格式输出，不要输出其他内容：
+  ```json
+  [
+    {
+      "question": "问题内容",
+      "hint": "输入提示文字",
+      "options": ["选项1", "选项2", "选项3"],
+      "priority": "high",
+      "required": true
+    }
+  ]
+  ```
+
+  字段说明：
+  - question: 问题文字
+  - hint: 输入框占位提示
+  - options: 常见选项（用户也可自由输入），至少给2个
+  - priority: "high"=核心问题必须回答, "medium"=建议回答, "low"=可选
+  - required: 是否必填
+
+  要求：
+  - 第1个问题必须是 high priority，关于研究的核心范围/对象
+  - 涵盖：研究范围与对象、目标篇幅、时间范围、对比需求、受众
+  - 用中文提问（如果用户输入是中文）或英文（如果用户输入是英文）
+  - 3-5个问题，其中至少1个 high, 1-2个 medium, 其余 low
+
+# 回退问题 — 当LLM调用失败时使用的预设问题
+fallback_questions_zh:
+  - question: "请具体说明研究的核心对象或范围是什么？"
+    hint: "例如：深度学习在医学影像中的应用"
+    options: []
+    priority: "high"
+    required: true
+  - question: "报告的目标字数大约是多少？"
+    hint: "输入目标字数"
+    options: ["3000字", "5000字", "8000字", "10000字"]
+    priority: "high"
+    required: true
+  - question: "研究的时间范围是什么？"
+    hint: "选择或输入时间范围"
+    options: ["近3年", "近5年", "近10年", "不限"]
+    priority: "medium"
+    required: false
+  - question: "是否需要对比分析不同方法或观点？"
+    hint: "选择是否对比"
+    options: ["需要", "不需要", "视情况而定"]
+    priority: "medium"
+    required: false
+  - question: "报告的主要读者是谁？"
+    hint: "选择或输入目标受众"
+    options: ["学术同行", "导师/评审", "企业管理者", "一般读者"]
+    priority: "low"
+    required: false
+
+fallback_questions_en:
+  - question: "What specific aspect or scope should the report focus on?"
+    hint: "e.g., deep learning applications in medical imaging"
+    options: []
+    priority: "high"
+    required: true
+  - question: "What is the target word count?"
+    hint: "Enter target length"
+    options: ["3000 words", "5000 words", "8000 words", "10000 words"]
+    priority: "high"
+    required: true
+  - question: "What time range should the research cover?"
+    hint: "Select or enter time range"
+    options: ["Last 3 years", "Last 5 years", "Last 10 years", "No limit"]
+    priority: "medium"
+    required: false
+  - question: "Should the report compare different approaches or viewpoints?"
+    hint: "Select comparison preference"
+    options: ["Yes", "No", "If relevant"]
+    priority: "medium"
+    required: false
+  - question: "Who is the intended audience?"
+    hint: "Select or enter target audience"
+    options: ["Academic peers", "Supervisor", "Business executives", "General readers"]
+    priority: "low"
+    required: false
