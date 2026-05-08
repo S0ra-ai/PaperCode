@@ -1,6 +1,6 @@
 id: task-006-python-tool-bridge
 title: Create Python MCP and CLI research tool bridge
-status: todo
+status: done
 priority: high
 owner: codex
 tags:
@@ -12,15 +12,15 @@ depends_on:
 - task-005-research-runtime
 - task-017-core-contract
 description: Create a Python research-tools layer that provides structured MCP tools
-  and one-shot CLI utilities for PDF/DOCX/LaTeX/data/experiment support. OpenCode
-  runtime remains the authority and records all tool outputs as artifacts/events.
+  and one-shot CLI utilities for PDF/DOCX/LaTeX/data/experiment support. The first-party
+  packages/server runtime remains the authority and records all tool outputs as artifacts/events.
 execution:
   mode: sequential
   retry: 0
 steps:
 - id: task-006-step-01-tool-boundaries
   title: Define Python tool boundaries
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: Separate structured MCP tools from one-shot CLI scripts and define
@@ -29,12 +29,28 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T16:35:32.545035'
+      level: info
+      message: 'Starting Python tool bridge on feature/python-tool-bridge. The boundary
+        is: Python provides structured MCP-style tools and one-shot CLI helpers; packages/server
+        runtime remains authoritative and records all Python outputs as events/artifacts.
+        External tools such as pandoc/LaTeX engines will be auto-discovered from PATH/env/config
+        links instead of requiring repeated user commands.'
+      agent: codex
+    - timestamp: '2026-05-08T16:42:44.485096'
+      level: info
+      message: 'Defined the boundary: Python provides structured MCP-style tools and
+        one-shot CLI helpers; packages/server remains authoritative and records outputs
+        as events/artifacts. External tools are auto-discovered from PATH, PAPER_FUCKER_TOOL_*
+        env vars, or ~/.paper_fucker/tools.json user links.'
+      agent: codex
+    last_run: '2026-05-08T16:42:44.485096'
+    attempt_count: 2
   meta: {}
 - id: task-006-step-02-python-project
   title: Create research-tools Python project
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-006-step-01-tool-boundaries
@@ -44,12 +60,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T16:42:44.718389'
+      level: info
+      message: Extending research-tools Python project with CLI entrypoint, structured
+        result models, external tool discovery, MCP SDK adapter, and unittest scaffolding.
+      agent: codex
+    - timestamp: '2026-05-08T16:42:55.424020'
+      level: info
+      message: 'Created research-tools Python CLI/project surface: paper-fucker-tools
+        entrypoint, python -m paper_fucker_tools, pydantic result models, external
+        tool discovery/link config, MCP SDK adapter, and unittest coverage.'
+      agent: codex
+    last_run: '2026-05-08T16:42:55.424020'
+    attempt_count: 2
   meta: {}
 - id: task-006-step-03-mcp-tools
   title: Implement structured MCP tools
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-006-step-02-python-project
@@ -59,12 +87,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T16:42:55.625485'
+      level: info
+      message: Implementing structured MCP-style tools for diagnostics, PDF probing,
+        dataset metadata probing, experiment log parsing, and DOCX generation stub.
+      agent: codex
+    - timestamp: '2026-05-08T16:43:07.428225'
+      level: info
+      message: 'Implemented structured MCP-style tools: tool_diagnostics, pdf_probe,
+        dataset_metadata_probe, experiment_log_parse, and docx_generation_stub, with
+        mcp_server.py adapting the same registry to FastMCP when the MCP SDK is installed.'
+      agent: codex
+    last_run: '2026-05-08T16:43:07.428225'
+    attempt_count: 2
   meta: {}
 - id: task-006-step-04-cli-tools
   title: Implement conversion CLI tools
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-006-step-02-python-project
@@ -74,24 +114,49 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T16:42:55.819591'
+      level: info
+      message: Implementing one-shot CLI tools for diagnostics, tool linking, mcp-call,
+        markdown-to-latex, latex-to-pdf, and docx conversion orchestration.
+      agent: codex
+    - timestamp: '2026-05-08T16:43:07.637338'
+      level: info
+      message: 'Implemented CLI utilities: diagnostics, link-tool, mcp-call, md-to-latex,
+        latex-to-pdf, convert-docx, and serve-mcp. Conversion commands auto-discover
+        external tools from config/env/PATH and return structured JSON errors if unavailable.'
+      agent: codex
+    last_run: '2026-05-08T16:43:07.637338'
+    attempt_count: 2
   meta: {}
 - id: task-006-step-05-bridge-smoke
-  title: Verify OpenCode to Python bridge smoke
-  status: todo
+  title: Verify server runtime to Python bridge smoke
+  status: done
   owner: codex
   depends_on:
   - task-006-step-03-mcp-tools
   - task-006-step-04-cli-tools
-  description: From the OpenCode runtime, call a Python MCP tool and a CLI tool, then
-    record their outputs as run events/artifacts.
+  description: From the first-party server runtime, call a Python MCP-style tool and
+    a CLI tool, then record their outputs as run events/artifacts.
   execution:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-08T16:43:07.832594'
+      level: info
+      message: Implementing and verifying packages/server runtime bridge that calls
+        Python structured tools/CLI commands and records their outputs as run events/artifacts.
+      agent: codex
+    - timestamp: '2026-05-08T16:44:53.026531'
+      level: info
+      message: Bridge smoke passed. Verified Python unittest (4 tests), CLI diagnostics,
+        md-to-latex orchestration, packages/server python bridge test (1 pass), combined
+        server research tests (7 pass, 0 fail, 45 expects), and root typecheck (13
+        successful tasks). Evidence recorded in reports/python-tool-bridge-smoke.md.
+      agent: codex
+    last_run: '2026-05-08T16:44:53.026531'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: directory
@@ -105,5 +170,5 @@ trace:
   attempt_count: 0
 meta:
   created_at: '2026-05-08T01:24:19.864239'
-  updated_at: '2026-05-08T05:59:22.407197'
+  updated_at: '2026-05-08T16:45:39.451058'
   version: '1'

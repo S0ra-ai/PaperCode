@@ -1,5 +1,6 @@
 export * from "./artifact-store"
 export * from "./paths"
 export * from "./policy"
+export * from "./python-bridge"
 export * from "./run-store"
 export * from "./state"
