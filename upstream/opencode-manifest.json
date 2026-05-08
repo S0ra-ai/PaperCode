@@ -1,0 +1,57 @@
+{
+  "name": "OpenCode",
+  "repository": "https://github.com/anomalyco/opencode",
+  "source": "github_release_tarball",
+  "release": {
+    "tag": "v1.14.41",
+    "url": "https://github.com/anomalyco/opencode/releases/tag/v1.14.41",
+    "published_at": "2026-05-07T14:52:13Z",
+    "target_commit": "98e091796b6a293cf20b4187e8fc6a949e0295e4",
+    "tag_ref": "8ba2a9171597262df9d19516c82a5e14f18f5c63"
+  },
+  "download": {
+    "tarball_url": "https://github.com/anomalyco/opencode/archive/refs/tags/v1.14.41.tar.gz",
+    "sha256": "0ef71c6dfecab631771dfefe6918519193df4239ebc55661dc6898d00ecd15a2"
+  },
+  "license": {
+    "type": "MIT",
+    "preserved_file": "upstream/opencode-LICENSE"
+  },
+  "import": {
+    "date": "2026-05-08",
+    "mode": "root_overlay_snapshot",
+    "git_history_imported": false,
+    "normal_files_imported": 4433,
+    "reparse_points_skipped": 62,
+    "protected_paths": [
+      ".plan/",
+      "legacy/",
+      "README.md",
+      "CHANGELOG",
+      "LICENSE",
+      "NOTICE.md",
+      "scripts/",
+      "upstream/"
+    ],
+    "preserved_upstream_files": {
+      "README.md": "upstream/opencode-README.md",
+      "LICENSE": "upstream/opencode-LICENSE",
+      "AGENTS.md": "upstream/opencode-AGENTS.md"
+    },
+    "excluded": [
+      ".git/",
+      ".github/",
+      "node_modules/",
+      ".turbo/",
+      "dist/",
+      "build/",
+      "coverage/",
+      "htmlcov/",
+      "symbolic links / reparse points"
+    ],
+    "notes": [
+      "Active upstream GitHub workflows were not imported to avoid running upstream CI in the private paper_fucker repository.",
+      "The root README, LICENSE, CHANGELOG, NOTICE, scripts, legacy archives, and TaskFlow plan remain paper_fucker-owned."
+    ]
+  }
+}

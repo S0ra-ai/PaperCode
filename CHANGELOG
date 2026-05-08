@@ -7,6 +7,29 @@
 
 :history
 
+0.1.0-dev - 2026/05/08 (88f63199) [develop]
+    :brief 导入 OpenCode v1.14.41 源码快照
+        - feat(upstream): 导入 OpenCode v1.14.41 root overlay 源码快照
+        - docs(upstream): 记录 OpenCode upstream manifest、MIT license 与 NOTICE 归属
+        - chore(import): 保留 paper_fucker 根 README/LICENSE/CHANGELOG 并跳过 active .github workflows
+        - chore(import): 跳过 Windows reparse point/symlink 并记录 tarball SHA256
+    :src
+        - packages/ - OpenCode upstream package source snapshot
+        - github/, infra/, nix/, script/, sdks/, specs/ - OpenCode upstream support source copied from official release tarball
+        - upstream/opencode-README.md - preserved upstream README
+        - upstream/opencode-LICENSE - preserved upstream MIT license
+        - upstream/opencode-AGENTS.md - preserved upstream agent instructions
+    :doc
+        - upstream/opencode-manifest.json - records release/tag/commit/tarball hash/import filtering decisions
+        - NOTICE.md - records OpenCode attribution and third-party license pointer
+        - .plan/confirmed/task-003-import-opencode.yaml - records TaskFlow execution logs
+    :verification
+        - TaskFlow validate_task task-003-import-opencode passed
+        - scripts/check-readme-version.ps1 passed
+        - Manifest JSON parsed successfully
+        - Verified active .github was not imported
+        - Verified no node_modules/.turbo/dist/build/coverage/htmlcov, nested .git, or reparse points remained in repository snapshot
+
 0.1.0-dev - 2026/05/08 (0906d17c) [develop]
     :brief 归档旧 IntelliGen 与 Folio 参考项目
         - docs(legacy): 归档旧 IntelliGen 过滤快照
