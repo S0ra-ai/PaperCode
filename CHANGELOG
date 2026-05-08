@@ -7,7 +7,7 @@
 
 :history
 
-    0.1.13-dev - 2026/05/09 (pending) [develop]
+    0.1.13-dev - 2026/05/09 (2b5a38f) [develop]
     :brief 实现 ClaimLedger-first Markdown 写作
         - feat(writing): 新增 ClaimLedger.v1, DraftPaper.v1, CitationRef, DraftSection, CheckpointGuidance, DraftRevision 领域 payload schema
         - feat(claims): 新增 composeClaimLedger, 在写作前生成 claim status、risk level、required action 和 citation binding
