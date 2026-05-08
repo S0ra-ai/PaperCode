@@ -1,0 +1,106 @@
+id: task-028-experiment-mcp-loop
+title: Add MCP-assisted experiment and reproduction loop
+status: todo
+priority: high
+owner: codex
+tags:
+- experiments
+- mcp
+- reproduction
+depends_on:
+- task-027-code-to-paper
+description: Extend experiment flow to use MCP/skills/Python tools for local exploration,
+  container reproduction, notebook generation, log parsing, metric extraction, and
+  baseline/ablation planning. Final claims may only cite reproduced or explicitly
+  exploratory results.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-028-step-01-red-experiment-test
+  title: Add failing experiment loop tests
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Test notebook/log capability registration, reproduction classification,
+    and claim eligibility semantics.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-028-step-02-experiment-capabilities
+  title: Implement experiment capabilities
+  status: todo
+  owner: codex
+  depends_on:
+  - task-028-step-01-red-experiment-test
+  description: Add experiment MCP/skill capability descriptors and Python tool integration
+    hooks.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-028-step-03-reproduction-policy
+  title: Implement reproduction claim policy
+  status: todo
+  owner: codex
+  depends_on:
+  - task-028-step-02-experiment-capabilities
+  description: Require reproduced or exploratory-marked experiment outputs for claim
+    binding.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-028-step-04-doc-version
+  title: Update docs and version 0.1.25-dev
+  status: todo
+  owner: codex
+  depends_on:
+  - task-028-step-03-reproduction-policy
+  description: Document experiment MCP loop and update CHANGELOG/README.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-028-step-05-verify
+  title: Run verification
+  status: todo
+  owner: codex
+  depends_on:
+  - task-028-step-04-doc-version
+  description: Run experiment tests, Python tests, typecheck, README check, and TaskFlow
+    validation.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: file
+  path: packages/server/src/paper/experiment-loop.ts
+  description: MCP-assisted experiment loop
+- type: file
+  path: packages/server/test/paper/experiment-loop.test.ts
+  description: Experiment loop tests
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-08T22:09:56.778856'
+  updated_at: '2026-05-08T22:09:56.778856'
+  version: '1'

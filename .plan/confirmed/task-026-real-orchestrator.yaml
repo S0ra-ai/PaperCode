@@ -1,0 +1,104 @@
+id: task-026-real-orchestrator
+title: Replace stub stage completion with real paper orchestrator graph
+status: todo
+priority: high
+owner: codex
+tags:
+- orchestrator
+- pipeline
+- paper
+depends_on:
+- task-025-research-intake
+description: Replace default stub stage completion with a real paper orchestrator
+  graph covering intake, planning, literature, code analysis, data, experiment design/execution/reproduction,
+  claim ledger, drafting, profile formatting, verification, revision, and export.
+  Any missing implementation must block with diagnostics instead of succeeding.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-026-step-01-red-orchestrator-test
+  title: Add failing orchestrator no-stub tests
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Test that default stages do not complete with stub handler summaries
+    and missing capabilities block with diagnostics.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-026-step-02-stage-graph
+  title: Implement paper stage graph
+  status: todo
+  owner: codex
+  depends_on:
+  - task-026-step-01-red-orchestrator-test
+  description: Add paper stage ids and dependency graph under paper domain.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-026-step-03-default-handlers
+  title: Implement default handlers
+  status: todo
+  owner: codex
+  depends_on:
+  - task-026-step-02-stage-graph
+  description: Wire existing research runtime modules through real default handlers
+    with blocked diagnostics for unavailable capabilities.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-026-step-04-doc-version
+  title: Update docs and version 0.1.23-dev
+  status: todo
+  owner: codex
+  depends_on:
+  - task-026-step-03-default-handlers
+  description: Document real orchestrator behavior and update CHANGELOG/README.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-026-step-05-verify
+  title: Run verification
+  status: todo
+  owner: codex
+  depends_on:
+  - task-026-step-04-doc-version
+  description: Run orchestrator tests, typecheck, README check, and TaskFlow validation.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: file
+  path: packages/server/src/paper/orchestrator.ts
+  description: Paper orchestrator graph and runner
+- type: file
+  path: packages/server/test/paper/orchestrator.test.ts
+  description: No-stub orchestrator tests
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-08T22:09:35.421631'
+  updated_at: '2026-05-08T22:09:35.421631'
+  version: '1'
