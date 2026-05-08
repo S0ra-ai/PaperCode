@@ -7,7 +7,7 @@
 
 :history
 
-    0.1.14-dev - 2026/05/09 (pending) [develop]
+    0.1.14-dev - 2026/05/09 (09a4874) [develop]
     :brief 实现最终真实性 verification gate
         - feat(verification): 新增 VerificationFinding, BlockingReport.v1, ReviewReport.v1, ModelReviewInput, VerificationGateResult schema
         - feat(references): 新增 checkReferences, citation source 缺失时阻断 final export
