@@ -1,6 +1,6 @@
 id: task-027-code-to-paper
 title: Add codebase-to-paper analysis artifacts
-status: in_progress
+status: done
 priority: high
 owner: codex
 tags:
@@ -123,7 +123,7 @@ steps:
   meta: {}
 - id: task-027-step-05-verify
   title: Run verification
-  status: in_progress
+  status: done
   owner: codex
   depends_on:
   - task-027-step-04-doc-version
@@ -138,8 +138,14 @@ steps:
       message: Running code-to-paper tests, server typecheck, README/CHANGELOG version
         check after hash backfill, and TaskFlow validation.
       agent: codex
-    last_run: '2026-05-09T00:29:31.101894'
-    attempt_count: 1
+    - timestamp: '2026-05-09T00:33:02.366979'
+      level: info
+      message: 'Verification passed: code-to-paper tests 2 pass/0 fail/7 expects;
+        server typecheck passed; README version 0.1.24-dev matches CHANGELOG; TaskFlow
+        validate_task task-027-code-to-paper valid with no warnings.'
+      agent: codex
+    last_run: '2026-05-09T00:33:02.366979'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -151,10 +157,7 @@ outputs:
 trace:
   logs: []
   attempt_count: 0
-lock:
-  by: codex
-  at: '2026-05-09T00:25:31.379580'
 meta:
   created_at: '2026-05-08T22:09:46.337768'
-  updated_at: '2026-05-09T00:29:31.101894'
+  updated_at: '2026-05-09T00:33:07.335411'
   version: '1'
