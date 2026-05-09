@@ -1,6 +1,6 @@
 # paper_fucker
 
-Current version: <!-- version:start -->0.2.3-dev<!-- version:end -->
+Current version: <!-- version:start -->0.2.4-dev<!-- version:end -->
 
 `paper_fucker` is a private-first, OpenCode-derived closed-loop paper system. It turns a topic, codebase, dataset, experiment log, or paper material set into a verifiable academic-paper bundle with research planning, source discovery, code understanding, experiment/reproduction support, ClaimLedger-first writing, authenticity gates, profile-aware formatting, preview, and export.
 
@@ -13,6 +13,7 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - paper_fucker owns the paper domain: intake, paper profiles, model roles, capability registry, paper orchestration, authoring loop, authenticity gates, and export bundles.
 - Supported input modes are topic-to-paper, code-to-paper, data-to-paper, experiment-log-to-paper, and mixed-materials-to-paper.
 - Model selection is role-based and OpenCode-provider-agnostic. The paper workflow resolves planner, literature researcher, code analyst, experiment designer, writer, reviewer, citation checker, and cheap summarizer roles from OpenCode `provider/model` ids.
+- OpenAI-compatible provider discovery accepts a user-supplied `base_url` and API key, calls `/models`, stores public provider config under `~/.paper_fucker/providers/`, and stores API keys only under `~/.paper_fucker/local/`.
 - The authoritative research contracts and paper_fucker runtime now live inside the OpenCode hard fork under `packages/opencode/src/paper`.
 - `PaperRun` is now the first-class user-visible state model. Instance HTTP API routes under `/paper` create runs, stream run snapshots, record guidance, expose preview/export status, list capabilities, run doctor diagnostics, discover providers, and resolve model roles.
 - The TUI home screen now submits natural Chinese research input to `/paper/runs` and navigates into a PaperRun dashboard instead of creating an ordinary chat session.
@@ -51,6 +52,8 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - `packages/opencode/src/paper/capabilities.ts`: research capability bus for OpenCode built-in tools, MCP servers, skills, first-party paper tools, and Python research tools. The orchestrator queries it by stage and records tool trace/OpenTelemetry metadata for each capability call.
 - `packages/opencode/src/paper/profiles.ts`: paper profile registry and `PaperProfile.v1` / `PaperProfileCheck.v1` contracts for venue-aware structure, submission checks, and profile skill routing.
 - `packages/opencode/src/paper/intake.ts`: multi-input research intake normalizer and runtime recorder for `ResearchIntakeRequest` to `ResearchBrief.v1`.
+- `packages/opencode/src/paper/model-discovery.ts`: OpenAI-compatible provider endpoint model discovery and secret-safe provider config storage.
+- `packages/opencode/src/paper/model-roles.ts`: model role assignment resolver for default, per-role, and subagent model overrides.
 - `packages/opencode/src/paper/orchestrator.ts`: paper-domain run graph/controller for intake, planning, literature, code analysis, data, experiment design/execution/reproduction, ClaimLedger, drafting, profile formatting, verification, revision, and export.
 - `packages/opencode/src/paper/code-to-paper.ts`: codebase-to-paper static analysis and runtime artifact recording with source-range-bound method, experiment, and reproduction surfaces.
 - `packages/opencode/src/paper/experiment-loop.ts`: paper-domain experiment capability resolver, log metric parser, and reproduction-aware claim eligibility policy.
@@ -107,6 +110,7 @@ Important early tasks:
 - `task-032-opencode-paper-core-migration`: migrate paper_fucker domain runtime into the OpenCode hard fork.
 - `task-033-paper-run-api`: expose `PaperRun` as first-class `/paper` HTTP/SSE API state.
 - `task-034-dialog-workbench-tui`: turn the TUI default flow into a Chinese PaperRun dialog workbench.
+- `task-035-provider-model-wizard`: OpenAI-compatible provider discovery and model role/subagent assignment.
 
 ## Branching
 

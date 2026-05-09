@@ -1,6 +1,6 @@
 id: task-035-provider-model-wizard
 title: Add OpenAI-compatible provider and model role wizard
-status: todo
+status: done
 priority: high
 owner: codex
 tags:
@@ -20,7 +20,7 @@ execution:
 steps:
 - id: task-035-step-01-red-model-discovery-tests
   title: Add failing model discovery and role tests
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: Add tests for ProviderEndpointConfig, OpenAI-compatible /v1/models
@@ -30,12 +30,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T07:51:13.589033'
+      level: info
+      message: Adding red tests for OpenAI-compatible model discovery, secret-safe
+        provider config storage, and model role/subagent override resolution.
+      agent: codex
+    - timestamp: '2026-05-09T07:51:54.066749'
+      level: info
+      message: Added red test packages/opencode/test/paper/model-discovery.test.ts.
+        It fails as expected because ../../src/paper/model-discovery is not implemented
+        yet.
+      agent: codex
+    last_run: '2026-05-09T07:51:54.066749'
+    attempt_count: 2
   meta: {}
 - id: task-035-step-02-provider-discovery
   title: Implement provider endpoint discovery
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-035-step-01-red-model-discovery-tests
@@ -46,12 +58,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T07:52:01.126799'
+      level: info
+      message: Implementing OpenAI-compatible provider endpoint discovery and secret-safe
+        global config storage under ~/.paper_fucker/local.
+      agent: codex
+    - timestamp: '2026-05-09T07:55:05.306563'
+      level: info
+      message: Implemented packages/opencode/src/paper/model-discovery.ts with ProviderEndpointConfig,
+        OpenAI-compatible /models discovery, timeout diagnostics, no-key result payloads,
+        and secret-safe global storage under ~/.paper_fucker/local/provider-secrets.json.
+      agent: codex
+    last_run: '2026-05-09T07:55:05.306563'
+    attempt_count: 2
   meta: {}
 - id: task-035-step-03-role-assignment
   title: Implement model role assignment UI and API
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-035-step-02-provider-discovery
@@ -61,12 +85,25 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T07:52:38.029593'
+      level: info
+      message: Implementing model role assignment resolver with role and subagent
+        overrides, plus paper API integration.
+      agent: codex
+    - timestamp: '2026-05-09T07:55:05.735897'
+      level: info
+      message: Implemented packages/opencode/src/paper/model-roles.ts for default/role/subagent
+        overrides, exported model-discovery/model-roles from paper index, extended
+        /paper/providers/discover and /paper/model-roles with POST handlers, and added
+        a TUI model roles dialog command.
+      agent: codex
+    last_run: '2026-05-09T07:55:05.735897'
+    attempt_count: 2
   meta: {}
 - id: task-035-step-04-doc-version
   title: Update docs and version 0.2.4-dev
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-035-step-03-role-assignment
@@ -76,12 +113,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T07:55:11.197604'
+      level: info
+      message: Updating README and CHANGELOG to 0.2.4-dev for provider/model discovery,
+        secret-safe storage, and role/subagent assignment.
+      agent: codex
+    - timestamp: '2026-05-09T07:56:37.719292'
+      level: info
+      message: Updated README and CHANGELOG to 0.2.4-dev with provider discovery,
+        secret-safe ~/.paper_fucker model config, and role/subagent assignment documentation.
+        Added reports/provider-model-wizard.md and verified README version sync.
+      agent: codex
+    last_run: '2026-05-09T07:56:37.719292'
+    attempt_count: 2
   meta: {}
 - id: task-035-step-05-verify
   title: Verify provider wizard
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-035-step-04-doc-version
@@ -92,8 +141,25 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T07:56:38.167321'
+      level: info
+      message: 'Running final provider wizard verification: model discovery tests,
+        opencode typecheck, preview tests, Python tests, README version check, tracked
+        secret scan, and TaskFlow validate_task.'
+      agent: codex
+    - timestamp: '2026-05-09T07:57:00.961337'
+      level: info
+      message: 'Verification passed: npx --yes bun@1.3.13 --cwd packages/opencode
+        test test/paper/model-discovery.test.ts (3 pass, 0 fail, 13 expects); npx
+        --yes bun@1.3.13 run --cwd packages/opencode typecheck; npx --yes bun@1.3.13
+        --cwd packages/preview test (2 pass, 0 fail, 9 expects); PYTHONPATH=research-tools/src
+        python -m unittest discover -s research-tools/tests (4 tests OK); scripts/check-readme-version.ps1;
+        tracked actual DeepSeek key scan found no matches; TaskFlow validate_task
+        task-035-provider-model-wizard.'
+      agent: codex
+    last_run: '2026-05-09T07:57:00.961337'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -110,5 +176,5 @@ trace:
   attempt_count: 0
 meta:
   created_at: '2026-05-09T02:49:52.727003'
-  updated_at: '2026-05-09T02:49:52.727003'
+  updated_at: '2026-05-09T07:57:50.057490'
   version: '1'

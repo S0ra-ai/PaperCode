@@ -41,6 +41,21 @@ export const PaperExportPayload = Schema.Struct({
   forced: Schema.optional(Schema.Boolean),
 })
 
+export const ProviderDiscoverPayload = Schema.Struct({
+  provider_id: Schema.String,
+  provider_name: Schema.optional(Schema.String),
+  base_url: Schema.String,
+  api_key: Schema.String,
+  compatibility: Schema.Literal("openai-compatible"),
+  timeout_ms: Schema.optional(Schema.Number),
+})
+
+export const ModelRoleAssignmentPayload = Schema.Struct({
+  default_model: Schema.String,
+  roles: Schema.optional(Schema.Record(Schema.String, Schema.String)),
+  subagents: Schema.optional(Schema.Record(Schema.String, Schema.String)),
+})
+
 export const PaperPaths = {
   runs: `${root}/runs`,
   run: `${root}/runs/:runID`,
@@ -155,6 +170,18 @@ export const PaperApi = HttpApi.make("paper")
             description: "Return OpenCode provider/model discovery data for paper model role assignment.",
           }),
         ),
+        HttpApiEndpoint.post("providersDiscoverOpenAI", PaperPaths.providersDiscover, {
+          payload: ProviderDiscoverPayload,
+          success: described(AnyJson, "OpenAI-compatible provider/model discovery"),
+          error: HttpApiError.BadRequest,
+        }).annotateMerge(
+          OpenApi.annotations({
+            identifier: "paper.providers.discoverOpenAI",
+            summary: "Discover OpenAI-compatible models",
+            description:
+              "Discover models from a user-supplied OpenAI-compatible endpoint without persisting the API key.",
+          }),
+        ),
         HttpApiEndpoint.get("modelRoles", PaperPaths.modelRoles, {
           success: described(AnyJson, "Paper model role assignment"),
         }).annotateMerge(
@@ -162,6 +189,17 @@ export const PaperApi = HttpApi.make("paper")
             identifier: "paper.model_roles",
             summary: "Get model roles",
             description: "Return the provider-agnostic model role routing defaults for paper agents.",
+          }),
+        ),
+        HttpApiEndpoint.post("modelRolesAssign", PaperPaths.modelRoles, {
+          payload: ModelRoleAssignmentPayload,
+          success: described(AnyJson, "Resolved paper model role assignment"),
+          error: HttpApiError.BadRequest,
+        }).annotateMerge(
+          OpenApi.annotations({
+            identifier: "paper.model_roles.assign",
+            summary: "Resolve model roles",
+            description: "Resolve default, per-role, and subagent model overrides for paper agents.",
           }),
         ),
       )
