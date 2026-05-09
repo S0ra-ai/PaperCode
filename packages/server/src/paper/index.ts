@@ -1,4 +1,5 @@
 export * from "./architecture"
 export * from "./capabilities"
+export * from "./intake"
 export * from "./model-router"
 export * from "./profiles"
