@@ -14,12 +14,20 @@ import {
   recordPaperRunGuidance,
   subscribePaperRunEvents,
 } from "@/paper/run"
+import { discoverOpenAICompatibleModels } from "@/paper/model-discovery"
+import { resolveAllModelRoleAssignments } from "@/paper/model-roles"
 import { Effect } from "effect"
 import * as Stream from "effect/Stream"
 import { HttpServerResponse } from "effect/unstable/http"
 import { HttpApiBuilder, HttpApiError } from "effect/unstable/httpapi"
 import { InstanceHttpApi } from "../api"
-import { PaperExportPayload, PaperGuidancePayload, PaperRunCreatePayload } from "../groups/paper"
+import {
+  ModelRoleAssignmentPayload,
+  PaperExportPayload,
+  PaperGuidancePayload,
+  PaperRunCreatePayload,
+  ProviderDiscoverPayload,
+} from "../groups/paper"
 
 function mapPaperError(error: unknown) {
   if (error instanceof PaperRunNotFoundError) return new HttpApiError.NotFound({})
@@ -148,8 +156,29 @@ export const paperHandlers = HttpApiBuilder.group(InstanceHttpApi, "paper", (han
       return discoverPaperProviders(providers)
     })
 
+    const providersDiscoverOpenAI = Effect.fn("PaperHttpApi.providersDiscoverOpenAI")(function* (ctx: {
+      payload: typeof ProviderDiscoverPayload.Type
+    }) {
+      return yield* Effect.tryPromise({
+        try: () => discoverOpenAICompatibleModels(ctx.payload),
+        catch: mapPaperBadRequest,
+      })
+    })
+
     const modelRoles = Effect.fn("PaperHttpApi.modelRoles")(function* () {
       return paperModelRoles()
+    })
+
+    const modelRolesAssign = Effect.fn("PaperHttpApi.modelRolesAssign")(function* (ctx: {
+      payload: typeof ModelRoleAssignmentPayload.Type
+    }) {
+      return yield* Effect.sync(() => ({
+        roles: resolveAllModelRoleAssignments({
+          default_model: ctx.payload.default_model,
+          roles: ctx.payload.roles as Parameters<typeof resolveAllModelRoleAssignments>[0]["roles"],
+          subagents: ctx.payload.subagents ? { ...ctx.payload.subagents } : undefined,
+        }),
+      })).pipe(Effect.catch(() => Effect.fail(new HttpApiError.BadRequest({}))))
     })
 
     return handlers
@@ -162,6 +191,8 @@ export const paperHandlers = HttpApiBuilder.group(InstanceHttpApi, "paper", (han
       .handle("capabilities", capabilities)
       .handle("doctor", doctor)
       .handle("providersDiscover", providersDiscover)
+      .handle("providersDiscoverOpenAI", providersDiscoverOpenAI)
       .handle("modelRoles", modelRoles)
+      .handle("modelRolesAssign", modelRolesAssign)
   }),
 )
