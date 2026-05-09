@@ -1,6 +1,6 @@
 id: task-030-paper-authoring-loop
 title: Add run-bound paper authoring, preview, review, and export loop
-status: todo
+status: done
 priority: high
 owner: codex
 tags:
@@ -20,7 +20,7 @@ execution:
 steps:
 - id: task-030-step-01-red-authoring-test
   title: Add failing authoring loop tests
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: Test run-bound preview snapshot, profile-aware revision, reviewer critique,
@@ -29,12 +29,25 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T00:56:15.061532'
+      level: info
+      message: Starting TDD RED step for run-bound preview snapshots, profile-aware
+        revision planning, reviewer critique, supplementary bundle, code/data availability
+        bundle, final gate blocking, and forced draft markers.
+      agent: codex
+    - timestamp: '2026-05-09T00:58:46.820895'
+      level: info
+      message: 'Added packages/server/test/paper/authoring.test.ts. RED verified:
+        test fails because createRunBoundPreviewSnapshot and runPaperAuthoringLoop
+        are not exported from packages/server/src/paper/index.ts.'
+      agent: codex
+    last_run: '2026-05-09T00:58:46.820895'
+    attempt_count: 2
   meta: {}
 - id: task-030-step-02-authoring-adapter
   title: Implement authoring loop adapter
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-030-step-01-red-authoring-test
@@ -44,12 +57,27 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T00:58:50.520721'
+      level: info
+      message: Implementing paper authoring adapter around existing writing, verification,
+        export, runtime artifact, and preview protocol modules.
+      agent: codex
+    - timestamp: '2026-05-09T01:04:03.962186'
+      level: info
+      message: 'Implemented packages/server/src/paper/authoring.ts around existing
+        writing, verification, export, runtime artifact, and telemetry modules. It
+        composes ClaimLedger-first drafts, applies profile-aware revision, records
+        verification, blocks final export when the final gate fails, produces forced
+        draft bundles, and writes availability/supplementary/preview artifacts. Authoring
+        test now passes: 3 pass, 0 fail, 20 expects.'
+      agent: codex
+    last_run: '2026-05-09T01:04:03.962186'
+    attempt_count: 2
   meta: {}
 - id: task-030-step-03-preview-binding
   title: Bind preview to run artifacts
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-030-step-02-authoring-adapter
@@ -59,12 +87,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T01:04:12.232652'
+      level: info
+      message: Binding PreviewSnapshot to run artifacts and diagnostics through packages/server/src/paper/preview.ts.
+      agent: codex
+    - timestamp: '2026-05-09T01:04:16.801829'
+      level: info
+      message: Implemented packages/server/src/paper/preview.ts. It converts run draft/ledger/verification/export
+        state into read-only PreviewSnapshot with Markdown/LaTeX/PDF/DOCX refs, claim/citation/reviewer/experiment/cost/agent
+        annotations, costs, tool diagnostics, agents, and render status. Covered by
+        packages/server/test/paper/authoring.test.ts.
+      agent: codex
+    last_run: '2026-05-09T01:04:16.801829'
+    attempt_count: 2
   meta: {}
 - id: task-030-step-04-doc-version
   title: Update docs and version 0.1.27-dev
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-030-step-03-preview-binding
@@ -73,12 +113,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T01:04:23.872548'
+      level: info
+      message: Updating README/CHANGELOG to 0.1.27-dev and adding authoring loop report.
+      agent: codex
+    - timestamp: '2026-05-09T01:05:15.474577'
+      level: info
+      message: Updated README and colon-history CHANGELOG to 0.1.27-dev, added packages/server/src/paper/authoring.ts
+        and preview.ts to project structure documentation, and added reports/paper-authoring-loop.md.
+        CHANGELOG commit id remains pending until the feature commit is created and
+        backfilled.
+      agent: codex
+    last_run: '2026-05-09T01:05:15.474577'
+    attempt_count: 2
   meta: {}
 - id: task-030-step-05-verify
   title: Run verification
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-030-step-04-doc-version
@@ -88,8 +140,23 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T01:05:22.324452'
+      level: info
+      message: Running authoring tests, preview package tests, server typecheck, workspace
+        typecheck, README/CHANGELOG version check after hash backfill, and TaskFlow
+        validation.
+      agent: codex
+    - timestamp: '2026-05-09T01:08:13.595584'
+      level: info
+      message: 'Verification complete for 0.1.27-dev: authoring test passed (3 pass,
+        0 fail, 20 expects); preview package test passed (2 pass, 0 fail, 9 expects);
+        server typecheck passed; workspace typecheck passed (14 successful); README
+        version check passed after CHANGELOG hash backfill to 5bc5d8b; TaskFlow validate_task
+        task-030-paper-authoring-loop passed.'
+      agent: codex
+    last_run: '2026-05-09T01:08:13.595584'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -106,5 +173,5 @@ trace:
   attempt_count: 0
 meta:
   created_at: '2026-05-08T22:10:20.524656'
-  updated_at: '2026-05-08T22:10:20.524656'
+  updated_at: '2026-05-09T01:08:25.652735'
   version: '1'
