@@ -2,10 +2,34 @@
 :author        s0ra (https://github.com/S0ra-ai)
 :repo          
 :desc          记录项目的重大变更和版本历史
-:version       0.1.27-dev
+:version       0.2.0-dev
 :last_update   2026/05/09
 
 :history
+
+    0.2.0-dev - 2026/05/09 (d57a117) [develop]
+    :brief 完整闭环论文系统 strict live acceptance
+        - feat(acceptance): 新增 scripts/strict-acceptance.ps1, 覆盖 18 个严格验收检查
+        - feat(live): DeepSeek live provider smoke 校验 /models 与 chat completion, 默认模型 deepseek-v4-pro
+        - feat(mcp): Exa remote MCP initialize live smoke 校验 https://mcp.exa.ai/mcp 可达
+        - feat(profile): Nature skill/profile smoke 校验 first-party nature-paper skill 与官方 author guidance
+        - feat(toolchain): pandoc Markdown-to-LaTeX、LaTeX PDF、DOCX generation 全部纳入 strict acceptance
+        - feat(runtime): topic-to-paper 与 code-to-paper runtime smoke 纳入最终验收
+        - feat(security): tracked-only secret scan 防止 API key 进入 Git
+        - docs(readme): 版本更新为 0.2.0-dev, 记录 strict live acceptance 入口
+        - test(paper): 覆盖 strict acceptance script inventory、strict live gating、tracked secret scan 和报告路径
+    :src
+        - scripts/strict-acceptance.ps1 - strict live acceptance script
+        - packages/server/test/paper/strict-acceptance.test.ts - strict acceptance script tests
+        - reports/strict-live-acceptance.md - strict live acceptance report
+        - README.md - strict acceptance documentation and version
+        - CHANGELOG - 0.2.0-dev history entry
+    :verification
+        - npx --yes bun@1.3.13 --cwd packages/server test test/paper/strict-acceptance.test.ts passed: 3 pass, 0 fail, 26 expects
+        - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\strict-acceptance.ps1 -FixtureMode passed
+        - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\strict-acceptance.ps1 passed
+        - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
+        - TaskFlow validate_task task-031-strict-live-acceptance passed
 
     0.1.27-dev - 2026/05/09 (5bc5d8b) [develop]
     :brief 新增 run-bound 论文写作、预览、审稿与导出闭环
