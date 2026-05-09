@@ -58,8 +58,8 @@ function clean(dir: string) {
   return fs.rm(dir, {
     recursive: true,
     force: true,
-    maxRetries: 5,
-    retryDelay: 100,
+    maxRetries: 50,
+    retryDelay: 200,
   })
 }
 

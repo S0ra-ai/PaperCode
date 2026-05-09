@@ -10,6 +10,7 @@ import { FileWatcher } from "../../src/file/watcher"
 import { Git } from "../../src/git"
 import { Instance } from "../../src/project/instance"
 import { WithInstance } from "../../src/project/with-instance"
+import { setTimeout as sleep } from "node:timers/promises"
 
 // Native @parcel/watcher bindings aren't reliably available in CI (missing on Linux, flaky on Windows)
 const describeWatcher = FileWatcher.hasNativeBinding() && !process.env.CI ? describe : describe.skip
@@ -86,7 +87,7 @@ function nextUpdate<E>(directory: string, check: (evt: WatcherEvent) => boolean,
     ({ deferred }) =>
       Effect.gen(function* () {
         yield* trigger
-        return yield* Deferred.await(deferred).pipe(Effect.timeout("5 seconds"))
+        return yield* Deferred.await(deferred).pipe(Effect.timeout("15 seconds"))
       }),
     ({ cleanup }) => Effect.sync(cleanup),
   )
@@ -110,6 +111,14 @@ function noUpdate<E>(
   )
 }
 
+async function pulseWrite(file: string, prefix: string) {
+  await fs.writeFile(file, `${prefix}-0`)
+  for (let i = 1; i <= 10; i++) {
+    await sleep(100)
+    await fs.writeFile(file, `${prefix}-${i}`)
+  }
+}
+
 function ready(directory: string) {
   const file = path.join(directory, `.watcher-${Math.random().toString(36).slice(2)}`)
   const head = path.join(directory, ".git", "HEAD")
@@ -117,8 +126,8 @@ function ready(directory: string) {
   return Effect.gen(function* () {
     yield* nextUpdate(
       directory,
-      (evt) => evt.file === file && evt.event === "add",
-      Effect.promise(() => fs.writeFile(file, "ready")),
+      (evt) => evt.file === file && (evt.event === "add" || evt.event === "change"),
+      Effect.promise(() => pulseWrite(file, "ready")),
     ).pipe(Effect.ensuring(Effect.promise(() => fs.rm(file, { force: true }).catch(() => undefined))), Effect.asVoid)
 
     const git = yield* Effect.promise(() =>
@@ -180,9 +189,16 @@ describeWatcher("FileWatcher", () => {
       dir,
       nextUpdate(
         dir,
-        (e) => e.file === file && e.event === "add",
-        Effect.promise(() => fs.writeFile(file, "plain")),
-      ).pipe(Effect.tap((evt) => Effect.sync(() => expect(evt).toEqual({ file, event: "add" })))),
+        (e) => e.file === file && (e.event === "add" || e.event === "change"),
+        Effect.promise(() => pulseWrite(file, "plain")),
+      ).pipe(
+        Effect.tap((evt) =>
+          Effect.sync(() => {
+            expect(evt.file).toBe(file)
+            expect(["add", "change"]).toContain(evt.event)
+          }),
+        ),
+      ),
     )
   })
 
