@@ -1,0 +1,114 @@
+id: task-035-provider-model-wizard
+title: Add OpenAI-compatible provider and model role wizard
+status: todo
+priority: high
+owner: codex
+tags:
+- models
+- providers
+- wizard
+- roles
+depends_on:
+- task-034-dialog-workbench-tui
+description: Add a global-user provider/model configuration flow for paper_fucker.
+  Users enter provider id/name, base_url, api_key, and compatibility format; the system
+  discovers model lists, stores secrets outside git under ~/.paper_fucker, and assigns
+  default and per-role models for parent agents and subagents.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-035-step-01-red-model-discovery-tests
+  title: Add failing model discovery and role tests
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Add tests for ProviderEndpointConfig, OpenAI-compatible /v1/models
+    discovery, secret-safe storage, ModelRoleAssignment, and role/subagent override
+    resolution.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-035-step-02-provider-discovery
+  title: Implement provider endpoint discovery
+  status: todo
+  owner: codex
+  depends_on:
+  - task-035-step-01-red-model-discovery-tests
+  description: Implement OpenAI-compatible model discovery with base_url, api_key,
+    compatibility format, request timeouts, and diagnostics. Do not write API keys
+    to tracked files.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-035-step-03-role-assignment
+  title: Implement model role assignment UI and API
+  status: todo
+  owner: codex
+  depends_on:
+  - task-035-step-02-provider-discovery
+  description: Add /paper/providers/discover and /paper/model-roles handlers plus
+    TUI dialogs for default model, role model, and subagent model overrides.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-035-step-04-doc-version
+  title: Update docs and version 0.2.4-dev
+  status: todo
+  owner: codex
+  depends_on:
+  - task-035-step-03-role-assignment
+  description: Document global ~/.paper_fucker model config, provider discovery, and
+    role assignment; update CHANGELOG/README to 0.2.4-dev.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-035-step-05-verify
+  title: Verify provider wizard
+  status: todo
+  owner: codex
+  depends_on:
+  - task-035-step-04-doc-version
+  description: Run model discovery tests, opencode tests/typecheck, preview tests
+    if touched, Python tests, README version check, tracked secret scan, and TaskFlow
+    validate_task task-035-provider-model-wizard.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: file
+  path: packages/opencode/src/paper/model-discovery.ts
+  description: Provider/model discovery implementation
+- type: file
+  path: packages/opencode/src/paper/model-roles.ts
+  description: Model role assignment types and resolver
+- type: report
+  path: reports/provider-model-wizard.md
+  description: Provider wizard verification report
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-09T02:49:52.727003'
+  updated_at: '2026-05-09T02:49:52.727003'
+  version: '1'

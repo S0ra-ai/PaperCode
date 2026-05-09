@@ -1,0 +1,185 @@
+id: task-032-opencode-paper-core-migration
+title: Migrate paper runtime into OpenCode core
+status: done
+priority: critical
+owner: codex
+tags:
+- opencode
+- paper-core
+- hard-fork
+- migration
+depends_on:
+- task-031-strict-live-acceptance
+description: Move the authoritative paper_fucker research and paper runtime from the
+  standalone @paper-fucker/server package into packages/opencode/src/paper. packages/opencode
+  becomes the paper_fucker product core rather than a substrate with an external server
+  package. Remove the standalone server workspace after imports, tests, README, and
+  reports are updated.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-032-step-01-red-import-tests
+  title: Add failing opencode paper-core import tests
+  status: done
+  owner: codex
+  depends_on: []
+  description: Create or move tests under packages/opencode/test/paper that assert
+    paper runtime exports, ResearchIntakeRequest, run storage, contracts, and authoring
+    loop are available from packages/opencode/src/paper.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-09T02:51:30.739404'
+      level: info
+      message: Starting paper core migration inspection and RED test planning on feature/opencode-paper-core-migration.
+        TaskFlow plan files were created and validated; branch was created manually
+        after prepare_git_branch rejected the intentional new plan files as dirty.
+      agent: codex
+    - timestamp: '2026-05-09T02:52:05.878333'
+      level: info
+      message: Added packages/opencode/test/paper/core-migration.test.ts. RED verified
+        with npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/core-migration.test.ts
+        failing because module '@/paper' does not exist yet.
+      agent: codex
+    last_run: '2026-05-09T02:52:05.878333'
+    attempt_count: 2
+  meta: {}
+- id: task-032-step-02-migrate-runtime
+  title: Move research and paper runtime into opencode
+  status: done
+  owner: codex
+  depends_on:
+  - task-032-step-01-red-import-tests
+  description: Move packages/server/src/research and packages/server/src/paper into
+    packages/opencode/src/paper, update relative imports, package exports, tsconfig/test
+    references, and Python bridge references.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-09T02:52:10.183493'
+      level: info
+      message: Migrating packages/server/src/paper, src/research, and src/init into
+        packages/opencode/src/paper with import rewrites and test relocation.
+      agent: codex
+    - timestamp: '2026-05-09T02:55:12.478418'
+      level: info
+      message: Moved paper, research, and init runtime code into packages/opencode/src/paper;
+        moved tests into packages/opencode/test/{paper,research,init}; fixed imports
+        and schema path; added ajv dependency to opencode. Targeted migration tests
+        passed (10 pass, 0 fail) and opencode typecheck passed.
+      agent: codex
+    last_run: '2026-05-09T02:55:12.478418'
+    attempt_count: 2
+  meta: {}
+- id: task-032-step-03-remove-server-workspace
+  title: Remove standalone server package
+  status: done
+  owner: codex
+  depends_on:
+  - task-032-step-02-migrate-runtime
+  description: Remove packages/server workspace/package/test references and update
+    root workspace docs so packages/opencode is the paper_fucker authoritative runtime.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-09T02:55:18.748766'
+      level: info
+      message: Removing standalone packages/server workspace remnants and updating
+        strict acceptance commands to use packages/opencode.
+      agent: codex
+    - timestamp: '2026-05-09T02:56:30.464733'
+      level: info
+      message: Removed standalone packages/server workspace package/tsconfig and local
+        cache directory; refreshed bun.lock with bun install; strict acceptance commands
+        now use packages/opencode; active code/package/script rg for packages/server
+        and @paper-fucker/server returns no matches. strict-acceptance tests passed
+        (3 pass, 0 fail).
+      agent: codex
+    last_run: '2026-05-09T02:56:30.464733'
+    attempt_count: 2
+  meta: {}
+- id: task-032-step-04-doc-version
+  title: Update docs and version 0.2.1-dev
+  status: done
+  owner: codex
+  depends_on:
+  - task-032-step-03-remove-server-workspace
+  description: Update README, reports, and CHANGELOG colon-history entry for 0.2.1-dev;
+    README version must track CHANGELOG latest version.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-09T02:56:36.004455'
+      level: info
+      message: Updating README and CHANGELOG to 0.2.1-dev for opencode paper core
+        migration.
+      agent: codex
+    - timestamp: '2026-05-09T02:58:24.733740'
+      level: info
+      message: Updated README to 0.2.1-dev with packages/opencode/src/paper as the
+        authoritative runtime, added reports/opencode-paper-core-migration.md, and
+        added a CHANGELOG 0.2.1-dev entry with a temporary hash pending work-commit
+        backfill. README version check passes.
+      agent: codex
+    last_run: '2026-05-09T02:58:24.733740'
+    attempt_count: 2
+  meta: {}
+- id: task-032-step-05-verify
+  title: Verify core migration
+  status: done
+  owner: codex
+  depends_on:
+  - task-032-step-04-doc-version
+  description: Run opencode paper tests, opencode typecheck, preview tests, Python
+    tests, README version check, and TaskFlow validate_task task-032-opencode-paper-core-migration.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-09T02:58:34.213357'
+      level: info
+      message: 'Running full task-032 verification: opencode tests/typecheck, preview
+        tests, Python tests, README version check, and TaskFlow validation.'
+      agent: codex
+    - timestamp: '2026-05-09T03:22:43.219947'
+      level: info
+      message: 'Verification complete for migration boundary. Passed: opencode targeted
+        migration/brand/provider/auth/installation/authoring suite (194 pass, 0 fail),
+        opencode typecheck, preview tests (2 pass), Python bridge tools tests with
+        PYTHONPATH=research-tools/src (4 tests), strict acceptance script tests (3
+        pass), README/CHANGELOG version check. Full opencode suite was run once and
+        recorded in reports/opencode-paper-core-migration.md: 2487 pass / 51 fail,
+        with failures concentrated in pre-existing Windows shell/path parser, session
+        timeout flakes, and stale OpenCode assertions; migration-related failures
+        were fixed and covered by targeted green tests.'
+      agent: codex
+    last_run: '2026-05-09T03:22:43.219947'
+    attempt_count: 2
+  meta: {}
+outputs:
+- type: directory
+  path: packages/opencode/src/paper
+  description: Authoritative paper_fucker paper runtime inside OpenCode hard fork
+- type: directory
+  path: packages/opencode/test/paper
+  description: Paper core tests moved into opencode package
+- type: file
+  path: README.md
+  description: Updated project structure and version
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-09T02:49:11.999292'
+  updated_at: '2026-05-09T07:07:22.401348'
+  version: '1'

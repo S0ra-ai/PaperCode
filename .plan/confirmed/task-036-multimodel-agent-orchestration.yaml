@@ -1,0 +1,113 @@
+id: task-036-multimodel-agent-orchestration
+title: Implement multi-layer multi-model agent orchestration
+status: todo
+priority: critical
+owner: codex
+tags:
+- agents
+- models
+- orchestration
+- budget
+depends_on:
+- task-035-provider-model-wizard
+description: Implement PaperRun agent orchestration where parent and child agents
+  can use different models, subagents can nest beyond one level, and all agent work
+  is constrained by budget tiers, permissions, data egress policy, source/license
+  gates, and final authenticity gates.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-036-step-01-red-agent-tree-tests
+  title: Add failing AgentTree and budget tests
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Add tests for AgentNode, AgentTree, AgentRoleRouter, BudgetTier limits,
+    multi-depth subagent creation, parent-child model differences, and artifact provenance.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-036-step-02-budget-egress-policy
+  title: Implement budget tiers and data egress policy
+  status: todo
+  owner: codex
+  depends_on:
+  - task-036-step-01-red-agent-tree-tests
+  description: Implement quick/standard/deep/submission/custom budgets and private-first
+    data egress authorization with secret/ignored/large-binary exclusion and audit
+    traces.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-036-step-03-agent-router
+  title: Implement AgentRoleRouter and nested execution
+  status: todo
+  owner: codex
+  depends_on:
+  - task-036-step-02-budget-egress-policy
+  description: Implement root/stage/worker/specialist agent hierarchy, per-agent provider/model
+    selection, depth/concurrency limits, cost tracking, failure propagation, and pause/diagnostic
+    behavior.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-036-step-04-doc-version
+  title: Update docs and version 0.2.5-dev
+  status: todo
+  owner: codex
+  depends_on:
+  - task-036-step-03-agent-router
+  description: Document multi-model agent tree, budget tiers, and data egress behavior;
+    update CHANGELOG/README to 0.2.5-dev.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-036-step-05-verify
+  title: Verify agent orchestration
+  status: todo
+  owner: codex
+  depends_on:
+  - task-036-step-04-doc-version
+  description: Run agent orchestration tests, opencode tests/typecheck, preview tests
+    if touched, Python tests, README version check, and TaskFlow validate_task task-036-multimodel-agent-orchestration.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: file
+  path: packages/opencode/src/paper/agents.ts
+  description: Agent tree and nested orchestration runtime
+- type: file
+  path: packages/opencode/src/paper/budget.ts
+  description: Budget tiers and limits
+- type: file
+  path: packages/opencode/src/paper/data-egress.ts
+  description: Private-first data egress policy
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-09T02:50:05.212994'
+  updated_at: '2026-05-09T02:50:05.212994'
+  version: '1'

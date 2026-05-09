@@ -1,6 +1,6 @@
 # paper_fucker
 
-Current version: <!-- version:start -->0.2.0-dev<!-- version:end -->
+Current version: <!-- version:start -->0.2.1-dev<!-- version:end -->
 
 `paper_fucker` is a private-first, OpenCode-derived closed-loop paper system. It turns a topic, codebase, dataset, experiment log, or paper material set into a verifiable academic-paper bundle with research planning, source discovery, code understanding, experiment/reproduction support, ClaimLedger-first writing, authenticity gates, profile-aware formatting, preview, and export.
 
@@ -13,7 +13,7 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - paper_fucker owns the paper domain: intake, paper profiles, model roles, capability registry, paper orchestration, authoring loop, authenticity gates, and export bundles.
 - Supported input modes are topic-to-paper, code-to-paper, data-to-paper, experiment-log-to-paper, and mixed-materials-to-paper.
 - Model selection is role-based and OpenCode-provider-agnostic. The paper workflow resolves planner, literature researcher, code analyst, experiment designer, writer, reviewer, citation checker, and cheap summarizer roles from OpenCode `provider/model` ids.
-- The authoritative research contracts and server-side paper_fucker runtime live under `packages/server`.
+- The authoritative research contracts and paper_fucker runtime now live inside the OpenCode hard fork under `packages/opencode/src/paper`.
 - Research runs are stored workspace-first under `<workspace>/.paper_fucker/runs/<run-id>`, with `~/.paper_fucker/runs/<run-id>` as the fallback.
 - Runtime operations are automatic API calls, not workflows that require users to keep typing shell commands.
 - Initialization writes config, linked tool paths, and encrypted secrets under `~/.paper_fucker`; it does not write credentials to `.env` or repository files.
@@ -27,7 +27,7 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - Experiment claims are gated by reproduction semantics: reproduced results may support final claims, while unreproduced results are blocked unless explicitly marked as exploratory.
 - The TUI default screen is now a Chinese paper research workbench with topic/code/material/data/log inputs, provider-role context, capability health, stage graph, ledgers, diagnostics, preview, and export controls represented in the paper state adapter.
 - The paper authoring loop now binds drafts to run artifacts, applies profile-aware revision metadata, creates read-only preview snapshots, runs reviewer/authenticity checks, blocks unsafe final export, and emits forced draft, supplementary, and availability bundles.
-- Strict live acceptance is available through `scripts/strict-acceptance.ps1`; it validates TaskFlow, version sync, tracked secret hygiene, server/preview/Python/typecheck suites, OpenCode TUI smoke, DeepSeek live provider smoke, Exa MCP live smoke, Nature skill/profile, pandoc, LaTeX, DOCX, topic-to-paper, code-to-paper, and Git Flow branch discipline.
+- Strict live acceptance is available through `scripts/strict-acceptance.ps1`; it validates TaskFlow, version sync, tracked secret hygiene, opencode/preview/Python/typecheck suites, OpenCode TUI smoke, DeepSeek live provider smoke, Exa MCP live smoke, Nature skill/profile, pandoc, LaTeX, DOCX, topic-to-paper, code-to-paper, and Git Flow branch discipline.
 - The automatic orchestrator now owns the default topic-to-paper stage graph and proceeds stage-by-stage unless a pause condition is raised.
 - Trusted template resolution now records `TemplateSpec.v1`, adopts clear high-confidence official templates automatically, and falls back to a CJC default when no venue is known.
 - Open literature and dataset discovery now records `SourceRecord.v1`, `LiteratureMap.v1`, `DataPlan.v1`, `DatasetCard.v1`, and direction feasibility artifacts with license and verification diagnostics.
@@ -36,7 +36,7 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - The final authenticity gate now blocks invalid references, unsupported claims, dataset license failures, and failed container reproduction while preserving non-blocking reviewer warnings.
 - Export bundles now produce Markdown/LaTeX/PDF/DOCX manifests, block final exports when the authenticity gate fails, and allow clearly marked forced drafts with failed checks attached.
 - The repository root is paper_fucker-first; upstream localized OpenCode README files are preserved under `upstream/opencode-readmes/`.
-- The imported OpenCode package remains the upstream-derived agent/CLI substrate while paper_fucker runtime surfaces are extracted into first-party packages.
+- The imported OpenCode package is now the paper_fucker product core: OpenCode substrate capabilities remain internal, while paper_fucker domain runtime surfaces live in `packages/opencode/src/paper`.
 - Python is reserved for per-run MCP and CLI research tools.
 - Project configuration and run indexes use `~/.paper_fucker`.
 - The default target is Windows-native operation.
@@ -44,32 +44,31 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 ## Project Structure
 
 - `schemas/research/`: JSON Schema source of truth for research runs, events, artifacts, sources, tool traces, claims, drafts, reviews, exports, and checkpoints.
-- `packages/server/`: first-party paper_fucker TypeScript server/runtime package. It owns AJV validation, OpenTelemetry span hooks, generated TypeScript contract types, run/event/artifact runtime APIs, permission/resource/cost/final-gate state, Python tool bridge calls, and rebuildable SQLite indexes.
-- `packages/server/src/init/`: first-party initialization and diagnostics flow for `~/.paper_fucker/config.json`, `tools.json`, encrypted `secrets.enc`, external tool discovery, and Full Access acknowledgement.
-- `packages/server/src/paper/`: first-party paper domain entrypoint. It defines the OpenCode-substrate architecture, paper input modes, and future model/capability/profile/orchestrator/authoring surfaces.
-- `packages/server/src/paper/capabilities.ts`: research capability bus for OpenCode built-in tools, MCP servers, skills, first-party paper tools, and Python research tools. The orchestrator queries it by stage and records tool trace/OpenTelemetry metadata for each capability call.
-- `packages/server/src/paper/profiles.ts`: paper profile registry and `PaperProfile.v1` / `PaperProfileCheck.v1` contracts for venue-aware structure, submission checks, and profile skill routing.
-- `packages/server/src/paper/intake.ts`: multi-input research intake normalizer and runtime recorder for `ResearchIntakeRequest` to `ResearchBrief.v1`.
-- `packages/server/src/paper/orchestrator.ts`: paper-domain run graph/controller for intake, planning, literature, code analysis, data, experiment design/execution/reproduction, ClaimLedger, drafting, profile formatting, verification, revision, and export.
-- `packages/server/src/paper/code-to-paper.ts`: codebase-to-paper static analysis and runtime artifact recording with source-range-bound method, experiment, and reproduction surfaces.
-- `packages/server/src/paper/experiment-loop.ts`: paper-domain experiment capability resolver, log metric parser, and reproduction-aware claim eligibility policy.
-- `packages/server/src/paper/tui-state.ts`: renderer-independent Chinese TUI workbench state adapter for home and run views.
-- `packages/server/src/paper/authoring.ts`: run-bound authoring loop adapter for ClaimLedger-first drafts, profile-aware revision, verification, final/forced export, supplementary bundle, and code/data availability bundle.
-- `packages/server/src/paper/preview.ts`: read-only PreviewSnapshot adapter that binds drafts, export files, claim/citation/reviewer annotations, costs, agents, and tool diagnostics to a run.
-- `packages/server/src/research/orchestrator/`: automatic topic-to-paper stage graph, Full Access pause policy, checkpoint guidance queue, and run controls.
-- `packages/server/src/research/templates/`: trusted template resolution, source evidence/confidence policy, and Markdown-to-LaTeX application through the Python bridge.
-- `packages/server/src/research/sources/`: open-source-first literature and dataset discovery, source verification metadata, license/access checks, and automatic nearby-direction feasibility turns.
-- `packages/server/src/research/experiments/`: experiment planning, host exploration runner abstraction, container reproduction gate, result analysis, and experiment artifacts.
-- `packages/server/src/research/writing/`: ClaimLedger-first writing, citation binding, streamed Markdown draft composition, checkpoint guidance application, and rollback diffs.
-- `packages/server/src/research/verification/`: final authenticity gate, blocking reports, review reports, reference/claim/data/reproduction checks, and multi-model review aggregation.
-- `packages/server/src/research/export/`: final and forced-draft export bundle creation, manifest generation, missing renderer diagnostics, and export fact recording.
-- `packages/server/src/research/README.md`: first-party research runtime boundary guide; domain logic belongs in this runtime and only uses `packages/opencode` through deliberate substrate adapters.
+- `packages/opencode/src/paper/`: authoritative paper_fucker TypeScript runtime inside the OpenCode hard fork. It owns AJV validation, OpenTelemetry span hooks, generated TypeScript contract types, run/event/artifact runtime APIs, permission/resource/cost/final-gate state, Python tool bridge calls, paper orchestration, profiles, authoring, preview binding, and rebuildable SQLite indexes.
+- `packages/opencode/src/paper/init/`: initialization and diagnostics flow for `~/.paper_fucker/config.json`, `tools.json`, encrypted `secrets.enc`, external tool discovery, and Full Access acknowledgement.
+- `packages/opencode/src/paper/capabilities.ts`: research capability bus for OpenCode built-in tools, MCP servers, skills, first-party paper tools, and Python research tools. The orchestrator queries it by stage and records tool trace/OpenTelemetry metadata for each capability call.
+- `packages/opencode/src/paper/profiles.ts`: paper profile registry and `PaperProfile.v1` / `PaperProfileCheck.v1` contracts for venue-aware structure, submission checks, and profile skill routing.
+- `packages/opencode/src/paper/intake.ts`: multi-input research intake normalizer and runtime recorder for `ResearchIntakeRequest` to `ResearchBrief.v1`.
+- `packages/opencode/src/paper/orchestrator.ts`: paper-domain run graph/controller for intake, planning, literature, code analysis, data, experiment design/execution/reproduction, ClaimLedger, drafting, profile formatting, verification, revision, and export.
+- `packages/opencode/src/paper/code-to-paper.ts`: codebase-to-paper static analysis and runtime artifact recording with source-range-bound method, experiment, and reproduction surfaces.
+- `packages/opencode/src/paper/experiment-loop.ts`: paper-domain experiment capability resolver, log metric parser, and reproduction-aware claim eligibility policy.
+- `packages/opencode/src/paper/tui-state.ts`: renderer-independent Chinese TUI workbench state adapter for home and run views.
+- `packages/opencode/src/paper/authoring.ts`: run-bound authoring loop adapter for ClaimLedger-first drafts, profile-aware revision, verification, final/forced export, supplementary bundle, and code/data availability bundle.
+- `packages/opencode/src/paper/preview.ts`: read-only PreviewSnapshot adapter that binds drafts, export files, claim/citation/reviewer annotations, costs, agents, and tool diagnostics to a run.
+- `packages/opencode/src/paper/research/orchestrator/`: automatic topic-to-paper stage graph, Full Access pause policy, checkpoint guidance queue, and run controls.
+- `packages/opencode/src/paper/research/templates/`: trusted template resolution, source evidence/confidence policy, and Markdown-to-LaTeX application through the Python bridge.
+- `packages/opencode/src/paper/research/sources/`: open-source-first literature and dataset discovery, source verification metadata, license/access checks, and automatic nearby-direction feasibility turns.
+- `packages/opencode/src/paper/research/experiments/`: experiment planning, host exploration runner abstraction, container reproduction gate, result analysis, and experiment artifacts.
+- `packages/opencode/src/paper/research/writing/`: ClaimLedger-first writing, citation binding, streamed Markdown draft composition, checkpoint guidance application, and rollback diffs.
+- `packages/opencode/src/paper/research/verification/`: final authenticity gate, blocking reports, review reports, reference/claim/data/reproduction checks, and multi-model review aggregation.
+- `packages/opencode/src/paper/research/export/`: final and forced-draft export bundle creation, manifest generation, missing renderer diagnostics, and export fact recording.
+- `packages/opencode/src/paper/research/README.md`: first-party research runtime boundary guide.
 - `packages/preview/`: first-party localhost read-only research preview package with token-checked snapshot/SSE endpoints and static Markdown/LaTeX/PDF/DOCX/annotation/diagnostics UI.
 - `scripts/strict-acceptance.ps1`: strict live acceptance entrypoint for the full paper system; `-FixtureMode` is only for deterministic script tests.
 - `research-tools/`: Python MCP/CLI tool package. It provides structured MCP-style diagnostics/probe/document helpers, one-shot conversion commands, external tool discovery/linking for pandoc and LaTeX engines, and generated Pydantic v2 models for tool-side validation.
 - `legacy/references/`: reference-project manifests and adopt/defer/reject analysis. These files are design guidance only and do not authorize code import.
 - `upstream/opencode-readmes/`: localized README files imported from the OpenCode snapshot, retained for provenance and translation reference instead of root-level project documentation.
-- `packages/opencode/`: imported OpenCode-derived agent and CLI substrate retained during migration; new paper_fucker domain code should not be added here unless it is a deliberate compatibility adapter.
+- `packages/opencode/`: deeply modified OpenCode hard fork and paper_fucker product core. OpenCode provider/model, agent/session, tool, MCP, skill, permission, plugin, and TUI substrate capabilities are retained for internal orchestration.
 
 ## Planning Source
 

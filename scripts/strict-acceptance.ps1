@@ -325,7 +325,7 @@ Invoke-Check "tracked-secret-scan" "Tracked secret scan" {
     Invoke-TrackedSecretScan
 }
 Invoke-Check "server-tests" "Server tests" {
-    Invoke-CheckedCommand "npx" @("--yes", "bun@1.3.13", "--cwd", "packages/server", "test")
+    Invoke-CheckedCommand "npx" @("--yes", "bun@1.3.13", "--cwd", "packages/opencode", "test")
 }
 Invoke-Check "preview-tests" "Preview tests" {
     Invoke-CheckedCommand "npx" @("--yes", "bun@1.3.13", "--cwd", "packages/preview", "test")
@@ -334,7 +334,7 @@ Invoke-Check "python-tests" "Python research tools tests" {
     Invoke-CheckedCommand "python" @("-m", "unittest", "discover", "-s", "research-tools/tests") @{ PYTHONPATH = (Join-Path $RepoRoot "research-tools/src") }
 }
 Invoke-Check "server-typecheck" "Server typecheck" {
-    Invoke-CheckedCommand "npx" @("--yes", "bun@1.3.13", "run", "--cwd", "packages/server", "typecheck")
+    Invoke-CheckedCommand "npx" @("--yes", "bun@1.3.13", "run", "--cwd", "packages/opencode", "typecheck")
 }
 Invoke-Check "workspace-typecheck" "Workspace typecheck" {
     Invoke-CheckedCommand "npx" @("--yes", "bun@1.3.13", "run", "typecheck")
@@ -361,10 +361,10 @@ Invoke-Check "docx-generation" "DOCX generation" {
     Invoke-DocxGeneration
 }
 Invoke-Check "topic-to-paper-live-run" "Topic-to-paper runtime smoke" {
-    Invoke-CheckedCommand "npx" @("--yes", "bun@1.3.13", "--cwd", "packages/server", "test", "test/research/e2e.test.ts")
+    Invoke-CheckedCommand "npx" @("--yes", "bun@1.3.13", "--cwd", "packages/opencode", "test", "test/research/e2e.test.ts")
 }
 Invoke-Check "code-to-paper-live-run" "Code-to-paper runtime smoke" {
-    Invoke-CheckedCommand "npx" @("--yes", "bun@1.3.13", "--cwd", "packages/server", "test", "test/paper/code-to-paper.test.ts")
+    Invoke-CheckedCommand "npx" @("--yes", "bun@1.3.13", "--cwd", "packages/opencode", "test", "test/paper/code-to-paper.test.ts")
 }
 Invoke-Check "git-flow-cleanup" "Git Flow branch discipline" {
     Invoke-GitFlowCleanupCheck

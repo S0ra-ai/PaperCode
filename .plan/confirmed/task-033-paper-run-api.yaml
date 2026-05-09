@@ -1,0 +1,113 @@
+id: task-033-paper-run-api
+title: Add first-class PaperRun HTTP API
+status: todo
+priority: critical
+owner: codex
+tags:
+- api
+- paperrun
+- events
+- hard-fork
+depends_on:
+- task-032-opencode-paper-core-migration
+description: Make PaperRun the user-visible state model in the OpenCode-derived server.
+  Add /paper APIs for run creation, status, SSE events, guidance, preview, export,
+  capabilities, doctor, provider discovery, and model role assignment. Map internal
+  OpenCode tool/model/session activity into PaperRun diagnostics and artifacts.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-033-step-01-red-api-tests
+  title: Add failing PaperRun API tests
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Add tests for /paper/runs create/get, /paper/runs/:id/events, /paper/runs/:id/guidance,
+    /paper/runs/:id/preview, /paper/runs/:id/export, /paper/capabilities, /paper/doctor,
+    /paper/providers/discover, and /paper/model-roles.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-033-step-02-types-and-store
+  title: Implement PaperRun public types and store adapters
+  status: todo
+  owner: codex
+  depends_on:
+  - task-033-step-01-red-api-tests
+  description: Add PaperRun, PaperRunCreateRequest, PaperRunSnapshot, PaperRunEvent,
+    PaperRunPauseQuestion, PaperRunGuidanceResponse, AgentTree, and PaperExportBundle
+    types backed by the migrated paper runtime.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-033-step-03-http-routes
+  title: Implement /paper HTTP routes and handlers
+  status: todo
+  owner: codex
+  depends_on:
+  - task-033-step-02-types-and-store
+  description: Register PaperRun HttpApi groups/handlers and SSE event streaming;
+    keep old session routes internal-only for substrate use.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-033-step-04-doc-version
+  title: Update docs and version 0.2.2-dev
+  status: todo
+  owner: codex
+  depends_on:
+  - task-033-step-03-http-routes
+  description: Document PaperRun API, update README/CHANGELOG colon-history to 0.2.2-dev,
+    and keep version sync.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-033-step-05-verify
+  title: Verify PaperRun API
+  status: todo
+  owner: codex
+  depends_on:
+  - task-033-step-04-doc-version
+  description: Run opencode API tests, opencode typecheck, preview tests if touched,
+    Python tests, README version check, and TaskFlow validate_task task-033-paper-run-api.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: file
+  path: packages/opencode/src/server/routes/instance/httpapi/groups/paper.ts
+  description: PaperRun API schema group
+- type: file
+  path: packages/opencode/src/server/routes/instance/httpapi/handlers/paper.ts
+  description: PaperRun API handlers
+- type: directory
+  path: packages/opencode/test/paper
+  description: PaperRun API tests
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-09T02:49:26.218304'
+  updated_at: '2026-05-09T02:49:26.218304'
+  version: '1'
