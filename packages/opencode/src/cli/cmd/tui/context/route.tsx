@@ -1,6 +1,7 @@
 import { createStore, reconcile } from "solid-js/store"
 import { createSimpleContext } from "./helper"
 import type { PromptInfo } from "../component/prompt/history"
+import type { PaperRunSnapshot } from "@/paper/run"
 
 export type HomeRoute = {
   type: "home"
@@ -13,13 +14,19 @@ export type SessionRoute = {
   prompt?: PromptInfo
 }
 
+export type PaperRoute = {
+  type: "paper"
+  runID: string
+  snapshot?: PaperRunSnapshot
+}
+
 export type PluginRoute = {
   type: "plugin"
   id: string
   data?: Record<string, unknown>
 }
 
-export type Route = HomeRoute | SessionRoute | PluginRoute
+export type Route = HomeRoute | SessionRoute | PaperRoute | PluginRoute
 
 export const { use: useRoute, provider: RouteProvider } = createSimpleContext({
   name: "Route",
