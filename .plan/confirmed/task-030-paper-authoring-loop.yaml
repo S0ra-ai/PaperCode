@@ -1,6 +1,6 @@
 id: task-030-paper-authoring-loop
 title: Add run-bound paper authoring, preview, review, and export loop
-status: in_progress
+status: done
 priority: high
 owner: codex
 tags:
@@ -130,7 +130,7 @@ steps:
   meta: {}
 - id: task-030-step-05-verify
   title: Run verification
-  status: in_progress
+  status: done
   owner: codex
   depends_on:
   - task-030-step-04-doc-version
@@ -147,8 +147,16 @@ steps:
         typecheck, README/CHANGELOG version check after hash backfill, and TaskFlow
         validation.
       agent: codex
-    last_run: '2026-05-09T01:05:22.324452'
-    attempt_count: 1
+    - timestamp: '2026-05-09T01:08:13.595584'
+      level: info
+      message: 'Verification complete for 0.1.27-dev: authoring test passed (3 pass,
+        0 fail, 20 expects); preview package test passed (2 pass, 0 fail, 9 expects);
+        server typecheck passed; workspace typecheck passed (14 successful); README
+        version check passed after CHANGELOG hash backfill to 5bc5d8b; TaskFlow validate_task
+        task-030-paper-authoring-loop passed.'
+      agent: codex
+    last_run: '2026-05-09T01:08:13.595584'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -168,5 +176,5 @@ lock:
   at: '2026-05-09T00:55:48.818344'
 meta:
   created_at: '2026-05-08T22:10:20.524656'
-  updated_at: '2026-05-09T01:05:22.324452'
+  updated_at: '2026-05-09T01:08:13.595584'
   version: '1'
