@@ -2,10 +2,32 @@
 :author        s0ra (https://github.com/S0ra-ai)
 :repo          
 :desc          记录项目的重大变更和版本历史
-:version       0.2.1-dev
+:version       0.2.2-dev
 :last_update   2026/05/09
 
 :history
+
+    0.2.2-dev - 2026/05/09 (8442f6a) [develop]
+    :brief 新增一等 PaperRun HTTP/SSE API
+        - feat(paper): 新增 PaperRun.v1 状态投影, 汇总 intake、stage graph、Source Ledger、Claim Ledger、实验状态、Agent Tree、diagnostics、pause questions、preview/export state
+        - feat(api): 新增 /paper/runs create/get、/paper/runs/:id/events SSE、guidance、preview、export、capabilities、doctor、providers/discover、model-roles
+        - feat(provider): provider discovery 通过 OpenCode ModelsDev substrate 读取模型目录, 失败时保留 DeepSeek 默认样例
+        - feat(export): final gate 未通过时阻断 final export, forced draft 明确返回 failed checks
+        - docs(readme): 版本更新为 0.2.2-dev, 记录 PaperRun API 与 hard fork 内部路由边界
+        - test(opencode): 覆盖 PaperRun API 生命周期、SSE、guidance、preview/export、capabilities、doctor、providers 和 model roles
+    :src
+        - packages/opencode/src/paper/run.ts - PaperRun public state projection and API helpers
+        - packages/opencode/src/server/routes/instance/httpapi/groups/paper.ts - PaperRun HttpApi schema group
+        - packages/opencode/src/server/routes/instance/httpapi/handlers/paper.ts - PaperRun HttpApi handlers
+        - packages/opencode/src/server/routes/instance/httpapi/api.ts - InstanceHttpApi PaperApi registration
+        - packages/opencode/src/server/routes/instance/httpapi/server.ts - paperHandlers route layer registration
+        - packages/opencode/test/paper/run-api.test.ts - PaperRun API integration test
+        - reports/paper-run-api.md - PaperRun API implementation report
+        - README.md - PaperRun API documentation and version update
+        - CHANGELOG - 0.2.2-dev history entry
+    :verification
+        - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/run-api.test.ts passed: 1 pass, 0 fail, 23 expects
+        - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
 
     0.2.1-dev - 2026/05/09 (3debb73) [develop]
     :brief 将 paper_fucker 论文运行时迁入 OpenCode hard fork

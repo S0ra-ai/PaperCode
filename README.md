@@ -1,6 +1,6 @@
 # paper_fucker
 
-Current version: <!-- version:start -->0.2.1-dev<!-- version:end -->
+Current version: <!-- version:start -->0.2.2-dev<!-- version:end -->
 
 `paper_fucker` is a private-first, OpenCode-derived closed-loop paper system. It turns a topic, codebase, dataset, experiment log, or paper material set into a verifiable academic-paper bundle with research planning, source discovery, code understanding, experiment/reproduction support, ClaimLedger-first writing, authenticity gates, profile-aware formatting, preview, and export.
 
@@ -14,6 +14,7 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - Supported input modes are topic-to-paper, code-to-paper, data-to-paper, experiment-log-to-paper, and mixed-materials-to-paper.
 - Model selection is role-based and OpenCode-provider-agnostic. The paper workflow resolves planner, literature researcher, code analyst, experiment designer, writer, reviewer, citation checker, and cheap summarizer roles from OpenCode `provider/model` ids.
 - The authoritative research contracts and paper_fucker runtime now live inside the OpenCode hard fork under `packages/opencode/src/paper`.
+- `PaperRun` is now the first-class user-visible state model. Instance HTTP API routes under `/paper` create runs, stream run snapshots, record guidance, expose preview/export status, list capabilities, run doctor diagnostics, discover providers, and resolve model roles.
 - Research runs are stored workspace-first under `<workspace>/.paper_fucker/runs/<run-id>`, with `~/.paper_fucker/runs/<run-id>` as the fallback.
 - Runtime operations are automatic API calls, not workflows that require users to keep typing shell commands.
 - Initialization writes config, linked tool paths, and encrypted secrets under `~/.paper_fucker`; it does not write credentials to `.env` or repository files.
@@ -55,6 +56,9 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - `packages/opencode/src/paper/tui-state.ts`: renderer-independent Chinese TUI workbench state adapter for home and run views.
 - `packages/opencode/src/paper/authoring.ts`: run-bound authoring loop adapter for ClaimLedger-first drafts, profile-aware revision, verification, final/forced export, supplementary bundle, and code/data availability bundle.
 - `packages/opencode/src/paper/preview.ts`: read-only PreviewSnapshot adapter that binds drafts, export files, claim/citation/reviewer annotations, costs, agents, and tool diagnostics to a run.
+- `packages/opencode/src/paper/run.ts`: first-class `PaperRun` state projection over research runtime facts, including intake, stage graph, source ledger, claim ledger, experiment status, agent tree, diagnostics, pause questions, preview state, and export state.
+- `packages/opencode/src/server/routes/instance/httpapi/groups/paper.ts`: `/paper` HttpApi schema group for PaperRun lifecycle, SSE, guidance, preview, export, capability, doctor, provider discovery, and model-role endpoints.
+- `packages/opencode/src/server/routes/instance/httpapi/handlers/paper.ts`: PaperRun HttpApi handlers that bind OpenCode instance context to workspace-first run storage and internal provider/model substrate.
 - `packages/opencode/src/paper/research/orchestrator/`: automatic topic-to-paper stage graph, Full Access pause policy, checkpoint guidance queue, and run controls.
 - `packages/opencode/src/paper/research/templates/`: trusted template resolution, source evidence/confidence policy, and Markdown-to-LaTeX application through the Python bridge.
 - `packages/opencode/src/paper/research/sources/`: open-source-first literature and dataset discovery, source verification metadata, license/access checks, and automatic nearby-direction feasibility turns.
@@ -98,6 +102,8 @@ Important early tasks:
 - `task-029-tui-paper-workbench`: OpenCode TUI refactor into paper workbench.
 - `task-030-paper-authoring-loop`: run-bound preview, review, revision, and export loop.
 - `task-031-strict-live-acceptance`: final strict live acceptance for the complete paper system.
+- `task-032-opencode-paper-core-migration`: migrate paper_fucker domain runtime into the OpenCode hard fork.
+- `task-033-paper-run-api`: expose `PaperRun` as first-class `/paper` HTTP/SSE API state.
 
 ## Branching
 
