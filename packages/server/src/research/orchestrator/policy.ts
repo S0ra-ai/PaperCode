@@ -14,6 +14,7 @@ export type StagePolicySignal = {
   source_license_conflict?: string
   low_confidence?: number
   cost_anomaly?: boolean
+  stage_failure?: string
 }
 
 export type StagePolicyDecision =
@@ -62,6 +63,16 @@ export function decideAutomaticStagePolicy(input: {
         reason: "source_license_conflict",
         stage: input.stage,
         message: `Source or license conflict: ${signal.source_license_conflict}`,
+      },
+    }
+  }
+  if (signal.stage_failure) {
+    return {
+      action: "pause",
+      condition: {
+        reason: "stage_failure",
+        stage: input.stage,
+        message: `Stage failure: ${signal.stage_failure}`,
       },
     }
   }

@@ -1,6 +1,6 @@
 id: task-026-real-orchestrator
 title: Replace stub stage completion with real paper orchestrator graph
-status: todo
+status: done
 priority: high
 owner: codex
 tags:
@@ -19,7 +19,7 @@ execution:
 steps:
 - id: task-026-step-01-red-orchestrator-test
   title: Add failing orchestrator no-stub tests
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: Test that default stages do not complete with stub handler summaries
@@ -28,12 +28,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T00:13:01.321305'
+      level: info
+      message: Starting TDD RED step for paper orchestrator graph, no stub completion,
+        missing handler/capability blocked diagnostics, and full custom handler graph
+        execution.
+      agent: codex
+    - timestamp: '2026-05-09T00:13:47.880250'
+      level: info
+      message: 'Added packages/server/test/paper/orchestrator.test.ts. RED verified:
+        test fails because PAPER_RESEARCH_STAGE_IDS is not exported from packages/server/src/paper/index.ts.'
+      agent: codex
+    last_run: '2026-05-09T00:13:47.880250'
+    attempt_count: 2
   meta: {}
 - id: task-026-step-02-stage-graph
   title: Implement paper stage graph
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-026-step-01-red-orchestrator-test
@@ -42,12 +54,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T00:13:51.712558'
+      level: info
+      message: Implementing complete paper stage graph and snapshot runner types under
+        packages/server/src/paper/orchestrator.ts.
+      agent: codex
+    - timestamp: '2026-05-09T00:15:43.846822'
+      level: info
+      message: 'Implemented packages/server/src/paper/orchestrator.ts and exported
+        it. Paper orchestrator tests pass for complete 14-stage graph, no-stub blocked
+        behavior, and full custom handler execution: 3 pass, 0 fail, 10 expects.'
+      agent: codex
+    last_run: '2026-05-09T00:15:43.846822'
+    attempt_count: 2
   meta: {}
 - id: task-026-step-03-default-handlers
   title: Implement default handlers
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-026-step-02-stage-graph
@@ -57,12 +81,27 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T00:15:51.824859'
+      level: info
+      message: 'Removing legacy stub completion path and validating default paper
+        handlers: intake records real ResearchBrief; later missing handlers/capabilities
+        return BlockedDiagnostic.v1 instead of fake success.'
+      agent: codex
+    - timestamp: '2026-05-09T00:17:10.707155'
+      level: info
+      message: 'Implemented no-stub behavior: paper orchestrator writes BlockedDiagnostic.v1
+        for missing capabilities/handlers; legacy research orchestrator fallback now
+        pauses with stage_failure instead of completing. Updated research orchestrator
+        tests to use explicit handlers. Combined orchestrator tests pass: 5 pass,
+        0 fail, 21 expects.'
+      agent: codex
+    last_run: '2026-05-09T00:17:10.707155'
+    attempt_count: 2
   meta: {}
 - id: task-026-step-04-doc-version
   title: Update docs and version 0.1.23-dev
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-026-step-03-default-handlers
@@ -71,12 +110,23 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T00:17:14.892711'
+      level: info
+      message: Updating README/CHANGELOG to 0.1.23-dev and adding real orchestrator
+        implementation report.
+      agent: codex
+    - timestamp: '2026-05-09T00:17:51.613566'
+      level: info
+      message: README updated to 0.1.23-dev, CHANGELOG colon-history entry added with
+        pending hash, and reports/real-orchestrator.md added.
+      agent: codex
+    last_run: '2026-05-09T00:17:51.613566'
+    attempt_count: 2
   meta: {}
 - id: task-026-step-05-verify
   title: Run verification
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-026-step-04-doc-version
@@ -85,8 +135,20 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T00:17:58.761282'
+      level: info
+      message: Running orchestrator tests, server typecheck, README/CHANGELOG version
+        check after hash backfill, and TaskFlow validation.
+      agent: codex
+    - timestamp: '2026-05-09T00:21:11.502356'
+      level: info
+      message: 'Verification passed: orchestrator tests 5 pass/0 fail/21 expects;
+        server typecheck passed; README version 0.1.23-dev matches CHANGELOG; TaskFlow
+        validate_task task-026-real-orchestrator valid with no warnings.'
+      agent: codex
+    last_run: '2026-05-09T00:21:11.502356'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -100,5 +162,5 @@ trace:
   attempt_count: 0
 meta:
   created_at: '2026-05-08T22:09:35.421631'
-  updated_at: '2026-05-08T22:09:35.421631'
+  updated_at: '2026-05-09T00:21:15.105243'
   version: '1'
