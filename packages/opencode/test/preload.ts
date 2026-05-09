@@ -12,13 +12,16 @@ await fs.mkdir(dir, { recursive: true })
 afterAll(async () => {
   const { Database } = await import("../src/storage/db")
   Database.close()
-  const busy = (error: unknown) =>
-    typeof error === "object" && error !== null && "code" in error && error.code === "EBUSY"
+  const retryable = (error: unknown) =>
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    (error.code === "EBUSY" || error.code === "EACCES" || error.code === "EPERM")
   const rm = async (left: number): Promise<void> => {
     Bun.gc(true)
-    await sleep(100)
+    await sleep(150)
     return fs.rm(dir, { recursive: true, force: true }).catch((error) => {
-      if (!busy(error)) throw error
+      if (!retryable(error)) throw error
       if (left <= 1) throw error
       return rm(left - 1)
     })
@@ -26,7 +29,7 @@ afterAll(async () => {
 
   // Windows can keep SQLite WAL handles alive until GC finalizers run, so we
   // force GC and retry teardown to avoid flaky EBUSY in test cleanup.
-  await rm(30)
+  await rm(80)
 })
 
 process.env["XDG_DATA_HOME"] = path.join(dir, "share")
@@ -46,6 +49,10 @@ process.env["OPENCODE_TEST_HOME"] = testHome
 const testManagedConfigDir = path.join(dir, "managed")
 process.env["OPENCODE_TEST_MANAGED_CONFIG_DIR"] = testManagedConfigDir
 process.env["OPENCODE_DISABLE_DEFAULT_PLUGINS"] = "true"
+
+if (process.platform === "win32") {
+  process.env["WINDIR"] ??= process.env["SystemRoot"] ?? "C:\\Windows"
+}
 
 // Write the cache version file to prevent global/index.ts from clearing the cache
 const cacheDir = path.join(dir, "cache", "opencode")
