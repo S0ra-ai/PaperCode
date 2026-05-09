@@ -2,10 +2,35 @@
 :author        s0ra (https://github.com/S0ra-ai)
 :repo          
 :desc          记录项目的重大变更和版本历史
-:version       0.2.3-dev
+:version       0.2.4-dev
 :last_update   2026/05/09
 
 :history
+
+    0.2.4-dev - 2026/05/09 (dd2fd98) [develop]
+    :brief 新增 OpenAI-compatible Provider/Model 角色向导基础
+        - feat(models): 新增 ProviderEndpointConfig 与 OpenAI-compatible /models discovery, 支持 base_url、api_key、compatibility、timeout diagnostics
+        - feat(secrets): provider public config 写入 ~/.paper_fucker/providers, API key 仅写入 ~/.paper_fucker/local/provider-secrets.json
+        - feat(roles): 新增 ModelRoleAssignment, 支持 default、per-role、subagent override 解析
+        - feat(api): /paper/providers/discover 支持用户端点 POST discovery, /paper/model-roles 支持 assignment resolve
+        - feat(tui): 新增 Paper model roles dialog command, TUI 可查看当前角色模型解析
+        - docs(readme): 版本更新为 0.2.4-dev, 记录 provider discovery 与 secret-safe model config
+        - test(models): 覆盖 /models discovery、API key 不泄漏、secret-safe storage 与 role/subagent override
+    :src
+        - packages/opencode/src/paper/model-discovery.ts - OpenAI-compatible provider discovery and storage
+        - packages/opencode/src/paper/model-roles.ts - model role and subagent override resolver
+        - packages/opencode/src/paper/index.ts - paper model discovery/roles exports
+        - packages/opencode/src/server/routes/instance/httpapi/groups/paper.ts - provider discovery and model role assignment payloads
+        - packages/opencode/src/server/routes/instance/httpapi/handlers/paper.ts - provider discovery and model role assignment handlers
+        - packages/opencode/src/cli/cmd/tui/component/dialog-paper-model-roles.tsx - TUI model role dialog
+        - packages/opencode/src/cli/cmd/tui/app.tsx - paper model roles command registration
+        - packages/opencode/test/paper/model-discovery.test.ts - discovery/storage/role tests
+        - reports/provider-model-wizard.md - provider wizard implementation report
+        - README.md - provider/model wizard documentation and version update
+        - CHANGELOG - 0.2.4-dev history entry
+    :verification
+        - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/model-discovery.test.ts passed: 3 pass, 0 fail, 13 expects
+        - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
 
     0.2.3-dev - 2026/05/09 (476b978) [develop]
     :brief 将 TUI 默认入口改为中文 PaperRun 论文工作台
