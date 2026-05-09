@@ -2,10 +2,56 @@
 :author        s0ra (https://github.com/S0ra-ai)
 :repo          
 :desc          记录项目的重大变更和版本历史
-:version       0.2.4-dev
+:version       0.2.5-dev
 :last_update   2026/05/09
 
 :history
+
+    0.2.5-dev - 2026/05/09 (5786258) [develop]
+    :brief 新增多层多模型 Agent 编排与私有优先数据外传策略
+        - feat(agents): 新增 AgentRoleRouter 与 PaperAgentTree, 支持 root/stage/worker/specialist/reviewer/verifier/citation 多层子 agent
+        - feat(models): 父 agent、子 agent、specialist subagent 可解析不同 OpenCode provider/model, 并记录 model source 与 artifact provenance
+        - feat(budget): 新增 quick/standard/deep/submission/custom 预算档, 约束最大深度、并发、live search、container reproduction 与成本上限
+        - feat(egress): 新增 private-first DataEgressPolicy, 阻断未授权路径、denied patterns、secret-like paths 与 binary artifacts
+        - feat(run): PaperRun Agent Tree 公开状态复用统一预算策略, 暴露 max_depth、max_parallel 与 cost cap
+        - fix(config): ensureGitignore 写入前创建 ~/.paper_fucker/config 目录, 修复 Windows skill directory 权限测试 ENOENT
+        - fix(paths): containsPath 使用 Windows 专用 containment 判断, 防止跨盘路径和 POSIX-root 路径误判为项目内
+        - test(windows): 修正 Git Bash/MSYS slash 路径、HttpApi PaperRoute allowlist、prompt/shell/compaction 并发测试超时阈值
+        - test(windows): 稳定 native watcher ready/non-git root、PTY output isolation、provider、MCP 与 research e2e 临时目录清理
+        - docs(readme): 版本更新为 0.2.5-dev, 记录多模型 agent、预算档和数据外传边界
+        - test(agents): 覆盖预算档、数据外传审计、多层子 agent、跨模型父子 agent 与 artifact provenance
+    :src
+        - packages/opencode/src/paper/agents.ts - multi-layer PaperAgentTree and AgentRoleRouter runtime
+        - packages/opencode/src/paper/budget.ts - budget tier policy
+        - packages/opencode/src/paper/data-egress.ts - private-first data egress evaluator
+        - packages/opencode/src/paper/run.ts - PaperRun Agent Tree budget policy projection
+        - packages/opencode/src/paper/index.ts - paper agent/budget/egress exports
+        - packages/opencode/src/config/config.ts - config gitignore parent directory creation
+        - packages/opencode/src/project/instance-context.ts - Windows-safe project containment checks
+        - packages/opencode/test/paper/agents.test.ts - agent orchestration tests
+        - packages/opencode/test/file/watcher.test.ts - Windows-stable native watcher readiness and non-git root events
+        - packages/opencode/test/fixture/fixture.ts - Windows temp cleanup retry budget
+        - packages/opencode/test/provider/provider.test.ts - provider plugin config timeout budget
+        - packages/opencode/test/pty/pty-output-isolation.test.ts - PTY output wait stabilization
+        - packages/opencode/test/research/e2e.test.ts - Windows research e2e temp cleanup retry budget
+        - packages/opencode/test/server/httpapi-bridge.test.ts - Paper HttpApi route allowlist
+        - packages/opencode/test/server/httpapi-mcp.test.ts - MCP HttpApi temp project cleanup ordering
+        - packages/opencode/test/shell/shell.test.ts - optional Git Bash path environment guard
+        - packages/opencode/test/tool/external-directory.test.ts - slash-drive Windows path normalization
+        - packages/opencode/test/tool/read.test.ts - slash-drive Windows read path normalization
+        - packages/opencode/test/tool/shell.test.ts - shell-specific timeout command
+        - packages/opencode/test/session/prompt.test.ts - Windows-stable concurrent prompt/shell timeouts
+        - packages/opencode/test/session/compaction.test.ts - Windows-stable retry abort timing
+        - reports/multimodel-agent-orchestration.md - implementation report
+        - README.md - agent orchestration documentation and version update
+        - CHANGELOG - 0.2.5-dev history entry
+    :verification
+        - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/agents.test.ts passed: 4 pass, 0 fail, 11 expects
+        - npx --yes bun@1.3.13 --cwd packages/opencode test passed: 2549 pass, 29 skip, 2 todo, 0 fail, 7379 expects
+        - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+        - npx --yes bun@1.3.13 --cwd packages/preview test passed: 2 pass, 0 fail, 9 expects
+        - python -m unittest discover -s research-tools/tests passed: 4 tests OK
+        - scripts/check-readme-version.ps1 passed: README 0.2.5-dev matches CHANGELOG latest version
 
     0.2.4-dev - 2026/05/09 (dd2fd98) [develop]
     :brief 新增 OpenAI-compatible Provider/Model 角色向导基础

@@ -460,6 +460,7 @@ export const layer = Layer.effect(
       const gitignore = path.join(dir, ".gitignore")
       const hasIgnore = yield* fs.existsSafe(gitignore)
       if (!hasIgnore) {
+        yield* fs.makeDirectory(dir, { recursive: true }).pipe(Effect.orDie)
         yield* fs
           .writeFileString(
             gitignore,

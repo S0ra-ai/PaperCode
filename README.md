@@ -1,6 +1,6 @@
 # paper_fucker
 
-Current version: <!-- version:start -->0.2.4-dev<!-- version:end -->
+Current version: <!-- version:start -->0.2.5-dev<!-- version:end -->
 
 `paper_fucker` is a private-first, OpenCode-derived closed-loop paper system. It turns a topic, codebase, dataset, experiment log, or paper material set into a verifiable academic-paper bundle with research planning, source discovery, code understanding, experiment/reproduction support, ClaimLedger-first writing, authenticity gates, profile-aware formatting, preview, and export.
 
@@ -14,6 +14,8 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - Supported input modes are topic-to-paper, code-to-paper, data-to-paper, experiment-log-to-paper, and mixed-materials-to-paper.
 - Model selection is role-based and OpenCode-provider-agnostic. The paper workflow resolves planner, literature researcher, code analyst, experiment designer, writer, reviewer, citation checker, and cheap summarizer roles from OpenCode `provider/model` ids.
 - OpenAI-compatible provider discovery accepts a user-supplied `base_url` and API key, calls `/models`, stores public provider config under `~/.paper_fucker/providers/`, and stores API keys only under `~/.paper_fucker/local/`.
+- Multi-model agent orchestration now has an explicit `AgentRoleRouter` and `AgentTree`: root, stage, worker, specialist, reviewer, verifier, and citation subagents can resolve different OpenCode provider/model ids while staying under budget-tier depth, parallelism, and cost limits.
+- Data egress is private-first. Agent/tool calls evaluate authorized paths, denied patterns, secret-like files, binary artifacts, and audit events before content may leave the local workspace.
 - The authoritative research contracts and paper_fucker runtime now live inside the OpenCode hard fork under `packages/opencode/src/paper`.
 - `PaperRun` is now the first-class user-visible state model. Instance HTTP API routes under `/paper` create runs, stream run snapshots, record guidance, expose preview/export status, list capabilities, run doctor diagnostics, discover providers, and resolve model roles.
 - The TUI home screen now submits natural Chinese research input to `/paper/runs` and navigates into a PaperRun dashboard instead of creating an ordinary chat session.
@@ -54,6 +56,9 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - `packages/opencode/src/paper/intake.ts`: multi-input research intake normalizer and runtime recorder for `ResearchIntakeRequest` to `ResearchBrief.v1`.
 - `packages/opencode/src/paper/model-discovery.ts`: OpenAI-compatible provider endpoint model discovery and secret-safe provider config storage.
 - `packages/opencode/src/paper/model-roles.ts`: model role assignment resolver for default, per-role, and subagent model overrides.
+- `packages/opencode/src/paper/agents.ts`: multi-layer paper agent tree, role router bridge, per-agent provider/model provenance, budget depth enforcement, and artifact provenance tracing.
+- `packages/opencode/src/paper/budget.ts`: quick/standard/deep/submission/custom budget tier policy for maximum depth, parallelism, live-search behavior, container reproduction, and cost caps.
+- `packages/opencode/src/paper/data-egress.ts`: private-first data egress evaluator for authorized paths, denied patterns, secret-like paths, binary artifacts, and audit traces.
 - `packages/opencode/src/paper/orchestrator.ts`: paper-domain run graph/controller for intake, planning, literature, code analysis, data, experiment design/execution/reproduction, ClaimLedger, drafting, profile formatting, verification, revision, and export.
 - `packages/opencode/src/paper/code-to-paper.ts`: codebase-to-paper static analysis and runtime artifact recording with source-range-bound method, experiment, and reproduction surfaces.
 - `packages/opencode/src/paper/experiment-loop.ts`: paper-domain experiment capability resolver, log metric parser, and reproduction-aware claim eligibility policy.
@@ -111,6 +116,7 @@ Important early tasks:
 - `task-033-paper-run-api`: expose `PaperRun` as first-class `/paper` HTTP/SSE API state.
 - `task-034-dialog-workbench-tui`: turn the TUI default flow into a Chinese PaperRun dialog workbench.
 - `task-035-provider-model-wizard`: OpenAI-compatible provider discovery and model role/subagent assignment.
+- `task-036-multimodel-agent-orchestration`: multi-layer multi-model agent tree, budget tiers, data egress policy, and artifact provenance.
 
 ## Branching
 
