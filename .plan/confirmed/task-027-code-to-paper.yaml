@@ -1,6 +1,6 @@
 id: task-027-code-to-paper
 title: Add codebase-to-paper analysis artifacts
-status: todo
+status: done
 priority: high
 owner: codex
 tags:
@@ -18,7 +18,7 @@ execution:
 steps:
 - id: task-027-step-01-red-code-test
   title: Add failing code-to-paper tests
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: Test codebase map, method extraction, experiment surface, reproduction
@@ -27,12 +27,23 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T00:25:50.274712'
+      level: info
+      message: Starting TDD RED step for CodebaseMap.v1, MethodExtraction.v1, ExperimentSurface.v1,
+        ReproductionPlan.v1, and source range binding.
+      agent: codex
+    - timestamp: '2026-05-09T00:26:35.260656'
+      level: info
+      message: 'Added packages/server/test/paper/code-to-paper.test.ts. RED verified:
+        test fails because analyzeCodebaseForPaper is not exported from packages/server/src/paper/index.ts.'
+      agent: codex
+    last_run: '2026-05-09T00:26:35.260656'
+    attempt_count: 2
   meta: {}
 - id: task-027-step-02-code-artifacts
   title: Implement code research artifacts
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-027-step-01-red-code-test
@@ -41,12 +52,25 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T00:26:40.474502'
+      level: info
+      message: Implementing CodebaseMap.v1, MethodExtraction.v1, ExperimentSurface.v1,
+        ReproductionPlan.v1, source range extraction, and runtime artifact recording.
+      agent: codex
+    - timestamp: '2026-05-09T00:28:38.809950'
+      level: info
+      message: 'Implemented packages/server/src/paper/code-to-paper.ts and exported
+        it. Code-to-paper tests pass for source-range-grounded CodebaseMap/MethodExtraction/ExperimentSurface/ReproductionPlan
+        and runtime artifact recording: 2 pass, 0 fail, 7 expects. Fixed artifact
+        recording to write sequentially to avoid run.json rename races on Windows.'
+      agent: codex
+    last_run: '2026-05-09T00:28:38.809950'
+    attempt_count: 2
   meta: {}
 - id: task-027-step-03-capability-integration
   title: Integrate code capabilities
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-027-step-02-code-artifacts
@@ -56,12 +80,26 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T00:28:43.513377'
+      level: info
+      message: 'Validating code_analysis capability integration: default ResearchCapabilityRegistry
+        already exposes opencode.read/grep/glob/task for code_analysis, and code-to-paper
+        artifacts bind outputs to source ranges.'
+      agent: codex
+    - timestamp: '2026-05-09T00:28:50.736330'
+      level: info
+      message: 'Capability integration verified against task-023 defaults: opencode.read,
+        opencode.grep, opencode.glob, and opencode.task are registered for code_analysis.
+        Code-to-paper module consumes workspace paths and produces source-range-bound
+        artifacts for orchestrator code_analysis stage.'
+      agent: codex
+    last_run: '2026-05-09T00:28:50.736330'
+    attempt_count: 2
   meta: {}
 - id: task-027-step-04-doc-version
   title: Update docs and version 0.1.24-dev
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-027-step-03-capability-integration
@@ -70,12 +108,22 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T00:28:54.749490'
+      level: info
+      message: Updating README/CHANGELOG to 0.1.24-dev and adding code-to-paper report.
+      agent: codex
+    - timestamp: '2026-05-09T00:29:26.986015'
+      level: info
+      message: README updated to 0.1.24-dev, CHANGELOG colon-history entry added with
+        pending hash, and reports/code-to-paper.md added.
+      agent: codex
+    last_run: '2026-05-09T00:29:26.986015'
+    attempt_count: 2
   meta: {}
 - id: task-027-step-05-verify
   title: Run verification
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-027-step-04-doc-version
@@ -84,8 +132,20 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T00:29:31.100889'
+      level: info
+      message: Running code-to-paper tests, server typecheck, README/CHANGELOG version
+        check after hash backfill, and TaskFlow validation.
+      agent: codex
+    - timestamp: '2026-05-09T00:33:02.366979'
+      level: info
+      message: 'Verification passed: code-to-paper tests 2 pass/0 fail/7 expects;
+        server typecheck passed; README version 0.1.24-dev matches CHANGELOG; TaskFlow
+        validate_task task-027-code-to-paper valid with no warnings.'
+      agent: codex
+    last_run: '2026-05-09T00:33:02.366979'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -99,5 +159,5 @@ trace:
   attempt_count: 0
 meta:
   created_at: '2026-05-08T22:09:46.337768'
-  updated_at: '2026-05-08T22:09:46.337768'
+  updated_at: '2026-05-09T00:33:07.335411'
   version: '1'
