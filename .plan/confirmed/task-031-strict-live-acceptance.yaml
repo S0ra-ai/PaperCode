@@ -1,6 +1,6 @@
 id: task-031-strict-live-acceptance
 title: Add strict live acceptance for complete paper system
-status: todo
+status: in_progress
 priority: high
 owner: codex
 tags:
@@ -20,7 +20,7 @@ execution:
 steps:
 - id: task-031-step-01-red-acceptance-test
   title: Add failing strict acceptance script tests
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: Test strict acceptance script composition, secret scan behavior, and
@@ -29,12 +29,26 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T01:10:55.465172'
+      level: info
+      message: Starting TDD RED step for strict acceptance script inventory, secret
+        scan behavior, and report composition. Script will default to strict mode;
+        fixture/mock mode is only for deterministic tests.
+      agent: codex
+    - timestamp: '2026-05-09T01:11:37.752250'
+      level: info
+      message: 'Added packages/server/test/paper/strict-acceptance.test.ts. RED verified:
+        test fails because scripts/strict-acceptance.ps1 is missing, so the required
+        strict live check inventory, live smoke functions, tracked secret scan, and
+        report path are not present.'
+      agent: codex
+    last_run: '2026-05-09T01:11:37.752250'
+    attempt_count: 2
   meta: {}
 - id: task-031-step-02-strict-script
   title: Implement strict acceptance script
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-031-step-01-red-acceptance-test
@@ -44,12 +58,25 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T01:11:42.775996'
+      level: info
+      message: Implementing scripts/strict-acceptance.ps1 with required check inventory,
+        tracked secret scan, report output, and strict live gating.
+      agent: codex
+    - timestamp: '2026-05-09T01:16:32.348672'
+      level: info
+      message: 'Implemented scripts/strict-acceptance.ps1 with the complete required
+        check inventory, strict-by-default live provider/Exa/toolchain gates, tracked-only
+        git secret scan, markdown report writer, and deterministic -FixtureMode support.
+        strict-acceptance.test.ts now passes: 3 pass, 0 fail, 26 expects.'
+      agent: codex
+    last_run: '2026-05-09T01:16:32.348672'
+    attempt_count: 2
   meta: {}
 - id: task-031-step-03-live-smoke-harness
   title: Add live smoke harness
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-031-step-02-strict-script
@@ -59,12 +86,28 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T01:16:36.663371'
+      level: info
+      message: Validating and tightening live smoke harness functions for DeepSeek,
+        Exa MCP initialize, Nature guidance, pandoc conversion, LaTeX PDF, DOCX, topic-to-paper,
+        and code-to-paper.
+      agent: codex
+    - timestamp: '2026-05-09T01:21:38.972977'
+      level: info
+      message: Strict smoke harness implemented and fixture-verified. The script includes
+        DeepSeek live /models + chat completion smoke, Exa remote MCP initialize smoke,
+        Nature skill plus official guidance smoke, pandoc Markdown-to-LaTeX, LaTeX
+        PDF generation, DOCX generation, topic-to-paper runtime smoke, code-to-paper
+        runtime smoke, and Git Flow branch discipline check. Fixture-mode script run
+        passed and generated reports/strict-live-acceptance.md.
+      agent: codex
+    last_run: '2026-05-09T01:21:38.972977'
+    attempt_count: 2
   meta: {}
 - id: task-031-step-04-doc-version
   title: Update docs and version 0.2.0-dev
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-031-step-03-live-smoke-harness
@@ -73,12 +116,25 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T01:21:47.978135'
+      level: info
+      message: Updating README/CHANGELOG to 0.2.0-dev and documenting strict acceptance
+        entrypoint/report.
+      agent: codex
+    - timestamp: '2026-05-09T01:22:36.179298'
+      level: info
+      message: Updated README and colon-history CHANGELOG to 0.2.0-dev, documented
+        scripts/strict-acceptance.ps1, and added reports/strict-live-acceptance.md
+        as the generated acceptance report path. CHANGELOG commit id remains pending
+        until the feature commit is created and backfilled.
+      agent: codex
+    last_run: '2026-05-09T01:22:36.179298'
+    attempt_count: 2
   meta: {}
 - id: task-031-step-05-verify
   title: Run final verification
-  status: todo
+  status: in_progress
   owner: codex
   depends_on:
   - task-031-step-04-doc-version
@@ -88,8 +144,14 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T01:22:44.212452'
+      level: info
+      message: Running strict acceptance script tests and typechecks before commit,
+        then backfilling the CHANGELOG hash and running strict-live acceptance.
+      agent: codex
+    last_run: '2026-05-09T01:22:44.212452'
+    attempt_count: 1
   meta: {}
 outputs:
 - type: file
@@ -104,7 +166,10 @@ outputs:
 trace:
   logs: []
   attempt_count: 0
+lock:
+  by: codex
+  at: '2026-05-09T01:10:25.876321'
 meta:
   created_at: '2026-05-08T22:10:32.984319'
-  updated_at: '2026-05-08T22:10:32.984319'
+  updated_at: '2026-05-09T01:22:44.212452'
   version: '1'
