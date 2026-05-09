@@ -1832,11 +1832,11 @@ describe("ProviderTransform.message - strip openai metadata when store=false", (
   })
 
   test("preserves metadata using providerID key when store is false", () => {
-    const opencodeModel = {
+    const paperFuckerModel = {
       ...openaiModel,
-      providerID: "opencode",
+      providerID: "paper_fucker",
       api: {
-        id: "opencode-test",
+        id: "paper-fucker-test",
         url: "https://api.paper_fucker.ai",
         npm: "@ai-sdk/openai-compatible",
       },
@@ -1849,7 +1849,7 @@ describe("ProviderTransform.message - strip openai metadata when store=false", (
             type: "text",
             text: "Hello",
             providerOptions: {
-              opencode: {
+              paper_fucker: {
                 itemId: "msg_123",
                 otherOption: "value",
               },
@@ -1859,18 +1859,18 @@ describe("ProviderTransform.message - strip openai metadata when store=false", (
       },
     ] as any[]
 
-    const result = ProviderTransform.message(msgs, opencodeModel, { store: false }) as any[]
+    const result = ProviderTransform.message(msgs, paperFuckerModel, { store: false }) as any[]
 
     expect(result[0].content[0].providerOptions?.paper_fucker?.itemId).toBe("msg_123")
     expect(result[0].content[0].providerOptions?.paper_fucker?.otherOption).toBe("value")
   })
 
   test("preserves itemId across all providerOptions keys", () => {
-    const opencodeModel = {
+    const paperFuckerModel = {
       ...openaiModel,
-      providerID: "opencode",
+      providerID: "paper_fucker",
       api: {
-        id: "opencode-test",
+        id: "paper-fucker-test",
         url: "https://api.paper_fucker.ai",
         npm: "@ai-sdk/openai-compatible",
       },
@@ -1880,7 +1880,7 @@ describe("ProviderTransform.message - strip openai metadata when store=false", (
         role: "assistant",
         providerOptions: {
           openai: { itemId: "msg_root" },
-          opencode: { itemId: "msg_opencode" },
+          paper_fucker: { itemId: "msg_paper_fucker" },
           extra: { itemId: "msg_extra" },
         },
         content: [
@@ -1889,7 +1889,7 @@ describe("ProviderTransform.message - strip openai metadata when store=false", (
             text: "Hello",
             providerOptions: {
               openai: { itemId: "msg_openai_part" },
-              opencode: { itemId: "msg_opencode_part" },
+              paper_fucker: { itemId: "msg_paper_fucker_part" },
               extra: { itemId: "msg_extra_part" },
             },
           },
@@ -1897,13 +1897,13 @@ describe("ProviderTransform.message - strip openai metadata when store=false", (
       },
     ] as any[]
 
-    const result = ProviderTransform.message(msgs, opencodeModel, { store: false }) as any[]
+    const result = ProviderTransform.message(msgs, paperFuckerModel, { store: false }) as any[]
 
     expect(result[0].providerOptions?.openai?.itemId).toBe("msg_root")
-    expect(result[0].providerOptions?.paper_fucker?.itemId).toBe("msg_opencode")
+    expect(result[0].providerOptions?.paper_fucker?.itemId).toBe("msg_paper_fucker")
     expect(result[0].providerOptions?.extra?.itemId).toBe("msg_extra")
     expect(result[0].content[0].providerOptions?.openai?.itemId).toBe("msg_openai_part")
-    expect(result[0].content[0].providerOptions?.paper_fucker?.itemId).toBe("msg_opencode_part")
+    expect(result[0].content[0].providerOptions?.paper_fucker?.itemId).toBe("msg_paper_fucker_part")
     expect(result[0].content[0].providerOptions?.extra?.itemId).toBe("msg_extra_part")
   })
 
