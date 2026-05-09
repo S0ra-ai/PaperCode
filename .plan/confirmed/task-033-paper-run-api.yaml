@@ -1,6 +1,6 @@
 id: task-033-paper-run-api
 title: Add first-class PaperRun HTTP API
-status: todo
+status: done
 priority: critical
 owner: codex
 tags:
@@ -20,7 +20,7 @@ execution:
 steps:
 - id: task-033-step-01-red-api-tests
   title: Add failing PaperRun API tests
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: Add tests for /paper/runs create/get, /paper/runs/:id/events, /paper/runs/:id/guidance,
@@ -30,12 +30,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T07:11:48.012375'
+      level: info
+      message: Starting PaperRun API task on feature/paper-run-api. Branch created
+        manually after task claim modified the TaskFlow lock file on develop.
+      agent: codex
+    - timestamp: '2026-05-09T07:16:01.715943'
+      level: info
+      message: Added PaperRun API red test at packages/opencode/test/paper/run-api.test.ts.
+        Verification failed as expected because ../../src/server/routes/instance/httpapi/groups/paper
+        does not exist yet, proving the new /paper API surface is not implemented.
+      agent: codex
+    last_run: '2026-05-09T07:16:01.715943'
+    attempt_count: 2
   meta: {}
 - id: task-033-step-02-types-and-store
   title: Implement PaperRun public types and store adapters
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-033-step-01-red-api-tests
@@ -46,12 +58,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T07:16:05.200532'
+      level: info
+      message: Implementing PaperRun public types and runtime projection backed by
+        migrated research runtime.
+      agent: codex
+    - timestamp: '2026-05-09T07:24:42.489131'
+      level: info
+      message: Implemented PaperRun public state types and runtime projection in packages/opencode/src/paper/run.ts,
+        backed by the migrated research runtime, intake records, stage graph, agent
+        tree, diagnostics, preview state, export state, and model role defaults.
+      agent: codex
+    last_run: '2026-05-09T07:24:42.489131'
+    attempt_count: 2
   meta: {}
 - id: task-033-step-03-http-routes
   title: Implement /paper HTTP routes and handlers
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-033-step-02-types-and-store
@@ -61,12 +85,25 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T07:24:42.909521'
+      level: info
+      message: PaperRun HttpApi routes and handlers are implemented; running typecheck
+        and targeted tests before marking route step complete.
+      agent: codex
+    - timestamp: '2026-05-09T07:25:59.803179'
+      level: info
+      message: Implemented packages/opencode/src/server/routes/instance/httpapi/groups/paper.ts
+        and handlers/paper.ts, wired PaperApi into InstanceHttpApi/server routes,
+        and verified npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/run-api.test.ts
+        plus opencode typecheck pass.
+      agent: codex
+    last_run: '2026-05-09T07:25:59.803179'
+    attempt_count: 2
   meta: {}
 - id: task-033-step-04-doc-version
   title: Update docs and version 0.2.2-dev
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-033-step-03-http-routes
@@ -76,12 +113,25 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T07:26:08.826043'
+      level: info
+      message: Updating README PaperRun API documentation, CHANGELOG colon-history
+        entry, and version sync to 0.2.2-dev.
+      agent: codex
+    - timestamp: '2026-05-09T07:27:24.923955'
+      level: info
+      message: Updated README to 0.2.2-dev with PaperRun API and route boundary documentation,
+        added CHANGELOG 0.2.2-dev colon-history entry with temporary hash placeholder
+        for later backfill, added reports/paper-run-api.md, and verified scripts/check-readme-version.ps1
+        passes.
+      agent: codex
+    last_run: '2026-05-09T07:27:24.923955'
+    attempt_count: 2
   meta: {}
 - id: task-033-step-05-verify
   title: Verify PaperRun API
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-033-step-04-doc-version
@@ -91,8 +141,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T07:27:25.349762'
+      level: info
+      message: 'Running PaperRun API verification: opencode API test, opencode typecheck,
+        preview tests, Python research-tools tests, README version check, and TaskFlow
+        validate_task.'
+      agent: codex
+    - timestamp: '2026-05-09T07:28:57.763702'
+      level: info
+      message: 'Verification passed: npx --yes bun@1.3.13 --cwd packages/opencode
+        test test/paper/run-api.test.ts (1 pass, 0 fail, 23 expects); npx --yes bun@1.3.13
+        run --cwd packages/opencode typecheck; npx --yes bun@1.3.13 --cwd packages/preview
+        test (2 pass, 0 fail, 9 expects); PYTHONPATH=research-tools/src python -m
+        unittest discover -s research-tools/tests (4 tests OK); scripts/check-readme-version.ps1;
+        TaskFlow validate_task task-033-paper-run-api.'
+      agent: codex
+    last_run: '2026-05-09T07:28:57.763702'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -109,5 +175,5 @@ trace:
   attempt_count: 0
 meta:
   created_at: '2026-05-09T02:49:26.218304'
-  updated_at: '2026-05-09T02:49:26.218304'
+  updated_at: '2026-05-09T07:32:29.692027'
   version: '1'
