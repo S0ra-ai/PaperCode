@@ -7,6 +7,15 @@ import { Pty } from "../../src/pty"
 import { tmpdir } from "../fixture/fixture"
 import { setTimeout as sleep } from "node:timers/promises"
 
+async function waitForOutput(output: string[], expected: string) {
+  const deadline = Date.now() + 5_000
+  while (Date.now() < deadline) {
+    if (output.join("").includes(expected)) return
+    await sleep(20)
+  }
+  throw new Error(`timed out waiting for PTY output: ${expected}`)
+}
+
 describe("pty", () => {
   test("does not leak output when websocket objects are reused", async () => {
     await using dir = await tmpdir({ git: true })
@@ -134,7 +143,7 @@ describe("pty", () => {
               ctx.connId = 2
 
               yield* pty.write(a.id, "AAA\n")
-              yield* Effect.promise(() => sleep(100))
+              yield* Effect.promise(() => waitForOutput(out, "AAA"))
 
               expect(out.join("")).toContain("AAA")
             } finally {

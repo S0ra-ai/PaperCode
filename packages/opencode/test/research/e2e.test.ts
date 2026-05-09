@@ -9,13 +9,18 @@ import { createResearchRun, getResearchRunStatus, type ResearchRuntimeOptions } 
 import { discoverAndRecordLiteratureData, type DatasetCandidate, type SourceCandidate } from "@/paper/research/sources"
 import { resolveAndRecordTemplate } from "@/paper/research/templates"
 import { recordVerificationGate } from "@/paper/research/verification"
-import { composeClaimLedger, composeDraftPaper, recordDraftWriting, streamMarkdownDraft } from "@/paper/research/writing"
+import {
+  composeClaimLedger,
+  composeDraftPaper,
+  recordDraftWriting,
+  streamMarkdownDraft,
+} from "@/paper/research/writing"
 
 const now = "2026-05-09T00:00:00Z"
 
-async function clean(dir: string, attempts = 30): Promise<void> {
+async function clean(dir: string, attempts = 80): Promise<void> {
   Bun.gc(true)
-  await sleep(100)
+  await sleep(200)
   return rm(dir, { recursive: true, force: true }).catch((error) => {
     if (attempts <= 1) throw error
     return clean(dir, attempts - 1)
@@ -95,7 +100,11 @@ describe("research pipeline end-to-end acceptance", () => {
       const options = runtimeOptions(workspace, home)
       const handle = await createResearchRun({ topic: "Claim-aware LLM retrieval evaluation" }, options)
 
-      const template = await resolveAndRecordTemplate(handle.run_dir, { run_id: handle.run.run_id, venue: "IEEE" }, options)
+      const template = await resolveAndRecordTemplate(
+        handle.run_dir,
+        { run_id: handle.run.run_id, venue: "IEEE" },
+        options,
+      )
       expect(template.resolution.action).toBe("adopt")
 
       const discovery = await discoverAndRecordLiteratureData(
@@ -120,7 +129,11 @@ describe("research pipeline end-to-end acceptance", () => {
         dataset_ids: discovery.data_plan.datasets.map((item) => item.dataset_id),
         now,
       })
-      const experiments = await recordExperimentLoop(handle.run_dir, { plan: experimentPlan, host_runner: runner, container_runner: runner }, options)
+      const experiments = await recordExperimentLoop(
+        handle.run_dir,
+        { plan: experimentPlan, host_runner: runner, container_runner: runner },
+        options,
+      )
       expect(experiments.report.final_claims_allowed).toBe(true)
 
       const ledger = composeClaimLedger({
@@ -137,7 +150,11 @@ describe("research pipeline end-to-end acceptance", () => {
         now,
       })
       const draft = composeDraftPaper({ title: "Claim-aware LLM Retrieval Evaluation", ledger, now })
-      const writing = await recordDraftWriting(handle.run_dir, { ledger, draft, chunks: [...streamMarkdownDraft(draft)] }, options)
+      const writing = await recordDraftWriting(
+        handle.run_dir,
+        { ledger, draft, chunks: [...streamMarkdownDraft(draft)] },
+        options,
+      )
       expect(writing.ledger.unsupported_claim_ids).toEqual([])
 
       const verification = await recordVerificationGate(
@@ -147,7 +164,10 @@ describe("research pipeline end-to-end acceptance", () => {
           draft,
           data_plan: discovery.data_plan,
           result_report: experiments.report,
-          available_source_ids: [...discovery.literature.sources.map((item) => item.source_id), ...discovery.data_plan.datasets.map((item) => item.source_id)],
+          available_source_ids: [
+            ...discovery.literature.sources.map((item) => item.source_id),
+            ...discovery.data_plan.datasets.map((item) => item.source_id),
+          ],
           model_reviews: [
             { model: "deepseek-v4-pro", verdict: "pass" },
             { model: "deepseek-v4-pro-review", verdict: "pass" },
@@ -205,7 +225,9 @@ describe("research pipeline end-to-end acceptance", () => {
 
       const ledger = composeClaimLedger({
         topic: "Unsafe final export fixture",
-        claims: [{ text: "Unsupported claim.", section_id: "discussion", confidence: 0.2, source_ids: [], artifact_ids: [] }],
+        claims: [
+          { text: "Unsupported claim.", section_id: "discussion", confidence: 0.2, source_ids: [], artifact_ids: [] },
+        ],
         now,
       })
       const draft = composeDraftPaper({ title: "Unsafe Final Export Fixture", ledger, now })

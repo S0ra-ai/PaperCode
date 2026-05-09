@@ -230,9 +230,21 @@ describe("HttpApi server", () => {
       "GET /api/session",
       "GET /api/session/{sessionID}/context",
       "GET /api/session/{sessionID}/message",
+      "GET /paper/capabilities",
+      "GET /paper/doctor",
+      "GET /paper/model-roles",
+      "GET /paper/providers/discover",
+      "GET /paper/runs/{runID}",
+      "GET /paper/runs/{runID}/events",
+      "GET /paper/runs/{runID}/preview",
       "POST /api/session/{sessionID}/compact",
       "POST /api/session/{sessionID}/prompt",
       "POST /api/session/{sessionID}/wait",
+      "POST /paper/model-roles",
+      "POST /paper/providers/discover",
+      "POST /paper/runs",
+      "POST /paper/runs/{runID}/export",
+      "POST /paper/runs/{runID}/guidance",
     ])
   })
 

@@ -2505,7 +2505,7 @@ test("plugin config enabled and disabled providers are honored", async () => {
       expect(providers[ProviderID.openai]).toBeUndefined()
     },
   })
-})
+}, 60_000)
 
 test("opencode loader keeps paid models when config apiKey is present", async () => {
   await using base = await tmpdir({

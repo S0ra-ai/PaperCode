@@ -33,6 +33,7 @@ import {
   type PaperResearchStageId,
   type PaperResearchStageStatus,
 } from "./orchestrator"
+import { budgetTierPolicy } from "./budget"
 
 export type BudgetTier = "quick" | "standard" | "deep" | "submission" | "custom"
 export type QualityMode = "reviewable_bundle" | "submission_candidate"
@@ -80,6 +81,7 @@ export interface AgentNode {
 export interface AgentTree {
   schema_version: "AgentTree.v1"
   max_depth: number
+  max_parallel: number
   nodes: AgentNode[]
 }
 
@@ -189,14 +191,6 @@ export class PaperRunNotFoundError extends Error {
   }
 }
 
-const BUDGET_CAPS_USD: Record<BudgetTier, number> = {
-  quick: 1,
-  standard: 5,
-  deep: 20,
-  submission: 50,
-  custom: 0,
-}
-
 function defaultDataEgressPolicy(input?: Partial<DataEgressPolicy>): DataEgressPolicy {
   return {
     mode: input?.mode ?? "private_first",
@@ -213,13 +207,6 @@ function normalizeBudgetTier(value?: BudgetTier): BudgetTier {
 function normalizeQualityMode(value: QualityMode | undefined, budgetTier: BudgetTier): QualityMode {
   if (value) return value
   return budgetTier === "submission" ? "submission_candidate" : "reviewable_bundle"
-}
-
-function budgetDepth(tier: BudgetTier) {
-  if (tier === "quick") return 1
-  if (tier === "standard") return 2
-  if (tier === "deep") return 3
-  return 4
 }
 
 function jsonRecord(value: unknown): Record<string, unknown> {
@@ -296,9 +283,11 @@ function defaultAgentTree(input: {
   capabilities: ResearchCapability[]
   writer: OpenCodeModelRef
 }): AgentTree {
+  const policy = budgetTierPolicy(input.tier)
   return {
     schema_version: "AgentTree.v1",
-    max_depth: budgetDepth(input.tier),
+    max_depth: policy.max_depth,
+    max_parallel: policy.max_parallel,
     nodes: [
       {
         agent_id: `${input.runID}:root`,
@@ -309,7 +298,7 @@ function defaultAgentTree(input: {
         capabilities: input.capabilities.map((capability) => capability.name),
         budget: {
           tier: input.tier,
-          usd_cap: BUDGET_CAPS_USD[input.tier],
+          usd_cap: policy.cost_cap_usd,
         },
         input_artifacts: [],
         output_artifacts: [],

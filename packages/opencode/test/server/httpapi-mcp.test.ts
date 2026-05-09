@@ -1,6 +1,5 @@
 import { afterEach, describe, expect, test } from "bun:test"
-import { Context, Effect, FileSystem, Layer, Path } from "effect"
-import { NodeFileSystem, NodePath } from "@effect/platform-node"
+import { Context, Effect, Layer } from "effect"
 import { Flag } from "@opencode-ai/core/flag/flag"
 import { ExperimentalHttpApiServer } from "../../src/server/routes/instance/httpapi/server"
 import { McpPaths } from "../../src/server/routes/instance/httpapi/groups/mcp"
@@ -17,7 +16,7 @@ void Log.init({ print: false })
 
 const original = Flag.OPENCODE_EXPERIMENTAL_HTTPAPI
 const context = Context.empty() as Context.Context<unknown>
-const it = testEffect(Layer.mergeAll(NodeFileSystem.layer, NodePath.layer))
+const it = testEffect(Layer.empty)
 
 function app(experimental: boolean) {
   Flag.OPENCODE_EXPERIMENTAL_HTTPAPI = experimental
@@ -39,29 +38,27 @@ function request(route: string, directory: string, init?: RequestInit) {
 
 function withMcpProject<A, E, R>(self: (dir: string) => Effect.Effect<A, E, R>) {
   return Effect.gen(function* () {
-    const fs = yield* FileSystem.FileSystem
-    const path = yield* Path.Path
-    const dir = yield* fs.makeTempDirectoryScoped({ prefix: "opencode-test-" })
-
-    yield* fs.writeFileString(
-      path.join(dir, "paper_fucker.json"),
-      JSON.stringify({
-        $schema: "https://opencode.ai/config.json",
-        formatter: false,
-        lsp: false,
-        mcp: {
-          demo: {
-            type: "local",
-            command: ["echo", "demo"],
-            enabled: false,
+    const tmp = yield* Effect.promise(() =>
+      tmpdir({
+        config: {
+          formatter: false,
+          lsp: false,
+          mcp: {
+            demo: {
+              type: "local",
+              command: ["echo", "demo"],
+              enabled: false,
+            },
           },
-        },
+        } as any,
       }),
     )
+    const dir = tmp.path
     yield* Effect.addFinalizer(() =>
-      Effect.promise(() =>
-        WithInstance.provide({ directory: dir, fn: () => InstanceRuntime.disposeInstance(Instance.current) }),
-      ).pipe(Effect.ignore),
+      Effect.promise(async () => {
+        await WithInstance.provide({ directory: dir, fn: () => InstanceRuntime.disposeInstance(Instance.current) })
+        await tmp[Symbol.asyncDispose]()
+      }).pipe(Effect.ignore),
     )
 
     return yield* self(dir).pipe(provideInstance(dir))
