@@ -43,6 +43,7 @@ import { DialogConsoleOrg } from "@tui/component/dialog-console-org"
 import { KeybindProvider, useKeybind } from "@tui/context/keybind"
 import { ThemeProvider, useTheme } from "@tui/context/theme"
 import { Home } from "@tui/routes/home"
+import { PaperRunDashboard } from "@tui/routes/paper"
 import { Session } from "@tui/routes/session"
 import { PromptHistoryProvider } from "./component/prompt/history"
 import { FrecencyProvider } from "./component/prompt/frecency"
@@ -328,6 +329,11 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
 
       const title = session.title.length > 40 ? session.title.slice(0, 37) + "..." : session.title
       renderer.setTerminalTitle(`OC | ${title}`)
+      return
+    }
+
+    if (route.data.type === "paper") {
+      renderer.setTerminalTitle(`paper_fucker | ${route.data.runID}`)
       return
     }
 
@@ -903,6 +909,9 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
           </Match>
           <Match when={route.data.type === "session"}>
             <Session />
+          </Match>
+          <Match when={route.data.type === "paper"}>
+            <PaperRunDashboard />
           </Match>
         </Switch>
       </Show>
