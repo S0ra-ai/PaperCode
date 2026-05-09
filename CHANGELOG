@@ -2,10 +2,33 @@
 :author        s0ra (https://github.com/S0ra-ai)
 :repo          
 :desc          记录项目的重大变更和版本历史
-:version       0.1.26-dev
+:version       0.1.27-dev
 :last_update   2026/05/09
 
 :history
+
+    0.1.27-dev - 2026/05/09 (pending) [develop]
+    :brief 新增 run-bound 论文写作、预览、审稿与导出闭环
+        - feat(authoring): 新增 PaperAuthoringLoop.v1, 串联 ClaimLedger-first draft、profile-aware revision、verification gate 和 export
+        - feat(preview): 新增 run-bound PreviewSnapshot adapter, 绑定 Markdown/LaTeX/PDF/DOCX artifacts 与 claim/citation/reviewer/cost/agent annotations
+        - feat(export): final gate 失败时阻断 final export 并自动输出带 failed checks 的 forced draft
+        - feat(bundle): 新增 PaperSupplementaryBundle.v1 与 PaperAvailabilityBundle.v1, 记录 claim ledger、review report、export manifest、代码/数据/复现可用性
+        - docs(readme): 版本更新为 0.1.27-dev, 记录 authoring loop 与 preview binding
+        - test(paper): 覆盖 preview snapshot、final export、supplementary/availability bundle、forced draft marker
+    :src
+        - packages/server/src/paper/authoring.ts - paper authoring loop adapter
+        - packages/server/src/paper/preview.ts - run-bound preview snapshot adapter
+        - packages/server/src/paper/index.ts - authoring and preview exports
+        - packages/server/test/paper/authoring.test.ts - authoring loop tests
+        - packages/preview/src/protocol.ts - PreviewSnapshot protocol integration
+        - reports/paper-authoring-loop.md - authoring loop implementation report
+    :verification
+        - npx --yes bun@1.3.13 --cwd packages/server test test/paper/authoring.test.ts passed: 3 pass, 0 fail, 20 expects
+        - npx --yes bun@1.3.13 --cwd packages/preview test passed: 2 pass, 0 fail, 9 expects
+        - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
+        - npx --yes bun@1.3.13 run typecheck passed
+        - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 pending
+        - TaskFlow validate_task task-030-paper-authoring-loop passed
 
     0.1.26-dev - 2026/05/09 (8e82c90) [develop]
     :brief 将 TUI 首屏改为中文论文工作台

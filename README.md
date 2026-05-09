@@ -1,6 +1,6 @@
 # paper_fucker
 
-Current version: <!-- version:start -->0.1.26-dev<!-- version:end -->
+Current version: <!-- version:start -->0.1.27-dev<!-- version:end -->
 
 `paper_fucker` is a private-first, OpenCode-derived closed-loop paper system. It turns a topic, codebase, dataset, experiment log, or paper material set into a verifiable academic-paper bundle with research planning, source discovery, code understanding, experiment/reproduction support, ClaimLedger-first writing, authenticity gates, profile-aware formatting, preview, and export.
 
@@ -26,6 +26,7 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - Code-to-paper analysis produces `CodebaseMap.v1`, `MethodExtraction.v1`, `ExperimentSurface.v1`, and `ReproductionPlan.v1` artifacts with source ranges for every extracted method, test, and reproduction command.
 - Experiment claims are gated by reproduction semantics: reproduced results may support final claims, while unreproduced results are blocked unless explicitly marked as exploratory.
 - The TUI default screen is now a Chinese paper research workbench with topic/code/material/data/log inputs, provider-role context, capability health, stage graph, ledgers, diagnostics, preview, and export controls represented in the paper state adapter.
+- The paper authoring loop now binds drafts to run artifacts, applies profile-aware revision metadata, creates read-only preview snapshots, runs reviewer/authenticity checks, blocks unsafe final export, and emits forced draft, supplementary, and availability bundles.
 - The automatic orchestrator now owns the default topic-to-paper stage graph and proceeds stage-by-stage unless a pause condition is raised.
 - Trusted template resolution now records `TemplateSpec.v1`, adopts clear high-confidence official templates automatically, and falls back to a CJC default when no venue is known.
 - Open literature and dataset discovery now records `SourceRecord.v1`, `LiteratureMap.v1`, `DataPlan.v1`, `DatasetCard.v1`, and direction feasibility artifacts with license and verification diagnostics.
@@ -52,6 +53,8 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - `packages/server/src/paper/code-to-paper.ts`: codebase-to-paper static analysis and runtime artifact recording with source-range-bound method, experiment, and reproduction surfaces.
 - `packages/server/src/paper/experiment-loop.ts`: paper-domain experiment capability resolver, log metric parser, and reproduction-aware claim eligibility policy.
 - `packages/server/src/paper/tui-state.ts`: renderer-independent Chinese TUI workbench state adapter for home and run views.
+- `packages/server/src/paper/authoring.ts`: run-bound authoring loop adapter for ClaimLedger-first drafts, profile-aware revision, verification, final/forced export, supplementary bundle, and code/data availability bundle.
+- `packages/server/src/paper/preview.ts`: read-only PreviewSnapshot adapter that binds drafts, export files, claim/citation/reviewer annotations, costs, agents, and tool diagnostics to a run.
 - `packages/server/src/research/orchestrator/`: automatic topic-to-paper stage graph, Full Access pause policy, checkpoint guidance queue, and run controls.
 - `packages/server/src/research/templates/`: trusted template resolution, source evidence/confidence policy, and Markdown-to-LaTeX application through the Python bridge.
 - `packages/server/src/research/sources/`: open-source-first literature and dataset discovery, source verification metadata, license/access checks, and automatic nearby-direction feasibility turns.
