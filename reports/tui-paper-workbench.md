@@ -30,3 +30,33 @@ This task moves the OpenCode-derived TUI toward a paper_fucker research workbenc
 - `npx --yes bun@1.3.13 --cwd packages/server test test/paper/tui-state.test.ts`
   - Passed: 2 pass, 0 fail, 8 expects.
 - Full typecheck, README/CHANGELOG version validation, and TaskFlow validation are recorded in the task step log and CHANGELOG verification block.
+
+---
+
+## Hard Fork PaperRun Route Update
+
+- Task: `task-034-dialog-workbench-tui`
+- Version: `0.2.3-dev`
+- Branch: `feature/dialog-workbench-tui`
+- Date: `2026-05-09`
+
+### Scope
+
+This task turns the default TUI home flow into a real PaperRun dialog workbench. It no longer treats the first prompt as an ordinary chat-session prompt; it parses the user's Chinese research request and creates a PaperRun through `/paper/runs`.
+
+### Implemented
+
+- Added `packages/opencode/src/cli/cmd/tui/routes/paper/workbench.ts` for prompt parsing, `/paper/runs` submission, PaperRun fetching, and dashboard state mapping.
+- Added `packages/opencode/src/cli/cmd/tui/routes/paper/index.tsx` for the PaperRun dashboard route.
+- Added `PaperRoute` to the route context and registered the route in the main TUI switch.
+- Updated `Home` to submit prompts to `/paper/runs` and navigate to the PaperRun dashboard.
+- Added `Prompt.onSubmitPrompt` interception so the home flow can bypass ordinary chat-session creation.
+- Updated plugin current-route metadata so plugins can detect `paper` route context.
+- Added tests for prompt parsing, `/paper/runs` submission, and Chinese dashboard panel state.
+
+### Verification
+
+- `npx --yes bun@1.3.13 --cwd packages/opencode test test/cli/tui/paper-workbench.test.ts`
+  - Passed: 3 pass, 0 fail, 20 expects.
+- `npx --yes bun@1.3.13 run --cwd packages/opencode typecheck`
+  - Passed.

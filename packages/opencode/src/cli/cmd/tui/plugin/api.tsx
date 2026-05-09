@@ -95,6 +95,14 @@ function routeCurrent(route: ReturnType<typeof useRoute>): TuiPluginApi["route"]
       },
     }
   }
+  if (route.data.type === "paper") {
+    return {
+      name: "paper",
+      params: {
+        runID: route.data.runID,
+      },
+    }
+  }
 
   return {
     name: route.data.id,
