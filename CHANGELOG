@@ -2,10 +2,29 @@
 :author        s0ra (https://github.com/S0ra-ai)
 :repo          
 :desc          记录项目的重大变更和版本历史
-:version       0.1.21-dev
+:version       0.1.22-dev
 :last_update   2026/05/09
 
 :history
+
+    0.1.22-dev - 2026/05/09 (4b3c5e7) [develop]
+    :brief 新增多输入 ResearchIntake 与 ResearchBrief 记录
+        - feat(paper): 新增 ResearchIntakeRequest 与 ResearchBrief.v1, 支持 topic/code/data/materials workflows
+        - feat(intake): 默认中文 zh-CN, 默认 generic-preprint, 保留 target_profile 和 per-role model override
+        - feat(runtime): recordResearchIntake 写入 intake/research-brief.json artifact 并追加 intake.brief.created event
+        - feat(risk): intake 输出 needed_evidence、pause_conditions 与 material/dataset/reproduction/code-grounding 风险
+        - docs(readme): 版本更新为 0.1.22-dev, 记录 multi-input intake 入口和 ResearchBrief.v1 artifact
+        - test(paper): 覆盖 topic-only、code-grounded、mixed-materials 和 runtime artifact/event recording
+    :src
+        - packages/server/src/paper/intake.ts - research intake normalizer and runtime recorder
+        - packages/server/src/paper/index.ts - paper intake export
+        - packages/server/test/paper/intake.test.ts - research intake tests
+        - reports/research-intake.md - intake implementation report
+    :verification
+        - npx --yes bun@1.3.13 --cwd packages/server test test/paper/intake.test.ts passed: 4 pass, 0 fail, 20 expects
+        - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
+        - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
+        - TaskFlow validate_task task-025-research-intake passed
 
     0.1.21-dev - 2026/05/09 (4e7754e) [develop]
     :brief 新增论文投稿 Profile 系统与 nature-paper skill

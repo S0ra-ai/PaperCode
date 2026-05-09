@@ -1,6 +1,6 @@
 id: task-025-research-intake
 title: Add multi-input research intake
-status: todo
+status: done
 priority: high
 owner: codex
 tags:
@@ -20,7 +20,7 @@ execution:
 steps:
 - id: task-025-step-01-red-intake-test
   title: Add failing intake tests
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: Test topic-only, code-grounded, and mixed material intake normalization
@@ -29,12 +29,23 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T00:03:31.155459'
+      level: info
+      message: Starting TDD RED step for ResearchIntakeRequest normalization, topic/code/mixed
+        input modes, ResearchBrief.v1 risks, and runtime artifact recording.
+      agent: codex
+    - timestamp: '2026-05-09T00:04:27.188846'
+      level: info
+      message: 'Added packages/server/test/paper/intake.test.ts. RED verified: test
+        fails because recordResearchIntake is not exported from packages/server/src/paper/index.ts.'
+      agent: codex
+    last_run: '2026-05-09T00:04:27.188846'
+    attempt_count: 2
   meta: {}
 - id: task-025-step-02-intake-types
   title: Implement intake types and normalizer
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-025-step-01-red-intake-test
@@ -44,12 +55,25 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T00:04:30.838919'
+      level: info
+      message: Implementing ResearchIntakeRequest, ResearchBrief, workflow inference,
+        path normalization, default Chinese language/profile, risks, evidence needs,
+        and model-role preservation.
+      agent: codex
+    - timestamp: '2026-05-09T00:05:46.825946'
+      level: info
+      message: 'Implemented packages/server/src/paper/intake.ts and exported it. Intake
+        tests pass for topic-only, code-grounded, mixed-material normalization and
+        ResearchBrief.v1 runtime recording: 4 pass, 0 fail, 20 expects.'
+      agent: codex
+    last_run: '2026-05-09T00:05:46.825946'
+    attempt_count: 2
   meta: {}
 - id: task-025-step-03-runtime-recording
   title: Record intake artifacts
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-025-step-02-intake-types
@@ -58,12 +82,25 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T00:05:50.731647'
+      level: info
+      message: Validating runtime recording path for ResearchBrief.v1 artifact and
+        intake.brief.created event.
+      agent: codex
+    - timestamp: '2026-05-09T00:05:54.814448'
+      level: info
+      message: recordResearchIntake writes intake/research-brief.json as an outline
+        artifact with metadata.artifact_schema=ResearchBrief.v1 and appends intake.brief.created
+        event containing workflow/profile/language/artifact id. Covered by intake
+        runtime test.
+      agent: codex
+    last_run: '2026-05-09T00:05:54.814448'
+    attempt_count: 2
   meta: {}
 - id: task-025-step-04-doc-version
   title: Update docs and version 0.1.22-dev
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-025-step-03-runtime-recording
@@ -72,12 +109,23 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T00:05:58.369441'
+      level: info
+      message: Updating README/CHANGELOG to 0.1.22-dev and adding intake implementation
+        report.
+      agent: codex
+    - timestamp: '2026-05-09T00:06:30.796632'
+      level: info
+      message: README updated to 0.1.22-dev, CHANGELOG colon-history entry added with
+        pending hash, and reports/research-intake.md added.
+      agent: codex
+    last_run: '2026-05-09T00:06:30.796632'
+    attempt_count: 2
   meta: {}
 - id: task-025-step-05-verify
   title: Run verification
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-025-step-04-doc-version
@@ -86,8 +134,20 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T00:06:34.814360'
+      level: info
+      message: Running intake tests, server typecheck, README/CHANGELOG version check
+        after hash backfill, and TaskFlow validation.
+      agent: codex
+    - timestamp: '2026-05-09T00:07:45.873968'
+      level: info
+      message: 'Verification passed: intake tests 4 pass/0 fail/20 expects; server
+        typecheck passed; README version 0.1.22-dev matches CHANGELOG; TaskFlow validate_task
+        task-025-research-intake valid with no warnings.'
+      agent: codex
+    last_run: '2026-05-09T00:07:45.873968'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -101,5 +161,5 @@ trace:
   attempt_count: 0
 meta:
   created_at: '2026-05-08T22:09:24.013354'
-  updated_at: '2026-05-08T22:09:24.013354'
+  updated_at: '2026-05-09T00:07:49.432509'
   version: '1'
