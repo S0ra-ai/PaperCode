@@ -1,6 +1,6 @@
 id: task-031-strict-live-acceptance
 title: Add strict live acceptance for complete paper system
-status: in_progress
+status: done
 priority: high
 owner: codex
 tags:
@@ -134,7 +134,7 @@ steps:
   meta: {}
 - id: task-031-step-05-verify
   title: Run final verification
-  status: in_progress
+  status: done
   owner: codex
   depends_on:
   - task-031-step-04-doc-version
@@ -150,8 +150,20 @@ steps:
       message: Running strict acceptance script tests and typechecks before commit,
         then backfilling the CHANGELOG hash and running strict-live acceptance.
       agent: codex
-    last_run: '2026-05-09T01:22:44.212452'
-    attempt_count: 1
+    - timestamp: '2026-05-09T01:32:09.457117'
+      level: info
+      message: 'Final verification complete for 0.2.0-dev: strict-acceptance script
+        test passed (3 pass, 0 fail, 26 expects); server typecheck passed; workspace
+        typecheck passed; README version check passed after CHANGELOG hash backfill
+        to d57a117; TaskFlow validate_task passed; strict live acceptance passed and
+        generated reports/strict-live-acceptance.md with all 18 checks pass, including
+        server tests, preview tests, Python tests, OpenCode TUI smoke, DeepSeek live
+        provider call, Exa MCP live initialize, Nature official guidance smoke, pandoc,
+        LaTeX PDF, DOCX, topic-to-paper runtime, code-to-paper runtime, tracked secret
+        scan, and Git Flow branch discipline.'
+      agent: codex
+    last_run: '2026-05-09T01:32:09.457117'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -171,5 +183,5 @@ lock:
   at: '2026-05-09T01:10:25.876321'
 meta:
   created_at: '2026-05-08T22:10:32.984319'
-  updated_at: '2026-05-09T01:22:44.212452'
+  updated_at: '2026-05-09T01:32:09.457117'
   version: '1'

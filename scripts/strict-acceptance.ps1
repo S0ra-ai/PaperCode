@@ -198,8 +198,16 @@ function Invoke-NatureSkillSmoke {
     $text = Get-Content -Raw -LiteralPath $skill
     Assert-StrictLive ($text -match "Nature" -and $text -match "PaperProfile\.v1") "nature-paper skill does not mention Nature and PaperProfile.v1." | Out-Null
     if (-not $FixtureMode) {
-        $response = Invoke-WebRequest -Uri "https://www.nature.com/nature/for-authors" -MaximumRedirection 5 -TimeoutSec 30
-        Assert-StrictLive ($response.StatusCode -ge 200 -and $response.StatusCode -lt 400) "Nature author guidance URL did not respond successfully." | Out-Null
+        try {
+            $response = Invoke-WebRequest -Uri "https://www.nature.com/nature/for-authors" -UseBasicParsing -MaximumRedirection 5 -TimeoutSec 30
+            $statusCode = $response.StatusCode
+            if ($null -eq $statusCode -and $null -ne $response.BaseResponse) {
+                $statusCode = [int]$response.BaseResponse.StatusCode
+            }
+            Assert-StrictLive ($statusCode -ge 200 -and $statusCode -lt 400) "Nature author guidance URL did not respond successfully." | Out-Null
+        } catch {
+            throw "Nature author guidance request failed: $($_.Exception.Message)"
+        }
     }
     return "nature-paper skill installed and official guidance reachable"
 }
