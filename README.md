@@ -1,6 +1,6 @@
 # paper_fucker
 
-Current version: <!-- version:start -->0.1.27-dev<!-- version:end -->
+Current version: <!-- version:start -->0.2.0-dev<!-- version:end -->
 
 `paper_fucker` is a private-first, OpenCode-derived closed-loop paper system. It turns a topic, codebase, dataset, experiment log, or paper material set into a verifiable academic-paper bundle with research planning, source discovery, code understanding, experiment/reproduction support, ClaimLedger-first writing, authenticity gates, profile-aware formatting, preview, and export.
 
@@ -27,6 +27,7 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - Experiment claims are gated by reproduction semantics: reproduced results may support final claims, while unreproduced results are blocked unless explicitly marked as exploratory.
 - The TUI default screen is now a Chinese paper research workbench with topic/code/material/data/log inputs, provider-role context, capability health, stage graph, ledgers, diagnostics, preview, and export controls represented in the paper state adapter.
 - The paper authoring loop now binds drafts to run artifacts, applies profile-aware revision metadata, creates read-only preview snapshots, runs reviewer/authenticity checks, blocks unsafe final export, and emits forced draft, supplementary, and availability bundles.
+- Strict live acceptance is available through `scripts/strict-acceptance.ps1`; it validates TaskFlow, version sync, tracked secret hygiene, server/preview/Python/typecheck suites, OpenCode TUI smoke, DeepSeek live provider smoke, Exa MCP live smoke, Nature skill/profile, pandoc, LaTeX, DOCX, topic-to-paper, code-to-paper, and Git Flow branch discipline.
 - The automatic orchestrator now owns the default topic-to-paper stage graph and proceeds stage-by-stage unless a pause condition is raised.
 - Trusted template resolution now records `TemplateSpec.v1`, adopts clear high-confidence official templates automatically, and falls back to a CJC default when no venue is known.
 - Open literature and dataset discovery now records `SourceRecord.v1`, `LiteratureMap.v1`, `DataPlan.v1`, `DatasetCard.v1`, and direction feasibility artifacts with license and verification diagnostics.
@@ -64,6 +65,7 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - `packages/server/src/research/export/`: final and forced-draft export bundle creation, manifest generation, missing renderer diagnostics, and export fact recording.
 - `packages/server/src/research/README.md`: first-party research runtime boundary guide; domain logic belongs in this runtime and only uses `packages/opencode` through deliberate substrate adapters.
 - `packages/preview/`: first-party localhost read-only research preview package with token-checked snapshot/SSE endpoints and static Markdown/LaTeX/PDF/DOCX/annotation/diagnostics UI.
+- `scripts/strict-acceptance.ps1`: strict live acceptance entrypoint for the full paper system; `-FixtureMode` is only for deterministic script tests.
 - `research-tools/`: Python MCP/CLI tool package. It provides structured MCP-style diagnostics/probe/document helpers, one-shot conversion commands, external tool discovery/linking for pandoc and LaTeX engines, and generated Pydantic v2 models for tool-side validation.
 - `legacy/references/`: reference-project manifests and adopt/defer/reject analysis. These files are design guidance only and do not authorize code import.
 - `upstream/opencode-readmes/`: localized README files imported from the OpenCode snapshot, retained for provenance and translation reference instead of root-level project documentation.
