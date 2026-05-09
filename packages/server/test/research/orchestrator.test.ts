@@ -9,16 +9,20 @@ import {
   queueGuidance,
   runOrchestratorControl,
   startAutomaticResearchRun,
+  type StageHandler,
   type ResearchStageId,
 } from "@/research/orchestrator"
 
 const now = "2026-05-09T00:00:00Z"
 
-async function clean(dir: string, attempts = 30): Promise<void> {
+async function clean(dir: string, attempts = 80): Promise<void> {
   Bun.gc(true)
   await sleep(250)
   return rm(dir, { recursive: true, force: true }).catch((error) => {
-    if (attempts <= 1) throw error
+    if (attempts <= 1) {
+      console.warn(`Could not remove temporary orchestrator test directory ${dir}: ${String(error)}`)
+      return
+    }
     return clean(dir, attempts - 1)
   })
 }
@@ -31,6 +35,19 @@ function runtimeOptions(workspace: string, home: string): ResearchRuntimeOptions
     clock: () => new Date(now),
     idFactory: (kind) => `${kind}-${++index}`,
   }
+}
+
+const successfulHandlers = (except: Partial<Record<ResearchStageId, StageHandler>> = {}) => {
+  const stages: ResearchStageId[] = ["intake", "template", "literature", "data", "experiment", "writing", "verification", "export"]
+  return Object.fromEntries(
+    stages.map((stage) => [
+      stage,
+      except[stage] ??
+        (() => ({
+          summary: `${stage} ok`,
+        })),
+    ]),
+  ) as Record<ResearchStageId, StageHandler>
 }
 
 describe("automatic research orchestrator", () => {
@@ -50,7 +67,8 @@ describe("automatic research orchestrator", () => {
         {
           run_dir: handle.run_dir,
           handlers: {
-            template: ({ guidance }) => {
+            ...successfulHandlers(),
+            template: ({ guidance }: { guidance: Array<{ text: string }> }) => {
               guidanceSeen.push(...guidance.map((item) => item.text))
               return {
                 summary: "template ok",
@@ -102,6 +120,7 @@ describe("automatic research orchestrator", () => {
         {
           run_dir: handle.run_dir,
           handlers: {
+            ...successfulHandlers(),
             literature: () => ({
               signal: { source_license_conflict: "dataset license unavailable" },
             }),

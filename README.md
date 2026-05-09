@@ -1,6 +1,6 @@
 # paper_fucker
 
-Current version: <!-- version:start -->0.1.22-dev<!-- version:end -->
+Current version: <!-- version:start -->0.1.23-dev<!-- version:end -->
 
 `paper_fucker` is a private-first, OpenCode-derived closed-loop paper system. It turns a topic, codebase, dataset, experiment log, or paper material set into a verifiable academic-paper bundle with research planning, source discovery, code understanding, experiment/reproduction support, ClaimLedger-first writing, authenticity gates, profile-aware formatting, preview, and export.
 
@@ -22,6 +22,7 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - MCP servers and skills are first-class research capabilities. Literature search, code analysis, experiments, paper profiles, statistical checks, figures, and export helpers are routed through the `ResearchCapabilityRegistry` instead of bypassing OpenCode.
 - Paper profiles are plugin-style domain capabilities. Built-in profile ids are `nature-paper`, `ieee-paper`, `acm-paper`, `springer-paper`, and `generic-preprint`; the first-party `nature-paper` skill is installed under `.paper_fucker/skills/nature-paper/SKILL.md`.
 - Research intake accepts topic, code paths, paper files, dataset paths, experiment logs, target profile, language, and model-role overrides, then records a `ResearchBrief.v1` artifact for the run.
+- The paper orchestrator owns the complete 14-stage closed-loop graph from intake to export. Missing capabilities or missing concrete handlers now produce `BlockedDiagnostic.v1` instead of silent stage success.
 - The automatic orchestrator now owns the default topic-to-paper stage graph and proceeds stage-by-stage unless a pause condition is raised.
 - Trusted template resolution now records `TemplateSpec.v1`, adopts clear high-confidence official templates automatically, and falls back to a CJC default when no venue is known.
 - Open literature and dataset discovery now records `SourceRecord.v1`, `LiteratureMap.v1`, `DataPlan.v1`, `DatasetCard.v1`, and direction feasibility artifacts with license and verification diagnostics.
@@ -44,6 +45,7 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - `packages/server/src/paper/capabilities.ts`: research capability bus for OpenCode built-in tools, MCP servers, skills, first-party paper tools, and Python research tools. The orchestrator queries it by stage and records tool trace/OpenTelemetry metadata for each capability call.
 - `packages/server/src/paper/profiles.ts`: paper profile registry and `PaperProfile.v1` / `PaperProfileCheck.v1` contracts for venue-aware structure, submission checks, and profile skill routing.
 - `packages/server/src/paper/intake.ts`: multi-input research intake normalizer and runtime recorder for `ResearchIntakeRequest` to `ResearchBrief.v1`.
+- `packages/server/src/paper/orchestrator.ts`: paper-domain run graph/controller for intake, planning, literature, code analysis, data, experiment design/execution/reproduction, ClaimLedger, drafting, profile formatting, verification, revision, and export.
 - `packages/server/src/research/orchestrator/`: automatic topic-to-paper stage graph, Full Access pause policy, checkpoint guidance queue, and run controls.
 - `packages/server/src/research/templates/`: trusted template resolution, source evidence/confidence policy, and Markdown-to-LaTeX application through the Python bridge.
 - `packages/server/src/research/sources/`: open-source-first literature and dataset discovery, source verification metadata, license/access checks, and automatic nearby-direction feasibility turns.
