@@ -7,7 +7,7 @@
 
 :history
 
-    0.2.0-dev - 2026/05/09 (pending) [develop]
+    0.2.0-dev - 2026/05/09 (d57a117) [develop]
     :brief 完整闭环论文系统 strict live acceptance
         - feat(acceptance): 新增 scripts/strict-acceptance.ps1, 覆盖 18 个严格验收检查
         - feat(live): DeepSeek live provider smoke 校验 /models 与 chat completion, 默认模型 deepseek-v4-pro
@@ -27,9 +27,9 @@
     :verification
         - npx --yes bun@1.3.13 --cwd packages/server test test/paper/strict-acceptance.test.ts passed: 3 pass, 0 fail, 26 expects
         - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\strict-acceptance.ps1 -FixtureMode passed
-        - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\strict-acceptance.ps1 pending
-        - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 pending
-        - TaskFlow validate_task task-031-strict-live-acceptance pending
+        - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\strict-acceptance.ps1 passed
+        - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
+        - TaskFlow validate_task task-031-strict-live-acceptance passed
 
     0.1.27-dev - 2026/05/09 (5bc5d8b) [develop]
     :brief 新增 run-bound 论文写作、预览、审稿与导出闭环
