@@ -1,0 +1,114 @@
+id: task-034-dialog-workbench-tui
+title: Turn TUI into Chinese PaperRun dialog workbench
+status: todo
+priority: critical
+owner: codex
+tags:
+- tui
+- workbench
+- paperrun
+- zh-CN
+depends_on:
+- task-033-paper-run-api
+description: Refactor the default TUI from a chat/session surface into a Chinese PaperRun
+  dialog workbench. The user enters natural language, code paths, paper materials,
+  datasets, or experiment logs; the TUI creates and controls PaperRun state through
+  /paper APIs. Add run dashboard panels for stage graph, Agent Tree, source ledger,
+  claim ledger, experiment state, diagnostics, preview, export, and pause questions.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-034-step-01-red-tui-tests
+  title: Add failing TUI workbench tests
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Add tests/smokes that assert the home prompt creates PaperRun requests
+    rather than chat prompts and that the run dashboard renders stage graph, Agent
+    Tree, diagnostics, preview/export controls, and Chinese labels.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-034-step-02-home-intake
+  title: Implement dialog intake home
+  status: todo
+  owner: codex
+  depends_on:
+  - task-034-step-01-red-tui-tests
+  description: Refactor TUI home input parsing into ResearchIntakeRequest/PaperRunCreateRequest
+    and call /paper/runs. Remove ordinary chat as the default user flow.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-034-step-03-run-dashboard
+  title: Implement PaperRun dashboard
+  status: todo
+  owner: codex
+  depends_on:
+  - task-034-step-02-home-intake
+  description: Add run route/panels for stage graph, event stream, Source Ledger,
+    Claim Ledger, Agent Tree, experiment status, model/tool/cost diagnostics, pause
+    questions, preview, and export.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-034-step-04-doc-version
+  title: Update docs and version 0.2.3-dev
+  status: todo
+  owner: codex
+  depends_on:
+  - task-034-step-03-run-dashboard
+  description: Document TUI workflow, update README/CHANGELOG to 0.2.3-dev, and keep
+    README version synced.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-034-step-05-verify
+  title: Verify TUI workbench
+  status: todo
+  owner: codex
+  depends_on:
+  - task-034-step-04-doc-version
+  description: Run TUI tests/smoke, opencode tests/typecheck, preview tests, Python
+    tests, README version check, and TaskFlow validate_task task-034-dialog-workbench-tui.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: directory
+  path: packages/opencode/src/cli/cmd/tui/routes/paper
+  description: PaperRun TUI routes and panels
+- type: file
+  path: packages/opencode/src/cli/cmd/tui/routes/home.tsx
+  description: Dialog intake home route
+- type: report
+  path: reports/tui-paper-workbench.md
+  description: TUI workbench verification report
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-09T02:49:39.841037'
+  updated_at: '2026-05-09T02:49:39.841037'
+  version: '1'

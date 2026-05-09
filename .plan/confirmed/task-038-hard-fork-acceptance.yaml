@@ -1,0 +1,115 @@
+id: task-038-hard-fork-acceptance
+title: Validate complete OpenCode hard fork paper workbench
+status: todo
+priority: critical
+owner: codex
+tags:
+- acceptance
+- hard-fork
+- live
+- paperrun
+depends_on:
+- task-037-public-surface-cleanup
+description: 'Add and run final hard fork acceptance for the integrated paper_fucker
+  product: PaperRun-first TUI/API, migrated paper core inside OpenCode, provider/model
+  wizard, multi-layer multi-model subagents, private-first data egress, reviewable
+  bundle and submission candidate quality modes, cleaned public branding, and strict
+  live acceptance report.'
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-038-step-01-red-hard-fork-acceptance
+  title: Add failing hard fork acceptance tests
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Add acceptance tests/script checks for PaperRun-first TUI/API, migrated
+    core, Agent Tree depth >= 2, different parent/child models, provider wizard, egress
+    policy, reviewable bundle, submission candidate, and Paper Fucker logo/branding.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-038-step-02-acceptance-script
+  title: Implement hard fork acceptance script
+  status: todo
+  owner: codex
+  depends_on:
+  - task-038-step-01-red-hard-fork-acceptance
+  description: Extend strict acceptance with hard fork checks while keeping fixture/mock
+    deterministic tests and live strict smoke support.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-038-step-03-live-fixture-runs
+  title: Run fixture and live acceptance paths
+  status: todo
+  owner: codex
+  depends_on:
+  - task-038-step-02-acceptance-script
+  description: Run deterministic fixture topic-to-paper/code-to-paper flows and live
+    strict smoke for at least one provider, Exa, Nature skill, pandoc, LaTeX, DOCX,
+    topic-to-paper, and code-to-paper.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-038-step-04-doc-version
+  title: Update docs and version 0.3.0-dev
+  status: todo
+  owner: codex
+  depends_on:
+  - task-038-step-03-live-fixture-runs
+  description: Update README, CHANGELOG, and reports to 0.3.0-dev with final hard
+    fork status and remaining known limitations, keeping README version in sync.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-038-step-05-verify
+  title: Verify final hard fork acceptance
+  status: todo
+  owner: codex
+  depends_on:
+  - task-038-step-04-doc-version
+  description: Run opencode tests/typecheck, preview tests, Python tests, README version
+    check, TaskFlow validate_task task-038-hard-fork-acceptance, strict live acceptance,
+    branch cleanup checks, and Git clean check.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: file
+  path: scripts/strict-acceptance.ps1
+  description: Strict acceptance including hard fork checks
+- type: report
+  path: reports/strict-live-acceptance.md
+  description: Final strict live acceptance report
+- type: report
+  path: reports/hard-fork-acceptance.md
+  description: Hard fork acceptance report
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-09T02:50:31.772293'
+  updated_at: '2026-05-09T02:50:31.772293'
+  version: '1'

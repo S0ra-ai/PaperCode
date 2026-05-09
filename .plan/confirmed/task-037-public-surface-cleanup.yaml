@@ -1,0 +1,114 @@
+id: task-037-public-surface-cleanup
+title: Clean public OpenCode surface into Paper Fucker product
+status: todo
+priority: high
+owner: codex
+tags:
+- branding
+- cli
+- cleanup
+- hard-fork
+depends_on:
+- task-036-multimodel-agent-orchestration
+description: Clean user-visible OpenCode remnants from the hard fork. The startup
+  ASCII art, TUI logo, help/banner text, public CLI commands, docs, and reports must
+  present Paper Fucker/paper_fucker as the product. Old chat/session/acp/github/pr
+  surfaces are removed from default user help or moved to internal/debug-only paths.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-037-step-01-red-surface-tests
+  title: Add failing public-surface tests
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Add tests/smokes asserting ASCII logo says Paper Fucker, default help
+    hides old chat/session surfaces, TUI logo is Paper Fucker, and user-facing docs
+    have no active OpenCode branding.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-037-step-02-logo-banner
+  title: Replace ASCII logo and banners
+  status: todo
+  owner: codex
+  depends_on:
+  - task-037-step-01-red-surface-tests
+  description: Update CLI logo glyphs, UI.logo consumers, TUI logo, web/upgrade/uninstall
+    banners, and startup output to use Paper Fucker user-visible branding.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-037-step-03-command-cleanup
+  title: Clean public CLI and docs surface
+  status: todo
+  owner: codex
+  depends_on:
+  - task-037-step-02-logo-banner
+  description: Remove or hide old ordinary chat/session/acp/github/pr/import/export-session/generate/stats
+    public commands. Keep models, mcp, skills, theme, doctor, run, preview, export
+    as product commands.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-037-step-04-doc-version
+  title: Update docs and version 0.2.6-dev
+  status: todo
+  owner: codex
+  depends_on:
+  - task-037-step-03-command-cleanup
+  description: Update README, reports, and CHANGELOG to 0.2.6-dev, documenting the
+    hard fork public surface and allowed internal OpenCode compatibility identifiers.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-037-step-05-verify
+  title: Verify public surface cleanup
+  status: todo
+  owner: codex
+  depends_on:
+  - task-037-step-04-doc-version
+  description: Run public-surface tests, rg checks for user-visible OpenCode/Open
+    Code remnants, opencode tests/typecheck, preview tests, Python tests, README version
+    check, and TaskFlow validate_task task-037-public-surface-cleanup.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: file
+  path: packages/opencode/src/cli/logo.ts
+  description: Paper Fucker ASCII logo source
+- type: file
+  path: packages/opencode/src/index.ts
+  description: Cleaned public CLI command registration
+- type: report
+  path: reports/public-surface-cleanup.md
+  description: Public branding and command cleanup report
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-09T02:50:18.498235'
+  updated_at: '2026-05-09T02:50:18.498235'
+  version: '1'
