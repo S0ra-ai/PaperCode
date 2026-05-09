@@ -1,6 +1,6 @@
 id: task-029-tui-paper-workbench
 title: Deeply refactor OpenCode TUI into paper workbench
-status: in_progress
+status: done
 priority: high
 owner: codex
 tags:
@@ -124,7 +124,7 @@ steps:
   meta: {}
 - id: task-029-step-05-verify
   title: Run verification
-  status: in_progress
+  status: done
   owner: codex
   depends_on:
   - task-029-step-04-doc-version
@@ -139,8 +139,17 @@ steps:
       message: Running focused TUI state tests, server typecheck, workspace typecheck,
         README/CHANGELOG version check after commit-hash backfill, and TaskFlow validation.
       agent: codex
-    last_run: '2026-05-09T00:51:29.768281'
-    attempt_count: 1
+    - timestamp: '2026-05-09T00:53:05.037766'
+      level: info
+      message: 'Verification complete for 0.1.26-dev: TUI state test passed (2 pass,
+        0 fail, 8 expects); server typecheck passed via npx --yes bun@1.3.13 run --cwd
+        packages/server typecheck; workspace typecheck passed via npx --yes bun@1.3.13
+        run typecheck (14 successful); README version check passed after CHANGELOG
+        hash backfill to 8e82c90; TaskFlow validate_task task-029-tui-paper-workbench
+        passed.'
+      agent: codex
+    last_run: '2026-05-09T00:53:05.037766'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -160,5 +169,5 @@ lock:
   at: '2026-05-09T00:51:17.623205'
 meta:
   created_at: '2026-05-08T22:10:08.904231'
-  updated_at: '2026-05-09T00:51:29.768281'
+  updated_at: '2026-05-09T00:53:05.037766'
   version: '1'
