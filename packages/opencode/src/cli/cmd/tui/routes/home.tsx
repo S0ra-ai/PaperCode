@@ -5,11 +5,14 @@ import { useProject } from "../context/project"
 import { useSync } from "../context/sync"
 import { Toast } from "../ui/toast"
 import { useArgs } from "../context/args"
-import { useRouteData } from "@tui/context/route"
+import { useRoute, useRouteData } from "@tui/context/route"
 import { usePromptRef } from "../context/prompt"
 import { useLocal } from "../context/local"
 import { TuiPluginRuntime } from "@/cli/cmd/tui/plugin/runtime"
 import { useEditorContext } from "@tui/context/editor"
+import { useSDK } from "@tui/context/sdk"
+import { useToast } from "@tui/ui/toast"
+import { submitPaperWorkbenchPrompt } from "./paper/workbench"
 
 let once = false
 const placeholder = {
@@ -25,11 +28,14 @@ export function Home() {
   const sync = useSync()
   const project = useProject()
   const route = useRouteData("home")
+  const router = useRoute()
   const promptRef = usePromptRef()
   const [ref, setRef] = createSignal<PromptRef | undefined>()
   const args = useArgs()
   const local = useLocal()
   const editor = useEditorContext()
+  const sdk = useSDK()
+  const toast = useToast()
   let sent = false
 
   onMount(() => {
@@ -90,6 +96,29 @@ export function Home() {
               workspaceID={project.workspace.current()}
               right={<TuiPluginRuntime.Slot name="home_prompt_right" workspace_id={project.workspace.current()} />}
               placeholders={placeholder}
+              onSubmitPrompt={async (prompt) => {
+                try {
+                  const result = await submitPaperWorkbenchPrompt({
+                    baseUrl: sdk.url,
+                    directory: sdk.directory,
+                    fetch: sdk.fetch,
+                    prompt,
+                  })
+                  router.navigate({
+                    type: "paper",
+                    runID: result.runID,
+                    snapshot: result.snapshot,
+                  })
+                  return true
+                } catch (error) {
+                  toast.show({
+                    variant: "error",
+                    message: error instanceof Error ? error.message : "PaperRun 创建失败",
+                    duration: 5000,
+                  })
+                  return false
+                }
+              }}
             />
           </TuiPluginRuntime.Slot>
         </box>
