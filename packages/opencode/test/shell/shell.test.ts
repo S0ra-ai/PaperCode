@@ -63,8 +63,10 @@ describe("shell", () => {
 
     test("normalizes Git Bash shell paths from env", async () => {
       const shell = "/cygdrive/c/Program Files/Git/bin/bash.exe"
+      const expected = Filesystem.windowsPath(shell)
+      if (!Filesystem.stat(expected)?.isFile()) return
       await withShell(shell, async () => {
-        expect(Shell.preferred()).toBe(Filesystem.windowsPath(shell))
+        expect(Shell.preferred()).toBe(expected)
       })
     })
 

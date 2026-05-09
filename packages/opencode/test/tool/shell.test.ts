@@ -1104,10 +1104,16 @@ describe("tool.shell abort", () => {
       directory: projectRoot,
       fn: async () => {
         const bash = await initShell()
+        const timeoutCommand =
+          sh() === "cmd"
+            ? "echo started && timeout /t 60 /nobreak"
+            : PS.has(sh())
+              ? "Write-Output started; Start-Sleep -Seconds 60"
+              : "echo started && sleep 60"
         const result = await Effect.runPromise(
           bash.execute(
             {
-              command: `echo started && sleep 60`,
+              command: timeoutCommand,
               description: "Timeout test",
               timeout: 500,
             },
