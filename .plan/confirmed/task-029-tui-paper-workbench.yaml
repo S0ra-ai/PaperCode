@@ -1,6 +1,6 @@
 id: task-029-tui-paper-workbench
 title: Deeply refactor OpenCode TUI into paper workbench
-status: todo
+status: in_progress
 priority: high
 owner: codex
 tags:
@@ -19,7 +19,7 @@ execution:
 steps:
 - id: task-029-step-01-red-tui-state-test
   title: Add failing TUI state tests
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: Test paper workbench state mapping and Chinese labels independent of
@@ -28,12 +28,23 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T00:46:06.391722'
+      level: info
+      message: Starting TDD RED step for Chinese paper workbench home state, run stage
+        mapping, diagnostics panels, and controls independent of renderer.
+      agent: codex
+    - timestamp: '2026-05-09T00:46:51.448832'
+      level: info
+      message: 'Added packages/server/test/paper/tui-state.test.ts. RED verified:
+        test fails because createPaperWorkbenchHomeState is not exported from packages/server/src/paper/index.ts.'
+      agent: codex
+    last_run: '2026-05-09T00:46:51.448832'
+    attempt_count: 2
   meta: {}
 - id: task-029-step-02-workbench-state
   title: Implement TUI workbench state adapter
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-029-step-01-red-tui-state-test
@@ -42,12 +53,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T00:46:56.227210'
+      level: info
+      message: Implementing TUI workbench state adapter with Chinese labels, stage
+        graph mapping, ledgers/diagnostics panels, controls, and health summary.
+      agent: codex
+    - timestamp: '2026-05-09T00:48:09.492131'
+      level: info
+      message: 'Implemented packages/server/src/paper/tui-state.ts and exported it.
+        TUI state tests pass for Chinese paper workbench home state, stage graph mapping,
+        ledgers, diagnostics, pause questions, and controls: 2 pass, 0 fail, 8 expects.'
+      agent: codex
+    last_run: '2026-05-09T00:48:09.492131'
+    attempt_count: 2
   meta: {}
 - id: task-029-step-03-home-and-run-views
   title: Implement home and run views
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-029-step-02-workbench-state
@@ -57,12 +80,25 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T00:48:14.699411'
+      level: info
+      message: Updating OpenCode TUI home placeholders and first-screen workbench
+        copy to default Chinese paper research inputs, while preserving plugin slots
+        and existing prompt behavior.
+      agent: codex
+    - timestamp: '2026-05-09T00:48:50.232786'
+      level: info
+      message: Updated packages/opencode/src/cli/cmd/tui/routes/home.tsx with Chinese
+        paper workbench header and topic/code/material/data/log placeholders while
+        preserving plugin slots and prompt behavior. TUI state tests still pass.
+      agent: codex
+    last_run: '2026-05-09T00:48:50.232786'
+    attempt_count: 2
   meta: {}
 - id: task-029-step-04-doc-version
   title: Update docs and version 0.1.26-dev
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-029-step-03-home-and-run-views
@@ -71,12 +107,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T00:49:01.231187'
+      level: info
+      message: Updating README/CHANGELOG to 0.1.26-dev and adding TUI workbench report.
+      agent: codex
+    - timestamp: '2026-05-09T00:51:25.928948'
+      level: info
+      message: Updated README and colon-history CHANGELOG to 0.1.26-dev, added reports/tui-paper-workbench.md,
+        and recorded the TUI paper workbench state adapter plus OpenCode TUI home
+        changes. CHANGELOG commit id remains pending until the feature commit is created,
+        then it will be backfilled.
+      agent: codex
+    last_run: '2026-05-09T00:51:25.928948'
+    attempt_count: 2
   meta: {}
 - id: task-029-step-05-verify
   title: Run verification
-  status: todo
+  status: in_progress
   owner: codex
   depends_on:
   - task-029-step-04-doc-version
@@ -85,8 +133,14 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T00:51:29.768281'
+      level: info
+      message: Running focused TUI state tests, server typecheck, workspace typecheck,
+        README/CHANGELOG version check after commit-hash backfill, and TaskFlow validation.
+      agent: codex
+    last_run: '2026-05-09T00:51:29.768281'
+    attempt_count: 1
   meta: {}
 outputs:
 - type: file
@@ -101,7 +155,10 @@ outputs:
 trace:
   logs: []
   attempt_count: 0
+lock:
+  by: codex
+  at: '2026-05-09T00:51:17.623205'
 meta:
   created_at: '2026-05-08T22:10:08.904231'
-  updated_at: '2026-05-08T22:10:08.904231'
+  updated_at: '2026-05-09T00:51:29.768281'
   version: '1'

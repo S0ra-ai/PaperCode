@@ -13,8 +13,12 @@ import { useEditorContext } from "@tui/context/editor"
 
 let once = false
 const placeholder = {
-  normal: ["Fix a TODO in the codebase", "What is the tech stack of this project?", "Fix broken tests"],
-  shell: ["ls -la", "git status", "pwd"],
+  normal: [
+    "输入论文主题，例如：低资源场景下的多智能体研究工作流评估",
+    "输入代码路径和主题，例如：--code packages/server 写一篇系统论文",
+    "拖入论文材料、数据集或实验日志，生成可审查论文 bundle",
+  ],
+  shell: ["paper_fucker doctor", "paper_fucker skills list", "paper_fucker mcp add exa --url https://mcp.exa.ai/mcp"],
 }
 
 export function Home() {
@@ -67,6 +71,11 @@ export function Home() {
           <TuiPluginRuntime.Slot name="home_logo" mode="replace">
             <Logo />
           </TuiPluginRuntime.Slot>
+        </box>
+        <box flexDirection="column" alignItems="center" maxWidth={75} paddingTop={1} paddingBottom={1} flexShrink={0}>
+          <text>paper_fucker 论文工作台</text>
+          <text>主题 / 代码路径 / 论文材料 / 数据集 / 实验日志</text>
+          <text>MCP · Skills · Provider Roles · Preview · Export</text>
         </box>
         <box height={1} minHeight={0} flexShrink={1} />
         <box width="100%" maxWidth={75} zIndex={1000} paddingTop={1} flexShrink={0}>
