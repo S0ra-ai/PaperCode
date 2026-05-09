@@ -7,7 +7,7 @@
 
 :history
 
-    0.1.22-dev - 2026/05/09 (pending) [develop]
+    0.1.22-dev - 2026/05/09 (4b3c5e7) [develop]
     :brief 新增多输入 ResearchIntake 与 ResearchBrief 记录
         - feat(paper): 新增 ResearchIntakeRequest 与 ResearchBrief.v1, 支持 topic/code/data/materials workflows
         - feat(intake): 默认中文 zh-CN, 默认 generic-preprint, 保留 target_profile 和 per-role model override
@@ -22,9 +22,9 @@
         - reports/research-intake.md - intake implementation report
     :verification
         - npx --yes bun@1.3.13 --cwd packages/server test test/paper/intake.test.ts passed: 4 pass, 0 fail, 20 expects
-        - npx --yes bun@1.3.13 run --cwd packages/server typecheck pending
-        - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 pending
-        - TaskFlow validate_task task-025-research-intake pending
+        - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
+        - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
+        - TaskFlow validate_task task-025-research-intake passed
 
     0.1.21-dev - 2026/05/09 (4e7754e) [develop]
     :brief 新增论文投稿 Profile 系统与 nature-paper skill
