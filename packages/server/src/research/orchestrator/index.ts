@@ -122,8 +122,9 @@ export async function startAutomaticResearchRun(input: OrchestratorRunInput, opt
             stage: stage.id,
             guidance: guidance.map((item) => ({ guidance_id: item.guidance_id, text: item.text })),
           })) ?? {
-            status: "succeeded" as const,
-            summary: `${stage.title} completed by stub handler.`,
+            status: "skipped" as const,
+            summary: `${stage.title} requires a concrete stage handler.`,
+            signal: { stage_failure: `No handler registered for ${stage.id}.` },
           }
         const policy = decideAutomaticStagePolicy({
           state: (await getResearchRunStatus(input.run_dir)).state,
