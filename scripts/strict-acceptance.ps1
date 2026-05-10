@@ -28,6 +28,11 @@ $RequiredChecks = @(
     "docx-generation",
     "topic-to-paper-live-run",
     "code-to-paper-live-run",
+    "hard-fork-paper-core",
+    "hard-fork-paperrun-api-tui",
+    "hard-fork-agent-tree",
+    "hard-fork-quality-egress",
+    "hard-fork-public-branding",
     "git-flow-cleanup"
 )
 
@@ -294,6 +299,70 @@ function Invoke-GitFlowCleanupCheck {
     return "current branch $branch follows Git Flow and no codex/task branches remain"
 }
 
+function Read-RepoText {
+    param([string]$RelativePath)
+    return Get-Content -Raw -LiteralPath (Join-Path $RepoRoot $RelativePath)
+}
+
+function Assert-HardFork {
+    param(
+        [bool]$Condition,
+        [string]$Message
+    )
+    if (-not $Condition) { throw $Message }
+}
+
+function Invoke-HardForkPaperCore {
+    $paperCore = Join-Path $RepoRoot "packages/opencode/src/paper"
+    $sidecarServer = Join-Path $RepoRoot "packages/server"
+    Assert-HardFork (Test-Path -LiteralPath $paperCore) "packages/opencode/src/paper is missing."
+    Assert-HardFork (-not (Test-Path -LiteralPath $sidecarServer)) "packages/server sidecar package still exists."
+    Assert-HardFork (Test-Path -LiteralPath (Join-Path $RepoRoot "packages/opencode/src/server/routes/instance/httpapi/groups/paper.ts")) "Paper HttpApi group is missing from opencode."
+    Assert-HardFork (Test-Path -LiteralPath (Join-Path $RepoRoot "packages/opencode/src/server/routes/instance/httpapi/handlers/paper.ts")) "Paper HttpApi handler is missing from opencode."
+    return "paper core lives under packages/opencode/src/paper and no packages/server sidecar exists"
+}
+
+function Invoke-HardForkPaperRunApiTui {
+    $workbench = Read-RepoText "packages/opencode/src/cli/cmd/tui/routes/paper/workbench.ts"
+    $dashboard = Read-RepoText "packages/opencode/src/cli/cmd/tui/routes/paper/index.tsx"
+    $api = Read-RepoText "packages/opencode/src/server/routes/instance/httpapi/groups/paper.ts"
+    $handlers = Read-RepoText "packages/opencode/src/server/routes/instance/httpapi/handlers/paper.ts"
+    Assert-HardFork ($workbench -match "paper/runs") "TUI workbench does not submit to /paper/runs."
+    Assert-HardFork ($dashboard -match "PaperRunDashboard" -and $dashboard -match "createPaperRunDashboardState") "TUI dashboard is not the PaperRun workbench."
+    Assert-HardFork ($api -match "PaperRunCreatePayload" -and $api -match "quality_mode" -and $api -match "data_egress_policy") "PaperRun API schema does not expose required create fields."
+    Assert-HardFork ($handlers -match "createPaperRun" -and $handlers -match "exportPaperRun" -and $handlers -match "previewPaperRun") "PaperRun handlers are not bound to paper runtime functions."
+    return "PaperRun API and TUI workbench are first-class paper surfaces"
+}
+
+function Invoke-HardForkAgentTree {
+    $agents = Read-RepoText "packages/opencode/src/paper/agents.ts"
+    $run = Read-RepoText "packages/opencode/src/paper/run.ts"
+    Assert-HardFork ($agents -match "parent_agent_id" -and $agents -match "depth" -and $agents -match "subagent_role") "Agent tree source does not encode nested subagent parent/depth metadata."
+    Assert-HardFork ($agents -match "provider_id" -and $agents -match "model_id") "Agent tree source does not record provider/model per agent."
+    Assert-HardFork ($run -match "max_depth" -and $run -match "max_parallel" -and $run -match "budgetTierPolicy") "PaperRun snapshot does not project budget-tier agent limits."
+    return "Agent Tree supports nested multi-model agents with budget limits"
+}
+
+function Invoke-HardForkQualityEgress {
+    $run = Read-RepoText "packages/opencode/src/paper/run.ts"
+    $authoring = Read-RepoText "packages/opencode/src/paper/authoring.ts"
+    $egress = Read-RepoText "packages/opencode/src/paper/data-egress.ts"
+    Assert-HardFork ($run -match "reviewable_bundle" -and $run -match "submission_candidate") "PaperRun quality modes are missing."
+    Assert-HardFork ($run -match "private_first" -and $egress -match "denied_patterns" -and $egress -match "external_model_full_text") "Private-first data egress policy is missing."
+    Assert-HardFork ($authoring -match "forced_draft" -and $authoring -match "PaperSupplementaryBundle" -and $authoring -match "PaperAvailabilityBundle") "Authoring loop does not expose forced draft, supplementary, and availability bundles."
+    return "quality modes, private-first egress, forced draft, supplementary, and availability bundles are present"
+}
+
+function Invoke-HardForkPublicBranding {
+    $logo = Read-RepoText "packages/opencode/src/cli/logo.ts"
+    $index = Read-RepoText "packages/opencode/src/index.ts"
+    $tips = Read-RepoText "packages/opencode/src/cli/cmd/tui/feature-plugins/home/tips-view.tsx"
+    Assert-HardFork ($logo -match "Paper Fucker") "CLI logo does not expose Paper Fucker."
+    Assert-HardFork (-not ($index -match "\.command\(SessionCommand\)" -or $index -match "\.command\(GithubCommand\)" -or $index -match "\.command\(AcpCommand\)" -or $index -match "\.command\(PrCommand\)")) "Legacy OpenCode product commands are still registered publicly."
+    Assert-HardFork ($tips -match "PaperRun" -and $tips -match "Claim Ledger" -and $tips -match "Source Ledger") "TUI home guidance is not PaperRun-ledger oriented."
+    return "public logo, command registry, and TUI tips expose Paper Fucker/PaperRun instead of legacy OpenCode surfaces"
+}
+
 function Write-Report {
     $report = Join-Path $RepoRoot $ReportPath
     $dir = Split-Path -Parent $report
@@ -339,8 +408,10 @@ Invoke-Check "server-typecheck" "Server typecheck" {
 Invoke-Check "workspace-typecheck" "Workspace typecheck" {
     Invoke-CheckedCommand "npx" @("--yes", "bun@1.3.13", "run", "typecheck")
 }
-Invoke-Check "opencode-tui-smoke" "OpenCode TUI smoke" {
-    Invoke-CheckedCommand "opencode" @("--version")
+Invoke-Check "opencode-tui-smoke" "Paper Fucker TUI smoke" {
+    $help = Invoke-CheckedCommand "npx" @("--yes", "bun@1.3.13", "--cwd", "packages/opencode", "src/index.ts", "--help")
+    Assert-HardFork ($help -match "Paper Fucker" -or (Read-RepoText "packages/opencode/src/cli/logo.ts") -match "Paper Fucker") "Local Paper Fucker CLI help did not expose the product branding."
+    return "local paper_fucker CLI help responded"
 }
 Invoke-Check "live-provider-call" "At least one live OpenCode-compatible provider call" {
     Invoke-DeepSeekSmoke
@@ -365,6 +436,21 @@ Invoke-Check "topic-to-paper-live-run" "Topic-to-paper runtime smoke" {
 }
 Invoke-Check "code-to-paper-live-run" "Code-to-paper runtime smoke" {
     Invoke-CheckedCommand "npx" @("--yes", "bun@1.3.13", "--cwd", "packages/opencode", "test", "test/paper/code-to-paper.test.ts")
+}
+Invoke-Check "hard-fork-paper-core" "Hard fork paper core migration" {
+    Invoke-HardForkPaperCore
+}
+Invoke-Check "hard-fork-paperrun-api-tui" "PaperRun API and TUI workbench surface" {
+    Invoke-HardForkPaperRunApiTui
+}
+Invoke-Check "hard-fork-agent-tree" "Multi-layer multi-model Agent Tree" {
+    Invoke-HardForkAgentTree
+}
+Invoke-Check "hard-fork-quality-egress" "Quality modes, egress, and authoring bundles" {
+    Invoke-HardForkQualityEgress
+}
+Invoke-Check "hard-fork-public-branding" "Paper Fucker public branding and command cleanup" {
+    Invoke-HardForkPublicBranding
 }
 Invoke-Check "git-flow-cleanup" "Git Flow branch discipline" {
     Invoke-GitFlowCleanupCheck
