@@ -66,6 +66,12 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 
 ## Project Structure
 
+- `paper_fucker` opens the Chinese TUI paper workbench. The user enters a topic, code path, paper material, dataset, experiment log, or mixed request; the home prompt posts it to `/paper/runs` as a `ResearchIntakeRequest`.
+- A `PaperRun` is created workspace-first under `.paper_fucker/runs/<run-id>` and automatically advances through intake, planning, literature, code analysis, data, experiment, reproduction, ClaimLedger, drafting, profile formatting, verification, revision, and export.
+- The system pauses only for actionable decisions: missing providers/tools, cost limits, data-egress authorization, license/source conflicts, low-confidence direction choices, unreproduced experiments, or authenticity gate blockers.
+- The run dashboard shows controls, stage graph, ledgers, model roles, capability health, preview/export controls, and the right sidebar for cost/token/context, outline, Agent Tree, gates, blockers, and recent calls.
+- Final export requires passing gates. Forced drafts are allowed for review but remain visibly marked with failed checks.
+
 - `schemas/research/`: JSON Schema source of truth for research runs, events, artifacts, sources, tool traces, claims, drafts, reviews, exports, and checkpoints.
 - `packages/opencode/src/paper/`: authoritative paper_fucker TypeScript runtime inside the OpenCode hard fork. It owns AJV validation, OpenTelemetry span hooks, generated TypeScript contract types, run/event/artifact runtime APIs, permission/resource/cost/final-gate state, Python tool bridge calls, paper orchestration, profiles, authoring, preview binding, and rebuildable SQLite indexes.
 - `packages/opencode/src/paper/init/`: initialization and diagnostics flow for `~/.paper_fucker/config.json`, `tools.json`, encrypted `secrets.enc`, external tool discovery, and Full Access acknowledgement.

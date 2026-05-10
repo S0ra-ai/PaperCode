@@ -17,9 +17,10 @@ import { submitPaperWorkbenchPrompt } from "./paper/workbench"
 let once = false
 const placeholder = {
   normal: [
-    "输入论文主题，例如：低资源场景下的多智能体研究工作流评估",
-    "输入代码路径和主题，例如：--code . 写一篇系统论文",
-    "拖入论文材料、数据集或实验日志，生成可审查论文 bundle",
+    "输入主题，系统会自动创建 PaperRun 并推进研究、写作、审稿和导出",
+    "指定代码仓库，例如：--code . 写一篇有源码依据的系统论文",
+    "加入材料，例如：--paper draft.pdf --data data.csv --log run.log 生成可审查论文包",
+    "目标投稿候选：--profile nature-paper --submission 主题或代码路径",
   ],
   shell: ["paper_fucker doctor", "paper_fucker skills list", "paper_fucker mcp add exa --url https://mcp.exa.ai/mcp"],
 }
@@ -80,8 +81,8 @@ export function Home() {
         </box>
         <box flexDirection="column" alignItems="center" maxWidth={75} paddingTop={1} paddingBottom={1} flexShrink={0}>
           <text>paper_fucker 论文工作台</text>
-          <text>主题 / 代码路径 / 论文材料 / 数据集 / 实验日志</text>
-          <text>MCP · Skills · Provider Roles · Preview · Export</text>
+          <text>主题 / 代码 / 论文材料 / 数据 / 实验日志 → PaperRun</text>
+          <text>自动编排 Agent · MCP · Skills，仅在授权、成本、真实性或复现风险时暂停</text>
         </box>
         <box height={1} minHeight={0} flexShrink={1} />
         <box width="100%" maxWidth={75} zIndex={1000} paddingTop={1} flexShrink={0}>

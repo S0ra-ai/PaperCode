@@ -40,7 +40,7 @@ function PaperRunSidebar(props: { sidebar: PaperRunSidebarState }) {
       <scrollbox flexGrow={1}>
         <box flexDirection="column" gap={1} paddingRight={1}>
           <text fg={theme.primary}>
-            <span style={{ bold: true }}>PaperRun Sidebar</span>
+            <span style={{ bold: true }}>运行侧栏</span>
           </text>
 
           <SidebarSection title="运行概览">
