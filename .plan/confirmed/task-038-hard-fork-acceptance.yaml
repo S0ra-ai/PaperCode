@@ -1,6 +1,6 @@
 id: task-038-hard-fork-acceptance
 title: Validate complete OpenCode hard fork paper workbench
-status: todo
+status: done
 priority: critical
 owner: codex
 tags:
@@ -21,7 +21,7 @@ execution:
 steps:
 - id: task-038-step-01-red-hard-fork-acceptance
   title: Add failing hard fork acceptance tests
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: Add acceptance tests/script checks for PaperRun-first TUI/API, migrated
@@ -31,12 +31,26 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T05:17:33.671463'
+      level: info
+      message: Starting final hard-fork acceptance. Branch feature/hard-fork-acceptance
+        was created from develop after task claim; TaskFlow prepare_git_branch could
+        not run because claim_task wrote the lock into the worktree.
+      agent: codex
+    - timestamp: '2026-05-10T05:20:15.559791'
+      level: info
+      message: Added hard-fork acceptance tests. Red run failed as intended because
+        scripts/strict-acceptance.ps1 does not yet declare hard-fork-paper-core/hard-fork-paperrun-api-tui/hard-fork-agent-tree/hard-fork-quality-egress/hard-fork-public-branding.
+        The new runtime test also exposed Windows EBUSY temp cleanup behavior to harden
+        in the implementation step.
+      agent: codex
+    last_run: '2026-05-10T05:20:15.559791'
+    attempt_count: 2
   meta: {}
 - id: task-038-step-02-acceptance-script
   title: Implement hard fork acceptance script
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-038-step-01-red-hard-fork-acceptance
@@ -46,12 +60,26 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T05:20:20.092602'
+      level: info
+      message: Implementing hard-fork acceptance script checks and stabilizing the
+        new runtime acceptance cleanup.
+      agent: codex
+    - timestamp: '2026-05-10T05:22:06.456955'
+      level: info
+      message: 'Implemented hard-fork acceptance checks in scripts/strict-acceptance.ps1:
+        hard-fork-paper-core, hard-fork-paperrun-api-tui, hard-fork-agent-tree, hard-fork-quality-egress,
+        and hard-fork-public-branding. Switched TUI smoke from global opencode to
+        local repository CLI help. Added packages/opencode/test/paper/hard-fork-acceptance.test.ts.
+        Targeted acceptance tests passed: 6 pass, 0 fail, 53 expects.'
+      agent: codex
+    last_run: '2026-05-10T05:22:06.456955'
+    attempt_count: 2
   meta: {}
 - id: task-038-step-03-live-fixture-runs
   title: Run fixture and live acceptance paths
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-038-step-02-acceptance-script
@@ -62,12 +90,27 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T05:22:35.258885'
+      level: info
+      message: Starting strict acceptance run. This covers deterministic topic/code
+        paper runtime tests plus live provider, Exa, Nature skill/profile, pandoc,
+        LaTeX, DOCX, and Git Flow checks.
+      agent: codex
+    - timestamp: '2026-05-10T05:43:25.607095'
+      level: info
+      message: Strict acceptance passed. reports/strict-live-acceptance.md was generated.
+        The run covered deterministic topic/code paper runtime tests plus live provider,
+        Exa MCP, Nature skill/profile, pandoc, LaTeX, DOCX, hard-fork paper core,
+        PaperRun API/TUI, Agent Tree, quality/egress, public branding, and Git Flow
+        checks.
+      agent: codex
+    last_run: '2026-05-10T05:43:25.607095'
+    attempt_count: 2
   meta: {}
 - id: task-038-step-04-doc-version
   title: Update docs and version 0.3.0-dev
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-038-step-03-live-fixture-runs
@@ -77,12 +120,26 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T05:45:17.829991'
+      level: info
+      message: Starting documentation and version synchronization for 0.3.0-dev after
+        strict hard-fork acceptance passed.
+      agent: codex
+    - timestamp: '2026-05-10T05:46:26.389180'
+      level: info
+      message: 'Updated README current version to 0.3.0-dev, added the hard-fork acceptance
+        status and task-038 planning reference, added the 0.3.0-dev CHANGELOG entry
+        with a placeholder work commit id to be backfilled after commit, and created
+        reports/hard-fork-acceptance.md. Version check passed: README version 0.3.0-dev
+        matches CHANGELOG latest version.'
+      agent: codex
+    last_run: '2026-05-10T05:46:26.389180'
+    attempt_count: 2
   meta: {}
 - id: task-038-step-05-verify
   title: Verify final hard fork acceptance
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-038-step-04-doc-version
@@ -93,8 +150,28 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T05:46:30.541982'
+      level: info
+      message: Starting final verification for task-038 after 0.3.0-dev documentation/version
+        synchronization.
+      agent: codex
+    - timestamp: '2026-05-10T06:06:49.786777'
+      level: info
+      message: 'Final verification passed. Targeted tests passed: npx --yes bun@1.3.13
+        --cwd packages/opencode test test/paper/strict-acceptance.test.ts test/paper/hard-fork-acceptance.test.ts
+        => 6 pass, 0 fail, 53 expects. Strict live acceptance passed and regenerated
+        reports/strict-live-acceptance.md with README version 0.3.0-dev, full opencode
+        suite 2547 pass / 38 skip / 2 todo / 0 fail, preview tests 2 pass, Python
+        tests 4 OK, server/workspace typecheck pass, local Paper Fucker CLI smoke
+        pass, DeepSeek live provider pass, Exa live search pass, Nature skill/profile
+        pass, pandoc/LaTeX/DOCX pass, topic-to-paper and code-to-paper fixture runs
+        pass, hard-fork checks pass, and Git Flow cleanup pass. README/CHANGELOG version
+        check passed and TaskFlow validate_task task-038-hard-fork-acceptance returned
+        valid with no warnings.'
+      agent: codex
+    last_run: '2026-05-10T06:06:49.786777'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -109,7 +186,10 @@ outputs:
 trace:
   logs: []
   attempt_count: 0
+lock:
+  by: codex
+  at: '2026-05-10T05:17:01.525267'
 meta:
   created_at: '2026-05-09T02:50:31.772293'
-  updated_at: '2026-05-09T02:50:31.772293'
+  updated_at: '2026-05-10T06:06:49.786777'
   version: '1'

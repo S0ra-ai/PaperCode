@@ -2,10 +2,29 @@
 :author        s0ra (https://github.com/S0ra-ai)
 :repo          
 :desc          记录项目的重大变更和版本历史
-:version       0.2.6-dev
-:last_update   2026/05/09
+:version       0.3.0-dev
+:last_update   2026/05/10
 
 :history
+
+    0.3.0-dev - 2026/05/10 (9fdb7dc) [develop]
+    :brief OpenCode hard fork 最终验收为 Paper Fucker 论文工作台
+        - test(acceptance): 新增 hard-fork acceptance 覆盖 paper core 迁移、PaperRun API/TUI、submission 预算档、多层多模型 Agent Tree、private-first data egress、forced draft 阻断原因
+        - test(strict): strict acceptance 新增 hard-fork-paper-core、hard-fork-paperrun-api-tui、hard-fork-agent-tree、hard-fork-quality-egress、hard-fork-public-branding 检查
+        - fix(strict): TUI smoke 改用仓库内 Paper Fucker CLI help, 不依赖全局 opencode 命令
+        - docs(report): 新增 hard fork acceptance 报告, strict live acceptance 覆盖 live provider、Exa、Nature skill/profile、pandoc、LaTeX、DOCX、topic-to-paper 与 code-to-paper
+        - docs(readme): 版本更新为 0.3.0-dev, 记录 PaperRun-first hard fork 验收状态
+    :src
+        - packages/opencode/test/paper/hard-fork-acceptance.test.ts - final hard fork product acceptance coverage
+        - packages/opencode/test/paper/strict-acceptance.test.ts - strict script required check list for hard fork checks
+        - scripts/strict-acceptance.ps1 - strict live acceptance hard fork checks and local CLI smoke
+        - reports/strict-live-acceptance.md - strict live acceptance report
+        - reports/hard-fork-acceptance.md - final hard fork acceptance report
+        - README.md - public hard fork status and version update
+        - CHANGELOG - 0.3.0-dev history entry
+    :verification
+        - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/strict-acceptance.test.ts test/paper/hard-fork-acceptance.test.ts passed: 6 pass, 0 fail, 53 expects
+        - scripts/strict-acceptance.ps1 passed with TaskFlow, version sync, tracked secret scan, opencode tests, preview tests, Python tests, typecheck, local Paper Fucker CLI smoke, DeepSeek live provider, Exa live search, Nature skill/profile, pandoc, LaTeX, DOCX, topic-to-paper, code-to-paper, hard fork checks, and Git Flow cleanup
 
     0.2.6-dev - 2026/05/09 (66db257) [develop]
     :brief 清理 OpenCode 用户可见表面为 Paper Fucker 论文工作台
