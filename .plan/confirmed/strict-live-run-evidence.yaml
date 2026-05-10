@@ -1,6 +1,6 @@
 id: strict-live-run-evidence
 title: Strict Live Run Evidence
-status: in_progress
+status: done
 priority: high
 owner: codex
 tags:
@@ -144,7 +144,7 @@ steps:
   meta: {}
 - id: strict-live-run-evidence-step-05-release
   title: Version 0.6.1-dev and merge
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - strict-live-run-evidence-step-04-verify
@@ -155,8 +155,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T19:57:08.297450'
+      level: info
+      message: Updating README and CHANGELOG to 0.6.1-dev with work commit affb5f1,
+        then rerunning version checks and strict acceptance so the report reflects
+        the final version.
+      agent: codex
+    - timestamp: '2026-05-10T20:00:57.022141'
+      level: info
+      message: 'README/CHANGELOG finalized at 0.6.1-dev with work commit affb5f1.
+        Final strict acceptance rerun passed and reports/strict-live-acceptance.md
+        now shows README version 0.6.1-dev and benchmark-backed topic/code PaperRun
+        live-run rows with project_version 0.6.1-dev. Validation passed: check-readme-version,
+        check-changelog-format, TaskFlow validate_task strict-live-run-evidence, TaskFlow
+        validate_changelog_format.'
+      agent: codex
+    last_run: '2026-05-10T20:00:57.022141'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -179,5 +195,5 @@ lock:
   at: '2026-05-10T19:48:44.442596'
 meta:
   created_at: '2026-05-10T19:48:37.991505'
-  updated_at: '2026-05-10T19:56:56.303191'
+  updated_at: '2026-05-10T20:00:57.022141'
   version: '1'
