@@ -1,5 +1,16 @@
 ﻿# Strict Live Acceptance Report
 
+## Latest Task 046 Attempt
+
+- Generated: 2026/05/10 16:29:24 +08:00
+- Mode: strict-live benchmark rerun on `feature/live-paper-quality-benchmark`
+- Status: needs-hardening
+- Result: the full script was terminated after more than 18 minutes while `packages/opencode test` continued without per-check timeout or progress output.
+- Follow-up: `task-047-strict-acceptance-timeouts` will add bounded checks, partial report persistence, and a focused paper-critical default suite.
+- Targeted live benchmark checks passed separately: DeepSeek `/models` + chat, Exa MCP initialize, Nature skill/guidance, pandoc LaTeX/DOCX, direct XeLaTeX PDF, and the focused PaperRun/code/export/observability tests.
+
+## Historical Full Script Result
+
 - Generated: 2026-05-10T14:06:28.9442609+08:00
 - Mode: strict-live
 - Status: passed
