@@ -2,10 +2,34 @@
 :author        s0ra (https://github.com/S0ra-ai)
 :repo          
 :desc          记录项目的重大变更和版本历史
-:version       0.6.4-dev
+:version       0.6.5-dev
 :last_update   2026/05/11
 
 :history
+
+    0.6.5-dev - 2026/05/11 (b188ae0) [develop]
+        :brief Crawler 数据采集与 Source Ledger gate
+        - feat(crawler): 新增 WebCrawlPlan、CrawlSourceRecord、CrawledDataset、CrawlComplianceReport 和 gate summary
+        - feat(crawler): 爬虫结果可转换为 ResearchSource web ledger、source_snapshot artifact 和 tool trace
+        - feat(python): 新增 Scrapling-first crawler bridge、fixture HTML extraction 和 web_crawl_probe 工具
+        - feat(run): PaperRun diagnostics 增加 crawler source、license、robots 阻断统计
+        - test(crawler): 覆盖爬虫契约、license/robots gate、artifact/tool trace 与 Python fixture crawler
+        :src
+            - packages/opencode/src/paper/crawler.ts - crawler artifact contracts, policy checks, ledger conversion, diagnostics
+            - packages/opencode/src/paper/run.ts - PaperRun crawler diagnostics summary
+            - research-tools/src/paper_fucker_tools/crawler.py - Scrapling availability and fixture crawler bridge
+            - research-tools/src/paper_fucker_tools/mcp_tools.py - web_crawl_probe registry entry
+        :test
+            - packages/opencode/test/paper/crawler.test.ts - TS crawler contract and gate tests
+            - research-tools/tests/test_crawler.py - Python crawler adapter and MCP probe tests
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/crawler.test.ts test/paper/capability-harness.test.ts
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 --cwd packages/preview test
+            - PYTHONPATH=research-tools/src python -m unittest discover -s research-tools/tests
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1
+            - TaskFlow validate_changelog_format
+            - TaskFlow validate_task crawler-data-acquisition
 
     0.6.4-dev - 2026/05/11 (86b5b08) [develop]
         :brief MemoryBank 与代码理解层
