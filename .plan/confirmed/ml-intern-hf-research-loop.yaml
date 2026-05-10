@@ -1,6 +1,6 @@
 id: ml-intern-hf-research-loop
 title: ML-Intern Inspired Hugging Face Research Loop
-status: todo
+status: in_progress
 priority: high
 owner: codex
 tags:
@@ -98,7 +98,10 @@ outputs:
 trace:
   logs: []
   attempt_count: 0
+lock:
+  by: codex
+  at: '2026-05-10T20:57:49.829001'
 meta:
   created_at: '2026-05-10T20:06:40.277677'
-  updated_at: '2026-05-10T20:06:40.277677'
+  updated_at: '2026-05-10T20:57:58.721484'
   version: '1'
