@@ -40,7 +40,11 @@ import {
 import { budgetTierPolicy } from "./budget"
 import { recordExportBundle, type ExportBundle } from "./research/export"
 import type { DraftPaper } from "./research/writing"
-import { paperObservabilityAuditFromEvents, type PaperObservabilityAuditSummary } from "./observability"
+import {
+  paperObservabilityAuditFromEvents,
+  recordDefaultPaperRunObservability,
+  type PaperObservabilityAuditSummary,
+} from "./observability"
 import {
   applyPaperRunControl,
   controllerSseEvent,
@@ -401,6 +405,16 @@ function modelRoleMap(config: ResearchIntakeRequest["model_roles"]) {
   return roles
 }
 
+function dataEgressCandidates(request: ResearchIntakeRequest) {
+  return [
+    ...(request.code_paths ?? []),
+    ...(request.paper_files ?? []),
+    ...(request.dataset_paths ?? []),
+    ...(request.experiment_logs ?? []),
+    request.workspace_path,
+  ].filter((item): item is string => typeof item === "string" && item.length > 0)
+}
+
 function finalGateStatus(value: unknown) {
   const status = jsonRecord(value).status
   return status === "passed" || status === "blocked" ? status : "not_started"
@@ -718,6 +732,18 @@ export async function createPaperRun(
     {
       run_dir: handle.run_dir,
       request: executionRequest,
+    },
+    normalized,
+  )
+  await recordDefaultPaperRunObservability(
+    handle.run_dir,
+    {
+      model_roles: modelRoleMap(request.model_roles),
+      capabilities: defaultResearchCapabilities(),
+      data_egress_policy: dataEgressPolicy,
+      data_egress_candidates: dataEgressCandidates(executionRequest),
+      budget_tier: budgetTier,
+      quality_mode: qualityMode,
     },
     normalized,
   )
