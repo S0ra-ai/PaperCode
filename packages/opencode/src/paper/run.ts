@@ -60,6 +60,7 @@ import {
   type CodeUnderstandingGraph,
 } from "./code-understanding"
 import { crawlerDiagnostics, type CrawlerDiagnosticsSummary } from "./crawler"
+import { hfLoopDiagnostics, type HFLoopDiagnostics } from "./huggingface-loop"
 
 import {
   applyPaperRunControl,
@@ -225,6 +226,7 @@ export interface PaperRunSnapshot {
     memory?: ReturnType<typeof memoryBankSummary>
     code_understanding?: ReturnType<typeof codeUnderstandingSummary>
     crawler?: CrawlerDiagnosticsSummary
+    huggingface?: HFLoopDiagnostics
   }
   artifacts: ResearchArtifact[]
   drafts: ResearchDraft[]
@@ -724,6 +726,7 @@ export async function getPaperRunSnapshotFromDir(runDir: string): Promise<PaperR
       memory: memoryBankSummary(memoryBank),
       code_understanding: codeUnderstandingSummary(codeGraph),
       crawler: crawlerDiagnostics({ sources }),
+      huggingface: hfLoopDiagnostics({ sources }),
     },
     artifacts,
     drafts,

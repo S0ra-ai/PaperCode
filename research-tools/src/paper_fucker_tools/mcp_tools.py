@@ -15,6 +15,7 @@ from typing import Any, Callable
 
 from .crawler import crawl_url, scrapling_status
 from .external_tools import discover_external_tools
+from .huggingface_loop import hf_research_probe as hf_research_probe_impl
 from .models import ToolArtifact, ToolEvent, ToolResult
 
 
@@ -147,6 +148,19 @@ def web_crawl_probe(input_data: dict[str, Any]) -> ToolResult:
     )
 
 
+def hf_research_probe(input_data: dict[str, Any]) -> ToolResult:
+    result = hf_research_probe_impl(input_data)
+    status = "failed" if result.get("mode") == "blocked" else "succeeded"
+    return ToolResult(
+        tool_name="hf_research_probe",
+        status=status,
+        artifacts=[ToolArtifact(title="Hugging Face research probe", data=result)],
+        events=[ToolEvent(type=f"python.hf.{result['kind']}.probed", payload=result)],
+        metadata=result,
+        error="; ".join(str(item) for item in result.get("diagnostics", [])) or None,
+    )
+
+
 def docx_generation(input_data: dict[str, Any]) -> ToolResult:
     output = Path(str(input_data["output_path"])).expanduser()
     title = str(input_data.get("title", "paper_fucker draft"))
@@ -177,6 +191,7 @@ TOOL_REGISTRY: dict[str, ToolHandler] = {
     "dataset_metadata_probe": dataset_metadata_probe,
     "experiment_log_parse": experiment_log_parse,
     "web_crawl_probe": web_crawl_probe,
+    "hf_research_probe": hf_research_probe,
     "docx_generation": docx_generation,
 }
 
