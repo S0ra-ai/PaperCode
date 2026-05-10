@@ -1,0 +1,99 @@
+id: memory-bank-code-understanding
+title: Memory Bank and Code Understanding Layer
+status: todo
+priority: high
+owner: codex
+tags:
+- memory-bank
+- code-understanding
+- privacy
+- 0.6.4-dev
+depends_on:
+- capability-pack-harness
+description: 实现 Paper Fucker 的 MemoryBank 与代码理解层，保留长期项目知识、agent 学习、代码结构摘要、source range、symbol/file
+  graph、实验入口和风险记忆；默认本地私有，不外传未授权内容。
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: memory-contracts
+  title: 定义 MemoryBank 契约
+  status: todo
+  owner: codex
+  depends_on: []
+  description: 定义 project/local/user scopes、memory entries、provenance、retention、redaction
+    与 refresh policy。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: code-understanding
+  title: 实现代码理解索引
+  status: todo
+  owner: codex
+  depends_on: []
+  description: 生成 CodeUnderstandingGraph，记录 package/module/file/symbol/source range/test/benchmark
+    surface，并供 Agent Team 查询。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: agent-memory-integration
+  title: 接入 Agent Team 和 sidebar
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Agent Team 在派发任务前读取相关 memory，任务完成后写回可追溯总结，sidebar 显示 memory/code coverage。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: tests
+  title: 验证 memory 与 code understanding
+  status: todo
+  owner: codex
+  depends_on: []
+  description: 测试作用域、隐私过滤、source range、incremental update、agent memory read/write。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: release
+  title: 版本、CHANGELOG、README 与验证
+  status: todo
+  owner: codex
+  depends_on: []
+  description: 版本推进到 0.6.4-dev，更新 colon DSL CHANGELOG 与 README，并运行相关测试和格式校验。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: file
+  path: packages/opencode/src/paper/memory-bank.ts
+  description: MemoryBank runtime
+- type: file
+  path: packages/opencode/src/paper/code-understanding.ts
+  description: Code understanding graph
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-10T20:06:16.841758'
+  updated_at: '2026-05-10T20:06:16.841758'
+  version: '1'

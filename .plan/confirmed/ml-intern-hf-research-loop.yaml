@@ -1,0 +1,104 @@
+id: ml-intern-hf-research-loop
+title: ML-Intern Inspired Hugging Face Research Loop
+status: todo
+priority: high
+owner: codex
+tags:
+- ml-intern
+- hugging-face
+- datasets
+- jobs
+- experiment
+- 0.6.6-dev
+depends_on:
+- crawler-data-acquisition
+description: 借鉴 Hugging Face ML-Intern 的 docs/papers/datasets/jobs/sandbox/trace loop，把
+  Hugging Face papers、datasets、models、spaces、jobs 和 Trackio/experiment logging 能力接入
+  Paper Fucker 的 capability bus、harness、ExperimentLedger 与 ClaimLedger。
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: hf-capability-contracts
+  title: 定义 HF research loop capabilities
+  status: todo
+  owner: codex
+  depends_on: []
+  description: 定义 HFDocs、HFPapers、HFDatasets、HFModels、HFSpaces、HFJobs、experiment tracking
+    capability metadata 和 artifact。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: tool-bridge
+  title: 实现 HF 工具桥接
+  status: todo
+  owner: codex
+  depends_on: []
+  description: 通过 OpenCode provider/tool substrate 与 Python research-tools 接入 HF Hub
+    API、datasets/jobs/papers 查询，支持 mock 与 live smoke。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: experiment-loop-integration
+  title: 接入实验闭环和真实性 gate
+  status: todo
+  owner: codex
+  depends_on: []
+  description: HF jobs/datasets 输出进入 ExperimentLedger/DataLedger，训练/评估结果必须绑定 logs、metrics、source
+    和 cost trace。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: tests
+  title: 验证 HF loop
+  status: todo
+  owner: codex
+  depends_on: []
+  description: fixture/mock 验证 docs/papers/datasets/jobs adapter、approval gate、trace
+    replay、experiment ledger、ClaimLedger 引用约束。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: release
+  title: 版本、CHANGELOG、README 与验证
+  status: todo
+  owner: codex
+  depends_on: []
+  description: 版本推进到 0.6.6-dev，更新 colon DSL CHANGELOG 与 README，并运行相关测试和格式校验。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: file
+  path: packages/opencode/src/paper/huggingface-loop.ts
+  description: HF research loop integration
+- type: file
+  path: research-tools/paper_fucker_tools/huggingface_loop.py
+  description: HF Python bridge
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-10T20:06:40.277677'
+  updated_at: '2026-05-10T20:06:40.277677'
+  version: '1'

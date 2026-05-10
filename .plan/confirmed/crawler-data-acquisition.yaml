@@ -1,0 +1,103 @@
+id: crawler-data-acquisition
+title: Crawler and Web Data Acquisition
+status: todo
+priority: high
+owner: codex
+tags:
+- crawler
+- scrapling
+- data-acquisition
+- source-ledger
+- 0.6.5-dev
+depends_on:
+- memory-bank-code-understanding
+description: 新增内置爬虫/网页数据获取能力，支持 Scrapling 优先、Scrapy/Crawl4AI/Playwright 适配扩展，遵守 robots、rate
+  limit、license、privacy 和 data egress policy；采集结果写入 SourceLedger/DataLedger，不允许无来源数据进入
+  ClaimLedger。
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: crawler-contracts
+  title: 定义 crawler artifact 与 policy
+  status: todo
+  owner: codex
+  depends_on: []
+  description: 定义 WebCrawlPlan、CrawlSourceRecord、CrawledDataset、CrawlComplianceReport
+    等 artifact schema。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: scrapling-adapter
+  title: 实现 Scrapling 适配与 fallback
+  status: todo
+  owner: codex
+  depends_on: []
+  description: 实现 Python bridge capability：优先使用 Scrapling；不可用时返回 toolchain missing
+    diagnostic；预留 Scrapy/Crawl4AI/Playwright fallback。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: ledger-integration
+  title: 接入 SourceLedger/DataLedger 和 gate
+  status: todo
+  owner: codex
+  depends_on: []
+  description: 爬虫输出带 URL、timestamp、robots/license 状态、hash、extraction evidence，并受 data
+    egress 和 license gate 控制。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: tests
+  title: 验证 crawler 数据获取
+  status: todo
+  owner: codex
+  depends_on: []
+  description: 使用本地 fixture server/HTML 验证抓取、robots 阻断、license conflict、artifact hash、gate
+    阻断。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: release
+  title: 版本、CHANGELOG、README 与验证
+  status: todo
+  owner: codex
+  depends_on: []
+  description: 版本推进到 0.6.5-dev，更新 colon DSL CHANGELOG 与 README，并运行相关测试和格式校验。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: file
+  path: packages/opencode/src/paper/crawler.ts
+  description: Crawler contracts and gate integration
+- type: file
+  path: research-tools/paper_fucker_tools/crawler.py
+  description: Python crawler bridge
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-10T20:06:28.449812'
+  updated_at: '2026-05-10T20:06:28.449812'
+  version: '1'
