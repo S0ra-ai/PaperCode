@@ -2,10 +2,34 @@
 :author        s0ra (https://github.com/S0ra-ai)
 :repo          
 :desc          记录项目的重大变更和版本历史
-:version       0.4.3-dev
+:version       0.4.4-dev
 :last_update   2026/05/10
 
 :history
+
+    0.4.4-dev - 2026/05/10 (713835c) [develop]
+    :brief 默认 PaperRun 引擎自动记录完整 observability audit 覆盖
+        - fix(observability): 新增 recordDefaultPaperRunObservability, 自动记录 model_role/capability/subagent/tool/data_egress/cost
+        - fix(run): createPaperRun 在默认 stage graph 之后写入 observability baseline, 不再依赖测试或调用方手动补 audit
+        - fix(strict): strict acceptance 的 Git Flow 检查允许 `fix/*` 活动分支, 与当前分支策略一致
+        - fix(strict): Write-Report 对 Windows 短暂文件占用增加重试, 避免阶段性报告写入偶发失败
+        - test(observability): 新增默认 PaperRun coverage 回归, 要求 missing_kinds 为空
+        - test(strict): 覆盖 active task work 可在 feature/fix 分支上运行 strict acceptance, 并检查报告写入重试
+        - docs(report): 新增 reports/default-observability-coverage.md 记录 live benchmark coverage
+    :src
+        - packages/opencode/src/paper/observability.ts - default run observability recorder
+        - packages/opencode/src/paper/run.ts - default engine audit integration
+        - packages/opencode/test/paper/observability-audit.test.ts - default coverage regression
+        - scripts/strict-acceptance.ps1 - Git Flow active branch validation
+        - packages/opencode/test/paper/strict-acceptance.test.ts - feature/fix branch validation coverage
+        - reports/default-observability-coverage.md - live audit coverage evidence
+        - .plan/confirmed/task-050-default-observability-coverage.yaml - TaskFlow execution logs
+        - README.md - current behavior and version update
+        - CHANGELOG - 0.4.4-dev history entry
+    :verification
+        - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/observability-audit.test.ts passed: 2 pass, 0 fail, 22 expects
+        - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+        - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts produced empty missing_kinds with counts stage=28, capability=12, model_role=8, subagent=1, tool=1, data_egress=1, export_renderer=4, cost=1
 
     0.4.3-dev - 2026/05/10 (7d5df2a) [develop]
     :brief PDF 导出支持多 LaTeX 引擎 fallback 并修复 Windows TeX 路径/standalone LaTeX
