@@ -240,8 +240,11 @@ export async function rebuildGlobalIndex(runDirs: string[], options?: { home?: s
       const insert = db.prepare(
         "INSERT INTO runs (run_id, topic, workspace, status, updated_at, run_dir) VALUES (?, ?, ?, ?, ?, ?)",
       )
+      const seenRunIds = new Set<string>()
       for (const runDir of runDirs) {
         const run = validate("run", await readJson(path.join(runDir, storageFacts.run)))
+        if (seenRunIds.has(run.run_id)) continue
+        seenRunIds.add(run.run_id)
         insert.run(run.run_id, run.topic, run.workspace, run.status, run.updated_at, runDir)
       }
     } finally {
