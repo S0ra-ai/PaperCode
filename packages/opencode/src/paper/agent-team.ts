@@ -60,6 +60,7 @@ export interface PaperAgentTeamMember {
   skills: string[]
   mcp_servers: string[]
   memory_scope: "none" | "local" | "project" | "user"
+  memory_entry_ids: string[]
   permissions: AgentPermissionEnvelope
   status: "planned" | "active" | "idle" | "blocked" | "done"
   current_task_ids: string[]
@@ -247,6 +248,7 @@ function memberFromAgentNode(
     skills: input?.skills ?? [],
     mcp_servers: input?.mcp_servers ?? [],
     memory_scope: input?.memory_scope ?? "local",
+    memory_entry_ids: [],
     permissions: node.permissions,
     status: memberStatusFromAgent(node),
     current_task_ids: [],
@@ -606,6 +608,7 @@ export function summarizePaperAgentTeam(team?: PaperAgentTeamState) {
       unread_messages: 0,
       evidence_backed_artifacts: 0,
       rejected_evidence: 0,
+      memory_entries: 0,
       max_member_depth: 0,
       recent_tasks: [] as Array<{ id: string; title: string; status: PaperAgentTeamTaskStatus }>,
     }
@@ -620,7 +623,15 @@ export function summarizePaperAgentTeam(team?: PaperAgentTeamState) {
     unread_messages: team.mailbox.filter((message) => !message.read_by.includes(team.lead_member_id)).length,
     evidence_backed_artifacts: team.coverage.evidence_backed_artifacts,
     rejected_evidence: team.coverage.rejected_evidence,
+    memory_entries: team.members.reduce((sum, member) => sum + (member.memory_entry_ids?.length ?? 0), 0),
     max_member_depth: team.coverage.max_member_depth,
     recent_tasks: team.tasks.slice(-4).map((task) => ({ id: task.task_id, title: task.title, status: task.status })),
   }
+}
+
+export function attachMemoryToTeamMember(team: PaperAgentTeamState, memberID: string, memoryEntryIDs: string[]) {
+  const member = team.members.find((item) => item.member_id === memberID)
+  if (!member) throw new Error(`Agent team member not found: ${memberID}`)
+  member.memory_entry_ids = Array.from(new Set([...member.memory_entry_ids, ...memoryEntryIDs]))
+  return member
 }
