@@ -1,5 +1,7 @@
 # Model Router Report
 
+> Historical path note: this report predates task-032. Any `packages/server` or `@paper-fucker/server` paths below are provenance only; the current paper_fucker runtime authority is `packages/opencode/src/paper`, and `packages/server` is intentionally absent.
+
 Version: `0.1.19-dev`
 
 TaskFlow task: `task-022-model-router`

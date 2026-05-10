@@ -1,6 +1,6 @@
 id: task-045-report-path-hygiene
 title: Clean stale server-path reports and migration documentation
-status: todo
+status: in_progress
 priority: medium
 owner: codex
 tags:
@@ -19,7 +19,7 @@ execution:
 steps:
 - id: task-045-step-01-audit
   title: Audit stale path references
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: List active docs/reports that still mention packages/server, fixture-only
@@ -28,12 +28,29 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T07:47:47.573534'
+      level: info
+      message: Auditing reports, README, and TaskFlow/docs for stale packages/server
+        paths, sidecar-server wording, and migration notes that no longer match the
+        OpenCode hard fork structure.
+      agent: codex
+    - timestamp: '2026-05-10T07:50:19.054785'
+      level: info
+      message: Audited README, CHANGELOG, reports, scripts, and .plan for stale packages/server
+        and @paper-fucker/server references. README and strict acceptance already
+        describe the current packages/opencode/src/paper hard-fork authority; scripts
+        intentionally assert packages/server absence. CHANGELOG and TaskFlow completed-task
+        logs keep old paths as provenance. Current cleanup scope is historical reports
+        that can be mistaken for current architecture guidance, especially core-contract/runtime/init/python/template/feature
+        reports written before task-032.
+      agent: codex
+    last_run: '2026-05-10T07:50:19.054785'
+    attempt_count: 2
   meta: {}
 - id: task-045-step-02-clean-current-docs
   title: Clean current documentation
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-045-step-01-audit
@@ -43,12 +60,27 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T07:50:24.719610'
+      level: info
+      message: Updating README and historical reports to distinguish pre-task-032
+        packages/server provenance from the current packages/opencode/src/paper runtime
+        authority.
+      agent: codex
+    - timestamp: '2026-05-10T07:51:40.258010'
+      level: info
+      message: Updated README to explain pre-task-032 report provenance. Added a uniform
+        historical path note to 25 pre-hard-fork reports that still contain packages/server
+        or @paper-fucker/server references. Left CHANGELOG and completed TaskFlow
+        logs untouched as immutable historical evidence, and left hard-fork/migration/strict
+        reports unchanged because their packages/server mentions already assert absence/migration.
+      agent: codex
+    last_run: '2026-05-10T07:51:40.258010'
+    attempt_count: 2
   meta: {}
 - id: task-045-step-03-report
   title: Write path hygiene report
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-045-step-02-clean-current-docs
@@ -57,8 +89,21 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T07:51:45.995637'
+      level: info
+      message: Writing reports/report-path-hygiene.md with audit scope, edited report
+        list, retained historical evidence, and verification policy.
+      agent: codex
+    - timestamp: '2026-05-10T07:52:08.557394'
+      level: info
+      message: Created reports/report-path-hygiene.md. It records current runtime
+        authority, the 25 marked historical reports, intentionally retained CHANGELOG/TaskFlow
+        history, allowed current packages/server mentions, and future documentation
+        policy.
+      agent: codex
+    last_run: '2026-05-10T07:52:08.557394'
+    attempt_count: 2
   meta: {}
 - id: task-045-step-04-doc-version
   title: Document 0.3.7-dev
@@ -101,7 +146,10 @@ outputs:
 trace:
   logs: []
   attempt_count: 0
+lock:
+  by: codex
+  at: '2026-05-10T07:47:32.356116'
 meta:
   created_at: '2026-05-10T06:13:25.872558'
-  updated_at: '2026-05-10T06:13:25.872558'
+  updated_at: '2026-05-10T07:52:08.557394'
   version: '1'

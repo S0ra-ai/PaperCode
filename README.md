@@ -41,6 +41,7 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - The PaperRun TUI dashboard now exposes live Chinese controls for guidance, resume, retry, cancel, preview, final export, forced draft export, capability health, and model-role visibility. It calls the PaperRun APIs directly, so normal operation does not require shell commands.
 - PaperRun export now renders run-bound Markdown, LaTeX, PDF, DOCX, and `manifest.json` files when tools are available. Missing pandoc or LaTeX engines produce explicit diagnostics, while forced drafts are visibly marked with failed checks.
 - PaperRun diagnostics now include durable observability audit coverage for stages, capabilities, model roles, subagents, tool traces, data-egress decisions, export renderers, and cost usage.
+- Historical reports written before `task-032-opencode-paper-core-migration` may retain `packages/server` or `@paper-fucker/server` paths as provenance. They are marked as historical; the current runtime authority is `packages/opencode/src/paper`, and `packages/server` is intentionally absent.
 - The automatic orchestrator now owns the default topic-to-paper stage graph and proceeds stage-by-stage unless a pause condition is raised.
 - Trusted template resolution now records `TemplateSpec.v1`, adopts clear high-confidence official templates automatically, and falls back to a CJC default when no venue is known.
 - Open literature and dataset discovery now records `SourceRecord.v1`, `LiteratureMap.v1`, `DataPlan.v1`, `DatasetCard.v1`, and direction feasibility artifacts with license and verification diagnostics.
@@ -135,6 +136,7 @@ Important early tasks:
 - `task-042-workbench-live-controls`: expose PaperRun live controls, model roles, and capability health in the Chinese TUI workbench.
 - `task-043-export-renderer-pipeline`: render concrete PaperRun Markdown/LaTeX/PDF/DOCX files, manifest, diagnostics, and forced draft bundles.
 - `task-044-observability-audit-hardening`: harden OpenTelemetry-style audit, tool trace, cost, data-egress, export renderer, and strict acceptance diagnostics.
+- `task-045-report-path-hygiene`: mark pre-hard-fork reports as historical path provenance and keep current architecture documentation pointed at `packages/opencode/src/paper`.
 
 ## Branching
 

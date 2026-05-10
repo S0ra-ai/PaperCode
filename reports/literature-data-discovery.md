@@ -1,5 +1,7 @@
 # Literature/Data Discovery Verification
 
+> Historical path note: this report predates task-032. Any `packages/server` or `@paper-fucker/server` paths below are provenance only; the current paper_fucker runtime authority is `packages/opencode/src/paper`, and `packages/server` is intentionally absent.
+
 TaskFlow task: `task-011-literature-data`
 Version: `0.1.11-dev`
 Date: `2026/05/09`
