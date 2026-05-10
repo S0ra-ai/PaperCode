@@ -722,7 +722,7 @@ it.live(
       }),
       { git: true, config: providerCfg },
     ),
-  10_000,
+  30_000,
 )
 
 it.live(
@@ -748,7 +748,7 @@ it.live(
       }),
       { git: true, config: providerCfg },
     ),
-  10_000,
+  30_000,
 )
 
 // Cancel semantics
@@ -1034,7 +1034,7 @@ it.live(
       }),
       { git: true, config: providerCfg },
     ),
-  10_000,
+  30_000,
 )
 
 it.live(

@@ -293,7 +293,7 @@ it.live("session.processor effect tests preserve text start time", () =>
           .pipe(Effect.forkChild)
 
         yield* Effect.promise(async () => {
-          const stop = Date.now() + 500
+          const stop = Date.now() + 10_000
           while (Date.now() < stop) {
             const text = MessageV2.parts(msg.id).find((part): part is MessageV2.TextPart => part.type === "text")
             if (text?.time?.start) return

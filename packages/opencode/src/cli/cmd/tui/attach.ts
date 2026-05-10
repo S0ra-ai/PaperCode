@@ -9,7 +9,7 @@ import { ServerAuth } from "@/server/auth"
 
 export const AttachCommand = cmd({
   command: "attach <url>",
-  describe: "attach to a running paper_fucker server",
+  describe: "attach to a running Paper Fucker server",
   builder: (yargs) =>
     yargs
       .positional("url", {
@@ -23,17 +23,20 @@ export const AttachCommand = cmd({
       })
       .option("continue", {
         alias: ["c"],
-        describe: "continue the last session",
+        describe: "resume the last internal run context",
         type: "boolean",
+        hidden: true,
       })
       .option("session", {
         alias: ["s"],
         type: "string",
-        describe: "session id to continue",
+        describe: "internal run context id to resume",
+        hidden: true,
       })
       .option("fork", {
         type: "boolean",
-        describe: "fork the session when continuing (use with --continue or --session)",
+        describe: "fork the internal run context before resuming",
+        hidden: true,
       })
       .option("password", {
         alias: ["p"],
@@ -51,7 +54,7 @@ export const AttachCommand = cmd({
       win32DisableProcessedInput()
 
       if (args.fork && !args.continue && !args.session) {
-        UI.error("--fork requires --continue or --session")
+        UI.error("--fork requires an internal resume target")
         process.exitCode = 1
         return
       }

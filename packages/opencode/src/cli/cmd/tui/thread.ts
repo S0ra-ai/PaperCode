@@ -79,7 +79,7 @@ export function resolveThreadDirectory(project?: string, envPWD = process.env.PW
 
 export const TuiThreadCommand = cmd({
   command: "$0 [project]",
-  describe: "start paper_fucker tui",
+  describe: "start the Paper Fucker paper workbench",
   builder: (yargs) =>
     withNetworkOptions(yargs)
       .positional("project", {
@@ -93,25 +93,29 @@ export const TuiThreadCommand = cmd({
       })
       .option("continue", {
         alias: ["c"],
-        describe: "continue the last session",
+        describe: "resume the last internal run context",
         type: "boolean",
+        hidden: true,
       })
       .option("session", {
         alias: ["s"],
         type: "string",
-        describe: "session id to continue",
+        describe: "internal run context id to resume",
+        hidden: true,
       })
       .option("fork", {
         type: "boolean",
-        describe: "fork the session when continuing (use with --continue or --session)",
+        describe: "fork the internal run context before resuming",
+        hidden: true,
       })
       .option("prompt", {
         type: "string",
-        describe: "prompt to use",
+        describe: "initial research input",
       })
       .option("agent", {
         type: "string",
-        describe: "agent to use",
+        describe: "internal primary agent override",
+        hidden: true,
       }),
   handler: async (args) => {
     // Keep ENABLE_PROCESSED_INPUT cleared even if other code flips it.
@@ -123,7 +127,7 @@ export const TuiThreadCommand = cmd({
       win32DisableProcessedInput()
 
       if (args.fork && !args.continue && !args.session) {
-        UI.error("--fork requires --continue or --session")
+        UI.error("--fork requires an internal resume target")
         process.exitCode = 1
         return
       }

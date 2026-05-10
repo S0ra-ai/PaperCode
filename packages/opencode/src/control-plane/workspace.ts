@@ -192,6 +192,15 @@ export const layer = Layer.effect(
       })
     }
 
+    const localTargetExists = Effect.fnUntraced(function* (directory: string) {
+      const deadline = Date.now() + 1_000
+      while (Date.now() < deadline) {
+        if (yield* Effect.promise(() => Filesystem.exists(directory))) return true
+        yield* Effect.sleep("25 millis")
+      }
+      return yield* Effect.promise(() => Filesystem.exists(directory))
+    })
+
     const connectSSE = Effect.fn("Workspace.connectSSE")(function* (
       url: URL | string,
       headers: HeadersInit | undefined,
@@ -486,7 +495,7 @@ export const layer = Layer.effect(
       const target = yield* EffectBridge.fromPromise(() => adapter.target(space))
 
       if (target.type === "local") {
-        setStatus(space.id, (yield* Effect.promise(() => Filesystem.exists(target.directory))) ? "connected" : "error")
+        setStatus(space.id, (yield* localTargetExists(target.directory)) ? "connected" : "error")
         return
       }
 

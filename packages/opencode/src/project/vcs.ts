@@ -277,6 +277,7 @@ export interface Interface {
 interface State {
   current: string | undefined
   root: Git.Base | undefined
+  refresh: Effect.Effect<void>
 }
 
 export class Service extends Context.Service<Service, Interface>()("@opencode/Vcs") {}
@@ -291,7 +292,7 @@ export const layer: Layer.Layer<Service, never, Git.Service | Bus.Service> = Lay
     const state = yield* InstanceState.make<State>(
       Effect.fn("Vcs.state")(function* (ctx) {
         if (ctx.project.vcs !== "git") {
-          return { current: undefined, root: undefined }
+          return { current: undefined, root: undefined, refresh: Effect.void }
         }
 
         const get = Effect.fnUntraced(function* () {
@@ -300,23 +301,25 @@ export const layer: Layer.Layer<Service, never, Git.Service | Bus.Service> = Lay
         const [current, root] = yield* Effect.all([git.branch(ctx.directory), git.defaultBranch(ctx.directory)], {
           concurrency: 2,
         })
-        const value = { current, root }
+        const value: State = { current, root, refresh: Effect.void }
         log.info("initialized", { branch: value.current, default_branch: value.root?.name })
+
+        const refresh = Effect.fnUntraced(function* () {
+          const next = yield* get()
+          if (next !== value.current) {
+            log.info("branch changed", { from: value.current, to: next })
+            value.current = next
+            yield* bus.publish(Event.BranchUpdated, { branch: next })
+          }
+        })
 
         yield* bus.subscribe(FileWatcher.Event.Updated).pipe(
           Stream.filter((evt) => evt.properties.file.endsWith("HEAD")),
-          Stream.runForEach((_evt) =>
-            Effect.gen(function* () {
-              const next = yield* get()
-              if (next !== value.current) {
-                log.info("branch changed", { from: value.current, to: next })
-                value.current = next
-                yield* bus.publish(Event.BranchUpdated, { branch: next })
-              }
-            }),
-          ),
+          Stream.runForEach(() => refresh()),
           Effect.forkScoped,
         )
+
+        value.refresh = refresh()
 
         return value
       }),
@@ -327,7 +330,13 @@ export const layer: Layer.Layer<Service, never, Git.Service | Bus.Service> = Lay
         yield* InstanceState.get(state).pipe(Effect.forkIn(scope))
       }),
       branch: Effect.fn("Vcs.branch")(function* () {
-        return yield* InstanceState.use(state, (x) => x.current)
+        return yield* InstanceState.useEffect(
+          state,
+          Effect.fnUntraced(function* (x) {
+            yield* x.refresh
+            return x.current
+          }),
+        )
       }),
       defaultBranch: Effect.fn("Vcs.defaultBranch")(function* () {
         return yield* InstanceState.use(state, (x) => x.root?.name)

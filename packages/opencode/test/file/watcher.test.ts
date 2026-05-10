@@ -12,8 +12,8 @@ import { Instance } from "../../src/project/instance"
 import { WithInstance } from "../../src/project/with-instance"
 import { setTimeout as sleep } from "node:timers/promises"
 
-// Native @parcel/watcher bindings aren't reliably available in CI (missing on Linux, flaky on Windows)
-const describeWatcher = FileWatcher.hasNativeBinding() && !process.env.CI ? describe : describe.skip
+// Native @parcel/watcher bindings are not reliable in CI and can crash Bun on Windows under full-suite load.
+const describeWatcher = FileWatcher.hasNativeBinding() && !process.env.CI && process.platform !== "win32" ? describe : describe.skip
 
 // ---------------------------------------------------------------------------
 // Helpers

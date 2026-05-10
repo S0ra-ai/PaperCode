@@ -12,8 +12,8 @@ import { WithInstance } from "../../src/project/with-instance"
 import { GlobalBus } from "../../src/bus/global"
 import { Vcs } from "@/project/vcs"
 
-// Skip in CI — native @parcel/watcher binding needed
-const describeVcs = FileWatcher.hasNativeBinding() && !process.env.CI ? describe : describe.skip
+// Skip where native @parcel/watcher is unavailable or unsafe; VCS also has polling fallback in production.
+const describeVcs = FileWatcher.hasNativeBinding() && !process.env.CI && process.platform !== "win32" ? describe : describe.skip
 
 // ---------------------------------------------------------------------------
 // Helpers
