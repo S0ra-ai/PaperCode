@@ -1,11 +1,25 @@
 :project       paper_fucker - 可验证论文研究自动化系统
 :author        s0ra (https://github.com/S0ra-ai)
-:repo
+:repo          
 :desc          记录项目的重大变更和版本历史
 :version       0.5.4-dev
 :last_update   2026/05/11
 
 :history
+
+    0.5.4-dev - 2026/05/11 (9fa7acd) [develop]
+        :brief 统一 CHANGELOG colon-history 缩进
+        - docs(changelog): 将历史版本行统一为 4 空格缩进, 修复 0.1.9-dev 等早期条目掉到 0 缩进的问题
+        - docs(changelog): 将版本字段统一为 8 空格缩进, :src/:doc/:verification 等字段内容统一为 12 空格缩进
+        - chore(script): 新增 scripts/check-changelog-format.ps1, 防止后续 CHANGELOG 缩进回退
+        :src
+            - CHANGELOG - full colon-history indentation normalization
+            - scripts/check-changelog-format.ps1 - changelog format regression check
+            - .plan/confirmed/changelog-format-normalization.yaml - TaskFlow execution logs
+        :verification
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-changelog-format.ps1 passed
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
+            - TaskFlow validate_task changelog-format-normalization passed
 
     0.5.4-dev - 2026/05/11 (f514f02) [develop]
         :brief 递归 PaperRun Agent Fabric
