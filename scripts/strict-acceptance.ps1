@@ -33,6 +33,7 @@ $RequiredChecks = @(
     "hard-fork-agent-tree",
     "hard-fork-quality-egress",
     "hard-fork-public-branding",
+    "observability-audit-coverage",
     "git-flow-cleanup"
 )
 
@@ -363,6 +364,17 @@ function Invoke-HardForkPublicBranding {
     return "public logo, command registry, and TUI tips expose Paper Fucker/PaperRun instead of legacy OpenCode surfaces"
 }
 
+function Invoke-ObservabilityAuditCoverage {
+    $observability = Read-RepoText "packages/opencode/src/paper/observability.ts"
+    $run = Read-RepoText "packages/opencode/src/paper/run.ts"
+    $exportPipeline = Read-RepoText "packages/opencode/src/paper/export-pipeline.ts"
+    Assert-HardFork ($observability -match "recordPaperToolTrace" -and $observability -match "recordPaperCostUsage" -and $observability -match "recordPaperDataEgressAudit") "Observability helpers do not record tool trace, cost, and data egress audit."
+    Assert-HardFork ($observability -match "PAPER_OBSERVABILITY_REQUIRED_KINDS" -and $observability -match "model_role" -and $observability -match "subagent" -and $observability -match "export_renderer") "Observability required coverage does not include model roles, subagents, and export renderers."
+    Assert-HardFork ($run -match "paperObservabilityAuditFromEvents" -and $run -match "audit:") "PaperRun snapshots do not expose observability audit summaries."
+    Assert-HardFork ($exportPipeline -match "recordPaperObservabilityAudit" -and $exportPipeline -match "export_renderer") "Export renderer pipeline does not emit audit entries."
+    return "PaperRun diagnostics expose observability audit coverage for stage/capability/model/subagent/tool/egress/export/cost"
+}
+
 function Write-Report {
     $report = Join-Path $RepoRoot $ReportPath
     $dir = Split-Path -Parent $report
@@ -451,6 +463,9 @@ Invoke-Check "hard-fork-quality-egress" "Quality modes, egress, and authoring bu
 }
 Invoke-Check "hard-fork-public-branding" "Paper Fucker public branding and command cleanup" {
     Invoke-HardForkPublicBranding
+}
+Invoke-Check "observability-audit-coverage" "PaperRun observability audit coverage" {
+    Invoke-ObservabilityAuditCoverage
 }
 Invoke-Check "git-flow-cleanup" "Git Flow branch discipline" {
     Invoke-GitFlowCleanupCheck

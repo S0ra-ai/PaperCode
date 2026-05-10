@@ -6,6 +6,7 @@ import type { ResearchFinalGateState, ResearchRuntimeOptions } from "./research/
 import type { DraftPaper } from "./research/writing"
 import { exportMarkdown } from "./research/export/bundle"
 import type { ExportBundle, ExportFile, ExportFormat, ExportManifest, ExportRenderer } from "./research/export"
+import { recordPaperObservabilityAudit } from "./observability"
 
 export type PaperExportToolName = Extract<
   InitToolName,
@@ -406,6 +407,23 @@ export async function renderPaperExportPipeline(
     renderer: input.renderers?.docx,
   })
   const files = [markdownFile, latexFile, pdfFile, docxFile]
+  for (const file of files) {
+    await recordPaperObservabilityAudit(
+      runDir,
+      {
+        kind: "export_renderer",
+        name: file.format,
+        status: file.status === "written" ? "succeeded" : "failed",
+        span_name: `paper_fucker.export.${file.format}`,
+        attributes: {
+          path: file.path,
+          bytes: file.bytes,
+          diagnostics: file.diagnostics,
+        },
+      },
+      options,
+    )
+  }
   const manifest: ExportManifest = {
     schema_version: "PaperExportManifest.v1",
     bundle_id: input.bundle_id,

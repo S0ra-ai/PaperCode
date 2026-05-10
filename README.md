@@ -1,6 +1,6 @@
 # paper_fucker
 
-Current version: <!-- version:start -->0.3.5-dev<!-- version:end -->
+Current version: <!-- version:start -->0.3.6-dev<!-- version:end -->
 
 `paper_fucker` is a private-first, OpenCode-derived closed-loop paper system. It turns a topic, codebase, dataset, experiment log, or paper material set into a verifiable academic-paper bundle with research planning, source discovery, code understanding, experiment/reproduction support, ClaimLedger-first writing, authenticity gates, profile-aware formatting, preview, and export.
 
@@ -33,13 +33,14 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - Experiment claims are gated by reproduction semantics: reproduced results may support final claims, while unreproduced results are blocked unless explicitly marked as exploratory.
 - The TUI default screen is now a Chinese paper research workbench with topic/code/material/data/log inputs, provider-role context, capability health, stage graph, ledgers, diagnostics, preview, and export controls represented in the paper state adapter.
 - The paper authoring loop now binds drafts to run artifacts, applies profile-aware revision metadata, creates read-only preview snapshots, runs reviewer/authenticity checks, blocks unsafe final export, and emits forced draft, supplementary, and availability bundles.
-- Strict live acceptance is available through `scripts/strict-acceptance.ps1`; it validates TaskFlow, version sync, tracked secret hygiene, opencode/preview/Python/typecheck suites, local Paper Fucker CLI/TUI smoke, DeepSeek live provider smoke, Exa MCP live smoke, Nature skill/profile, pandoc, LaTeX, DOCX, topic-to-paper, code-to-paper, hard-fork paper core, PaperRun API/TUI, Agent Tree, private-first egress, public branding, and Git Flow branch discipline.
+- Strict live acceptance is available through `scripts/strict-acceptance.ps1`; it validates TaskFlow, version sync, tracked secret hygiene, opencode/preview/Python/typecheck suites, local Paper Fucker CLI/TUI smoke, DeepSeek live provider smoke, Exa MCP live smoke, Nature skill/profile, pandoc, LaTeX, DOCX, topic-to-paper, code-to-paper, hard-fork paper core, PaperRun API/TUI, Agent Tree, private-first egress, observability audit coverage, public branding, and Git Flow branch discipline.
 - Final hard-fork acceptance for `0.3.0-dev` asserts that the user-visible product is now PaperRun-first: the paper core lives under `packages/opencode/src/paper`, `packages/server` is gone, the Chinese TUI creates PaperRuns instead of ordinary chat sessions, nested multi-model agents are traceable, final export is blocked by failed authenticity gates, and forced drafts carry failed checks.
 - PaperRun creation now drives the default paper stage engine directly. A new run records planning, literature/data seed discovery, source-range code analysis, experiment/reproduction diagnostics, ClaimLedger, draft, profile check, verification gate, preview/export artifacts, and controller snapshots without requiring fixture handler injection.
 - PaperRun now has a durable controller state. Pause checkpoints, guidance queue, resume/retry/cancel controls, controller SSE events, and `controller_state` snapshots are persisted under each run so the TUI/API can steer runs without shell commands.
 - Intake now records a real `MaterialIndex.v1` for user-supplied code paths, paper files, datasets, and experiment logs. Indexed material receives source ranges and Source Ledger entries; secret-like paths, ignored directories, and unsupported binaries are skipped with explicit reasons.
 - The PaperRun TUI dashboard now exposes live Chinese controls for guidance, resume, retry, cancel, preview, final export, forced draft export, capability health, and model-role visibility. It calls the PaperRun APIs directly, so normal operation does not require shell commands.
 - PaperRun export now renders run-bound Markdown, LaTeX, PDF, DOCX, and `manifest.json` files when tools are available. Missing pandoc or LaTeX engines produce explicit diagnostics, while forced drafts are visibly marked with failed checks.
+- PaperRun diagnostics now include durable observability audit coverage for stages, capabilities, model roles, subagents, tool traces, data-egress decisions, export renderers, and cost usage.
 - The automatic orchestrator now owns the default topic-to-paper stage graph and proceeds stage-by-stage unless a pause condition is raised.
 - Trusted template resolution now records `TemplateSpec.v1`, adopts clear high-confidence official templates automatically, and falls back to a CJC default when no venue is known.
 - Open literature and dataset discovery now records `SourceRecord.v1`, `LiteratureMap.v1`, `DataPlan.v1`, `DatasetCard.v1`, and direction feasibility artifacts with license and verification diagnostics.
@@ -74,6 +75,7 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - `packages/opencode/src/paper/preview.ts`: read-only PreviewSnapshot adapter that binds drafts, export files, claim/citation/reviewer annotations, costs, agents, and tool diagnostics to a run.
 - `packages/opencode/src/paper/run.ts`: first-class `PaperRun` state projection over research runtime facts, including intake, stage graph, source ledger, claim ledger, experiment status, agent tree, diagnostics, pause questions, preview state, and export state.
 - `packages/opencode/src/paper/export-pipeline.ts`: run-bound export renderer pipeline for Markdown, LaTeX, PDF, DOCX, manifest generation, pandoc/LaTeX diagnostics, forced draft markings, and injectable test renderers.
+- `packages/opencode/src/paper/observability.ts`: PaperRun observability helpers for durable audit events, tool traces, cost updates, data-egress decisions, and snapshot coverage summaries.
 - `packages/opencode/src/cli/cmd/tui/routes/paper/`: Chinese PaperRun workbench route and prompt utilities. The home prompt parses topic, code paths, paper files, datasets, logs, target profile, language, and budget flags into `PaperRunCreateRequest`, then displays a live run dashboard with controller status, guidance/resume/retry/cancel actions, stage graph, Agent Tree, ledgers, diagnostics, model roles, MCP/Skill/toolchain health, preview, final export, and forced draft controls.
 - `packages/opencode/src/server/routes/instance/httpapi/groups/paper.ts`: `/paper` HttpApi schema group for PaperRun lifecycle, SSE, guidance, preview, export, capability, doctor, provider discovery, and model-role endpoints.
 - `packages/opencode/src/server/routes/instance/httpapi/handlers/paper.ts`: PaperRun HttpApi handlers that bind OpenCode instance context to workspace-first run storage and internal provider/model substrate.
@@ -132,6 +134,7 @@ Important early tasks:
 - `task-041-real-intake-material-indexing`: index real input materials with source ranges, Source Ledger entries, and private-first filtering.
 - `task-042-workbench-live-controls`: expose PaperRun live controls, model roles, and capability health in the Chinese TUI workbench.
 - `task-043-export-renderer-pipeline`: render concrete PaperRun Markdown/LaTeX/PDF/DOCX files, manifest, diagnostics, and forced draft bundles.
+- `task-044-observability-audit-hardening`: harden OpenTelemetry-style audit, tool trace, cost, data-egress, export renderer, and strict acceptance diagnostics.
 
 ## Branching
 
