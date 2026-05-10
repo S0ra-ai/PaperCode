@@ -13,6 +13,8 @@ const EXPERIMENT_LOOP_CAPABILITIES = [
   "opencode.shell",
   "python.experiment-log-parse",
   "python.dataset-metadata-probe",
+  "hf.jobs",
+  "hf.trackio",
 ] as const
 
 export function resolveExperimentLoopCapabilities(registry: ResearchCapabilityRegistry): ResearchCapability[] {
