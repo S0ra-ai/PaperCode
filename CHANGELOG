@@ -2,10 +2,31 @@
 :author        s0ra (https://github.com/S0ra-ai)
 :repo          
 :desc          记录项目的重大变更和版本历史
-:version       0.6.2-dev
+:version       0.6.3-dev
 :last_update   2026/05/11
 
 :history
+
+    0.6.3-dev - 2026/05/11 (590d9f9) [develop]
+        :brief 内置 capability pack 与 harness 调度层
+        - feat(capability): 新增内置 PaperCapabilityPack, 覆盖 paper profiles、literature MCP、crawler、Hugging Face、code/experiment、writing/verification/export
+        - feat(registry): 新增 PaperCapabilityRegistry snapshot 与按 stage 查询, skills/MCP/Python/first-party tools 自动融合
+        - feat(harness): 新增 PaperHarness 队列、approval gate、并发上限、retry、doom-loop 检测和 capability trace 绑定
+        - feat(api): /paper/capabilities 与 doctor 暴露内置 pack 元数据, 论文能力不再依赖用户手动安装
+        - test(capability): 覆盖 pack fusion、stage 查询、审批、trace、retry 与重复调用跳过
+        :src
+            - packages/opencode/src/paper/capability-pack.ts - built-in capability pack definitions
+            - packages/opencode/src/paper/capability-registry.ts - registry snapshot and stage-scoped queries
+            - packages/opencode/src/paper/harness.ts - capability harness scheduler
+            - packages/opencode/src/paper/capabilities.ts - default capabilities sourced from packs
+            - packages/opencode/src/paper/run.ts - capabilities/doctor pack exposure
+            - packages/opencode/src/paper/index.ts - paper core export surface
+        :test
+            - packages/opencode/test/paper/capability-harness.test.ts - capability pack and harness coverage
+            - packages/opencode/test/paper/capabilities.test.ts - default registry regression
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/capability-harness.test.ts test/paper/capabilities.test.ts passed: 7 pass, 0 fail, 25 expects
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
 
     0.6.2-dev - 2026/05/11 (408a187) [develop]
         :brief PaperRun Agent Team 协作层

@@ -22,6 +22,7 @@ import type {
   ResearchToolTrace,
 } from "./research/contracts"
 import { defaultResearchCapabilities, type ResearchCapability } from "./capabilities"
+import { builtinPaperCapabilityPacks } from "./capability-pack"
 import { normalizeResearchIntake, type ResearchBrief, type ResearchIntakeRequest } from "./intake"
 import {
   createModelRoleRouter,
@@ -895,6 +896,7 @@ export async function exportPaperRun(
 export function paperCapabilities() {
   return {
     capabilities: defaultResearchCapabilities(),
+    packs: builtinPaperCapabilityPacks(),
   }
 }
 
@@ -908,6 +910,7 @@ export function paperDoctor() {
       total: capabilities.length,
       mcp: capabilities.filter((capability) => capability.type === "mcp").map((capability) => capability.name),
       skills: capabilities.filter((capability) => capability.type === "skill").map((capability) => capability.name),
+      packs: builtinPaperCapabilityPacks().map((pack) => pack.id),
     },
     checks: [
       { name: "paper_core", status: "ok" },
