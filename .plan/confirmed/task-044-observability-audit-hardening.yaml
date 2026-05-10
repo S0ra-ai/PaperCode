@@ -107,7 +107,7 @@ steps:
   meta: {}
 - id: task-044-step-04-doc-version
   title: Document 0.3.6-dev
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-044-step-03-snapshot-strict
@@ -116,8 +116,21 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T07:43:35.418177'
+      level: info
+      message: 'Work commit created: 7d335eb feat(observability): audit paperrun diagnostics.
+        Updating CHANGELOG, README, and observability report for 0.3.6-dev.'
+      agent: codex
+    - timestamp: '2026-05-10T07:44:55.777011'
+      level: info
+      message: Updated CHANGELOG colon DSL to 0.3.6-dev with real work commit 7d335eb,
+        updated README version/current status/project structure/planning list, added
+        reports/observability-audit-hardening.md, and verified README/CHANGELOG sync
+        passes.
+      agent: codex
+    last_run: '2026-05-10T07:44:55.777011'
+    attempt_count: 2
   meta: {}
 - id: task-044-step-05-verify
   title: Verify observability audit
@@ -152,5 +165,5 @@ lock:
   at: '2026-05-10T07:34:53.793419'
 meta:
   created_at: '2026-05-10T06:13:14.337733'
-  updated_at: '2026-05-10T07:42:56.108662'
+  updated_at: '2026-05-10T07:44:55.777011'
   version: '1'

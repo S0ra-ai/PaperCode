@@ -2,10 +2,35 @@
 :author        s0ra (https://github.com/S0ra-ai)
 :repo          
 :desc          记录项目的重大变更和版本历史
-:version       0.3.5-dev
+:version       0.3.6-dev
 :last_update   2026/05/10
 
 :history
+
+    0.3.6-dev - 2026/05/10 (7d335eb) [develop]
+    :brief PaperRun 新增 observability audit、cost、tool trace 与 data-egress 诊断
+        - feat(observability): 新增 PaperObservabilityAudit.v1 与 summary coverage, 覆盖 stage、capability、model_role、subagent、tool、data_egress、export_renderer、cost
+        - feat(runtime): 新增 recordPaperToolTrace、recordPaperCostUsage、recordPaperDataEgressAudit 与 recordPaperObservabilityAudit
+        - feat(snapshot): PaperRun diagnostics 新增 audit summary, 从 durable run events 聚合审计覆盖与缺口
+        - feat(export): export renderer pipeline 为每个 format 写入 export_renderer audit event
+        - feat(strict): strict acceptance 新增 observability-audit-coverage 检查
+        - test(observability): 新增 snapshot 级审计测试, 验证 tool trace、cost、egress 与 coverage 可查询
+        - docs(readme): 版本更新为 0.3.6-dev, 记录 observability audit hardening
+    :src
+        - packages/opencode/src/paper/observability.ts - audit helpers, tool trace, cost, data egress, and summary projection
+        - packages/opencode/src/paper/run.ts - diagnostics.audit snapshot projection
+        - packages/opencode/src/paper/export-pipeline.ts - export_renderer audit events
+        - packages/opencode/src/paper/index.ts - observability public exports
+        - packages/opencode/test/paper/observability-audit.test.ts - observability coverage tests
+        - packages/opencode/test/paper/strict-acceptance.test.ts - strict inventory update
+        - scripts/strict-acceptance.ps1 - observability audit coverage check
+        - reports/observability-audit-hardening.md - implementation report
+        - README.md - current behavior and version update
+        - CHANGELOG - 0.3.6-dev history entry
+    :verification
+        - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/observability-audit.test.ts test/paper/export-pipeline.test.ts passed: 4 pass, 0 fail, 29 expects
+        - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/observability-audit.test.ts test/paper/strict-acceptance.test.ts passed: 4 pass, 0 fail, 43 expects
+        - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
 
     0.3.5-dev - 2026/05/10 (855a944) [develop]
     :brief PaperRun export pipeline 写出真实文件与 manifest
