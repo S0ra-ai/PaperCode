@@ -337,7 +337,7 @@ function Invoke-GitFlowCleanupCheck {
     } finally {
         Pop-Location
     }
-    Assert-StrictLive (($branch -eq "develop") -or ($branch -match "^feature/[a-z0-9-]+$")) "Current branch '$branch' is not develop or a Git Flow feature branch." | Out-Null
+    Assert-StrictLive (($branch -eq "develop") -or ($branch -match "^(feature|fix)/[a-z0-9-]+$")) "Current branch '$branch' is not develop or a Git Flow feature/fix branch." | Out-Null
     Assert-StrictLive (@($forbidden).Count -eq 0) "Forbidden local branches remain: $($forbidden -join ', ')." | Out-Null
     return "current branch $branch follows Git Flow and no codex/task branches remain"
 }
@@ -437,7 +437,15 @@ function Write-Report {
     foreach ($result in $Results) {
         $lines += "| ``{0}`` | {1} | {2} | {3} |" -f $result.id, $result.status, $result.seconds, $result.detail
     }
-    Set-Content -LiteralPath $report -Encoding UTF8 -Value ($lines -join "`n")
+    for ($attempt = 1; $attempt -le 8; $attempt++) {
+        try {
+            Set-Content -LiteralPath $report -Encoding UTF8 -Value ($lines -join "`n")
+            return
+        } catch [System.IO.IOException] {
+            if ($attempt -eq 8) { throw }
+            Start-Sleep -Milliseconds (150 * $attempt)
+        }
+    }
 }
 
 Invoke-Check "taskflow-validate-all" "TaskFlow validates all tasks" {

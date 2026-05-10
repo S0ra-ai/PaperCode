@@ -19,7 +19,7 @@ execution:
 steps:
 - id: task-050-step-01-red
   title: Add default engine audit coverage regression
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: Add a test creating a normal PaperRun and asserting required audit
@@ -28,12 +28,26 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T09:22:24.026773'
+      level: info
+      message: Adding a default-engine regression that creates a normal PaperRun and
+        asserts diagnostics.audit has all required kinds without manual observability
+        helper calls.
+      agent: codex
+    - timestamp: '2026-05-10T09:24:02.494505'
+      level: info
+      message: RED verified with npx --yes bun@1.3.13 --cwd packages/opencode test
+        test/paper/observability-audit.test.ts. New default-engine regression fails
+        because diagnostics.audit.missing_kinds contains capability, model_role, subagent,
+        tool, data_egress, and cost.
+      agent: codex
+    last_run: '2026-05-10T09:24:02.494505'
+    attempt_count: 2
   meta: {}
 - id: task-050-step-02-engine
   title: Wire audit helpers into default execution
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-050-step-01-red
@@ -43,12 +57,25 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T09:24:08.951178'
+      level: info
+      message: Wiring default observability audit helpers into createPaperRun so real
+        runs record model roles, capabilities, root subagent, default engine tool
+        trace, data-egress audit, and cost baseline automatically.
+      agent: codex
+    - timestamp: '2026-05-10T09:27:21.189412'
+      level: info
+      message: Wired recordDefaultPaperRunObservability into createPaperRun. The default
+        engine now records model_role, capability, subagent, tool trace, data_egress
+        audit, and cost baseline automatically. Observability audit regression passes.
+      agent: codex
+    last_run: '2026-05-10T09:27:21.189412'
+    attempt_count: 2
   meta: {}
 - id: task-050-step-03-snapshot
   title: Expose complete coverage in diagnostics
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-050-step-02-engine
@@ -58,8 +85,20 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T09:27:21.863437'
+      level: info
+      message: Verifying PaperRun diagnostics.audit missing_kinds is empty for normal
+        default-engine reviewable runs and live benchmark runs.
+      agent: codex
+    - timestamp: '2026-05-10T09:28:11.430967'
+      level: info
+      message: 'Live benchmark diagnostics.audit now has complete coverage. Counts:
+        stage=28, capability=12, model_role=8, subagent=1, tool=1, data_egress=1,
+        export_renderer=4, cost=1. missing_kinds is empty.'
+      agent: codex
+    last_run: '2026-05-10T09:28:11.430967'
+    attempt_count: 2
   meta: {}
 - id: task-050-step-04-doc-version
   title: Document 0.4.4-dev
@@ -107,7 +146,10 @@ outputs:
 trace:
   logs: []
   attempt_count: 0
+lock:
+  by: codex
+  at: '2026-05-10T09:21:59.056080'
 meta:
   created_at: '2026-05-10T08:28:55.067763'
-  updated_at: '2026-05-10T08:28:55.067763'
+  updated_at: '2026-05-10T09:28:11.430967'
   version: '1'

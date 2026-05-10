@@ -61,6 +61,7 @@ describe("strict live acceptance script", () => {
     expect(script).toContain("Stop-Job")
     expect(script).toContain("timed out after")
     expect(script).toContain("Write-Report")
+    expect(script).toContain("Start-Sleep -Milliseconds")
     expect(script).toContain("[strict]")
   })
 
@@ -71,5 +72,11 @@ describe("strict live acceptance script", () => {
     expect(script).toContain("strict-live-full")
     expect(script).toContain("test/paper/paperrun-execution.test.ts")
     expect(script).toContain("test/paper/observability-audit.test.ts")
+  })
+
+  test("allows Git Flow feature and fix branches during active task work", () => {
+    const script = readFileSync(scriptPath, "utf8")
+    expect(script).toContain("^(feature|fix)/[a-z0-9-]+$")
+    expect(script).toContain("Git Flow feature/fix branch")
   })
 })
