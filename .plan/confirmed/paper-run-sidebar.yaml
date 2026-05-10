@@ -1,0 +1,109 @@
+id: paper-run-sidebar
+title: PaperRun Sidebar
+status: todo
+priority: high
+owner: codex
+tags:
+- paper
+- tui
+- ux
+- 0.5.5-dev
+depends_on:
+- recursive-agent-fabric
+description: Add a persistent PaperRun TUI sidebar that preserves OpenCode cost/token/outline
+  value while exposing PaperRun agent tree, gates, blockers, and model/tool diagnostics.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: paper-run-sidebar-step-01-inspect
+  title: Inspect current PaperRun TUI and OpenCode sidebar logic
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Compare PaperRun routes with existing OpenCode sidebar cost/token/outline
+    sources.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: paper-run-sidebar-step-02-state
+  title: Implement PaperRun sidebar state
+  status: todo
+  owner: codex
+  depends_on:
+  - paper-run-sidebar-step-01-inspect
+  description: Add PaperRunSidebarState, PaperRunCostDiagnostics, PaperRunOutlineState,
+    and PaperRunGateSummary derived from PaperRun facts.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: paper-run-sidebar-step-03-ui
+  title: Render persistent sidebar
+  status: todo
+  owner: codex
+  depends_on:
+  - paper-run-sidebar-step-02-state
+  description: Add right sidebar sections for overview, cost/context, outline, agent
+    tree, gates, and recent diagnostics in the paper workbench.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: paper-run-sidebar-step-04-tests
+  title: Test sidebar behavior
+  status: todo
+  owner: codex
+  depends_on:
+  - paper-run-sidebar-step-03-ui
+  description: Verify state derivation and TUI text output for cost/token/context/outline/agent/gate/blocker
+    sections.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: paper-run-sidebar-step-05-version
+  title: Version and validate 0.5.5-dev
+  status: todo
+  owner: codex
+  depends_on:
+  - paper-run-sidebar-step-04-tests
+  description: Update README and CHANGELOG, run required checks, validate TaskFlow
+    task.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: directory
+  path: packages/opencode/src/cli/cmd/tui/routes/paper
+  description: PaperRun sidebar UI and state bindings
+- type: directory
+  path: packages/opencode/src/paper
+  description: Sidebar diagnostics state and tests
+- type: file
+  path: CHANGELOG
+  description: Colon DSL entry for 0.5.5-dev
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-10T18:27:59.231893'
+  updated_at: '2026-05-10T18:27:59.231893'
+  version: '1'

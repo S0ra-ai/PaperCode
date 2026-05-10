@@ -46,6 +46,12 @@ import {
   type PaperObservabilityAuditSummary,
 } from "./observability"
 import {
+  recursiveAgentPolicyForBudget,
+  type AgentPermissionEnvelope,
+  type RecursiveAgentPolicy,
+} from "./agents"
+
+import {
   applyPaperRunControl,
   controllerSseEvent,
   derivePaperRunControllerState,
@@ -96,13 +102,16 @@ export interface AgentNode {
   input_artifacts: string[]
   output_artifacts: string[]
   tool_traces: string[]
+  children: string[]
+  permissions: AgentPermissionEnvelope
   status: "planned" | "running" | "succeeded" | "blocked" | "failed"
 }
 
 export interface AgentTree {
   schema_version: "AgentTree.v1"
-  max_depth: number
+  max_depth: null
   max_parallel: number
+  recursive_policy: RecursiveAgentPolicy
   nodes: AgentNode[]
 }
 
@@ -124,7 +133,16 @@ export interface PaperRunGuidanceResponse {
 export interface PaperRunEvent {
   event_id: string
   run_id: string
-  type: string
+  type:
+    | string
+    | "agent.spawned"
+    | "agent.completed"
+    | "agent.blocked"
+    | "agent.expansion_skipped"
+    | "sidebar.updated"
+    | "outline.updated"
+    | "diagnostics.cost_updated"
+    | "gate.summary_updated"
   created_at: string
   actor: ResearchEvent["actor"]
   payload: Record<string, unknown>
@@ -364,10 +382,17 @@ function defaultAgentTree(input: {
   writer: OpenCodeModelRef
 }): AgentTree {
   const policy = budgetTierPolicy(input.tier)
+  const permissionDefaults: AgentPermissionEnvelope = {
+    allowed_tool_names: input.capabilities.map((capability) => capability.name),
+    allowed_paths: [],
+    data_egress: "private_first",
+    network_allowed: false,
+  }
   return {
     schema_version: "AgentTree.v1",
     max_depth: policy.max_depth,
     max_parallel: policy.max_parallel,
+    recursive_policy: recursiveAgentPolicyForBudget(input.tier),
     nodes: [
       {
         agent_id: `${input.runID}:root`,
@@ -383,6 +408,8 @@ function defaultAgentTree(input: {
         input_artifacts: [],
         output_artifacts: [],
         tool_traces: [],
+        children: [],
+        permissions: permissionDefaults,
         status: "running",
       },
     ],
@@ -455,9 +482,10 @@ function exportState(input: {
 function normalizeFinalGateState(value: unknown, updatedAt: string): ResearchFinalGateState {
   const record = jsonRecord(value)
   const status = record.status === "passed" ? "passed" : "blocked"
+  const blockers = metadataStringArray(record.blockers)
   return {
     status,
-    blockers: metadataStringArray(record.blockers),
+    blockers: status === "passed" ? blockers : blockers.length > 0 ? blockers : ["final_gate_not_passed"],
     updated_at: metadataString(record.updated_at) ?? updatedAt,
   }
 }

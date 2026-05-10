@@ -2,7 +2,8 @@ export type BudgetTier = "quick" | "standard" | "deep" | "submission" | "custom"
 
 export interface BudgetTierPolicy {
   tier: BudgetTier
-  max_depth: number
+  max_depth: null
+  depth_policy: "unbounded"
   max_parallel: number
   cost_cap_usd: number
   live_search: "limited" | "enabled" | "broad"
@@ -12,7 +13,8 @@ export interface BudgetTierPolicy {
 const POLICIES: Record<BudgetTier, BudgetTierPolicy> = {
   quick: {
     tier: "quick",
-    max_depth: 1,
+    max_depth: null,
+    depth_policy: "unbounded",
     max_parallel: 2,
     cost_cap_usd: 1,
     live_search: "limited",
@@ -20,7 +22,8 @@ const POLICIES: Record<BudgetTier, BudgetTierPolicy> = {
   },
   standard: {
     tier: "standard",
-    max_depth: 2,
+    max_depth: null,
+    depth_policy: "unbounded",
     max_parallel: 4,
     cost_cap_usd: 5,
     live_search: "enabled",
@@ -28,7 +31,8 @@ const POLICIES: Record<BudgetTier, BudgetTierPolicy> = {
   },
   deep: {
     tier: "deep",
-    max_depth: 3,
+    max_depth: null,
+    depth_policy: "unbounded",
     max_parallel: 6,
     cost_cap_usd: 20,
     live_search: "broad",
@@ -36,7 +40,8 @@ const POLICIES: Record<BudgetTier, BudgetTierPolicy> = {
   },
   submission: {
     tier: "submission",
-    max_depth: 4,
+    max_depth: null,
+    depth_policy: "unbounded",
     max_parallel: 8,
     cost_cap_usd: 50,
     live_search: "broad",
@@ -44,7 +49,8 @@ const POLICIES: Record<BudgetTier, BudgetTierPolicy> = {
   },
   custom: {
     tier: "custom",
-    max_depth: 4,
+    max_depth: null,
+    depth_policy: "unbounded",
     max_parallel: 8,
     cost_cap_usd: 0,
     live_search: "broad",

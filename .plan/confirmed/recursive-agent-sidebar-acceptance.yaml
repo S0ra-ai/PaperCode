@@ -1,0 +1,94 @@
+id: recursive-agent-sidebar-acceptance
+title: Recursive Agent Sidebar Acceptance
+status: todo
+priority: high
+owner: codex
+tags:
+- acceptance
+- paper
+- 0.6.0-dev
+depends_on:
+- brand-surface-audit
+description: Run integrated acceptance proving recursive agents, sidebar diagnostics,
+  Chinese workbench flow, brand checks, version sync, and strict report all pass at
+  0.6.0-dev.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: recursive-agent-sidebar-acceptance-step-01-integrate
+  title: Run integrated PaperRun acceptance scenario
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Exercise topic and code intake, recursive agent depth, sidebar state,
+    and gate/forced draft behavior through fixtures or live smoke where available.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: recursive-agent-sidebar-acceptance-step-02-verify
+  title: Run full verification suite
+  status: todo
+  owner: codex
+  depends_on:
+  - recursive-agent-sidebar-acceptance-step-01-integrate
+  description: Run opencode tests/typecheck, preview tests, Python tests, version
+    check, secret scan, and strict acceptance.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: recursive-agent-sidebar-acceptance-step-03-taskflow
+  title: Validate TaskFlow and git state
+  status: todo
+  owner: codex
+  depends_on:
+  - recursive-agent-sidebar-acceptance-step-02-verify
+  description: Validate all new tasks, ensure develop integration, and confirm no
+    residual feature branches before final push.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: recursive-agent-sidebar-acceptance-step-04-version
+  title: Finalize 0.6.0-dev
+  status: todo
+  owner: codex
+  depends_on:
+  - recursive-agent-sidebar-acceptance-step-03-taskflow
+  description: Update final README/CHANGELOG version and strict report references
+    with real commit ids.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: report
+  path: reports/strict-live-acceptance.md
+  description: Strict acceptance report refreshed
+- type: file
+  path: README.md
+  description: Final 0.6.0-dev status
+- type: file
+  path: CHANGELOG
+  description: Colon DSL entry for 0.6.0-dev
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-10T18:28:30.382667'
+  updated_at: '2026-05-10T18:28:30.382667'
+  version: '1'
