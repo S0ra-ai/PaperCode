@@ -5,7 +5,7 @@ counts:
 progress:
   total: 68
   completed: 62
-  in_progress: 0
-last_updated: '2026-05-10T20:06:51.411858'
+  in_progress: 1
+last_updated: '2026-05-10T20:07:25.697095'
 ordering:
   strategy: priority_dependency
