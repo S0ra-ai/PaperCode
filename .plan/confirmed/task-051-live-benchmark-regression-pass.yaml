@@ -1,6 +1,6 @@
 id: task-051-live-benchmark-regression-pass
 title: Rerun live paper quality benchmark after hardening
-status: todo
+status: done
 priority: high
 owner: codex
 tags:
@@ -77,7 +77,7 @@ steps:
   meta: {}
 - id: task-051-step-03-doc-version
   title: Document 0.5.0-dev
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-051-step-02-review
@@ -87,12 +87,23 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T09:54:35.272158'
+      level: info
+      message: Updating README and CHANGELOG to 0.5.0-dev using work commit cf7aad5.
+      agent: codex
+    - timestamp: '2026-05-10T09:55:24.300354'
+      level: info
+      message: 'Updated README current version and CHANGELOG to 0.5.0-dev. CHANGELOG
+        entry uses real work commit cf7aad5. scripts/check-readme-version.ps1 passed:
+        README version 0.5.0-dev matches CHANGELOG latest version.'
+      agent: codex
+    last_run: '2026-05-10T09:55:24.300354'
+    attempt_count: 2
   meta: {}
 - id: task-051-step-04-verify
   title: Verify milestone pass
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-051-step-03-doc-version
@@ -102,8 +113,21 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T09:55:29.886597'
+      level: info
+      message: Running final version sync, focused strict acceptance, and TaskFlow
+        validation after the 0.5.0-dev documentation update.
+      agent: codex
+    - timestamp: '2026-05-10T09:59:36.888810'
+      level: info
+      message: 'Final verification passed after 0.5.0-dev docs update: focused scripts/strict-acceptance.ps1
+        -CheckTimeoutSeconds 300 passed, scripts/check-readme-version.ps1 passed,
+        and TaskFlow validate_task task-051-live-benchmark-regression-pass returned
+        valid with no errors or warnings.'
+      agent: codex
+    last_run: '2026-05-10T09:59:36.888810'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: report
@@ -123,5 +147,5 @@ lock:
   at: '2026-05-10T09:46:40.859507'
 meta:
   created_at: '2026-05-10T08:28:10.404036'
-  updated_at: '2026-05-10T09:54:05.798108'
+  updated_at: '2026-05-10T09:59:36.888810'
   version: '1'
