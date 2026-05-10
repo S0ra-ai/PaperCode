@@ -2,10 +2,38 @@
 :author        s0ra (https://github.com/S0ra-ai)
 :repo          
 :desc          记录项目的重大变更和版本历史
-:version       0.3.7-dev
+:version       0.4.0-dev
 :last_update   2026/05/10
 
 :history
+
+    0.4.0-dev - 2026/05/10 (b0452c8) [develop]
+    :brief 运行真实 topic+code PaperRun 质量基准并生成后续硬化任务
+        - feat(benchmark): 新增 scripts/live-paper-quality-benchmark.ts, 可复现创建真实 PaperRun、forced export 与 summary JSON
+        - feat(gitignore): 忽略 .paper_fucker/runs/, 防止 live PaperRun 产物进入 Git
+        - docs(benchmark): 新增 reports/live-paper-quality-benchmark.md, 记录 DeepSeek/Exa/Nature/toolchain/PaperRun 结果与质量缺口
+        - docs(strict): 更新 reports/strict-live-acceptance.md, 标记 task-046 strict rerun 因无超时保护需要硬化
+        - plan(taskflow): 新增 task-047..task-051, 覆盖 strict timeout、PaperRun terminal gate、PDF fallback、默认 audit coverage 与最终 benchmark 回归
+        - docs(readme): 版本更新为 0.4.0-dev, 记录 live benchmark 入口和后续硬化计划
+    :src
+        - scripts/live-paper-quality-benchmark.ts - reproducible topic+code PaperRun live benchmark
+        - reports/live-paper-quality-benchmark.md - benchmark evidence, artifacts, and quality gap review
+        - reports/strict-live-acceptance.md - latest task-046 strict attempt status and follow-up
+        - .gitignore - ignored .paper_fucker/runs/ runtime artifacts
+        - .plan/confirmed/task-047-strict-acceptance-timeouts.yaml - strict timeout hardening task
+        - .plan/confirmed/task-048-paperrun-completion-gates.yaml - terminal/gate alignment task
+        - .plan/confirmed/task-049-export-pdf-renderer-fallback.yaml - PDF renderer fallback task
+        - .plan/confirmed/task-050-default-observability-coverage.yaml - default audit coverage task
+        - .plan/confirmed/task-051-live-benchmark-regression-pass.yaml - milestone rerun task
+        - README.md - current behavior and version update
+        - CHANGELOG - 0.4.0-dev history entry
+    :verification
+        - DeepSeek /models + chat smoke passed for deepseek-v4-pro
+        - Exa MCP initialize passed
+        - nature-paper skill and Nature author guidance smoke passed
+        - pandoc Markdown-to-LaTeX and DOCX smokes passed; direct XeLaTeX PDF smoke passed
+        - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/paperrun-execution.test.ts test/paper/code-to-paper.test.ts test/paper/export-pipeline.test.ts test/paper/observability-audit.test.ts passed: 7 pass, 0 fail, 49 expects
+        - scripts/live-paper-quality-benchmark.ts produced run-622f4660-3c8c-4dfe-b25f-04ef7484fd8f with 14/14 stages succeeded, 84 sources, 33 artifacts, 1 claim, 1 draft, forced Markdown/LaTeX/DOCX export, and documented final gate blockers
 
     0.3.7-dev - 2026/05/10 (55167c9) [develop]
     :brief 报告路径卫生清理, 标记迁移前 server 路径为历史证据

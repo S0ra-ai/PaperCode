@@ -121,7 +121,7 @@ steps:
   meta: {}
 - id: task-046-step-04-doc-version
   title: Document 0.4.0-dev
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-046-step-03-quality-review
@@ -131,8 +131,19 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T08:33:46.230130'
+      level: info
+      message: Work commit is b0452c8. Updating README and colon DSL CHANGELOG to
+        0.4.0-dev.
+      agent: codex
+    - timestamp: '2026-05-10T08:34:26.577337'
+      level: info
+      message: Updated README to 0.4.0-dev and inserted CHANGELOG colon-history entry
+        for work commit b0452c8. README/CHANGELOG version check passes.
+      agent: codex
+    last_run: '2026-05-10T08:34:26.577337'
+    attempt_count: 2
   meta: {}
 - id: task-046-step-05-verify
   title: Verify live benchmark milestone
@@ -167,5 +178,5 @@ lock:
   at: '2026-05-10T07:58:57.706215'
 meta:
   created_at: '2026-05-10T06:13:38.838295'
-  updated_at: '2026-05-10T08:33:16.316188'
+  updated_at: '2026-05-10T08:34:26.578337'
   version: '1'
