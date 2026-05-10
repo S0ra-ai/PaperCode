@@ -1,6 +1,6 @@
 id: agent-team-capability-acceptance
 title: Agent Team Capability Acceptance
-status: todo
+status: in_progress
 priority: critical
 owner: codex
 tags:
@@ -82,7 +82,10 @@ outputs:
 trace:
   logs: []
   attempt_count: 0
+lock:
+  by: codex
+  at: '2026-05-10T21:12:20.003330'
 meta:
   created_at: '2026-05-10T20:06:51.044344'
-  updated_at: '2026-05-10T20:06:51.044344'
+  updated_at: '2026-05-10T21:12:24.086647'
   version: '1'
