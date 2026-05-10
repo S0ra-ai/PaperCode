@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test"
 import {
   assertAuthenticResearchOutput,
-  phaseOneStageStubs,
+  createStageBlockingDiagnostic,
   ResearchAuthenticityError,
   type ResearchFinalGateState,
 } from "@/paper/research/runtime"
@@ -9,25 +9,29 @@ import {
 const now = "2026-05-09T00:00:00Z"
 
 describe("research authenticity guards", () => {
-  test("marks phase one downstream research stages as explicit not_implemented stubs", () => {
-    const stubs = phaseOneStageStubs()
-    expect(stubs.map((stub) => stub.stage)).toEqual([
-      "template",
-      "literature",
-      "data",
-      "experiment",
-      "writing",
-      "verification",
-      "export",
-    ])
-    expect(stubs.every((stub) => stub.status === "not_implemented" && stub.blocks_final_output)).toBe(true)
+  test("creates explicit stage blocking diagnostics", () => {
+    const diagnostic = createStageBlockingDiagnostic({
+      stage: "verification",
+      reason: "claim evidence is missing",
+      required_action: "attach source ledger entries before final export",
+      historical_task_id: "task-014-verification-gate",
+    })
+
+    expect(diagnostic).toEqual({
+      stage: "verification",
+      status: "blocked",
+      reason: "claim evidence is missing",
+      required_action: "attach source ledger entries before final export",
+      historical_task_id: "task-014-verification-gate",
+      blocks_final_output: true,
+    })
   })
 
   test("blocks placeholder research facts and final export before the gate passes", () => {
     expect(() =>
       assertAuthenticResearchOutput({
         kind: "claim",
-        provenance: { source_type: "synthetic", note: "fixture-only claim" },
+        provenance: { source_type: "placeholder", note: "fixture-only claim" },
       }),
     ).toThrow(ResearchAuthenticityError)
 

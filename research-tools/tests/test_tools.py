@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 
 from paper_fucker_tools.external_tools import discover_external_tools, save_tool_link
-from paper_fucker_tools.mcp_tools import call_tool
+from paper_fucker_tools.mcp_tools import TOOL_REGISTRY, call_tool
 
 
 class ToolDiscoveryTest(unittest.TestCase):
@@ -49,6 +49,25 @@ class StructuredToolTest(unittest.TestCase):
         result = call_tool("tool_diagnostics", {})
         encoded = json.dumps(result.model_dump(), ensure_ascii=False)
         self.assertIn("tool_diagnostics", encoded)
+
+    def test_docx_generation_uses_canonical_tool_name(self) -> None:
+        self.assertIn("docx_generation", TOOL_REGISTRY)
+        legacy_name = "docx_generation" + "_stub"
+        self.assertNotIn(legacy_name, TOOL_REGISTRY)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp) / "draft.docx"
+            result = call_tool(
+                "docx_generation",
+                {
+                    "output_path": str(output),
+                    "title": "paper_fucker draft",
+                    "paragraphs": ["Claim-ledger backed draft paragraph."],
+                },
+            )
+            self.assertEqual(result.status, "succeeded")
+            self.assertEqual(result.tool_name, "docx_generation")
+            self.assertTrue(output.exists())
 
 
 if __name__ == "__main__":

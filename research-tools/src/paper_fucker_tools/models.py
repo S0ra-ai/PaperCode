@@ -1,8 +1,8 @@
 """Structured result models for Python research tools.
 
-Python tools return these objects to the TypeScript runtime. They do not own
-paper_fucker run state; the server runtime records returned data as events and
-artifacts.
+Python tools return these objects to the TypeScript paper runtime. They do not
+own paper_fucker run state; the OpenCode paper core records returned data as
+events and artifacts.
 """
 
 from __future__ import annotations
@@ -16,7 +16,7 @@ ToolStatus = Literal["succeeded", "failed", "skipped"]
 
 
 class ToolArtifact(BaseModel):
-    """A tool-produced output that the server runtime may persist as an artifact."""
+    """A tool-produced output that the paper runtime may persist as an artifact."""
 
     path: str | None = None
     mime_type: str = "application/json"
