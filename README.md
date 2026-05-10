@@ -1,6 +1,6 @@
 # paper_fucker
 
-Current version: <!-- version:start -->0.5.3-dev<!-- version:end -->
+Current version: <!-- version:start -->0.5.4-dev<!-- version:end -->
 
 `paper_fucker` is a private-first, OpenCode-derived closed-loop paper system. It turns a topic, codebase, dataset, experiment log, or paper material set into a verifiable academic-paper bundle with research planning, source discovery, code understanding, experiment/reproduction support, ClaimLedger-first writing, authenticity gates, profile-aware formatting, preview, and export.
 
@@ -14,7 +14,7 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - Supported input modes are topic-to-paper, code-to-paper, data-to-paper, experiment-log-to-paper, and mixed-materials-to-paper.
 - Model selection is role-based and OpenCode-provider-agnostic. The paper workflow resolves planner, literature researcher, code analyst, experiment designer, writer, reviewer, citation checker, and cheap summarizer roles from OpenCode `provider/model` ids.
 - OpenAI-compatible provider discovery accepts a user-supplied `base_url` and API key, calls `/models`, stores public provider config under `~/.paper_fucker/providers/`, and stores API keys only under `~/.paper_fucker/local/`.
-- Multi-model agent orchestration now has an explicit `AgentRoleRouter` and `AgentTree`: root, stage, worker, specialist, reviewer, verifier, and citation subagents can resolve different OpenCode provider/model ids while staying under budget-tier depth, parallelism, and cost limits.
+- Multi-model agent orchestration now has an explicit recursive `AgentRoleRouter` and `AgentTree`: root, stage, worker, specialist, reviewer, verifier, and citation subagents can resolve different OpenCode provider/model ids, continue spawning child agents, and stop by budget, time, parallelism, context, permission, data-egress, license, source, authenticity, or coverage conditions instead of fixed depth limits.
 - Data egress is private-first. Agent/tool calls evaluate authorized paths, denied patterns, secret-like files, binary artifacts, and audit events before content may leave the local workspace.
 - Tracked documentation no longer contains provider-token-shaped example keys; local credentials remain under ignored `.paper_fucker/local/`.
 - The authoritative research contracts and paper_fucker runtime now live inside the OpenCode hard fork under `packages/opencode/src/paper`.
@@ -74,8 +74,8 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - `packages/opencode/src/paper/intake.ts`: multi-input research intake normalizer and runtime recorder for `ResearchIntakeRequest` to `ResearchBrief.v1`.
 - `packages/opencode/src/paper/model-discovery.ts`: OpenAI-compatible provider endpoint model discovery and secret-safe provider config storage.
 - `packages/opencode/src/paper/model-roles.ts`: model role assignment resolver for default, per-role, and subagent model overrides.
-- `packages/opencode/src/paper/agents.ts`: multi-layer paper agent tree, role router bridge, per-agent provider/model provenance, budget depth enforcement, and artifact provenance tracing.
-- `packages/opencode/src/paper/budget.ts`: quick/standard/deep/submission/custom budget tier policy for maximum depth, parallelism, live-search behavior, container reproduction, and cost caps.
+- `packages/opencode/src/paper/agents.ts`: recursive paper agent fabric, role router bridge, per-agent provider/model provenance, guardrail-based expansion decisions, parent-to-child permission narrowing, and artifact provenance tracing.
+- `packages/opencode/src/paper/budget.ts`: quick/standard/deep/submission/custom budget tier policy for parallelism, live-search behavior, container reproduction, and cost caps; recursive agent depth is product-unbounded and governed by runtime stop conditions.
 - `packages/opencode/src/paper/data-egress.ts`: private-first data egress evaluator for authorized paths, denied patterns, secret-like paths, binary artifacts, and audit traces.
 - `packages/opencode/src/paper/orchestrator.ts`: paper-domain run graph/controller for intake, planning, literature, code analysis, data, experiment design/execution/reproduction, ClaimLedger, drafting, profile formatting, verification, revision, and export.
 - `packages/opencode/src/paper/code-to-paper.ts`: codebase-to-paper static analysis and runtime artifact recording with source-range-bound method, experiment, and reproduction surfaces.

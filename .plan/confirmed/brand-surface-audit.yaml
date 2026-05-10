@@ -1,0 +1,109 @@
+id: brand-surface-audit
+title: Brand Surface Audit
+status: todo
+priority: medium
+owner: codex
+tags:
+- brand
+- tui
+- acceptance
+- 0.5.7-dev
+depends_on:
+- paper-workbench-ux-flow
+description: Ensure user-visible startup ASCII, TUI logo, help, doctor, errors, and
+  strict reports consistently use Paper Fucker and do not expose OpenCode/Open Code
+  as the product surface.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: brand-surface-audit-step-01-scan
+  title: Scan user-visible brand surfaces
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Search startup logo, help, doctor, strict acceptance, TUI copy, and
+    errors for OpenCode/Open Code user-facing remnants.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: brand-surface-audit-step-02-clean
+  title: Clean brand remnants
+  status: todo
+  owner: codex
+  depends_on:
+  - brand-surface-audit-step-01-scan
+  description: Replace user-facing product remnants with Paper Fucker while preserving
+    internal OpenCode substrate terminology where appropriate.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: brand-surface-audit-step-03-strict
+  title: Strengthen brand acceptance checks
+  status: todo
+  owner: codex
+  depends_on:
+  - brand-surface-audit-step-02-clean
+  description: Ensure strict acceptance checks logo and visible help/doctor/TUI surfaces
+    for Paper Fucker and OpenCode remnants.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: brand-surface-audit-step-04-tests
+  title: Test brand surfaces
+  status: todo
+  owner: codex
+  depends_on:
+  - brand-surface-audit-step-03-strict
+  description: Run brand smoke and focused tests for help/doctor/TUI copy.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: brand-surface-audit-step-05-version
+  title: Version and validate 0.5.7-dev
+  status: todo
+  owner: codex
+  depends_on:
+  - brand-surface-audit-step-04-tests
+  description: Update README/CHANGELOG if needed, run required checks, validate TaskFlow
+    task.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: directory
+  path: packages/opencode/src
+  description: Brand surface cleanup
+- type: file
+  path: scripts/strict-acceptance.ps1
+  description: Brand smoke checks updated
+- type: file
+  path: CHANGELOG
+  description: Colon DSL entry for 0.5.7-dev
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-10T18:28:20.626823'
+  updated_at: '2026-05-10T18:28:20.626823'
+  version: '1'

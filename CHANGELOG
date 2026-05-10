@@ -2,47 +2,69 @@
 :author        s0ra (https://github.com/S0ra-ai)
 :repo          
 :desc          记录项目的重大变更和版本历史
-:version       0.5.3-dev
-:last_update   2026/05/10
+:version       0.5.4-dev
+:last_update   2026/05/11
 
 :history
 
+    0.5.4-dev - 2026/05/11 (f514f02) [develop]
+        :brief 递归 PaperRun Agent Fabric
+        - feat(agent): 新增 RecursiveAgentPolicy.v1 与 AgentExpansionDecision, 子 agent 不再受预算档固定深度限制
+        - feat(agent): 子 agent 可继续派生子 agent, 由 cost/time/concurrency/context/permission/data-egress/license/authenticity/coverage 条件停止
+        - feat(agent): AgentTree 记录 children、permissions、recursive_policy 与 agent.spawned/completed/blocked/expansion_skipped 事件
+        - fix(runtime): appendResearchEvent 对 deterministic idFactory 重入做 event_id 去重, 避免恢复/导出阶段写坏 SQLite index
+        - fix(export): forced draft 在 final gate blocker 为空时仍携带 final_gate_not_passed
+        - test(agent): 覆盖 depth 3 递归、多模型子 agent、权限收窄、循环防护、gate-aware 阻断
+        :src
+            - packages/opencode/src/paper/agents.ts - recursive agent policy, expansion decisions, permissions, events
+            - packages/opencode/src/paper/budget.ts - unbounded depth policy with budget resource caps
+            - packages/opencode/src/paper/run.ts - PaperRun AgentTree snapshot and forced export blocker normalization
+            - packages/opencode/src/paper/research/runtime/run-store.ts - unique event id fallback
+            - packages/opencode/src/paper/observability.ts - root agent spawned event
+            - packages/opencode/test/paper/agents.test.ts - recursive agent fabric tests
+            - packages/opencode/test/paper/hard-fork-acceptance.test.ts - unbounded agent acceptance updates
+            - packages/opencode/test/cli/tui/paper-workbench-controls.test.ts - recursive policy fixture
+            - .plan/confirmed/recursive-agent-fabric.yaml - TaskFlow execution logs
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/agents.test.ts test/paper/hard-fork-acceptance.test.ts test/cli/tui/paper-workbench-controls.test.ts passed: 10 pass, 0 fail, 64 expects
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+
     0.5.3-dev - 2026/05/10 (ab28a53) [develop]
-    :brief 移除 tracked 文档中的 secret-like 示例 token
+        :brief 移除 tracked 文档中的 secret-like 示例 token
         - fix(security): github/README.md 中的 ANTHROPIC_API_KEY 示例从 sk-ant 形态改为 <provider-api-key>
         - fix(security): github/README.md 中的 MOCK_TOKEN 示例从 github_pat 形态改为 <github-token>
         - docs(report): 新增 reports/tracked-secret-example-cleanup.md 记录扫描证据
-    :src
-        - github/README.md - non-secret placeholders for provider/GitHub token examples
-        - reports/tracked-secret-example-cleanup.md - cleanup report
-        - .plan/confirmed/task-054-tracked-secret-example-cleanup.yaml - TaskFlow execution logs
-        - README.md - current status and version update
-        - CHANGELOG - 0.5.3-dev history entry
-    :verification
-        - git grep -n -P "(?<![A-Za-z0-9])sk-[A-Za-z0-9._-]{20,}" -- . ':!CHANGELOG' ':!reports' ':!tmp' returned no matches
-        - git grep -n -P "github_pat_[A-Za-z0-9_]{10,}" -- . ':!CHANGELOG' ':!reports' ':!tmp' returned no matches
-        - TaskFlow validate_task task-054-tracked-secret-example-cleanup passed
+        :src
+            - github/README.md - non-secret placeholders for provider/GitHub token examples
+            - reports/tracked-secret-example-cleanup.md - cleanup report
+            - .plan/confirmed/task-054-tracked-secret-example-cleanup.yaml - TaskFlow execution logs
+            - README.md - current status and version update
+            - CHANGELOG - 0.5.3-dev history entry
+        :verification
+            - git grep -n -P "(?<![A-Za-z0-9])sk-[A-Za-z0-9._-]{20,}" -- . ':!CHANGELOG' ':!reports' ':!tmp' returned no matches
+            - git grep -n -P "github_pat_[A-Za-z0-9_]{10,}" -- . ':!CHANGELOG' ':!reports' ':!tmp' returned no matches
+            - TaskFlow validate_task task-054-tracked-secret-example-cleanup passed
 
     0.5.2-dev - 2026/05/10 (d266530) [develop]
-    :brief 清理 TUI 首页模型 provider 与代码示例文案
+        :brief 清理 TUI 首页模型 provider 与代码示例文案
         - fix(tui): 首页 code-to-paper placeholder 从 `--code packages/opencode` 改为 `--code .`, 避免把用户引向上游目录名
         - fix(tui): provider 提示从 OpenCode provider 改为通用模型 provider, 保留 OpenAI-compatible 与 DeepSeek 示例
         - fix(i18n): 首页 tips 标签从 Tip 改为 提示
         - fix(i18n): 内置主题切换提示改为中文
         - docs(report): 新增 reports/tui-provider-copy-cleanup.md 记录用户可见文案清理与扫描证据
-    :src
-        - packages/opencode/src/cli/cmd/tui/routes/home.tsx - home placeholder copy
-        - packages/opencode/src/cli/cmd/tui/feature-plugins/home/tips-view.tsx - provider/theme/tip copy
-        - reports/tui-provider-copy-cleanup.md - cleanup report
-        - .plan/confirmed/task-053-tui-provider-copy-cleanup.yaml - TaskFlow execution logs
-        - README.md - current status and version update
-        - CHANGELOG - 0.5.2-dev history entry
-    :verification
-        - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
-        - current TUI copy scan found no OpenCode provider/Open Code/Tip/English theme/--code packages/opencode matches in home tips
+        :src
+            - packages/opencode/src/cli/cmd/tui/routes/home.tsx - home placeholder copy
+            - packages/opencode/src/cli/cmd/tui/feature-plugins/home/tips-view.tsx - provider/theme/tip copy
+            - reports/tui-provider-copy-cleanup.md - cleanup report
+            - .plan/confirmed/task-053-tui-provider-copy-cleanup.yaml - TaskFlow execution logs
+            - README.md - current status and version update
+            - CHANGELOG - 0.5.2-dev history entry
+        :verification
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+            - current TUI copy scan found no OpenCode provider/Open Code/Tip/English theme/--code packages/opencode matches in home tips
 
     0.5.1-dev - 2026/05/10 (878cdfb) [develop]
-    :brief 清理当前运行时残留的 Phase 1 stub 命名
+        :brief 清理当前运行时残留的 Phase 1 stub 命名
         - fix(runtime): ResearchStageStub/createNotImplementedStageStub/phaseOneStageStubs 改为 ResearchStageBlockingDiagnostic/createStageBlockingDiagnostic
         - fix(runtime): stage blocking diagnostic 使用 blocked 语义, 不再把当前论文阶段描述为 not_implemented
         - fix(authenticity): provenance guard 改为阻断 placeholder/synthetic/fake, 保留真实性 gate 约束但移除当前 stub 来源类型
@@ -51,25 +73,25 @@
         - test(runtime): 更新 guard/orchestrator 测试, 覆盖 blocking diagnostic 与缺失能力阻断记录
         - test(python-tools): 新增 docx_generation registry 与实际 DOCX 写出测试
         - docs(report): 新增 reports/remove-stub-leftovers.md 记录清理和扫描证据
-    :src
-        - packages/opencode/src/paper/research/runtime/guards.ts - blocking diagnostics and authenticity provenance guard
-        - packages/opencode/test/research/guards.test.ts - guard tests
-        - packages/opencode/test/paper/orchestrator.test.ts - blocked diagnostic orchestration test wording
-        - research-tools/src/paper_fucker_tools/mcp_tools.py - canonical DOCX tool name
-        - research-tools/src/paper_fucker_tools/models.py - current paper runtime wording
-        - research-tools/tests/test_tools.py - DOCX tool registry/write test
-        - reports/remove-stub-leftovers.md - cleanup report
-        - .plan/confirmed/task-052-remove-stub-leftovers.yaml - TaskFlow execution logs
-        - README.md - current status and version update
-        - CHANGELOG - 0.5.1-dev history entry
-    :verification
-        - npx --yes bun@1.3.13 --cwd packages/opencode test test/research/guards.test.ts test/paper/orchestrator.test.ts passed: 6 pass, 0 fail, 14 expects
-        - $env:PYTHONPATH='research-tools/src'; python -m unittest discover -s research-tools/tests passed: 5 tests OK
-        - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
-        - focused current-code scan found no phaseOneStageStubs/ResearchStageStub/createNotImplementedStageStub/not_implemented/docx_generation_stub/stub handler/packages/server/@paper-fucker/server/server runtime matches
+        :src
+            - packages/opencode/src/paper/research/runtime/guards.ts - blocking diagnostics and authenticity provenance guard
+            - packages/opencode/test/research/guards.test.ts - guard tests
+            - packages/opencode/test/paper/orchestrator.test.ts - blocked diagnostic orchestration test wording
+            - research-tools/src/paper_fucker_tools/mcp_tools.py - canonical DOCX tool name
+            - research-tools/src/paper_fucker_tools/models.py - current paper runtime wording
+            - research-tools/tests/test_tools.py - DOCX tool registry/write test
+            - reports/remove-stub-leftovers.md - cleanup report
+            - .plan/confirmed/task-052-remove-stub-leftovers.yaml - TaskFlow execution logs
+            - README.md - current status and version update
+            - CHANGELOG - 0.5.1-dev history entry
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/research/guards.test.ts test/paper/orchestrator.test.ts passed: 6 pass, 0 fail, 14 expects
+            - $env:PYTHONPATH='research-tools/src'; python -m unittest discover -s research-tools/tests passed: 5 tests OK
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+            - focused current-code scan found no phaseOneStageStubs/ResearchStageStub/createNotImplementedStageStub/not_implemented/docx_generation_stub/stub handler/packages/server/@paper-fucker/server/server runtime matches
 
     0.5.0-dev - 2026/05/10 (cf7aad5) [develop]
-    :brief Live PaperRun 基准回归通过并收口 0.4.x 质量缺口
+        :brief Live PaperRun 基准回归通过并收口 0.4.x 质量缺口
         - test(benchmark): 重新执行真实 topic+code PaperRun, 记录 run-ee44237e-e1cc-40d5-abee-611dbc9a8222
         - test(strict): focused strict acceptance 通过, 覆盖 TaskFlow、版本同步、secret scan、server/preview/Python/typecheck、CLI/TUI、DeepSeek、Exa、Nature、pandoc、LaTeX、DOCX、topic/code run 与 hard-fork checks
         - test(paperrun): 确认完整执行后 PaperRun snapshot 正确显示 blocked, 不再卡在 running
@@ -77,18 +99,18 @@
         - test(export): forced Markdown/LaTeX/PDF/DOCX 均写出, PDF fallback 成功且保留 latexmk 失败诊断
         - test(observability): stage/capability/model_role/subagent/tool/data_egress/export_renderer/cost audit 覆盖完整, missing_kinds 为空
         - docs(report): 重写 reports/live-paper-quality-benchmark.md 为 0.5.0-dev 回归报告, 记录 0.4.0 缺口到 0.5.0 结果的闭环
-    :src
-        - reports/live-paper-quality-benchmark.md - live PaperRun benchmark regression report
-        - reports/strict-live-acceptance.md - focused strict acceptance evidence
-        - .plan/confirmed/task-051-live-benchmark-regression-pass.yaml - TaskFlow execution logs
-        - README.md - current behavior and version update
-        - CHANGELOG - 0.5.0-dev history entry
-    :verification
-        - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts produced blocked reviewable run with forced Markdown/LaTeX/PDF/DOCX export, PDF written, and empty missing_kinds
-        - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\strict-acceptance.ps1 -CheckTimeoutSeconds 300 passed
+        :src
+            - reports/live-paper-quality-benchmark.md - live PaperRun benchmark regression report
+            - reports/strict-live-acceptance.md - focused strict acceptance evidence
+            - .plan/confirmed/task-051-live-benchmark-regression-pass.yaml - TaskFlow execution logs
+            - README.md - current behavior and version update
+            - CHANGELOG - 0.5.0-dev history entry
+        :verification
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts produced blocked reviewable run with forced Markdown/LaTeX/PDF/DOCX export, PDF written, and empty missing_kinds
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\strict-acceptance.ps1 -CheckTimeoutSeconds 300 passed
 
     0.4.4-dev - 2026/05/10 (713835c) [develop]
-    :brief 默认 PaperRun 引擎自动记录完整 observability audit 覆盖
+        :brief 默认 PaperRun 引擎自动记录完整 observability audit 覆盖
         - fix(observability): 新增 recordDefaultPaperRunObservability, 自动记录 model_role/capability/subagent/tool/data_egress/cost
         - fix(run): createPaperRun 在默认 stage graph 之后写入 observability baseline, 不再依赖测试或调用方手动补 audit
         - fix(strict): strict acceptance 的 Git Flow 检查允许 `fix/*` 活动分支, 与当前分支策略一致
@@ -96,128 +118,128 @@
         - test(observability): 新增默认 PaperRun coverage 回归, 要求 missing_kinds 为空
         - test(strict): 覆盖 active task work 可在 feature/fix 分支上运行 strict acceptance, 并检查报告写入重试
         - docs(report): 新增 reports/default-observability-coverage.md 记录 live benchmark coverage
-    :src
-        - packages/opencode/src/paper/observability.ts - default run observability recorder
-        - packages/opencode/src/paper/run.ts - default engine audit integration
-        - packages/opencode/test/paper/observability-audit.test.ts - default coverage regression
-        - scripts/strict-acceptance.ps1 - Git Flow active branch validation
-        - packages/opencode/test/paper/strict-acceptance.test.ts - feature/fix branch validation coverage
-        - reports/default-observability-coverage.md - live audit coverage evidence
-        - .plan/confirmed/task-050-default-observability-coverage.yaml - TaskFlow execution logs
-        - README.md - current behavior and version update
-        - CHANGELOG - 0.4.4-dev history entry
-    :verification
-        - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/observability-audit.test.ts passed: 2 pass, 0 fail, 22 expects
-        - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
-        - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts produced empty missing_kinds with counts stage=28, capability=12, model_role=8, subagent=1, tool=1, data_egress=1, export_renderer=4, cost=1
+        :src
+            - packages/opencode/src/paper/observability.ts - default run observability recorder
+            - packages/opencode/src/paper/run.ts - default engine audit integration
+            - packages/opencode/test/paper/observability-audit.test.ts - default coverage regression
+            - scripts/strict-acceptance.ps1 - Git Flow active branch validation
+            - packages/opencode/test/paper/strict-acceptance.test.ts - feature/fix branch validation coverage
+            - reports/default-observability-coverage.md - live audit coverage evidence
+            - .plan/confirmed/task-050-default-observability-coverage.yaml - TaskFlow execution logs
+            - README.md - current behavior and version update
+            - CHANGELOG - 0.4.4-dev history entry
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/observability-audit.test.ts passed: 2 pass, 0 fail, 22 expects
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts produced empty missing_kinds with counts stage=28, capability=12, model_role=8, subagent=1, tool=1, data_egress=1, export_renderer=4, cost=1
 
     0.4.3-dev - 2026/05/10 (7d5df2a) [develop]
-    :brief PDF 导出支持多 LaTeX 引擎 fallback 并修复 Windows TeX 路径/standalone LaTeX
+        :brief PDF 导出支持多 LaTeX 引擎 fallback 并修复 Windows TeX 路径/standalone LaTeX
         - fix(export): PDF renderer 按 latexmk -> xelatex -> pdflatex -> lualatex -> tectonic 顺序尝试
         - fix(export): 任一引擎失败后继续尝试下一引擎, 并把失败原因保留到 PDF diagnostics
         - fix(export): 传给 LaTeX 引擎的 Windows 路径统一转为 `/`, 避免反斜杠被 TeX 解析为控制序列
         - fix(export): Pandoc Markdown-to-LaTeX 使用 `-s -t latex`, 生成可直接编译的 standalone 文档
         - test(export): 新增 latexmk 失败、xelatex 成功的 fallback 回归测试
         - docs(report): 新增 reports/export-pdf-renderer-fallback.md 记录 live smoke 与语义
-    :src
-        - packages/opencode/src/paper/export-pipeline.ts - PDF fallback chain, path normalization, standalone LaTeX
-        - packages/opencode/test/paper/export-pipeline.test.ts - fallback regression coverage
-        - reports/export-pdf-renderer-fallback.md - live PDF fallback evidence
-        - .plan/confirmed/task-049-export-pdf-renderer-fallback.yaml - TaskFlow execution logs
-        - README.md - current behavior and version update
-        - CHANGELOG - 0.4.3-dev history entry
-    :verification
-        - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/export-pipeline.test.ts passed: 4 pass, 0 fail, 24 expects
-        - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
-        - Direct pandoc -s + xelatex smoke generated tmp/pdf-fallback-smoke/smoke.pdf
-        - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts produced run-045f3eb0-cb86-4340-89b9-d0ee58464040 with forced Markdown/LaTeX/PDF/DOCX export and PDF status written
+        :src
+            - packages/opencode/src/paper/export-pipeline.ts - PDF fallback chain, path normalization, standalone LaTeX
+            - packages/opencode/test/paper/export-pipeline.test.ts - fallback regression coverage
+            - reports/export-pdf-renderer-fallback.md - live PDF fallback evidence
+            - .plan/confirmed/task-049-export-pdf-renderer-fallback.yaml - TaskFlow execution logs
+            - README.md - current behavior and version update
+            - CHANGELOG - 0.4.3-dev history entry
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/export-pipeline.test.ts passed: 4 pass, 0 fail, 24 expects
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+            - Direct pandoc -s + xelatex smoke generated tmp/pdf-fallback-smoke/smoke.pdf
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts produced run-045f3eb0-cb86-4340-89b9-d0ee58464040 with forced Markdown/LaTeX/PDF/DOCX export and PDF status written
 
     0.4.2-dev - 2026/05/10 (18562fb) [develop]
-    :brief 对齐 PaperRun 完成态、真实性 gate 与 reproduction_failure 阶段展示
+        :brief 对齐 PaperRun 完成态、真实性 gate 与 reproduction_failure 阶段展示
         - fix(paperrun): PaperRun snapshot status 新增 blocked, 完整执行但 final gate 阻断时不再显示 running
         - fix(controller): durable controller 新增 review_required, 用于已跑完但需要证据/复现/审查的 run
         - fix(stage): final gate 的 reproduction_failure 反投影到 reproduction stage, 避免复现阶段成功但最终 gate 因复现失败阻断的矛盾
         - fix(runtime): 完整执行完成后内部 ResearchRun 可标记 succeeded, PaperRun eligibility 仍由 gate 投影为 blocked
         - test(paperrun): 增加 completed-but-blocked run 终态回归断言
         - docs(report): 新增 reports/paperrun-completion-gates.md 记录状态语义与验证
-    :src
-        - packages/opencode/src/paper/run.ts - PaperRun terminal status and reproduction gate projection
-        - packages/opencode/src/paper/run-controller.ts - review_required controller status
-        - packages/opencode/src/cli/cmd/tui/routes/paper/workbench.ts - Chinese controller label and fallback status projection
-        - packages/opencode/test/paper/paperrun-execution.test.ts - completed blocked run regression
-        - reports/paperrun-completion-gates.md - gate alignment report
-        - .plan/confirmed/task-048-paperrun-completion-gates.yaml - TaskFlow execution logs
-        - README.md - current behavior and version update
-        - CHANGELOG - 0.4.2-dev history entry
-    :verification
-        - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/paperrun-execution.test.ts test/paper/paperrun-controller.test.ts test/cli/tui/paper-workbench-controls.test.ts passed: 4 pass, 0 fail, 48 expects
-        - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+        :src
+            - packages/opencode/src/paper/run.ts - PaperRun terminal status and reproduction gate projection
+            - packages/opencode/src/paper/run-controller.ts - review_required controller status
+            - packages/opencode/src/cli/cmd/tui/routes/paper/workbench.ts - Chinese controller label and fallback status projection
+            - packages/opencode/test/paper/paperrun-execution.test.ts - completed blocked run regression
+            - reports/paperrun-completion-gates.md - gate alignment report
+            - .plan/confirmed/task-048-paperrun-completion-gates.yaml - TaskFlow execution logs
+            - README.md - current behavior and version update
+            - CHANGELOG - 0.4.2-dev history entry
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/paperrun-execution.test.ts test/paper/paperrun-controller.test.ts test/cli/tui/paper-workbench-controls.test.ts passed: 4 pass, 0 fail, 48 expects
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
 
     0.4.1-dev - 2026/05/10 (fad39b1) [develop]
-    :brief 严格验收脚本增加逐项超时、进度报告与 focused 默认测试集
+        :brief 严格验收脚本增加逐项超时、进度报告与 focused 默认测试集
         - fix(strict): scripts/strict-acceptance.ps1 新增 CheckTimeoutSeconds、FullWorkspaceSuite 与 FullWorkspaceTimeoutSeconds 参数
         - fix(strict): 每个检查通过 Start-Job/Wait-Job 独立执行, 超时后清理子任务并报告 timed out after
         - fix(strict): Invoke-Check 在 finally 中写入报告, 长流程失败或超时时保留已完成检查证据
         - test(strict): strict-acceptance.test.ts 覆盖逐项超时、部分报告、focused 默认测试集与 full workspace opt-in
         - docs(strict): reports/strict-live-acceptance.md 更新为 strict-live-focused 通过记录
-    :src
-        - scripts/strict-acceptance.ps1 - bounded strict live acceptance runner
-        - packages/opencode/test/paper/strict-acceptance.test.ts - timeout and suite-policy regression coverage
-        - reports/strict-live-acceptance.md - focused strict live acceptance evidence
-        - .plan/confirmed/task-047-strict-acceptance-timeouts.yaml - TaskFlow execution logs
-        - README.md - current behavior and version update
-        - CHANGELOG - 0.4.1-dev history entry
-    :verification
-        - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/strict-acceptance.test.ts passed: 5 pass, 0 fail, 43 expects
-        - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\strict-acceptance.ps1 -FixtureMode -CheckTimeoutSeconds 120 -ReportPath tmp/strict-acceptance-fixture.md passed
-        - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\strict-acceptance.ps1 -CheckTimeoutSeconds 300 -ReportPath reports/strict-live-acceptance.md passed in strict-live-focused mode
+        :src
+            - scripts/strict-acceptance.ps1 - bounded strict live acceptance runner
+            - packages/opencode/test/paper/strict-acceptance.test.ts - timeout and suite-policy regression coverage
+            - reports/strict-live-acceptance.md - focused strict live acceptance evidence
+            - .plan/confirmed/task-047-strict-acceptance-timeouts.yaml - TaskFlow execution logs
+            - README.md - current behavior and version update
+            - CHANGELOG - 0.4.1-dev history entry
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/strict-acceptance.test.ts passed: 5 pass, 0 fail, 43 expects
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\strict-acceptance.ps1 -FixtureMode -CheckTimeoutSeconds 120 -ReportPath tmp/strict-acceptance-fixture.md passed
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\strict-acceptance.ps1 -CheckTimeoutSeconds 300 -ReportPath reports/strict-live-acceptance.md passed in strict-live-focused mode
 
     0.4.0-dev - 2026/05/10 (b0452c8) [develop]
-    :brief 运行真实 topic+code PaperRun 质量基准并生成后续硬化任务
+        :brief 运行真实 topic+code PaperRun 质量基准并生成后续硬化任务
         - feat(benchmark): 新增 scripts/live-paper-quality-benchmark.ts, 可复现创建真实 PaperRun、forced export 与 summary JSON
         - feat(gitignore): 忽略 .paper_fucker/runs/, 防止 live PaperRun 产物进入 Git
         - docs(benchmark): 新增 reports/live-paper-quality-benchmark.md, 记录 DeepSeek/Exa/Nature/toolchain/PaperRun 结果与质量缺口
         - docs(strict): 更新 reports/strict-live-acceptance.md, 标记 task-046 strict rerun 因无超时保护需要硬化
         - plan(taskflow): 新增 task-047..task-051, 覆盖 strict timeout、PaperRun terminal gate、PDF fallback、默认 audit coverage 与最终 benchmark 回归
         - docs(readme): 版本更新为 0.4.0-dev, 记录 live benchmark 入口和后续硬化计划
-    :src
-        - scripts/live-paper-quality-benchmark.ts - reproducible topic+code PaperRun live benchmark
-        - reports/live-paper-quality-benchmark.md - benchmark evidence, artifacts, and quality gap review
-        - reports/strict-live-acceptance.md - latest task-046 strict attempt status and follow-up
-        - .gitignore - ignored .paper_fucker/runs/ runtime artifacts
-        - .plan/confirmed/task-047-strict-acceptance-timeouts.yaml - strict timeout hardening task
-        - .plan/confirmed/task-048-paperrun-completion-gates.yaml - terminal/gate alignment task
-        - .plan/confirmed/task-049-export-pdf-renderer-fallback.yaml - PDF renderer fallback task
-        - .plan/confirmed/task-050-default-observability-coverage.yaml - default audit coverage task
-        - .plan/confirmed/task-051-live-benchmark-regression-pass.yaml - milestone rerun task
-        - README.md - current behavior and version update
-        - CHANGELOG - 0.4.0-dev history entry
-    :verification
-        - DeepSeek /models + chat smoke passed for deepseek-v4-pro
-        - Exa MCP initialize passed
-        - nature-paper skill and Nature author guidance smoke passed
-        - pandoc Markdown-to-LaTeX and DOCX smokes passed; direct XeLaTeX PDF smoke passed
-        - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/paperrun-execution.test.ts test/paper/code-to-paper.test.ts test/paper/export-pipeline.test.ts test/paper/observability-audit.test.ts passed: 7 pass, 0 fail, 49 expects
-        - scripts/live-paper-quality-benchmark.ts produced run-622f4660-3c8c-4dfe-b25f-04ef7484fd8f with 14/14 stages succeeded, 84 sources, 33 artifacts, 1 claim, 1 draft, forced Markdown/LaTeX/DOCX export, and documented final gate blockers
+        :src
+            - scripts/live-paper-quality-benchmark.ts - reproducible topic+code PaperRun live benchmark
+            - reports/live-paper-quality-benchmark.md - benchmark evidence, artifacts, and quality gap review
+            - reports/strict-live-acceptance.md - latest task-046 strict attempt status and follow-up
+            - .gitignore - ignored .paper_fucker/runs/ runtime artifacts
+            - .plan/confirmed/task-047-strict-acceptance-timeouts.yaml - strict timeout hardening task
+            - .plan/confirmed/task-048-paperrun-completion-gates.yaml - terminal/gate alignment task
+            - .plan/confirmed/task-049-export-pdf-renderer-fallback.yaml - PDF renderer fallback task
+            - .plan/confirmed/task-050-default-observability-coverage.yaml - default audit coverage task
+            - .plan/confirmed/task-051-live-benchmark-regression-pass.yaml - milestone rerun task
+            - README.md - current behavior and version update
+            - CHANGELOG - 0.4.0-dev history entry
+        :verification
+            - DeepSeek /models + chat smoke passed for deepseek-v4-pro
+            - Exa MCP initialize passed
+            - nature-paper skill and Nature author guidance smoke passed
+            - pandoc Markdown-to-LaTeX and DOCX smokes passed; direct XeLaTeX PDF smoke passed
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/paperrun-execution.test.ts test/paper/code-to-paper.test.ts test/paper/export-pipeline.test.ts test/paper/observability-audit.test.ts passed: 7 pass, 0 fail, 49 expects
+            - scripts/live-paper-quality-benchmark.ts produced run-622f4660-3c8c-4dfe-b25f-04ef7484fd8f with 14/14 stages succeeded, 84 sources, 33 artifacts, 1 claim, 1 draft, forced Markdown/LaTeX/DOCX export, and documented final gate blockers
 
     0.3.7-dev - 2026/05/10 (55167c9) [develop]
-    :brief 报告路径卫生清理, 标记迁移前 server 路径为历史证据
+        :brief 报告路径卫生清理, 标记迁移前 server 路径为历史证据
         - docs(reports): 为 25 个 task-032 前报告添加 historical path note, 避免将 packages/server 误读为当前架构
         - docs(readme): 说明历史报告可保留 packages/server/@paper-fucker/server 作为 provenance, 当前权威路径为 packages/opencode/src/paper
         - docs(report): 新增 report-path-hygiene 审计报告, 区分当前文档、历史证据、迁移/缺失断言
         - note(history): CHANGELOG 与已完成 TaskFlow logs 保留旧路径, 不重写真实历史提交与验证记录
-    :src
-        - README.md - current path/provenance policy and version update
-        - reports/report-path-hygiene.md - audit result and future documentation policy
-        - reports/* - pre-hard-fork reports marked with historical path note
-        - .plan/confirmed/task-045-report-path-hygiene.yaml - TaskFlow execution evidence
-        - CHANGELOG - 0.3.7-dev history entry
-    :verification
-        - rg audit confirmed pre-hard-fork report server-path references are marked as historical provenance
-        - CHANGELOG and TaskFlow completed-task logs intentionally retained as historical evidence
+        :src
+            - README.md - current path/provenance policy and version update
+            - reports/report-path-hygiene.md - audit result and future documentation policy
+            - reports/* - pre-hard-fork reports marked with historical path note
+            - .plan/confirmed/task-045-report-path-hygiene.yaml - TaskFlow execution evidence
+            - CHANGELOG - 0.3.7-dev history entry
+        :verification
+            - rg audit confirmed pre-hard-fork report server-path references are marked as historical provenance
+            - CHANGELOG and TaskFlow completed-task logs intentionally retained as historical evidence
 
     0.3.6-dev - 2026/05/10 (7d335eb) [develop]
-    :brief PaperRun 新增 observability audit、cost、tool trace 与 data-egress 诊断
+        :brief PaperRun 新增 observability audit、cost、tool trace 与 data-egress 诊断
         - feat(observability): 新增 PaperObservabilityAudit.v1 与 summary coverage, 覆盖 stage、capability、model_role、subagent、tool、data_egress、export_renderer、cost
         - feat(runtime): 新增 recordPaperToolTrace、recordPaperCostUsage、recordPaperDataEgressAudit 与 recordPaperObservabilityAudit
         - feat(snapshot): PaperRun diagnostics 新增 audit summary, 从 durable run events 聚合审计覆盖与缺口
@@ -225,24 +247,24 @@
         - feat(strict): strict acceptance 新增 observability-audit-coverage 检查
         - test(observability): 新增 snapshot 级审计测试, 验证 tool trace、cost、egress 与 coverage 可查询
         - docs(readme): 版本更新为 0.3.6-dev, 记录 observability audit hardening
-    :src
-        - packages/opencode/src/paper/observability.ts - audit helpers, tool trace, cost, data egress, and summary projection
-        - packages/opencode/src/paper/run.ts - diagnostics.audit snapshot projection
-        - packages/opencode/src/paper/export-pipeline.ts - export_renderer audit events
-        - packages/opencode/src/paper/index.ts - observability public exports
-        - packages/opencode/test/paper/observability-audit.test.ts - observability coverage tests
-        - packages/opencode/test/paper/strict-acceptance.test.ts - strict inventory update
-        - scripts/strict-acceptance.ps1 - observability audit coverage check
-        - reports/observability-audit-hardening.md - implementation report
-        - README.md - current behavior and version update
-        - CHANGELOG - 0.3.6-dev history entry
-    :verification
-        - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/observability-audit.test.ts test/paper/export-pipeline.test.ts passed: 4 pass, 0 fail, 29 expects
-        - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/observability-audit.test.ts test/paper/strict-acceptance.test.ts passed: 4 pass, 0 fail, 43 expects
-        - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+        :src
+            - packages/opencode/src/paper/observability.ts - audit helpers, tool trace, cost, data egress, and summary projection
+            - packages/opencode/src/paper/run.ts - diagnostics.audit snapshot projection
+            - packages/opencode/src/paper/export-pipeline.ts - export_renderer audit events
+            - packages/opencode/src/paper/index.ts - observability public exports
+            - packages/opencode/test/paper/observability-audit.test.ts - observability coverage tests
+            - packages/opencode/test/paper/strict-acceptance.test.ts - strict inventory update
+            - scripts/strict-acceptance.ps1 - observability audit coverage check
+            - reports/observability-audit-hardening.md - implementation report
+            - README.md - current behavior and version update
+            - CHANGELOG - 0.3.6-dev history entry
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/observability-audit.test.ts test/paper/export-pipeline.test.ts passed: 4 pass, 0 fail, 29 expects
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/observability-audit.test.ts test/paper/strict-acceptance.test.ts passed: 4 pass, 0 fail, 43 expects
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
 
     0.3.5-dev - 2026/05/10 (855a944) [develop]
-    :brief PaperRun export pipeline 写出真实文件与 manifest
+        :brief PaperRun export pipeline 写出真实文件与 manifest
         - feat(export): 新增 run-bound export pipeline, 写出 Markdown、LaTeX、PDF、DOCX 与 manifest.json
         - feat(export): 默认发现 pandoc、latexmk、xelatex、pdflatex、lualatex、tectonic, 并支持测试/调用方注入 renderer 或 command runner
         - feat(api): /paper/runs/:runID/export 现在返回 concrete files、manifest_path、tool_diagnostics 与 failed_checks
@@ -250,64 +272,64 @@
         - fix(export): 缺少 pandoc/LaTeX engine 时写入 actionable diagnostics, 不再假装 PDF/DOCX 成功
         - test(export): 新增 export-pipeline 测试, 覆盖 final export、forced draft、manifest、缺工具诊断与 API forced export 文件返回
         - docs(readme): 版本更新为 0.3.5-dev, 记录真实 export renderer pipeline
-    :src
-        - packages/opencode/src/paper/export-pipeline.ts - run-bound renderer pipeline and external tool diagnostics
-        - packages/opencode/src/paper/research/export/recording.ts - recordExportBundle wiring to renderer pipeline
-        - packages/opencode/src/paper/research/export/schemas.ts - manifest metadata fields
-        - packages/opencode/src/paper/run.ts - PaperRun export API file/manifest response and preview export state
-        - packages/opencode/src/paper/index.ts - export pipeline public exports
-        - packages/opencode/test/paper/export-pipeline.test.ts - renderer pipeline coverage
-        - packages/opencode/test/paper/run-api.test.ts - export API concrete file assertions
-        - reports/export-renderer-pipeline.md - implementation report
-        - README.md - current behavior and version update
-        - CHANGELOG - 0.3.5-dev history entry
-    :verification
-        - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/export-pipeline.test.ts test/paper/authoring.test.ts test/paper/run-api.test.ts passed: 7 pass, 0 fail, 63 expects
-        - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/run-api.test.ts passed: 1 pass, 0 fail, 27 expects
-        - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+        :src
+            - packages/opencode/src/paper/export-pipeline.ts - run-bound renderer pipeline and external tool diagnostics
+            - packages/opencode/src/paper/research/export/recording.ts - recordExportBundle wiring to renderer pipeline
+            - packages/opencode/src/paper/research/export/schemas.ts - manifest metadata fields
+            - packages/opencode/src/paper/run.ts - PaperRun export API file/manifest response and preview export state
+            - packages/opencode/src/paper/index.ts - export pipeline public exports
+            - packages/opencode/test/paper/export-pipeline.test.ts - renderer pipeline coverage
+            - packages/opencode/test/paper/run-api.test.ts - export API concrete file assertions
+            - reports/export-renderer-pipeline.md - implementation report
+            - README.md - current behavior and version update
+            - CHANGELOG - 0.3.5-dev history entry
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/export-pipeline.test.ts test/paper/authoring.test.ts test/paper/run-api.test.ts passed: 7 pass, 0 fail, 63 expects
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/run-api.test.ts passed: 1 pass, 0 fail, 27 expects
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
 
     0.3.4-dev - 2026/05/10 (30479e1) [develop]
-    :brief TUI 论文工作台新增 PaperRun live controls 与能力健康显示
+        :brief TUI 论文工作台新增 PaperRun live controls 与能力健康显示
         - feat(tui): PaperRun dashboard 新增发送指导、继续运行、重试阶段、取消运行、打开预览、导出终稿、导出 forced draft、能力健康、模型角色 controls
         - feat(tui): 新增 renderer-independent API helpers, 自动调用 /paper/runs/:runID/guidance、/control、/preview、/export、/paper/capabilities、/paper/model-roles、/paper/doctor
         - feat(tui): 显示 durable controller status、queued guidance 数、模型角色 provider/model、MCP/Skill/toolchain 健康状态
         - fix(tui): dashboard state 对旧 snapshot 缺少 controller_state/model_roles 的情况保持兼容
         - test(tui): 新增 live controls 测试, 更新中文 dashboard panel/control 断言
         - docs(readme): 版本更新为 0.3.4-dev, 记录 live workbench controls
-    :src
-        - packages/opencode/src/cli/cmd/tui/routes/paper/workbench.ts - live control state, API helpers, capability/model/doctor adapters
-        - packages/opencode/src/cli/cmd/tui/routes/paper/index.tsx - visible controller, action, model-role, and health sections
-        - packages/opencode/test/cli/tui/paper-workbench-controls.test.ts - live control and API helper coverage
-        - packages/opencode/test/cli/tui/paper-workbench.test.ts - updated dashboard control assertions
-        - reports/workbench-live-controls.md - implementation report
-        - README.md - current behavior and version update
-        - CHANGELOG - 0.3.4-dev history entry
-    :verification
-        - npx --yes bun@1.3.13 --cwd packages/opencode test test/cli/tui/paper-workbench.test.ts test/cli/tui/paper-workbench-controls.test.ts passed: 5 pass, 0 fail, 38 expects
-        - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+        :src
+            - packages/opencode/src/cli/cmd/tui/routes/paper/workbench.ts - live control state, API helpers, capability/model/doctor adapters
+            - packages/opencode/src/cli/cmd/tui/routes/paper/index.tsx - visible controller, action, model-role, and health sections
+            - packages/opencode/test/cli/tui/paper-workbench-controls.test.ts - live control and API helper coverage
+            - packages/opencode/test/cli/tui/paper-workbench.test.ts - updated dashboard control assertions
+            - reports/workbench-live-controls.md - implementation report
+            - README.md - current behavior and version update
+            - CHANGELOG - 0.3.4-dev history entry
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/cli/tui/paper-workbench.test.ts test/cli/tui/paper-workbench-controls.test.ts passed: 5 pass, 0 fail, 38 expects
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
 
     0.3.3-dev - 2026/05/10 (11d1042) [develop]
-    :brief Intake 新增真实材料索引与 Source Ledger 记录
+        :brief Intake 新增真实材料索引与 Source Ledger 记录
         - feat(intake): 新增 MaterialIndex.v1, 支持 code_paths、paper_files、dataset_paths、experiment_logs 的 workspace-safe 索引
         - feat(materials): 记录 mime、bytes、sha256、source_range、text_preview 与 material source_id
         - feat(source-ledger): PaperRun intake 写入 MaterialIndex artifact, 并为 indexed materials 创建 Source Ledger entries
         - fix(egress): `.env`、secret-like paths、.git/node_modules、unsupported binary files 默认跳过并记录 skip reason
         - test(materials): 覆盖材料索引、source ranges、secret/binary skip、PaperRun intake artifact/source ledger 写入
         - docs(readme): 版本更新为 0.3.3-dev, 记录真实 material intake
-    :src
-        - packages/opencode/src/paper/material-index.ts - MaterialIndex runtime and recording helpers
-        - packages/opencode/src/paper/orchestrator.ts - intake stage material index wiring
-        - packages/opencode/src/paper/index.ts - material index public exports
-        - packages/opencode/test/paper/material-index.test.ts - material index tests
-        - reports/real-intake-material-indexing.md - implementation report
-        - README.md - current behavior and version update
-        - CHANGELOG - 0.3.3-dev history entry
-    :verification
-        - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/material-index.test.ts passed: 2 pass, 0 fail, 11 expects
-        - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+        :src
+            - packages/opencode/src/paper/material-index.ts - MaterialIndex runtime and recording helpers
+            - packages/opencode/src/paper/orchestrator.ts - intake stage material index wiring
+            - packages/opencode/src/paper/index.ts - material index public exports
+            - packages/opencode/test/paper/material-index.test.ts - material index tests
+            - reports/real-intake-material-indexing.md - implementation report
+            - README.md - current behavior and version update
+            - CHANGELOG - 0.3.3-dev history entry
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/material-index.test.ts passed: 2 pass, 0 fail, 11 expects
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
 
     0.3.2-dev - 2026/05/10 (644922b) [develop]
-    :brief 新增持久化 PaperRun controller、guidance queue 与控制 API
+        :brief 新增持久化 PaperRun controller、guidance queue 与控制 API
         - feat(controller): 新增 PaperRunController.v1, 持久化 checkpoints、guidance_queue、controls、internal_sessions 与 controller status
         - feat(paperrun): PaperRun snapshot 新增 controller_state, 创建 run 后同步 controller 状态
         - feat(guidance): recordPaperRunGuidance 同步写入 durable guidance queue, resume/retry 后标记 queued guidance 为 applied
@@ -315,24 +337,24 @@
         - fix(runtime): run.status_changed 事件改为符合 research contract 的 run.status.changed
         - test(paperrun): 新增 durable controller 测试并扩展 run-api control endpoint 覆盖
         - docs(readme): 版本更新为 0.3.2-dev, 记录 PaperRun controller 控制闭环
-    :src
-        - packages/opencode/src/paper/run-controller.ts - durable controller state, guidance queue, controls, and SSE serialization
-        - packages/opencode/src/paper/run.ts - controller_state projection, guidance queue wiring, controlPaperRun, and controller SSE
-        - packages/opencode/src/paper/index.ts - controller public exports
-        - packages/opencode/src/paper/research/runtime/run-store.ts - contract-safe status event name
-        - packages/opencode/src/server/routes/instance/httpapi/groups/paper.ts - /paper/runs/:runID/control schema and route
-        - packages/opencode/src/server/routes/instance/httpapi/handlers/paper.ts - control endpoint handler
-        - packages/opencode/test/paper/paperrun-controller.test.ts - controller behavior tests
-        - packages/opencode/test/paper/run-api.test.ts - API control endpoint coverage
-        - reports/paperrun-resume-guidance-controller.md - implementation report
-        - README.md - current behavior and version update
-        - CHANGELOG - 0.3.2-dev history entry
-    :verification
-        - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/paperrun-controller.test.ts test/paper/run-api.test.ts passed: 2 pass, 0 fail, 36 expects
-        - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+        :src
+            - packages/opencode/src/paper/run-controller.ts - durable controller state, guidance queue, controls, and SSE serialization
+            - packages/opencode/src/paper/run.ts - controller_state projection, guidance queue wiring, controlPaperRun, and controller SSE
+            - packages/opencode/src/paper/index.ts - controller public exports
+            - packages/opencode/src/paper/research/runtime/run-store.ts - contract-safe status event name
+            - packages/opencode/src/server/routes/instance/httpapi/groups/paper.ts - /paper/runs/:runID/control schema and route
+            - packages/opencode/src/server/routes/instance/httpapi/handlers/paper.ts - control endpoint handler
+            - packages/opencode/test/paper/paperrun-controller.test.ts - controller behavior tests
+            - packages/opencode/test/paper/run-api.test.ts - API control endpoint coverage
+            - reports/paperrun-resume-guidance-controller.md - implementation report
+            - README.md - current behavior and version update
+            - CHANGELOG - 0.3.2-dev history entry
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/paperrun-controller.test.ts test/paper/run-api.test.ts passed: 2 pass, 0 fail, 36 expects
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
 
     0.3.1-dev - 2026/05/10 (e78a169) [develop]
-    :brief PaperRun 创建默认驱动论文 stage engine
+        :brief PaperRun 创建默认驱动论文 stage engine
         - feat(paperrun): createPaperRun 默认调用 startPaperResearchRun, 创建 run 后直接推进 14-stage paper graph
         - feat(orchestrator): 新增默认具体 stage handlers, 记录 planning、source/data discovery、code-to-paper、experiment diagnostics、ClaimLedger、draft、profile check、verification 与 forced export bundle
         - feat(runtime): PaperRun stage snapshot 识别 paperorchestrator.stage.completed, API/TUI 创建路径能返回已推进的 stage 状态
@@ -340,40 +362,40 @@
         - fix(paperrun): 无效 code_paths 转换为 PaperRun blocked diagnostic, 不再让 /paper/runs 创建返回 HTTP 400
         - test(paperrun): 新增 paperrun-execution 测试, 禁止默认产品路径依赖 fixture handler injection
         - docs(readme): 版本更新为 0.3.1-dev, 记录 PaperRun 默认执行引擎
-    :src
-        - packages/opencode/src/paper/orchestrator.ts - default concrete paper stage handlers and run-scoped execution cache
-        - packages/opencode/src/paper/run.ts - createPaperRun to stage engine wiring and orchestrator completion status projection
-        - packages/opencode/src/paper/research/runtime/run-store.ts - normalized run_dir duplicate guard during index refresh
-        - packages/opencode/src/paper/research/storage.ts - duplicate run_id guard during global index rebuild
-        - packages/opencode/test/paper/paperrun-execution.test.ts - default PaperRun execution coverage
-        - reports/paperrun-execution-engine.md - implementation report
-        - README.md - current behavior and version update
-        - CHANGELOG - 0.3.1-dev history entry
-    :verification
-        - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/run-api.test.ts test/cli/tui/paper-workbench.test.ts test/paper/paperrun-execution.test.ts passed: 5 pass, 0 fail, 56 expects
-        - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+        :src
+            - packages/opencode/src/paper/orchestrator.ts - default concrete paper stage handlers and run-scoped execution cache
+            - packages/opencode/src/paper/run.ts - createPaperRun to stage engine wiring and orchestrator completion status projection
+            - packages/opencode/src/paper/research/runtime/run-store.ts - normalized run_dir duplicate guard during index refresh
+            - packages/opencode/src/paper/research/storage.ts - duplicate run_id guard during global index rebuild
+            - packages/opencode/test/paper/paperrun-execution.test.ts - default PaperRun execution coverage
+            - reports/paperrun-execution-engine.md - implementation report
+            - README.md - current behavior and version update
+            - CHANGELOG - 0.3.1-dev history entry
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/run-api.test.ts test/cli/tui/paper-workbench.test.ts test/paper/paperrun-execution.test.ts passed: 5 pass, 0 fail, 56 expects
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
 
     0.3.0-dev - 2026/05/10 (9fdb7dc) [develop]
-    :brief OpenCode hard fork 最终验收为 Paper Fucker 论文工作台
+        :brief OpenCode hard fork 最终验收为 Paper Fucker 论文工作台
         - test(acceptance): 新增 hard-fork acceptance 覆盖 paper core 迁移、PaperRun API/TUI、submission 预算档、多层多模型 Agent Tree、private-first data egress、forced draft 阻断原因
         - test(strict): strict acceptance 新增 hard-fork-paper-core、hard-fork-paperrun-api-tui、hard-fork-agent-tree、hard-fork-quality-egress、hard-fork-public-branding 检查
         - fix(strict): TUI smoke 改用仓库内 Paper Fucker CLI help, 不依赖全局 opencode 命令
         - docs(report): 新增 hard fork acceptance 报告, strict live acceptance 覆盖 live provider、Exa、Nature skill/profile、pandoc、LaTeX、DOCX、topic-to-paper 与 code-to-paper
         - docs(readme): 版本更新为 0.3.0-dev, 记录 PaperRun-first hard fork 验收状态
-    :src
-        - packages/opencode/test/paper/hard-fork-acceptance.test.ts - final hard fork product acceptance coverage
-        - packages/opencode/test/paper/strict-acceptance.test.ts - strict script required check list for hard fork checks
-        - scripts/strict-acceptance.ps1 - strict live acceptance hard fork checks and local CLI smoke
-        - reports/strict-live-acceptance.md - strict live acceptance report
-        - reports/hard-fork-acceptance.md - final hard fork acceptance report
-        - README.md - public hard fork status and version update
-        - CHANGELOG - 0.3.0-dev history entry
-    :verification
-        - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/strict-acceptance.test.ts test/paper/hard-fork-acceptance.test.ts passed: 6 pass, 0 fail, 53 expects
-        - scripts/strict-acceptance.ps1 passed with TaskFlow, version sync, tracked secret scan, opencode tests, preview tests, Python tests, typecheck, local Paper Fucker CLI smoke, DeepSeek live provider, Exa live search, Nature skill/profile, pandoc, LaTeX, DOCX, topic-to-paper, code-to-paper, hard fork checks, and Git Flow cleanup
+        :src
+            - packages/opencode/test/paper/hard-fork-acceptance.test.ts - final hard fork product acceptance coverage
+            - packages/opencode/test/paper/strict-acceptance.test.ts - strict script required check list for hard fork checks
+            - scripts/strict-acceptance.ps1 - strict live acceptance hard fork checks and local CLI smoke
+            - reports/strict-live-acceptance.md - strict live acceptance report
+            - reports/hard-fork-acceptance.md - final hard fork acceptance report
+            - README.md - public hard fork status and version update
+            - CHANGELOG - 0.3.0-dev history entry
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/strict-acceptance.test.ts test/paper/hard-fork-acceptance.test.ts passed: 6 pass, 0 fail, 53 expects
+            - scripts/strict-acceptance.ps1 passed with TaskFlow, version sync, tracked secret scan, opencode tests, preview tests, Python tests, typecheck, local Paper Fucker CLI smoke, DeepSeek live provider, Exa live search, Nature skill/profile, pandoc, LaTeX, DOCX, topic-to-paper, code-to-paper, hard fork checks, and Git Flow cleanup
 
     0.2.6-dev - 2026/05/09 (66db257) [develop]
-    :brief 清理 OpenCode 用户可见表面为 Paper Fucker 论文工作台
+        :brief 清理 OpenCode 用户可见表面为 Paper Fucker 论文工作台
         - feat(cli): 启动 ASCII logo 与默认 help/banner 改为 Paper Fucker wordmark
         - feat(cli): 默认命令注册移除 acp/agent/console/db/generate/github/import/pr/session/stats/upgrade/uninstall 等旧产品入口
         - feat(cli): run/tui/attach 的旧 resume/session/agent 参数改为隐藏内部兼容参数, 避免普通用户入口暴露 chat session 语义
@@ -385,41 +407,41 @@
         - test(authoring): Windows EBUSY 临时目录清理失败降级为 cleanup warning
         - test(cli): 新增 public-surface 测试覆盖品牌、默认命令注册、PaperRun help 文案和 TUI 首页提示
         - docs(readme): 版本更新为 0.2.6-dev, 记录 public surface cleanup
-    :src
-        - packages/opencode/src/cli/logo.ts - Paper Fucker wordmark and TUI logo glyph source
-        - packages/opencode/src/cli/ui.ts - CLI logo rendering source
-        - packages/opencode/src/index.ts - default command registry cleanup
-        - packages/opencode/src/cli/cmd/tui/thread.ts - default TUI public help cleanup
-        - packages/opencode/src/cli/cmd/tui/attach.ts - attach command public help cleanup
-        - packages/opencode/src/cli/cmd/run.ts - non-interactive PaperRun command help cleanup
-        - packages/opencode/src/cli/cmd/export.ts - PaperRun export command wording
-        - packages/opencode/src/cli/cmd/tui/feature-plugins/home/tips-view.tsx - Chinese paper workbench tips
-        - packages/opencode/src/control-plane/workspace.ts - local workspace target existence wait for Windows visibility
-        - packages/opencode/src/project/vcs.ts - refreshable VCS branch cache state
-        - packages/opencode/test/control-plane/workspace.test.ts - deterministic workspace sync startup tests
-        - packages/opencode/test/file/watcher.test.ts - Windows native watcher crash guard
-        - packages/opencode/test/paper/authoring.test.ts - Windows EBUSY cleanup guard
-        - packages/opencode/test/plugin/install-concurrency.test.ts - Windows full-suite concurrency timeout budget
-        - packages/opencode/test/plugin/meta.test.ts - metadata process concurrency timeout budget
-        - packages/opencode/test/preload.ts - Windows global teardown timeout budget
-        - packages/opencode/test/project/vcs.test.ts - Windows native watcher-dependent VCS skip guard
-        - packages/opencode/test/session/processor-effect.test.ts - processor timing budget
-        - packages/opencode/test/session/prompt.test.ts - prompt queue timing budget
-        - packages/opencode/test/cli/public-surface.test.ts - public surface regression tests
-        - reports/public-surface-cleanup.md - implementation report
-        - README.md - public surface and version update
-        - CHANGELOG - 0.2.6-dev history entry
-    :verification
-        - npx --yes bun@1.3.13 --cwd packages/opencode src/index.ts --help passed and showed Paper Fucker/PaperRun public help
-        - npx --yes bun@1.3.13 --cwd packages/opencode test passed: 2544 pass, 38 skip, 2 todo, 0 fail, 16 snapshots, 7462 expects
-        - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
-        - npx --yes bun@1.3.13 --cwd packages/preview test passed: 2 pass, 0 fail, 9 expects
-        - python -m unittest discover -s research-tools/tests passed: 4 tests OK
-        - scripts/check-readme-version.ps1 passed: README 0.2.6-dev matches CHANGELOG
-        - TaskFlow validate_task task-037-public-surface-cleanup passed with no warnings
+        :src
+            - packages/opencode/src/cli/logo.ts - Paper Fucker wordmark and TUI logo glyph source
+            - packages/opencode/src/cli/ui.ts - CLI logo rendering source
+            - packages/opencode/src/index.ts - default command registry cleanup
+            - packages/opencode/src/cli/cmd/tui/thread.ts - default TUI public help cleanup
+            - packages/opencode/src/cli/cmd/tui/attach.ts - attach command public help cleanup
+            - packages/opencode/src/cli/cmd/run.ts - non-interactive PaperRun command help cleanup
+            - packages/opencode/src/cli/cmd/export.ts - PaperRun export command wording
+            - packages/opencode/src/cli/cmd/tui/feature-plugins/home/tips-view.tsx - Chinese paper workbench tips
+            - packages/opencode/src/control-plane/workspace.ts - local workspace target existence wait for Windows visibility
+            - packages/opencode/src/project/vcs.ts - refreshable VCS branch cache state
+            - packages/opencode/test/control-plane/workspace.test.ts - deterministic workspace sync startup tests
+            - packages/opencode/test/file/watcher.test.ts - Windows native watcher crash guard
+            - packages/opencode/test/paper/authoring.test.ts - Windows EBUSY cleanup guard
+            - packages/opencode/test/plugin/install-concurrency.test.ts - Windows full-suite concurrency timeout budget
+            - packages/opencode/test/plugin/meta.test.ts - metadata process concurrency timeout budget
+            - packages/opencode/test/preload.ts - Windows global teardown timeout budget
+            - packages/opencode/test/project/vcs.test.ts - Windows native watcher-dependent VCS skip guard
+            - packages/opencode/test/session/processor-effect.test.ts - processor timing budget
+            - packages/opencode/test/session/prompt.test.ts - prompt queue timing budget
+            - packages/opencode/test/cli/public-surface.test.ts - public surface regression tests
+            - reports/public-surface-cleanup.md - implementation report
+            - README.md - public surface and version update
+            - CHANGELOG - 0.2.6-dev history entry
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode src/index.ts --help passed and showed Paper Fucker/PaperRun public help
+            - npx --yes bun@1.3.13 --cwd packages/opencode test passed: 2544 pass, 38 skip, 2 todo, 0 fail, 16 snapshots, 7462 expects
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+            - npx --yes bun@1.3.13 --cwd packages/preview test passed: 2 pass, 0 fail, 9 expects
+            - python -m unittest discover -s research-tools/tests passed: 4 tests OK
+            - scripts/check-readme-version.ps1 passed: README 0.2.6-dev matches CHANGELOG
+            - TaskFlow validate_task task-037-public-surface-cleanup passed with no warnings
 
     0.2.5-dev - 2026/05/09 (5786258) [develop]
-    :brief 新增多层多模型 Agent 编排与私有优先数据外传策略
+        :brief 新增多层多模型 Agent 编排与私有优先数据外传策略
         - feat(agents): 新增 AgentRoleRouter 与 PaperAgentTree, 支持 root/stage/worker/specialist/reviewer/verifier/citation 多层子 agent
         - feat(models): 父 agent、子 agent、specialist subagent 可解析不同 OpenCode provider/model, 并记录 model source 与 artifact provenance
         - feat(budget): 新增 quick/standard/deep/submission/custom 预算档, 约束最大深度、并发、live search、container reproduction 与成本上限
@@ -431,41 +453,41 @@
         - test(windows): 稳定 native watcher ready/non-git root、PTY output isolation、provider、MCP 与 research e2e 临时目录清理
         - docs(readme): 版本更新为 0.2.5-dev, 记录多模型 agent、预算档和数据外传边界
         - test(agents): 覆盖预算档、数据外传审计、多层子 agent、跨模型父子 agent 与 artifact provenance
-    :src
-        - packages/opencode/src/paper/agents.ts - multi-layer PaperAgentTree and AgentRoleRouter runtime
-        - packages/opencode/src/paper/budget.ts - budget tier policy
-        - packages/opencode/src/paper/data-egress.ts - private-first data egress evaluator
-        - packages/opencode/src/paper/run.ts - PaperRun Agent Tree budget policy projection
-        - packages/opencode/src/paper/index.ts - paper agent/budget/egress exports
-        - packages/opencode/src/config/config.ts - config gitignore parent directory creation
-        - packages/opencode/src/project/instance-context.ts - Windows-safe project containment checks
-        - packages/opencode/test/paper/agents.test.ts - agent orchestration tests
-        - packages/opencode/test/file/watcher.test.ts - Windows-stable native watcher readiness and non-git root events
-        - packages/opencode/test/fixture/fixture.ts - Windows temp cleanup retry budget
-        - packages/opencode/test/provider/provider.test.ts - provider plugin config timeout budget
-        - packages/opencode/test/pty/pty-output-isolation.test.ts - PTY output wait stabilization
-        - packages/opencode/test/research/e2e.test.ts - Windows research e2e temp cleanup retry budget
-        - packages/opencode/test/server/httpapi-bridge.test.ts - Paper HttpApi route allowlist
-        - packages/opencode/test/server/httpapi-mcp.test.ts - MCP HttpApi temp project cleanup ordering
-        - packages/opencode/test/shell/shell.test.ts - optional Git Bash path environment guard
-        - packages/opencode/test/tool/external-directory.test.ts - slash-drive Windows path normalization
-        - packages/opencode/test/tool/read.test.ts - slash-drive Windows read path normalization
-        - packages/opencode/test/tool/shell.test.ts - shell-specific timeout command
-        - packages/opencode/test/session/prompt.test.ts - Windows-stable concurrent prompt/shell timeouts
-        - packages/opencode/test/session/compaction.test.ts - Windows-stable retry abort timing
-        - reports/multimodel-agent-orchestration.md - implementation report
-        - README.md - agent orchestration documentation and version update
-        - CHANGELOG - 0.2.5-dev history entry
-    :verification
-        - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/agents.test.ts passed: 4 pass, 0 fail, 11 expects
-        - npx --yes bun@1.3.13 --cwd packages/opencode test passed: 2549 pass, 29 skip, 2 todo, 0 fail, 7379 expects
-        - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
-        - npx --yes bun@1.3.13 --cwd packages/preview test passed: 2 pass, 0 fail, 9 expects
-        - python -m unittest discover -s research-tools/tests passed: 4 tests OK
-        - scripts/check-readme-version.ps1 passed: README 0.2.5-dev matches CHANGELOG latest version
+        :src
+            - packages/opencode/src/paper/agents.ts - multi-layer PaperAgentTree and AgentRoleRouter runtime
+            - packages/opencode/src/paper/budget.ts - budget tier policy
+            - packages/opencode/src/paper/data-egress.ts - private-first data egress evaluator
+            - packages/opencode/src/paper/run.ts - PaperRun Agent Tree budget policy projection
+            - packages/opencode/src/paper/index.ts - paper agent/budget/egress exports
+            - packages/opencode/src/config/config.ts - config gitignore parent directory creation
+            - packages/opencode/src/project/instance-context.ts - Windows-safe project containment checks
+            - packages/opencode/test/paper/agents.test.ts - agent orchestration tests
+            - packages/opencode/test/file/watcher.test.ts - Windows-stable native watcher readiness and non-git root events
+            - packages/opencode/test/fixture/fixture.ts - Windows temp cleanup retry budget
+            - packages/opencode/test/provider/provider.test.ts - provider plugin config timeout budget
+            - packages/opencode/test/pty/pty-output-isolation.test.ts - PTY output wait stabilization
+            - packages/opencode/test/research/e2e.test.ts - Windows research e2e temp cleanup retry budget
+            - packages/opencode/test/server/httpapi-bridge.test.ts - Paper HttpApi route allowlist
+            - packages/opencode/test/server/httpapi-mcp.test.ts - MCP HttpApi temp project cleanup ordering
+            - packages/opencode/test/shell/shell.test.ts - optional Git Bash path environment guard
+            - packages/opencode/test/tool/external-directory.test.ts - slash-drive Windows path normalization
+            - packages/opencode/test/tool/read.test.ts - slash-drive Windows read path normalization
+            - packages/opencode/test/tool/shell.test.ts - shell-specific timeout command
+            - packages/opencode/test/session/prompt.test.ts - Windows-stable concurrent prompt/shell timeouts
+            - packages/opencode/test/session/compaction.test.ts - Windows-stable retry abort timing
+            - reports/multimodel-agent-orchestration.md - implementation report
+            - README.md - agent orchestration documentation and version update
+            - CHANGELOG - 0.2.5-dev history entry
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/agents.test.ts passed: 4 pass, 0 fail, 11 expects
+            - npx --yes bun@1.3.13 --cwd packages/opencode test passed: 2549 pass, 29 skip, 2 todo, 0 fail, 7379 expects
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+            - npx --yes bun@1.3.13 --cwd packages/preview test passed: 2 pass, 0 fail, 9 expects
+            - python -m unittest discover -s research-tools/tests passed: 4 tests OK
+            - scripts/check-readme-version.ps1 passed: README 0.2.5-dev matches CHANGELOG latest version
 
     0.2.4-dev - 2026/05/09 (dd2fd98) [develop]
-    :brief 新增 OpenAI-compatible Provider/Model 角色向导基础
+        :brief 新增 OpenAI-compatible Provider/Model 角色向导基础
         - feat(models): 新增 ProviderEndpointConfig 与 OpenAI-compatible /models discovery, 支持 base_url、api_key、compatibility、timeout diagnostics
         - feat(secrets): provider public config 写入 ~/.paper_fucker/providers, API key 仅写入 ~/.paper_fucker/local/provider-secrets.json
         - feat(roles): 新增 ModelRoleAssignment, 支持 default、per-role、subagent override 解析
@@ -473,90 +495,90 @@
         - feat(tui): 新增 Paper model roles dialog command, TUI 可查看当前角色模型解析
         - docs(readme): 版本更新为 0.2.4-dev, 记录 provider discovery 与 secret-safe model config
         - test(models): 覆盖 /models discovery、API key 不泄漏、secret-safe storage 与 role/subagent override
-    :src
-        - packages/opencode/src/paper/model-discovery.ts - OpenAI-compatible provider discovery and storage
-        - packages/opencode/src/paper/model-roles.ts - model role and subagent override resolver
-        - packages/opencode/src/paper/index.ts - paper model discovery/roles exports
-        - packages/opencode/src/server/routes/instance/httpapi/groups/paper.ts - provider discovery and model role assignment payloads
-        - packages/opencode/src/server/routes/instance/httpapi/handlers/paper.ts - provider discovery and model role assignment handlers
-        - packages/opencode/src/cli/cmd/tui/component/dialog-paper-model-roles.tsx - TUI model role dialog
-        - packages/opencode/src/cli/cmd/tui/app.tsx - paper model roles command registration
-        - packages/opencode/test/paper/model-discovery.test.ts - discovery/storage/role tests
-        - reports/provider-model-wizard.md - provider wizard implementation report
-        - README.md - provider/model wizard documentation and version update
-        - CHANGELOG - 0.2.4-dev history entry
-    :verification
-        - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/model-discovery.test.ts passed: 3 pass, 0 fail, 13 expects
-        - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+        :src
+            - packages/opencode/src/paper/model-discovery.ts - OpenAI-compatible provider discovery and storage
+            - packages/opencode/src/paper/model-roles.ts - model role and subagent override resolver
+            - packages/opencode/src/paper/index.ts - paper model discovery/roles exports
+            - packages/opencode/src/server/routes/instance/httpapi/groups/paper.ts - provider discovery and model role assignment payloads
+            - packages/opencode/src/server/routes/instance/httpapi/handlers/paper.ts - provider discovery and model role assignment handlers
+            - packages/opencode/src/cli/cmd/tui/component/dialog-paper-model-roles.tsx - TUI model role dialog
+            - packages/opencode/src/cli/cmd/tui/app.tsx - paper model roles command registration
+            - packages/opencode/test/paper/model-discovery.test.ts - discovery/storage/role tests
+            - reports/provider-model-wizard.md - provider wizard implementation report
+            - README.md - provider/model wizard documentation and version update
+            - CHANGELOG - 0.2.4-dev history entry
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/model-discovery.test.ts passed: 3 pass, 0 fail, 13 expects
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
 
     0.2.3-dev - 2026/05/09 (476b978) [develop]
-    :brief 将 TUI 默认入口改为中文 PaperRun 论文工作台
+        :brief 将 TUI 默认入口改为中文 PaperRun 论文工作台
         - feat(tui): 首页 prompt 解析主题、代码路径、论文材料、数据集、实验日志、profile、language、budget 为 PaperRunCreateRequest
         - feat(tui): Prompt 支持 onSubmitPrompt 拦截, 首页默认提交 /paper/runs 而不是创建普通 chat session
         - feat(tui): 新增 paper route 与 PaperRun dashboard, 展示 Stage Graph、Agent Tree、Source Ledger、Claim Ledger、实验复现、diagnostics、pause questions、Preview、Export
         - feat(plugin): TUI plugin route current metadata 支持 paper route, 便于插件识别当前 PaperRun
         - docs(readme): 版本更新为 0.2.3-dev, 记录中文 PaperRun workbench 默认流
         - test(tui): 覆盖 prompt parsing、/paper/runs submit 与中文 dashboard panel state
-    :src
-        - packages/opencode/src/cli/cmd/tui/routes/home.tsx - home prompt PaperRun submission flow
-        - packages/opencode/src/cli/cmd/tui/component/prompt/index.tsx - onSubmitPrompt interception before session chat
-        - packages/opencode/src/cli/cmd/tui/routes/paper/workbench.ts - PaperRun prompt parser, raw API submitter, dashboard state mapper
-        - packages/opencode/src/cli/cmd/tui/routes/paper/index.tsx - Chinese PaperRun dashboard route
-        - packages/opencode/src/cli/cmd/tui/context/route.tsx - PaperRoute type
-        - packages/opencode/src/cli/cmd/tui/app.tsx - paper route switch and terminal title
-        - packages/opencode/src/cli/cmd/tui/plugin/api.tsx - plugin current route metadata for paper runs
-        - packages/opencode/test/cli/tui/paper-workbench.test.ts - TUI PaperRun workbench tests
-        - reports/tui-paper-workbench.md - TUI workbench implementation report
-        - README.md - TUI workflow documentation and version update
-        - CHANGELOG - 0.2.3-dev history entry
-    :verification
-        - npx --yes bun@1.3.13 --cwd packages/opencode test test/cli/tui/paper-workbench.test.ts passed: 3 pass, 0 fail, 20 expects
-        - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+        :src
+            - packages/opencode/src/cli/cmd/tui/routes/home.tsx - home prompt PaperRun submission flow
+            - packages/opencode/src/cli/cmd/tui/component/prompt/index.tsx - onSubmitPrompt interception before session chat
+            - packages/opencode/src/cli/cmd/tui/routes/paper/workbench.ts - PaperRun prompt parser, raw API submitter, dashboard state mapper
+            - packages/opencode/src/cli/cmd/tui/routes/paper/index.tsx - Chinese PaperRun dashboard route
+            - packages/opencode/src/cli/cmd/tui/context/route.tsx - PaperRoute type
+            - packages/opencode/src/cli/cmd/tui/app.tsx - paper route switch and terminal title
+            - packages/opencode/src/cli/cmd/tui/plugin/api.tsx - plugin current route metadata for paper runs
+            - packages/opencode/test/cli/tui/paper-workbench.test.ts - TUI PaperRun workbench tests
+            - reports/tui-paper-workbench.md - TUI workbench implementation report
+            - README.md - TUI workflow documentation and version update
+            - CHANGELOG - 0.2.3-dev history entry
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/cli/tui/paper-workbench.test.ts passed: 3 pass, 0 fail, 20 expects
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
 
     0.2.2-dev - 2026/05/09 (8442f6a) [develop]
-    :brief 新增一等 PaperRun HTTP/SSE API
+        :brief 新增一等 PaperRun HTTP/SSE API
         - feat(paper): 新增 PaperRun.v1 状态投影, 汇总 intake、stage graph、Source Ledger、Claim Ledger、实验状态、Agent Tree、diagnostics、pause questions、preview/export state
         - feat(api): 新增 /paper/runs create/get、/paper/runs/:id/events SSE、guidance、preview、export、capabilities、doctor、providers/discover、model-roles
         - feat(provider): provider discovery 通过 OpenCode ModelsDev substrate 读取模型目录, 失败时保留 DeepSeek 默认样例
         - feat(export): final gate 未通过时阻断 final export, forced draft 明确返回 failed checks
         - docs(readme): 版本更新为 0.2.2-dev, 记录 PaperRun API 与 hard fork 内部路由边界
         - test(opencode): 覆盖 PaperRun API 生命周期、SSE、guidance、preview/export、capabilities、doctor、providers 和 model roles
-    :src
-        - packages/opencode/src/paper/run.ts - PaperRun public state projection and API helpers
-        - packages/opencode/src/server/routes/instance/httpapi/groups/paper.ts - PaperRun HttpApi schema group
-        - packages/opencode/src/server/routes/instance/httpapi/handlers/paper.ts - PaperRun HttpApi handlers
-        - packages/opencode/src/server/routes/instance/httpapi/api.ts - InstanceHttpApi PaperApi registration
-        - packages/opencode/src/server/routes/instance/httpapi/server.ts - paperHandlers route layer registration
-        - packages/opencode/test/paper/run-api.test.ts - PaperRun API integration test
-        - reports/paper-run-api.md - PaperRun API implementation report
-        - README.md - PaperRun API documentation and version update
-        - CHANGELOG - 0.2.2-dev history entry
-    :verification
-        - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/run-api.test.ts passed: 1 pass, 0 fail, 23 expects
-        - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+        :src
+            - packages/opencode/src/paper/run.ts - PaperRun public state projection and API helpers
+            - packages/opencode/src/server/routes/instance/httpapi/groups/paper.ts - PaperRun HttpApi schema group
+            - packages/opencode/src/server/routes/instance/httpapi/handlers/paper.ts - PaperRun HttpApi handlers
+            - packages/opencode/src/server/routes/instance/httpapi/api.ts - InstanceHttpApi PaperApi registration
+            - packages/opencode/src/server/routes/instance/httpapi/server.ts - paperHandlers route layer registration
+            - packages/opencode/test/paper/run-api.test.ts - PaperRun API integration test
+            - reports/paper-run-api.md - PaperRun API implementation report
+            - README.md - PaperRun API documentation and version update
+            - CHANGELOG - 0.2.2-dev history entry
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/run-api.test.ts passed: 1 pass, 0 fail, 23 expects
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
 
     0.2.1-dev - 2026/05/09 (3debb73) [develop]
-    :brief 将 paper_fucker 论文运行时迁入 OpenCode hard fork
+        :brief 将 paper_fucker 论文运行时迁入 OpenCode hard fork
         - refactor(opencode): 将 paper/research/init runtime 从 packages/server 迁入 packages/opencode/src/paper
         - refactor(workspace): 移除独立 @paper-fucker/server workspace, opencode 成为论文领域权威运行时
         - test(opencode): 迁移 paper/research/init 测试到 packages/opencode/test 并新增 core migration smoke
         - chore(lockfile): 刷新 bun.lock 并将 ajv 依赖归属 packages/opencode
         - docs(readme): 版本更新为 0.2.1-dev, 项目结构改为 opencode paper core
-    :src
-        - packages/opencode/src/paper - authoritative paper_fucker runtime inside OpenCode hard fork
-        - packages/opencode/test/paper/core-migration.test.ts - opencode paper runtime export smoke
-        - scripts/strict-acceptance.ps1 - strict acceptance commands now run opencode paper tests
-        - README.md - runtime boundary and version update
-        - CHANGELOG - 0.2.1-dev history entry
-    :verification
-        - npx --yes bun@1.3.13 --cwd packages/opencode test test/provider/transform.test.ts test/server/auth.test.ts test/server/httpapi-bridge.test.ts test/server/httpapi-raw-route-auth.test.ts test/installation/installation.test.ts test/paper/authoring.test.ts test/paper/core-migration.test.ts test/init/init.test.ts test/paper/intake.test.ts test/research/contracts.test.ts passed: 194 pass, 0 fail
-        - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/strict-acceptance.test.ts passed: 3 pass, 0 fail, 26 expects
-        - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
-        - npx --yes bun@1.3.13 --cwd packages/preview test passed: 2 pass, 0 fail
-        - PYTHONPATH=research-tools/src python -m unittest discover -s research-tools/tests passed: 4 tests
+        :src
+            - packages/opencode/src/paper - authoritative paper_fucker runtime inside OpenCode hard fork
+            - packages/opencode/test/paper/core-migration.test.ts - opencode paper runtime export smoke
+            - scripts/strict-acceptance.ps1 - strict acceptance commands now run opencode paper tests
+            - README.md - runtime boundary and version update
+            - CHANGELOG - 0.2.1-dev history entry
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/provider/transform.test.ts test/server/auth.test.ts test/server/httpapi-bridge.test.ts test/server/httpapi-raw-route-auth.test.ts test/installation/installation.test.ts test/paper/authoring.test.ts test/paper/core-migration.test.ts test/init/init.test.ts test/paper/intake.test.ts test/research/contracts.test.ts passed: 194 pass, 0 fail
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/strict-acceptance.test.ts passed: 3 pass, 0 fail, 26 expects
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+            - npx --yes bun@1.3.13 --cwd packages/preview test passed: 2 pass, 0 fail
+            - PYTHONPATH=research-tools/src python -m unittest discover -s research-tools/tests passed: 4 tests
 
     0.2.0-dev - 2026/05/09 (d57a117) [develop]
-    :brief 完整闭环论文系统 strict live acceptance
+        :brief 完整闭环论文系统 strict live acceptance
         - feat(acceptance): 新增 scripts/strict-acceptance.ps1, 覆盖 18 个严格验收检查
         - feat(live): DeepSeek live provider smoke 校验 /models 与 chat completion, 默认模型 deepseek-v4-pro
         - feat(mcp): Exa remote MCP initialize live smoke 校验 https://mcp.exa.ai/mcp 可达
@@ -566,164 +588,164 @@
         - feat(security): tracked-only secret scan 防止 API key 进入 Git
         - docs(readme): 版本更新为 0.2.0-dev, 记录 strict live acceptance 入口
         - test(paper): 覆盖 strict acceptance script inventory、strict live gating、tracked secret scan 和报告路径
-    :src
-        - scripts/strict-acceptance.ps1 - strict live acceptance script
-        - packages/server/test/paper/strict-acceptance.test.ts - strict acceptance script tests
-        - reports/strict-live-acceptance.md - strict live acceptance report
-        - README.md - strict acceptance documentation and version
-        - CHANGELOG - 0.2.0-dev history entry
-    :verification
-        - npx --yes bun@1.3.13 --cwd packages/server test test/paper/strict-acceptance.test.ts passed: 3 pass, 0 fail, 26 expects
-        - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\strict-acceptance.ps1 -FixtureMode passed
-        - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\strict-acceptance.ps1 passed
-        - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
-        - TaskFlow validate_task task-031-strict-live-acceptance passed
+        :src
+            - scripts/strict-acceptance.ps1 - strict live acceptance script
+            - packages/server/test/paper/strict-acceptance.test.ts - strict acceptance script tests
+            - reports/strict-live-acceptance.md - strict live acceptance report
+            - README.md - strict acceptance documentation and version
+            - CHANGELOG - 0.2.0-dev history entry
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/server test test/paper/strict-acceptance.test.ts passed: 3 pass, 0 fail, 26 expects
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\strict-acceptance.ps1 -FixtureMode passed
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\strict-acceptance.ps1 passed
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
+            - TaskFlow validate_task task-031-strict-live-acceptance passed
 
     0.1.27-dev - 2026/05/09 (5bc5d8b) [develop]
-    :brief 新增 run-bound 论文写作、预览、审稿与导出闭环
+        :brief 新增 run-bound 论文写作、预览、审稿与导出闭环
         - feat(authoring): 新增 PaperAuthoringLoop.v1, 串联 ClaimLedger-first draft、profile-aware revision、verification gate 和 export
         - feat(preview): 新增 run-bound PreviewSnapshot adapter, 绑定 Markdown/LaTeX/PDF/DOCX artifacts 与 claim/citation/reviewer/cost/agent annotations
         - feat(export): final gate 失败时阻断 final export 并自动输出带 failed checks 的 forced draft
         - feat(bundle): 新增 PaperSupplementaryBundle.v1 与 PaperAvailabilityBundle.v1, 记录 claim ledger、review report、export manifest、代码/数据/复现可用性
         - docs(readme): 版本更新为 0.1.27-dev, 记录 authoring loop 与 preview binding
         - test(paper): 覆盖 preview snapshot、final export、supplementary/availability bundle、forced draft marker
-    :src
-        - packages/server/src/paper/authoring.ts - paper authoring loop adapter
-        - packages/server/src/paper/preview.ts - run-bound preview snapshot adapter
-        - packages/server/src/paper/index.ts - authoring and preview exports
-        - packages/server/test/paper/authoring.test.ts - authoring loop tests
-        - packages/preview/src/protocol.ts - PreviewSnapshot protocol integration
-        - reports/paper-authoring-loop.md - authoring loop implementation report
-    :verification
-        - npx --yes bun@1.3.13 --cwd packages/server test test/paper/authoring.test.ts passed: 3 pass, 0 fail, 20 expects
-        - npx --yes bun@1.3.13 --cwd packages/preview test passed: 2 pass, 0 fail, 9 expects
-        - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
-        - npx --yes bun@1.3.13 run typecheck passed
-        - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
-        - TaskFlow validate_task task-030-paper-authoring-loop passed
+        :src
+            - packages/server/src/paper/authoring.ts - paper authoring loop adapter
+            - packages/server/src/paper/preview.ts - run-bound preview snapshot adapter
+            - packages/server/src/paper/index.ts - authoring and preview exports
+            - packages/server/test/paper/authoring.test.ts - authoring loop tests
+            - packages/preview/src/protocol.ts - PreviewSnapshot protocol integration
+            - reports/paper-authoring-loop.md - authoring loop implementation report
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/server test test/paper/authoring.test.ts passed: 3 pass, 0 fail, 20 expects
+            - npx --yes bun@1.3.13 --cwd packages/preview test passed: 2 pass, 0 fail, 9 expects
+            - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
+            - npx --yes bun@1.3.13 run typecheck passed
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
+            - TaskFlow validate_task task-030-paper-authoring-loop passed
 
     0.1.26-dev - 2026/05/09 (8e82c90) [develop]
-    :brief 将 TUI 首屏改为中文论文工作台
+        :brief 将 TUI 首屏改为中文论文工作台
         - feat(tui): 新增 TuiPaperWorkbenchState.v1 与 TuiResearchRunState.v1 renderer-independent 状态 adapter
         - feat(tui): run view state 映射 stage graph、事件流、Source Ledger、Claim Ledger、实验状态、模型/工具/成本诊断和 controls
         - feat(opencode-tui): 首页 placeholder 改为中文论文主题/代码路径/材料/数据/实验日志输入
         - feat(opencode-tui): 首页增加 paper_fucker 论文工作台首屏信号, 保留 plugin slots 和 prompt 行为
         - docs(readme): 版本更新为 0.1.26-dev, 记录 TUI paper workbench 状态与首页行为
         - test(paper): 覆盖中文 home state、stage label/status mapping、pause question、panels 和 controls
-    :src
-        - packages/server/src/paper/tui-state.ts - paper TUI state adapter
-        - packages/server/src/paper/index.ts - TUI state export
-        - packages/server/test/paper/tui-state.test.ts - TUI state tests
-        - packages/opencode/src/cli/cmd/tui/routes/home.tsx - Chinese paper workbench home
-        - reports/tui-paper-workbench.md - TUI workbench implementation report
-    :verification
-        - npx --yes bun@1.3.13 --cwd packages/server test test/paper/tui-state.test.ts passed: 2 pass, 0 fail, 8 expects
-        - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
-        - npx --yes bun@1.3.13 run typecheck passed
-        - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
-        - TaskFlow validate_task task-029-tui-paper-workbench passed
+        :src
+            - packages/server/src/paper/tui-state.ts - paper TUI state adapter
+            - packages/server/src/paper/index.ts - TUI state export
+            - packages/server/test/paper/tui-state.test.ts - TUI state tests
+            - packages/opencode/src/cli/cmd/tui/routes/home.tsx - Chinese paper workbench home
+            - reports/tui-paper-workbench.md - TUI workbench implementation report
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/server test test/paper/tui-state.test.ts passed: 2 pass, 0 fail, 8 expects
+            - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
+            - npx --yes bun@1.3.13 run typecheck passed
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
+            - TaskFlow validate_task task-029-tui-paper-workbench passed
 
     0.1.25-dev - 2026/05/09 (f4fa60d) [develop]
-    :brief 新增 MCP/Skill 辅助实验与复现 Claim Policy
+        :brief 新增 MCP/Skill 辅助实验与复现 Claim Policy
         - feat(experiment): 新增 experiment-loop paper domain helpers, 解析日志 metric 并解析 direction/unit
         - feat(capability): 解析 Jupyter notebook skill、OpenCode shell、Python experiment-log/dataset probe 能力
         - feat(policy): classifyExperimentClaimEligibility 要求 final claim 必须来自 reproduced result
         - feat(policy): 未复现结果默认 blocked, 仅显式 exploratory 时允许以 exploratory 标签引用且不能作为 final claim
         - docs(readme): 版本更新为 0.1.25-dev, 记录 reproduction-aware experiment claim policy
         - test(paper): 覆盖 capability resolution、log metric parsing、reproduced claimable 和 exploratory-only semantics
-    :src
-        - packages/server/src/paper/experiment-loop.ts - experiment MCP/skill helpers and claim policy
-        - packages/server/src/paper/index.ts - experiment-loop export
-        - packages/server/test/paper/experiment-loop.test.ts - experiment MCP loop tests
-        - reports/experiment-mcp-loop.md - experiment loop implementation report
-    :verification
-        - npx --yes bun@1.3.13 --cwd packages/server test test/paper/experiment-loop.test.ts passed: 4 pass, 0 fail, 5 expects
-        - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
-        - PYTHONPATH=research-tools/src python -m unittest discover -s research-tools/tests passed: 4 tests OK
-        - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
-        - TaskFlow validate_task task-028-experiment-mcp-loop passed
+        :src
+            - packages/server/src/paper/experiment-loop.ts - experiment MCP/skill helpers and claim policy
+            - packages/server/src/paper/index.ts - experiment-loop export
+            - packages/server/test/paper/experiment-loop.test.ts - experiment MCP loop tests
+            - reports/experiment-mcp-loop.md - experiment loop implementation report
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/server test test/paper/experiment-loop.test.ts passed: 4 pass, 0 fail, 5 expects
+            - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
+            - PYTHONPATH=research-tools/src python -m unittest discover -s research-tools/tests passed: 4 tests OK
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
+            - TaskFlow validate_task task-028-experiment-mcp-loop passed
 
     0.1.24-dev - 2026/05/09 (6842b6d) [develop]
-    :brief 新增 code-to-paper 源码证据 Artifact
+        :brief 新增 code-to-paper 源码证据 Artifact
         - feat(code): 新增 CodebaseMap.v1, MethodExtraction.v1, ExperimentSurface.v1, ReproductionPlan.v1 artifacts
         - feat(grounding): 方法、类、测试入口和复现命令全部绑定 source_range(path/start_line/end_line)
         - feat(runtime): recordCodeToPaperArtifacts 顺序写入四类 artifact 并追加 codetopaper.artifacts.created event
         - fix(runtime): 避免并发写 artifact 时多个 writeResearchArtifact 同时更新 run.json 导致 Windows rename 竞争
         - docs(readme): 版本更新为 0.1.24-dev, 记录 code-to-paper source-range grounded artifacts
         - test(paper): 覆盖代码映射、方法抽取、实验表面、复现计划与 run artifact recording
-    :src
-        - packages/server/src/paper/code-to-paper.ts - code-to-paper static analysis and recording
-        - packages/server/src/paper/index.ts - code-to-paper exports
-        - packages/server/test/paper/code-to-paper.test.ts - code-to-paper tests
-        - reports/code-to-paper.md - code-to-paper implementation report
-    :verification
-        - npx --yes bun@1.3.13 --cwd packages/server test test/paper/code-to-paper.test.ts passed: 2 pass, 0 fail, 7 expects
-        - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
-        - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
-        - TaskFlow validate_task task-027-code-to-paper passed
+        :src
+            - packages/server/src/paper/code-to-paper.ts - code-to-paper static analysis and recording
+            - packages/server/src/paper/index.ts - code-to-paper exports
+            - packages/server/test/paper/code-to-paper.test.ts - code-to-paper tests
+            - reports/code-to-paper.md - code-to-paper implementation report
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/server test test/paper/code-to-paper.test.ts passed: 2 pass, 0 fail, 7 expects
+            - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
+            - TaskFlow validate_task task-027-code-to-paper passed
 
     0.1.23-dev - 2026/05/09 (ec78dfe) [develop]
-    :brief 新增真实论文 Orchestrator 图并移除 stub completion
+        :brief 新增真实论文 Orchestrator 图并移除 stub completion
         - feat(paper): 新增 ResearchRunGraph.v1 / ResearchRunController.v1 paper orchestrator, 覆盖 intake 到 export 14 个 stage
         - feat(orchestrator): 默认 intake 记录真实 ResearchBrief.v1, 后续缺少 handler 或 capability 时写入 BlockedDiagnostic.v1
         - fix(research/orchestrator): 移除 legacy stub handler 成功路径, 缺少 stage handler 时按 stage_failure 暂停
         - test(orchestrator): 覆盖 complete graph、no-stub blocked diagnostic、full handler graph execution 与 legacy handler 显式化
         - docs(readme): 版本更新为 0.1.23-dev, 记录 no fake success orchestrator 行为
-    :src
-        - packages/server/src/paper/orchestrator.ts - paper stage graph and runner
-        - packages/server/src/paper/index.ts - paper orchestrator export
-        - packages/server/src/research/orchestrator/index.ts - no-stub fallback behavior
-        - packages/server/src/research/orchestrator/policy.ts - stage_failure pause signal
-        - packages/server/test/paper/orchestrator.test.ts - paper no-stub orchestrator tests
-        - packages/server/test/research/orchestrator.test.ts - explicit legacy orchestrator handlers
-        - reports/real-orchestrator.md - implementation report
-    :verification
-        - npx --yes bun@1.3.13 --cwd packages/server test test/research/orchestrator.test.ts test/paper/orchestrator.test.ts passed: 5 pass, 0 fail, 21 expects
-        - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
-        - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
-        - TaskFlow validate_task task-026-real-orchestrator passed
+        :src
+            - packages/server/src/paper/orchestrator.ts - paper stage graph and runner
+            - packages/server/src/paper/index.ts - paper orchestrator export
+            - packages/server/src/research/orchestrator/index.ts - no-stub fallback behavior
+            - packages/server/src/research/orchestrator/policy.ts - stage_failure pause signal
+            - packages/server/test/paper/orchestrator.test.ts - paper no-stub orchestrator tests
+            - packages/server/test/research/orchestrator.test.ts - explicit legacy orchestrator handlers
+            - reports/real-orchestrator.md - implementation report
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/server test test/research/orchestrator.test.ts test/paper/orchestrator.test.ts passed: 5 pass, 0 fail, 21 expects
+            - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
+            - TaskFlow validate_task task-026-real-orchestrator passed
 
     0.1.22-dev - 2026/05/09 (4b3c5e7) [develop]
-    :brief 新增多输入 ResearchIntake 与 ResearchBrief 记录
+        :brief 新增多输入 ResearchIntake 与 ResearchBrief 记录
         - feat(paper): 新增 ResearchIntakeRequest 与 ResearchBrief.v1, 支持 topic/code/data/materials workflows
         - feat(intake): 默认中文 zh-CN, 默认 generic-preprint, 保留 target_profile 和 per-role model override
         - feat(runtime): recordResearchIntake 写入 intake/research-brief.json artifact 并追加 intake.brief.created event
         - feat(risk): intake 输出 needed_evidence、pause_conditions 与 material/dataset/reproduction/code-grounding 风险
         - docs(readme): 版本更新为 0.1.22-dev, 记录 multi-input intake 入口和 ResearchBrief.v1 artifact
         - test(paper): 覆盖 topic-only、code-grounded、mixed-materials 和 runtime artifact/event recording
-    :src
-        - packages/server/src/paper/intake.ts - research intake normalizer and runtime recorder
-        - packages/server/src/paper/index.ts - paper intake export
-        - packages/server/test/paper/intake.test.ts - research intake tests
-        - reports/research-intake.md - intake implementation report
-    :verification
-        - npx --yes bun@1.3.13 --cwd packages/server test test/paper/intake.test.ts passed: 4 pass, 0 fail, 20 expects
-        - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
-        - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
-        - TaskFlow validate_task task-025-research-intake passed
+        :src
+            - packages/server/src/paper/intake.ts - research intake normalizer and runtime recorder
+            - packages/server/src/paper/index.ts - paper intake export
+            - packages/server/test/paper/intake.test.ts - research intake tests
+            - reports/research-intake.md - intake implementation report
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/server test test/paper/intake.test.ts passed: 4 pass, 0 fail, 20 expects
+            - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
+            - TaskFlow validate_task task-025-research-intake passed
 
     0.1.21-dev - 2026/05/09 (4e7754e) [develop]
-    :brief 新增论文投稿 Profile 系统与 nature-paper skill
+        :brief 新增论文投稿 Profile 系统与 nature-paper skill
         - feat(paper): 新增 PaperProfileRegistry, PaperProfile.v1 与 PaperProfileCheck.v1 契约
         - feat(profiles): 内置 nature-paper/ieee-paper/acm-paper/springer-paper/generic-preprint profile ids
         - feat(nature): 新增 first-party .paper_fucker/skills/nature-paper/SKILL.md, 要求运行时刷新 Nature 官方作者指南
         - feat(gate): profile check 输出 blockers/warnings, 可接入真实性 gate 与导出 gate
         - docs(readme): 版本更新为 0.1.21-dev, 记录 profile registry 与 Nature skill 安装路径
         - test(paper): 覆盖内置 profile ids、Nature runtime refresh policy、profile check shape 与 skill 文件
-    :src
-        - packages/server/src/paper/profiles.ts - paper profile registry and built-in profiles
-        - packages/server/src/paper/index.ts - paper profile exports
-        - packages/server/test/paper/profiles.test.ts - paper profile and Nature skill tests
-        - .paper_fucker/skills/nature-paper/SKILL.md - first-party Nature paper skill
-        - reports/paper-profile-skills.md - paper profile implementation report
-    :verification
-        - npx --yes bun@1.3.13 --cwd packages/server test test/paper/profiles.test.ts passed: 4 pass, 0 fail, 12 expects
-        - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
-        - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
-        - TaskFlow validate_task task-024-paper-profile-skills passed
+        :src
+            - packages/server/src/paper/profiles.ts - paper profile registry and built-in profiles
+            - packages/server/src/paper/index.ts - paper profile exports
+            - packages/server/test/paper/profiles.test.ts - paper profile and Nature skill tests
+            - .paper_fucker/skills/nature-paper/SKILL.md - first-party Nature paper skill
+            - reports/paper-profile-skills.md - paper profile implementation report
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/server test test/paper/profiles.test.ts passed: 4 pass, 0 fail, 12 expects
+            - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
+            - TaskFlow validate_task task-024-paper-profile-skills passed
 
     0.1.20-dev - 2026/05/09 (d0f2a9a) [develop]
-    :brief 新增 MCP/Skill/Tool/Python 论文能力总线
+        :brief 新增 MCP/Skill/Tool/Python 论文能力总线
         - feat(paper): 新增 ResearchCapabilityRegistry, 支持能力注册、重复注册诊断、stage/type 过滤与 trace metadata
         - feat(mcp): 默认注册 Exa remote MCP 为 literature/data/verification 能力
         - feat(opencode): 默认注册 read/grep/glob/task/shell 等 OpenCode substrate 能力
@@ -731,95 +753,95 @@
         - feat(python): 默认注册 experiment log parse 与 dataset metadata probe Python research tools
         - docs(readme): 版本更新为 0.1.20-dev, 明确 orchestrator 通过 ResearchCapabilityRegistry 调度 MCP/skills/tools
         - test(paper): 覆盖 stage surface、默认能力、stage/type filtering、重复注册和 trace metadata
-    :src
-        - packages/server/src/paper/capabilities.ts - research capability registry and defaults
-        - packages/server/src/paper/index.ts - paper capability registry export
-        - packages/server/test/paper/capabilities.test.ts - capability registry tests
-        - reports/research-skill-mcp-bus.md - capability bus implementation report
-    :verification
-        - npx --yes bun@1.3.13 --cwd packages/server test test/paper/capabilities.test.ts passed: 4 pass, 0 fail, 11 expects
-        - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
-        - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
-        - TaskFlow validate_task task-023-research-skill-mcp-bus passed
+        :src
+            - packages/server/src/paper/capabilities.ts - research capability registry and defaults
+            - packages/server/src/paper/index.ts - paper capability registry export
+            - packages/server/test/paper/capabilities.test.ts - capability registry tests
+            - reports/research-skill-mcp-bus.md - capability bus implementation report
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/server test test/paper/capabilities.test.ts passed: 4 pass, 0 fail, 11 expects
+            - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
+            - TaskFlow validate_task task-023-research-skill-mcp-bus passed
 
     0.1.19-dev - 2026/05/09 (60227c0) [develop]
-    :brief 新增 OpenCode provider-agnostic 模型角色路由
+        :brief 新增 OpenCode provider-agnostic 模型角色路由
         - feat(paper): 新增 ModelRoleRouter, 支持 planner/literature/code/experiment/writer/reviewer/citation/summarizer 角色
         - feat(models): 支持任意 OpenCode provider/model id 与 per-role override
         - feat(init): 初始化 config 写入 model_roles.strategy=opencode_provider_agnostic 与默认 deepseek/deepseek-v4-pro 样例
         - docs(readme): 明确 DeepSeek 只是默认样例, 模型选择按 OpenCode provider/model 角色路由
         - test(paper): 覆盖角色列表、默认样例、跨 provider override 与无效模型 id 诊断
-    :src
-        - packages/server/src/paper/model-router.ts - provider-agnostic model role router
-        - packages/server/test/paper/model-router.test.ts - model role router tests
-        - packages/server/src/init/config.ts - persisted model_roles config
-        - packages/server/src/init/wizard.ts - init wizard model role integration
-        - packages/server/test/init/init.test.ts - init model role config assertion
-    :verification
-        - npx --yes bun@1.3.13 --cwd packages/server test test/paper/model-router.test.ts passed: 4 pass, 0 fail, 9 expects
-        - npx --yes bun@1.3.13 --cwd packages/server test test/init/init.test.ts passed: 2 pass, 0 fail, 17 expects
-        - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
-        - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
-        - TaskFlow validate_task task-022-model-router passed
+        :src
+            - packages/server/src/paper/model-router.ts - provider-agnostic model role router
+            - packages/server/test/paper/model-router.test.ts - model role router tests
+            - packages/server/src/init/config.ts - persisted model_roles config
+            - packages/server/src/init/wizard.ts - init wizard model role integration
+            - packages/server/test/init/init.test.ts - init model role config assertion
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/server test test/paper/model-router.test.ts passed: 4 pass, 0 fail, 9 expects
+            - npx --yes bun@1.3.13 --cwd packages/server test test/init/init.test.ts passed: 2 pass, 0 fail, 17 expects
+            - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
+            - TaskFlow validate_task task-022-model-router passed
 
     0.1.18-dev - 2026/05/09 (b8fabeb) [develop]
-    :brief 重定界 OpenCode 底座与 paper_fucker 论文领域内核
+        :brief 重定界 OpenCode 底座与 paper_fucker 论文领域内核
         - feat(paper): 新增 packages/server/src/paper 架构入口, 固化 OpenCode substrate / research runtime / paper domain 三层边界
         - feat(paper): 声明 topic/code/data/experiment-log/materials-to-paper 输入模式
         - docs(readme): 改写产品定位, 明确 DeepSeek 只是默认样例, 所有 OpenCode provider/model 都应可接入
         - docs(readme): 明确 MCP 和 skills 是论文能力总线, 不是附属功能
         - chore(taskflow): 新增 task-021 到 task-031 完整闭环论文系统任务链
-    :src
-        - packages/server/src/paper/architecture.ts - paper system architecture metadata
-        - packages/server/src/paper/index.ts - paper domain entrypoint
-        - packages/server/test/paper/architecture.test.ts - architecture boundary tests
-        - reports/architecture-reframe.md - architecture reframe report
-        - README.md - product positioning and task chain update
-    :verification
-        - npx --yes bun@1.3.13 --cwd packages/server test test/paper/architecture.test.ts passed: 3 pass, 0 fail, 6 expects
-        - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
-        - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
-        - TaskFlow validate_task task-021-architecture-reframe passed
+        :src
+            - packages/server/src/paper/architecture.ts - paper system architecture metadata
+            - packages/server/src/paper/index.ts - paper domain entrypoint
+            - packages/server/test/paper/architecture.test.ts - architecture boundary tests
+            - reports/architecture-reframe.md - architecture reframe report
+            - README.md - product positioning and task chain update
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/server test test/paper/architecture.test.ts passed: 3 pass, 0 fail, 6 expects
+            - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
+            - TaskFlow validate_task task-021-architecture-reframe passed
 
     0.1.17-dev - 2026/05/09 (e214ff4) [develop]
-    :brief 补齐端到端研究流水线验收
+        :brief 补齐端到端研究流水线验收
         - test(e2e): 新增 fixture topic acceptance, 串联 template/literature-data/experiment/writing/verification/export
         - test(e2e): 验证 final gate passed 后 final export 产生 markdown/latex/pdf/docx facts/artifacts
         - test(e2e): 验证 final gate blocked 时 final export 被阻断且 forced draft 明确标记 failed checks
         - docs(readme): 版本更新为 0.1.17-dev 并记录端到端验收状态
         - chore(taskflow): 新增并完成 task-020-end-to-end-acceptance
-    :src
-        - packages/server/test/research/e2e.test.ts - end-to-end pipeline acceptance test
-        - reports/end-to-end-acceptance.md - end-to-end acceptance report
-        - README.md - version and current status update
-        - CHANGELOG - 0.1.17-dev history entry
-    :verification
-        - npx --yes bun@1.3.13 --cwd packages/server test test/research/e2e.test.ts passed: 2 pass, 0 fail, 18 expects
-        - npx --yes bun@1.3.13 --cwd packages/preview test passed
-        - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
-        - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
-        - TaskFlow validate_task task-020-end-to-end-acceptance passed
+        :src
+            - packages/server/test/research/e2e.test.ts - end-to-end pipeline acceptance test
+            - reports/end-to-end-acceptance.md - end-to-end acceptance report
+            - README.md - version and current status update
+            - CHANGELOG - 0.1.17-dev history entry
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/server test test/research/e2e.test.ts passed: 2 pass, 0 fail, 18 expects
+            - npx --yes bun@1.3.13 --cwd packages/preview test passed
+            - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
+            - TaskFlow validate_task task-020-end-to-end-acceptance passed
 
     0.1.16-dev - 2026/05/09 (2f644e4) [develop]
-    :brief 整理项目结构与 first-party 边界
+        :brief 整理项目结构与 first-party 边界
         - chore(structure): 将根目录 21 个 OpenCode 上游本地化 README 移入 upstream/opencode-readmes/
         - docs(upstream): 新增 upstream/opencode-readmes/README.md, 标记这些文件仅作上游 provenance 和翻译参考
         - docs(research): 新增 packages/server/src/research/README.md, 固化 first-party research runtime 模块边界
         - docs(readme): 版本更新为 0.1.16-dev, 说明 root paper_fucker-first 与 upstream localized README archive
         - chore(taskflow): 新增并完成 task-019-project-structure-cleanup
-    :src
-        - upstream/opencode-readmes/ - moved upstream localized README archive
-        - upstream/opencode-readmes/README.md - upstream localized README archive note
-        - packages/server/src/research/README.md - first-party research runtime boundary guide
-        - README.md - project structure update
-        - reports/project-structure-cleanup.md - cleanup verification report
-    :verification
-        - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
-        - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
-        - root README.*.md structure check passed: only README.md remains at root
+        :src
+            - upstream/opencode-readmes/ - moved upstream localized README archive
+            - upstream/opencode-readmes/README.md - upstream localized README archive note
+            - packages/server/src/research/README.md - first-party research runtime boundary guide
+            - README.md - project structure update
+            - reports/project-structure-cleanup.md - cleanup verification report
+        :verification
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
+            - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
+            - root README.*.md structure check passed: only README.md remains at root
 
     0.1.15-dev - 2026/05/09 (6e4994e) [develop]
-    :brief 实现 final 与 forced-draft export bundle
+        :brief 实现 final 与 forced-draft export bundle
         - feat(export): 新增 ExportBundle.v1, ExportFile, ExportManifest, ExportRenderer 和 verification summary schema
         - feat(markdown): Markdown export 支持 forced draft banner, 明确标记非 final 输出和 failed checks
         - feat(latex): LaTeX export 支持 renderer injection, 缺省使用内部 fallback 并记录 diagnostics
@@ -829,18 +851,18 @@
         - test(export): 覆盖 final success、gate failure blocking final、forced draft、missing external tool diagnostics、manifest completeness
         - docs(readme): 版本更新为 0.1.15-dev 并记录 export 模块边界
         - chore(taskflow): 完成 task-015-export-bundles 并记录 verification report
-    :src
-        - packages/server/src/research/export/schemas.ts - ExportBundle and manifest schemas
-        - packages/server/src/research/export/bundle.ts - bundle file rendering and forced draft Markdown banner
-        - packages/server/src/research/export/recording.ts - final/forced policy and runtime export recording
-        - packages/server/test/research/export.test.ts - export bundle tests
-        - reports/export-bundles.md - export verification report
-    :verification
-        - npx --yes bun@1.3.13 --cwd packages/server test test/research/export.test.ts passed: 5 pass, 0 fail, 14 expects
-        - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
+        :src
+            - packages/server/src/research/export/schemas.ts - ExportBundle and manifest schemas
+            - packages/server/src/research/export/bundle.ts - bundle file rendering and forced draft Markdown banner
+            - packages/server/src/research/export/recording.ts - final/forced policy and runtime export recording
+            - packages/server/test/research/export.test.ts - export bundle tests
+            - reports/export-bundles.md - export verification report
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/server test test/research/export.test.ts passed: 5 pass, 0 fail, 14 expects
+            - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
 
     0.1.14-dev - 2026/05/09 (09a4874) [develop]
-    :brief 实现最终真实性 verification gate
+        :brief 实现最终真实性 verification gate
         - feat(verification): 新增 VerificationFinding, BlockingReport.v1, ReviewReport.v1, ModelReviewInput, VerificationGateResult schema
         - feat(references): 新增 checkReferences, citation source 缺失时阻断 final export
         - feat(claims): 新增 checkClaimSupport, unsupported/needs_evidence claim 阻断 final export
@@ -851,20 +873,20 @@
         - test(verification): 覆盖 invalid reference、unsupported claim、dataset license failure、reproduction failure、reviewer warning、successful final gate
         - docs(readme): 版本更新为 0.1.14-dev 并记录 verification 模块边界
         - chore(taskflow): 完成 task-014-verification-gate 并记录 verification report
-    :src
-        - packages/server/src/research/verification/schemas.ts - BlockingReport and ReviewReport schemas
-        - packages/server/src/research/verification/checks.ts - reference, claim, data, and experiment checks
-        - packages/server/src/research/verification/review.ts - multi-model review aggregation
-        - packages/server/src/research/verification/gate.ts - final gate evaluation
-        - packages/server/src/research/verification/recording.ts - final gate runtime recording
-        - packages/server/test/research/verification.test.ts - verification gate tests
-        - reports/verification-gate.md - verification gate report
-    :verification
-        - npx --yes bun@1.3.13 --cwd packages/server test test/research/verification.test.ts passed: 6 pass, 0 fail, 11 expects
-        - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
+        :src
+            - packages/server/src/research/verification/schemas.ts - BlockingReport and ReviewReport schemas
+            - packages/server/src/research/verification/checks.ts - reference, claim, data, and experiment checks
+            - packages/server/src/research/verification/review.ts - multi-model review aggregation
+            - packages/server/src/research/verification/gate.ts - final gate evaluation
+            - packages/server/src/research/verification/recording.ts - final gate runtime recording
+            - packages/server/test/research/verification.test.ts - verification gate tests
+            - reports/verification-gate.md - verification gate report
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/server test test/research/verification.test.ts passed: 6 pass, 0 fail, 11 expects
+            - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
 
     0.1.13-dev - 2026/05/09 (2b5a38f) [develop]
-    :brief 实现 ClaimLedger-first Markdown 写作
+        :brief 实现 ClaimLedger-first Markdown 写作
         - feat(writing): 新增 ClaimLedger.v1, DraftPaper.v1, CitationRef, DraftSection, CheckpointGuidance, DraftRevision 领域 payload schema
         - feat(claims): 新增 composeClaimLedger, 在写作前生成 claim status、risk level、required action 和 citation binding
         - feat(markdown): 新增 composeDraftPaper 与 streamMarkdownDraft, 输出 Markdown chunks/source ranges/unsupported claim annotations
@@ -874,20 +896,20 @@
         - test(writing): 覆盖 claim creation、citation binding、streamed preview、unsupported annotation、guidance application、rollback
         - docs(readme): 版本更新为 0.1.13-dev 并记录 writing 模块边界
         - chore(taskflow): 完成 task-013-writing-claim-ledger 并记录 verification report
-    :src
-        - packages/server/src/research/writing/schemas.ts - ClaimLedger/DraftPaper/Citation/DraftRevision schemas
-        - packages/server/src/research/writing/ledger.ts - claim-first ledger composer
-        - packages/server/src/research/writing/draft.ts - Markdown draft composer, stream, and guidance application
-        - packages/server/src/research/writing/revision.ts - diff and rollback helpers
-        - packages/server/src/research/writing/recording.ts - claim/draft fact and artifact recording
-        - packages/server/test/research/writing.test.ts - writing pipeline tests
-        - reports/writing-claim-ledger.md - writing verification report
-    :verification
-        - npx --yes bun@1.3.13 --cwd packages/server test test/research/writing.test.ts passed: 5 pass, 0 fail, 16 expects
-        - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
+        :src
+            - packages/server/src/research/writing/schemas.ts - ClaimLedger/DraftPaper/Citation/DraftRevision schemas
+            - packages/server/src/research/writing/ledger.ts - claim-first ledger composer
+            - packages/server/src/research/writing/draft.ts - Markdown draft composer, stream, and guidance application
+            - packages/server/src/research/writing/revision.ts - diff and rollback helpers
+            - packages/server/src/research/writing/recording.ts - claim/draft fact and artifact recording
+            - packages/server/test/research/writing.test.ts - writing pipeline tests
+            - reports/writing-claim-ledger.md - writing verification report
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/server test test/research/writing.test.ts passed: 5 pass, 0 fail, 16 expects
+            - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
 
     0.1.12-dev - 2026/05/09 (d7bf542) [develop]
-    :brief 实现实验循环与容器复现门禁
+        :brief 实现实验循环与容器复现门禁
         - feat(experiments): 新增 ExperimentPlan.v1, ExperimentRun.v1, ResultReport.v1 领域 payload schema
         - feat(planning): 新增 planExperiments, 默认规划 proposed method、3 个 baseline、关键 ablation、primary metric 和资源预算
         - feat(runner): 新增 host exploration runner abstraction, 记录 command/environment/metrics/resource usage/failure category
@@ -897,20 +919,20 @@
         - test(experiments): 覆盖成功 baseline run、方法低于 baseline、环境失败、资源超限、容器复现失败阻断 final claims
         - docs(readme): 版本更新为 0.1.12-dev 并记录 experiments 模块边界
         - chore(taskflow): 完成 task-012-experiment-loop 并记录 verification report
-    :src
-        - packages/server/src/research/experiments/schemas.ts - ExperimentPlan/ExperimentRun/ResultReport schemas
-        - packages/server/src/research/experiments/planning.ts - baseline and ablation planner
-        - packages/server/src/research/experiments/runner.ts - host and container runner abstraction
-        - packages/server/src/research/experiments/analysis.ts - result comparison and reproduction gate
-        - packages/server/src/research/experiments/recording.ts - run artifact recording
-        - packages/server/test/research/experiments.test.ts - experiment loop tests
-        - reports/experiment-loop.md - experiment verification report
-    :verification
-        - npx --yes bun@1.3.13 --cwd packages/server test test/research/experiments.test.ts passed: 5 pass, 0 fail, 14 expects
-        - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
+        :src
+            - packages/server/src/research/experiments/schemas.ts - ExperimentPlan/ExperimentRun/ResultReport schemas
+            - packages/server/src/research/experiments/planning.ts - baseline and ablation planner
+            - packages/server/src/research/experiments/runner.ts - host and container runner abstraction
+            - packages/server/src/research/experiments/analysis.ts - result comparison and reproduction gate
+            - packages/server/src/research/experiments/recording.ts - run artifact recording
+            - packages/server/test/research/experiments.test.ts - experiment loop tests
+            - reports/experiment-loop.md - experiment verification report
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/server test test/research/experiments.test.ts passed: 5 pass, 0 fail, 14 expects
+            - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
 
     0.1.11-dev - 2026/05/09 (ee88ff1) [develop]
-    :brief 实现开放文献与数据发现
+        :brief 实现开放文献与数据发现
         - feat(sources): 新增 SourceRecord.v1, LiteratureMap.v1, DataPlan.v1, DatasetCard.v1, DirectionFeasibility.v1 领域 payload schema
         - feat(literature): 新增 discoverLiterature, 记录 provider/source/license/version/verification 并按主题聚类
         - feat(data): 新增 discoverDatasets, 记录 dataset card、license conflict、access constraint 与 verification diagnostics
@@ -919,20 +941,20 @@
         - test(sources): 覆盖文献/数据充足、缺数据自动转向、license 冲突暂停、verification failure diagnostics
         - docs(readme): 版本更新为 0.1.11-dev 并记录 sources 模块边界
         - chore(taskflow): 完成 task-011-literature-data 并记录 discovery verification report
-    :src
-        - packages/server/src/research/sources/schemas.ts - SourceRecord/LiteratureMap/DataPlan/DatasetCard/DirectionFeasibility schemas
-        - packages/server/src/research/sources/literature.ts - literature source normalization and clustering
-        - packages/server/src/research/sources/datasets.ts - dataset cards, license checks, access checks
-        - packages/server/src/research/sources/feasibility.ts - feasibility and automatic direction turn policy
-        - packages/server/src/research/sources/recording.ts - run fact/artifact recording
-        - packages/server/test/research/sources.test.ts - literature/data discovery tests
-        - reports/literature-data-discovery.md - discovery verification report
-    :verification
-        - npx --yes bun@1.3.13 --cwd packages/server test test/research/sources.test.ts passed: 4 pass, 0 fail, 14 expects
-        - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
+        :src
+            - packages/server/src/research/sources/schemas.ts - SourceRecord/LiteratureMap/DataPlan/DatasetCard/DirectionFeasibility schemas
+            - packages/server/src/research/sources/literature.ts - literature source normalization and clustering
+            - packages/server/src/research/sources/datasets.ts - dataset cards, license checks, access checks
+            - packages/server/src/research/sources/feasibility.ts - feasibility and automatic direction turn policy
+            - packages/server/src/research/sources/recording.ts - run fact/artifact recording
+            - packages/server/test/research/sources.test.ts - literature/data discovery tests
+            - reports/literature-data-discovery.md - discovery verification report
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/server test test/research/sources.test.ts passed: 4 pass, 0 fail, 14 expects
+            - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
 
     0.1.10-dev - 2026/05/09 (385fe8e) [develop]
-    :brief 实现可信模板解析与 Markdown-to-LaTeX 应用
+        :brief 实现可信模板解析与 Markdown-to-LaTeX 应用
         - feat(templates): 新增 TemplateSpec.v1, 包含 source evidence、trust、license status、confidence、required files、conflict flags
         - feat(templates): 新增 trusted template resolver, 内置 IEEE/ACM official candidates 与 CJC fallback
         - feat(policy): 自动采纳 clear license/no conflict/confidence >= 0.75 的模板, 其余进入 pause
@@ -940,18 +962,18 @@
         - test(templates): 覆盖 official source success、conflict pause、unclear license pause、low confidence pause、CJC fallback、Markdown-to-LaTeX bridge
         - docs(readme): 版本更新为 0.1.10-dev 并记录 templates 模块边界
         - chore(taskflow): 完成 task-010-template-resolve 并记录 verification report
-    :src
-        - packages/server/src/research/templates/spec.ts - TemplateSpec.v1 and source evidence schema
-        - packages/server/src/research/templates/resolver.ts - trusted candidate resolution and artifact recording
-        - packages/server/src/research/templates/application.ts - Markdown-to-LaTeX bridge application
-        - packages/server/test/research/templates.test.ts - template resolution tests
-        - reports/template-resolution.md - template verification report
-    :verification
-        - npx --yes bun@1.3.13 --cwd packages/server test test/research/templates.test.ts test/research/python-bridge.test.ts passed: 5 pass, 0 fail, 18 expects
-        - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
+        :src
+            - packages/server/src/research/templates/spec.ts - TemplateSpec.v1 and source evidence schema
+            - packages/server/src/research/templates/resolver.ts - trusted candidate resolution and artifact recording
+            - packages/server/src/research/templates/application.ts - Markdown-to-LaTeX bridge application
+            - packages/server/test/research/templates.test.ts - template resolution tests
+            - reports/template-resolution.md - template verification report
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/server test test/research/templates.test.ts test/research/python-bridge.test.ts passed: 5 pass, 0 fail, 18 expects
+            - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
 
 0.1.9-dev - 2026/05/09 (77f144c) [develop]
-    :brief 实现自动 topic-to-paper orchestrator
+        :brief 实现自动 topic-to-paper orchestrator
         - feat(orchestrator): 新增 first-party automatic stage graph, 覆盖 intake/template/literature/data/experiment/writing/verification/export
         - feat(policy): Full Access 默认自动推进, 在 safety/authenticity/cost/tool/license/low-confidence 条件下暂停
         - feat(guidance): 新增 GuidanceQueue.v1 artifact, TUI guidance 在下一 checkpoint 自动应用
@@ -960,20 +982,20 @@
         - test(orchestrator): 覆盖完整 stage graph、guidance queue、preview startup、policy pause、run controls
         - docs(readme): 版本更新为 0.1.9-dev 并记录 orchestrator 模块边界
         - chore(taskflow): 完成 task-009-auto-orchestrator 并记录 smoke report
-    :src
-        - packages/server/src/research/orchestrator/stage-graph.ts - automatic stage graph and snapshots
-        - packages/server/src/research/orchestrator/policy.ts - automatic proceed/pause policy
-        - packages/server/src/research/orchestrator/guidance.ts - GuidanceQueue.v1 artifact helpers
-        - packages/server/src/research/orchestrator/controls.ts - run control list and event emitter
-        - packages/server/src/research/orchestrator/index.ts - orchestrator execution loop
-        - packages/server/test/research/orchestrator.test.ts - orchestrator smoke tests
-        - reports/orchestrator-smoke.md - automatic flow smoke report
-    :verification
-        - npx --yes bun@1.3.13 --cwd packages/server test test/research/orchestrator.test.ts test/research/runtime.test.ts test/research/guards.test.ts passed: 8 pass, 0 fail, 44 expects
-        - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
+        :src
+            - packages/server/src/research/orchestrator/stage-graph.ts - automatic stage graph and snapshots
+            - packages/server/src/research/orchestrator/policy.ts - automatic proceed/pause policy
+            - packages/server/src/research/orchestrator/guidance.ts - GuidanceQueue.v1 artifact helpers
+            - packages/server/src/research/orchestrator/controls.ts - run control list and event emitter
+            - packages/server/src/research/orchestrator/index.ts - orchestrator execution loop
+            - packages/server/test/research/orchestrator.test.ts - orchestrator smoke tests
+            - reports/orchestrator-smoke.md - automatic flow smoke report
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/server test test/research/orchestrator.test.ts test/research/runtime.test.ts test/research/guards.test.ts passed: 8 pass, 0 fail, 44 expects
+            - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
 
 0.1.8-dev - 2026/05/09 (e876c63) [develop]
-    :brief 完成参考项目分析并接入 Exa MCP
+        :brief 完成参考项目分析并接入 Exa MCP
         - docs(references): 新增 reference manifest, 记录 OpenCode/Folio/IntelliGen/AI Scientist/PaperOrchestra/AutoResearch/EvoScientist/FARS/AutoRA 来源与 license 状态
         - docs(references): 新增 OpenCode substrate 分析, 明确只通过 opencode-adapter 使用工具/session/MCP/TUI 能力
         - docs(references): 新增 Folio/IntelliGen 分析, 采纳 StageMessage discipline、FormatSpec cache、fail-closed citation、evidence UI 等概念
@@ -981,20 +1003,20 @@
         - feat(mcp): 项目 paper_fucker.jsonc 配置 Exa remote MCP server
         - chore(codex): 执行 codex mcp add exa --url https://mcp.exa.ai/mcp
         - chore(taskflow): 完成 task-016-reference-analysis 并记录 step logs
-    :src
-        - .paper_fucker/paper_fucker.jsonc - Exa remote MCP configuration
-        - legacy/references/manifest.json - reference source manifest
-        - legacy/references/analysis/opencode.md - OpenCode substrate decision report
-        - legacy/references/analysis/folio-intelligen.md - Folio and IntelliGen decision report
-        - legacy/references/analysis/research-agents.md - external research agent decision report
-        - legacy/references/analysis/summary.md - adopt/defer/reject summary and follow-ups
-    :verification
-        - legacy/references/manifest.json parsed with PowerShell ConvertFrom-Json
-        - npx --yes bun@1.3.13 --cwd packages/opencode src/index.ts mcp list --help passed
-        - codex mcp add exa --url https://mcp.exa.ai/mcp passed
+        :src
+            - .paper_fucker/paper_fucker.jsonc - Exa remote MCP configuration
+            - legacy/references/manifest.json - reference source manifest
+            - legacy/references/analysis/opencode.md - OpenCode substrate decision report
+            - legacy/references/analysis/folio-intelligen.md - Folio and IntelliGen decision report
+            - legacy/references/analysis/research-agents.md - external research agent decision report
+            - legacy/references/analysis/summary.md - adopt/defer/reject summary and follow-ups
+        :verification
+            - legacy/references/manifest.json parsed with PowerShell ConvertFrom-Json
+            - npx --yes bun@1.3.13 --cwd packages/opencode src/index.ts mcp list --help passed
+            - codex mcp add exa --url https://mcp.exa.ai/mcp passed
 
 0.1.7-dev - 2026/05/09 (9bae52d) [develop]
-    :brief 通过 Phase 1 验收并补齐真实性守卫
+        :brief 通过 Phase 1 验收并补齐真实性守卫
         - feat(runtime): 新增 phaseOneStageStubs, 将模板/文献/数据/实验/写作/验证/导出显式标记为 not_implemented
         - feat(runtime): 新增 assertAuthenticResearchOutput, 阻止 stub/synthetic/fake 输出进入研究事实
         - feat(runtime): final export 必须等待 authenticity gate passed, gate 未通过时直接阻断
@@ -1002,20 +1024,20 @@
         - docs(acceptance): 新增 Phase 1 验收报告, 记录 Windows 原生 CLI、runtime、Python bridge、secrets ignored 检查
         - docs(readme): 版本更新为 0.1.7-dev, 说明 Phase 1 baseline acceptance 已通过
         - chore(taskflow): 执行 task-018-phase-1-acceptance 并记录 step logs
-    :src
-        - packages/server/src/research/runtime/guards.ts - Phase 1 not_implemented stubs and authenticity output guard
-        - packages/server/src/research/runtime/index.ts - runtime guard exports
-        - packages/server/test/research/guards.test.ts - authenticity guard tests
-        - reports/phase-1-acceptance.md - Phase 1 acceptance evidence
-    :verification
-        - npx --yes bun@1.3.13 --cwd packages/opencode src/index.ts --help passed
-        - npx --yes bun@1.3.13 --cwd packages/opencode src/index.ts --version passed: local
-        - npx --yes bun@1.3.13 --cwd packages/server test test/research/guards.test.ts test/research/runtime.test.ts test/research/python-bridge.test.ts test/init/init.test.ts passed: 9 pass, 0 fail, 54 expects
-        - python -m unittest discover initially failed until research-tools/src was added to PYTHONPATH
-        - PYTHONPATH=research-tools/src python -m unittest discover -s research-tools/tests passed: 4 tests
+        :src
+            - packages/server/src/research/runtime/guards.ts - Phase 1 not_implemented stubs and authenticity output guard
+            - packages/server/src/research/runtime/index.ts - runtime guard exports
+            - packages/server/test/research/guards.test.ts - authenticity guard tests
+            - reports/phase-1-acceptance.md - Phase 1 acceptance evidence
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode src/index.ts --help passed
+            - npx --yes bun@1.3.13 --cwd packages/opencode src/index.ts --version passed: local
+            - npx --yes bun@1.3.13 --cwd packages/server test test/research/guards.test.ts test/research/runtime.test.ts test/research/python-bridge.test.ts test/init/init.test.ts passed: 9 pass, 0 fail, 54 expects
+            - python -m unittest discover initially failed until research-tools/src was added to PYTHONPATH
+            - PYTHONPATH=research-tools/src python -m unittest discover -s research-tools/tests passed: 4 tests
 
 0.1.6-dev - 2026/05/08 (3e2be8c) [develop]
-    :brief 新增只读研究预览与 DeepSeek/中文默认配置
+        :brief 新增只读研究预览与 DeepSeek/中文默认配置
         - feat(preview): 新增 @paper-fucker/preview first-party package 与 localhost read-only preview
         - feat(preview/server): token-checked preview/snapshot/SSE endpoints, 非 GET/HEAD/OPTIONS 写方法返回 405
         - feat(preview/ui): 新增 Markdown/LaTeX/PDF/DOCX/Annotations/Diagnostics tabs 与 render status strip
@@ -1025,32 +1047,32 @@
         - chore(local): .gitignore 忽略 .paper_fucker/local/, 用于本地未跟踪 API key 与模型默认配置
         - docs(readme): 记录 packages/preview、中文默认语言、DeepSeek 默认模型与本地预览能力
         - chore(taskflow): 完成 task-008-preview-runtime 并记录 preview smoke report/browser screenshot
-    :src
-        - packages/preview/index.html - static read-only preview workbench
-        - packages/preview/src/protocol.ts - preview.v1 snapshot and stream event contracts
-        - packages/preview/src/server.ts - localhost token-protected Bun server
-        - packages/preview/src/render-queue.ts - realtime render queue with stale job cancellation
-        - packages/preview/src/client.js - browser snapshot/SSE client
-        - packages/preview/src/style.css - preview workspace UI
-        - packages/preview/test/preview.test.ts - preview server and render queue tests
-        - packages/server/src/init/config.ts - zh-CN and deepseek-v4-pro defaults
-        - reports/preview-smoke.md - verification report
-        - reports/preview-browser-smoke.png - browser smoke screenshot
-    :doc
-        - README.md - version 0.1.6-dev and preview/default model notes
-        - .plan/confirmed/task-008-preview-runtime.yaml - TaskFlow execution logs and server-runtime wording correction
-    :verification
-        - DeepSeek model list fetched from https://api.deepseek.com/v1/models: deepseek-v4-flash, deepseek-v4-pro
-        - npx --yes bun@1.3.13 install passed
-        - npx --yes bun@1.3.13 --cwd packages/preview test passed: 2 pass, 0 fail, 9 expects
-        - npx --yes bun@1.3.13 run --cwd packages/preview typecheck passed
-        - npx --yes bun@1.3.13 --cwd packages/server test test/init/init.test.ts test/research/contracts.test.ts test/research/runtime.test.ts test/research/python-bridge.test.ts passed: 9 pass, 0 fail, 60 expects
-        - Browser smoke loaded localhost preview with live/ready status and Markdown content
-        - npx --yes bun@1.3.13 run typecheck passed across workspace: 14 successful tasks
-        - TaskFlow validate_task task-008-preview-runtime passed
+        :src
+            - packages/preview/index.html - static read-only preview workbench
+            - packages/preview/src/protocol.ts - preview.v1 snapshot and stream event contracts
+            - packages/preview/src/server.ts - localhost token-protected Bun server
+            - packages/preview/src/render-queue.ts - realtime render queue with stale job cancellation
+            - packages/preview/src/client.js - browser snapshot/SSE client
+            - packages/preview/src/style.css - preview workspace UI
+            - packages/preview/test/preview.test.ts - preview server and render queue tests
+            - packages/server/src/init/config.ts - zh-CN and deepseek-v4-pro defaults
+            - reports/preview-smoke.md - verification report
+            - reports/preview-browser-smoke.png - browser smoke screenshot
+        :doc
+            - README.md - version 0.1.6-dev and preview/default model notes
+            - .plan/confirmed/task-008-preview-runtime.yaml - TaskFlow execution logs and server-runtime wording correction
+        :verification
+            - DeepSeek model list fetched from https://api.deepseek.com/v1/models: deepseek-v4-flash, deepseek-v4-pro
+            - npx --yes bun@1.3.13 install passed
+            - npx --yes bun@1.3.13 --cwd packages/preview test passed: 2 pass, 0 fail, 9 expects
+            - npx --yes bun@1.3.13 run --cwd packages/preview typecheck passed
+            - npx --yes bun@1.3.13 --cwd packages/server test test/init/init.test.ts test/research/contracts.test.ts test/research/runtime.test.ts test/research/python-bridge.test.ts passed: 9 pass, 0 fail, 60 expects
+            - Browser smoke loaded localhost preview with live/ready status and Markdown content
+            - npx --yes bun@1.3.13 run typecheck passed across workspace: 14 successful tasks
+            - TaskFlow validate_task task-008-preview-runtime passed
 
 0.1.5-dev - 2026/05/08 (8e81d99) [develop]
-    :brief 新增初始化与诊断向导
+        :brief 新增初始化与诊断向导
         - feat(init): 新增 packages/server/src/init first-party 初始化/诊断模块
         - feat(config): 定义 ~/.paper_fucker/config.json、tools.json、secrets.enc 路径与 schema
         - feat(discovery): 自动扫描 pandoc、LaTeX engines、Docker、Python、Git、Chrome、Edge, 支持用户链接与 PAPER_FUCKER_TOOL_* env
@@ -1058,27 +1080,27 @@
         - feat(cli): 新增 init --yes 与 diagnostics CLI flow, 支持 workspace/tool/secret/budget/preview/full-access flags
         - docs(readme): 明确初始化写入 ~/.paper_fucker 且 credentials 不进入 repo
         - chore(taskflow): 完成 task-007-init-wizard 并记录 init diagnostics smoke report
-    :src
-        - packages/server/src/init/config.ts - config/tools path helpers and config schema
-        - packages/server/src/init/discovery.ts - external tool discovery and linking
-        - packages/server/src/init/secrets.ts - encrypted secrets.enc storage
-        - packages/server/src/init/wizard.ts - init and diagnostics API
-        - packages/server/src/init/cli.ts - non-interactive init/diagnostics CLI
-        - packages/server/test/init/init.test.ts - init smoke tests
-        - reports/init-diagnostics-smoke.md - verification report
-    :doc
-        - README.md - version 0.1.5-dev and initialization structure
-        - .plan/confirmed/task-007-init-wizard.yaml - TaskFlow execution logs
-    :verification
-        - npx --yes bun@1.3.13 --cwd packages/server test test/init/init.test.ts passed: 2 pass, 0 fail, 15 expects
-        - npx --yes bun@1.3.13 --cwd packages/server src/init/cli.ts init --yes ... passed
-        - npx --yes bun@1.3.13 --cwd packages/server src/init/cli.ts diagnostics --home <tmp> passed
-        - npx --yes bun@1.3.13 --cwd packages/server test test/init/init.test.ts test/research/contracts.test.ts test/research/runtime.test.ts test/research/python-bridge.test.ts passed: 9 pass, 0 fail, 60 expects
-        - npx --yes bun@1.3.13 run typecheck passed across workspace: 13 successful tasks
-        - TaskFlow validate_task task-007-init-wizard passed
+        :src
+            - packages/server/src/init/config.ts - config/tools path helpers and config schema
+            - packages/server/src/init/discovery.ts - external tool discovery and linking
+            - packages/server/src/init/secrets.ts - encrypted secrets.enc storage
+            - packages/server/src/init/wizard.ts - init and diagnostics API
+            - packages/server/src/init/cli.ts - non-interactive init/diagnostics CLI
+            - packages/server/test/init/init.test.ts - init smoke tests
+            - reports/init-diagnostics-smoke.md - verification report
+        :doc
+            - README.md - version 0.1.5-dev and initialization structure
+            - .plan/confirmed/task-007-init-wizard.yaml - TaskFlow execution logs
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/server test test/init/init.test.ts passed: 2 pass, 0 fail, 15 expects
+            - npx --yes bun@1.3.13 --cwd packages/server src/init/cli.ts init --yes ... passed
+            - npx --yes bun@1.3.13 --cwd packages/server src/init/cli.ts diagnostics --home <tmp> passed
+            - npx --yes bun@1.3.13 --cwd packages/server test test/init/init.test.ts test/research/contracts.test.ts test/research/runtime.test.ts test/research/python-bridge.test.ts passed: 9 pass, 0 fail, 60 expects
+            - npx --yes bun@1.3.13 run typecheck passed across workspace: 13 successful tasks
+            - TaskFlow validate_task task-007-init-wizard passed
 
 0.1.4-dev - 2026/05/08 (760d1d4) [develop]
-    :brief 接入 Python MCP/CLI research tool bridge
+        :brief 接入 Python MCP/CLI research tool bridge
         - feat(tools): 新增 research-tools CLI 入口 paper-fucker-tools 与 python -m paper_fucker_tools
         - feat(mcp): 新增 tool_diagnostics/pdf_probe/dataset_metadata_probe/experiment_log_parse/docx_generation_stub 结构化 MCP-style tools
         - feat(mcp-server): 新增 FastMCP adapter, 安装 MCP SDK 后可复用同一工具 registry
@@ -1087,29 +1109,29 @@
         - feat(server/runtime): 新增 python-bridge.ts, server runtime 自动调用 Python structured tool/CLI 并记录 log artifact 与 python.tool/python.cli event
         - docs(readme): 明确 research-tools 外部工具发现、链接配置和 server runtime bridge 边界
         - chore(taskflow): 完成 task-006-python-tool-bridge 并记录 bridge smoke report
-    :src
-        - research-tools/src/paper_fucker_tools/external_tools.py - external tool discovery and user link config
-        - research-tools/src/paper_fucker_tools/mcp_tools.py - structured tool registry
-        - research-tools/src/paper_fucker_tools/cli.py - one-shot CLI commands
-        - research-tools/src/paper_fucker_tools/mcp_server.py - FastMCP adapter
-        - packages/server/src/research/runtime/python-bridge.ts - TypeScript runtime to Python bridge
-        - packages/server/test/research/python-bridge.test.ts - bridge smoke test
-        - research-tools/tests/test_tools.py - Python tool tests
-        - reports/python-tool-bridge-smoke.md - verification report
-    :doc
-        - README.md - version 0.1.4-dev and Python bridge structure
-        - .plan/confirmed/task-006-python-tool-bridge.yaml - TaskFlow execution logs and server-runtime wording correction
-    :verification
-        - python -m unittest discover -s research-tools/tests passed: 4 tests
-        - python -m paper_fucker_tools diagnostics --json passed
-        - python -m paper_fucker_tools md-to-latex <sample.md> -o <sample.tex> --allow-fallback passed
-        - npx --yes bun@1.3.13 --cwd packages/server test test/research/python-bridge.test.ts passed: 1 pass, 0 fail, 6 expects
-        - npx --yes bun@1.3.13 --cwd packages/server test test/research/contracts.test.ts test/research/runtime.test.ts test/research/python-bridge.test.ts passed: 7 pass, 0 fail, 45 expects
-        - npx --yes bun@1.3.13 run typecheck passed across workspace: 13 successful tasks
-        - TaskFlow validate_task task-006-python-tool-bridge passed
+        :src
+            - research-tools/src/paper_fucker_tools/external_tools.py - external tool discovery and user link config
+            - research-tools/src/paper_fucker_tools/mcp_tools.py - structured tool registry
+            - research-tools/src/paper_fucker_tools/cli.py - one-shot CLI commands
+            - research-tools/src/paper_fucker_tools/mcp_server.py - FastMCP adapter
+            - packages/server/src/research/runtime/python-bridge.ts - TypeScript runtime to Python bridge
+            - packages/server/test/research/python-bridge.test.ts - bridge smoke test
+            - research-tools/tests/test_tools.py - Python tool tests
+            - reports/python-tool-bridge-smoke.md - verification report
+        :doc
+            - README.md - version 0.1.4-dev and Python bridge structure
+            - .plan/confirmed/task-006-python-tool-bridge.yaml - TaskFlow execution logs and server-runtime wording correction
+        :verification
+            - python -m unittest discover -s research-tools/tests passed: 4 tests
+            - python -m paper_fucker_tools diagnostics --json passed
+            - python -m paper_fucker_tools md-to-latex <sample.md> -o <sample.tex> --allow-fallback passed
+            - npx --yes bun@1.3.13 --cwd packages/server test test/research/python-bridge.test.ts passed: 1 pass, 0 fail, 6 expects
+            - npx --yes bun@1.3.13 --cwd packages/server test test/research/contracts.test.ts test/research/runtime.test.ts test/research/python-bridge.test.ts passed: 7 pass, 0 fail, 45 expects
+            - npx --yes bun@1.3.13 run typecheck passed across workspace: 13 successful tasks
+            - TaskFlow validate_task task-006-python-tool-bridge passed
 
 0.1.3-dev - 2026/05/08 (d873f97) [develop]
-    :brief 建立 first-party research runtime
+        :brief 建立 first-party research runtime
         - feat(server/runtime): 新增 packages/server/src/research/runtime 作为 paper_fucker 权威运行时模块
         - feat(run-store): 支持 workspace-first <workspace>/.paper_fucker/runs/<run-id>, ~/.paper_fucker/runs fallback, create/resume/status API
         - feat(events): 事件写入 append-only events.jsonl, 并刷新 run-local/global SQLite index
@@ -1121,26 +1143,26 @@
         - feat(otel): create/resume/status/event/artifact/cost/final gate/index refresh 均接入 paper_fucker.research OpenTelemetry spans
         - docs(readme): 明确运行时自动 API 调用、workspace-first run store 和 packages/opencode adapter 边界
         - chore(taskflow): 完成 task-005-research-runtime 并记录 runtime smoke report
-    :src
-        - packages/server/src/research/runtime/paths.ts - run directory resolution, workspace/home storage selection, artifact path safety
-        - packages/server/src/research/runtime/run-store.ts - run lifecycle, event append, index refresh, cost/final gate APIs
-        - packages/server/src/research/runtime/artifact-store.ts - artifact writes, versioning, stable hash, locked protection
-        - packages/server/src/research/runtime/policy.ts - permission, bounded mode, resource detection, budget state
-        - packages/server/src/research/runtime/state.ts - runtime-state.json persistence
-        - packages/server/test/research/runtime.test.ts - runtime smoke tests
-        - reports/research-runtime-smoke.md - verification report
-    :doc
-        - README.md - version 0.1.3-dev and first-party runtime structure
-        - .plan/confirmed/task-005-research-runtime.yaml - TaskFlow execution logs and OpenCode wording correction
-    :verification
-        - npx --yes bun@1.3.13 --cwd packages/server test test/research/runtime.test.ts passed: 3 pass, 0 fail, 28 expects
-        - npx --yes bun@1.3.13 --cwd packages/server test test/research/contracts.test.ts test/research/runtime.test.ts passed: 6 pass, 0 fail, 39 expects
-        - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
-        - npx --yes bun@1.3.13 run typecheck passed across workspace: 13 successful tasks
-        - TaskFlow validate_task task-005-research-runtime passed
+        :src
+            - packages/server/src/research/runtime/paths.ts - run directory resolution, workspace/home storage selection, artifact path safety
+            - packages/server/src/research/runtime/run-store.ts - run lifecycle, event append, index refresh, cost/final gate APIs
+            - packages/server/src/research/runtime/artifact-store.ts - artifact writes, versioning, stable hash, locked protection
+            - packages/server/src/research/runtime/policy.ts - permission, bounded mode, resource detection, budget state
+            - packages/server/src/research/runtime/state.ts - runtime-state.json persistence
+            - packages/server/test/research/runtime.test.ts - runtime smoke tests
+            - reports/research-runtime-smoke.md - verification report
+        :doc
+            - README.md - version 0.1.3-dev and first-party runtime structure
+            - .plan/confirmed/task-005-research-runtime.yaml - TaskFlow execution logs and OpenCode wording correction
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/server test test/research/runtime.test.ts passed: 3 pass, 0 fail, 28 expects
+            - npx --yes bun@1.3.13 --cwd packages/server test test/research/contracts.test.ts test/research/runtime.test.ts passed: 6 pass, 0 fail, 39 expects
+            - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
+            - npx --yes bun@1.3.13 run typecheck passed across workspace: 13 successful tasks
+            - TaskFlow validate_task task-005-research-runtime passed
 
 0.1.2-dev - 2026/05/08 (b95a0cb) [develop]
-    :brief 建立 paper_fucker research contract/server 包
+        :brief 建立 paper_fucker research contract/server 包
         - feat(server): 新增 @paper-fucker/server 作为 first-party paper_fucker server/runtime 契约包
         - feat(schema): 新增 schemas/research/v1.schema.json, 固化 run/event/artifact/source/tool_trace/claim/draft/review/export/checkpoint 契约
         - feat(validation): 使用 AJV 2020 校验 JSON Schema, 对缺失/旧版/不兼容 schema_version 抛出明确迁移错误
@@ -1149,28 +1171,28 @@
         - feat(python): 新增 research-tools Python 包与 generated Pydantic v2 models
         - docs(readme): 明确 packages/server 为 paper_fucker 权威 research runtime, packages/opencode 仅保留 upstream-derived CLI/agent substrate
         - chore(taskflow): 完成 task-017-core-contract 并记录 contract validation report
-    :src
-        - schemas/research/v1.schema.json - JSON Schema source of truth
-        - packages/server/package.json - @paper-fucker/server workspace package
-        - packages/server/src/research/generated/contracts.ts - generated TypeScript contract types
-        - packages/server/src/research/contracts.ts - AJV validation and schema_version migration failures
-        - packages/server/src/research/storage.ts - JSON/JSONL fact loading and rebuildable SQLite indexes
-        - packages/server/src/research/telemetry.ts - OpenTelemetry API span wrapper
-        - research-tools/src/paper_fucker_tools/generated/research_contracts.py - generated Pydantic v2 models
-        - reports/core-contract-validation.md - validation and architecture report
-    :doc
-        - README.md - project structure updated to separate packages/server from packages/opencode
-        - .plan/confirmed/task-017-core-contract.yaml - TaskFlow execution logs and architecture correction
-    :verification
-        - npx --yes bun@1.3.13 install passed
-        - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
-        - npx --yes bun@1.3.13 --cwd packages/server test test/research/contracts.test.ts passed: 3 pass, 0 fail
-        - Python generated Pydantic import smoke passed with Python 3.11.7 and pydantic 2.11.3
-        - npx --yes bun@1.3.13 run typecheck passed across workspace: 13 successful tasks
-        - TaskFlow validate_task task-017-core-contract passed
+        :src
+            - schemas/research/v1.schema.json - JSON Schema source of truth
+            - packages/server/package.json - @paper-fucker/server workspace package
+            - packages/server/src/research/generated/contracts.ts - generated TypeScript contract types
+            - packages/server/src/research/contracts.ts - AJV validation and schema_version migration failures
+            - packages/server/src/research/storage.ts - JSON/JSONL fact loading and rebuildable SQLite indexes
+            - packages/server/src/research/telemetry.ts - OpenTelemetry API span wrapper
+            - research-tools/src/paper_fucker_tools/generated/research_contracts.py - generated Pydantic v2 models
+            - reports/core-contract-validation.md - validation and architecture report
+        :doc
+            - README.md - project structure updated to separate packages/server from packages/opencode
+            - .plan/confirmed/task-017-core-contract.yaml - TaskFlow execution logs and architecture correction
+        :verification
+            - npx --yes bun@1.3.13 install passed
+            - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
+            - npx --yes bun@1.3.13 --cwd packages/server test test/research/contracts.test.ts passed: 3 pass, 0 fail
+            - Python generated Pydantic import smoke passed with Python 3.11.7 and pydantic 2.11.3
+            - npx --yes bun@1.3.13 run typecheck passed across workspace: 13 successful tasks
+            - TaskFlow validate_task task-017-core-contract passed
 
 0.1.1-dev - 2026/05/08 (c8da1ae) [develop]
-    :brief OpenCode fork 品牌与运行时命名迁移为 paper_fucker
+        :brief OpenCode fork 品牌与运行时命名迁移为 paper_fucker
         - feat(cli): 命令入口、help、serve 输出、安装脚本、构建脚本和 Docker 默认命令迁移为 paper_fucker
         - feat(config): 项目/全局配置迁移为 .paper_fucker、paper_fucker.json/jsonc、~/.paper_fucker
         - feat(runtime): 默认数据库、mDNS、HTTP header、SDK server、desktop sidecar 和观测服务名迁移为 paper_fucker
@@ -1178,69 +1200,69 @@
         - feat(github): GitHub agent workflow、命令提示、默认分支和 OIDC audience 改为 paper_fucker 命名
         - test(runtime): 更新 config/storage/httpapi/cors/app/sdk/desktop 相关测试与品牌冒烟报告
         - chore(taskflow): 完成 task-004-brand-paper-fucker 并记录品牌迁移验证日志
-    :src
-        - .paper_fucker/ - 项目本地 agent/command/glossary/plugin/theme 配置命名空间
-        - packages/opencode/bin/paper_fucker - 用户可见 CLI bin 入口
-        - packages/core/src/global.ts - paper_fucker 全局路径与测试覆盖路径
-        - packages/core/src/flag/flag.ts - PAPER_FUCKER_* 环境变量优先级与 OPENCODE_* 兼容回退
-        - packages/opencode/src/index.ts - yargs 命令名、运行时环境变量与迁移标记
-        - packages/opencode/src/config/ - .paper_fucker 与 paper_fucker.json/jsonc 配置发现
-        - packages/opencode/src/server/ - paper_fucker HTTP API header、CORS、mDNS、UI fallback 和 auth 标识
-        - packages/app/ - Web app 标题、协议、存储 key、主题预加载与 i18n 文案
-        - packages/desktop/ - Electron app id、protocol、sidecar env、store 与 product 文案
-        - packages/sdk/js/ - SDK server 命令与 x-paper-fucker header
-        - reports/brand-smoke.md - 品牌迁移验证报告
-    :doc
-        - README.md - 版本更新为 0.1.1-dev，并明确 paper_fucker TypeScript runtime 为权威运行时
-        - .plan/confirmed/task-004-brand-paper-fucker.yaml - TaskFlow step 日志与验收结果
-    :verification
-        - npx --yes bun@1.3.13 install passed
-        - packages/core/opencode/app/sdk/js/ui/desktop typecheck passed
-        - packages/core global path test passed: 2 pass, 0 fail
-        - packages/opencode config/storage/httpapi-ui/mcp-headers/cors tests passed: 99 pass, 0 fail
-        - packages/app persisted storage/theme/server/layout tests passed: 328 pass, 0 fail
-        - CLI smoke passed: --help shows paper_fucker commands and paper-fucker.local, --version returned local, serve printed paper_fucker server listening
-        - Old-name scan found no active IntelliGen/Python-core/codex-task naming outside historical or generic contexts
+        :src
+            - .paper_fucker/ - 项目本地 agent/command/glossary/plugin/theme 配置命名空间
+            - packages/opencode/bin/paper_fucker - 用户可见 CLI bin 入口
+            - packages/core/src/global.ts - paper_fucker 全局路径与测试覆盖路径
+            - packages/core/src/flag/flag.ts - PAPER_FUCKER_* 环境变量优先级与 OPENCODE_* 兼容回退
+            - packages/opencode/src/index.ts - yargs 命令名、运行时环境变量与迁移标记
+            - packages/opencode/src/config/ - .paper_fucker 与 paper_fucker.json/jsonc 配置发现
+            - packages/opencode/src/server/ - paper_fucker HTTP API header、CORS、mDNS、UI fallback 和 auth 标识
+            - packages/app/ - Web app 标题、协议、存储 key、主题预加载与 i18n 文案
+            - packages/desktop/ - Electron app id、protocol、sidecar env、store 与 product 文案
+            - packages/sdk/js/ - SDK server 命令与 x-paper-fucker header
+            - reports/brand-smoke.md - 品牌迁移验证报告
+        :doc
+            - README.md - 版本更新为 0.1.1-dev，并明确 paper_fucker TypeScript runtime 为权威运行时
+            - .plan/confirmed/task-004-brand-paper-fucker.yaml - TaskFlow step 日志与验收结果
+        :verification
+            - npx --yes bun@1.3.13 install passed
+            - packages/core/opencode/app/sdk/js/ui/desktop typecheck passed
+            - packages/core global path test passed: 2 pass, 0 fail
+            - packages/opencode config/storage/httpapi-ui/mcp-headers/cors tests passed: 99 pass, 0 fail
+            - packages/app persisted storage/theme/server/layout tests passed: 328 pass, 0 fail
+            - CLI smoke passed: --help shows paper_fucker commands and paper-fucker.local, --version returned local, serve printed paper_fucker server listening
+            - Old-name scan found no active IntelliGen/Python-core/codex-task naming outside historical or generic contexts
 
 0.1.0-dev - 2026/05/08 (88f63199) [develop]
-    :brief 导入 OpenCode v1.14.41 源码快照
+        :brief 导入 OpenCode v1.14.41 源码快照
         - feat(upstream): 导入 OpenCode v1.14.41 root overlay 源码快照
         - docs(upstream): 记录 OpenCode upstream manifest、MIT license 与 NOTICE 归属
         - chore(import): 保留 paper_fucker 根 README/LICENSE/CHANGELOG 并跳过 active .github workflows
         - chore(import): 跳过 Windows reparse point/symlink 并记录 tarball SHA256
-    :src
-        - packages/ - OpenCode upstream package source snapshot
-        - github/, infra/, nix/, script/, sdks/, specs/ - OpenCode upstream support source copied from official release tarball
-        - upstream/opencode-README.md - preserved upstream README
-        - upstream/opencode-LICENSE - preserved upstream MIT license
-        - upstream/opencode-AGENTS.md - preserved upstream agent instructions
-    :doc
-        - upstream/opencode-manifest.json - records release/tag/commit/tarball hash/import filtering decisions
-        - NOTICE.md - records OpenCode attribution and third-party license pointer
-        - .plan/confirmed/task-003-import-opencode.yaml - records TaskFlow execution logs
-    :verification
-        - TaskFlow validate_task task-003-import-opencode passed
-        - scripts/check-readme-version.ps1 passed
-        - Manifest JSON parsed successfully
-        - Verified active .github was not imported
-        - Verified no node_modules/.turbo/dist/build/coverage/htmlcov, nested .git, or reparse points remained in repository snapshot
+        :src
+            - packages/ - OpenCode upstream package source snapshot
+            - github/, infra/, nix/, script/, sdks/, specs/ - OpenCode upstream support source copied from official release tarball
+            - upstream/opencode-README.md - preserved upstream README
+            - upstream/opencode-LICENSE - preserved upstream MIT license
+            - upstream/opencode-AGENTS.md - preserved upstream agent instructions
+        :doc
+            - upstream/opencode-manifest.json - records release/tag/commit/tarball hash/import filtering decisions
+            - NOTICE.md - records OpenCode attribution and third-party license pointer
+            - .plan/confirmed/task-003-import-opencode.yaml - records TaskFlow execution logs
+        :verification
+            - TaskFlow validate_task task-003-import-opencode passed
+            - scripts/check-readme-version.ps1 passed
+            - Manifest JSON parsed successfully
+            - Verified active .github was not imported
+            - Verified no node_modules/.turbo/dist/build/coverage/htmlcov, nested .git, or reparse points remained in repository snapshot
 
 0.1.0-dev - 2026/05/08 (0906d17c) [develop]
-    :brief 归档旧 IntelliGen 与 Folio 参考项目
+        :brief 归档旧 IntelliGen 与 Folio 参考项目
         - docs(legacy): 归档旧 IntelliGen 过滤快照
         - docs(legacy): 归档 Folio 过滤快照并生成 git bundle
         - docs(legacy): 新增 archive manifest 与验证记录
         - chore(taskflow): 完成 legacy archive 任务状态与步骤日志
-    :src
-        - legacy/intelligen-v3 - filtered old IntelliGen snapshot
-        - legacy/folio - filtered Folio snapshot
-        - legacy/folio.git.bundle - complete Folio git history bundle
-    :verification
-        - Folio bundle verified successfully
-        - Forbidden artifact scan found no real .env, dependency directories, virtualenvs, caches, pycache, sandbox/site/build output, logs, nested archives, or WAL/SHM files
+        :src
+            - legacy/intelligen-v3 - filtered old IntelliGen snapshot
+            - legacy/folio - filtered Folio snapshot
+            - legacy/folio.git.bundle - complete Folio git history bundle
+        :verification
+            - Folio bundle verified successfully
+            - Forbidden artifact scan found no real .env, dependency directories, virtualenvs, caches, pycache, sandbox/site/build output, logs, nested archives, or WAL/SHM files
 
 0.1.0-dev - 2026/05/08 (196557f3) [develop]
-    :brief 初始化 TaskFlow 计划与仓库治理
+        :brief 初始化 TaskFlow 计划与仓库治理
         - docs(governance): 建立 TaskFlow-first 计划源、私有优先仓库策略、Git Flow 分支治理和 README 版本追踪
         - docs(plan): 将 docs/rebuild 规划同步进 .plan/confirmed, 删除旧 docs 作为活跃计划源
         - docs(contract): 新增 core contract 与 phase 1 acceptance 任务, 固化后续运行时契约门槛

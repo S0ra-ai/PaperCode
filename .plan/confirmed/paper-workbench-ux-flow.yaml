@@ -1,0 +1,109 @@
+id: paper-workbench-ux-flow
+title: Paper Workbench UX Flow
+status: todo
+priority: high
+owner: codex
+tags:
+- paper
+- tui
+- ux
+- 0.5.6-dev
+depends_on:
+- paper-run-sidebar
+description: 'Make the Chinese TUI paper workbench communicate the end-to-end user
+  flow clearly: natural-language intake, automatic PaperRun orchestration, pause conditions,
+  reviewable/submission outputs, and forced-draft semantics.'
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: paper-workbench-ux-flow-step-01-inspect
+  title: Inspect current workbench copy and intake parsing
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Identify current Chinese copy, run controls, examples, and pause/export
+    labels.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: paper-workbench-ux-flow-step-02-copy
+  title: Improve workbench user flow copy
+  status: todo
+  owner: codex
+  depends_on:
+  - paper-workbench-ux-flow-step-01-inspect
+  description: Clarify theme/code/data/material intake, automatic orchestration, pause
+    conditions, and output modes in the TUI without turning it into a marketing page.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: paper-workbench-ux-flow-step-03-docs
+  title: Document user usage flow
+  status: todo
+  owner: codex
+  depends_on:
+  - paper-workbench-ux-flow-step-02-copy
+  description: Update README to explain the actual Paper Fucker workflow from launch
+    to export.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: paper-workbench-ux-flow-step-04-tests
+  title: Test UX flow state/copy
+  status: todo
+  owner: codex
+  depends_on:
+  - paper-workbench-ux-flow-step-03-docs
+  description: Add or update tests for parsing examples, Chinese default language,
+    output modes, and forced draft labels.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: paper-workbench-ux-flow-step-05-version
+  title: Version and validate 0.5.6-dev
+  status: todo
+  owner: codex
+  depends_on:
+  - paper-workbench-ux-flow-step-04-tests
+  description: Update CHANGELOG, run required checks, validate TaskFlow task.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: directory
+  path: packages/opencode/src/cli/cmd/tui/routes/paper
+  description: Workbench copy and flow affordances
+- type: file
+  path: README.md
+  description: User flow documentation updated
+- type: file
+  path: CHANGELOG
+  description: Colon DSL entry for 0.5.6-dev
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-10T18:28:10.279609'
+  updated_at: '2026-05-10T18:28:10.279609'
+  version: '1'

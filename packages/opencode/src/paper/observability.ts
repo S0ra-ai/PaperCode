@@ -362,6 +362,22 @@ export async function recordDefaultPaperRunObservability(
     },
     options,
   )
+  await appendResearchEvent(
+    runDir,
+    {
+      event_id: `${run.run_id}:agent-root-spawned`,
+      type: "agent.spawned",
+      actor: "system",
+      payload: {
+        agent_id: `${run.run_id}:root`,
+        depth: 0,
+        role: "root_run_agent",
+        budget_tier: input.budget_tier,
+        recursive_depth_policy: "unbounded",
+      },
+    },
+    options,
+  )
 
   await recordPaperToolTrace(
     runDir,

@@ -1,0 +1,174 @@
+id: recursive-agent-fabric
+title: Recursive Agent Fabric
+status: done
+priority: high
+owner: codex
+tags:
+- paper
+- agent
+- orchestration
+- 0.5.4-dev
+depends_on: []
+description: Implement product-unbounded recursive agent orchestration for PaperRun.
+  Runtime expansion is constrained by budget, time, concurrency, token/context, permissions,
+  data egress, license/source/authenticity gates, and coverage completion rather than
+  fixed max depth or child count.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: recursive-agent-fabric-step-01-inspect
+  title: Inspect current PaperRun agent/runtime implementation
+  status: done
+  owner: codex
+  depends_on: []
+  description: Locate current AgentTree, AgentRoleRouter, BudgetTier, PaperRun events,
+    and tests before editing.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-10T18:29:12.326543'
+      level: info
+      message: Inspecting PaperRun agent/runtime implementation on feature/recursive-agent-fabric.
+      agent: codex
+    - timestamp: '2026-05-10T18:30:02.120054'
+      level: info
+      message: Inspected packages/opencode/src/paper/agents.ts, budget.ts, run.ts,
+        observability.ts and tests. Current implementation still enforces budget max_depth
+        in spawnPaperSubagent and exposes max_depth in AgentTree; PaperRun snapshots
+        synthesize only a root agent from defaultAgentTree. Tests currently expect
+        tier depth enforcement, so recursive policy and tests need changing.
+      agent: codex
+    last_run: '2026-05-10T18:30:02.120054'
+    attempt_count: 2
+  meta: {}
+- id: recursive-agent-fabric-step-02-policy
+  title: Implement recursive agent policy and expansion decisions
+  status: done
+  owner: codex
+  depends_on:
+  - recursive-agent-fabric-step-01-inspect
+  description: Add product-unbounded RecursiveAgentPolicy with guardrail stop conditions
+    and parent-to-child permission narrowing.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-10T18:38:03.434122'
+      level: info
+      message: Implementing recursive policy and expansion decisions.
+      agent: codex
+    - timestamp: '2026-05-10T18:38:13.530742'
+      level: info
+      message: Implemented RecursiveAgentPolicy.v1, AgentExpansionDecision, runtime
+        stop conditions, permission narrowing, children tracking, and product-unbounded
+        depth policy. Budget tiers now keep cost/parallel/live-search/container behavior
+        while max_depth is null and depth_policy is unbounded.
+      agent: codex
+    last_run: '2026-05-10T18:38:13.530742'
+    attempt_count: 2
+  meta: {}
+- id: recursive-agent-fabric-step-03-events
+  title: Wire recursive agent events and diagnostics
+  status: done
+  owner: codex
+  depends_on:
+  - recursive-agent-fabric-step-02-policy
+  description: Emit agent.spawned, agent.completed, agent.blocked, and agent.expansion_skipped
+    with artifact lineage and cost diagnostics updates.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-10T18:38:02.746837'
+      level: info
+      message: Wiring agent events and diagnostics after policy implementation.
+      agent: codex
+    - timestamp: '2026-05-10T18:38:14.202794'
+      level: info
+      message: Added in-memory agent tree events for agent.spawned, agent.completed,
+        agent.blocked, and agent.expansion_skipped. PaperRun snapshots expose recursive_policy
+        and root-agent event capture; event appends now avoid duplicate event_id when
+        deterministic id factories reset between resumed operations.
+      agent: codex
+    last_run: '2026-05-10T18:38:14.202794'
+    attempt_count: 2
+  meta: {}
+- id: recursive-agent-fabric-step-04-tests
+  title: Test recursive agents
+  status: done
+  owner: codex
+  depends_on:
+  - recursive-agent-fabric-step-03-events
+  description: Add tests proving depth 3 child spawning, different role model assignment,
+    cycle prevention, and gate-aware child permission behavior.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-10T18:38:04.153017'
+      level: info
+      message: Updating and running recursive agent tests.
+      agent: codex
+    - timestamp: '2026-05-10T18:38:14.929381'
+      level: info
+      message: 'Updated agents and hard-fork tests. Verification passed: npx --yes
+        bun@1.3.13 --cwd packages/opencode test test/paper/agents.test.ts test/paper/hard-fork-acceptance.test.ts
+        test/cli/tui/paper-workbench-controls.test.ts (10 pass); npx --yes bun@1.3.13
+        run --cwd packages/opencode typecheck passed.'
+      agent: codex
+    last_run: '2026-05-10T18:38:14.929381'
+    attempt_count: 2
+  meta: {}
+- id: recursive-agent-fabric-step-05-version
+  title: Version and validate 0.5.4-dev
+  status: done
+  owner: codex
+  depends_on:
+  - recursive-agent-fabric-step-04-tests
+  description: Update README and CHANGELOG, run required checks, validate TaskFlow
+    task.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-10T18:39:05.997805'
+      level: info
+      message: Updating README/CHANGELOG for 0.5.4-dev with work commit f514f02 and
+        running version/TaskFlow validation.
+      agent: codex
+    - timestamp: '2026-05-10T18:39:17.463826'
+      level: info
+      message: README version 0.5.4-dev matches CHANGELOG latest version. TaskFlow
+        validate_task recursive-agent-fabric passed. Work commit recorded in CHANGELOG
+        as f514f02.
+      agent: codex
+    last_run: '2026-05-10T18:39:17.463826'
+    attempt_count: 2
+  meta: {}
+outputs:
+- type: directory
+  path: packages/opencode/src/paper
+  description: Recursive agent policy, role routing, events, and tests
+- type: file
+  path: README.md
+  description: Version and behavior summary updated
+- type: file
+  path: CHANGELOG
+  description: Colon DSL entry for 0.5.4-dev
+trace:
+  logs: []
+  attempt_count: 0
+lock:
+  by: codex
+  at: '2026-05-10T18:28:47.304656'
+meta:
+  created_at: '2026-05-10T18:27:48.727235'
+  updated_at: '2026-05-10T18:39:17.463826'
+  version: '1'
