@@ -2,10 +2,26 @@
 :author        s0ra (https://github.com/S0ra-ai)
 :repo          
 :desc          记录项目的重大变更和版本历史
-:version       0.3.6-dev
+:version       0.3.7-dev
 :last_update   2026/05/10
 
 :history
+
+    0.3.7-dev - 2026/05/10 (55167c9) [develop]
+    :brief 报告路径卫生清理, 标记迁移前 server 路径为历史证据
+        - docs(reports): 为 25 个 task-032 前报告添加 historical path note, 避免将 packages/server 误读为当前架构
+        - docs(readme): 说明历史报告可保留 packages/server/@paper-fucker/server 作为 provenance, 当前权威路径为 packages/opencode/src/paper
+        - docs(report): 新增 report-path-hygiene 审计报告, 区分当前文档、历史证据、迁移/缺失断言
+        - note(history): CHANGELOG 与已完成 TaskFlow logs 保留旧路径, 不重写真实历史提交与验证记录
+    :src
+        - README.md - current path/provenance policy and version update
+        - reports/report-path-hygiene.md - audit result and future documentation policy
+        - reports/* - pre-hard-fork reports marked with historical path note
+        - .plan/confirmed/task-045-report-path-hygiene.yaml - TaskFlow execution evidence
+        - CHANGELOG - 0.3.7-dev history entry
+    :verification
+        - rg audit confirmed pre-hard-fork report server-path references are marked as historical provenance
+        - CHANGELOG and TaskFlow completed-task logs intentionally retained as historical evidence
 
     0.3.6-dev - 2026/05/10 (7d335eb) [develop]
     :brief PaperRun 新增 observability audit、cost、tool trace 与 data-egress 诊断
