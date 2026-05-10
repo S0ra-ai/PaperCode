@@ -6,6 +6,7 @@ import {
   getResearchRunStatus,
   loadResearchRun,
   readJsonlFacts,
+  updateResearchRunStatus,
   type ResearchRuntimeOptions,
 } from "./research/runtime"
 import type {
@@ -35,6 +36,16 @@ import {
   type PaperResearchStageStatus,
 } from "./orchestrator"
 import { budgetTierPolicy } from "./budget"
+import {
+  applyPaperRunControl,
+  controllerSseEvent,
+  derivePaperRunControllerState,
+  enqueuePaperRunGuidance,
+  initializePaperRunControllerState,
+  loadPaperRunControllerState,
+  type PaperRunControlInput,
+  type PaperRunControllerState,
+} from "./run-controller"
 
 export type BudgetTier = "quick" | "standard" | "deep" | "submission" | "custom"
 export type QualityMode = "reviewable_bundle" | "submission_candidate"
@@ -172,6 +183,7 @@ export interface PaperRunSnapshot {
     run_id: string
   }
   export_state: PaperExportBundle
+  controller_state: PaperRunControllerState
   internal_sessions: string[]
 }
 
@@ -426,7 +438,7 @@ export async function getPaperRunSnapshotFromDir(runDir: string): Promise<PaperR
         ]
       : []
 
-  return {
+  const snapshot = {
     schema_version: "PaperRun.v1",
     run_id: status.run.run_id,
     topic: status.run.topic,
@@ -482,6 +494,11 @@ export async function getPaperRunSnapshotFromDir(runDir: string): Promise<PaperR
     },
     export_state: exportState({ runID: status.run.run_id, state: status.state, exports }),
     internal_sessions: metadataStringArray(metadata.internal_sessions),
+  } satisfies Omit<PaperRunSnapshot, "controller_state">
+
+  return {
+    ...snapshot,
+    controller_state: await loadPaperRunControllerState(runDir).catch(() => derivePaperRunControllerState(snapshot)),
   }
 }
 
@@ -542,16 +559,21 @@ export async function createPaperRun(
     },
     normalized,
   )
+  const snapshot = await getPaperRunSnapshotFromDir(handle.run_dir)
+  const controller = await initializePaperRunControllerState(handle.run_dir, snapshot, normalized)
   return {
     run_id: handle.run.run_id,
     run_dir: handle.run_dir,
-    snapshot: await getPaperRunSnapshotFromDir(handle.run_dir),
+    snapshot: {
+      ...(await getPaperRunSnapshotFromDir(handle.run_dir)),
+      controller_state: controller,
+    },
   }
 }
 
 export async function subscribePaperRunEvents(runID: string, options?: PaperRunRuntimeOptions) {
   const snapshot = await getPaperRunSnapshot(runID, options)
-  return `event: paper.run.snapshot\ndata: ${JSON.stringify(snapshot)}\n\n`
+  return `event: paper.run.snapshot\ndata: ${JSON.stringify(snapshot)}\n\n${controllerSseEvent(snapshot.controller_state)}`
 }
 
 export async function recordPaperRunGuidance(
@@ -571,12 +593,24 @@ export async function recordPaperRunGuidance(
     },
     options,
   )
+  await enqueuePaperRunGuidance(runDir, { message: input.message, event_id: event.event_id }, options)
   return {
     accepted: true,
     run_id: runID,
     event_id: event.event_id,
     message: "指导已记录，并会作为后续 stage/agent 的约束。",
   }
+}
+
+export async function controlPaperRun(
+  runID: string,
+  input: PaperRunControlInput,
+  options?: PaperRunRuntimeOptions,
+) {
+  const runDir = await findPaperRunDir(runID, options)
+  const state = await applyPaperRunControl(runDir, input, options)
+  if (input.action === "cancel") await updateResearchRunStatus(runDir, "cancelled", options)
+  return state
 }
 
 export async function previewPaperRun(runID: string, options?: PaperRunRuntimeOptions) {
