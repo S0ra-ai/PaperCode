@@ -1,6 +1,6 @@
 id: capability-pack-harness
 title: Built-in Capability Pack and Harness Scheduler
-status: todo
+status: in_progress
 priority: high
 owner: codex
 tags:
@@ -95,7 +95,10 @@ outputs:
 trace:
   logs: []
   attempt_count: 0
+lock:
+  by: codex
+  at: '2026-05-10T20:23:19.406530'
 meta:
   created_at: '2026-05-10T20:06:05.790049'
-  updated_at: '2026-05-10T20:06:05.790049'
+  updated_at: '2026-05-10T20:23:24.597061'
   version: '1'
