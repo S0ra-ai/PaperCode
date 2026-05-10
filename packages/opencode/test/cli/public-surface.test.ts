@@ -63,6 +63,9 @@ describe("public Paper Fucker surface", () => {
 
     expect(tips).toContain("PaperRun")
     expect(tips).toContain("Claim Ledger")
+    expect(tips).toContain("submission_candidate")
+    expect(tips).toContain("右侧栏")
+    expect(tips).toContain("子 agent 深度由运行态条件停止")
     expect(tips).toContain("paper_fucker export <run-id>")
     expect(tips).not.toContain("paper_fucker preview <run-id>")
     expect(tips).not.toContain("paper_fucker run --code")

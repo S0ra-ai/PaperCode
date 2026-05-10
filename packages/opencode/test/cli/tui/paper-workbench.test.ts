@@ -22,6 +22,16 @@ describe("TUI PaperRun workbench", () => {
     expect(request.quality_mode).toBe("reviewable_bundle")
   })
 
+  test("parses submission intent into stricter PaperRun quality mode", () => {
+    const request = parsePaperWorkbenchPrompt("--profile nature-paper --submission 基于仓库生成投稿候选论文")
+
+    expect(request.topic).toBe("基于仓库生成投稿候选论文")
+    expect(request.target_profile).toBe("nature-paper")
+    expect(request.budget_tier).toBe("submission")
+    expect(request.quality_mode).toBe("submission_candidate")
+    expect(request.language).toBe("zh-CN")
+  })
+
   test("submits home prompt to /paper/runs instead of session chat", async () => {
     const calls: Array<{ url: string; init: RequestInit }> = []
     const result = await submitPaperWorkbenchPrompt({

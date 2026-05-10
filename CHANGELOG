@@ -2,10 +2,30 @@
 :author        s0ra (https://github.com/S0ra-ai)
 :repo          
 :desc          记录项目的重大变更和版本历史
-:version       0.5.5-dev
+:version       0.5.6-dev
 :last_update   2026/05/11
 
 :history
+
+    0.5.6-dev - 2026/05/11 (002f011) [develop]
+        :brief 明确 PaperRun 工作台用户流程
+        - feat(tui): 首页 placeholder 和标题改为主题/代码/材料/数据/日志输入后自动创建 PaperRun 的流程表达
+        - feat(tui): tips 明确 reviewable_bundle、submission_candidate、右侧栏诊断与运行态递归 agent 停止语义
+        - feat(tui): PaperRun 侧栏标题改为中文, 下一步动作改为中文暂停问题表达
+        - docs(readme): 新增用户使用流程, 覆盖 intake、自动 stage graph、暂停条件、dashboard/sidebar、final export 与 forced draft
+        - test(tui): 覆盖 submission intent 解析和用户可见 tips
+        :src
+            - packages/opencode/src/cli/cmd/tui/routes/home.tsx - workbench intake placeholders and header copy
+            - packages/opencode/src/cli/cmd/tui/feature-plugins/home/tips-view.tsx - PaperRun flow tips
+            - packages/opencode/src/cli/cmd/tui/routes/paper/index.tsx - Chinese sidebar title
+            - packages/opencode/src/cli/cmd/tui/routes/paper/workbench.ts - Chinese next-action copy
+            - packages/opencode/test/cli/public-surface.test.ts - tips assertions
+            - packages/opencode/test/cli/tui/paper-workbench.test.ts - submission mode parse test
+            - README.md - user flow documentation
+            - .plan/confirmed/paper-workbench-ux-flow.yaml - TaskFlow execution logs
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/cli/tui/paper-workbench.test.ts test/cli/public-surface.test.ts passed: 8 pass, 0 fail, 77 expects
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
 
     0.5.5-dev - 2026/05/11 (399aeb2) [develop]
         :brief PaperRun 右侧诊断栏
