@@ -84,6 +84,14 @@ describe("strict live acceptance script", () => {
     expect(script).toContain("test/paper/observability-audit.test.ts")
   })
 
+  test("uses real PaperRun benchmark evidence for live topic and code checks", () => {
+    const script = readFileSync(scriptPath, "utf8")
+    expect(script).toContain("scripts/live-paper-quality-benchmark.ts")
+    expect(script).toContain('"--scenario", "topic"')
+    expect(script).toContain('"--scenario", "code"')
+    expect(script).not.toContain('"test/research/e2e.test.ts"')
+  })
+
   test("allows Git Flow feature and fix branches during active task work", () => {
     const script = readFileSync(scriptPath, "utf8")
     expect(script).toContain("^(feature|fix)/[a-z0-9-]+$")

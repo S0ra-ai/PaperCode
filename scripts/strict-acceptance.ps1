@@ -232,7 +232,7 @@ function Invoke-ExaSmoke {
         params = @{
             protocolVersion = "2024-11-05"
             capabilities = @{}
-            clientInfo = @{ name = "paper_fucker_acceptance"; version = "0.2.0-dev" }
+            clientInfo = @{ name = "paper_fucker_acceptance"; version = Get-ProjectVersion }
         }
     } | ConvertTo-Json -Depth 8
     $response = Invoke-RestMethod -Uri "https://mcp.exa.ai/mcp" -Method Post -ContentType "application/json" -Headers @{ Accept = "application/json, text/event-stream" } -Body $body -TimeoutSec 30
@@ -345,6 +345,13 @@ function Invoke-GitFlowCleanupCheck {
 function Read-RepoText {
     param([string]$RelativePath)
     return Get-Content -Raw -LiteralPath (Join-Path $RepoRoot $RelativePath)
+}
+
+function Get-ProjectVersion {
+    $readme = Read-RepoText "README.md"
+    $match = [regex]::Match($readme, "<!-- version:start -->([^<]+)<!-- version:end -->")
+    if ($match.Success) { return $match.Groups[1].Value }
+    return "unknown"
 }
 
 function Assert-HardFork {
@@ -521,10 +528,10 @@ Invoke-Check "docx-generation" "DOCX generation" {
     Invoke-DocxGeneration
 }
 Invoke-Check "topic-to-paper-live-run" "Topic-to-paper runtime smoke" {
-    Invoke-CheckedCommand "npx" @("--yes", "bun@1.3.13", "--cwd", "packages/opencode", "test", "test/research/e2e.test.ts")
+    Invoke-CheckedCommand "npx" @("--yes", "bun@1.3.13", "scripts/live-paper-quality-benchmark.ts", "--scenario", "topic")
 }
 Invoke-Check "code-to-paper-live-run" "Code-to-paper runtime smoke" {
-    Invoke-CheckedCommand "npx" @("--yes", "bun@1.3.13", "--cwd", "packages/opencode", "test", "test/paper/code-to-paper.test.ts")
+    Invoke-CheckedCommand "npx" @("--yes", "bun@1.3.13", "scripts/live-paper-quality-benchmark.ts", "--scenario", "code")
 }
 Invoke-Check "hard-fork-paper-core" "Hard fork paper core migration" {
     Invoke-HardForkPaperCore

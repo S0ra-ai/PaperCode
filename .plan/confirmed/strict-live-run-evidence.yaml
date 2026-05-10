@@ -1,0 +1,183 @@
+id: strict-live-run-evidence
+title: Strict Live Run Evidence
+status: in_progress
+priority: high
+owner: codex
+tags:
+- acceptance
+- paperrun
+- 0.6.1-dev
+depends_on:
+- recursive-agent-sidebar-acceptance
+description: Replace fixture-backed strict acceptance topic/code live-run evidence
+  with real PaperRun benchmark executions, and keep external smoke client version
+  aligned with the current project version.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: strict-live-run-evidence-step-01-audit
+  title: Audit strict live evidence gaps
+  status: done
+  owner: codex
+  depends_on: []
+  description: Confirm strict acceptance currently labels fixture e2e tests as live
+    topic/code runs and identify stale smoke metadata such as hard-coded client versions.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-10T19:49:02.528667'
+      level: info
+      message: Auditing strict acceptance evidence after 0.6.0-dev completion. The
+        report labels topic/code checks as live-run, but topic uses test/research/e2e.test.ts
+        fixture data; Exa MCP initialize clientInfo is hard-coded to 0.2.0-dev.
+      agent: codex
+    - timestamp: '2026-05-10T19:49:08.068454'
+      level: info
+      message: 'Confirmed gaps: reports/strict-live-acceptance.md shows topic-to-paper-live-run
+        executing fixture e2e tests and code-to-paper live-run executing unit-style
+        fixture codebase tests; scripts/strict-acceptance.ps1 uses hard-coded Exa
+        MCP clientInfo version 0.2.0-dev. Existing scripts/live-paper-quality-benchmark.ts
+        is the right anchor for real PaperRun evidence but needs scenario support
+        and assertions.'
+      agent: codex
+    last_run: '2026-05-10T19:49:08.068454'
+    attempt_count: 2
+  meta: {}
+- id: strict-live-run-evidence-step-02-benchmark
+  title: Upgrade live PaperRun benchmark script
+  status: done
+  owner: codex
+  depends_on:
+  - strict-live-run-evidence-step-01-audit
+  description: Make scripts/live-paper-quality-benchmark.ts support topic and code
+    scenarios, emit scenario-specific summaries, and fail if required PaperRun artifacts,
+    preview, forced export, and gate evidence are missing.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-10T19:51:19.493346'
+      level: info
+      message: Upgrading scripts/live-paper-quality-benchmark.ts to scenario-based
+        topic/code PaperRun benchmark with hard assertions on stage graph, artifacts,
+        source ledger, ClaimLedger, draft, review, readonly preview, forced export,
+        failed checks, observability audit, and code-specific artifact schemas.
+      agent: codex
+    - timestamp: '2026-05-10T19:52:29.796300'
+      level: info
+      message: scripts/live-paper-quality-benchmark.ts now supports --scenario topic/code.
+        Both scenarios passed locally and wrote tmp/live-paper-quality-benchmark/<scenario>/paperrun-summary.json
+        with 14 stages, 33 artifacts, 1 claim, readonly ready preview, forced_draft
+        export, explicit reproduction_failure failed checks, and no missing observability
+        audit kinds; code scenario also asserts CodebaseMap/MethodExtraction/ExperimentSurface/ReproductionPlan
+        artifact schemas.
+      agent: codex
+    last_run: '2026-05-10T19:52:29.796300'
+    attempt_count: 2
+  meta: {}
+- id: strict-live-run-evidence-step-03-strict
+  title: Use benchmark in strict acceptance
+  status: done
+  owner: codex
+  depends_on:
+  - strict-live-run-evidence-step-02-benchmark
+  description: Update scripts/strict-acceptance.ps1 so topic-to-paper-live-run and
+    code-to-paper-live-run execute the live PaperRun benchmark instead of fixture
+    tests, and align Exa clientInfo version with the current README/CHANGELOG version.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-10T19:52:35.802181'
+      level: info
+      message: Updating strict acceptance to execute scripts/live-paper-quality-benchmark.ts
+        --scenario topic/code for live run checks and to derive Exa MCP clientInfo
+        version from README instead of a stale hard-coded version.
+      agent: codex
+    - timestamp: '2026-05-10T19:53:00.272170'
+      level: info
+      message: Strict acceptance now runs scripts/live-paper-quality-benchmark.ts
+        --scenario topic for topic-to-paper-live-run and --scenario code for code-to-paper-live-run.
+        Exa MCP initialize uses Get-ProjectVersion from README instead of hard-coded
+        0.2.0-dev. The PowerShell script parses under Windows PowerShell and remains
+        ASCII-safe/no reserved $HOME assignment.
+      agent: codex
+    last_run: '2026-05-10T19:53:00.272170'
+    attempt_count: 2
+  meta: {}
+- id: strict-live-run-evidence-step-04-verify
+  title: Verify strict live evidence
+  status: done
+  owner: codex
+  depends_on:
+  - strict-live-run-evidence-step-03-strict
+  description: Run targeted tests, strict acceptance, version checks, CHANGELOG format
+    validation, and TaskFlow validation for the new evidence path.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-10T19:53:07.779628'
+      level: info
+      message: Running targeted tests/typecheck/version/changelog checks and strict
+        acceptance with the real benchmark-backed live run evidence.
+      agent: codex
+    - timestamp: '2026-05-10T19:56:56.303191'
+      level: info
+      message: 'Verification passed: strict-acceptance.test.ts 9 pass; packages/opencode
+        typecheck; check-readme-version; check-changelog-format; TaskFlow validate_task
+        strict-live-run-evidence; TaskFlow validate_changelog_format. Full scripts/strict-acceptance.ps1
+        -CheckTimeoutSeconds 300 passed. The refreshed report shows topic-to-paper-live-run
+        and code-to-paper-live-run running benchmark-backed PaperRuns with project_version
+        0.6.0-dev, 14 stages, 33 artifacts, 1 claim, forced_draft export, explicit
+        reproduction_failure checks, and ready preview; no fixture e2e test path appears
+        in the live-run report rows.'
+      agent: codex
+    last_run: '2026-05-10T19:56:56.303191'
+    attempt_count: 2
+  meta: {}
+- id: strict-live-run-evidence-step-05-release
+  title: Version 0.6.1-dev and merge
+  status: todo
+  owner: codex
+  depends_on:
+  - strict-live-run-evidence-step-04-verify
+  description: Update README/CHANGELOG to 0.6.1-dev with the real work commit id,
+    rerun strict acceptance so the report reflects 0.6.1-dev, merge through Git Flow,
+    and clean the branch.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: file
+  path: scripts/live-paper-quality-benchmark.ts
+  description: Scenario-specific PaperRun benchmark script
+- type: file
+  path: scripts/strict-acceptance.ps1
+  description: Strict acceptance live run evidence path
+- type: report
+  path: reports/strict-live-acceptance.md
+  description: Strict report with non-fixture topic/code live-run evidence
+- type: file
+  path: CHANGELOG
+  description: Colon DSL entry for 0.6.1-dev
+trace:
+  logs: []
+  attempt_count: 0
+lock:
+  by: codex
+  at: '2026-05-10T19:48:44.442596'
+meta:
+  created_at: '2026-05-10T19:48:37.991505'
+  updated_at: '2026-05-10T19:56:56.303191'
+  version: '1'
