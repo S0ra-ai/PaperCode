@@ -1,6 +1,6 @@
 # paper_fucker
 
-Current version: <!-- version:start -->0.3.2-dev<!-- version:end -->
+Current version: <!-- version:start -->0.3.3-dev<!-- version:end -->
 
 `paper_fucker` is a private-first, OpenCode-derived closed-loop paper system. It turns a topic, codebase, dataset, experiment log, or paper material set into a verifiable academic-paper bundle with research planning, source discovery, code understanding, experiment/reproduction support, ClaimLedger-first writing, authenticity gates, profile-aware formatting, preview, and export.
 
@@ -37,6 +37,7 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - Final hard-fork acceptance for `0.3.0-dev` asserts that the user-visible product is now PaperRun-first: the paper core lives under `packages/opencode/src/paper`, `packages/server` is gone, the Chinese TUI creates PaperRuns instead of ordinary chat sessions, nested multi-model agents are traceable, final export is blocked by failed authenticity gates, and forced drafts carry failed checks.
 - PaperRun creation now drives the default paper stage engine directly. A new run records planning, literature/data seed discovery, source-range code analysis, experiment/reproduction diagnostics, ClaimLedger, draft, profile check, verification gate, preview/export artifacts, and controller snapshots without requiring fixture handler injection.
 - PaperRun now has a durable controller state. Pause checkpoints, guidance queue, resume/retry/cancel controls, controller SSE events, and `controller_state` snapshots are persisted under each run so the TUI/API can steer runs without shell commands.
+- Intake now records a real `MaterialIndex.v1` for user-supplied code paths, paper files, datasets, and experiment logs. Indexed material receives source ranges and Source Ledger entries; secret-like paths, ignored directories, and unsupported binaries are skipped with explicit reasons.
 - The automatic orchestrator now owns the default topic-to-paper stage graph and proceeds stage-by-stage unless a pause condition is raised.
 - Trusted template resolution now records `TemplateSpec.v1`, adopts clear high-confidence official templates automatically, and falls back to a CJC default when no venue is known.
 - Open literature and dataset discovery now records `SourceRecord.v1`, `LiteratureMap.v1`, `DataPlan.v1`, `DatasetCard.v1`, and direction feasibility artifacts with license and verification diagnostics.
@@ -125,6 +126,7 @@ Important early tasks:
 - `task-038-hard-fork-acceptance`: validate the complete OpenCode hard fork paper workbench with strict live acceptance and hard-fork-specific checks.
 - `task-039-paperrun-execution-engine`: make PaperRun creation drive the real default paper stage engine.
 - `task-040-paperrun-resume-guidance-controller`: add durable PaperRun resume, guidance, cancel, checkpoint, and controller SSE state.
+- `task-041-real-intake-material-indexing`: index real input materials with source ranges, Source Ledger entries, and private-first filtering.
 
 ## Branching
 
