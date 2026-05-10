@@ -1,0 +1,161 @@
+id: task-052-remove-stub-leftovers
+title: Remove runtime stub leftovers
+status: todo
+priority: high
+owner: codex
+tags:
+- cleanup
+- runtime
+- python-tools
+- hard-fork
+depends_on:
+- task-051-live-benchmark-regression-pass
+description: Remove misleading Phase 1 stub/not_implemented naming from the current
+  paper_fucker runtime and Python research-tool surface now that the closed-loop PaperRun
+  implementation exists. Replace it with explicit blocking diagnostics and canonical
+  DOCX generation tool names, while retaining authenticity checks that reject placeholder/synthetic
+  facts.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-052-step-01-inventory
+  title: Inventory stub leftovers
+  status: done
+  owner: codex
+  depends_on: []
+  description: Record the remaining runtime/public stub leftovers and decide which
+    are current defects versus historical/provenance references.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-10T10:07:58.951924'
+      level: info
+      message: Inventorying current runtime/public stub leftovers after TaskFlow reached
+        52/52 done.
+      agent: codex
+    - timestamp: '2026-05-10T10:08:05.981209'
+      level: info
+      message: 'Found two current-code cleanup targets: packages/opencode/src/paper/research/runtime/guards.ts
+        still exposes Phase 1 not_implemented stage stubs via ResearchStageStub/createNotImplementedStageStub/phaseOneStageStubs
+        and tests assert that wording; research-tools/src/paper_fucker_tools/mcp_tools.py
+        exposes docx_generation_stub as the canonical registry entry. Historical reports
+        and CHANGELOG references are provenance only and will remain documented as
+        historical.'
+      agent: codex
+    last_run: '2026-05-10T10:08:05.981209'
+    attempt_count: 2
+  meta: {}
+- id: task-052-step-02-runtime-guards
+  title: Replace Phase 1 stage stubs with blocking diagnostics
+  status: done
+  owner: codex
+  depends_on:
+  - task-052-step-01-inventory
+  description: Rename runtime types/helpers/tests from Phase 1 stub/not_implemented
+    terminology to explicit blocking diagnostics that do not imply unimplemented current
+    stages.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-10T10:08:56.683069'
+      level: info
+      message: Renaming Phase 1 stage stub guard API to current blocking diagnostics
+        and updating TypeScript tests.
+      agent: codex
+    - timestamp: '2026-05-10T10:09:45.625525'
+      level: info
+      message: Updated runtime guards from Phase 1 stub/not_implemented API to createStageBlockingDiagnostic/ResearchStageBlockingDiagnostic
+        with blocked status. Authenticity guard now rejects placeholder/synthetic/fake
+        provenance. Updated TypeScript guard and paper orchestrator tests to remove
+        stub wording from current paper tests.
+      agent: codex
+    last_run: '2026-05-10T10:09:45.625525'
+    attempt_count: 2
+  meta: {}
+- id: task-052-step-03-python-docx-tool
+  title: Rename Python DOCX tool
+  status: done
+  owner: codex
+  depends_on:
+  - task-052-step-01-inventory
+  description: Replace docx_generation_stub with canonical docx_generation and update
+    tests/registry.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-10T10:09:50.914744'
+      level: info
+      message: Renaming Python DOCX generation tool from docx_generation_stub to docx_generation
+        and covering the registry with unit tests.
+      agent: codex
+    - timestamp: '2026-05-10T10:10:24.455835'
+      level: info
+      message: Renamed Python DOCX generation tool to docx_generation, updated ToolResult
+        names, removed docx_generation_stub from TOOL_REGISTRY, and added a unit test
+        that verifies the canonical tool name writes a DOCX file.
+      agent: codex
+    last_run: '2026-05-10T10:10:24.455835'
+    attempt_count: 2
+  meta: {}
+- id: task-052-step-04-verify
+  title: Verify cleanup
+  status: in_progress
+  owner: codex
+  depends_on:
+  - task-052-step-02-runtime-guards
+  - task-052-step-03-python-docx-tool
+  description: Run targeted TypeScript/Python tests, typecheck, README/CHANGELOG version
+    sync, strict branding/stub scans, and TaskFlow validation.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-10T10:11:10.761964'
+      level: info
+      message: Running targeted cleanup tests and scans before version documentation.
+      agent: codex
+    last_run: '2026-05-10T10:11:10.761964'
+    attempt_count: 1
+  meta: {}
+outputs:
+- type: file
+  path: packages/opencode/src/paper/research/runtime/guards.ts
+  description: Runtime guard types and helpers no longer expose stage stubs as current
+    implementation state.
+- type: file
+  path: packages/opencode/test/research/guards.test.ts
+  description: Tests assert blocking diagnostics and placeholder rejection without
+    Phase 1 stub wording.
+- type: file
+  path: research-tools/src/paper_fucker_tools/mcp_tools.py
+  description: Canonical DOCX generation tool name replaces stub suffix.
+- type: file
+  path: research-tools/tests/test_tools.py
+  description: Python tool tests cover canonical DOCX tool registry.
+- type: report
+  path: reports/remove-stub-leftovers.md
+  description: Cleanup report and verification evidence.
+- type: file
+  path: README.md
+  description: Current status records the cleanup.
+- type: file
+  path: CHANGELOG
+  description: 0.5.1-dev history entry with real commit id.
+trace:
+  logs: []
+  attempt_count: 0
+lock:
+  by: codex
+  at: '2026-05-10T10:07:41.581499'
+meta:
+  created_at: '2026-05-10T10:07:29.516146'
+  updated_at: '2026-05-10T10:11:10.761964'
+  version: '1'

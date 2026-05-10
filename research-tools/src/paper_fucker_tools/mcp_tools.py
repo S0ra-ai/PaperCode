@@ -122,7 +122,7 @@ def experiment_log_parse(input_data: dict[str, Any]) -> ToolResult:
     )
 
 
-def docx_generation_stub(input_data: dict[str, Any]) -> ToolResult:
+def docx_generation(input_data: dict[str, Any]) -> ToolResult:
     output = Path(str(input_data["output_path"])).expanduser()
     title = str(input_data.get("title", "paper_fucker draft"))
     paragraphs = [str(item) for item in input_data.get("paragraphs", [])]
@@ -137,13 +137,13 @@ def docx_generation_stub(input_data: dict[str, Any]) -> ToolResult:
         doc.save(str(output))
         metadata = {"path": str(output), "title": title, "paragraphs": len(paragraphs)}
         return ToolResult.ok(
-            "docx_generation_stub",
+            "docx_generation",
             artifacts=[ToolArtifact(path=str(output), mime_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document", data=metadata)],
             events=[ToolEvent(type="python.docx.generated", payload=metadata)],
             metadata=metadata,
         )
     except Exception as error:  # pragma: no cover - optional dependency/runtime variability
-        return ToolResult.fail("docx_generation_stub", str(error), metadata={"path": str(output), "title": title})
+        return ToolResult.fail("docx_generation", str(error), metadata={"path": str(output), "title": title})
 
 
 TOOL_REGISTRY: dict[str, ToolHandler] = {
@@ -151,7 +151,7 @@ TOOL_REGISTRY: dict[str, ToolHandler] = {
     "pdf_probe": pdf_probe,
     "dataset_metadata_probe": dataset_metadata_probe,
     "experiment_log_parse": experiment_log_parse,
-    "docx_generation_stub": docx_generation_stub,
+    "docx_generation": docx_generation,
 }
 
 

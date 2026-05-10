@@ -9,11 +9,13 @@ export type ResearchPlannedStage =
   | "verification"
   | "export"
 
-export type ResearchStageStub = {
+export type ResearchStageBlockingDiagnostic = {
   stage: ResearchPlannedStage
-  status: "not_implemented"
+  status: "blocked"
   reason: string
   blocks_final_output: true
+  required_action?: string
+  historical_task_id?: string
 }
 
 export type ResearchOutputKind =
@@ -25,7 +27,7 @@ export type ResearchOutputKind =
   | "final_export"
 
 export type ResearchOutputProvenance = {
-  source_type: "verified" | "tool" | "user" | "stub" | "synthetic" | "fake"
+  source_type: "verified" | "tool" | "user" | "placeholder" | "synthetic" | "fake"
   source_ids?: string[]
   artifact_ids?: string[]
   note?: string
@@ -38,25 +40,21 @@ export class ResearchAuthenticityError extends Error {
   }
 }
 
-export function createNotImplementedStageStub(stage: ResearchPlannedStage, reason: string): ResearchStageStub {
-  return {
-    stage,
-    status: "not_implemented",
-    reason,
+export function createStageBlockingDiagnostic(input: {
+  stage: ResearchPlannedStage
+  reason: string
+  required_action?: string
+  historical_task_id?: string
+}): ResearchStageBlockingDiagnostic {
+  const diagnostic: ResearchStageBlockingDiagnostic = {
+    stage: input.stage,
+    status: "blocked",
+    reason: input.reason,
     blocks_final_output: true,
   }
-}
-
-export function phaseOneStageStubs(): ResearchStageStub[] {
-  return [
-    createNotImplementedStageStub("template", "Trusted template resolution is tracked by task-010-template-resolve."),
-    createNotImplementedStageStub("literature", "Open literature discovery is tracked by task-011-literature-data."),
-    createNotImplementedStageStub("data", "Dataset discovery and license verification is tracked by task-011-literature-data."),
-    createNotImplementedStageStub("experiment", "Experiment planning and reproduction is tracked by task-012-experiment-loop."),
-    createNotImplementedStageStub("writing", "Claim-ledger writing is tracked by task-013-writing-claim-ledger."),
-    createNotImplementedStageStub("verification", "Authenticity verification is tracked by task-014-verification-gate."),
-    createNotImplementedStageStub("export", "Final and forced-draft export is tracked by task-015-export-bundles."),
-  ]
+  if (input.required_action) diagnostic.required_action = input.required_action
+  if (input.historical_task_id) diagnostic.historical_task_id = input.historical_task_id
+  return diagnostic
 }
 
 export function assertAuthenticResearchOutput(input: {
@@ -65,7 +63,7 @@ export function assertAuthenticResearchOutput(input: {
   final_gate?: ResearchFinalGateState
 }) {
   const sourceType = input.provenance.source_type
-  if (sourceType === "stub" || sourceType === "synthetic" || sourceType === "fake") {
+  if (sourceType === "placeholder" || sourceType === "synthetic" || sourceType === "fake") {
     throw new ResearchAuthenticityError(
       `${input.kind} output is ${sourceType}; paper_fucker must not turn unverified placeholder material into research facts.`,
     )
