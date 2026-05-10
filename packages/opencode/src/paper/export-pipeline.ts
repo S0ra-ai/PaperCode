@@ -113,10 +113,10 @@ function discoveredTools(explicit?: PaperExportToolPaths): PaperExportToolPaths 
   )
 }
 
-function latexEngine(tools: PaperExportToolPaths) {
-  return (["latexmk", "tectonic", "xelatex", "pdflatex", "lualatex"] as PaperExportToolName[])
+function latexEngines(tools: PaperExportToolPaths) {
+  return (["latexmk", "xelatex", "pdflatex", "lualatex", "tectonic"] as PaperExportToolName[])
     .map((name) => ({ name, path: tools[name] }))
-    .find((item): item is { name: PaperExportToolName; path: string } => Boolean(item.path))
+    .filter((item): item is { name: PaperExportToolName; path: string } => Boolean(item.path))
 }
 
 function failedFile(bundleID: string, format: ExportFormat, diagnostics: string[]): ExportFile {
@@ -181,6 +181,18 @@ async function commandFile(input: {
   })
 }
 
+function latexCliPath(value: string) {
+  return value.replace(/\\/g, "/")
+}
+
+function pdfArgs(engine: PaperExportToolName, cwd: string, texPath: string) {
+  const latexCwd = latexCliPath(cwd)
+  const latexTexPath = latexCliPath(texPath)
+  if (engine === "latexmk") return ["-pdf", "-interaction=nonstopmode", `-outdir=${latexCwd}`, latexTexPath]
+  if (engine === "tectonic") return ["--outdir", latexCwd, latexTexPath]
+  return ["-interaction=nonstopmode", `-output-directory=${latexCwd}`, latexTexPath]
+}
+
 async function renderMarkdown(runDir: string, bundleID: string, markdown: string) {
   return writtenFile({
     runDir,
@@ -229,7 +241,7 @@ async function renderLatex(input: {
   return commandFile({
     command: input.command,
     tool: pandoc,
-    args: [markdownPath, "-t", "latex", "-o", latexPath],
+    args: [markdownPath, "-s", "-t", "latex", "-o", latexPath],
     cwd: outputDir(input.runDir, input.bundleID),
     output: latexPath,
     format: "latex",
@@ -273,8 +285,8 @@ async function renderPdf(input: {
   if (input.latexFile.status !== "written") {
     return failedFile(input.bundleID, "pdf", ["LaTeX source unavailable; install pandoc or provide a LaTeX renderer."])
   }
-  const engine = latexEngine(input.tools)
-  if (!engine) {
+  const engines = latexEngines(input.tools)
+  if (engines.length === 0) {
     return failedFile(input.bundleID, "pdf", [
       "LaTeX engine not available for PDF rendering. Install latexmk, tectonic, xelatex, pdflatex, or lualatex, then run `paper_fucker init`.",
     ])
@@ -282,23 +294,31 @@ async function renderPdf(input: {
   const cwd = outputDir(input.runDir, input.bundleID)
   const texPath = outputFile(input.runDir, input.bundleID, "latex")
   const pdfPath = outputFile(input.runDir, input.bundleID, "pdf")
-  const args =
-    engine.name === "latexmk"
-      ? ["-pdf", "-interaction=nonstopmode", `-outdir=${cwd}`, texPath]
-      : engine.name === "tectonic"
-        ? ["--outdir", cwd, texPath]
-        : ["-interaction=nonstopmode", `-output-directory=${cwd}`, texPath]
-  return commandFile({
-    command: input.command,
-    tool: engine.path,
-    args,
-    cwd,
-    output: pdfPath,
-    format: "pdf",
-    bundleID: input.bundleID,
-    runDir: input.runDir,
-    missingDiagnostic: `${engine.name} did not produce PDF output.`,
-  })
+  const diagnostics: string[] = []
+  for (const engine of engines) {
+    const result = await input.command({ tool: engine.path, args: pdfArgs(engine.name, cwd, texPath), cwd })
+    if (result.exit_code !== 0) {
+      diagnostics.push(
+        `${engine.name} failed with exit code ${result.exit_code}. ${
+          result.stderr || result.stdout || `${engine.name} did not produce PDF output.`
+        }`.trim(),
+      )
+      continue
+    }
+    const exists = await Bun.file(pdfPath).exists()
+    if (!exists) {
+      diagnostics.push(`${engine.name} did not create ${path.basename(pdfPath)}.`)
+      continue
+    }
+    return writtenFile({
+      runDir: input.runDir,
+      bundleID: input.bundleID,
+      format: "pdf",
+      bytes: new Uint8Array(await readFile(pdfPath)),
+      diagnostics,
+    })
+  }
+  return failedFile(input.bundleID, "pdf", diagnostics.length > 0 ? diagnostics : ["No LaTeX engine produced PDF output."])
 }
 
 async function renderDocx(input: {
