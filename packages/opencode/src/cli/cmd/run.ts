@@ -205,7 +205,7 @@ function normalizePath(input?: string) {
 
 export const RunCommand = effectCmd({
   command: "run [message..]",
-  describe: "run paper_fucker with a message",
+  describe: "start a PaperRun from CLI input",
   // --attach connects to a remote server (no local instance needed); the
   // default path runs an in-process server and needs the project instance.
   instance: (args) => !args.attach,
@@ -215,7 +215,7 @@ export const RunCommand = effectCmd({
   builder: (yargs: Argv) =>
     yargs
       .positional("message", {
-        describe: "message to send",
+        describe: "research topic, code path, paper material, or run guidance",
         type: "string",
         array: true,
         default: [],
@@ -226,21 +226,25 @@ export const RunCommand = effectCmd({
       })
       .option("continue", {
         alias: ["c"],
-        describe: "continue the last session",
+        describe: "resume the last internal run context",
         type: "boolean",
+        hidden: true,
       })
       .option("session", {
         alias: ["s"],
-        describe: "session id to continue",
+        describe: "internal run context id to resume",
         type: "string",
+        hidden: true,
       })
       .option("fork", {
-        describe: "fork the session before continuing (requires --continue or --session)",
+        describe: "fork the internal run context before resuming",
         type: "boolean",
+        hidden: true,
       })
       .option("share", {
         type: "boolean",
-        describe: "share the session",
+        describe: "share the internal run transcript",
+        hidden: true,
       })
       .option("model", {
         type: "string",
@@ -249,7 +253,8 @@ export const RunCommand = effectCmd({
       })
       .option("agent", {
         type: "string",
-        describe: "agent to use",
+        describe: "internal primary agent override",
+        hidden: true,
       })
       .option("format", {
         type: "string",
@@ -265,7 +270,8 @@ export const RunCommand = effectCmd({
       })
       .option("title", {
         type: "string",
-        describe: "title for the session (uses truncated prompt if no value provided)",
+        describe: "internal run title override",
+        hidden: true,
       })
       .option("attach", {
         type: "string",
@@ -347,12 +353,12 @@ export const RunCommand = effectCmd({
       if (!process.stdin.isTTY) message += "\n" + (await Bun.stdin.text())
 
       if (message.trim().length === 0 && !args.command) {
-        UI.error("You must provide a message or a command")
+        UI.error("You must provide a research topic, material path, guidance message, or command")
         process.exit(1)
       }
 
       if (args.fork && !args.continue && !args.session) {
-        UI.error("--fork requires --continue or --session")
+        UI.error("--fork requires an internal resume target")
         process.exit(1)
       }
 

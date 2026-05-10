@@ -219,12 +219,12 @@ function sanitize(data: { info: Session.Info; messages: MessageV2.WithParts[] })
 }
 
 export const ExportCommand = effectCmd({
-  command: "export [sessionID]",
-  describe: "export session data as JSON",
+  command: "export [runID]",
+  describe: "export a PaperRun bundle as JSON",
   builder: (yargs) =>
     yargs
-      .positional("sessionID", {
-        describe: "session id to export",
+      .positional("runID", {
+        describe: "PaperRun id to export",
         type: "string",
       })
       .option("sanitize", {
@@ -236,19 +236,19 @@ export const ExportCommand = effectCmd({
   }),
 })
 
-const run = Effect.fn("Cli.export.body")(function* (args: { sessionID?: string; sanitize?: boolean }) {
+const run = Effect.fn("Cli.export.body")(function* (args: { runID?: string; sanitize?: boolean }) {
   const svc = yield* Session.Service
-  let sessionID = args.sessionID ? SessionID.make(args.sessionID) : undefined
-  process.stderr.write(`Exporting session: ${sessionID ?? "latest"}\n`)
+  let sessionID = args.runID ? SessionID.make(args.runID) : undefined
+  process.stderr.write(`Exporting PaperRun: ${sessionID ?? "latest"}\n`)
 
   if (!sessionID) {
     UI.empty()
-    prompts.intro("Export session", { output: process.stderr })
+    prompts.intro("Export PaperRun", { output: process.stderr })
 
     const sessions = yield* svc.list()
 
     if (sessions.length === 0) {
-      prompts.log.error("No sessions found", { output: process.stderr })
+      prompts.log.error("No PaperRuns found", { output: process.stderr })
       prompts.outro("Done", { output: process.stderr })
       return
     }
@@ -257,7 +257,7 @@ const run = Effect.fn("Cli.export.body")(function* (args: { sessionID?: string; 
 
     const selectedSession = yield* Effect.promise(() =>
       prompts.autocomplete({
-        message: "Select session to export",
+        message: "Select PaperRun to export",
         maxItems: 10,
         options: sessions.map((session) => ({
           label: session.title,
@@ -274,7 +274,7 @@ const run = Effect.fn("Cli.export.body")(function* (args: { sessionID?: string; 
 
     sessionID = selectedSession
 
-    prompts.outro("Exporting session...", { output: process.stderr })
+    prompts.outro("Exporting PaperRun...", { output: process.stderr })
   }
 
   // Match legacy try/catch — catches both typed failures and defects
@@ -287,5 +287,5 @@ const run = Effect.fn("Cli.export.body")(function* (args: { sessionID?: string; 
 
     process.stdout.write(JSON.stringify(args.sanitize ? sanitize(exportData) : exportData, null, 2))
     process.stdout.write(EOL)
-  }).pipe(Effect.catchCause(() => fail(`Session not found: ${sessionID!}`)))
+  }).pipe(Effect.catchCause(() => fail(`PaperRun not found: ${sessionID!}`)))
 })
