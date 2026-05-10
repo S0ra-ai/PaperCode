@@ -46,7 +46,19 @@ function snapshot(): PaperRunSnapshot {
     source_ledger: [],
     claim_ledger: [],
     experiment_status: { planned: false, exploratory_runs: 0, reproduction_gate: "blocked" },
-    agent_tree: { schema_version: "AgentTree.v1", max_depth: 2, max_parallel: 4, nodes: [] },
+    agent_tree: {
+      schema_version: "AgentTree.v1",
+      max_depth: null,
+      max_parallel: 4,
+      recursive_policy: {
+        schema_version: "RecursiveAgentPolicy.v1",
+        depth_policy: "unbounded",
+        stop_conditions: ["cost_cap", "concurrency_cap", "authenticity_gate_block"],
+        cost_cap_usd: 5,
+        max_parallel: 4,
+      },
+      nodes: [],
+    },
     diagnostics: {
       counts: {
         events: 0,

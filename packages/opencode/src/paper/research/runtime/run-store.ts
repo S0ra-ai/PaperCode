@@ -118,6 +118,15 @@ export function nextResearchId(kind: "run" | "event" | "artifact", options?: Res
   return options?.idFactory?.(kind) ?? `${kind}-${randomUUID()}`
 }
 
+async function nextUniqueResearchEventId(runDir: string, options?: ResearchRuntimeOptions) {
+  const existing = new Set((await readJsonlFacts(runDir, "event")).map((event) => event.event_id))
+  for (let attempt = 0; attempt < 10; attempt++) {
+    const candidate = nextResearchId("event", options)
+    if (!existing.has(candidate)) return candidate
+  }
+  return `event-${randomUUID()}`
+}
+
 export function runFilePath(runDir: string) {
   return path.join(runDir, storageFacts.run)
 }
@@ -205,7 +214,7 @@ export async function appendResearchEvent(
       const createdAt = input.created_at ?? nowIso(options)
       const event = await appendResearchFact(runDir, "event", {
         schema_version: RESEARCH_SCHEMA_VERSION,
-        event_id: input.event_id ?? nextResearchId("event", options),
+        event_id: input.event_id ?? (await nextUniqueResearchEventId(runDir, options)),
         run_id: run.run_id,
         type: input.type,
         created_at: createdAt,
