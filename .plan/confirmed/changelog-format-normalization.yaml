@@ -1,0 +1,114 @@
+id: changelog-format-normalization
+title: Normalize CHANGELOG colon-history indentation
+status: done
+priority: high
+owner: codex
+tags:
+- docs
+- changelog
+- format
+depends_on: []
+description: Normalize the full CHANGELOG colon-history indentation so every version
+  line is nested under :history, every entry field is nested under its version, and
+  future regressions are caught by a script.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: changelog-format-normalization-step-01-inspect
+  title: Inspect current indentation problems
+  status: done
+  owner: codex
+  depends_on: []
+  description: Scan CHANGELOG for unindented history version lines and mis-nested
+    field headers.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-10T18:45:22.723052'
+      level: info
+      message: Scanning CHANGELOG for history entries not nested under :history.
+      agent: codex
+    - timestamp: '2026-05-10T18:45:27.477936'
+      level: info
+      message: Found unindented historical version entries at 0.1.9-dev through early
+        0.1.0-dev, matching the screenshot. Field headers also needed consistent nesting
+        under versions.
+      agent: codex
+    last_run: '2026-05-10T18:45:27.477936'
+    attempt_count: 2
+  meta: {}
+- id: changelog-format-normalization-step-02-normalize
+  title: Normalize CHANGELOG indentation
+  status: done
+  owner: codex
+  depends_on:
+  - changelog-format-normalization-step-01-inspect
+  description: 'Format all history entries consistently: version lines at four spaces,
+    fields and brief bullets at eight spaces, section content at twelve spaces.'
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-10T18:45:31.645805'
+      level: info
+      message: Normalizing full CHANGELOG indentation.
+      agent: codex
+    - timestamp: '2026-05-10T18:46:09.706238'
+      level: info
+      message: 'Normalized full CHANGELOG history indentation: version lines now use
+        4 spaces, entry section headers 8 spaces, brief bullets 8 spaces, and section
+        content bullets 12 spaces. Verified the 0.1.9-dev screenshot area is now nested
+        under :history.'
+      agent: codex
+    last_run: '2026-05-10T18:46:09.706238'
+    attempt_count: 2
+  meta: {}
+- id: changelog-format-normalization-step-03-check
+  title: Add and run format check
+  status: done
+  owner: codex
+  depends_on:
+  - changelog-format-normalization-step-02-normalize
+  description: Create scripts/check-changelog-format.ps1 and run it with README version
+    check and TaskFlow validation.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-10T18:46:14.131934'
+      level: info
+      message: Adding and running CHANGELOG format check.
+      agent: codex
+    - timestamp: '2026-05-10T18:46:24.470817'
+      level: info
+      message: 'Verification passed: scripts/check-changelog-format.ps1, scripts/check-readme-version.ps1,
+        and TaskFlow validate_task changelog-format-normalization.'
+      agent: codex
+    last_run: '2026-05-10T18:46:24.470817'
+    attempt_count: 2
+  meta: {}
+outputs:
+- type: file
+  path: CHANGELOG
+  description: Full colon-history indentation normalized
+- type: file
+  path: scripts/check-changelog-format.ps1
+  description: Regression check for changelog indentation
+- type: file
+  path: .plan/confirmed/changelog-format-normalization.yaml
+  description: TaskFlow execution logs
+trace:
+  logs: []
+  attempt_count: 0
+lock:
+  by: codex
+  at: '2026-05-10T18:45:12.576924'
+meta:
+  created_at: '2026-05-10T18:45:09.022300'
+  updated_at: '2026-05-10T18:46:24.470817'
+  version: '1'
