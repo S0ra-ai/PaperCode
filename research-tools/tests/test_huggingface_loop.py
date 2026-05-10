@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import unittest
+from unittest.mock import patch
 
+from paper_fucker_tools import huggingface_loop
 from paper_fucker_tools.huggingface_loop import hf_research_probe
 from paper_fucker_tools.mcp_tools import TOOL_REGISTRY, call_tool
 
@@ -33,6 +35,51 @@ class HuggingFaceLoopToolTest(unittest.TestCase):
         self.assertEqual(result["mode"], "fixture")
         self.assertEqual(result["records"], [fixture])
         self.assertEqual(result["diagnostics"], [])
+
+    def test_live_paper_records_use_huggingface_api_data(self) -> None:
+        with patch.object(
+            huggingface_loop,
+            "_hf_get",
+            return_value=[
+                {
+                    "paper": {
+                        "id": "2309.16588",
+                        "title": "A Paper",
+                        "summary": "official paper metadata",
+                        "authors": [{"name": "Researcher"}],
+                    }
+                }
+            ],
+        ):
+            result = huggingface_loop.hf_research_probe({"kind": "papers", "query": "paper generation", "allow_network": True})
+
+        self.assertEqual(result["mode"], "live")
+        self.assertEqual(result["records"][0]["schema_version"], "HFPaperRecord.v1")
+        self.assertEqual(result["records"][0]["trust"], "hf_official")
+
+    def test_jobs_require_token_for_live_product_access(self) -> None:
+        result = hf_research_probe({"kind": "jobs", "query": "paper generation", "allow_network": True})
+
+        self.assertEqual(result["mode"], "blocked")
+        self.assertEqual(result["records"], [])
+        self.assertEqual(result["diagnostics"], ["hf_token_required_for_jobs"])
+
+    def test_trackio_accepts_explicit_export_without_fixture_mode(self) -> None:
+        result = hf_research_probe(
+            {
+                "kind": "trackio",
+                "query": "paper generation",
+                "trackio_export": {
+                    "run_id": "trackio-live-export",
+                    "title": "Trackio exported metrics",
+                    "metrics": [{"name": "accuracy", "value": 0.91, "step": 1}],
+                },
+            }
+        )
+
+        self.assertEqual(result["mode"], "provided")
+        self.assertEqual(result["records"][0]["schema_version"], "HFTrackioRecord.v1")
+        self.assertEqual(result["records"][0]["trust"], "user_provided_trackio_export")
 
     def test_mcp_probe_fails_when_product_call_would_mock(self) -> None:
         self.assertIn("hf_research_probe", TOOL_REGISTRY)

@@ -3,6 +3,8 @@ import {
   writeResearchArtifact,
   type ResearchRuntimeOptions,
 } from "./research/runtime"
+import { readFile } from "node:fs/promises"
+import path from "node:path"
 import type { ResearchArtifact } from "./research/contracts"
 import { createResearchCapabilityRegistry, defaultResearchCapabilities, type ResearchCapabilityRegistry } from "./capabilities"
 import { normalizeResearchIntake, recordResearchIntake, type ResearchIntakeRequest } from "./intake"
@@ -15,7 +17,7 @@ import { planExperiments } from "./research/experiments/planning"
 import { recordExperimentLoop } from "./research/experiments/recording"
 import { composeClaimLedger, composeDraftPaper } from "./research/writing"
 import type { DataPlan } from "./research/sources"
-import type { ResultReport, ExperimentPlan, ExperimentRunner } from "./research/experiments"
+import type { ExperimentMetricDirection, ResultReport, ExperimentPlan, ExperimentRunner } from "./research/experiments"
 import type { ClaimLedger } from "./research/writing"
 
 export const PAPER_RESEARCH_STAGE_IDS = [
@@ -293,6 +295,18 @@ type DefaultExperimentLoopResult = {
   loop: Awaited<ReturnType<typeof recordExperimentLoop>>
 }
 
+type ExperimentEvidenceManifest = {
+  schema_version: "ExperimentEvidenceManifest.v1"
+  created_at?: string
+  primary_metric?: string
+  metric_direction?: ExperimentMetricDirection
+  metric_values?: Record<string, number>
+  stdout?: string
+  container_image?: string
+  container_digest?: string
+  provenance?: string
+}
+
 const defaultExecutionCache = new Map<string, DefaultExecutionCache>()
 
 function defaultCache(runDir: string) {
@@ -403,6 +417,96 @@ function defaultExperimentRunner(reason: string): ExperimentRunner {
   })
 }
 
+function resolveInputPath(request: ResearchIntakeRequest, inputPath: string) {
+  return path.isAbsolute(inputPath) ? inputPath : path.resolve(workspacePath(request), inputPath)
+}
+
+function isExperimentEvidenceManifest(value: unknown): value is ExperimentEvidenceManifest {
+  if (!value || typeof value !== "object") return false
+  const candidate = value as Partial<ExperimentEvidenceManifest>
+  return candidate.schema_version === "ExperimentEvidenceManifest.v1" && typeof candidate.metric_values === "object"
+}
+
+async function loadExperimentEvidenceManifest(
+  runDir: string,
+  request: ResearchIntakeRequest,
+  options?: ResearchRuntimeOptions,
+): Promise<ExperimentEvidenceManifest | undefined> {
+  for (const inputPath of request.experiment_logs ?? []) {
+    const resolved = resolveInputPath(request, inputPath)
+    let parsed: unknown
+    try {
+      parsed = JSON.parse(await readFile(resolved, "utf8"))
+    } catch {
+      continue
+    }
+    if (!isExperimentEvidenceManifest(parsed)) continue
+    await writeResearchArtifact(
+      runDir,
+      {
+        kind: "log",
+        logical_path: `experiments/evidence/${path.basename(resolved)}`,
+        data: parsed,
+        metadata: {
+          artifact_schema: "ExperimentEvidenceManifest.v1",
+          source_path: resolved,
+          provenance: parsed.provenance ?? "user_supplied_experiment_log",
+        },
+      },
+      options,
+    )
+    await appendResearchEvent(
+      runDir,
+      {
+        type: "experiments.evidencemanifest.loaded",
+        actor: "system",
+        payload: {
+          source_path: resolved,
+          provenance: parsed.provenance ?? "user_supplied_experiment_log",
+          primary_metric: parsed.primary_metric,
+        },
+      },
+      options,
+    )
+    return parsed
+  }
+  return undefined
+}
+
+function metricDirection(plan: ExperimentPlan, metricName: string, evidence: ExperimentEvidenceManifest): ExperimentMetricDirection {
+  return evidence.metric_direction ?? plan.metrics.find((metric) => metric.name === metricName)?.direction ?? "higher_better"
+}
+
+function evidenceMetricValue(evidence: ExperimentEvidenceManifest, spec: Parameters<ExperimentRunner>[0], mode: "host" | "container") {
+  const values = evidence.metric_values ?? {}
+  return values[`${mode}:${spec.experiment_id}`] ?? values[spec.experiment_id] ?? values[`${mode}:${spec.role}`] ?? values[spec.role]
+}
+
+function experimentEvidenceRunner(plan: ExperimentPlan, evidence: ExperimentEvidenceManifest, mode: "host" | "container"): ExperimentRunner {
+  return (spec) => {
+    const metricName = evidence.primary_metric ?? plan.metrics.find((metric) => metric.primary)?.name ?? spec.expected_metric
+    const value = evidenceMetricValue(evidence, spec, mode)
+    if (typeof value !== "number" || !Number.isFinite(value)) {
+      return {
+        status: "environment_failed",
+        metrics: [],
+        stdout: "",
+        stderr: `Experiment evidence manifest is missing ${mode} metric value for ${spec.experiment_id}.`,
+        exit_code: 2,
+        resource_usage: { wall_time_seconds: 0 },
+      }
+    }
+    return {
+      status: "succeeded",
+      metrics: [{ name: metricName, value, direction: metricDirection(plan, metricName, evidence) }],
+      stdout: evidence.stdout ?? `Loaded ${mode} reproduction evidence from ExperimentEvidenceManifest.v1.`,
+      stderr: "",
+      exit_code: 0,
+      resource_usage: { wall_time_seconds: 0 },
+    }
+  }
+}
+
 async function defaultExperimentLoop(
   runDir: string,
   request: ResearchIntakeRequest,
@@ -415,16 +519,25 @@ async function defaultExperimentLoop(
     topic: normalizeResearchIntake(request).topic,
     method_name: methodName(request),
     dataset_ids: sources.data_plan.datasets.map((dataset) => dataset.dataset_id),
-    objective: "Create a reproducible evaluation plan before allowing final paper claims.",
-    now: nowIso(options),
-  })
+      objective: "Create a reproducible evaluation plan before allowing final paper claims.",
+      now: nowIso(options),
+    })
+  const evidence = await loadExperimentEvidenceManifest(runDir, request, options)
   const loop = await recordExperimentLoop(
     runDir,
     {
       plan,
-      host_runner: defaultExperimentRunner("no approved experiment command or container runner was attached to this PaperRun"),
-      container_runner: defaultExperimentRunner("host exploration did not produce runnable successful experiments"),
-      run_options: { now: nowIso(options) },
+      host_runner: evidence
+        ? experimentEvidenceRunner(plan, evidence, "host")
+        : defaultExperimentRunner("no approved experiment command or container runner was attached to this PaperRun"),
+      container_runner: evidence
+        ? experimentEvidenceRunner(plan, evidence, "container")
+        : defaultExperimentRunner("host exploration did not produce runnable successful experiments"),
+      run_options: {
+        now: nowIso(options),
+        container_image: evidence?.container_image,
+        container_digest: evidence?.container_digest,
+      },
     },
     options,
   )
