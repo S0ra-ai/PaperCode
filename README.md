@@ -1,6 +1,6 @@
 # paper_fucker
 
-Current version: <!-- version:start -->0.5.6-dev<!-- version:end -->
+Current version: <!-- version:start -->0.5.7-dev<!-- version:end -->
 
 `paper_fucker` is a private-first, OpenCode-derived closed-loop paper system. It turns a topic, codebase, dataset, experiment log, or paper material set into a verifiable academic-paper bundle with research planning, source discovery, code understanding, experiment/reproduction support, ClaimLedger-first writing, authenticity gates, profile-aware formatting, preview, and export.
 
@@ -20,7 +20,7 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - The authoritative research contracts and paper_fucker runtime now live inside the OpenCode hard fork under `packages/opencode/src/paper`.
 - `PaperRun` is now the first-class user-visible state model. Instance HTTP API routes under `/paper` create runs, stream run snapshots, record guidance, expose preview/export status, list capabilities, run doctor diagnostics, discover providers, and resolve model roles.
 - The TUI home screen now submits natural Chinese research input to `/paper/runs` and navigates into a PaperRun dashboard instead of creating an ordinary chat session.
-- Public CLI, startup logo, default help, and TUI home guidance now present Paper Fucker as the product surface. Legacy OpenCode chat/session/acp/github/pr commands are kept out of the default user entrypoint or hidden as internal compatibility substrate.
+- Public CLI, startup logo, default help, TUI home guidance, sidebars, and paper API descriptions now present Paper Fucker as the product surface. Legacy OpenCode chat/session/acp/github/pr commands are kept out of the default user entrypoint or hidden as internal compatibility substrate.
 - TUI home/tips copy is Chinese by default and avoids user-facing OpenCode product wording for provider setup and code-to-paper examples.
 - Research runs are stored workspace-first under `<workspace>/.paper_fucker/runs/<run-id>`, with `~/.paper_fucker/runs/<run-id>` as the fallback.
 - Runtime operations are automatic API calls, not workflows that require users to keep typing shell commands.
