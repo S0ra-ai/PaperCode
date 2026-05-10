@@ -107,7 +107,7 @@ steps:
   meta: {}
 - id: task-045-step-04-doc-version
   title: Document 0.3.7-dev
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-045-step-03-report
@@ -116,8 +116,19 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T07:52:49.009630'
+      level: info
+      message: Work commit is 55167c9. Updating colon DSL CHANGELOG and README version
+        to 0.3.7-dev.
+      agent: codex
+    - timestamp: '2026-05-10T07:53:16.566610'
+      level: info
+      message: Updated README to 0.3.7-dev and inserted CHANGELOG colon-history entry
+        for work commit 55167c9. README/CHANGELOG version check passes.
+      agent: codex
+    last_run: '2026-05-10T07:53:16.566610'
+    attempt_count: 2
   meta: {}
 - id: task-045-step-05-verify
   title: Verify doc hygiene
@@ -151,5 +162,5 @@ lock:
   at: '2026-05-10T07:47:32.356116'
 meta:
   created_at: '2026-05-10T06:13:25.872558'
-  updated_at: '2026-05-10T07:52:08.557394'
+  updated_at: '2026-05-10T07:53:16.566610'
   version: '1'
