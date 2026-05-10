@@ -64,11 +64,34 @@ describe("TUI PaperRun workbench", () => {
       },
       source_ledger: [{ source_id: "src-1" }],
       claim_ledger: [{ claim_id: "claim-1" }, { claim_id: "claim-2" }],
-      agent_tree: { nodes: [{ agent_id: "agent-root" }, { agent_id: "agent-child" }] },
-      diagnostics: { counts: { events: 3, artifacts: 4 } },
-      experiment_status: { reproduction_gate: "not_started" },
+      artifacts: [{ artifact_id: "artifact-draft", kind: "outline", path: "writing/draft-stage.json", metadata: { artifact_schema: "DraftPaper.v1" } }],
+      drafts: [{ draft_id: "draft-1", title: "论文工作台", format: "markdown", path: "draft.md" }],
+      agent_tree: {
+        max_depth: null,
+        max_parallel: 4,
+        recursive_policy: { depth_policy: "unbounded" },
+        nodes: [
+          { agent_id: "agent-root", role: "planner", status: "running", provider_id: "deepseek", model_id: "deepseek-v4-pro", depth: 0 },
+          { agent_id: "agent-child", role: "reviewer", status: "planned", provider_id: "openai", model_id: "gpt-5.2", depth: 1 },
+        ],
+      },
+      diagnostics: {
+        counts: { events: 3, artifacts: 4 },
+        cost: { total_usd: 0.42, llm_usd: 0.4, api_usd: 0.02, budget: { total_soft_usd: 5 }, alerts: [] },
+        final_gate: { status: "blocked", blockers: ["unsupported_claim"] },
+        tool_traces: [
+          {
+            tool_name: "model.writer",
+            status: "succeeded",
+            started_at: "2026-05-11T00:00:00Z",
+            input: { tokens: { input: 1000, context_limit: 8000 } },
+            output: { tokens: { output: 500 } },
+          },
+        ],
+      },
+      experiment_status: { reproduction_gate: "blocked" },
       preview_state: { status: "ready" },
-      export_state: { status: "blocked" },
+      export_state: { status: "blocked", failed_checks: ["unsupported_claim"] },
       pause_questions: [{ question_id: "q1", message: "需要确认数据外传" }],
     } as unknown as PaperRunSnapshot
 
@@ -78,6 +101,21 @@ describe("TUI PaperRun workbench", () => {
     expect(state.stage_graph.map((stage) => stage.label)).toEqual(["输入整理", "研究规划"])
     expect(state.panels.map((panel) => panel.label)).toContain("Agent Tree")
     expect(state.panels.map((panel) => panel.label)).toContain("Source Ledger")
+    expect(state.sidebar.cost.formatted_total).toBe("$0.42")
+    expect(state.sidebar.cost.last_call_tokens).toBe(1500)
+    expect(state.sidebar.outline.source).toBe("draft")
+    expect(state.sidebar.agent_tree).toMatchObject({
+      total_agents: 2,
+      active_agents: 2,
+      max_depth_observed: 1,
+      depth_policy: "unbounded",
+    })
+    expect(state.sidebar.gate).toMatchObject({
+      status: "blocked",
+      failed_checks: ["unsupported_claim"],
+      reproduction_gate: "blocked",
+    })
+    expect(state.sidebar.diagnostics.recent_calls[0]!.name).toBe("model.writer")
     expect(state.controls.map((control) => control.label)).toEqual([
       "发送指导",
       "继续运行",
