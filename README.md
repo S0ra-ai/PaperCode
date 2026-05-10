@@ -1,6 +1,6 @@
 # paper_fucker
 
-Current version: <!-- version:start -->0.5.2-dev<!-- version:end -->
+Current version: <!-- version:start -->0.5.3-dev<!-- version:end -->
 
 `paper_fucker` is a private-first, OpenCode-derived closed-loop paper system. It turns a topic, codebase, dataset, experiment log, or paper material set into a verifiable academic-paper bundle with research planning, source discovery, code understanding, experiment/reproduction support, ClaimLedger-first writing, authenticity gates, profile-aware formatting, preview, and export.
 
@@ -16,6 +16,7 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - OpenAI-compatible provider discovery accepts a user-supplied `base_url` and API key, calls `/models`, stores public provider config under `~/.paper_fucker/providers/`, and stores API keys only under `~/.paper_fucker/local/`.
 - Multi-model agent orchestration now has an explicit `AgentRoleRouter` and `AgentTree`: root, stage, worker, specialist, reviewer, verifier, and citation subagents can resolve different OpenCode provider/model ids while staying under budget-tier depth, parallelism, and cost limits.
 - Data egress is private-first. Agent/tool calls evaluate authorized paths, denied patterns, secret-like files, binary artifacts, and audit events before content may leave the local workspace.
+- Tracked documentation no longer contains provider-token-shaped example keys; local credentials remain under ignored `.paper_fucker/local/`.
 - The authoritative research contracts and paper_fucker runtime now live inside the OpenCode hard fork under `packages/opencode/src/paper`.
 - `PaperRun` is now the first-class user-visible state model. Instance HTTP API routes under `/paper` create runs, stream run snapshots, record guidance, expose preview/export status, list capabilities, run doctor diagnostics, discover providers, and resolve model roles.
 - The TUI home screen now submits natural Chinese research input to `/paper/runs` and navigates into a PaperRun dashboard instead of creating an ordinary chat session.

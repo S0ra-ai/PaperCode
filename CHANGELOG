@@ -2,10 +2,26 @@
 :author        s0ra (https://github.com/S0ra-ai)
 :repo          
 :desc          记录项目的重大变更和版本历史
-:version       0.5.2-dev
+:version       0.5.3-dev
 :last_update   2026/05/10
 
 :history
+
+    0.5.3-dev - 2026/05/10 (ab28a53) [develop]
+    :brief 移除 tracked 文档中的 secret-like 示例 token
+        - fix(security): github/README.md 中的 ANTHROPIC_API_KEY 示例从 sk-ant 形态改为 <provider-api-key>
+        - fix(security): github/README.md 中的 MOCK_TOKEN 示例从 github_pat 形态改为 <github-token>
+        - docs(report): 新增 reports/tracked-secret-example-cleanup.md 记录扫描证据
+    :src
+        - github/README.md - non-secret placeholders for provider/GitHub token examples
+        - reports/tracked-secret-example-cleanup.md - cleanup report
+        - .plan/confirmed/task-054-tracked-secret-example-cleanup.yaml - TaskFlow execution logs
+        - README.md - current status and version update
+        - CHANGELOG - 0.5.3-dev history entry
+    :verification
+        - git grep -n -P "(?<![A-Za-z0-9])sk-[A-Za-z0-9._-]{20,}" -- . ':!CHANGELOG' ':!reports' ':!tmp' returned no matches
+        - git grep -n -P "github_pat_[A-Za-z0-9_]{10,}" -- . ':!CHANGELOG' ':!reports' ':!tmp' returned no matches
+        - TaskFlow validate_task task-054-tracked-secret-example-cleanup passed
 
     0.5.2-dev - 2026/05/10 (d266530) [develop]
     :brief 清理 TUI 首页模型 provider 与代码示例文案
