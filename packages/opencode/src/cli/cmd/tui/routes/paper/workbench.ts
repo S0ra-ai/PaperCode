@@ -747,7 +747,7 @@ function activeStage(snapshot: PaperRunSnapshot) {
 }
 
 function nextAction(snapshot: PaperRunSnapshot, gate: PaperRunGateSummary) {
-  if (snapshot.pause_questions.length > 0) return "回答 pause question"
+  if (snapshot.pause_questions.length > 0) return "回答暂停问题"
   if (gate.failed_checks.length > 0) return "补证据或导出 forced draft"
   if (snapshot.export_state.status === "final") return "导出终稿"
   if (snapshot.status === "running") return "等待自动 stage 推进"
