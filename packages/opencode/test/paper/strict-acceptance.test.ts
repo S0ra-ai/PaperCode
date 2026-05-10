@@ -53,4 +53,23 @@ describe("strict live acceptance script", () => {
     expect(script).toContain("sk-[A-Za-z0-9]")
     expect(script).toContain("reports/strict-live-acceptance.md")
   })
+
+  test("bounds each check and writes partial reports during execution", () => {
+    const script = readFileSync(scriptPath, "utf8")
+    expect(script).toContain("[int]$CheckTimeoutSeconds")
+    expect(script).toContain("Wait-Job")
+    expect(script).toContain("Stop-Job")
+    expect(script).toContain("timed out after")
+    expect(script).toContain("Write-Report")
+    expect(script).toContain("[strict]")
+  })
+
+  test("uses focused paper-critical tests by default with opt-in full workspace suite", () => {
+    const script = readFileSync(scriptPath, "utf8")
+    expect(script).toContain("[switch]$FullWorkspaceSuite")
+    expect(script).toContain("strict-live-focused")
+    expect(script).toContain("strict-live-full")
+    expect(script).toContain("test/paper/paperrun-execution.test.ts")
+    expect(script).toContain("test/paper/observability-audit.test.ts")
+  })
 })

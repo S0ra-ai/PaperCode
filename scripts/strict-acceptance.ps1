@@ -1,5 +1,8 @@
 param(
     [switch]$FixtureMode,
+    [switch]$FullWorkspaceSuite,
+    [int]$CheckTimeoutSeconds = 600,
+    [int]$FullWorkspaceTimeoutSeconds = 1800,
     [string]$ReportPath = "reports/strict-live-acceptance.md"
 )
 
@@ -9,6 +12,13 @@ $ErrorActionPreference = "Stop"
 $RepoRoot = Split-Path -Parent $PSScriptRoot
 $Results = New-Object "System.Collections.Generic.List[object]"
 $Failed = $false
+$AcceptanceMode = if ($FixtureMode) {
+    "fixture"
+} elseif ($FullWorkspaceSuite) {
+    "strict-live-full"
+} else {
+    "strict-live-focused"
+}
 
 $RequiredChecks = @(
     "taskflow-validate-all",
@@ -70,36 +80,63 @@ function Invoke-CheckedCommand {
     param(
         [string]$File,
         [string[]]$Arguments,
-        [hashtable]$Environment = @{}
+        [hashtable]$Environment = @{},
+        [int]$TimeoutSeconds = $CheckTimeoutSeconds
     )
-    $previous = @{}
-    foreach ($key in $Environment.Keys) {
-        $previous[$key] = [Environment]::GetEnvironmentVariable($key, "Process")
-        [Environment]::SetEnvironmentVariable($key, [string]$Environment[$key], "Process")
-    }
-    try {
-        Push-Location $RepoRoot
+    $job = Start-Job -ScriptBlock {
+        param(
+            [string]$JobRepoRoot,
+            [string]$JobFile,
+            [string[]]$JobArguments,
+            [hashtable]$JobEnvironment
+        )
+        $ErrorActionPreference = "Continue"
+        $previous = @{}
+        foreach ($key in $JobEnvironment.Keys) {
+            $previous[$key] = [Environment]::GetEnvironmentVariable($key, "Process")
+            [Environment]::SetEnvironmentVariable($key, [string]$JobEnvironment[$key], "Process")
+        }
+        Push-Location $JobRepoRoot
         try {
-            $previousErrorPreference = $ErrorActionPreference
-            $ErrorActionPreference = "Continue"
             try {
-                $output = & $File @Arguments 2>&1
+                $output = & $JobFile @JobArguments 2>&1
                 $exit = $LASTEXITCODE
-            } finally {
-                $ErrorActionPreference = $previousErrorPreference
+                if ($null -eq $exit) { $exit = 0 }
+                [pscustomobject]@{
+                    exit = [int]$exit
+                    output = @($output | ForEach-Object { [string]$_ })
+                }
+            } catch {
+                [pscustomobject]@{
+                    exit = 1
+                    output = @([string]$_.Exception.Message)
+                }
             }
         } finally {
             Pop-Location
+            foreach ($key in $JobEnvironment.Keys) {
+                [Environment]::SetEnvironmentVariable($key, $previous[$key], "Process")
+            }
         }
-        if ($exit -ne 0) {
-            throw "$File $($Arguments -join ' ') failed with exit $exit. $($output -join ' ')"
-        }
-        return ($output | Select-Object -Last 12) -join " "
-    } finally {
-        foreach ($key in $Environment.Keys) {
-            [Environment]::SetEnvironmentVariable($key, $previous[$key], "Process")
-        }
+    } -ArgumentList $RepoRoot, $File, $Arguments, $Environment
+
+    $done = Wait-Job -Job $job -Timeout $TimeoutSeconds
+    if ($null -eq $done) {
+        Stop-Job -Job $job -Force
+        Remove-Job -Job $job -Force
+        throw "$File $($Arguments -join ' ') timed out after ${TimeoutSeconds}s"
     }
+
+    $result = Receive-Job -Job $job
+    Remove-Job -Job $job -Force
+    if ($null -eq $result) {
+        throw "$File $($Arguments -join ' ') produced no result"
+    }
+    $last = @($result)[-1]
+    if ([int]$last.exit -ne 0) {
+        throw "$File $($Arguments -join ' ') failed with exit $($last.exit). $($last.output -join ' ')"
+    }
+    return ($last.output | Select-Object -Last 12) -join " "
 }
 
 function Invoke-Check {
@@ -109,14 +146,19 @@ function Invoke-Check {
         [scriptblock]$Body
     )
     $timer = [System.Diagnostics.Stopwatch]::StartNew()
+    Write-Host "[strict] start $Id - $Title"
     try {
         $detail = & $Body
         $timer.Stop()
         Add-Result $Id $Title "pass" $detail $timer.Elapsed.TotalSeconds
+        Write-Host "[strict] pass  $Id in $([Math]::Round($timer.Elapsed.TotalSeconds, 3))s"
     } catch {
         $timer.Stop()
         $script:Failed = $true
         Add-Result $Id $Title "fail" $_.Exception.Message $timer.Elapsed.TotalSeconds
+        Write-Host "[strict] fail  $Id in $([Math]::Round($timer.Elapsed.TotalSeconds, 3))s"
+    } finally {
+        Write-Report
     }
 }
 
@@ -384,7 +426,9 @@ function Write-Report {
         "# Strict Live Acceptance Report",
         "",
         "- Generated: $(Get-Date -Format o)",
-        "- Mode: $(if ($FixtureMode) { "fixture" } else { "strict-live" })",
+        "- Mode: $AcceptanceMode",
+        "- Full workspace suite: $([bool]$FullWorkspaceSuite)",
+        "- Check timeout seconds: $CheckTimeoutSeconds",
         "- Status: $status",
         "",
         "| Check | Status | Seconds | Detail |",
@@ -406,7 +450,22 @@ Invoke-Check "tracked-secret-scan" "Tracked secret scan" {
     Invoke-TrackedSecretScan
 }
 Invoke-Check "server-tests" "Server tests" {
-    Invoke-CheckedCommand "npx" @("--yes", "bun@1.3.13", "--cwd", "packages/opencode", "test")
+    if ($FullWorkspaceSuite) {
+        Invoke-CheckedCommand -File "npx" -Arguments @("--yes", "bun@1.3.13", "--cwd", "packages/opencode", "test") -TimeoutSeconds $FullWorkspaceTimeoutSeconds
+    } else {
+        Invoke-CheckedCommand -File "npx" -Arguments @(
+            "--yes",
+            "bun@1.3.13",
+            "--cwd",
+            "packages/opencode",
+            "test",
+            "test/paper/paperrun-execution.test.ts",
+            "test/paper/code-to-paper.test.ts",
+            "test/paper/export-pipeline.test.ts",
+            "test/paper/observability-audit.test.ts",
+            "test/paper/strict-acceptance.test.ts"
+        )
+    }
 }
 Invoke-Check "preview-tests" "Preview tests" {
     Invoke-CheckedCommand "npx" @("--yes", "bun@1.3.13", "--cwd", "packages/preview", "test")
