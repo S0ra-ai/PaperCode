@@ -59,6 +59,7 @@ import {
   createCodeUnderstandingGraph,
   type CodeUnderstandingGraph,
 } from "./code-understanding"
+import { crawlerDiagnostics, type CrawlerDiagnosticsSummary } from "./crawler"
 
 import {
   applyPaperRunControl,
@@ -223,6 +224,7 @@ export interface PaperRunSnapshot {
     audit: PaperObservabilityAuditSummary
     memory?: ReturnType<typeof memoryBankSummary>
     code_understanding?: ReturnType<typeof codeUnderstandingSummary>
+    crawler?: CrawlerDiagnosticsSummary
   }
   artifacts: ResearchArtifact[]
   drafts: ResearchDraft[]
@@ -721,6 +723,7 @@ export async function getPaperRunSnapshotFromDir(runDir: string): Promise<PaperR
       audit: paperObservabilityAuditFromEvents(events),
       memory: memoryBankSummary(memoryBank),
       code_understanding: codeUnderstandingSummary(codeGraph),
+      crawler: crawlerDiagnostics({ sources }),
     },
     artifacts,
     drafts,

@@ -13,6 +13,7 @@ import re
 from pathlib import Path
 from typing import Any, Callable
 
+from .crawler import crawl_url, scrapling_status
 from .external_tools import discover_external_tools
 from .models import ToolArtifact, ToolEvent, ToolResult
 
@@ -122,6 +123,30 @@ def experiment_log_parse(input_data: dict[str, Any]) -> ToolResult:
     )
 
 
+def web_crawl_probe(input_data: dict[str, Any]) -> ToolResult:
+    record = crawl_url(input_data)
+    status = "succeeded" if record.get("status") == "fetched" else "skipped"
+    metadata = {
+        "scrapling": scrapling_status(),
+        "record": record,
+    }
+    if status == "skipped":
+        return ToolResult(
+            tool_name="web_crawl_probe",
+            status="skipped",
+            artifacts=[ToolArtifact(title="Crawler source record", data=record)],
+            events=[ToolEvent(type="python.crawler.skipped", payload=metadata)],
+            metadata=metadata,
+            error="; ".join(str(item) for item in record.get("diagnostics", [])) or None,
+        )
+    return ToolResult.ok(
+        "web_crawl_probe",
+        artifacts=[ToolArtifact(title="Crawler source record", data=record)],
+        events=[ToolEvent(type="python.crawler.fetched", payload=metadata)],
+        metadata=metadata,
+    )
+
+
 def docx_generation(input_data: dict[str, Any]) -> ToolResult:
     output = Path(str(input_data["output_path"])).expanduser()
     title = str(input_data.get("title", "paper_fucker draft"))
@@ -151,6 +176,7 @@ TOOL_REGISTRY: dict[str, ToolHandler] = {
     "pdf_probe": pdf_probe,
     "dataset_metadata_probe": dataset_metadata_probe,
     "experiment_log_parse": experiment_log_parse,
+    "web_crawl_probe": web_crawl_probe,
     "docx_generation": docx_generation,
 }
 
