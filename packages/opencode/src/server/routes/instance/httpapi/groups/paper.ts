@@ -185,7 +185,7 @@ export const PaperApi = HttpApi.make("paper")
           OpenApi.annotations({
             identifier: "paper.providers.discover",
             summary: "Discover providers and models",
-            description: "Return OpenCode provider/model discovery data for paper model role assignment.",
+            description: "Return provider/model discovery data for paper model role assignment.",
           }),
         ),
         HttpApiEndpoint.post("providersDiscoverOpenAI", PaperPaths.providersDiscover, {
