@@ -400,10 +400,20 @@ function Invoke-HardForkPublicBranding {
     $logo = Read-RepoText "packages/opencode/src/cli/logo.ts"
     $index = Read-RepoText "packages/opencode/src/index.ts"
     $tips = Read-RepoText "packages/opencode/src/cli/cmd/tui/feature-plugins/home/tips-view.tsx"
+    $home = Read-RepoText "packages/opencode/src/cli/cmd/tui/routes/home.tsx"
+    $dashboard = Read-RepoText "packages/opencode/src/cli/cmd/tui/routes/paper/index.tsx"
+    $sessionSidebar = Read-RepoText "packages/opencode/src/cli/cmd/tui/routes/session/sidebar.tsx"
+    $pluginSidebarFooter = Read-RepoText "packages/opencode/src/cli/cmd/tui/feature-plugins/sidebar/footer.tsx"
+    $paperApi = Read-RepoText "packages/opencode/src/server/routes/instance/httpapi/groups/paper.ts"
     Assert-HardFork ($logo -match "Paper Fucker") "CLI logo does not expose Paper Fucker."
     Assert-HardFork (-not ($index -match "\.command\(SessionCommand\)" -or $index -match "\.command\(GithubCommand\)" -or $index -match "\.command\(AcpCommand\)" -or $index -match "\.command\(PrCommand\)")) "Legacy OpenCode product commands are still registered publicly."
-    Assert-HardFork ($tips -match "PaperRun" -and $tips -match "Claim Ledger" -and $tips -match "Source Ledger") "TUI home guidance is not PaperRun-ledger oriented."
-    return "public logo, command registry, and TUI tips expose Paper Fucker/PaperRun instead of legacy OpenCode surfaces"
+    Assert-HardFork ($tips -match "PaperRun" -and $tips -match "Claim Ledger" -and $tips -match "Source Ledger" -and $tips -match "右侧栏") "TUI home guidance is not PaperRun-ledger oriented."
+    Assert-HardFork ($home -match "PaperRun" -and $home -match "论文工作台") "TUI home route is not PaperRun workbench oriented."
+    Assert-HardFork ($dashboard -match "运行侧栏" -and $dashboard -match "Agent Tree" -and $dashboard -match "成本 / 上下文") "PaperRun dashboard sidebar is missing diagnostic sections."
+    Assert-HardFork ($sessionSidebar -match "Paper Fucker" -and -not ($sessionSidebar -match "<b>Open</b>" -or $sessionSidebar -match "<b>Code</b>")) "Session sidebar footer still exposes legacy OpenCode branding."
+    Assert-HardFork ($pluginSidebarFooter -match "Paper Fucker" -and -not ($pluginSidebarFooter -match "<b>Open</b>" -or $pluginSidebarFooter -match "<b>Code</b>")) "Plugin sidebar footer still exposes legacy OpenCode branding."
+    Assert-HardFork (-not ($paperApi -match "OpenCode provider/model discovery data")) "Paper provider discovery API still exposes legacy OpenCode product wording."
+    return "public logo, command registry, TUI home, sidebars, dashboard, and paper API expose Paper Fucker/PaperRun surfaces"
 }
 
 function Invoke-ObservabilityAuditCoverage {
