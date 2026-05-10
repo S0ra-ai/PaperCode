@@ -1,6 +1,6 @@
 id: recursive-agent-sidebar-acceptance
 title: Recursive Agent Sidebar Acceptance
-status: todo
+status: done
 priority: high
 owner: codex
 tags:
@@ -18,7 +18,7 @@ execution:
 steps:
 - id: recursive-agent-sidebar-acceptance-step-01-integrate
   title: Run integrated PaperRun acceptance scenario
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: Exercise topic and code intake, recursive agent depth, sidebar state,
@@ -27,12 +27,28 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T19:30:00.796079'
+      level: info
+      message: Running integrated PaperRun acceptance coverage for recursive agent
+        depth, multi-model routing, sidebar diagnostics, Chinese workbench flow, gate
+        blocking, forced draft, and brand surfaces.
+      agent: codex
+    - timestamp: '2026-05-10T19:30:32.198081'
+      level: info
+      message: 'Integrated acceptance passed: npx --yes bun@1.3.13 --cwd packages/opencode
+        test test/paper/agents.test.ts test/cli/tui/paper-workbench.test.ts test/cli/tui/paper-workbench-controls.test.ts
+        test/cli/public-surface.test.ts test/paper/hard-fork-acceptance.test.ts test/paper/strict-acceptance.test.ts.
+        Result: 25 pass, 0 fail, 195 expects. Coverage includes recursive depth, multi-model
+        subagents, private egress blocking, PaperRun dashboard/sidebar, Chinese workbench
+        flow, hard-fork core, brand surfaces, and strict acceptance script inventory.'
+      agent: codex
+    last_run: '2026-05-10T19:30:32.198081'
+    attempt_count: 2
   meta: {}
 - id: recursive-agent-sidebar-acceptance-step-02-verify
   title: Run full verification suite
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - recursive-agent-sidebar-acceptance-step-01-integrate
@@ -42,12 +58,31 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T19:30:50.005228'
+      level: info
+      message: 'Running full verification suite: opencode typecheck, preview tests,
+        Python research-tools tests, README/CHANGELOG validation, tracked secret scan,
+        and strict acceptance report generation.'
+      agent: codex
+    - timestamp: '2026-05-10T19:42:19.745329'
+      level: info
+      message: 'Full verification passed. Individual checks: opencode typecheck; packages/preview
+        test (2 pass); Python research-tools unittest (5 pass); scripts/check-readme-version.ps1;
+        scripts/check-changelog-format.ps1; tracked secret scan. Strict live acceptance
+        passed and refreshed reports/strict-live-acceptance.md: TaskFlow validate-all,
+        focused opencode server tests, preview, Python, server/workspace typecheck,
+        local CLI/TUI smoke, DeepSeek live provider smoke, Exa live search, nature
+        skill/profile, pandoc, LaTeX PDF, DOCX, topic-to-paper, code-to-paper, hard-fork
+        paper core/API/TUI/agent-tree/quality-egress/public-branding, observability
+        audit, and Git Flow cleanup.'
+      agent: codex
+    last_run: '2026-05-10T19:42:19.745329'
+    attempt_count: 2
   meta: {}
 - id: recursive-agent-sidebar-acceptance-step-03-taskflow
   title: Validate TaskFlow and git state
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - recursive-agent-sidebar-acceptance-step-02-verify
@@ -57,12 +92,26 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T19:42:31.141901'
+      level: info
+      message: Validating full TaskFlow plan, current task, CHANGELOG colon DSL, and
+        Git Flow branch state before final 0.6.0-dev versioning.
+      agent: codex
+    - timestamp: '2026-05-10T19:42:43.535112'
+      level: info
+      message: TaskFlow global validation passed for all tasks; TaskFlow validate_task
+        recursive-agent-sidebar-acceptance passed; TaskFlow validate_changelog_format
+        passed. Git Flow state is current feature/recursive-agent-sidebar-acceptance
+        with only expected acceptance/report/script/test/plan changes; no codex/*
+        or task-* branches are present.
+      agent: codex
+    last_run: '2026-05-10T19:42:43.535112'
+    attempt_count: 2
   meta: {}
 - id: recursive-agent-sidebar-acceptance-step-04-version
   title: Finalize 0.6.0-dev
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - recursive-agent-sidebar-acceptance-step-03-taskflow
@@ -72,8 +121,22 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T19:43:09.183269'
+      level: info
+      message: Finalizing 0.6.0-dev with work commit 0e792d7, then rerunning version
+        checks and strict acceptance so the report reflects the final version.
+      agent: codex
+    - timestamp: '2026-05-10T19:46:34.176348'
+      level: info
+      message: 'Finalized 0.6.0-dev in README and CHANGELOG with work commit 0e792d7.
+        Reran strict live acceptance after the version bump; reports/strict-live-acceptance.md
+        now shows Status: passed and README version 0.6.0-dev matches CHANGELOG latest
+        version. Validation passed: check-readme-version, check-changelog-format,
+        TaskFlow validate_changelog_format, TaskFlow validate_task recursive-agent-sidebar-acceptance.'
+      agent: codex
+    last_run: '2026-05-10T19:46:34.176348'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: report
@@ -88,7 +151,10 @@ outputs:
 trace:
   logs: []
   attempt_count: 0
+lock:
+  by: codex
+  at: '2026-05-10T19:29:33.413831'
 meta:
   created_at: '2026-05-10T18:28:30.382667'
-  updated_at: '2026-05-10T18:28:30.382667'
+  updated_at: '2026-05-10T19:46:34.176348'
   version: '1'
