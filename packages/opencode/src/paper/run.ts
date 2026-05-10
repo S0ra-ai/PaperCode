@@ -19,7 +19,7 @@ import type {
   ResearchToolTrace,
 } from "./research/contracts"
 import { defaultResearchCapabilities, type ResearchCapability } from "./capabilities"
-import { normalizeResearchIntake, recordResearchIntake, type ResearchBrief, type ResearchIntakeRequest } from "./intake"
+import { normalizeResearchIntake, type ResearchBrief, type ResearchIntakeRequest } from "./intake"
 import {
   createModelRoleRouter,
   DEFAULT_MODEL_ROLE_CONFIG,
@@ -29,6 +29,7 @@ import {
 } from "./model-router"
 import {
   PAPER_RESEARCH_STAGE_GRAPH,
+  startPaperResearchRun,
   type PaperResearchStageDefinition,
   type PaperResearchStageId,
   type PaperResearchStageStatus,
@@ -240,7 +241,9 @@ function runOptions(input?: PaperRunRuntimeOptions): PaperRunRuntimeOptions {
 
 function stageStatusFromEvents(stage: PaperResearchStageDefinition, events: ResearchEvent[]): PaperRunStageSnapshot {
   const completed = events.findLast(
-    (event) => event.type === "paper.stage.completed" && event.payload?.stage === stage.id,
+    (event) =>
+      (event.type === "paper.stage.completed" || event.type === "paperorchestrator.stage.completed") &&
+      event.payload?.stage === stage.id,
   )
   if (completed) {
     return {
@@ -491,10 +494,15 @@ export async function createPaperRun(
   const budgetTier = normalizeBudgetTier(request.budget_tier)
   const qualityMode = normalizeQualityMode(request.quality_mode, budgetTier)
   const dataEgressPolicy = defaultDataEgressPolicy(request.data_egress_policy)
+  const workspace = request.workspace_path ?? normalized.workspace
+  const executionRequest: ResearchIntakeRequest = {
+    ...request,
+    workspace_path: workspace,
+  }
   const handle = await createResearchRun(
     {
       topic: brief.topic,
-      workspace: request.workspace_path ?? normalized.workspace,
+      workspace,
       metadata: {
         paper_run: true,
         paper_intake: {
@@ -514,7 +522,6 @@ export async function createPaperRun(
     },
     normalized,
   )
-  await recordResearchIntake(handle.run_dir, request, normalized)
   await appendResearchEvent(
     handle.run_dir,
     {
@@ -525,6 +532,13 @@ export async function createPaperRun(
         quality_mode: qualityMode,
         data_egress_policy: dataEgressPolicy,
       },
+    },
+    normalized,
+  )
+  await startPaperResearchRun(
+    {
+      run_dir: handle.run_dir,
+      request: executionRequest,
     },
     normalized,
   )

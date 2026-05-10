@@ -1,0 +1,190 @@
+id: task-039-paperrun-execution-engine
+title: Make PaperRun creation drive the real paper stage engine
+status: done
+priority: critical
+owner: codex
+tags:
+- paperrun
+- orchestrator
+- runtime
+- hard-fork
+depends_on:
+- task-038-hard-fork-acceptance
+description: Version 0.3.1-dev. Wire PaperRun creation and API/TUI entrypoints to
+  the first-party paper stage engine by default. Creating a PaperRun must automatically
+  execute or intentionally block the 14-stage graph with concrete domain handlers,
+  record artifacts/events/diagnostics, update the PaperRun snapshot, and never rely
+  on fixture-only handler injection for the normal product path.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-039-step-01-red-tests
+  title: Add red PaperRun execution tests
+  status: done
+  owner: codex
+  depends_on: []
+  description: Add tests proving /paper run creation advances the stage graph, records
+    orchestrator events/artifacts, blocks with diagnostics on missing evidence, and
+    does not require injected fixture handlers for the product path.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-10T06:14:26.771049'
+      level: info
+      message: Starting red tests for PaperRun creation driving the real default stage
+        engine without injected fixture handlers.
+      agent: codex
+    - timestamp: '2026-05-10T06:16:45.125962'
+      level: info
+      message: 'Added packages/opencode/test/paper/paperrun-execution.test.ts. Red
+        run failed as expected: createPaperRun currently leaves planning pending and
+        does not start paperorchestrator events, proving PaperRun creation is still
+        only creating state rather than driving the default stage engine.'
+      agent: codex
+    last_run: '2026-05-10T06:16:45.125962'
+    attempt_count: 2
+  meta: {}
+- id: task-039-step-02-default-handlers
+  title: Implement concrete default stage handlers
+  status: done
+  owner: codex
+  depends_on:
+  - task-039-step-01-red-tests
+  description: Use existing first-party modules for intake, planning, template/profile,
+    literature/data, code-to-paper, experiment planning, claim ledger, drafting, verification,
+    revision, and export. Missing live capability should produce BlockedDiagnostic.v1
+    with pause questions, not fake success.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-10T06:16:49.925635'
+      level: info
+      message: Implementing concrete default PaperRun stage handlers using existing
+        first-party paper modules and wiring them into the stage engine.
+      agent: codex
+    - timestamp: '2026-05-10T06:28:53.141650'
+      level: info
+      message: 'Implemented default PaperRun stage handlers and a run-scoped execution
+        cache. The default engine now records planning, source/data discovery, code-to-paper
+        artifacts, experiment planning/execution/reproduction diagnostics, ClaimLedger/draft/profile/verification,
+        forced export bundles, and stage controller snapshots. Also hardened runtime
+        global index rebuild against duplicate run ids and mapped paperorchestrator.stage.completed
+        events into PaperRun stage snapshots. Targeted paperrun-execution test passed:
+        1 pass, 0 fail, 13 expects.'
+      agent: codex
+    last_run: '2026-05-10T06:28:53.141650'
+    attempt_count: 2
+  meta: {}
+- id: task-039-step-03-api-tui-integration
+  title: Wire createPaperRun to the engine
+  status: done
+  owner: codex
+  depends_on:
+  - task-039-step-02-default-handlers
+  description: Ensure API/TUI PaperRun creation runs the default controller, updates
+    snapshots, exposes stage status, diagnostics, pause questions, artifacts, and
+    export state, while keeping deterministic tests stable.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-10T06:28:53.724416'
+      level: info
+      message: Verifying API/TUI-facing PaperRun creation after wiring createPaperRun
+        to the default stage engine.
+      agent: codex
+    - timestamp: '2026-05-10T06:32:19.983824'
+      level: info
+      message: 'Wired createPaperRun to startPaperResearchRun and verified API/TUI-facing
+        behavior. Invalid requested code paths now become PaperRun blocked diagnostics
+        instead of HTTP 400 creation failures. Tests passed: npx --yes bun@1.3.13
+        --cwd packages/opencode test test/paper/run-api.test.ts test/cli/tui/paper-workbench.test.ts
+        test/paper/paperrun-execution.test.ts => 5 pass, 0 fail, 56 expects.'
+      agent: codex
+    last_run: '2026-05-10T06:32:19.983824'
+    attempt_count: 2
+  meta: {}
+- id: task-039-step-04-doc-version
+  title: Document 0.3.1-dev
+  status: done
+  owner: codex
+  depends_on:
+  - task-039-step-03-api-tui-integration
+  description: Update README, CHANGELOG colon DSL with real commit id, and reports/paperrun-execution-engine.md.
+    README version must match CHANGELOG.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-10T06:34:32.582885'
+      level: info
+      message: Updating README, CHANGELOG, and reports/paperrun-execution-engine.md
+        for 0.3.1-dev using work commit e78a169.
+      agent: codex
+    - timestamp: '2026-05-10T06:35:30.784732'
+      level: info
+      message: Updated README current version to 0.3.1-dev, added PaperRun default
+        execution engine status and task-039 planning reference, added CHANGELOG 0.3.1-dev
+        entry with work commit e78a169, created reports/paperrun-execution-engine.md,
+        and ran scripts/check-readme-version.ps1 successfully.
+      agent: codex
+    last_run: '2026-05-10T06:35:30.784732'
+    attempt_count: 2
+  meta: {}
+- id: task-039-step-05-verify
+  title: Verify PaperRun execution engine
+  status: done
+  owner: codex
+  depends_on:
+  - task-039-step-04-doc-version
+  description: Run targeted PaperRun execution tests, opencode typecheck, README version
+    check, TaskFlow validate_task, and relevant strict acceptance subset.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-10T06:35:31.357713'
+      level: info
+      message: Starting final verification for task-039 after 0.3.1-dev documentation/version
+        synchronization.
+      agent: codex
+    - timestamp: '2026-05-10T06:36:28.806944'
+      level: info
+      message: 'Final verification passed. Tests: npx --yes bun@1.3.13 --cwd packages/opencode
+        test test/paper/run-api.test.ts test/cli/tui/paper-workbench.test.ts test/paper/paperrun-execution.test.ts
+        test/paper/strict-acceptance.test.ts => 8 pass, 0 fail, 87 expects. Typecheck
+        passed: npx --yes bun@1.3.13 run --cwd packages/opencode typecheck. README/CHANGELOG
+        version check passed for 0.3.1-dev. TaskFlow validate_task task-039-paperrun-execution-engine
+        returned valid with no warnings.'
+      agent: codex
+    last_run: '2026-05-10T06:36:28.806944'
+    attempt_count: 2
+  meta: {}
+outputs:
+- type: file
+  path: packages/opencode/src/paper/run.ts
+  description: PaperRun creation wired to stage engine
+- type: file
+  path: packages/opencode/src/paper/orchestrator.ts
+  description: Default concrete stage handlers and controller behavior
+- type: file
+  path: packages/opencode/test/paper/paperrun-execution.test.ts
+  description: PaperRun execution tests
+- type: report
+  path: reports/paperrun-execution-engine.md
+  description: Implementation and verification report
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-10T06:12:04.040129'
+  updated_at: '2026-05-10T06:37:00.805939'
+  version: '1'

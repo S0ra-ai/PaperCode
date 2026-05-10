@@ -1,0 +1,111 @@
+id: task-044-observability-audit-hardening
+title: Harden OpenTelemetry, cost, tool trace, and data-egress audit coverage
+status: todo
+priority: medium
+owner: codex
+tags:
+- observability
+- otel
+- audit
+- cost
+- egress
+depends_on:
+- task-043-export-renderer-pipeline
+description: Version 0.3.6-dev. Ensure every PaperRun stage, capability call, model
+  role call, subagent transition, tool invocation, data-egress decision, and export
+  renderer action emits OpenTelemetry span metadata and durable run diagnostics. The
+  audit must be queryable from PaperRun snapshots and strict acceptance.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-044-step-01-red-tests
+  title: Add observability audit tests
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Cover spans/tool traces for stages, capabilities, model roles, subagents,
+    egress decisions, cost diagnostics, and export renderer actions.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-044-step-02-instrumentation
+  title: Implement instrumentation helpers
+  status: todo
+  owner: codex
+  depends_on:
+  - task-044-step-01-red-tests
+  description: Centralize OpenTelemetry span attributes and durable diagnostic recording
+    across paper runtime modules.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-044-step-03-snapshot-strict
+  title: Expose audit in snapshots and strict acceptance
+  status: todo
+  owner: codex
+  depends_on:
+  - task-044-step-02-instrumentation
+  description: Surface audit entries in PaperRun snapshots and add strict acceptance
+    checks for coverage.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-044-step-04-doc-version
+  title: Document 0.3.6-dev
+  status: todo
+  owner: codex
+  depends_on:
+  - task-044-step-03-snapshot-strict
+  description: Update README, CHANGELOG, and report with real commit id.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-044-step-05-verify
+  title: Verify observability audit
+  status: todo
+  owner: codex
+  depends_on:
+  - task-044-step-04-doc-version
+  description: Run observability tests, strict acceptance subset, typecheck, version
+    check, and TaskFlow validate_task.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: file
+  path: packages/opencode/src/paper/observability.ts
+  description: PaperRun observability helpers
+- type: file
+  path: packages/opencode/test/paper/observability-audit.test.ts
+  description: Observability tests
+- type: report
+  path: reports/observability-audit-hardening.md
+  description: Implementation report
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-10T06:13:14.337733'
+  updated_at: '2026-05-10T06:13:14.337733'
+  version: '1'

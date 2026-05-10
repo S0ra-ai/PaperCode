@@ -1,0 +1,111 @@
+id: task-041-real-intake-material-indexing
+title: Index real input materials for topic, code, data, logs, and paper files
+status: todo
+priority: high
+owner: codex
+tags:
+- intake
+- materials
+- source-ledger
+- egress
+depends_on:
+- task-040-paperrun-resume-guidance-controller
+description: Version 0.3.3-dev. Build a real intake material index for user-provided
+  repositories, code paths, datasets, experiment logs, PDFs, Markdown, LaTeX, and
+  DOCX. Every downstream claim must be able to trace to a source range or a blocked
+  diagnostic, while ignored files, secrets, binaries, and unapproved egress remain
+  protected.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-041-step-01-red-tests
+  title: Add material indexing tests
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Cover code, markdown, latex, docx/pdf probes where supported, experiment
+    logs, datasets, ignored files, secret-like paths, binaries, and source range emission.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-041-step-02-indexer
+  title: Implement material indexer
+  status: todo
+  owner: codex
+  depends_on:
+  - task-041-step-01-red-tests
+  description: Build workspace-safe file discovery, parsers/probes, source range records,
+    and data-egress audit entries using existing OpenCode and Python bridge capabilities.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-041-step-03-wire-intake
+  title: Wire material index into PaperRun intake
+  status: todo
+  owner: codex
+  depends_on:
+  - task-041-step-02-indexer
+  description: Record material index artifacts and Source Ledger entries during intake
+    and expose them through PaperRun snapshots and preview diagnostics.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-041-step-04-doc-version
+  title: Document 0.3.3-dev
+  status: todo
+  owner: codex
+  depends_on:
+  - task-041-step-03-wire-intake
+  description: Update README, CHANGELOG, and report with real commit id.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-041-step-05-verify
+  title: Verify material intake
+  status: todo
+  owner: codex
+  depends_on:
+  - task-041-step-04-doc-version
+  description: Run targeted material-index tests, Python bridge tests if touched,
+    typecheck, version check, and TaskFlow validate_task.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: file
+  path: packages/opencode/src/paper/material-index.ts
+  description: Material indexer
+- type: file
+  path: packages/opencode/test/paper/material-index.test.ts
+  description: Material indexing tests
+- type: report
+  path: reports/real-intake-material-indexing.md
+  description: Implementation report
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-10T06:12:31.210057'
+  updated_at: '2026-05-10T06:12:31.210057'
+  version: '1'
