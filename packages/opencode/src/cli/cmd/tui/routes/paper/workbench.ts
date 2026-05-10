@@ -64,6 +64,70 @@ export interface PaperWorkbenchCapabilityHealthState {
   network: string
 }
 
+export interface PaperRunCostDiagnostics {
+  total_usd: number
+  llm_usd: number
+  api_usd: number
+  budget_total_usd?: number
+  alert_count: number
+  total_tokens: number
+  last_call_tokens: number
+  context_percent?: number
+  formatted_total: string
+}
+
+export interface PaperRunOutlineState {
+  source: "draft" | "artifact" | "stage_graph"
+  items: Array<{
+    label: string
+    status: string
+    detail?: string
+  }>
+  missing_sections: string[]
+}
+
+export interface PaperRunGateSummary {
+  status: "passed" | "blocked" | "open" | "not_started"
+  status_label: string
+  failed_checks: string[]
+  reproduction_gate: string
+  export_status: string
+  final_export_enabled: boolean
+}
+
+export interface PaperRunSidebarState {
+  overview: {
+    current_stage: string
+    current_stage_status: string
+    next_action: string
+    blockers: string[]
+  }
+  cost: PaperRunCostDiagnostics
+  outline: PaperRunOutlineState
+  agent_tree: {
+    total_agents: number
+    active_agents: number
+    max_depth_observed: number
+    depth_policy: string
+    max_parallel: number
+    recent_agents: Array<{
+      id: string
+      role: string
+      status: string
+      model: string
+      depth: number
+    }>
+  }
+  gate: PaperRunGateSummary
+  diagnostics: {
+    recent_calls: Array<{
+      name: string
+      status: string
+      detail: string
+    }>
+  }
+}
+
 export interface PaperDashboardState {
   language: "zh-CN"
   run_id: string
@@ -92,6 +156,7 @@ export interface PaperDashboardState {
     id: string
     message: string
   }>
+  sidebar: PaperRunSidebarState
 }
 
 const STAGE_LABELS: Record<string, string> = {
@@ -150,6 +215,11 @@ const HEALTH_STATUS_LABELS: Record<string, string> = {
   unavailable: "不可用",
   unknown: "未知",
 }
+
+const money = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+})
 
 function tokenize(input: string) {
   const tokens: string[] = []
@@ -519,6 +589,211 @@ function capabilityHealthState(
   return [...capabilityItems, ...toolchainItems]
 }
 
+function objectValue(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : {}
+}
+
+function numericValue(value: unknown) {
+  return typeof value === "number" && Number.isFinite(value) ? value : 0
+}
+
+function arrayValue(value: unknown) {
+  return Array.isArray(value) ? value : []
+}
+
+function tokenUsageFrom(value: unknown): {
+  total: number
+  input: number
+  output: number
+  reasoning: number
+  cache_read: number
+  cache_write: number
+  context_limit?: number
+} {
+  const record = objectValue(value)
+  const nested = [record.tokens, record.usage, record.token_usage].map(objectValue)
+  const candidates = [record, ...nested]
+  const read = (...keys: string[]) =>
+    candidates.reduce((sum, candidate) => sum + keys.reduce((inner, key) => inner + numericValue(candidate[key]), 0), 0)
+  const input = read("input_tokens", "prompt_tokens", "input")
+  const output = read("output_tokens", "completion_tokens", "output")
+  const reasoning = read("reasoning_tokens", "reasoning")
+  const cache_read = read("cache_read_tokens", "cache_read", "cached_tokens")
+  const cache_write = read("cache_write_tokens", "cache_write")
+  const total = read("total_tokens", "total") || input + output + reasoning + cache_read + cache_write
+  const contextLimit = candidates.map((candidate) => numericValue(candidate.context_limit ?? candidate.context_window)).find((item) => item > 0)
+  return {
+    total,
+    input,
+    output,
+    reasoning,
+    cache_read,
+    cache_write,
+    context_limit: contextLimit,
+  }
+}
+
+function costDiagnostics(snapshot: PaperRunSnapshot): PaperRunCostDiagnostics {
+  const cost = objectValue(snapshot.diagnostics.cost)
+  const budget = objectValue(cost.budget)
+  const traces = snapshot.diagnostics.tool_traces ?? []
+  const usage = traces.map((trace) => {
+    const input = tokenUsageFrom(trace.input)
+    const output = tokenUsageFrom(trace.output)
+    const total = input.total + output.total
+    return {
+      total,
+      context_limit: input.context_limit ?? output.context_limit,
+    }
+  })
+  const totalTokens = usage.reduce((sum, item) => sum + item.total, 0)
+  const last = usage.findLast((item) => item.total > 0)
+  const contextPercent =
+    last?.context_limit && last.context_limit > 0 ? Math.round((last.total / last.context_limit) * 100) : undefined
+  const totalUsd = numericValue(cost.total_usd)
+  return {
+    total_usd: totalUsd,
+    llm_usd: numericValue(cost.llm_usd),
+    api_usd: numericValue(cost.api_usd),
+    budget_total_usd: numericValue(budget.total_soft_usd) || undefined,
+    alert_count: arrayValue(cost.alerts).length,
+    total_tokens: totalTokens,
+    last_call_tokens: last?.total ?? 0,
+    context_percent: contextPercent,
+    formatted_total: money.format(totalUsd),
+  }
+}
+
+function artifactSchema(artifact: PaperRunSnapshot["artifacts"][number]) {
+  const metadata = objectValue(artifact.metadata)
+  return typeof metadata.artifact_schema === "string" ? metadata.artifact_schema : undefined
+}
+
+function outlineState(snapshot: PaperRunSnapshot): PaperRunOutlineState {
+  const artifacts = snapshot.artifacts ?? []
+  const drafts = snapshot.drafts ?? []
+  const claims = snapshot.claim_ledger ?? []
+  const draftArtifact = artifacts.find((artifact) => artifactSchema(artifact) === "DraftPaper.v1")
+  const outlineArtifact = artifacts.find((artifact) => artifact.kind === "outline")
+  if (drafts.length > 0) {
+    return {
+      source: "draft",
+      items: drafts.slice(-4).map((draft) => ({
+        label: draft.title,
+        status: draft.format,
+        detail: draft.path,
+      })),
+      missing_sections: claims.length === 0 ? ["Claim Ledger"] : [],
+    }
+  }
+  if (draftArtifact || outlineArtifact) {
+    const artifact = draftArtifact ?? outlineArtifact!
+    return {
+      source: "artifact",
+      items: [
+        {
+          label: artifact.path,
+          status: artifactSchema(artifact) ?? artifact.kind,
+          detail: artifact.artifact_id,
+        },
+      ],
+      missing_sections: claims.length === 0 ? ["Claim Ledger", "DraftPaper"] : ["DraftPaper"],
+    }
+  }
+  return {
+    source: "stage_graph",
+    items: snapshot.stage_graph.stages
+      .filter((stage) => stage.status !== "pending")
+      .slice(-6)
+      .map((stage) => ({
+        label: STAGE_LABELS[stage.id] ?? stage.title,
+        status: STATUS_LABELS[stage.status] ?? stage.status,
+        detail: stage.summary,
+      })),
+    missing_sections: ["DraftPaper", "Claim Ledger"],
+  }
+}
+
+function gateSummary(snapshot: PaperRunSnapshot): PaperRunGateSummary {
+  const gate = objectValue(snapshot.diagnostics.final_gate)
+  const status = gate.status === "passed" || gate.status === "blocked" || gate.status === "open" ? gate.status : "not_started"
+  const exportFailedChecks = snapshot.export_state.failed_checks ?? []
+  const failedChecks = exportFailedChecks.length
+    ? exportFailedChecks
+    : arrayValue(gate.blockers).filter((item): item is string => typeof item === "string")
+  const labels: Record<PaperRunGateSummary["status"], string> = {
+    passed: "通过",
+    blocked: "阻断",
+    open: "待审查",
+    not_started: "未开始",
+  }
+  return {
+    status,
+    status_label: labels[status],
+    failed_checks: failedChecks,
+    reproduction_gate: snapshot.experiment_status?.reproduction_gate ?? "not_started",
+    export_status: snapshot.export_state.status,
+    final_export_enabled: snapshot.export_state.status === "final",
+  }
+}
+
+function activeStage(snapshot: PaperRunSnapshot) {
+  return (
+    snapshot.stage_graph.stages.find((stage) => stage.status === "blocked") ??
+    snapshot.stage_graph.stages.find((stage) => stage.status === "running") ??
+    snapshot.stage_graph.stages.find((stage) => stage.status === "pending") ??
+    snapshot.stage_graph.stages.at(-1)
+  )
+}
+
+function nextAction(snapshot: PaperRunSnapshot, gate: PaperRunGateSummary) {
+  if (snapshot.pause_questions.length > 0) return "回答 pause question"
+  if (gate.failed_checks.length > 0) return "补证据或导出 forced draft"
+  if (snapshot.export_state.status === "final") return "导出终稿"
+  if (snapshot.status === "running") return "等待自动 stage 推进"
+  return "查看 Preview / Export"
+}
+
+export function createPaperRunSidebarState(snapshot: PaperRunSnapshot): PaperRunSidebarState {
+  const gate = gateSummary(snapshot)
+  const current = activeStage(snapshot)
+  const nodes = snapshot.agent_tree.nodes ?? []
+  const recentAgents = nodes.slice(-4).map((agent) => ({
+    id: agent.agent_id,
+    role: agent.role,
+    status: agent.status,
+    model: `${agent.provider_id}/${agent.model_id}`,
+    depth: agent.depth,
+  }))
+  const recentCalls = (snapshot.diagnostics.tool_traces ?? []).slice(-5).map((trace) => ({
+    name: trace.tool_name,
+    status: trace.status,
+    detail: trace.error ?? trace.ended_at ?? trace.started_at,
+  }))
+  return {
+    overview: {
+      current_stage: current ? (STAGE_LABELS[current.id] ?? current.title) : "未开始",
+      current_stage_status: current ? (STATUS_LABELS[current.status] ?? current.status) : "未知",
+      next_action: nextAction(snapshot, gate),
+      blockers: [...gate.failed_checks, ...snapshot.pause_questions.map((question) => question.reason)].filter(Boolean),
+    },
+    cost: costDiagnostics(snapshot),
+    outline: outlineState(snapshot),
+    agent_tree: {
+      total_agents: nodes.length,
+      active_agents: nodes.filter((node) => node.status === "running" || node.status === "planned").length,
+      max_depth_observed: nodes.reduce((max, node) => Math.max(max, node.depth), 0),
+      depth_policy: snapshot.agent_tree.recursive_policy?.depth_policy ?? (snapshot.agent_tree.max_depth === null ? "unbounded" : "legacy"),
+      max_parallel: snapshot.agent_tree.max_parallel,
+      recent_agents: recentAgents,
+    },
+    gate,
+    diagnostics: {
+      recent_calls: recentCalls,
+    },
+  }
+}
+
 export function createPaperRunDashboardState(
   snapshot: PaperRunSnapshot,
   options: PaperWorkbenchDashboardOptions = {},
@@ -558,6 +833,7 @@ export function createPaperRunDashboardState(
       id: question.question_id,
       message: question.message,
     })),
+    sidebar: createPaperRunSidebarState(snapshot),
   }
 }
 
