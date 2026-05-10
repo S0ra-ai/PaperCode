@@ -1,0 +1,112 @@
+id: task-048-paperrun-completion-gates
+title: Align PaperRun completion state with authenticity gates
+status: todo
+priority: high
+owner: codex
+tags:
+- paperrun
+- gates
+- runtime
+depends_on:
+- task-047-strict-acceptance-timeouts
+description: Version 0.4.2-dev. The live benchmark completed all 14 stages but the
+  PaperRun snapshot status still reported running, while final export was blocked
+  by reproduction_failure even though the reproduction stage was marked succeeded.
+  Align run status, stage status, controller state, and final gate semantics so completed-but-blocked
+  runs are explicit and not misleading.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-048-step-01-red
+  title: Add regression for completed blocked run state
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Create a test asserting that a full graph with failed final gate becomes
+    blocked/review_required instead of running, and that reproduction status reflects
+    gate outcome.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-048-step-02-status
+  title: Implement terminal PaperRun status projection
+  status: todo
+  owner: codex
+  depends_on:
+  - task-048-step-01-red
+  description: Update PaperRun/runtime/controller status projection so all-stage completion
+    produces completed, blocked, or failed terminal state with explicit blockers.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-048-step-03-reproduction
+  title: Align reproduction stage and final gate
+  status: todo
+  owner: codex
+  depends_on:
+  - task-048-step-02-status
+  description: Ensure reproduction_failure is represented as stage diagnostic or blocked
+    status instead of successful reproduction with a contradictory final blocker.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-048-step-04-doc-version
+  title: Document 0.4.2-dev
+  status: todo
+  owner: codex
+  depends_on:
+  - task-048-step-03-reproduction
+  description: Update README, CHANGELOG, and runtime/gate report with real commit
+    id.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-048-step-05-verify
+  title: Verify PaperRun terminal states
+  status: todo
+  owner: codex
+  depends_on:
+  - task-048-step-04-doc-version
+  description: Run PaperRun execution/API tests, typecheck, version check, and TaskFlow
+    validate_task.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: file
+  path: packages/opencode/src/paper/run.ts
+  description: PaperRun status projection
+- type: file
+  path: packages/opencode/test/paper/paperrun-execution.test.ts
+  description: Terminal status regression coverage
+- type: report
+  path: reports/paperrun-completion-gates.md
+  description: Completion/gate alignment report
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-10T08:28:54.405011'
+  updated_at: '2026-05-10T08:28:54.405011'
+  version: '1'
