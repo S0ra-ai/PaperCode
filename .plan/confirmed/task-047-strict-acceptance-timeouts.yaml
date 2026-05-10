@@ -1,6 +1,6 @@
 id: task-047-strict-acceptance-timeouts
 title: Harden strict live acceptance with bounded checks
-status: todo
+status: done
 priority: high
 owner: codex
 tags:
@@ -20,7 +20,7 @@ execution:
 steps:
 - id: task-047-step-01-red
   title: Reproduce strict acceptance hang risk
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: Add or run a slow fixture that proves Invoke-CheckedCommand lacks per-check
@@ -29,12 +29,26 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T08:39:02.618975'
+      level: info
+      message: Inspecting strict acceptance script/tests and adding regression coverage
+        for timeout/partial report behavior.
+      agent: codex
+    - timestamp: '2026-05-10T08:40:22.087224'
+      level: info
+      message: 'Added regression assertions to packages/opencode/test/paper/strict-acceptance.test.ts
+        for CheckTimeoutSeconds, Wait-Job/Stop-Job timeout handling, partial Write-Report
+        progress, FullWorkspaceSuite mode, focused default mode, and targeted PaperRun
+        test names. RED verified: strict-acceptance.test.ts fails because scripts/strict-acceptance.ps1
+        lacks those timeout and suite-policy markers.'
+      agent: codex
+    last_run: '2026-05-10T08:40:22.087224'
+    attempt_count: 2
   meta: {}
 - id: task-047-step-02-timeouts
   title: Add bounded check execution
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-047-step-01-red
@@ -44,12 +58,25 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T08:40:46.765107'
+      level: info
+      message: Implementing per-check timeout, job cleanup, progress logs, and partial
+        report persistence in scripts/strict-acceptance.ps1.
+      agent: codex
+    - timestamp: '2026-05-10T08:46:34.360110'
+      level: info
+      message: Implemented per-check Start-Job/Wait-Job bounded execution with configurable
+        CheckTimeoutSeconds, Stop-Job cleanup on timeout, progress logs for each check,
+        and Write-Report in Invoke-Check finally so partial results persist after
+        each check. Verified with strict-acceptance.test.ts and fixture strict acceptance.
+      agent: codex
+    last_run: '2026-05-10T08:46:34.360110'
+    attempt_count: 2
   meta: {}
 - id: task-047-step-03-suite-policy
   title: Split focused and full suites
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-047-step-02-timeouts
@@ -60,12 +87,26 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T08:46:40.639183'
+      level: info
+      message: Applying focused/default and opt-in full workspace strict acceptance
+        suite policy.
+      agent: codex
+    - timestamp: '2026-05-10T08:46:46.006540'
+      level: info
+      message: 'Added FullWorkspaceSuite switch. Default mode is strict-live-focused
+        and runs targeted paper-critical opencode tests: paperrun-execution, code-to-paper,
+        export-pipeline, observability-audit, and strict-acceptance. FullWorkspaceSuite
+        preserves opt-in full packages/opencode test with a longer FullWorkspaceTimeoutSeconds
+        budget.'
+      agent: codex
+    last_run: '2026-05-10T08:46:46.006540'
+    attempt_count: 2
   meta: {}
 - id: task-047-step-04-doc-version
   title: Document 0.4.1-dev
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-047-step-03-suite-policy
@@ -75,12 +116,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T08:50:42.179753'
+      level: info
+      message: Updating README and colon DSL CHANGELOG to 0.4.1-dev with real work
+        commit fad39b1.
+      agent: codex
+    - timestamp: '2026-05-10T08:50:56.259399'
+      level: info
+      message: 'Updated README current version to 0.4.1-dev and inserted CHANGELOG
+        0.4.1-dev colon-history entry with real work commit fad39b1. Version check
+        passed: README version 0.4.1-dev matches CHANGELOG latest version.'
+      agent: codex
+    last_run: '2026-05-10T08:50:56.259399'
+    attempt_count: 2
   meta: {}
 - id: task-047-step-05-verify
   title: Verify bounded strict acceptance
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-047-step-04-doc-version
@@ -90,8 +143,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T08:51:01.813295'
+      level: info
+      message: Running final bounded focused strict acceptance after README/CHANGELOG
+        0.4.1-dev synchronization so reports/strict-live-acceptance.md contains current
+        version evidence.
+      agent: codex
+    - timestamp: '2026-05-10T08:54:07.408286'
+      level: info
+      message: 'Final verification passed. strict-acceptance.test.ts: 5 pass, 0 fail,
+        43 expects. Fixture strict acceptance passed with CheckTimeoutSeconds=120.
+        Focused strict acceptance passed with CheckTimeoutSeconds=300 and updated
+        reports/strict-live-acceptance.md, including README version 0.4.1-dev == CHANGELOG
+        latest version. TaskFlow validate_task task-047-strict-acceptance-timeouts
+        passed.'
+      agent: codex
+    last_run: '2026-05-10T08:54:07.408286'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -108,5 +177,5 @@ trace:
   attempt_count: 0
 meta:
   created_at: '2026-05-10T08:28:54.093716'
-  updated_at: '2026-05-10T08:28:54.093716'
+  updated_at: '2026-05-10T08:54:25.320711'
   version: '1'
