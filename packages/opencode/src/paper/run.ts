@@ -150,7 +150,7 @@ export interface PaperRunSnapshot {
   run_id: string
   topic: string
   workspace: string
-  status: "initialized" | "running" | "succeeded" | "failed" | "cancelled"
+  status: "initialized" | "running" | "succeeded" | "blocked" | "failed" | "cancelled"
   created_at: string
   updated_at: string
   intake: ResearchBrief
@@ -267,7 +267,25 @@ function runOptions(input?: PaperRunRuntimeOptions): PaperRunRuntimeOptions {
   }
 }
 
-function stageStatusFromEvents(stage: PaperResearchStageDefinition, events: ResearchEvent[]): PaperRunStageSnapshot {
+function finalGateBlockers(value: unknown) {
+  return metadataStringArray(jsonRecord(value).blockers)
+}
+
+function stageStatusFromEvents(
+  stage: PaperResearchStageDefinition,
+  events: ResearchEvent[],
+  finalGate: unknown,
+): PaperRunStageSnapshot {
+  const gate = finalGateStatus(finalGate)
+  const gateBlockers = finalGateBlockers(finalGate)
+  if (stage.id === "reproduction" && gate === "blocked" && gateBlockers.includes("reproduction_failure")) {
+    return {
+      ...stage,
+      status: "blocked",
+      summary: "Final gate blocker reproduction_failure requires successful container reproduction before final claims.",
+    }
+  }
+
   const completed = events.findLast(
     (event) =>
       (event.type === "paper.stage.completed" || event.type === "paperorchestrator.stage.completed") &&
@@ -306,6 +324,33 @@ function stageStatusFromEvents(stage: PaperResearchStageDefinition, events: Rese
   }
 
   return { ...stage, status: "pending" }
+}
+
+function terminalStages(stages: PaperRunStageSnapshot[]) {
+  return stages.every((stage) => stage.status !== "pending" && stage.status !== "running")
+}
+
+function paperRunStatus(input: {
+  researchStatus: Awaited<ReturnType<typeof getResearchRunStatus>>["run"]["status"]
+  stages: PaperRunStageSnapshot[]
+  finalGate: unknown
+}): PaperRunSnapshot["status"] {
+  if (input.researchStatus === "cancelled") return "cancelled"
+  if (input.researchStatus === "failed") return "failed"
+  const gate = finalGateStatus(input.finalGate)
+  if (input.stages.some((stage) => stage.status === "blocked")) return "blocked"
+  if (gate === "blocked") return "blocked"
+  if (input.stages.every((stage) => stage.status === "succeeded" || stage.status === "skipped")) {
+    return gate === "passed" ? "succeeded" : "blocked"
+  }
+  return input.researchStatus
+}
+
+function researchTerminalStatus(snapshot: Omit<PaperRunSnapshot, "controller_state">): "succeeded" | "failed" | undefined {
+  if (!terminalStages(snapshot.stage_graph.stages)) return undefined
+  const gate = finalGateStatus(snapshot.diagnostics.final_gate)
+  if (snapshot.stage_graph.stages.some((stage) => stage.status === "blocked") && gate !== "blocked") return "failed"
+  return "succeeded"
 }
 
 function defaultAgentTree(input: {
@@ -540,6 +585,7 @@ export async function getPaperRunSnapshotFromDir(runDir: string): Promise<PaperR
   const roles = modelRoleMap(intake.model_roles)
   const capabilities = defaultResearchCapabilities()
   const gate = finalGateStatus(status.state.final_gate)
+  const stages = PAPER_RESEARCH_STAGE_GRAPH.stages.map((stage) => stageStatusFromEvents(stage, events, status.state.final_gate))
   const pauseQuestions: PaperRunPauseQuestion[] =
     gate === "blocked"
       ? [
@@ -558,7 +604,7 @@ export async function getPaperRunSnapshotFromDir(runDir: string): Promise<PaperR
     run_id: status.run.run_id,
     topic: status.run.topic,
     workspace: status.run.workspace,
-    status: status.run.status,
+    status: paperRunStatus({ researchStatus: status.run.status, stages, finalGate: status.state.final_gate }),
     created_at: status.run.created_at,
     updated_at: status.run.updated_at,
     intake,
@@ -567,7 +613,7 @@ export async function getPaperRunSnapshotFromDir(runDir: string): Promise<PaperR
     data_egress_policy: dataEgressPolicy,
     stage_graph: {
       schema_version: PAPER_RESEARCH_STAGE_GRAPH.schema_version,
-      stages: PAPER_RESEARCH_STAGE_GRAPH.stages.map((stage) => stageStatusFromEvents(stage, events)),
+      stages,
     },
     events: events.map((event) => ({
       event_id: event.event_id,
@@ -675,6 +721,9 @@ export async function createPaperRun(
     },
     normalized,
   )
+  const projected = await getPaperRunSnapshotFromDir(handle.run_dir)
+  const terminalStatus = researchTerminalStatus(projected)
+  if (terminalStatus) await updateResearchRunStatus(handle.run_dir, terminalStatus, normalized)
   const snapshot = await getPaperRunSnapshotFromDir(handle.run_dir)
   const controller = await initializePaperRunControllerState(handle.run_dir, snapshot, normalized)
   return {

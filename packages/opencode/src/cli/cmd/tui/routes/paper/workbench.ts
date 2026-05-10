@@ -123,6 +123,7 @@ const STATUS_LABELS: Record<string, string> = {
 const CONTROLLER_STATUS_LABELS: Record<PaperRunControllerState["status"], string> = {
   running: "运行中",
   paused: "已暂停",
+  review_required: "需审查",
   cancelled: "已取消",
   completed: "已完成",
 }
@@ -348,10 +349,18 @@ function blockedStage(snapshot: PaperRunSnapshot) {
 function snapshotController(snapshot: PaperRunSnapshot): PaperRunControllerState {
   if (snapshot.controller_state) return snapshot.controller_state
   const blocked = snapshot.stage_graph.stages.some((stage) => stage.status === "blocked")
+  const terminalStages = snapshot.stage_graph.stages.every((stage) => stage.status !== "pending" && stage.status !== "running")
   return {
     schema_version: "PaperRunController.v1",
     run_id: snapshot.run_id,
-    status: snapshot.status === "cancelled" ? "cancelled" : blocked || snapshot.pause_questions.length > 0 ? "paused" : "running",
+    status:
+      snapshot.status === "cancelled"
+        ? "cancelled"
+        : snapshot.status === "blocked" && terminalStages
+          ? "review_required"
+          : blocked || snapshot.pause_questions.length > 0
+            ? "paused"
+            : "running",
     checkpoints: [],
     guidance_queue: [],
     controls: [],
