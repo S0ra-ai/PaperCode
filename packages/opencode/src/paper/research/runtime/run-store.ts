@@ -178,7 +178,9 @@ export async function refreshResearchIndexes(runDir: string, options?: ResearchP
         workspace: options?.workspace ?? run.workspace,
         home: options?.home,
       })
-      if (!runDirs.includes(runDir)) runDirs.push(runDir)
+      const normalizedRunDir = path.resolve(runDir).toLowerCase()
+      const seenRunDirs = new Set(runDirs.map((item) => path.resolve(item).toLowerCase()))
+      if (!seenRunDirs.has(normalizedRunDir)) runDirs.push(runDir)
       const global_index_path = await rebuildGlobalIndex(runDirs, { home: options?.home })
       span.setAttribute("paper_fucker.research.run_id", run.run_id)
       span.setAttribute("paper_fucker.research.global_index.path", global_index_path)
