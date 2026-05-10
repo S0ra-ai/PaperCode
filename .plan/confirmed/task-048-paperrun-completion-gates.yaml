@@ -1,6 +1,6 @@
 id: task-048-paperrun-completion-gates
 title: Align PaperRun completion state with authenticity gates
-status: todo
+status: done
 priority: high
 owner: codex
 tags:
@@ -111,7 +111,7 @@ steps:
   meta: {}
 - id: task-048-step-04-doc-version
   title: Document 0.4.2-dev
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-048-step-03-reproduction
@@ -121,12 +121,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T09:07:22.844554'
+      level: info
+      message: Updating README and colon DSL CHANGELOG to 0.4.2-dev with real work
+        commit 18562fb.
+      agent: codex
+    - timestamp: '2026-05-10T09:08:05.490829'
+      level: info
+      message: 'Updated README current version to 0.4.2-dev and inserted CHANGELOG
+        0.4.2-dev colon-history entry with real work commit 18562fb. Version check
+        passed: README version 0.4.2-dev matches CHANGELOG latest version.'
+      agent: codex
+    last_run: '2026-05-10T09:08:05.490829'
+    attempt_count: 2
   meta: {}
 - id: task-048-step-05-verify
   title: Verify PaperRun terminal states
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-048-step-04-doc-version
@@ -136,8 +148,21 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T09:08:18.611685'
+      level: info
+      message: 'Running final PaperRun terminal state verification: targeted PaperRun/controller/TUI
+        tests, opencode typecheck, README/CHANGELOG version check, and TaskFlow validate_task.'
+      agent: codex
+    - timestamp: '2026-05-10T09:09:11.237983'
+      level: info
+      message: 'Final verification passed. Targeted PaperRun/controller/TUI tests:
+        4 pass, 0 fail, 48 expects. npx --yes bun@1.3.13 run --cwd packages/opencode
+        typecheck passed. README version 0.4.2-dev matches CHANGELOG latest version.
+        TaskFlow validate_task task-048-paperrun-completion-gates passed.'
+      agent: codex
+    last_run: '2026-05-10T09:09:11.237983'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -157,5 +182,5 @@ lock:
   at: '2026-05-10T08:57:30.589690'
 meta:
   created_at: '2026-05-10T08:28:54.405011'
-  updated_at: '2026-05-10T09:06:47.961227'
+  updated_at: '2026-05-10T09:09:11.237983'
   version: '1'
