@@ -1,6 +1,6 @@
 # paper_fucker
 
-Current version: <!-- version:start -->0.5.5-dev<!-- version:end -->
+Current version: <!-- version:start -->0.5.6-dev<!-- version:end -->
 
 `paper_fucker` is a private-first, OpenCode-derived closed-loop paper system. It turns a topic, codebase, dataset, experiment log, or paper material set into a verifiable academic-paper bundle with research planning, source discovery, code understanding, experiment/reproduction support, ClaimLedger-first writing, authenticity gates, profile-aware formatting, preview, and export.
 
