@@ -21,7 +21,16 @@ async function clean(dir: string, attempts = 80): Promise<void> {
   Bun.gc(true)
   await sleep(150)
   return rm(dir, { recursive: true, force: true }).catch((error) => {
-    if (attempts <= 1) throw error
+    const retryable =
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      (error.code === "EBUSY" || error.code === "EACCES" || error.code === "EPERM")
+    if (!retryable) throw error
+    if (attempts <= 1) {
+      console.warn(`Could not remove temporary authoring test directory ${dir}: ${String(error)}`)
+      return
+    }
     return clean(dir, attempts - 1)
   })
 }
