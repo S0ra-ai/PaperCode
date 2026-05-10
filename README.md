@@ -1,6 +1,6 @@
 # paper_fucker
 
-Current version: <!-- version:start -->0.6.0-dev<!-- version:end -->
+Current version: <!-- version:start -->0.6.1-dev<!-- version:end -->
 
 `paper_fucker` is a private-first, OpenCode-derived closed-loop paper system. It turns a topic, codebase, dataset, experiment log, or paper material set into a verifiable academic-paper bundle with research planning, source discovery, code understanding, experiment/reproduction support, ClaimLedger-first writing, authenticity gates, profile-aware formatting, preview, and export.
 
@@ -37,7 +37,7 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - The paper authoring loop now binds drafts to run artifacts, applies profile-aware revision metadata, creates read-only preview snapshots, runs reviewer/authenticity checks, blocks unsafe final export, and emits forced draft, supplementary, and availability bundles.
 - Strict live acceptance is available through `scripts/strict-acceptance.ps1`; it validates TaskFlow, version sync, tracked secret hygiene, opencode/preview/Python/typecheck suites, local Paper Fucker CLI/TUI smoke, DeepSeek live provider smoke, Exa MCP live smoke, Nature skill/profile, pandoc, LaTeX, DOCX, topic-to-paper, code-to-paper, hard-fork paper core, PaperRun API/TUI, Agent Tree, private-first egress, observability audit coverage, public branding, and Git Flow branch discipline.
 - Strict live acceptance is bounded by per-check timeouts and writes partial progress after every check. The default mode runs a focused paper-critical suite for local milestone validation; `-FullWorkspaceSuite` preserves the slower full `packages/opencode test` path for extended runs.
-- The 0.6.0-dev acceptance pass verifies the recursive Agent Fabric, PaperRun right sidebar, Chinese workbench UX flow, public Paper Fucker branding, live provider/Exa/toolchain smokes, topic-to-paper, and code-to-paper in one strict report.
+- The 0.6.1-dev acceptance pass verifies the recursive Agent Fabric, PaperRun right sidebar, Chinese workbench UX flow, public Paper Fucker branding, live provider/Exa/toolchain smokes, and benchmark-backed topic-to-paper/code-to-paper PaperRuns in one strict report.
 - Final hard-fork acceptance for `0.3.0-dev` asserts that the user-visible product is now PaperRun-first: the paper core lives under `packages/opencode/src/paper`, `packages/server` is gone, the Chinese TUI creates PaperRuns instead of ordinary chat sessions, nested multi-model agents are traceable, final export is blocked by failed authenticity gates, and forced drafts carry failed checks.
 - PaperRun creation now drives the default paper stage engine directly. A new run records planning, literature/data seed discovery, source-range code analysis, experiment/reproduction diagnostics, ClaimLedger, draft, profile check, verification gate, preview/export artifacts, and controller snapshots without requiring fixture handler injection.
 - PaperRun now has a durable controller state. Pause checkpoints, guidance queue, resume/retry/cancel controls, controller SSE events, and `controller_state` snapshots are persisted under each run so the TUI/API can steer runs without shell commands.
