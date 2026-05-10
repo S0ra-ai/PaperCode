@@ -178,10 +178,7 @@ outputs:
 trace:
   logs: []
   attempt_count: 0
-lock:
-  by: codex
-  at: '2026-05-10T04:23:36.059829'
 meta:
   created_at: '2026-05-09T02:50:18.498235'
-  updated_at: '2026-05-10T05:12:09.450271'
+  updated_at: '2026-05-10T05:12:56.383297'
   version: '1'
