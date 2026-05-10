@@ -3,7 +3,7 @@ import { RESEARCH_SCHEMA_VERSION, type ResearchSource, type ResearchToolTrace } 
 import type { ExperimentRun } from "./research/experiments"
 
 export type HFResearchKind = "docs" | "papers" | "datasets" | "models" | "spaces" | "jobs" | "trackio"
-export type HFResearchTrust = "hf_official" | "community" | "local_fixture"
+export type HFResearchTrust = "hf_official" | "community" | "local_fixture" | "user_provided_trackio_export"
 
 export interface HFResearchLoopCapability {
   schema_version: "HFResearchLoopCapability.v1"

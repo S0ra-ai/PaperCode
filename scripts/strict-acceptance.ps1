@@ -36,8 +36,11 @@ $RequiredChecks = @(
     "pandoc-conversion",
     "latex-pdf-generation",
     "docx-generation",
+    "live-crawler-fetch",
+    "hf-live-research-loop",
     "topic-to-paper-live-run",
     "code-to-paper-live-run",
+    "final-export-pass-run",
     "hard-fork-paper-core",
     "hard-fork-paperrun-api-tui",
     "hard-fork-agent-tree",
@@ -278,6 +281,19 @@ function New-AcceptanceTempDir {
     return $tmp
 }
 
+function Invoke-PythonAcceptanceSnippet {
+    param(
+        [string]$Name,
+        [string]$Code,
+        [int]$TimeoutSeconds = 120
+    )
+    $tmp = Join-Path $RepoRoot "tmp/strict-acceptance-python"
+    New-Item -ItemType Directory -Path $tmp -Force | Out-Null
+    $snippet = Join-Path $tmp $Name
+    Set-Content -LiteralPath $snippet -Encoding UTF8 -Value $Code
+    return Invoke-CheckedCommand -File "python" -Arguments @($snippet) -Environment @{ PYTHONPATH = (Join-Path $RepoRoot "research-tools/src") } -TimeoutSeconds $TimeoutSeconds
+}
+
 function Invoke-PandocConversion {
     $pandoc = Get-Command pandoc -ErrorAction SilentlyContinue
     Assert-StrictLive ($null -ne $pandoc) "pandoc was not found on PATH." | Out-Null
@@ -318,6 +334,57 @@ function Invoke-DocxGeneration {
     Invoke-CheckedCommand "pandoc" @($md, "-o", $docx) | Out-Null
     Assert-StrictLive (Test-Path -LiteralPath $docx) "pandoc did not write DOCX output." | Out-Null
     return "pandoc generated acceptance-docx.docx"
+}
+
+function Invoke-LiveCrawlerFetch {
+    if ($FixtureMode) { return "fixture live-crawler-fetch: skipped external HTTP fetch" }
+    $code = @'
+import json
+from paper_fucker_tools.crawler import crawl_url
+record = crawl_url({
+    "url": "https://example.com/",
+    "allow_network": True,
+    "respect_robots": False,
+    "license_status": "compatible",
+    "timeout_seconds": 30,
+})
+assert record["schema_version"] == "CrawlSourceRecord.v1", record
+assert record["status"] == "fetched", record
+assert record["http_status"] >= 200 and record["http_status"] < 400, record
+assert record["content_sha256"], record
+assert "scrapling_live_fetch_not_implemented" not in record.get("diagnostics", []), record
+print(json.dumps({"status": record["status"], "method": record["extraction_evidence"]["method"], "title": record["title"]}))
+'@
+    return Invoke-PythonAcceptanceSnippet -Name "live-crawler-fetch.py" -Code $code -TimeoutSeconds 120
+}
+
+function Invoke-HFLiveResearchLoop {
+    if ($FixtureMode) { return "fixture hf-live-research-loop: live papers/jobs/trackio boundary skipped" }
+    $code = @'
+import json
+from paper_fucker_tools.huggingface_loop import hf_research_probe
+papers = hf_research_probe({"kind": "papers", "query": "transformers", "limit": 1, "allow_network": True})
+assert papers["mode"] == "live", papers
+assert len(papers["records"]) >= 1, papers
+assert papers["records"][0]["trust"] == "hf_official", papers
+jobs = hf_research_probe({"kind": "jobs", "query": "paper_fucker", "limit": 1, "allow_network": True})
+assert jobs["mode"] in {"live", "blocked"}, jobs
+if jobs["mode"] == "blocked":
+    assert jobs["diagnostics"] == ["hf_token_required_for_jobs"], jobs
+trackio = hf_research_probe({
+    "kind": "trackio",
+    "query": "paper_fucker",
+    "trackio_export": {
+        "run_id": "strict-live-trackio-export",
+        "title": "Strict live Trackio exported metrics",
+        "metrics": [{"name": "accuracy", "value": 0.94, "step": 1}],
+    },
+})
+assert trackio["mode"] == "provided", trackio
+assert trackio["records"][0]["trust"] == "user_provided_trackio_export", trackio
+print(json.dumps({"papers": len(papers["records"]), "jobs_mode": jobs["mode"], "trackio_mode": trackio["mode"]}))
+'@
+    return Invoke-PythonAcceptanceSnippet -Name "hf-live-research-loop.py" -Code $code -TimeoutSeconds 180
 }
 
 function Invoke-TrackedSecretScan {
@@ -582,11 +649,20 @@ Invoke-Check "latex-pdf-generation" "LaTeX PDF generation" {
 Invoke-Check "docx-generation" "DOCX generation" {
     Invoke-DocxGeneration
 }
+Invoke-Check "live-crawler-fetch" "Authorized live crawler fetch" {
+    Invoke-LiveCrawlerFetch
+}
+Invoke-Check "hf-live-research-loop" "Hugging Face live papers and no-mock jobs/Trackio boundary" {
+    Invoke-HFLiveResearchLoop
+}
 Invoke-Check "topic-to-paper-live-run" "Topic-to-paper runtime smoke" {
     Invoke-CheckedCommand "npx" @("--yes", "bun@1.3.13", "scripts/live-paper-quality-benchmark.ts", "--scenario", "topic")
 }
 Invoke-Check "code-to-paper-live-run" "Code-to-paper runtime smoke" {
     Invoke-CheckedCommand "npx" @("--yes", "bun@1.3.13", "scripts/live-paper-quality-benchmark.ts", "--scenario", "code")
+}
+Invoke-Check "final-export-pass-run" "Reproduction-pass final export runtime smoke" {
+    Invoke-CheckedCommand "npx" @("--yes", "bun@1.3.13", "scripts/live-paper-quality-benchmark.ts", "--scenario", "final")
 }
 Invoke-Check "hard-fork-paper-core" "Hard fork paper core migration" {
     Invoke-HardForkPaperCore

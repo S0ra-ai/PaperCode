@@ -1,0 +1,207 @@
+id: live-product-closure
+title: 真实产品闭环补齐
+status: in_progress
+priority: high
+owner: codex
+tags:
+- paper
+- acceptance
+- live
+- crawler
+- huggingface
+- export
+- 0.8.0-dev
+depends_on: []
+description: 补齐 Paper Fucker 从可验收骨架到真实产品闭环的剩余缺口：实现授权 live crawler、增强 Hugging Face
+  live research loop、提供 reproduction-pass final export 场景，并将 strict acceptance 升级为能区分
+  focused/live/full 的真实验收报告。
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: inspect-gaps
+  title: 确认真实闭环缺口
+  status: done
+  owner: codex
+  depends_on: []
+  description: 记录当前 fixture-mode strict report、Scrapling live fetch 缺口、HF jobs/trackio
+    live 边界、forced draft-only 现状。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-10T21:43:33.783095'
+      level: info
+      message: Recording inspected live-product closure gaps before implementation.
+      agent: codex
+    - timestamp: '2026-05-10T21:43:38.897642'
+      level: info
+      message: 'Inspected current closure gaps: reports/strict-live-acceptance.md
+        is fixture mode; research-tools crawler blocks live allow_network path with
+        scrapling_live_fetch_not_implemented; HF loop live supports datasets/models/spaces
+        but papers/jobs/trackio fall back to fixture record helpers; topic/code benchmarks
+        currently complete stage graph but finish blocked with forced_draft because
+        reproduction_failure. Implementation will close these without adding hidden
+        product mocks.'
+      agent: codex
+    last_run: '2026-05-10T21:43:38.897642'
+    attempt_count: 2
+  meta: {}
+- id: live-crawler
+  title: 实现授权 live crawler
+  status: done
+  owner: codex
+  depends_on:
+  - inspect-gaps
+  description: 在 research-tools crawler 中实现 allow_network=true 的真实 URL fetch，保留 robots/license/fail-closed
+    边界，避免未授权网络请求。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-10T21:47:10.388120'
+      level: info
+      message: Implementing authorized live web crawl path with Scrapling-first adapter
+        and stdlib fallback, preserving network authorization and robots/license diagnostics.
+      agent: codex
+    - timestamp: '2026-05-10T21:56:44.282633'
+      level: info
+      message: 'Implemented authorized live crawler fetch in research-tools/src/paper_fucker_tools/crawler.py:
+        Scrapling-first when installed, stdlib HTTP fallback otherwise, explicit allow_network
+        gate, robots policy diagnostics, content hash/title/text extraction, and no
+        scrapling_live_fetch_not_implemented path. Added local HTTP unit test; Python
+        crawler tests passed.'
+      agent: codex
+    last_run: '2026-05-10T21:56:44.282633'
+    attempt_count: 2
+  meta: {}
+- id: hf-live-loop
+  title: 增强 HF live research loop
+  status: done
+  owner: codex
+  depends_on:
+  - inspect-gaps
+  description: 将 papers/jobs/trackio 从 fixture fallback 改为授权网络下真实或明确 blocked/approval-required
+    的产品记录，不允许未授权合成产品数据。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-10T21:48:34.855221'
+      level: info
+      message: Implementing Hugging Face live records for papers and authenticated
+        jobs, plus explicit Trackio export ingestion without synthetic product fallback.
+      agent: codex
+    - timestamp: '2026-05-10T21:56:45.691736'
+      level: info
+      message: 'Enhanced HF bridge: papers use official HF API live records; jobs
+        require HF token for live product data; Trackio accepts explicit exported
+        metrics as provided evidence; unauthorized product calls remain blocked without
+        synthetic fallback. Added Python tests; HF bridge tests passed.'
+      agent: codex
+    last_run: '2026-05-10T21:56:45.691736'
+    attempt_count: 2
+  meta: {}
+- id: final-export-pass
+  title: 增加 reproduction-pass final export 场景
+  status: done
+  owner: codex
+  depends_on:
+  - live-crawler
+  - hf-live-loop
+  description: 提供一个可复现通过的 PaperRun/authoring/benchmark 场景，证明 final export 可以在 gates
+    通过时生成，而不是只能 forced draft。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-10T21:52:03.068360'
+      level: info
+      message: Adding ExperimentEvidenceManifest.v1 ingestion and a live-paper-quality
+        final scenario that must pass reproduction and final export gates.
+      agent: codex
+    - timestamp: '2026-05-10T21:56:47.095836'
+      level: info
+      message: Added ExperimentEvidenceManifest.v1 ingestion in PaperRun default experiment
+        loop and scripts/live-paper-quality-benchmark.ts --scenario final. The final
+        scenario now passes reproduction gate and returns final_export=final while
+        forced draft remains available. Targeted PaperRun test and final benchmark
+        passed.
+      agent: codex
+    last_run: '2026-05-10T21:56:47.095836'
+    attempt_count: 2
+  meta: {}
+- id: strict-live-report
+  title: 升级 strict live acceptance
+  status: done
+  owner: codex
+  depends_on:
+  - final-export-pass
+  description: 更新 strict acceptance 检查和报告，明确 fixture/focused/full 模式，增加 crawler live、HF
+    no-mock/live boundary、final export pass 检查。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-10T21:52:13.570699'
+      level: info
+      message: Upgrading strict acceptance with live crawler, HF live/no-mock boundary,
+        and final export pass checks.
+      agent: codex
+    - timestamp: '2026-05-10T21:56:48.385743'
+      level: info
+      message: Extended scripts/strict-acceptance.ps1 with live-crawler-fetch, hf-live-research-loop,
+        and final-export-pass-run checks; updated strict-acceptance test inventory.
+        Strict acceptance script test passed; live final benchmark generated tmp/live-paper-quality-benchmark/final/paperrun-summary.json.
+      agent: codex
+    last_run: '2026-05-10T21:56:48.385743'
+    attempt_count: 2
+  meta: {}
+- id: docs-version-changelog
+  title: 同步 README/CHANGELOG/版本
+  status: todo
+  owner: codex
+  depends_on:
+  - strict-live-report
+  description: 以 CHANGELOG 为唯一版本源更新 README 当前版本，记录真实 commit id，保持 colon DSL 缩进校验通过。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: file
+  path: research-tools/src/paper_fucker_tools/crawler.py
+  description: Live crawler bridge
+- type: file
+  path: research-tools/src/paper_fucker_tools/huggingface_loop.py
+  description: HF live research bridge
+- type: file
+  path: scripts/strict-acceptance.ps1
+  description: Strict live acceptance script
+- type: file
+  path: reports/strict-live-acceptance.md
+  description: Strict live evidence report
+- type: file
+  path: CHANGELOG
+  description: Colon DSL changelog
+- type: file
+  path: README.md
+  description: Current version and product status
+trace:
+  logs: []
+  attempt_count: 0
+lock:
+  by: codex
+  at: '2026-05-10T21:43:05.656731'
+meta:
+  created_at: '2026-05-10T21:43:00.814577'
+  updated_at: '2026-05-10T21:56:48.385743'
+  version: '1'
