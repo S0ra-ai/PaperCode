@@ -1,6 +1,6 @@
 # paper_fucker
 
-Current version: <!-- version:start -->0.8.0-dev<!-- version:end -->
+Current version: <!-- version:start -->0.8.1-dev<!-- version:end -->
 
 `paper_fucker` is a private-first, OpenCode-derived closed-loop paper system. It turns a topic, codebase, dataset, experiment log, or paper material set into a verifiable academic-paper bundle with research planning, source discovery, code understanding, experiment/reproduction support, ClaimLedger-first writing, authenticity gates, profile-aware formatting, preview, and export.
 
@@ -37,6 +37,7 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - The paper authoring loop now binds drafts to run artifacts, applies profile-aware revision metadata, creates read-only preview snapshots, runs reviewer/authenticity checks, blocks unsafe final export, and emits forced draft, supplementary, and availability bundles.
 - Strict live acceptance is available through `scripts/strict-acceptance.ps1`; it validates TaskFlow, version sync, tracked secret hygiene, opencode/preview/Python/typecheck suites, local Paper Fucker CLI/TUI smoke, DeepSeek live provider smoke, Exa MCP live smoke, Nature skill/profile, pandoc, LaTeX, DOCX, topic-to-paper, code-to-paper, hard-fork paper core, PaperRun API/TUI, Agent Tree, private-first egress, observability audit coverage, public branding, and Git Flow branch discipline.
 - Strict live acceptance is bounded by per-check timeouts and writes partial progress after every check. The default mode runs a focused paper-critical suite for local milestone validation; `-FullWorkspaceSuite` preserves the slower full `packages/opencode test` path for extended runs.
+- The 0.8.1-dev line adds the autonomous continuation loop: when TaskFlow is empty, Codex runs a product audit, turns failed checks or credible improvements into new TaskFlow work, executes them through Git Flow, and keeps README/CHANGELOG/reports aligned.
 - The 0.8.0-dev line closes the live product loop milestone: authorized crawler fetches real HTTP content, Hugging Face papers use live Hub API records, HF jobs are token-gated, Trackio accepts explicit exported metrics, and `ExperimentEvidenceManifest.v1` can drive a reproduction-passed `final` export.
 - The 0.7.0-dev line closes the Agent Team capability acceptance milestone: built-in skills/MCP/Python capabilities, harness approval gates, MemoryBank, code understanding, crawler data, HF loop, PaperRun sidebar UX, no-mock HF boundary, and TaskFlow changelog split archives are covered by strict acceptance.
 - Final hard-fork acceptance for `0.3.0-dev` asserts that the user-visible product is now PaperRun-first: the paper core lives under `packages/opencode/src/paper`, `packages/server` is gone, the Chinese TUI creates PaperRuns instead of ordinary chat sessions, nested multi-model agents are traceable, final export is blocked by failed authenticity gates, and forced drafts carry failed checks.
@@ -73,6 +74,14 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - The system pauses only for actionable decisions: missing providers/tools, cost limits, data-egress authorization, license/source conflicts, low-confidence direction choices, unreproduced experiments, or authenticity gate blockers.
 - The run dashboard shows controls, stage graph, ledgers, model roles, capability health, preview/export controls, and the right sidebar for cost/token/context, outline, Agent Tree, gates, blockers, and recent calls.
 - Final export requires passing gates. Forced drafts are allowed for review but remain visibly marked with failed checks.
+
+## Autonomous Continuation Protocol
+
+- When TaskFlow has no confirmed work, Codex must not stop at "all done"; it should run `scripts/autonomous-product-audit.ps1`, inspect the generated report, and create the next TaskFlow task for any failed check or credible improvement.
+- The autonomous loop is TaskFlow-first: validate the `paper_fucker` project binding, create a feature-named Git Flow branch from `develop`, create/claim a TaskFlow task, implement, validate, record step logs, update CHANGELOG/README, merge back to `develop`, push, and clean the feature branch.
+- The audit must cover product truth, not only tests: strict live evidence, live crawler/HF/final-export proof, no-mock boundaries, Paper Fucker brand surface, README/CHANGELOG version sync, colon DSL changelog shape, dangerous development residue, and Git Flow hygiene.
+- If the audit passes, Codex should still look for the next highest-value product hardening item: full workspace suite, real provider diversity, live HF Jobs with token approval, richer crawler compliance, TUI UX polish, or documentation drift.
+- Reports are part of the product memory. `reports/autonomous-product-audit.md` records the current self-audit result; `reports/strict-live-acceptance.md` remains the focused live product acceptance evidence.
 
 - `schemas/research/`: JSON Schema source of truth for research runs, events, artifacts, sources, tool traces, claims, drafts, reviews, exports, and checkpoints.
 - `packages/opencode/src/paper/`: authoritative paper_fucker TypeScript runtime inside the OpenCode hard fork. It owns AJV validation, OpenTelemetry span hooks, generated TypeScript contract types, run/event/artifact runtime APIs, permission/resource/cost/final-gate state, Python tool bridge calls, paper orchestration, profiles, authoring, preview binding, and rebuildable SQLite indexes.

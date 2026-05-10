@@ -1,0 +1,149 @@
+id: autonomous-product-audit-loop
+title: 自驱产品审计与持续推进流程
+status: done
+priority: high
+owner: codex
+tags:
+- paper
+- audit
+- autonomous
+- taskflow
+- docs
+- 0.8.1-dev
+depends_on: []
+description: 建立 Paper Fucker 的自驱审计机制：在 TaskFlow 全部完成后自动寻找下一批工作，审计真实产品闭环、文档/版本/CHANGELOG、no-mock
+  边界、品牌残留、strict live evidence 和 Git Flow 状态，并生成可追踪报告。
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: audit-state
+  title: 审计当前完成状态
+  status: done
+  owner: codex
+  depends_on: []
+  description: 检查 TaskFlow、Git、strict report、README/CHANGELOG、no-mock/live/final export
+    证据，判断是否真的符合当前预期。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-10T23:20:13.067695'
+      level: info
+      message: Auditing current completion state before adding the self-driven loop.
+      agent: codex
+    - timestamp: '2026-05-10T23:21:51.987777'
+      level: info
+      message: 'Current state audited: previous 0.8.0-dev work meets focused strict
+        live expectations, with strict-live-focused report passed and evidence for
+        live crawler, HF live/no-mock boundary, topic/code blocked-by-reproduction
+        behavior, and final_export=final pass scenario. New expectation is continuous
+        self-driven discovery, not a one-time feature checklist.'
+      agent: codex
+    last_run: '2026-05-10T23:21:51.987777'
+    attempt_count: 2
+  meta: {}
+- id: audit-script
+  title: 新增自驱审计脚本
+  status: done
+  owner: codex
+  depends_on:
+  - audit-state
+  description: 新增 scripts/autonomous-product-audit.ps1，集中检查 TaskFlow 空队列、版本同步、CHANGELOG
+    缩进、strict report passed、live/final evidence、dangerous mock/not_implemented residues、品牌残留、Git
+    Flow 状态，并生成 Markdown 报告。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-10T23:21:57.524325'
+      level: info
+      message: Adding scripts/autonomous-product-audit.ps1 and generated report to
+        make self-driven gap discovery repeatable.
+      agent: codex
+    - timestamp: '2026-05-10T23:23:49.562062'
+      level: info
+      message: Added scripts/autonomous-product-audit.ps1 and generated reports/autonomous-product-audit.md.
+        The script checks TaskFlow queue state, README/CHANGELOG version sync, colon
+        DSL changelog shape, strict live evidence, dangerous residue, Paper Fucker/PaperRun
+        brand surface, and Git Flow branch discipline. It passes with -AllowActiveTask
+        during this active TaskFlow task.
+      agent: codex
+    last_run: '2026-05-10T23:23:49.562062'
+    attempt_count: 2
+  meta: {}
+- id: docs-loop
+  title: 文档化持续推进流程
+  status: done
+  owner: codex
+  depends_on:
+  - audit-script
+  description: 更新 README，说明 Codex 在无任务时应执行自驱审计、自动创建 TaskFlow 任务、执行、验证、同步文档和版本。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-10T23:23:56.146144'
+      level: info
+      message: Documenting the autonomous continuation protocol in README.
+      agent: codex
+    - timestamp: '2026-05-10T23:24:15.422230'
+      level: info
+      message: 'README now includes an Autonomous Continuation Protocol: when TaskFlow
+        has no confirmed work, Codex runs scripts/autonomous-product-audit.ps1, creates
+        the next TaskFlow task from failed checks or credible improvements, follows
+        Git Flow, updates docs/version/CHANGELOG, and keeps reports as product memory.'
+      agent: codex
+    last_run: '2026-05-10T23:24:15.422230'
+    attempt_count: 2
+  meta: {}
+- id: validation
+  title: 验证审计流程
+  status: done
+  owner: codex
+  depends_on:
+  - docs-loop
+  description: 运行自驱审计脚本、README/CHANGELOG version check、CHANGELOG format validation、TaskFlow
+    validate_task、必要 targeted tests。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-10T23:24:20.891168'
+      level: info
+      message: Running autonomous audit validation and standard version/TaskFlow checks.
+      agent: codex
+    - timestamp: '2026-05-10T23:25:01.521817'
+      level: info
+      message: 'Validation passed: scripts/autonomous-product-audit.ps1 -AllowActiveTask
+        generated a passing report, README/CHANGELOG version check passed, TaskFlow
+        validate_task passed, TaskFlow changelog format validation passed, and git
+        diff --check passed.'
+      agent: codex
+    last_run: '2026-05-10T23:25:01.521817'
+    attempt_count: 2
+  meta: {}
+outputs:
+- type: file
+  path: scripts/autonomous-product-audit.ps1
+  description: Autonomous audit script
+- type: file
+  path: reports/autonomous-product-audit.md
+  description: Generated audit report
+- type: file
+  path: README.md
+  description: Autonomous loop documentation
+- type: file
+  path: CHANGELOG
+  description: Colon DSL changelog entry
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-10T23:19:58.649057'
+  updated_at: '2026-05-10T23:25:43.627237'
+  version: '1'
