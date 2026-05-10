@@ -1,6 +1,6 @@
 id: task-046-live-paper-quality-benchmark
 title: Run and record a live reviewable paper quality benchmark
-status: todo
+status: done
 priority: medium
 owner: codex
 tags:
@@ -21,7 +21,7 @@ execution:
 steps:
 - id: task-046-step-01-design
   title: Design live benchmark scenario
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: Choose a realistic topic/code-path scenario, budget tier, profile,
@@ -31,12 +31,31 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T07:59:36.255425'
+      level: info
+      message: Designing a local live benchmark around a topic plus the current packages/opencode/src/paper
+        code path, with standard budget, reviewable_bundle quality mode, private-first
+        egress, and available live provider/search/toolchain checks.
+      agent: codex
+    - timestamp: '2026-05-10T08:03:12.337205'
+      level: info
+      message: 'Benchmark design: topic ''可验证论文自动化系统的闭环生成与真实性审查''; workspace E:\Project\paper_fucker;
+        code paths packages/opencode/src/paper, packages/opencode/src/server/routes/instance/httpapi/handlers/paper.ts,
+        packages/opencode/src/cli/cmd/tui/routes/paper; target_profile generic-preprint;
+        language zh-CN; budget_tier standard; quality_mode reviewable_bundle; private-first
+        egress allowing only selected repo paths; provider smoke uses local DeepSeek
+        default model deepseek-v4-pro without logging secrets; Exa MCP, Nature skill,
+        pandoc/LaTeX/DOCX and PaperRun export are included as live/toolchain checks.
+        Added .paper_fucker/runs/ to .gitignore before execution so live run artifacts
+        stay untracked.'
+      agent: codex
+    last_run: '2026-05-10T08:03:12.337205'
+    attempt_count: 2
   meta: {}
 - id: task-046-step-02-run
   title: Run live benchmark
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-046-step-01-design
@@ -47,12 +66,32 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T08:03:19.009174'
+      level: info
+      message: Executing live provider/search/toolchain smokes and a real PaperRun
+        benchmark on the current paper core code paths.
+      agent: codex
+    - timestamp: '2026-05-10T08:27:05.850018'
+      level: info
+      message: 'Live benchmark executed. DeepSeek /models + chat smoke passed for
+        deepseek-v4-pro; Exa MCP initialize passed; nature-paper skill and official
+        Nature author guidance smoke passed; pandoc Markdown->LaTeX and DOCX passed;
+        direct xelatex PDF smoke passed after correcting the local smoke input; targeted
+        PaperRun/code/export/observability tests passed: 7 pass, 0 fail, 49 expects.
+        A real PaperRun was created: run-622f4660-3c8c-4dfe-b25f-04ef7484fd8f, 14/14
+        stages succeeded, 79 events, 84 sources, 33 artifacts, 1 claim, 1 draft, 1
+        review, forced Markdown/LaTeX/DOCX export succeeded, final export blocked
+        by reproduction_failure as expected for an ungated benchmark. Strict live
+        acceptance full run was terminated after >18 minutes while packages/opencode
+        test continued without timeout; this is recorded as a quality gap.'
+      agent: codex
+    last_run: '2026-05-10T08:27:05.850018'
+    attempt_count: 2
   meta: {}
 - id: task-046-step-03-quality-review
   title: Review benchmark quality gaps
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-046-step-02-run
@@ -62,12 +101,27 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T08:27:10.744605'
+      level: info
+      message: Reviewing live benchmark gaps and creating follow-up TaskFlow tasks
+        for incomplete product behavior.
+      agent: codex
+    - timestamp: '2026-05-10T08:33:16.316188'
+      level: info
+      message: Quality review completed. Created follow-up tasks task-047 through
+        task-051 for strict acceptance timeout/progress hardening, PaperRun terminal/gate
+        alignment, PDF renderer fallback, default observability coverage, and a final
+        live benchmark regression pass. All five new tasks validate successfully.
+        Wrote reports/live-paper-quality-benchmark.md and updated reports/strict-live-acceptance.md
+        with the latest needs-hardening attempt.
+      agent: codex
+    last_run: '2026-05-10T08:33:16.316188'
+    attempt_count: 2
   meta: {}
 - id: task-046-step-04-doc-version
   title: Document 0.4.0-dev
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-046-step-03-quality-review
@@ -77,12 +131,23 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T08:33:46.230130'
+      level: info
+      message: Work commit is b0452c8. Updating README and colon DSL CHANGELOG to
+        0.4.0-dev.
+      agent: codex
+    - timestamp: '2026-05-10T08:34:26.577337'
+      level: info
+      message: Updated README to 0.4.0-dev and inserted CHANGELOG colon-history entry
+        for work commit b0452c8. README/CHANGELOG version check passes.
+      agent: codex
+    last_run: '2026-05-10T08:34:26.577337'
+    attempt_count: 2
   meta: {}
 - id: task-046-step-05-verify
   title: Verify live benchmark milestone
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-046-step-04-doc-version
@@ -92,8 +157,26 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T08:34:57.253383'
+      level: info
+      message: 'Running bounded benchmark milestone verification: targeted PaperRun
+        tests, opencode typecheck, README version check, TaskFlow validation for task-046..051,
+        git ignore/secret checks, and branch status.'
+      agent: codex
+    - timestamp: '2026-05-10T08:36:25.742046'
+      level: info
+      message: 'Verification passed: targeted PaperRun/code/export/observability tests
+        passed (7 pass, 0 fail, 49 expects); npx --yes bun@1.3.13 run --cwd packages/opencode
+        typecheck passed; README version 0.4.0-dev matches CHANGELOG latest version;
+        .paper_fucker/local and .paper_fucker/runs are gitignored; strict-style tracked
+        secret scan git grep -E ''sk-[A-Za-z0-9]{20,}'' found no matches; TaskFlow
+        validate_task passed for task-046 through task-051. Full strict live acceptance
+        remains intentionally deferred to task-047 because task-046 proved the current
+        script can run unbounded for >18 minutes.'
+      agent: codex
+    last_run: '2026-05-10T08:36:25.742046'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: report
@@ -110,5 +193,5 @@ trace:
   attempt_count: 0
 meta:
   created_at: '2026-05-10T06:13:38.838295'
-  updated_at: '2026-05-10T06:13:38.838295'
+  updated_at: '2026-05-10T08:36:52.563502'
   version: '1'

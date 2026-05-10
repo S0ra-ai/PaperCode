@@ -1,6 +1,6 @@
 # paper_fucker
 
-Current version: <!-- version:start -->0.3.7-dev<!-- version:end -->
+Current version: <!-- version:start -->0.4.0-dev<!-- version:end -->
 
 `paper_fucker` is a private-first, OpenCode-derived closed-loop paper system. It turns a topic, codebase, dataset, experiment log, or paper material set into a verifiable academic-paper bundle with research planning, source discovery, code understanding, experiment/reproduction support, ClaimLedger-first writing, authenticity gates, profile-aware formatting, preview, and export.
 
@@ -42,6 +42,7 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - PaperRun export now renders run-bound Markdown, LaTeX, PDF, DOCX, and `manifest.json` files when tools are available. Missing pandoc or LaTeX engines produce explicit diagnostics, while forced drafts are visibly marked with failed checks.
 - PaperRun diagnostics now include durable observability audit coverage for stages, capabilities, model roles, subagents, tool traces, data-egress decisions, export renderers, and cost usage.
 - Historical reports written before `task-032-opencode-paper-core-migration` may retain `packages/server` or `@paper-fucker/server` paths as provenance. They are marked as historical; the current runtime authority is `packages/opencode/src/paper`, and `packages/server` is intentionally absent.
+- A live reviewable benchmark now exists for the current paper core: `scripts/live-paper-quality-benchmark.ts` creates a real topic+code PaperRun, records summary JSON under ignored `tmp/`, and writes findings in `reports/live-paper-quality-benchmark.md`. The first run passed live DeepSeek, Exa, Nature, pandoc, DOCX, direct XeLaTeX, and targeted PaperRun tests, while surfacing hardening tasks for strict acceptance timeouts, terminal run status, PDF fallback, and default audit coverage.
 - The automatic orchestrator now owns the default topic-to-paper stage graph and proceeds stage-by-stage unless a pause condition is raised.
 - Trusted template resolution now records `TemplateSpec.v1`, adopts clear high-confidence official templates automatically, and falls back to a CJC default when no venue is known.
 - Open literature and dataset discovery now records `SourceRecord.v1`, `LiteratureMap.v1`, `DataPlan.v1`, `DatasetCard.v1`, and direction feasibility artifacts with license and verification diagnostics.
@@ -90,6 +91,7 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - `packages/opencode/src/paper/research/README.md`: first-party research runtime boundary guide.
 - `packages/preview/`: first-party localhost read-only research preview package with token-checked snapshot/SSE endpoints and static Markdown/LaTeX/PDF/DOCX/annotation/diagnostics UI.
 - `scripts/strict-acceptance.ps1`: strict live acceptance entrypoint for the full paper system; `-FixtureMode` is only for deterministic script tests.
+- `scripts/live-paper-quality-benchmark.ts`: reproducible local live benchmark that creates a topic+code PaperRun against the current paper core, triggers forced export, and writes an ignored JSON summary for quality review.
 - `research-tools/`: Python MCP/CLI tool package. It provides structured MCP-style diagnostics/probe/document helpers, one-shot conversion commands, external tool discovery/linking for pandoc and LaTeX engines, and generated Pydantic v2 models for tool-side validation.
 - `legacy/references/`: reference-project manifests and adopt/defer/reject analysis. These files are design guidance only and do not authorize code import.
 - `upstream/opencode-readmes/`: localized README files imported from the OpenCode snapshot, retained for provenance and translation reference instead of root-level project documentation.
@@ -137,6 +139,12 @@ Important early tasks:
 - `task-043-export-renderer-pipeline`: render concrete PaperRun Markdown/LaTeX/PDF/DOCX files, manifest, diagnostics, and forced draft bundles.
 - `task-044-observability-audit-hardening`: harden OpenTelemetry-style audit, tool trace, cost, data-egress, export renderer, and strict acceptance diagnostics.
 - `task-045-report-path-hygiene`: mark pre-hard-fork reports as historical path provenance and keep current architecture documentation pointed at `packages/opencode/src/paper`.
+- `task-046-live-paper-quality-benchmark`: run and record a live reviewable topic+code paper benchmark.
+- `task-047-strict-acceptance-timeouts`: bound strict live acceptance checks and preserve partial reports on timeout.
+- `task-048-paperrun-completion-gates`: align PaperRun terminal status and reproduction/authenticity gate semantics.
+- `task-049-export-pdf-renderer-fallback`: fall back across LaTeX engines when PDF export fails.
+- `task-050-default-observability-coverage`: record full observability audit coverage in normal PaperRun execution.
+- `task-051-live-benchmark-regression-pass`: rerun the live benchmark after hardening and require improved milestone evidence.
 
 ## Branching
 
