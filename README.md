@@ -1,6 +1,6 @@
 # paper_fucker
 
-Current version: <!-- version:start -->0.4.1-dev<!-- version:end -->
+Current version: <!-- version:start -->0.4.2-dev<!-- version:end -->
 
 `paper_fucker` is a private-first, OpenCode-derived closed-loop paper system. It turns a topic, codebase, dataset, experiment log, or paper material set into a verifiable academic-paper bundle with research planning, source discovery, code understanding, experiment/reproduction support, ClaimLedger-first writing, authenticity gates, profile-aware formatting, preview, and export.
 
@@ -44,6 +44,7 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - PaperRun diagnostics now include durable observability audit coverage for stages, capabilities, model roles, subagents, tool traces, data-egress decisions, export renderers, and cost usage.
 - Historical reports written before `task-032-opencode-paper-core-migration` may retain `packages/server` or `@paper-fucker/server` paths as provenance. They are marked as historical; the current runtime authority is `packages/opencode/src/paper`, and `packages/server` is intentionally absent.
 - A live reviewable benchmark now exists for the current paper core: `scripts/live-paper-quality-benchmark.ts` creates a real topic+code PaperRun, records summary JSON under ignored `tmp/`, and writes findings in `reports/live-paper-quality-benchmark.md`. The first run passed live DeepSeek, Exa, Nature, pandoc, DOCX, direct XeLaTeX, and targeted PaperRun tests, while surfacing hardening tasks for strict acceptance timeouts, terminal run status, PDF fallback, and default audit coverage.
+- PaperRun terminal states now distinguish execution completion from paper eligibility. A full graph whose authenticity gate blocks final export is surfaced as `blocked` with controller status `review_required`, and `reproduction_failure` is reflected on the reproduction stage instead of hiding behind a successful stage label.
 - The automatic orchestrator now owns the default topic-to-paper stage graph and proceeds stage-by-stage unless a pause condition is raised.
 - Trusted template resolution now records `TemplateSpec.v1`, adopts clear high-confidence official templates automatically, and falls back to a CJC default when no venue is known.
 - Open literature and dataset discovery now records `SourceRecord.v1`, `LiteratureMap.v1`, `DataPlan.v1`, `DatasetCard.v1`, and direction feasibility artifacts with license and verification diagnostics.
