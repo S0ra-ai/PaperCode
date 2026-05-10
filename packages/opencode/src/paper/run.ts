@@ -50,6 +50,7 @@ import {
   type AgentPermissionEnvelope,
   type RecursiveAgentPolicy,
 } from "./agents"
+import { createPaperAgentTeam, type PaperAgentTeamState } from "./agent-team"
 
 import {
   applyPaperRunControl,
@@ -192,6 +193,7 @@ export interface PaperRunSnapshot {
     reproduction_gate: "not_started" | "passed" | "blocked"
   }
   agent_tree: AgentTree
+  agent_team: PaperAgentTeamState
   diagnostics: {
     counts: {
       events: number
@@ -641,6 +643,12 @@ export async function getPaperRunSnapshotFromDir(runDir: string): Promise<PaperR
         ]
       : []
 
+  const agentTree = defaultAgentTree({
+    runID: status.run.run_id,
+    tier: budgetTier,
+    capabilities,
+    writer: roles.writer,
+  })
   const snapshot = {
     schema_version: "PaperRun.v1",
     run_id: status.run.run_id,
@@ -672,11 +680,17 @@ export async function getPaperRunSnapshotFromDir(runDir: string): Promise<PaperR
       exploratory_runs: toolTraces.filter((trace) => trace.tool_name.includes("experiment")).length,
       reproduction_gate: gate === "passed" ? "passed" : gate === "blocked" ? "blocked" : "not_started",
     },
-    agent_tree: defaultAgentTree({
-      runID: status.run.run_id,
-      tier: budgetTier,
-      capabilities,
-      writer: roles.writer,
+    agent_tree: agentTree,
+    agent_team: createPaperAgentTeam({
+      run_id: status.run.run_id,
+      tree: {
+        run_id: status.run.run_id,
+        root_agent_id: `${status.run.run_id}:root`,
+        nodes: agentTree.nodes,
+      },
+      skills: ["nature-paper", "citation-check", "paper-export"],
+      mcp_servers: capabilities.filter((capability) => capability.type === "mcp").map((capability) => capability.name),
+      memory_scope: "local",
     }),
     diagnostics: {
       counts: status.counts,

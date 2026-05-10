@@ -7,6 +7,9 @@ git:
 
 changelog:
   path: CHANGELOG
+  archive_dir: docs/changelog
+  minor_split_line_threshold: 300
+  indentation: four-space-colon-dsl
   version_policy: extended-semver
   format: colon-history
 

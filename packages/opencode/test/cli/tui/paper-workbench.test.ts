@@ -85,6 +85,26 @@ describe("TUI PaperRun workbench", () => {
           { agent_id: "agent-child", role: "reviewer", status: "planned", provider_id: "openai", model_id: "gpt-5.2", depth: 1 },
         ],
       },
+      agent_team: {
+        members: [
+          { member_id: "member-root", status: "active" },
+          { member_id: "member-child", status: "planned" },
+        ],
+        tasks: [
+          { task_id: "team-task-code", title: "代码地图", status: "assigned" },
+          { task_id: "team-task-review", title: "证据审查", status: "queued" },
+        ],
+        mailbox: [{ message_id: "msg-1", read_by: ["member-child"] }],
+        lead_member_id: "member-root",
+        coverage: {
+          active_tasks: 1,
+          completed_tasks: 0,
+          blocked_tasks: 0,
+          max_member_depth: 1,
+          evidence_backed_artifacts: 0,
+          rejected_evidence: 0,
+        },
+      },
       diagnostics: {
         counts: { events: 3, artifacts: 4 },
         cost: { total_usd: 0.42, llm_usd: 0.4, api_usd: 0.02, budget: { total_soft_usd: 5 }, alerts: [] },
@@ -110,6 +130,7 @@ describe("TUI PaperRun workbench", () => {
     expect(state.language).toBe("zh-CN")
     expect(state.stage_graph.map((stage) => stage.label)).toEqual(["输入整理", "研究规划"])
     expect(state.panels.map((panel) => panel.label)).toContain("Agent Tree")
+    expect(state.panels.map((panel) => panel.label)).toContain("Agent Team")
     expect(state.panels.map((panel) => panel.label)).toContain("Source Ledger")
     expect(state.sidebar.cost.formatted_total).toBe("$0.42")
     expect(state.sidebar.cost.last_call_tokens).toBe(1500)
@@ -119,6 +140,14 @@ describe("TUI PaperRun workbench", () => {
       active_agents: 2,
       max_depth_observed: 1,
       depth_policy: "unbounded",
+    })
+    expect(state.sidebar.agent_team).toMatchObject({
+      total_members: 2,
+      active_members: 2,
+      queued_tasks: 1,
+      active_tasks: 1,
+      unread_messages: 1,
+      max_member_depth: 1,
     })
     expect(state.sidebar.gate).toMatchObject({
       status: "blocked",

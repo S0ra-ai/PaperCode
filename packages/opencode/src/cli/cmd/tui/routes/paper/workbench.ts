@@ -4,6 +4,7 @@ import type { PaperProfileId } from "@/paper/profiles"
 import type { ResearchCapability, ResearchCapabilityType } from "@/paper/capabilities"
 import type { OpenCodeModelRef, PaperModelRole } from "@/paper/model-router"
 import type { PaperRunControlAction, PaperRunControllerState } from "@/paper/run-controller"
+import { summarizePaperAgentTeam } from "@/paper/agent-team"
 
 export interface PaperWorkbenchSubmitInput {
   baseUrl: string
@@ -116,6 +117,21 @@ export interface PaperRunSidebarState {
       status: string
       model: string
       depth: number
+    }>
+  }
+  agent_team: {
+    total_members: number
+    active_members: number
+    queued_tasks: number
+    active_tasks: number
+    completed_tasks: number
+    blocked_tasks: number
+    unread_messages: number
+    max_member_depth: number
+    recent_tasks: Array<{
+      id: string
+      title: string
+      status: string
     }>
   }
   gate: PaperRunGateSummary
@@ -758,6 +774,7 @@ export function createPaperRunSidebarState(snapshot: PaperRunSnapshot): PaperRun
   const gate = gateSummary(snapshot)
   const current = activeStage(snapshot)
   const nodes = snapshot.agent_tree.nodes ?? []
+  const team = summarizePaperAgentTeam(snapshot.agent_team)
   const recentAgents = nodes.slice(-4).map((agent) => ({
     id: agent.agent_id,
     role: agent.role,
@@ -787,6 +804,7 @@ export function createPaperRunSidebarState(snapshot: PaperRunSnapshot): PaperRun
       max_parallel: snapshot.agent_tree.max_parallel,
       recent_agents: recentAgents,
     },
+    agent_team: team,
     gate,
     diagnostics: {
       recent_calls: recentCalls,
@@ -819,6 +837,7 @@ export function createPaperRunDashboardState(
     panels: [
       { id: "stage_graph", label: "阶段图", count: snapshot.stage_graph.stages.length },
       { id: "agent_tree", label: "Agent Tree", count: snapshot.agent_tree.nodes.length },
+      { id: "agent_team", label: "Agent Team", count: snapshot.agent_team?.members.length ?? 0 },
       { id: "sources", label: "Source Ledger", count: snapshot.source_ledger.length },
       { id: "claims", label: "Claim Ledger", count: snapshot.claim_ledger.length },
       { id: "experiments", label: "实验复现" },
