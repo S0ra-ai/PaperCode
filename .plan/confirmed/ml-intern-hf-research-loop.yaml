@@ -1,6 +1,6 @@
 id: ml-intern-hf-research-loop
 title: ML-Intern Inspired Hugging Face Research Loop
-status: in_progress
+status: done
 priority: high
 owner: codex
 tags:
@@ -132,7 +132,7 @@ steps:
   meta: {}
 - id: release
   title: 版本、CHANGELOG、README 与验证
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: 版本推进到 0.6.6-dev，更新 colon DSL CHANGELOG 与 README，并运行相关测试和格式校验。
@@ -140,8 +140,21 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T21:08:04.245559'
+      level: info
+      message: Work commit created; recording CHANGELOG 0.6.6-dev, syncing README
+        version, and rerunning release checks.
+      agent: codex
+    - timestamp: '2026-05-10T21:08:49.889716'
+      level: info
+      message: Recorded CHANGELOG 0.6.6-dev for work commit 1c1c2a5, updated README
+        version to 0.6.6-dev with no-mock HF product note, and passed README version
+        check, changelog indentation validation, TaskFlow validate_task, and git diff
+        --check.
+      agent: codex
+    last_run: '2026-05-10T21:08:49.889716'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -158,5 +171,5 @@ lock:
   at: '2026-05-10T20:57:49.829001'
 meta:
   created_at: '2026-05-10T20:06:40.277677'
-  updated_at: '2026-05-10T21:07:48.064378'
+  updated_at: '2026-05-10T21:08:49.889716'
   version: '1'
