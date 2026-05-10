@@ -39,6 +39,16 @@ describe("strict live acceptance script", () => {
     for (const check of requiredChecks) expect(script).toContain(check)
   })
 
+  test("keeps the PowerShell script ASCII-safe for Windows PowerShell parsing", () => {
+    const script = readFileSync(scriptPath)
+    expect([...script].every((byte) => byte < 0x80)).toBe(true)
+  })
+
+  test("does not assign reserved PowerShell variables", () => {
+    const script = readFileSync(scriptPath, "utf8")
+    expect(script).not.toMatch(/\$home\s*=/i)
+  })
+
   test("keeps strict live checks strict while allowing deterministic fixture tests", () => {
     const script = readFileSync(scriptPath, "utf8")
     expect(script).toContain("[switch]$FixtureMode")
