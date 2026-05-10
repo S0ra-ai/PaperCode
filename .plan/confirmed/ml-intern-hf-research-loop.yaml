@@ -21,7 +21,7 @@ execution:
 steps:
 - id: hf-capability-contracts
   title: 定义 HF research loop capabilities
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: 定义 HFDocs、HFPapers、HFDatasets、HFModels、HFSpaces、HFJobs、experiment tracking
@@ -30,12 +30,26 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T21:00:57.534334'
+      level: info
+      message: Implementing Hugging Face docs/papers/datasets/models/spaces/jobs/Trackio
+        research loop contracts and extending built-in capability pack metadata.
+      agent: codex
+    - timestamp: '2026-05-10T21:06:59.908184'
+      level: info
+      message: Added packages/opencode/src/paper/huggingface-loop.ts with HFResearchLoopCapability,
+        HFResearchLoopPlan, HFPaper/HFDataset/HFModel/HFSpace/HFJob/HFTrackio records,
+        source-ledger conversion, HF job-to-ExperimentRun conversion, tool trace generation,
+        and diagnostics. Extended built-in HF capability pack with hf.models, hf.spaces,
+        hf.trackio.
+      agent: codex
+    last_run: '2026-05-10T21:06:59.908184'
+    attempt_count: 2
   meta: {}
 - id: tool-bridge
   title: 实现 HF 工具桥接
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: 通过 OpenCode provider/tool substrate 与 Python research-tools 接入 HF Hub
@@ -44,12 +58,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T21:07:00.675333'
+      level: info
+      message: Recording implemented Python Hugging Face bridge before completion.
+      agent: codex
+    - timestamp: '2026-05-10T21:07:08.417391'
+      level: info
+      message: 'Added research-tools/src/paper_fucker_tools/huggingface_loop.py and
+        hf_research_probe registry entry. Product calls no longer synthesize mock
+        records: without explicit fixture or allow_network they return blocked/failed
+        diagnostics; fixture records are explicit test inputs only.'
+      agent: codex
+    last_run: '2026-05-10T21:07:08.417391'
+    attempt_count: 2
   meta: {}
 - id: experiment-loop-integration
   title: 接入实验闭环和真实性 gate
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: HF jobs/datasets 输出进入 ExperimentLedger/DataLedger，训练/评估结果必须绑定 logs、metrics、source
@@ -58,12 +84,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T21:07:01.452371'
+      level: info
+      message: Recording implemented experiment-loop integration before completion.
+      agent: codex
+    - timestamp: '2026-05-10T21:07:09.211507'
+      level: info
+      message: Added hf.jobs and hf.trackio to experiment capability resolution. HF
+        jobs can be converted into ExperimentRun records with container reproduction
+        metadata, metrics, cost, logs URI, and final-claim eligibility remains controlled
+        by reproduction gate.
+      agent: codex
+    last_run: '2026-05-10T21:07:09.211507'
+    attempt_count: 2
   meta: {}
 - id: tests
   title: 验证 HF loop
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: fixture/mock 验证 docs/papers/datasets/jobs adapter、approval gate、trace
@@ -72,8 +110,25 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T21:07:15.414369'
+      level: info
+      message: Running HF loop tests, experiment loop tests, capability harness tests,
+        opencode typecheck, preview tests, Python research-tools tests, version check,
+        changelog indentation validation, and task validation.
+      agent: codex
+    - timestamp: '2026-05-10T21:07:48.064378'
+      level: info
+      message: 'Passed: npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/huggingface-loop.test.ts
+        test/paper/experiment-loop.test.ts test/paper/capability-harness.test.ts;
+        npx --yes bun@1.3.13 run --cwd packages/opencode typecheck; npx --yes bun@1.3.13
+        --cwd packages/preview test; PYTHONPATH=research-tools/src python -m unittest
+        discover -s research-tools/tests; scripts/check-readme-version.ps1; TaskFlow
+        validate_changelog_format; TaskFlow validate_task ml-intern-hf-research-loop;
+        git diff --check.'
+      agent: codex
+    last_run: '2026-05-10T21:07:48.064378'
+    attempt_count: 2
   meta: {}
 - id: release
   title: 版本、CHANGELOG、README 与验证
@@ -103,5 +158,5 @@ lock:
   at: '2026-05-10T20:57:49.829001'
 meta:
   created_at: '2026-05-10T20:06:40.277677'
-  updated_at: '2026-05-10T20:57:58.721484'
+  updated_at: '2026-05-10T21:07:48.064378'
   version: '1'
