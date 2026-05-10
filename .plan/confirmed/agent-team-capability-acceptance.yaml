@@ -1,0 +1,88 @@
+id: agent-team-capability-acceptance
+title: Agent Team Capability Acceptance
+status: todo
+priority: critical
+owner: codex
+tags:
+- acceptance
+- strict
+- agent-team
+- capability
+- 0.7.0-dev
+depends_on:
+- ml-intern-hf-research-loop
+description: 新增最终验收：Agent Team、capability pack、harness、MemoryBank、code understanding、crawler、HF
+  loop、skills/MCP 内置融合必须形成完整闭环，不要求用户手动安装论文相关能力；strict acceptance 报告记录真实/fixture 边界。
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: acceptance-script
+  title: 扩展 strict acceptance
+  status: todo
+  owner: codex
+  depends_on: []
+  description: 加入 Agent Team、Capability Pack、Harness、MemoryBank、Crawler、HF loop、内置
+    skills/MCP、ML-Intern borrowed mechanism 的检查项。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: e2e-scenarios
+  title: 新增端到端场景
+  status: todo
+  owner: codex
+  depends_on: []
+  description: 验证主题/代码/网页数据/HF dataset 混合输入能自动拆队、调用能力、写 ledger、生成 reviewable bundle
+    并在 gate 失败时阻断 final export。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: brand-and-ux-smoke
+  title: 验证中文工作台 UX 和品牌
+  status: todo
+  owner: codex
+  depends_on: []
+  description: 确保 Paper Fucker 用户入口、sidebar、Agent Team、capability/skills/MCP 健康状态、pause
+    questions、cost/token/context/outlines 均可见。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: release
+  title: 版本、CHANGELOG、README 与最终验证
+  status: todo
+  owner: codex
+  depends_on: []
+  description: 版本推进到 0.7.0-dev，TaskFlow 全部 done，develop 干净并推送，无 feature 分支残留。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: report
+  path: reports/strict-live-acceptance.md
+  description: Updated strict acceptance report
+- type: file
+  path: scripts/strict-acceptance.ps1
+  description: Strict acceptance checks
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-10T20:06:51.044344'
+  updated_at: '2026-05-10T20:06:51.044344'
+  version: '1'

@@ -1,0 +1,101 @@
+id: capability-pack-harness
+title: Built-in Capability Pack and Harness Scheduler
+status: todo
+priority: high
+owner: codex
+tags:
+- capability
+- skills
+- mcp
+- harness
+- 0.6.3-dev
+depends_on:
+- paper-agent-team-fabric
+description: 将 skills、MCP、built-in tools、Python tools、paper_fucker first-party capabilities
+  融合为内置能力层，并提供 harness 调度、审批、重试、去重、doom-loop 检测、成本/权限控制。用户不需要额外安装论文相关 skills/MCP，系统按
+  stage 自动发现和调用。
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: capability-pack-contracts
+  title: 定义内置 capability pack 契约
+  status: todo
+  owner: codex
+  depends_on: []
+  description: 定义 paper profile、literature、crawler、HF、code、experiment、writing、verification
+    等 pack 元数据、schema、信任级别和 stage 范围。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: skill-mcp-fusion
+  title: 融合内置 skills/MCP 到 registry
+  status: todo
+  owner: codex
+  depends_on: []
+  description: 将 paper_fucker 内置 skill、MCP 配置、first-party tools 注册为 runtime capabilities，避免要求用户手工安装。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: harness-scheduler
+  title: 实现 harness 调度层
+  status: todo
+  owner: codex
+  depends_on: []
+  description: 实现队列、优先级、并发、retry/backoff、approval gate、low-value expansion skip、doom-loop
+    检测与 OpenTelemetry/tool_trace 记录。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: tests
+  title: 验证能力层和 harness
+  status: todo
+  owner: codex
+  depends_on: []
+  description: 测试 stage 查询、权限过滤、MCP/skill fusion、审批阻断、重复调用检测、诊断输出。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: release
+  title: 版本、CHANGELOG、README 与验证
+  status: todo
+  owner: codex
+  depends_on: []
+  description: 版本推进到 0.6.3-dev，更新 colon DSL CHANGELOG 与 README，并运行相关测试和格式校验。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: file
+  path: packages/opencode/src/paper/harness.ts
+  description: Harness scheduler runtime
+- type: file
+  path: packages/opencode/src/paper/capability-pack.ts
+  description: Built-in capability pack contracts
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-10T20:06:05.790049'
+  updated_at: '2026-05-10T20:06:05.790049'
+  version: '1'

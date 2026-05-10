@@ -1,0 +1,118 @@
+id: paper-agent-team-fabric
+title: PaperRun Agent Team Fabric
+status: todo
+priority: high
+owner: codex
+tags:
+- agent-team
+- paper-run
+- ml-intern
+- opencode-hardfork
+- 0.6.2-dev
+depends_on: []
+description: 实现 Paper Fucker 内建多 agent team 协作层，借鉴 Claude Code subagents 的独立上下文/模型/权限/skills/memory
+  机制，以及 ML-Intern 的 submission loop、ToolRouter、ContextManager、approval gate、doom-loop
+  detector 思路。目标是让 PaperRun 具备 team lead、teammates、共享任务板、mailbox、角色模型路由、权限继承收紧、artifact
+  归因与 bottom-up evidence merge。
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: reference-synthesis
+  title: 记录 CC/ML-Intern 借鉴点
+  status: todo
+  owner: codex
+  depends_on: []
+  description: 将已查证的 Claude Code subagents/skills、smolagents、ML-Intern、Scrapling 资料转写为
+    Paper Fucker 设计约束，不直接复制实现。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: team-contracts
+  title: 新增 Agent Team 类型与策略
+  status: todo
+  owner: codex
+  depends_on: []
+  description: 实现 PaperAgentTeam、PaperAgentTeamMember、PaperAgentTeamTask、PaperAgentTeamMessage、TeamHarnessDecision
+    等领域类型；明确无产品硬上限但由预算/时间/并发/权限/gate 控制。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: team-runtime
+  title: 实现共享任务板、mailbox 与权限收紧
+  status: todo
+  owner: codex
+  depends_on: []
+  description: 提供创建 team、派发任务、记录消息、完成任务、生成 coverage summary、合并 evidence artifact 的纯运行时能力。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: paper-run-integration
+  title: 接入 PaperRun snapshot/diagnostics/sidebar
+  status: todo
+  owner: codex
+  depends_on: []
+  description: 把 Agent Team 的活跃成员、任务板、mailbox、artifact 归因摘要接入 PaperRun diagnostics
+    与 TUI 右侧栏状态。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: tests
+  title: 补充 Agent Team 单元与 TUI 状态测试
+  status: todo
+  owner: codex
+  depends_on: []
+  description: 验证多模型角色、递归父子关系、权限只收紧、任务板派发、mailbox、evidence-only merge、sidebar 摘要。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: release
+  title: 版本、CHANGELOG、README 与 TaskFlow 验证
+  status: todo
+  owner: codex
+  depends_on: []
+  description: 版本推进到 0.6.2-dev，CHANGELOG 使用 colon DSL 并写真实 commit id，README 跟随最新版本，运行版本/CHANGELOG/相关测试。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: report
+  path: reports/references/agent-team-and-ml-intern.md
+  description: Reference synthesis for Agent Team and ML-Intern borrowing
+- type: file
+  path: packages/opencode/src/paper/agent-team.ts
+  description: Agent Team contracts and runtime
+- type: file
+  path: packages/opencode/test/paper/agent-team.test.ts
+  description: Agent Team tests
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-10T20:05:53.573106'
+  updated_at: '2026-05-10T20:05:53.573106'
+  version: '1'
