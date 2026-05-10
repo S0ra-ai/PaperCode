@@ -91,6 +91,21 @@ function PaperRunSidebar(props: { sidebar: PaperRunSidebarState }) {
             ))}
           </SidebarSection>
 
+          <SidebarSection title="Agent Team">
+            <text>
+              {props.sidebar.agent_team.total_members} members / depth {props.sidebar.agent_team.max_member_depth}
+            </text>
+            <text fg={theme.textMuted}>
+              queued {props.sidebar.agent_team.queued_tasks} / active {props.sidebar.agent_team.active_tasks} / unread{" "}
+              {props.sidebar.agent_team.unread_messages}
+            </text>
+            {props.sidebar.agent_team.recent_tasks.map((task) => (
+              <text fg={task.status === "blocked" ? theme.warning : theme.textMuted}>
+                {task.status} {task.title}
+              </text>
+            ))}
+          </SidebarSection>
+
           <SidebarSection title="Gate">
             <text fg={props.sidebar.gate.status === "blocked" ? theme.error : theme.text}>
               {props.sidebar.gate.status_label} / export {props.sidebar.gate.export_status}

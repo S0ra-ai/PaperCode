@@ -1,4 +1,5 @@
 export * from "./architecture"
+export * from "./agent-team"
 export * from "./agents"
 export * from "./authoring"
 export { budgetTierPolicy } from "./budget"
