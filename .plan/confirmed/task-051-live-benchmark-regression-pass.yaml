@@ -20,7 +20,7 @@ execution:
 steps:
 - id: task-051-step-01-run
   title: Rerun live benchmark scenario
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: Run scripts/live-paper-quality-benchmark.ts and focused strict live
@@ -29,12 +29,26 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T09:46:53.195317'
+      level: info
+      message: Running scripts/live-paper-quality-benchmark.ts and focused strict
+        live acceptance for the final 0.5.0-dev regression pass.
+      agent: codex
+    - timestamp: '2026-05-10T09:51:24.113205'
+      level: info
+      message: Live benchmark and focused strict acceptance passed. Benchmark run
+        run-ee44237e-e1cc-40d5-abee-611dbc9a8222 produced status blocked, reproduction
+        stage blocked, forced Markdown/LaTeX/PDF/DOCX export, PDF status written,
+        audit missing_kinds empty, export_count 4. Focused strict acceptance passed
+        with CheckTimeoutSeconds=300.
+      agent: codex
+    last_run: '2026-05-10T09:51:24.113205'
+    attempt_count: 2
   meta: {}
 - id: task-051-step-02-review
   title: Review benchmark quality delta
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-051-step-01-run
@@ -44,8 +58,22 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T09:53:29.774788'
+      level: info
+      message: Reviewing benchmark regression deltas and updating the permanent live
+        benchmark report for 0.5.0-dev.
+      agent: codex
+    - timestamp: '2026-05-10T09:54:05.798108'
+      level: info
+      message: Updated reports/live-paper-quality-benchmark.md for 0.5.0-dev. The
+        report records the final run run-ee44237e-e1cc-40d5-abee-611dbc9a8222, corrected
+        PaperRun blocked status, reproduction blocked projection, forced Markdown/LaTeX/PDF/DOCX
+        export with PDF written, empty observability missing_kinds, and the expected
+        residual final-export blocker reproduction_failure.
+      agent: codex
+    last_run: '2026-05-10T09:54:05.798108'
+    attempt_count: 2
   meta: {}
 - id: task-051-step-03-doc-version
   title: Document 0.5.0-dev
@@ -90,7 +118,10 @@ outputs:
 trace:
   logs: []
   attempt_count: 0
+lock:
+  by: codex
+  at: '2026-05-10T09:46:40.859507'
 meta:
   created_at: '2026-05-10T08:28:10.404036'
-  updated_at: '2026-05-10T08:28:10.404036'
+  updated_at: '2026-05-10T09:54:05.798108'
   version: '1'
