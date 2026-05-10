@@ -1,6 +1,6 @@
 id: recursive-agent-sidebar-acceptance
 title: Recursive Agent Sidebar Acceptance
-status: in_progress
+status: done
 priority: high
 owner: codex
 tags:
@@ -111,7 +111,7 @@ steps:
   meta: {}
 - id: recursive-agent-sidebar-acceptance-step-04-version
   title: Finalize 0.6.0-dev
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - recursive-agent-sidebar-acceptance-step-03-taskflow
@@ -121,8 +121,22 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T19:43:09.183269'
+      level: info
+      message: Finalizing 0.6.0-dev with work commit 0e792d7, then rerunning version
+        checks and strict acceptance so the report reflects the final version.
+      agent: codex
+    - timestamp: '2026-05-10T19:46:34.176348'
+      level: info
+      message: 'Finalized 0.6.0-dev in README and CHANGELOG with work commit 0e792d7.
+        Reran strict live acceptance after the version bump; reports/strict-live-acceptance.md
+        now shows Status: passed and README version 0.6.0-dev matches CHANGELOG latest
+        version. Validation passed: check-readme-version, check-changelog-format,
+        TaskFlow validate_changelog_format, TaskFlow validate_task recursive-agent-sidebar-acceptance.'
+      agent: codex
+    last_run: '2026-05-10T19:46:34.176348'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: report
@@ -142,5 +156,5 @@ lock:
   at: '2026-05-10T19:29:33.413831'
 meta:
   created_at: '2026-05-10T18:28:30.382667'
-  updated_at: '2026-05-10T19:42:43.535112'
+  updated_at: '2026-05-10T19:46:34.176348'
   version: '1'
