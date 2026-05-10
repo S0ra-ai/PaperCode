@@ -1,6 +1,6 @@
 # paper_fucker
 
-Current version: <!-- version:start -->0.2.6-dev<!-- version:end -->
+Current version: <!-- version:start -->0.3.0-dev<!-- version:end -->
 
 `paper_fucker` is a private-first, OpenCode-derived closed-loop paper system. It turns a topic, codebase, dataset, experiment log, or paper material set into a verifiable academic-paper bundle with research planning, source discovery, code understanding, experiment/reproduction support, ClaimLedger-first writing, authenticity gates, profile-aware formatting, preview, and export.
 
@@ -33,7 +33,8 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - Experiment claims are gated by reproduction semantics: reproduced results may support final claims, while unreproduced results are blocked unless explicitly marked as exploratory.
 - The TUI default screen is now a Chinese paper research workbench with topic/code/material/data/log inputs, provider-role context, capability health, stage graph, ledgers, diagnostics, preview, and export controls represented in the paper state adapter.
 - The paper authoring loop now binds drafts to run artifacts, applies profile-aware revision metadata, creates read-only preview snapshots, runs reviewer/authenticity checks, blocks unsafe final export, and emits forced draft, supplementary, and availability bundles.
-- Strict live acceptance is available through `scripts/strict-acceptance.ps1`; it validates TaskFlow, version sync, tracked secret hygiene, opencode/preview/Python/typecheck suites, OpenCode TUI smoke, DeepSeek live provider smoke, Exa MCP live smoke, Nature skill/profile, pandoc, LaTeX, DOCX, topic-to-paper, code-to-paper, and Git Flow branch discipline.
+- Strict live acceptance is available through `scripts/strict-acceptance.ps1`; it validates TaskFlow, version sync, tracked secret hygiene, opencode/preview/Python/typecheck suites, local Paper Fucker CLI/TUI smoke, DeepSeek live provider smoke, Exa MCP live smoke, Nature skill/profile, pandoc, LaTeX, DOCX, topic-to-paper, code-to-paper, hard-fork paper core, PaperRun API/TUI, Agent Tree, private-first egress, public branding, and Git Flow branch discipline.
+- Final hard-fork acceptance for `0.3.0-dev` asserts that the user-visible product is now PaperRun-first: the paper core lives under `packages/opencode/src/paper`, `packages/server` is gone, the Chinese TUI creates PaperRuns instead of ordinary chat sessions, nested multi-model agents are traceable, final export is blocked by failed authenticity gates, and forced drafts carry failed checks.
 - The automatic orchestrator now owns the default topic-to-paper stage graph and proceeds stage-by-stage unless a pause condition is raised.
 - Trusted template resolution now records `TemplateSpec.v1`, adopts clear high-confidence official templates automatically, and falls back to a CJC default when no venue is known.
 - Open literature and dataset discovery now records `SourceRecord.v1`, `LiteratureMap.v1`, `DataPlan.v1`, `DatasetCard.v1`, and direction feasibility artifacts with license and verification diagnostics.
@@ -119,6 +120,7 @@ Important early tasks:
 - `task-035-provider-model-wizard`: OpenAI-compatible provider discovery and model role/subagent assignment.
 - `task-036-multimodel-agent-orchestration`: multi-layer multi-model agent tree, budget tiers, data egress policy, and artifact provenance.
 - `task-037-public-surface-cleanup`: clean startup logo, help/banner text, public commands, and TUI guidance into Paper Fucker product surfaces.
+- `task-038-hard-fork-acceptance`: validate the complete OpenCode hard fork paper workbench with strict live acceptance and hard-fork-specific checks.
 
 ## Branching
 
