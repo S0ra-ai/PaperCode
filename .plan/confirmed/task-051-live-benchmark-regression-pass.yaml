@@ -1,6 +1,6 @@
 id: task-051-live-benchmark-regression-pass
 title: Rerun live paper quality benchmark after hardening
-status: todo
+status: done
 priority: high
 owner: codex
 tags:
@@ -20,7 +20,7 @@ execution:
 steps:
 - id: task-051-step-01-run
   title: Rerun live benchmark scenario
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: Run scripts/live-paper-quality-benchmark.ts and focused strict live
@@ -29,12 +29,26 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T09:46:53.195317'
+      level: info
+      message: Running scripts/live-paper-quality-benchmark.ts and focused strict
+        live acceptance for the final 0.5.0-dev regression pass.
+      agent: codex
+    - timestamp: '2026-05-10T09:51:24.113205'
+      level: info
+      message: Live benchmark and focused strict acceptance passed. Benchmark run
+        run-ee44237e-e1cc-40d5-abee-611dbc9a8222 produced status blocked, reproduction
+        stage blocked, forced Markdown/LaTeX/PDF/DOCX export, PDF status written,
+        audit missing_kinds empty, export_count 4. Focused strict acceptance passed
+        with CheckTimeoutSeconds=300.
+      agent: codex
+    last_run: '2026-05-10T09:51:24.113205'
+    attempt_count: 2
   meta: {}
 - id: task-051-step-02-review
   title: Review benchmark quality delta
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-051-step-01-run
@@ -44,12 +58,26 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T09:53:29.774788'
+      level: info
+      message: Reviewing benchmark regression deltas and updating the permanent live
+        benchmark report for 0.5.0-dev.
+      agent: codex
+    - timestamp: '2026-05-10T09:54:05.798108'
+      level: info
+      message: Updated reports/live-paper-quality-benchmark.md for 0.5.0-dev. The
+        report records the final run run-ee44237e-e1cc-40d5-abee-611dbc9a8222, corrected
+        PaperRun blocked status, reproduction blocked projection, forced Markdown/LaTeX/PDF/DOCX
+        export with PDF written, empty observability missing_kinds, and the expected
+        residual final-export blocker reproduction_failure.
+      agent: codex
+    last_run: '2026-05-10T09:54:05.798108'
+    attempt_count: 2
   meta: {}
 - id: task-051-step-03-doc-version
   title: Document 0.5.0-dev
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-051-step-02-review
@@ -59,12 +87,23 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T09:54:35.272158'
+      level: info
+      message: Updating README and CHANGELOG to 0.5.0-dev using work commit cf7aad5.
+      agent: codex
+    - timestamp: '2026-05-10T09:55:24.300354'
+      level: info
+      message: 'Updated README current version and CHANGELOG to 0.5.0-dev. CHANGELOG
+        entry uses real work commit cf7aad5. scripts/check-readme-version.ps1 passed:
+        README version 0.5.0-dev matches CHANGELOG latest version.'
+      agent: codex
+    last_run: '2026-05-10T09:55:24.300354'
+    attempt_count: 2
   meta: {}
 - id: task-051-step-04-verify
   title: Verify milestone pass
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-051-step-03-doc-version
@@ -74,8 +113,21 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T09:55:29.886597'
+      level: info
+      message: Running final version sync, focused strict acceptance, and TaskFlow
+        validation after the 0.5.0-dev documentation update.
+      agent: codex
+    - timestamp: '2026-05-10T09:59:36.888810'
+      level: info
+      message: 'Final verification passed after 0.5.0-dev docs update: focused scripts/strict-acceptance.ps1
+        -CheckTimeoutSeconds 300 passed, scripts/check-readme-version.ps1 passed,
+        and TaskFlow validate_task task-051-live-benchmark-regression-pass returned
+        valid with no errors or warnings.'
+      agent: codex
+    last_run: '2026-05-10T09:59:36.888810'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: report
@@ -92,5 +144,5 @@ trace:
   attempt_count: 0
 meta:
   created_at: '2026-05-10T08:28:10.404036'
-  updated_at: '2026-05-10T08:28:10.404036'
+  updated_at: '2026-05-10T09:59:58.665566'
   version: '1'
