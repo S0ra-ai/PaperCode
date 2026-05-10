@@ -2,10 +2,32 @@
 :author        s0ra (https://github.com/S0ra-ai)
 :repo          
 :desc          记录项目的重大变更和版本历史
-:version       0.3.0-dev
+:version       0.3.1-dev
 :last_update   2026/05/10
 
 :history
+
+    0.3.1-dev - 2026/05/10 (e78a169) [develop]
+    :brief PaperRun 创建默认驱动论文 stage engine
+        - feat(paperrun): createPaperRun 默认调用 startPaperResearchRun, 创建 run 后直接推进 14-stage paper graph
+        - feat(orchestrator): 新增默认具体 stage handlers, 记录 planning、source/data discovery、code-to-paper、experiment diagnostics、ClaimLedger、draft、profile check、verification 与 forced export bundle
+        - feat(runtime): PaperRun stage snapshot 识别 paperorchestrator.stage.completed, API/TUI 创建路径能返回已推进的 stage 状态
+        - fix(runtime): 全局 run index 对重复 run_dir/run_id 更稳健, 避免 Windows/index refresh 竞态造成 SQLite primary key 冲突
+        - fix(paperrun): 无效 code_paths 转换为 PaperRun blocked diagnostic, 不再让 /paper/runs 创建返回 HTTP 400
+        - test(paperrun): 新增 paperrun-execution 测试, 禁止默认产品路径依赖 fixture handler injection
+        - docs(readme): 版本更新为 0.3.1-dev, 记录 PaperRun 默认执行引擎
+    :src
+        - packages/opencode/src/paper/orchestrator.ts - default concrete paper stage handlers and run-scoped execution cache
+        - packages/opencode/src/paper/run.ts - createPaperRun to stage engine wiring and orchestrator completion status projection
+        - packages/opencode/src/paper/research/runtime/run-store.ts - normalized run_dir duplicate guard during index refresh
+        - packages/opencode/src/paper/research/storage.ts - duplicate run_id guard during global index rebuild
+        - packages/opencode/test/paper/paperrun-execution.test.ts - default PaperRun execution coverage
+        - reports/paperrun-execution-engine.md - implementation report
+        - README.md - current behavior and version update
+        - CHANGELOG - 0.3.1-dev history entry
+    :verification
+        - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/run-api.test.ts test/cli/tui/paper-workbench.test.ts test/paper/paperrun-execution.test.ts passed: 5 pass, 0 fail, 56 expects
+        - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
 
     0.3.0-dev - 2026/05/10 (9fdb7dc) [develop]
     :brief OpenCode hard fork 最终验收为 Paper Fucker 论文工作台
