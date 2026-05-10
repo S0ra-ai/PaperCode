@@ -3,13 +3,23 @@ import { useRouteData } from "@tui/context/route"
 import { useSDK } from "@tui/context/sdk"
 import { useTheme } from "@tui/context/theme"
 import type { PaperRunSnapshot } from "@/paper/run"
-import { createPaperRunDashboardState, fetchPaperRunSnapshot } from "./workbench"
+import type { ResearchCapability } from "@/paper/capabilities"
+import {
+  createPaperRunDashboardState,
+  fetchPaperRunSnapshot,
+  fetchPaperWorkbenchCapabilities,
+  fetchPaperWorkbenchDoctor,
+  paperWorkbenchHealthFromDoctor,
+  type PaperWorkbenchHealthInput,
+} from "./workbench"
 
 export function PaperRunDashboard() {
   const route = useRouteData("paper")
   const sdk = useSDK()
   const { theme } = useTheme()
   const [snapshot, setSnapshot] = createSignal<PaperRunSnapshot | undefined>(route.snapshot)
+  const [capabilities, setCapabilities] = createSignal<ResearchCapability[]>([])
+  const [health, setHealth] = createSignal<PaperWorkbenchHealthInput>({})
   const [error, setError] = createSignal<string>()
 
   onMount(() => {
@@ -24,10 +34,31 @@ export function PaperRunDashboard() {
       .catch((cause) => setError(cause instanceof Error ? cause.message : "PaperRun 读取失败"))
   })
 
+  onMount(() => {
+    void fetchPaperWorkbenchCapabilities({
+      baseUrl: sdk.url,
+      directory: sdk.directory,
+      fetch: sdk.fetch,
+    })
+      .then((payload) => setCapabilities(payload.capabilities))
+      .catch(() => setCapabilities([]))
+
+    void fetchPaperWorkbenchDoctor({
+      baseUrl: sdk.url,
+      directory: sdk.directory,
+      fetch: sdk.fetch,
+    })
+      .then((payload) => setHealth(paperWorkbenchHealthFromDoctor(payload)))
+      .catch(() => setHealth({}))
+  })
+
   const state = createMemo(() => {
     const value = snapshot()
     if (!value) return
-    return createPaperRunDashboardState(value)
+    return createPaperRunDashboardState(value, {
+      capabilities: capabilities(),
+      health: health(),
+    })
   })
 
   return (
@@ -42,7 +73,7 @@ export function PaperRunDashboard() {
         <box flexDirection="row" gap={2}>
           <text fg={theme.textMuted}>Preview</text>
           <text fg={theme.textMuted}>Export</text>
-          <text fg={theme.textMuted}>Capabilities</text>
+          <text fg={theme.textMuted}>MCP/Skills</text>
         </box>
       </box>
 
@@ -56,8 +87,15 @@ export function PaperRunDashboard() {
                 <span style={{ bold: true }}>{view().title}</span>
               </text>
               <box flexDirection="row" gap={2} flexWrap="wrap">
+                <text fg={theme.textMuted}>控制器</text>
+                <text fg={theme.primary}>{view().controller_status.label}</text>
+                <text fg={theme.textMuted}>待处理指导 {view().controller_status.pending_guidance}</text>
+              </box>
+              <box flexDirection="row" gap={2} flexWrap="wrap">
                 {view().controls.map((control) => (
-                  <text fg={theme.accent}>{control.label}</text>
+                  <text fg={control.enabled ? (control.danger ? theme.error : theme.accent) : theme.textMuted}>
+                    {control.label}
+                  </text>
                 ))}
               </box>
             </box>
@@ -82,6 +120,30 @@ export function PaperRunDashboard() {
                 </box>
               ))}
             </box>
+
+            <box flexDirection="column" gap={0}>
+              <text fg={theme.textMuted}>模型角色</text>
+              {view().model_roles.map((role) => (
+                <box flexDirection="row" gap={2}>
+                  <text>{role.label}</text>
+                  <text fg={theme.textMuted}>{role.provider_model}</text>
+                </box>
+              ))}
+            </box>
+
+            <Show when={view().capability_health.length > 0}>
+              <box flexDirection="column" gap={0}>
+                <text fg={theme.textMuted}>MCP / Skill / 工具链健康</text>
+                {view().capability_health.map((item) => (
+                  <box flexDirection="row" gap={2}>
+                    <text>{item.label}</text>
+                    <text fg={item.status === "missing" || item.status === "disabled" ? theme.warning : theme.textMuted}>
+                      {item.status_label}
+                    </text>
+                  </box>
+                ))}
+              </box>
+            </Show>
 
             <Show when={view().pause_questions.length > 0}>
               <box flexDirection="column" gap={0}>
