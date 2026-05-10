@@ -21,8 +21,11 @@ const requiredChecks = [
   "pandoc-conversion",
   "latex-pdf-generation",
   "docx-generation",
+  "live-crawler-fetch",
+  "hf-live-research-loop",
   "topic-to-paper-live-run",
   "code-to-paper-live-run",
+  "final-export-pass-run",
   "hard-fork-paper-core",
   "hard-fork-paperrun-api-tui",
   "hard-fork-agent-tree",
@@ -103,6 +106,7 @@ describe("strict live acceptance script", () => {
     expect(script).toContain("scripts/live-paper-quality-benchmark.ts")
     expect(script).toContain('"--scenario", "topic"')
     expect(script).toContain('"--scenario", "code"')
+    expect(script).toContain('"--scenario", "final"')
     expect(script).not.toContain('"test/research/e2e.test.ts"')
   })
 

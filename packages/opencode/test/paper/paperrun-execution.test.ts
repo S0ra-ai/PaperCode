@@ -105,4 +105,51 @@ describe("PaperRun default execution engine", () => {
     )
     expect(blockedDiagnostics.length).toBe(0)
   })
+
+  test("experiment evidence manifest allows final export when reproduction passes", async () => {
+    const { workspace, home } = await fixtureWorkspace()
+    await writeFile(
+      path.join(workspace, "experiment-evidence.json"),
+      JSON.stringify(
+        {
+          schema_version: "ExperimentEvidenceManifest.v1",
+          created_at: now,
+          provenance: "unit-test-local-reproduction",
+          primary_metric: "accuracy",
+          metric_direction: "higher_better",
+          metric_values: {
+            "host:proposed": 0.94,
+            "container:proposed": 0.94,
+            "host:baseline": 0.81,
+            "container:baseline": 0.81,
+            "host:ablation": 0.89,
+            "container:ablation": 0.89,
+          },
+          container_image: "paper-fucker/local-reproduction",
+          container_digest: "sha256:unit-test",
+        },
+        null,
+        2,
+      ),
+    )
+    const run = await createPaperRun(
+      {
+        topic: "带复现实验证据的最终论文导出",
+        workspace_path: workspace,
+        code_paths: ["src"],
+        experiment_logs: ["experiment-evidence.json"],
+        target_profile: "generic-preprint",
+        language: "zh-CN",
+        budget_tier: "standard",
+      },
+      runtimeOptions(workspace, home),
+    )
+
+    expect(run.snapshot.status).toBe("succeeded")
+    expect(run.snapshot.export_state.status).toBe("final")
+    expect(run.snapshot.export_state.failed_checks).toEqual([])
+    expect(run.snapshot.experiment_status.reproduction_gate).toBe("passed")
+    expect(run.snapshot.stage_graph.stages.find((stage) => stage.id === "reproduction")?.status).toBe("succeeded")
+    expect(run.snapshot.artifacts.some((artifact) => artifact.metadata?.artifact_schema === "ExperimentEvidenceManifest.v1")).toBe(true)
+  })
 })
