@@ -1,6 +1,6 @@
 id: paper-run-sidebar
 title: PaperRun Sidebar
-status: todo
+status: done
 priority: high
 owner: codex
 tags:
@@ -18,7 +18,7 @@ execution:
 steps:
 - id: paper-run-sidebar-step-01-inspect
   title: Inspect current PaperRun TUI and OpenCode sidebar logic
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: Compare PaperRun routes with existing OpenCode sidebar cost/token/outline
@@ -27,12 +27,25 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T18:48:08.524825'
+      level: info
+      message: Inspecting PaperRun TUI dashboard and OpenCode sidebar sources for
+        cost/token/outline behavior.
+      agent: codex
+    - timestamp: '2026-05-10T18:52:30.115083'
+      level: info
+      message: Inspected PaperRun workbench state/rendering and legacy OpenCode sidebar.
+        Existing sidebar derived cost from assistant messages and context from last
+        assistant token usage; PaperRun had diagnostics.cost, tool_traces, agent_tree,
+        export_state, artifacts, drafts, and gates but no persistent sidebar state.
+      agent: codex
+    last_run: '2026-05-10T18:52:30.115083'
+    attempt_count: 2
   meta: {}
 - id: paper-run-sidebar-step-02-state
   title: Implement PaperRun sidebar state
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - paper-run-sidebar-step-01-inspect
@@ -42,12 +55,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T18:52:30.806504'
+      level: info
+      message: Implementing PaperRun sidebar state derivation.
+      agent: codex
+    - timestamp: '2026-05-10T18:52:41.065748'
+      level: info
+      message: Added PaperRunCostDiagnostics, PaperRunOutlineState, PaperRunGateSummary,
+        and PaperRunSidebarState in the paper workbench adapter. Sidebar state derives
+        cost, token/context usage, outline source, agent tree summary, gate status,
+        blockers, and recent tool/model calls from PaperRunSnapshot.
+      agent: codex
+    last_run: '2026-05-10T18:52:41.065748'
+    attempt_count: 2
   meta: {}
 - id: paper-run-sidebar-step-03-ui
   title: Render persistent sidebar
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - paper-run-sidebar-step-02-state
@@ -57,12 +82,22 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T18:52:31.536963'
+      level: info
+      message: Rendering persistent PaperRun sidebar.
+      agent: codex
+    - timestamp: '2026-05-10T18:52:41.855688'
+      level: info
+      message: Rendered a persistent right sidebar in PaperRunDashboard with sections
+        for run overview, cost/context, outline, Agent Tree, Gate, and recent diagnostics.
+      agent: codex
+    last_run: '2026-05-10T18:52:41.855688'
+    attempt_count: 2
   meta: {}
 - id: paper-run-sidebar-step-04-tests
   title: Test sidebar behavior
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - paper-run-sidebar-step-03-ui
@@ -72,12 +107,23 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T18:52:32.239998'
+      level: info
+      message: Testing sidebar state and TUI mapping.
+      agent: codex
+    - timestamp: '2026-05-10T18:52:42.602299'
+      level: info
+      message: 'Verification passed: npx --yes bun@1.3.13 --cwd packages/opencode
+        test test/cli/tui/paper-workbench.test.ts test/cli/tui/paper-workbench-controls.test.ts
+        (5 pass); npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed.'
+      agent: codex
+    last_run: '2026-05-10T18:52:42.602299'
+    attempt_count: 2
   meta: {}
 - id: paper-run-sidebar-step-05-version
   title: Version and validate 0.5.5-dev
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - paper-run-sidebar-step-04-tests
@@ -87,8 +133,20 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T18:53:22.559251'
+      level: info
+      message: Updating README/CHANGELOG for 0.5.5-dev with work commit 399aeb2 and
+        running version/format/TaskFlow validation.
+      agent: codex
+    - timestamp: '2026-05-10T18:53:33.505618'
+      level: info
+      message: README version 0.5.5-dev matches CHANGELOG latest version. CHANGELOG
+        colon-history indentation is valid. TaskFlow validate_task paper-run-sidebar
+        passed. Work commit recorded in CHANGELOG as 399aeb2.
+      agent: codex
+    last_run: '2026-05-10T18:53:33.505618'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: directory
@@ -103,7 +161,10 @@ outputs:
 trace:
   logs: []
   attempt_count: 0
+lock:
+  by: codex
+  at: '2026-05-10T18:47:57.673270'
 meta:
   created_at: '2026-05-10T18:27:59.231893'
-  updated_at: '2026-05-10T18:27:59.231893'
+  updated_at: '2026-05-10T18:53:33.505618'
   version: '1'
