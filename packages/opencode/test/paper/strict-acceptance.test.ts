@@ -23,6 +23,11 @@ const requiredChecks = [
   "docx-generation",
   "topic-to-paper-live-run",
   "code-to-paper-live-run",
+  "hard-fork-paper-core",
+  "hard-fork-paperrun-api-tui",
+  "hard-fork-agent-tree",
+  "hard-fork-quality-egress",
+  "hard-fork-public-branding",
   "git-flow-cleanup",
 ]
 
