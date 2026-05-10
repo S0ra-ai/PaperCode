@@ -227,8 +227,7 @@ export async function rebuildGlobalIndex(runDirs: string[], options?: { home?: s
     const db = new Database(indexPath, { create: true })
     try {
       db.exec(`
-        DROP TABLE IF EXISTS runs;
-        CREATE TABLE runs (
+        CREATE TABLE IF NOT EXISTS runs (
           run_id TEXT PRIMARY KEY,
           topic TEXT NOT NULL,
           workspace TEXT NOT NULL,
@@ -236,6 +235,7 @@ export async function rebuildGlobalIndex(runDirs: string[], options?: { home?: s
           updated_at TEXT NOT NULL,
           run_dir TEXT NOT NULL
         );
+        DELETE FROM runs;
       `)
       const insert = db.prepare(
         "INSERT INTO runs (run_id, topic, workspace, status, updated_at, run_dir) VALUES (?, ?, ?, ?, ?, ?)",
