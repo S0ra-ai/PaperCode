@@ -7,7 +7,7 @@ import {
   type ResearchRuntimeOptions,
 } from "../runtime"
 import { withSpan } from "../telemetry"
-import { buildExportFiles } from "./bundle"
+import { renderPaperExportPipeline } from "../../export-pipeline"
 import type { ExportBundle, RecordExportBundleInput } from "./schemas"
 
 export class FinalExportBlockedError extends Error {
@@ -30,10 +30,6 @@ function failedChecks(input: RecordExportBundleInput) {
   return input.final_gate.status === "passed" ? [] : input.final_gate.blockers
 }
 
-function toolDiagnostics(files: ExportBundle["files"]) {
-  return files.flatMap((file) => file.diagnostics.map((diagnostic) => `${file.format}: ${diagnostic}`))
-}
-
 export async function recordExportBundle(
   runDir: string,
   input: RecordExportBundleInput,
@@ -52,38 +48,23 @@ export async function recordExportBundle(
       const run = await loadResearchRun(runDir)
       const createdAt = nowIso(options, input.now)
       const id = bundleId(input)
-      const files = await buildExportFiles({
+      const rendered = await renderPaperExportPipeline(
         runDir,
-        bundleId: id,
-        draft: input.draft,
-        forcedChecks: input.mode === "forced_draft" ? failures : [],
-        renderers: input.renderers,
-      })
-      const bundle: ExportBundle = {
-        schema_version: "ExportBundle.v1",
-        bundle_id: id,
-        created_at: createdAt,
-        status: input.mode === "final" ? "final" : "forced_draft",
-        draft_id: input.draft.draft_id,
-        final_gate: input.final_gate,
-        verification_summary: {
-          final_gate_status: input.final_gate.status,
-          failed_checks: failures,
-          forced: input.mode === "forced_draft",
-        },
-        files,
-        manifest: {
+        {
+          mode: input.mode,
           bundle_id: id,
-          files: files.map((file) => ({
-            format: file.format,
-            path: file.path,
-            sha256: file.sha256,
-            bytes: file.bytes,
-            status: file.status,
-          })),
+          draft: input.draft,
+          final_gate: input.final_gate,
           source_artifact_ids: input.source_artifact_ids,
-          tool_diagnostics: toolDiagnostics(files),
+          renderers: input.renderers,
+          now: input.now,
         },
+        options,
+      )
+      const files = rendered.bundle.files
+      const bundle: ExportBundle = {
+        ...rendered.bundle,
+        created_at: createdAt,
       }
       const artifact = await writeResearchArtifact(
         runDir,

@@ -1,6 +1,6 @@
 id: task-043-export-renderer-pipeline
 title: Make PaperRun export render real Markdown, LaTeX, PDF, DOCX, and bundles
-status: todo
+status: done
 priority: high
 owner: codex
 tags:
@@ -22,7 +22,7 @@ execution:
 steps:
 - id: task-043-step-01-red-tests
   title: Add export renderer tests
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: Cover final export when gate passes, forced draft when gate fails,
@@ -31,12 +31,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T07:17:01.908722'
+      level: info
+      message: 'Starting red tests for real PaperRun export rendering: Markdown, LaTeX,
+        PDF, DOCX, manifest, final gate blocking, and forced draft bundle behavior.'
+      agent: codex
+    - timestamp: '2026-05-10T07:19:38.197018'
+      level: info
+      message: 'Added failing export renderer pipeline tests in packages/opencode/test/paper/export-pipeline.test.ts.
+        Red run: npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/export-pipeline.test.ts
+        failed because @/paper/export-pipeline is not implemented yet.'
+      agent: codex
+    last_run: '2026-05-10T07:19:38.197018'
+    attempt_count: 2
   meta: {}
 - id: task-043-step-02-renderers
   title: Implement renderer pipeline
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-043-step-01-red-tests
@@ -46,12 +58,26 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T07:19:43.451741'
+      level: info
+      message: Implementing run-bound export renderer pipeline with Markdown/LaTeX/PDF/DOCX
+        files, manifest, external tool discovery/diagnostics, and forced draft markings.
+      agent: codex
+    - timestamp: '2026-05-10T07:22:37.552097'
+      level: info
+      message: 'Implemented packages/opencode/src/paper/export-pipeline.ts with run-bound
+        Markdown/LaTeX/PDF/DOCX rendering, manifest.json output, external tool discovery,
+        injectable command runner, missing pandoc/LaTeX diagnostics, and forced draft
+        markings. Updated research export recording to use the new pipeline. Focused
+        export-pipeline test now passes: 3 pass, 0 fail.'
+      agent: codex
+    last_run: '2026-05-10T07:22:37.552097'
+    attempt_count: 2
   meta: {}
 - id: task-043-step-03-api-preview
   title: Wire export pipeline to API and preview
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-043-step-02-renderers
@@ -61,12 +87,29 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T07:22:45.867287'
+      level: info
+      message: Wiring export renderer pipeline into PaperRun export API and preview/export
+        state so concrete files, diagnostics, and forced draft metadata surface through
+        snapshots.
+      agent: codex
+    - timestamp: '2026-05-10T07:27:05.815960'
+      level: info
+      message: 'Wired the renderer pipeline into recordExportBundle and /paper/runs/:runID/export.
+        Forced/final export now returns concrete files, manifest_path, tool_diagnostics,
+        and failed checks; preview payload includes exports and export_state. Updated
+        run-api coverage to assert forced export returns a written Markdown file and
+        manifest. Verification so far: export-pipeline + authoring + run-api tests
+        passed (7 pass, 0 fail); run-api focused passed (1 pass, 27 expects); opencode
+        typecheck passed.'
+      agent: codex
+    last_run: '2026-05-10T07:27:05.815960'
+    attempt_count: 2
   meta: {}
 - id: task-043-step-04-doc-version
   title: Document 0.3.5-dev
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-043-step-03-api-preview
@@ -75,12 +118,25 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T07:27:34.681337'
+      level: info
+      message: 'Work commit created: 855a944 feat(export): render paperrun bundles
+        to files. Updating CHANGELOG, README, and export renderer report for 0.3.5-dev.'
+      agent: codex
+    - timestamp: '2026-05-10T07:28:49.527319'
+      level: info
+      message: Updated CHANGELOG colon DSL to 0.3.5-dev with real work commit 855a944,
+        updated README version/current status/project structure/planning task list,
+        added reports/export-renderer-pipeline.md, and verified README/CHANGELOG sync
+        passes.
+      agent: codex
+    last_run: '2026-05-10T07:28:49.527319'
+    attempt_count: 2
   meta: {}
 - id: task-043-step-05-verify
   title: Verify export renderer pipeline
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-043-step-04-doc-version
@@ -90,8 +146,23 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T07:29:11.869641'
+      level: info
+      message: 'Running final verification for export renderer pipeline: export/authoring/API
+        tests, external tool smoke, typecheck, version sync, and TaskFlow validate_task.'
+      agent: codex
+    - timestamp: '2026-05-10T07:33:36.609986'
+      level: info
+      message: 'Verification passed. Tests: npx --yes bun@1.3.13 --cwd packages/opencode
+        test test/paper/export-pipeline.test.ts test/paper/authoring.test.ts test/paper/run-api.test.ts
+        => 7 pass, 0 fail, 65 expects. Typecheck passed. README version check passed
+        for 0.3.5-dev. TaskFlow validate_task passed. Real tool smoke passed after
+        correcting the smoke command quoting: pandoc generated LaTeX and DOCX, xelatex
+        generated PDF.'
+      agent: codex
+    last_run: '2026-05-10T07:33:36.609986'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -108,5 +179,5 @@ trace:
   attempt_count: 0
 meta:
   created_at: '2026-05-10T06:12:57.680903'
-  updated_at: '2026-05-10T06:12:57.680903'
+  updated_at: '2026-05-10T07:34:00.234476'
   version: '1'
