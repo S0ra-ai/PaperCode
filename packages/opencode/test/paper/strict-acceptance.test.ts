@@ -29,6 +29,10 @@ const requiredChecks = [
   "hard-fork-quality-egress",
   "hard-fork-public-branding",
   "observability-audit-coverage",
+  "agent-team-capability-fusion",
+  "paper-workbench-ux-sidebar",
+  "hf-no-mock-boundary",
+  "changelog-split-archives",
   "git-flow-cleanup",
 ]
 
@@ -82,6 +86,16 @@ describe("strict live acceptance script", () => {
     expect(script).toContain("strict-live-full")
     expect(script).toContain("test/paper/paperrun-execution.test.ts")
     expect(script).toContain("test/paper/observability-audit.test.ts")
+    expect(script).toContain("test/paper/agent-team-capability-acceptance.test.ts")
+  })
+
+  test("checks Agent Team capability fusion and product no-mock boundaries", () => {
+    const script = readFileSync(scriptPath, "utf8")
+    expect(script).toContain("Invoke-AgentTeamCapabilityFusion")
+    expect(script).toContain("Invoke-PaperWorkbenchUXSidebar")
+    expect(script).toContain("Invoke-HFNoMockBoundary")
+    expect(script).toContain("network_not_authorized")
+    expect(script).toContain("Invoke-ChangelogSplitArchives")
   })
 
   test("uses real PaperRun benchmark evidence for live topic and code checks", () => {
