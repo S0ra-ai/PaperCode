@@ -32,6 +32,8 @@ describe("paper experiment MCP loop", () => {
         "opencode.shell",
         "python.experiment-log-parse",
         "python.dataset-metadata-probe",
+        "hf.jobs",
+        "hf.trackio",
       ]),
     )
   })

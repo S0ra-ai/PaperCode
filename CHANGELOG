@@ -2,10 +2,39 @@
 :author        s0ra (https://github.com/S0ra-ai)
 :repo          
 :desc          记录项目的重大变更和版本历史
-:version       0.6.5-dev
+:version       0.6.6-dev
 :last_update   2026/05/11
 
 :history
+
+    0.6.6-dev - 2026/05/11 (1c1c2a5) [develop]
+        :brief Hugging Face / ML-Intern research loop
+        - feat(hf): 新增 ML-Intern-inspired HF research loop contracts, 覆盖 docs/papers/datasets/models/spaces/jobs/trackio
+        - feat(hf): HF records 可转换为 Source Ledger, HF jobs 可转换为 ExperimentRun 并记录 tool trace
+        - feat(capability): Hugging Face capability pack 增加 hf.models、hf.spaces、hf.trackio
+        - feat(experiment): experiment loop capability resolution 接入 hf.jobs 与 hf.trackio
+        - feat(python): 新增 hf_research_probe bridge, 产品默认未授权网络时 blocked/failed, fixture 仅作为显式测试输入
+        - test(hf): 覆盖 HF capability plan、source ledger、job experiment conversion、未授权网络禁止 mock
+        :src
+            - packages/opencode/src/paper/huggingface-loop.ts - HF research loop contracts, source conversion, job-to-experiment conversion, diagnostics
+            - packages/opencode/src/paper/capability-pack.ts - HF models/spaces/trackio capabilities
+            - packages/opencode/src/paper/experiment-loop.ts - HF jobs/trackio experiment capability integration
+            - packages/opencode/src/paper/run.ts - PaperRun HF diagnostics summary
+            - research-tools/src/paper_fucker_tools/huggingface_loop.py - HF Python bridge with explicit fixture/live-only behavior
+            - research-tools/src/paper_fucker_tools/mcp_tools.py - hf_research_probe registry entry
+        :test
+            - packages/opencode/test/paper/huggingface-loop.test.ts - HF research loop contract tests
+            - packages/opencode/test/paper/experiment-loop.test.ts - HF experiment capability regression
+            - research-tools/tests/test_huggingface_loop.py - Python bridge product no-mock enforcement tests
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/huggingface-loop.test.ts test/paper/experiment-loop.test.ts test/paper/capability-harness.test.ts
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 --cwd packages/preview test
+            - PYTHONPATH=research-tools/src python -m unittest discover -s research-tools/tests
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1
+            - TaskFlow validate_changelog_format
+            - TaskFlow validate_task ml-intern-hf-research-loop
+            - git diff --check
 
     0.6.5-dev - 2026/05/11 (b188ae0) [develop]
         :brief Crawler 数据采集与 Source Ledger gate
