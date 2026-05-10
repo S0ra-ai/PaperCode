@@ -1,6 +1,6 @@
 id: task-053-tui-provider-copy-cleanup
 title: Clean TUI provider copy
-status: todo
+status: done
 priority: medium
 owner: codex
 tags:
@@ -43,7 +43,7 @@ steps:
   meta: {}
 - id: task-053-step-02-verify
   title: Verify copy cleanup
-  status: in_progress
+  status: done
   owner: codex
   depends_on:
   - task-053-step-01-copy-update
@@ -59,8 +59,17 @@ steps:
       message: Running TUI-focused typecheck and current user-visible copy scans before
         version documentation.
       agent: codex
-    last_run: '2026-05-10T10:24:15.341970'
-    attempt_count: 1
+    - timestamp: '2026-05-10T10:29:22.395663'
+      level: info
+      message: 'Verification passed: opencode typecheck passed; current TUI home/tips
+        copy scan found no OpenCode provider/Open Code/Tip/English theme/--code packages/opencode
+        matches; replacement copy scan confirmed Chinese/generic provider wording;
+        scripts/check-readme-version.ps1 passed for 0.5.2-dev; TaskFlow validate_task
+        returned valid; focused strict-acceptance.ps1 -CheckTimeoutSeconds 300 passed
+        and refreshed reports/strict-live-acceptance.md.'
+      agent: codex
+    last_run: '2026-05-10T10:29:22.395663'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -87,5 +96,5 @@ lock:
   at: '2026-05-10T10:23:16.756970'
 meta:
   created_at: '2026-05-10T10:23:12.320263'
-  updated_at: '2026-05-10T10:24:15.341970'
+  updated_at: '2026-05-10T10:29:22.395663'
   version: '1'
