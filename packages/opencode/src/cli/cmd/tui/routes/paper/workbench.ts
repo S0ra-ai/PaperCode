@@ -127,6 +127,7 @@ export interface PaperRunSidebarState {
     completed_tasks: number
     blocked_tasks: number
     unread_messages: number
+    memory_entries: number
     max_member_depth: number
     recent_tasks: Array<{
       id: string
@@ -141,6 +142,13 @@ export interface PaperRunSidebarState {
       status: string
       detail: string
     }>
+  }
+  knowledge: {
+    memory_entries: number
+    redacted_memory: number
+    code_files: number
+    code_symbols: number
+    experiment_surfaces: number
   }
 }
 
@@ -775,6 +783,8 @@ export function createPaperRunSidebarState(snapshot: PaperRunSnapshot): PaperRun
   const current = activeStage(snapshot)
   const nodes = snapshot.agent_tree.nodes ?? []
   const team = summarizePaperAgentTeam(snapshot.agent_team)
+  const memory = objectValue(snapshot.diagnostics.memory)
+  const code = objectValue(snapshot.diagnostics.code_understanding)
   const recentAgents = nodes.slice(-4).map((agent) => ({
     id: agent.agent_id,
     role: agent.role,
@@ -808,6 +818,13 @@ export function createPaperRunSidebarState(snapshot: PaperRunSnapshot): PaperRun
     gate,
     diagnostics: {
       recent_calls: recentCalls,
+    },
+    knowledge: {
+      memory_entries: numericValue(memory.total_entries),
+      redacted_memory: numericValue(memory.redacted),
+      code_files: numericValue(code.files),
+      code_symbols: numericValue(code.symbols),
+      experiment_surfaces: numericValue(code.experiment_surfaces),
     },
   }
 }

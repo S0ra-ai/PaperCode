@@ -106,6 +106,16 @@ function PaperRunSidebar(props: { sidebar: PaperRunSidebarState }) {
             ))}
           </SidebarSection>
 
+          <SidebarSection title="Memory / Code">
+            <text>
+              memory {props.sidebar.knowledge.memory_entries} / redacted {props.sidebar.knowledge.redacted_memory}
+            </text>
+            <text fg={theme.textMuted}>
+              files {props.sidebar.knowledge.code_files} / symbols {props.sidebar.knowledge.code_symbols} / surfaces{" "}
+              {props.sidebar.knowledge.experiment_surfaces}
+            </text>
+          </SidebarSection>
+
           <SidebarSection title="Gate">
             <text fg={props.sidebar.gate.status === "blocked" ? theme.error : theme.text}>
               {props.sidebar.gate.status_label} / export {props.sidebar.gate.export_status}

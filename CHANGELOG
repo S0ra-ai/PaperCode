@@ -2,10 +2,32 @@
 :author        s0ra (https://github.com/S0ra-ai)
 :repo          
 :desc          记录项目的重大变更和版本历史
-:version       0.6.3-dev
+:version       0.6.4-dev
 :last_update   2026/05/11
 
 :history
+
+    0.6.4-dev - 2026/05/11 (86b5b08) [develop]
+        :brief MemoryBank 与代码理解层
+        - feat(memory): 新增 MemoryBank.v1, 支持 scope、share policy、provenance、retention、secret/path redaction 与查询摘要
+        - feat(code): 新增 CodeUnderstandingGraph.v1, 记录 package/file/symbol/source range/test/benchmark surface 与 coverage
+        - feat(agent-team): Agent Team member 可绑定 memory_entry_ids, 让队友学习与 artifact provenance 可追踪
+        - feat(paperrun): PaperRun snapshot 增加 memory_bank 与 code_understanding diagnostics
+        - feat(tui): 右侧栏新增 Memory / Code 摘要, 显示 memory、redaction、code files、symbols 和 experiment surfaces
+        - test(memory): 覆盖 redaction、查询、retention、source range、experiment surface 与 Agent Team memory 归属
+        :src
+            - packages/opencode/src/paper/memory-bank.ts - MemoryBank contracts and runtime
+            - packages/opencode/src/paper/code-understanding.ts - CodeUnderstandingGraph contracts and helpers
+            - packages/opencode/src/paper/agent-team.ts - member memory bindings
+            - packages/opencode/src/paper/run.ts - PaperRun memory/code snapshot diagnostics
+            - packages/opencode/src/cli/cmd/tui/routes/paper/workbench.ts - sidebar knowledge state
+            - packages/opencode/src/cli/cmd/tui/routes/paper/index.tsx - Memory / Code sidebar section
+        :test
+            - packages/opencode/test/paper/memory-code-understanding.test.ts - memory and code graph coverage
+            - packages/opencode/test/cli/tui/paper-workbench.test.ts - sidebar regression
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/memory-code-understanding.test.ts test/paper/agent-team.test.ts test/cli/tui/paper-workbench.test.ts passed: 9 pass, 0 fail, 58 expects
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
 
     0.6.3-dev - 2026/05/11 (590d9f9) [develop]
         :brief 内置 capability pack 与 harness 调度层

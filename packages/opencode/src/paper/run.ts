@@ -52,6 +52,13 @@ import {
   type RecursiveAgentPolicy,
 } from "./agents"
 import { createPaperAgentTeam, type PaperAgentTeamState } from "./agent-team"
+import { createPaperMemoryBank, memoryBankSummary, type PaperMemoryBank } from "./memory-bank"
+import {
+  addCodeFile,
+  codeUnderstandingSummary,
+  createCodeUnderstandingGraph,
+  type CodeUnderstandingGraph,
+} from "./code-understanding"
 
 import {
   applyPaperRunControl,
@@ -195,6 +202,8 @@ export interface PaperRunSnapshot {
   }
   agent_tree: AgentTree
   agent_team: PaperAgentTeamState
+  memory_bank: PaperMemoryBank
+  code_understanding: CodeUnderstandingGraph
   diagnostics: {
     counts: {
       events: number
@@ -212,6 +221,8 @@ export interface PaperRunSnapshot {
     final_gate: unknown
     tool_traces: ResearchToolTrace[]
     audit: PaperObservabilityAuditSummary
+    memory?: ReturnType<typeof memoryBankSummary>
+    code_understanding?: ReturnType<typeof codeUnderstandingSummary>
   }
   artifacts: ResearchArtifact[]
   drafts: ResearchDraft[]
@@ -650,6 +661,12 @@ export async function getPaperRunSnapshotFromDir(runDir: string): Promise<PaperR
     capabilities,
     writer: roles.writer,
   })
+  const memoryBank = createPaperMemoryBank({ run_id: status.run.run_id })
+  const codeGraph = createCodeUnderstandingGraph({ run_id: status.run.run_id, workspace: status.run.workspace })
+  const intakeMetadata = jsonRecord(metadata.paper_intake)
+  for (const path of metadataStringArray(intakeMetadata.code_paths)) {
+    addCodeFile(codeGraph, { path })
+  }
   const snapshot = {
     schema_version: "PaperRun.v1",
     run_id: status.run.run_id,
@@ -693,6 +710,8 @@ export async function getPaperRunSnapshotFromDir(runDir: string): Promise<PaperR
       mcp_servers: capabilities.filter((capability) => capability.type === "mcp").map((capability) => capability.name),
       memory_scope: "local",
     }),
+    memory_bank: memoryBank,
+    code_understanding: codeGraph,
     diagnostics: {
       counts: status.counts,
       model_roles: roles,
@@ -700,6 +719,8 @@ export async function getPaperRunSnapshotFromDir(runDir: string): Promise<PaperR
       final_gate: status.state.final_gate,
       tool_traces: toolTraces,
       audit: paperObservabilityAuditFromEvents(events),
+      memory: memoryBankSummary(memoryBank),
+      code_understanding: codeUnderstandingSummary(codeGraph),
     },
     artifacts,
     drafts,
