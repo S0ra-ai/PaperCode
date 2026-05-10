@@ -28,6 +28,7 @@ const requiredChecks = [
   "hard-fork-agent-tree",
   "hard-fork-quality-egress",
   "hard-fork-public-branding",
+  "observability-audit-coverage",
   "git-flow-cleanup",
 ]
 

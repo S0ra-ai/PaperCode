@@ -40,6 +40,7 @@ import {
 import { budgetTierPolicy } from "./budget"
 import { recordExportBundle, type ExportBundle } from "./research/export"
 import type { DraftPaper } from "./research/writing"
+import { paperObservabilityAuditFromEvents, type PaperObservabilityAuditSummary } from "./observability"
 import {
   applyPaperRunControl,
   controllerSseEvent,
@@ -185,6 +186,7 @@ export interface PaperRunSnapshot {
     cost: unknown
     final_gate: unknown
     tool_traces: ResearchToolTrace[]
+    audit: PaperObservabilityAuditSummary
   }
   artifacts: ResearchArtifact[]
   drafts: ResearchDraft[]
@@ -594,6 +596,7 @@ export async function getPaperRunSnapshotFromDir(runDir: string): Promise<PaperR
       cost: status.state.cost,
       final_gate: status.state.final_gate,
       tool_traces: toolTraces,
+      audit: paperObservabilityAuditFromEvents(events),
     },
     artifacts,
     drafts,
