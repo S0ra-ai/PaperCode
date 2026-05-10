@@ -109,7 +109,10 @@ describe("PaperRun HttpApi", () => {
       headers: { ...headers, "content-type": "application/json" },
     })
     expect(exportResponse.status).toBe(200)
-    expect((await exportResponse.json()).status).toBe("forced_draft")
+    const exported = await exportResponse.json()
+    expect(exported.status).toBe("forced_draft")
+    expect(exported.files.some((file: { format: string; status: string }) => file.format === "markdown" && file.status === "written")).toBe(true)
+    expect(exported.manifest_path).toContain("manifest.json")
 
     const capabilities = await app().request(PaperPaths.capabilities, { headers })
     expect(capabilities.status).toBe(200)

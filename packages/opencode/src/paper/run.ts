@@ -1,4 +1,5 @@
 import path from "path"
+import { readFile } from "fs/promises"
 import {
   appendResearchEvent,
   createResearchRun,
@@ -7,6 +8,7 @@ import {
   loadResearchRun,
   readJsonlFacts,
   updateResearchRunStatus,
+  type ResearchFinalGateState,
   type ResearchRuntimeOptions,
 } from "./research/runtime"
 import type {
@@ -36,6 +38,8 @@ import {
   type PaperResearchStageStatus,
 } from "./orchestrator"
 import { budgetTierPolicy } from "./budget"
+import { recordExportBundle, type ExportBundle } from "./research/export"
+import type { DraftPaper } from "./research/writing"
 import {
   applyPaperRunControl,
   controllerSseEvent,
@@ -127,6 +131,16 @@ export interface PaperExportBundle {
   formats: Array<"markdown" | "latex" | "pdf" | "docx" | "html">
   artifact_ids: string[]
   failed_checks: string[]
+  files?: Array<{
+    format: "markdown" | "latex" | "pdf" | "docx" | "html"
+    path: string
+    status: "written" | "failed"
+    mime_type?: string
+    bytes?: number
+    sha256?: string
+  }>
+  manifest_path?: string
+  tool_diagnostics?: string[]
   message: string
 }
 
@@ -367,8 +381,107 @@ function exportState(input: {
     status: "final",
     formats: input.exports.map((item) => item.format),
     artifact_ids: input.exports.flatMap((item) => item.artifact_ids),
+    files: input.exports.map((item) => ({
+      format: item.format,
+      path: item.path,
+      status: "written" as const,
+    })),
     failed_checks: [],
     message: "Final export is available.",
+  }
+}
+
+function normalizeFinalGateState(value: unknown, updatedAt: string): ResearchFinalGateState {
+  const record = jsonRecord(value)
+  const status = record.status === "passed" ? "passed" : "blocked"
+  return {
+    status,
+    blockers: metadataStringArray(record.blockers),
+    updated_at: metadataString(record.updated_at) ?? updatedAt,
+  }
+}
+
+function fallbackDraftPaper(input: {
+  runID: string
+  title: string
+  markdown?: string
+  claimIDs?: string[]
+  createdAt: string
+}): DraftPaper {
+  const markdown = input.markdown ?? `# ${input.title}\n\nNo recorded Markdown draft was available for this PaperRun.`
+  return {
+    schema_version: "DraftPaper.v1",
+    draft_id: `draft:${input.runID}`,
+    title: input.title,
+    created_at: input.createdAt,
+    version: 1,
+    sections: [
+      {
+        section_id: "paper",
+        title: "Paper",
+        level: 1,
+        markdown,
+        claim_ids: input.claimIDs ?? [],
+        source_ranges: [],
+      },
+    ],
+    markdown,
+    claim_ids: input.claimIDs ?? [],
+    applied_guidance_ids: [],
+  }
+}
+
+async function loadLatestDraftPaper(input: {
+  runDir: string
+  run: Awaited<ReturnType<typeof loadResearchRun>>
+  drafts: ResearchDraft[]
+}) {
+  const latest = input.drafts.at(-1)
+  if (!latest) {
+    return {
+      draft: fallbackDraftPaper({
+        runID: input.run.run_id,
+        title: input.run.topic,
+        createdAt: input.run.updated_at,
+      }),
+      sourceArtifactIDs: [] as string[],
+    }
+  }
+  const markdown = await readFile(path.join(input.runDir, latest.path), "utf8").catch(() => undefined)
+  return {
+    draft: fallbackDraftPaper({
+      runID: input.run.run_id,
+      title: latest.title,
+      markdown,
+      claimIDs: latest.claim_ids,
+      createdAt: latest.created_at,
+    }),
+    sourceArtifactIDs: latest.artifact_ids,
+  }
+}
+
+function paperExportBundleFromResearch(runID: string, bundle: ExportBundle): PaperExportBundle {
+  const writtenFiles = bundle.files.filter((file) => file.status === "written")
+  return {
+    run_id: runID,
+    status: bundle.status,
+    formats: writtenFiles.map((file) => file.format),
+    artifact_ids: bundle.manifest.source_artifact_ids,
+    failed_checks: bundle.verification_summary.failed_checks,
+    files: bundle.files.map((file) => ({
+      format: file.format,
+      path: file.path,
+      status: file.status,
+      mime_type: file.mime_type,
+      bytes: file.bytes,
+      sha256: file.sha256,
+    })),
+    manifest_path: bundle.manifest.path,
+    tool_diagnostics: bundle.manifest.tool_diagnostics,
+    message:
+      bundle.status === "final"
+        ? "Final export rendered with concrete files."
+        : "Forced draft exported with failed checks explicitly marked.",
   }
 }
 
@@ -620,6 +733,8 @@ export async function previewPaperRun(runID: string, options?: PaperRunRuntimeOp
     run_id: runID,
     status: snapshot.preview_state.status,
     drafts: snapshot.drafts,
+    exports: snapshot.exports,
+    export_state: snapshot.export_state,
     annotations: snapshot.claim_ledger.map((claim) => ({
       claim_id: claim.claim_id,
       source_ids: claim.source_ids,
@@ -634,19 +749,27 @@ export async function exportPaperRun(
   input: { forced?: boolean },
   options?: PaperRunRuntimeOptions,
 ): Promise<PaperExportBundle> {
-  const snapshot = await getPaperRunSnapshot(runID, options)
-  if (snapshot.export_state.status === "final") return snapshot.export_state
-  if (input.forced) {
-    return {
-      run_id: runID,
-      status: "forced_draft",
-      formats: ["markdown", "latex", "pdf", "docx"],
-      artifact_ids: snapshot.drafts.flatMap((draft) => draft.artifact_ids),
-      failed_checks: snapshot.export_state.failed_checks,
-      message: "Forced draft exported with failed checks explicitly marked.",
-    }
+  const runDir = await findPaperRunDir(runID, options)
+  const status = await getResearchRunStatus(runDir)
+  const finalGate = normalizeFinalGateState(status.state.final_gate, status.run.updated_at)
+  if (finalGate.status !== "passed" && !input.forced) {
+    const snapshot = await getPaperRunSnapshotFromDir(runDir)
+    return snapshot.export_state
   }
-  return snapshot.export_state
+
+  const drafts = await readJsonlFacts(runDir, "draft")
+  const latest = await loadLatestDraftPaper({ runDir, run: status.run, drafts })
+  const exported = await recordExportBundle(
+    runDir,
+    {
+      mode: input.forced ? "forced_draft" : "final",
+      draft: latest.draft,
+      final_gate: finalGate,
+      source_artifact_ids: latest.sourceArtifactIDs,
+    },
+    options,
+  )
+  return paperExportBundleFromResearch(runID, exported.bundle)
 }
 
 export function paperCapabilities() {
