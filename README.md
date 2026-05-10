@@ -1,6 +1,6 @@
 # paper_fucker
 
-Current version: <!-- version:start -->0.5.0-dev<!-- version:end -->
+Current version: <!-- version:start -->0.5.1-dev<!-- version:end -->
 
 `paper_fucker` is a private-first, OpenCode-derived closed-loop paper system. It turns a topic, codebase, dataset, experiment log, or paper material set into a verifiable academic-paper bundle with research planning, source discovery, code understanding, experiment/reproduction support, ClaimLedger-first writing, authenticity gates, profile-aware formatting, preview, and export.
 
@@ -44,6 +44,7 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - PDF export now falls back across LaTeX engines in order: `latexmk`, `xelatex`, `pdflatex`, `lualatex`, then `tectonic`. Engine failures are retained as diagnostics, Windows paths are normalized for TeX, and Pandoc emits standalone LaTeX for direct compilation.
 - PaperRun diagnostics now include durable observability audit coverage for stages, capabilities, model roles, subagents, tool traces, data-egress decisions, export renderers, and cost usage.
 - Default PaperRun execution now records that full observability coverage automatically; live reviewable runs no longer require manual helper calls to populate capability, model_role, subagent, tool, data_egress, export_renderer, cost, and stage audit kinds.
+- Current runtime cleanup removed Phase 1 stub/not_implemented terminology from paper authenticity guards and renamed the Python DOCX helper to the canonical `docx_generation` tool.
 - Historical reports written before `task-032-opencode-paper-core-migration` may retain `packages/server` or `@paper-fucker/server` paths as provenance. They are marked as historical; the current runtime authority is `packages/opencode/src/paper`, and `packages/server` is intentionally absent.
 - A live reviewable benchmark now exists for the current paper core: `scripts/live-paper-quality-benchmark.ts` creates a real topic+code PaperRun, records summary JSON under ignored `tmp/`, and writes findings in `reports/live-paper-quality-benchmark.md`. The first run passed live DeepSeek, Exa, Nature, pandoc, DOCX, direct XeLaTeX, and targeted PaperRun tests, while surfacing hardening tasks for strict acceptance timeouts, terminal run status, PDF fallback, and default audit coverage.
 - The `0.5.0-dev` live benchmark regression pass confirms those hardening tasks are closed: focused strict acceptance passes, PaperRun terminates as `blocked` when authenticity gates block final export, reproduction is projected as blocked, forced Markdown/LaTeX/PDF/DOCX export succeeds, and observability audit `missing_kinds` is empty.
