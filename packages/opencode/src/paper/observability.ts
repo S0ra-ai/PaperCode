@@ -9,6 +9,8 @@ import {
 } from "./research/runtime"
 import { applyCostUsage, type ResearchCostUsage } from "./research/runtime/policy"
 import { evaluateDataEgressPolicy, type DataEgressEvaluationResult, type DataEgressPolicy } from "./data-egress"
+import type { ResearchCapability } from "./capabilities"
+import type { OpenCodeModelRef } from "./model-router"
 
 export const PAPER_OBSERVABILITY_REQUIRED_KINDS = [
   "stage",
@@ -76,6 +78,15 @@ export interface RecordPaperDataEgressAuditInput {
 
 export interface RecordPaperCostUsageInput extends ResearchCostUsage {
   reason?: string
+}
+
+export interface RecordDefaultPaperRunObservabilityInput {
+  model_roles: Record<string, OpenCodeModelRef>
+  capabilities: ResearchCapability[]
+  data_egress_policy: DataEgressPolicy
+  data_egress_candidates: string[]
+  budget_tier: string
+  quality_mode: string
 }
 
 function nowIso(options?: ResearchRuntimeOptions) {
@@ -292,4 +303,92 @@ export async function recordPaperDataEgressAudit(
     options,
   )
   return result
+}
+
+export async function recordDefaultPaperRunObservability(
+  runDir: string,
+  input: RecordDefaultPaperRunObservabilityInput,
+  options?: ResearchRuntimeOptions,
+) {
+  const run = await loadResearchRun(runDir)
+  for (const [role, model] of Object.entries(input.model_roles)) {
+    await recordPaperObservabilityAudit(
+      runDir,
+      {
+        kind: "model_role",
+        name: role,
+        status: "succeeded",
+        span_name: `paper_fucker.model_role.${role}`,
+        attributes: {
+          provider_id: model.provider_id,
+          model_id: model.model_id,
+        },
+      },
+      options,
+    )
+  }
+
+  for (const capability of input.capabilities) {
+    await recordPaperObservabilityAudit(
+      runDir,
+      {
+        kind: "capability",
+        name: capability.name,
+        status: "succeeded",
+        span_name: `paper_fucker.capability.${capability.name}`,
+        attributes: {
+          type: capability.type,
+          stage_count: capability.allowed_stages.length,
+          trust: capability.trust,
+          network: capability.network,
+        },
+      },
+      options,
+    )
+  }
+
+  await recordPaperObservabilityAudit(
+    runDir,
+    {
+      kind: "subagent",
+      name: "root_run_agent",
+      status: "succeeded",
+      span_name: "paper_fucker.agent.root_run_agent",
+      attributes: {
+        agent_id: `${run.run_id}:root`,
+        depth: 0,
+        budget_tier: input.budget_tier,
+      },
+    },
+    options,
+  )
+
+  await recordPaperToolTrace(
+    runDir,
+    {
+      tool_name: "paper.default_engine",
+      status: "succeeded",
+      input: {
+        capability_count: input.capabilities.length,
+        budget_tier: input.budget_tier,
+        quality_mode: input.quality_mode,
+      },
+      output: {
+        run_id: run.run_id,
+      },
+    },
+    options,
+  )
+
+  await recordPaperDataEgressAudit(
+    runDir,
+    {
+      policy: input.data_egress_policy,
+      candidates: input.data_egress_candidates,
+      stage: "intake",
+    },
+    options,
+  )
+
+  await recordPaperCostUsage(runDir, { llm_usd: 0, api_usd: 0, reason: "default_engine_baseline" }, options)
 }

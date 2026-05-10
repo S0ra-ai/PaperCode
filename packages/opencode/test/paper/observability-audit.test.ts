@@ -70,6 +70,19 @@ afterEach(async () => {
 })
 
 describe("PaperRun observability audit", () => {
+  test("default PaperRun engine records complete audit coverage without manual helper calls", async () => {
+    const run = await newPaperRun()
+    const snapshot = await getPaperRunSnapshot(run.run_id, run.options)
+    const audit = snapshot.diagnostics.audit
+
+    expect(audit.coverage.missing_kinds).toEqual([])
+    for (const kind of ["stage", "capability", "model_role", "subagent", "tool", "data_egress", "export_renderer", "cost"]) {
+      expect(audit.counts[kind as keyof typeof audit.counts]).toBeGreaterThan(0)
+    }
+    expect(snapshot.diagnostics.tool_traces.length).toBeGreaterThan(0)
+    expect(snapshot.diagnostics.cost).toMatchObject({ total_usd: expect.any(Number) })
+  })
+
   test("records durable audit, tool trace, cost, and egress diagnostics in snapshots", async () => {
     const run = await newPaperRun()
 
@@ -151,6 +164,8 @@ describe("PaperRun observability audit", () => {
     expect(audit.coverage.missing_kinds).toEqual([])
     expect(snapshot.diagnostics.tool_traces.map((trace) => trace.tool_name)).toContain("paper.export.renderer.pandoc")
     expect(snapshot.diagnostics.cost).toMatchObject({ llm_usd: 0.02, api_usd: 0.01, total_usd: 0.03 })
-    expect(audit.entries.find((entry) => entry.kind === "data_egress")?.attributes.blocked).toBe(2)
+    expect(
+      audit.entries.find((entry) => entry.kind === "data_egress" && entry.name === "code_analysis")?.attributes.blocked,
+    ).toBe(2)
   })
 })
