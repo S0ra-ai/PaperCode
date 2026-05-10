@@ -30,7 +30,13 @@ export type ExportFile = {
 }
 
 export type ExportManifest = {
+  schema_version: "PaperExportManifest.v1"
   bundle_id: string
+  status: "final" | "forced_draft"
+  final_gate_status: ResearchFinalGateState["status"]
+  forced: boolean
+  failed_checks: string[]
+  path: string
   files: Array<Pick<ExportFile, "format" | "path" | "sha256" | "bytes" | "status">>
   source_artifact_ids: string[]
   tool_diagnostics: string[]
