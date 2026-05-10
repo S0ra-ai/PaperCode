@@ -2,7 +2,7 @@ import { createMemo, For } from "solid-js"
 import { DEFAULT_THEMES, useTheme } from "@tui/context/theme"
 
 const themeCount = Object.keys(DEFAULT_THEMES).length
-const themeTip = `Use {highlight}/themes{/highlight} or {highlight}Ctrl+X T{/highlight} to switch between ${themeCount} built-in themes`
+const themeTip = `使用 {highlight}/themes{/highlight} 或 {highlight}Ctrl+X T{/highlight} 在 ${themeCount} 个内置主题之间切换`
 
 type TipPart = { text: string; highlight: boolean }
 
@@ -40,7 +40,7 @@ export function Tips(props: { connected?: boolean }) {
   return (
     <box flexDirection="row" maxWidth="100%">
       <text flexShrink={0} style={{ fg: theme.warning }}>
-        ● Tip{" "}
+        ● 提示{" "}
       </text>
       <text flexShrink={1}>
         <For each={parts()}>
@@ -59,7 +59,7 @@ const TIPS = [
   "运行 {highlight}/paper{/highlight} 打开当前 PaperRun 的阶段图、Source Ledger 和 Claim Ledger",
   "运行 {highlight}/models{/highlight} 或 {highlight}Ctrl+X M{/highlight} 查看并切换可用模型",
   "在模型角色面板中为 planner、writer、reviewer、citation_checker 分配不同 provider/model",
-  "使用 {highlight}/connect{/highlight} 添加 OpenAI-compatible、DeepSeek 或其他 OpenCode provider",
+  "使用 {highlight}/connect{/highlight} 添加 OpenAI-compatible、DeepSeek 或其他模型 provider",
   "运行 {highlight}/doctor{/highlight} 检查 MCP、skills、pandoc、LaTeX、Python 和容器工具链",
   "运行 {highlight}/skills{/highlight} 查看 Nature、IEEE、ACM、Springer 等论文 profile skill",
   "使用 Nature profile 时，系统会抓取并缓存最新官方作者指南，而不是依赖过期常量",
