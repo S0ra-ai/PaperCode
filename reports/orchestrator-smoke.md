@@ -1,5 +1,7 @@
 # Automatic Orchestrator Smoke Report
 
+> Historical path note: this report predates task-032. Any `packages/server` or `@paper-fucker/server` paths below are provenance only; the current paper_fucker runtime authority is `packages/opencode/src/paper`, and `packages/server` is intentionally absent.
+
 Date: 2026-05-09
 TaskFlow task: `task-009-auto-orchestrator`
 Version: `0.1.9-dev`
