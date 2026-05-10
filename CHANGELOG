@@ -2,10 +2,29 @@
 :author        s0ra (https://github.com/S0ra-ai)
 :repo          
 :desc          记录项目的重大变更和版本历史
-:version       0.5.7-dev
+:version       0.6.0-dev
 :last_update   2026/05/11
 
 :history
+
+    0.6.0-dev - 2026/05/11 (0e792d7) [develop]
+        :brief 递归 Agent 与论文工作台综合验收
+        - test(acceptance): 综合验收递归 Agent Fabric、PaperRun 右侧栏、中文工作台流程、品牌表面与 strict live acceptance
+        - fix(acceptance): strict-acceptance.ps1 保持 ASCII-safe, 避免 Windows PowerShell 非 UTF-8 解析失败
+        - fix(acceptance): strict branding 检查避开 PowerShell 只读 $HOME 变量, 并匹配真实 PaperRunSidebar/home 入口
+        - test(acceptance): strict-acceptance 测试覆盖 ASCII-safe 与 PowerShell 保留变量回归
+        - report(acceptance): 刷新 reports/strict-live-acceptance.md, 覆盖 live provider、Exa、Nature、pandoc、LaTeX、DOCX、topic/code paper smoke 与 Git Flow
+        :src
+            - scripts/strict-acceptance.ps1 - strict live acceptance and branding checks
+            - packages/opencode/test/paper/strict-acceptance.test.ts - PowerShell safety regression tests
+            - reports/strict-live-acceptance.md - strict live acceptance report
+            - .plan/confirmed/recursive-agent-sidebar-acceptance.yaml - TaskFlow execution logs
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/agents.test.ts test/cli/tui/paper-workbench.test.ts test/cli/tui/paper-workbench-controls.test.ts test/cli/public-surface.test.ts test/paper/hard-fork-acceptance.test.ts test/paper/strict-acceptance.test.ts passed: 25 pass, 0 fail, 195 expects
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+            - npx --yes bun@1.3.13 --cwd packages/preview test passed: 2 pass, 0 fail, 9 expects
+            - python -m unittest discover -s research-tools/tests passed: 5 tests
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\strict-acceptance.ps1 -CheckTimeoutSeconds 300 passed
 
     0.5.7-dev - 2026/05/11 (1c09b71) [develop]
         :brief Paper Fucker 品牌表面审计
