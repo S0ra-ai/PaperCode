@@ -18,7 +18,7 @@ let once = false
 const placeholder = {
   normal: [
     "输入论文主题，例如：低资源场景下的多智能体研究工作流评估",
-    "输入代码路径和主题，例如：--code packages/opencode 写一篇系统论文",
+    "输入代码路径和主题，例如：--code . 写一篇系统论文",
     "拖入论文材料、数据集或实验日志，生成可审查论文 bundle",
   ],
   shell: ["paper_fucker doctor", "paper_fucker skills list", "paper_fucker mcp add exa --url https://mcp.exa.ai/mcp"],
