@@ -91,6 +91,14 @@ describe("PaperRun default execution engine", () => {
     expect(run.snapshot.drafts.length).toBeGreaterThan(0)
     expect(run.snapshot.exports.length).toBeGreaterThan(0)
     expect(run.snapshot.export_state.status).toBe("blocked")
+    expect(run.snapshot.export_state.failed_checks).toContain("reproduction_failure")
+    expect(run.snapshot.status).toBe("blocked")
+    expect(run.snapshot.controller_state.status).toBe("review_required")
+    expect(stageStatus.get("reproduction")).toBe("blocked")
+    expect(run.snapshot.stage_graph.stages.find((stage) => stage.id === "reproduction")?.summary).toContain(
+      "reproduction_failure",
+    )
+    expect(run.snapshot.experiment_status.reproduction_gate).toBe("blocked")
 
     const blockedDiagnostics = run.snapshot.artifacts.filter(
       (artifact) => artifact.metadata?.artifact_schema === "BlockedDiagnostic.v1",

@@ -5,7 +5,7 @@ import type { PaperRunSnapshot, PaperRunStageSnapshot } from "./run"
 
 type PaperRunSnapshotForController = Omit<PaperRunSnapshot, "controller_state">
 
-export type PaperRunControllerStatus = "running" | "paused" | "cancelled" | "completed"
+export type PaperRunControllerStatus = "running" | "paused" | "review_required" | "cancelled" | "completed"
 export type PaperRunControlAction = "resume" | "retry" | "cancel"
 
 export interface PaperRunControllerCheckpoint {
@@ -72,8 +72,12 @@ function stageArtifactIds(snapshot: PaperRunSnapshotForController, stage: PaperR
 
 function statusFromSnapshot(snapshot: PaperRunSnapshotForController): PaperRunControllerStatus {
   if (snapshot.status === "cancelled") return "cancelled"
+  const terminalStages = snapshot.stage_graph.stages.every((stage) => stage.status !== "pending" && stage.status !== "running")
+  const blockedStage = snapshot.stage_graph.stages.some((stage) => stage.status === "blocked")
+  if (snapshot.status === "blocked" && terminalStages) return "review_required"
+  if (snapshot.pause_questions.length > 0 && terminalStages) return "review_required"
   if (snapshot.pause_questions.length > 0) return "paused"
-  if (snapshot.stage_graph.stages.some((stage) => stage.status === "blocked")) return "paused"
+  if (blockedStage) return "paused"
   if (snapshot.stage_graph.stages.every((stage) => stage.status === "succeeded")) return "completed"
   return "running"
 }
