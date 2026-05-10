@@ -2,10 +2,30 @@
 :author        s0ra (https://github.com/S0ra-ai)
 :repo          
 :desc          记录项目的重大变更和版本历史
-:version       0.8.0-dev
+:version       0.8.1-dev
 :last_update   2026/05/11
 
 :history
+
+    0.8.1-dev - 2026/05/11 (1c6692d) [develop]
+        :brief 自驱产品审计与持续推进流程
+        - feat(audit): 新增 autonomous product audit 脚本，TaskFlow 空队列后可自动审计并寻找下一轮工作
+        - feat(report): 生成 reports/autonomous-product-audit.md，记录 TaskFlow、版本、strict live evidence、no-mock residue、品牌和 Git Flow 状态
+        - docs(readme): 新增 Autonomous Continuation Protocol，明确无任务时自动审计、创建 TaskFlow、执行、验证和同步文档
+        - test(audit): 审计脚本覆盖 strict live focused evidence、final_export=final 证据和危险残留扫描
+        :src
+            - scripts/autonomous-product-audit.ps1 - self-driven product audit checks and report generation
+        :doc
+            - README.md - autonomous continuation protocol
+            - reports/autonomous-product-audit.md - generated audit result
+        :taskflow
+            - .plan/confirmed/autonomous-product-audit-loop.yaml - tracked autonomous audit task
+        :verification
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\autonomous-product-audit.ps1 -AllowActiveTask passed
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
+            - TaskFlow validate_task autonomous-product-audit-loop passed
+            - TaskFlow validate_changelog_format passed
+            - git diff --check passed
 
     0.8.0-dev - 2026/05/11 (c6499a2) [develop]
         :brief 真实产品闭环补齐
