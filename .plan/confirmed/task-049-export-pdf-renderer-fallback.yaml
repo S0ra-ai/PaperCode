@@ -1,6 +1,6 @@
 id: task-049-export-pdf-renderer-fallback
 title: Make PDF export fall back across LaTeX engines
-status: todo
+status: done
 priority: high
 owner: codex
 tags:
@@ -19,7 +19,7 @@ execution:
 steps:
 - id: task-049-step-01-red
   title: Add PDF fallback regression
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: Add a renderer test where latexmk fails and xelatex succeeds, proving
@@ -28,12 +28,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T09:11:00.334122'
+      level: info
+      message: Adding regression coverage where latexmk exits non-zero, xelatex succeeds,
+        and the PDF file should be marked written with per-engine diagnostics retained.
+      agent: codex
+    - timestamp: '2026-05-10T09:11:53.540046'
+      level: info
+      message: RED verified with npx --yes bun@1.3.13 --cwd packages/opencode test
+        test/paper/export-pipeline.test.ts. New fallback test fails because the current
+        renderer calls latexmk and then stops; xelatex is never attempted.
+      agent: codex
+    last_run: '2026-05-10T09:11:53.540046'
+    attempt_count: 2
   meta: {}
 - id: task-049-step-02-fallback
   title: Implement renderer fallback chain
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-049-step-01-red
@@ -43,12 +55,25 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T09:12:02.782423'
+      level: info
+      message: Implementing ordered PDF renderer fallback chain across latexmk, xelatex,
+        pdflatex, lualatex, and tectonic while preserving per-engine failure diagnostics.
+      agent: codex
+    - timestamp: '2026-05-10T09:12:57.423041'
+      level: info
+      message: 'Implemented ordered PDF fallback chain: latexmk, xelatex, pdflatex,
+        lualatex, tectonic. Each failed engine appends diagnostics, and the first
+        successful engine writes the PDF with earlier diagnostics preserved. export-pipeline
+        fallback regression now passes.'
+      agent: codex
+    last_run: '2026-05-10T09:12:57.423041'
+    attempt_count: 2
   meta: {}
 - id: task-049-step-03-live-smoke
   title: Run real PDF export smoke
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-049-step-02-fallback
@@ -58,12 +83,26 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T09:13:10.598958'
+      level: info
+      message: Running live pandoc/xelatex smoke and a real PaperRun forced export
+        smoke to verify PDF generation with the fallback-capable export pipeline.
+      agent: codex
+    - timestamp: '2026-05-10T09:17:28.562667'
+      level: info
+      message: Live smoke passed. Direct pandoc -s + xelatex generated tmp/pdf-fallback-smoke/smoke.pdf
+        after using normalized forward-slash LaTeX paths. npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts
+        produced run-045f3eb0-cb86-4340-89b9-d0ee58464040; forced export now includes
+        markdown, latex, pdf, and docx with PDF status written and one retained latexmk
+        failure diagnostic before fallback success.
+      agent: codex
+    last_run: '2026-05-10T09:17:28.562667'
+    attempt_count: 2
   meta: {}
 - id: task-049-step-04-doc-version
   title: Document 0.4.3-dev
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-049-step-03-live-smoke
@@ -72,12 +111,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T09:18:33.745164'
+      level: info
+      message: Updating README and colon DSL CHANGELOG to 0.4.3-dev with real work
+        commit 7d5df2a.
+      agent: codex
+    - timestamp: '2026-05-10T09:19:12.847399'
+      level: info
+      message: 'Updated README current version to 0.4.3-dev and inserted CHANGELOG
+        0.4.3-dev colon-history entry with real work commit 7d5df2a. Version check
+        passed: README version 0.4.3-dev matches CHANGELOG latest version.'
+      agent: codex
+    last_run: '2026-05-10T09:19:12.847399'
+    attempt_count: 2
   meta: {}
 - id: task-049-step-05-verify
   title: Verify export fallback
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-049-step-04-doc-version
@@ -87,8 +138,21 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T09:19:22.293546'
+      level: info
+      message: 'Running final export fallback verification: export-pipeline tests,
+        opencode typecheck, README/CHANGELOG version check, and TaskFlow validate_task.'
+      agent: codex
+    - timestamp: '2026-05-10T09:20:40.948759'
+      level: info
+      message: 'Final verification passed. export-pipeline + run-api tests: 5 pass,
+        0 fail, 51 expects. npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+        passed. README version 0.4.3-dev matches CHANGELOG latest version. TaskFlow
+        validate_task task-049-export-pdf-renderer-fallback passed.'
+      agent: codex
+    last_run: '2026-05-10T09:20:40.948759'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -105,5 +169,5 @@ trace:
   attempt_count: 0
 meta:
   created_at: '2026-05-10T08:28:54.725074'
-  updated_at: '2026-05-10T08:28:54.725074'
+  updated_at: '2026-05-10T09:21:05.933566'
   version: '1'
