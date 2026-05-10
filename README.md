@@ -1,6 +1,6 @@
 # paper_fucker
 
-Current version: <!-- version:start -->0.4.2-dev<!-- version:end -->
+Current version: <!-- version:start -->0.4.3-dev<!-- version:end -->
 
 `paper_fucker` is a private-first, OpenCode-derived closed-loop paper system. It turns a topic, codebase, dataset, experiment log, or paper material set into a verifiable academic-paper bundle with research planning, source discovery, code understanding, experiment/reproduction support, ClaimLedger-first writing, authenticity gates, profile-aware formatting, preview, and export.
 
@@ -41,6 +41,7 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - Intake now records a real `MaterialIndex.v1` for user-supplied code paths, paper files, datasets, and experiment logs. Indexed material receives source ranges and Source Ledger entries; secret-like paths, ignored directories, and unsupported binaries are skipped with explicit reasons.
 - The PaperRun TUI dashboard now exposes live Chinese controls for guidance, resume, retry, cancel, preview, final export, forced draft export, capability health, and model-role visibility. It calls the PaperRun APIs directly, so normal operation does not require shell commands.
 - PaperRun export now renders run-bound Markdown, LaTeX, PDF, DOCX, and `manifest.json` files when tools are available. Missing pandoc or LaTeX engines produce explicit diagnostics, while forced drafts are visibly marked with failed checks.
+- PDF export now falls back across LaTeX engines in order: `latexmk`, `xelatex`, `pdflatex`, `lualatex`, then `tectonic`. Engine failures are retained as diagnostics, Windows paths are normalized for TeX, and Pandoc emits standalone LaTeX for direct compilation.
 - PaperRun diagnostics now include durable observability audit coverage for stages, capabilities, model roles, subagents, tool traces, data-egress decisions, export renderers, and cost usage.
 - Historical reports written before `task-032-opencode-paper-core-migration` may retain `packages/server` or `@paper-fucker/server` paths as provenance. They are marked as historical; the current runtime authority is `packages/opencode/src/paper`, and `packages/server` is intentionally absent.
 - A live reviewable benchmark now exists for the current paper core: `scripts/live-paper-quality-benchmark.ts` creates a real topic+code PaperRun, records summary JSON under ignored `tmp/`, and writes findings in `reports/live-paper-quality-benchmark.md`. The first run passed live DeepSeek, Exa, Nature, pandoc, DOCX, direct XeLaTeX, and targeted PaperRun tests, while surfacing hardening tasks for strict acceptance timeouts, terminal run status, PDF fallback, and default audit coverage.
