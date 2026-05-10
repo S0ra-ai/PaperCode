@@ -74,4 +74,19 @@ describe("public Paper Fucker surface", () => {
     expect(tips).not.toContain("github install")
     expect(tips).not.toContain("agent create")
   })
+
+  test("TUI sidebars and paper API avoid legacy product branding", async () => {
+    const sessionSidebar = await source("cli/cmd/tui/routes/session/sidebar.tsx")
+    const pluginSidebarFooter = await source("cli/cmd/tui/feature-plugins/sidebar/footer.tsx")
+    const paperApi = await source("server/routes/instance/httpapi/groups/paper.ts")
+
+    for (const text of [sessionSidebar, pluginSidebarFooter]) {
+      expect(text).toContain("Paper Fucker")
+      expect(text).not.toContain("<b>Open</b>")
+      expect(text).not.toContain("<b>Code</b>")
+    }
+
+    expect(paperApi).toContain("Return provider/model discovery data")
+    expect(paperApi).not.toContain("OpenCode provider/model discovery data")
+  })
 })
