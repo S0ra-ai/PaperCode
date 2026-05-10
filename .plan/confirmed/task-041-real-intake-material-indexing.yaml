@@ -1,6 +1,6 @@
 id: task-041-real-intake-material-indexing
 title: Index real input materials for topic, code, data, logs, and paper files
-status: todo
+status: done
 priority: high
 owner: codex
 tags:
@@ -21,7 +21,7 @@ execution:
 steps:
 - id: task-041-step-01-red-tests
   title: Add material indexing tests
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: Cover code, markdown, latex, docx/pdf probes where supported, experiment
@@ -30,12 +30,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T06:52:58.955490'
+      level: info
+      message: Starting red tests for material indexing of code, markdown, latex,
+        datasets, experiment logs, ignored files, secrets, binaries, and source ranges.
+      agent: codex
+    - timestamp: '2026-05-10T06:54:03.351199'
+      level: info
+      message: Added packages/opencode/test/paper/material-index.test.ts. Red run
+        failed as expected because indexResearchMaterials is not exported or implemented
+        yet, proving intake still lacks a real material indexing layer.
+      agent: codex
+    last_run: '2026-05-10T06:54:03.351199'
+    attempt_count: 2
   meta: {}
 - id: task-041-step-02-indexer
   title: Implement material indexer
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-041-step-01-red-tests
@@ -45,12 +57,27 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T06:54:13.450849'
+      level: info
+      message: Implementing material indexer with workspace-safe discovery, source
+        ranges, secret/binary filtering, and source ledger recording helpers.
+      agent: codex
+    - timestamp: '2026-05-10T06:56:49.735260'
+      level: info
+      message: Implemented packages/opencode/src/paper/material-index.ts with MaterialIndex.v1,
+        workspace-safe path containment, recursive code directory collection, source
+        ranges, sha256/bytes/mime metadata, secret-like path filtering, ignored path
+        filtering, binary filtering, source id generation, and recordMaterialIndex
+        source-ledger/artifact recording. Material index tests passed and opencode
+        typecheck passed.
+      agent: codex
+    last_run: '2026-05-10T06:56:49.735260'
+    attempt_count: 2
   meta: {}
 - id: task-041-step-03-wire-intake
   title: Wire material index into PaperRun intake
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-041-step-02-indexer
@@ -60,12 +87,25 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T06:56:55.344075'
+      level: info
+      message: Wiring material index artifacts and Source Ledger entries into PaperRun
+        intake.
+      agent: codex
+    - timestamp: '2026-05-10T06:57:01.212273'
+      level: info
+      message: 'Wired material indexing into the default PaperRun intake stage. createPaperRun
+        now records MaterialIndex.v1 artifacts and source ledger entries for indexed
+        code, paper files, datasets, and experiment logs while excluding secrets and
+        binaries. Test coverage passed: material-index test 2 pass, 0 fail, 11 expects.'
+      agent: codex
+    last_run: '2026-05-10T06:57:01.212273'
+    attempt_count: 2
   meta: {}
 - id: task-041-step-04-doc-version
   title: Document 0.3.3-dev
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-041-step-03-wire-intake
@@ -74,12 +114,25 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T06:57:25.286617'
+      level: info
+      message: Updating README, CHANGELOG, and reports/real-intake-material-indexing.md
+        for 0.3.3-dev using work commit 11d1042.
+      agent: codex
+    - timestamp: '2026-05-10T06:58:17.148308'
+      level: info
+      message: Updated README current version to 0.3.3-dev, added material indexing
+        status and task-041 planning reference, added CHANGELOG 0.3.3-dev entry with
+        work commit 11d1042, created reports/real-intake-material-indexing.md, and
+        ran scripts/check-readme-version.ps1 successfully.
+      agent: codex
+    last_run: '2026-05-10T06:58:17.148308'
+    attempt_count: 2
   meta: {}
 - id: task-041-step-05-verify
   title: Verify material intake
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-041-step-04-doc-version
@@ -89,8 +142,22 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T06:58:17.743912'
+      level: info
+      message: Starting final verification for task-041 after 0.3.3-dev documentation/version
+        synchronization.
+      agent: codex
+    - timestamp: '2026-05-10T06:59:13.312073'
+      level: info
+      message: 'Final verification passed. Tests: npx --yes bun@1.3.13 --cwd packages/opencode
+        test test/paper/material-index.test.ts test/paper/paperrun-execution.test.ts
+        => 3 pass, 0 fail, 24 expects. Typecheck passed. README/CHANGELOG version
+        check passed for 0.3.3-dev. TaskFlow validate_task task-041-real-intake-material-indexing
+        returned valid with no warnings.'
+      agent: codex
+    last_run: '2026-05-10T06:59:13.312073'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -105,7 +172,10 @@ outputs:
 trace:
   logs: []
   attempt_count: 0
+lock:
+  by: codex
+  at: '2026-05-10T06:52:58.091586'
 meta:
   created_at: '2026-05-10T06:12:31.210057'
-  updated_at: '2026-05-10T06:12:31.210057'
+  updated_at: '2026-05-10T06:59:13.312073'
   version: '1'
