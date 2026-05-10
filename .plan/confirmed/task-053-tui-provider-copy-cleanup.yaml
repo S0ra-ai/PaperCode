@@ -1,0 +1,97 @@
+id: task-053-tui-provider-copy-cleanup
+title: Clean TUI provider copy
+status: done
+priority: medium
+owner: codex
+tags:
+- tui
+- branding
+- copy
+depends_on:
+- task-052-remove-stub-leftovers
+description: Remove remaining user-visible OpenCode wording from the paper workbench
+  home tips/examples while keeping internal OpenCode provider substrate names intact.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-053-step-01-copy-update
+  title: Update user-visible TUI copy
+  status: done
+  owner: codex
+  depends_on: []
+  description: Replace remaining OpenCode-branded provider/home example text in the
+    Paper Fucker TUI home surface with generic provider and paper_fucker examples.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-10T10:23:21.485981'
+      level: info
+      message: Updating Paper Fucker TUI home/tips user-visible copy to avoid legacy
+        OpenCode product wording.
+      agent: codex
+    - timestamp: '2026-05-10T10:24:09.462940'
+      level: info
+      message: Updated TUI home placeholder from --code packages/opencode to --code
+        ., changed provider tip to generic model provider wording, localized Tip label
+        to 提示, and localized built-in theme switching copy.
+      agent: codex
+    last_run: '2026-05-10T10:24:09.462940'
+    attempt_count: 2
+  meta: {}
+- id: task-053-step-02-verify
+  title: Verify copy cleanup
+  status: done
+  owner: codex
+  depends_on:
+  - task-053-step-01-copy-update
+  description: Run TUI-focused tests or typecheck, README/CHANGELOG version sync,
+    current user-visible copy scan, and TaskFlow validation.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-10T10:24:15.341970'
+      level: info
+      message: Running TUI-focused typecheck and current user-visible copy scans before
+        version documentation.
+      agent: codex
+    - timestamp: '2026-05-10T10:29:22.395663'
+      level: info
+      message: 'Verification passed: opencode typecheck passed; current TUI home/tips
+        copy scan found no OpenCode provider/Open Code/Tip/English theme/--code packages/opencode
+        matches; replacement copy scan confirmed Chinese/generic provider wording;
+        scripts/check-readme-version.ps1 passed for 0.5.2-dev; TaskFlow validate_task
+        returned valid; focused strict-acceptance.ps1 -CheckTimeoutSeconds 300 passed
+        and refreshed reports/strict-live-acceptance.md.'
+      agent: codex
+    last_run: '2026-05-10T10:29:22.395663'
+    attempt_count: 2
+  meta: {}
+outputs:
+- type: file
+  path: packages/opencode/src/cli/cmd/tui/routes/home.tsx
+  description: Paper workbench example text no longer points users at packages/opencode.
+- type: file
+  path: packages/opencode/src/cli/cmd/tui/feature-plugins/home/tips-view.tsx
+  description: User-visible provider tip uses generic provider wording instead of
+    OpenCode product wording.
+- type: report
+  path: reports/tui-provider-copy-cleanup.md
+  description: Copy cleanup report and verification evidence.
+- type: file
+  path: README.md
+  description: Current status and version update.
+- type: file
+  path: CHANGELOG
+  description: 0.5.2-dev history entry with real commit id.
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-10T10:23:12.320263'
+  updated_at: '2026-05-10T10:29:43.583405'
+  version: '1'
