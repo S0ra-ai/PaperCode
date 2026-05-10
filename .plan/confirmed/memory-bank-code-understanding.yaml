@@ -1,6 +1,6 @@
 id: memory-bank-code-understanding
 title: Memory Bank and Code Understanding Layer
-status: in_progress
+status: done
 priority: high
 owner: codex
 tags:
@@ -18,7 +18,7 @@ execution:
 steps:
 - id: memory-contracts
   title: 定义 MemoryBank 契约
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: 定义 project/local/user scopes、memory entries、provenance、retention、redaction
@@ -27,12 +27,22 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T20:36:08.523947'
+      level: info
+      message: 开始定义 MemoryBank 契约，覆盖作用域、provenance、redaction、share policy 与 retention。
+      agent: codex
+    - timestamp: '2026-05-10T20:36:49.226575'
+      level: info
+      message: 已新增 packages/opencode/src/paper/memory-bank.ts，定义 MemoryBank.v1、MemoryPolicy、entry
+        provenance、share_policy、redaction 与查询/摘要。
+      agent: codex
+    last_run: '2026-05-10T20:36:49.226575'
+    attempt_count: 2
   meta: {}
 - id: code-understanding
   title: 实现代码理解索引
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: 生成 CodeUnderstandingGraph，记录 package/module/file/symbol/source range/test/benchmark
@@ -41,12 +51,23 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T20:36:54.023172'
+      level: info
+      message: 开始实现 CodeUnderstandingGraph，记录文件、符号、source ranges、测试/benchmark surface
+        与覆盖摘要。
+      agent: codex
+    - timestamp: '2026-05-10T20:37:32.470459'
+      level: info
+      message: 已新增 packages/opencode/src/paper/code-understanding.ts，定义 CodeUnderstandingGraph.v1、文件/包/符号/source
+        range/实验 surface 和覆盖摘要。
+      agent: codex
+    last_run: '2026-05-10T20:37:32.470459'
+    attempt_count: 2
   meta: {}
 - id: agent-memory-integration
   title: 接入 Agent Team 和 sidebar
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: Agent Team 在派发任务前读取相关 memory，任务完成后写回可追溯总结，sidebar 显示 memory/code coverage。
@@ -54,12 +75,23 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T20:38:20.643795'
+      level: info
+      message: 开始接入 Agent Team memory entry 归属、PaperRun snapshot diagnostics 和 TUI
+        sidebar knowledge 摘要。
+      agent: codex
+    - timestamp: '2026-05-10T20:38:29.739472'
+      level: info
+      message: Agent Team member 现在可绑定 memory_entry_ids；PaperRunSnapshot 增加 memory_bank
+        与 code_understanding；diagnostics/sidebar 增加 memory/code coverage 摘要。
+      agent: codex
+    last_run: '2026-05-10T20:38:29.739472'
+    attempt_count: 2
   meta: {}
 - id: tests
   title: 验证 memory 与 code understanding
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: 测试作用域、隐私过滤、source range、incremental update、agent memory read/write。
@@ -67,12 +99,23 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T20:39:01.401310'
+      level: info
+      message: 开始运行 memory/code understanding、Agent Team、TUI 相关测试和 typecheck。
+      agent: codex
+    - timestamp: '2026-05-10T20:40:00.292126'
+      level: info
+      message: 验证通过：npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/memory-code-understanding.test.ts
+        test/paper/agent-team.test.ts test/cli/tui/paper-workbench.test.ts；npx --yes
+        bun@1.3.13 run --cwd packages/opencode typecheck。
+      agent: codex
+    last_run: '2026-05-10T20:40:00.292126'
+    attempt_count: 2
   meta: {}
 - id: release
   title: 版本、CHANGELOG、README 与验证
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: 版本推进到 0.6.4-dev，更新 colon DSL CHANGELOG 与 README，并运行相关测试和格式校验。
@@ -80,8 +123,21 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T20:40:05.271998'
+      level: info
+      message: 开始提交 0.6.4-dev work commit，随后记录 CHANGELOG、README 版本和验证。
+      agent: codex
+    - timestamp: '2026-05-10T20:40:58.699145'
+      level: info
+      message: 完成 0.6.4-dev release sync。work commit 为 86b5b08，CHANGELOG 通过 TaskFlow
+        record_changelog_entry 记录真实 commit id；README 版本同步；验证通过：check-readme-version.ps1、check-changelog-format.ps1、TaskFlow
+        validate_changelog_format、TaskFlow validate_task memory-bank-code-understanding、packages/opencode
+        memory/code tests、packages/opencode typecheck、packages/preview test、research-tools
+        unittest（PYTHONPATH=research-tools/src）。
+      agent: codex
+    last_run: '2026-05-10T20:40:58.699145'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -98,5 +154,5 @@ lock:
   at: '2026-05-10T20:33:16.667751'
 meta:
   created_at: '2026-05-10T20:06:16.841758'
-  updated_at: '2026-05-10T20:33:24.371936'
+  updated_at: '2026-05-10T20:40:58.699145'
   version: '1'
