@@ -1,0 +1,112 @@
+id: task-047-strict-acceptance-timeouts
+title: Harden strict live acceptance with bounded checks
+status: todo
+priority: high
+owner: codex
+tags:
+- acceptance
+- quality
+- tooling
+depends_on:
+- task-046-live-paper-quality-benchmark
+description: Version 0.4.1-dev. The live benchmark showed scripts/strict-acceptance.ps1
+  can run packages/opencode test for more than 18 minutes without progress or timeout.
+  Add per-check timeout, progress reporting, partial report writing on timeout/failure,
+  and a focused paper-critical default suite while preserving an opt-in full workspace
+  mode.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-047-step-01-red
+  title: Reproduce strict acceptance hang risk
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Add or run a slow fixture that proves Invoke-CheckedCommand lacks per-check
+    timeout and partial report behavior.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-047-step-02-timeouts
+  title: Add bounded check execution
+  status: todo
+  owner: codex
+  depends_on:
+  - task-047-step-01-red
+  description: Implement per-check timeout, elapsed progress detail, child-process
+    cleanup, and partial report persistence for strict acceptance checks.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-047-step-03-suite-policy
+  title: Split focused and full suites
+  status: todo
+  owner: codex
+  depends_on:
+  - task-047-step-02-timeouts
+  description: Make strict live default run paper-critical targeted tests with an
+    explicit switch for full workspace tests so nightly/full validation remains available
+    without blocking local milestone runs.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-047-step-04-doc-version
+  title: Document 0.4.1-dev
+  status: todo
+  owner: codex
+  depends_on:
+  - task-047-step-03-suite-policy
+  description: Update README, CHANGELOG, and reports/strict-live-acceptance.md with
+    real commit id.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-047-step-05-verify
+  title: Verify bounded strict acceptance
+  status: todo
+  owner: codex
+  depends_on:
+  - task-047-step-04-doc-version
+  description: Run fixture timeout tests, focused strict acceptance, README version
+    check, and TaskFlow validate_task.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: file
+  path: scripts/strict-acceptance.ps1
+  description: Bounded strict live acceptance script
+- type: file
+  path: packages/opencode/test/paper/strict-acceptance.test.ts
+  description: Timeout and suite-policy coverage
+- type: report
+  path: reports/strict-live-acceptance.md
+  description: Updated strict acceptance evidence
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-10T08:28:54.093716'
+  updated_at: '2026-05-10T08:28:54.093716'
+  version: '1'

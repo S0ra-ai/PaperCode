@@ -1,0 +1,96 @@
+id: task-051-live-benchmark-regression-pass
+title: Rerun live paper quality benchmark after hardening
+status: todo
+priority: high
+owner: codex
+tags:
+- benchmark
+- acceptance
+- milestone
+depends_on:
+- task-050-default-observability-coverage
+description: Version 0.5.0-dev. After strict acceptance, PaperRun terminal status,
+  PDF fallback, and default observability gaps are fixed, rerun the same topic+code
+  benchmark and require a bounded strict acceptance report plus a reviewable bundle
+  with explicit terminal status, PDF outcome, audit coverage, and quality gaps reduced
+  to documented authenticity limits.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-051-step-01-run
+  title: Rerun live benchmark scenario
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Run scripts/live-paper-quality-benchmark.ts and focused strict live
+    acceptance after all hardening tasks land.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-051-step-02-review
+  title: Review benchmark quality delta
+  status: todo
+  owner: codex
+  depends_on:
+  - task-051-step-01-run
+  description: 'Compare against task-046 gaps: strict timeout, running status, reproduction
+    contradiction, PDF failure, audit missing kinds.'
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-051-step-03-doc-version
+  title: Document 0.5.0-dev
+  status: todo
+  owner: codex
+  depends_on:
+  - task-051-step-02-review
+  description: Update README, CHANGELOG, strict/live benchmark reports with real commit
+    id.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-051-step-04-verify
+  title: Verify milestone pass
+  status: todo
+  owner: codex
+  depends_on:
+  - task-051-step-03-doc-version
+  description: Run focused strict acceptance, version check, TaskFlow validate_task,
+    and Git Flow branch checks.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: report
+  path: reports/live-paper-quality-benchmark.md
+  description: Updated benchmark quality delta
+- type: report
+  path: reports/strict-live-acceptance.md
+  description: Bounded strict live acceptance pass evidence
+- type: file
+  path: CHANGELOG
+  description: 0.5.0-dev milestone entry
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-10T08:28:10.404036'
+  updated_at: '2026-05-10T08:28:10.404036'
+  version: '1'
