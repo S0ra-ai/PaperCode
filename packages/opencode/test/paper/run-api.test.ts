@@ -93,6 +93,13 @@ describe("PaperRun HttpApi", () => {
     expect(guidance.status).toBe(200)
     expect((await guidance.json()).accepted).toBe(true)
 
+    const control = await app().request(runPath(PaperPaths.control, runID), {
+      ...json({ action: "resume" }),
+      headers: { ...headers, "content-type": "application/json" },
+    })
+    expect(control.status).toBe(200)
+    expect((await control.json()).status).toBe("running")
+
     const preview = await app().request(runPath(PaperPaths.preview, runID), { headers })
     expect(preview.status).toBe(200)
     expect((await preview.json()).readonly).toBe(true)

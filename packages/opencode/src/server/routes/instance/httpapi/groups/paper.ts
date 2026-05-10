@@ -37,6 +37,11 @@ export const PaperGuidancePayload = Schema.Struct({
   message: Schema.String,
 })
 
+export const PaperControlPayload = Schema.Struct({
+  action: Schema.Literals(["resume", "retry", "cancel"]),
+  stage: Schema.optional(Schema.String),
+})
+
 export const PaperExportPayload = Schema.Struct({
   forced: Schema.optional(Schema.Boolean),
 })
@@ -61,6 +66,7 @@ export const PaperPaths = {
   run: `${root}/runs/:runID`,
   events: `${root}/runs/:runID/events`,
   guidance: `${root}/runs/:runID/guidance`,
+  control: `${root}/runs/:runID/control`,
   preview: `${root}/runs/:runID/preview`,
   export: `${root}/runs/:runID/export`,
   capabilities: `${root}/capabilities`,
@@ -118,6 +124,18 @@ export const PaperApi = HttpApi.make("paper")
             identifier: "paper.runs.guidance",
             summary: "Record PaperRun guidance",
             description: "Attach Chinese user guidance to a running paper workflow.",
+          }),
+        ),
+        HttpApiEndpoint.post("controlRun", PaperPaths.control, {
+          params: { runID: Schema.String },
+          payload: PaperControlPayload,
+          success: described(AnyJson, "PaperRun controller state"),
+          error: [HttpApiError.BadRequest, HttpApiError.NotFound],
+        }).annotateMerge(
+          OpenApi.annotations({
+            identifier: "paper.runs.control",
+            summary: "Control PaperRun",
+            description: "Resume, retry, or cancel a PaperRun controller without requiring shell commands.",
           }),
         ),
         HttpApiEndpoint.get("preview", PaperPaths.preview, {

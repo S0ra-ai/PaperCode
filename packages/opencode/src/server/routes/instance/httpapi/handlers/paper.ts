@@ -2,6 +2,7 @@ import { InstanceState } from "@/effect/instance-state"
 import { ModelsDev } from "@/provider/models"
 import {
   createPaperRun,
+  controlPaperRun,
   discoverPaperProviders,
   exportPaperRun,
   getPaperRunSnapshot,
@@ -23,6 +24,7 @@ import { HttpApiBuilder, HttpApiError } from "effect/unstable/httpapi"
 import { InstanceHttpApi } from "../api"
 import {
   ModelRoleAssignmentPayload,
+  PaperControlPayload,
   PaperExportPayload,
   PaperGuidancePayload,
   PaperRunCreatePayload,
@@ -122,6 +124,22 @@ export const paperHandlers = HttpApiBuilder.group(InstanceHttpApi, "paper", (han
       })
     })
 
+    const controlRun = Effect.fn("PaperHttpApi.controlRun")(function* (ctx: {
+      params: { runID: string }
+      payload: typeof PaperControlPayload.Type
+    }) {
+      const instance = yield* InstanceState.context
+      return yield* Effect.tryPromise({
+        try: () =>
+          controlPaperRun(
+            ctx.params.runID,
+            ctx.payload as Parameters<typeof controlPaperRun>[1],
+            paperOptions(instance.directory),
+          ),
+        catch: mapPaperError,
+      })
+    })
+
     const preview = Effect.fn("PaperHttpApi.preview")(function* (ctx: { params: { runID: string } }) {
       const instance = yield* InstanceState.context
       return yield* Effect.tryPromise({
@@ -186,6 +204,7 @@ export const paperHandlers = HttpApiBuilder.group(InstanceHttpApi, "paper", (han
       .handle("getRun", getRun)
       .handleRaw("events", events)
       .handle("guidance", guidance)
+      .handle("controlRun", controlRun)
       .handle("preview", preview)
       .handle("export", exportBundle)
       .handle("capabilities", capabilities)
