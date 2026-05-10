@@ -1,6 +1,6 @@
 id: crawler-data-acquisition
 title: Crawler and Web Data Acquisition
-status: in_progress
+status: done
 priority: high
 owner: codex
 tags:
@@ -126,7 +126,7 @@ steps:
   meta: {}
 - id: release
   title: 版本、CHANGELOG、README 与验证
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: 版本推进到 0.6.5-dev，更新 colon DSL CHANGELOG 与 README，并运行相关测试和格式校验。
@@ -134,8 +134,20 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T20:53:44.532357'
+      level: info
+      message: Work commit created; recording CHANGELOG 0.6.5-dev, syncing README
+        version, and rerunning release checks.
+      agent: codex
+    - timestamp: '2026-05-10T20:54:20.756186'
+      level: info
+      message: Recorded CHANGELOG 0.6.5-dev for work commit b188ae0, updated README
+        version to 0.6.5-dev, and passed scripts/check-readme-version.ps1, validate_changelog_format,
+        validate_task, and git diff --check.
+      agent: codex
+    last_run: '2026-05-10T20:54:20.756186'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -152,5 +164,5 @@ lock:
   at: '2026-05-10T20:44:21.024593'
 meta:
   created_at: '2026-05-10T20:06:28.449812'
-  updated_at: '2026-05-10T20:53:20.145683'
+  updated_at: '2026-05-10T20:54:20.756186'
   version: '1'
