@@ -1,6 +1,6 @@
 id: agent-team-capability-acceptance
 title: Agent Team Capability Acceptance
-status: in_progress
+status: done
 priority: critical
 owner: codex
 tags:
@@ -101,7 +101,7 @@ steps:
   meta: {}
 - id: release
   title: 版本、CHANGELOG、README 与最终验证
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: 版本推进到 0.7.0-dev，TaskFlow 全部 done，develop 干净并推送，无 feature 分支残留。
@@ -109,8 +109,22 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T21:26:22.887452'
+      level: info
+      message: Work commit created; recording CHANGELOG 0.7.0-dev, syncing README,
+        rerunning strict fixture acceptance, and completing final TaskFlow validation.
+      agent: codex
+    - timestamp: '2026-05-10T21:30:34.944424'
+      level: info
+      message: Recorded CHANGELOG 0.7.0-dev for work commit 1db0157, updated README
+        to 0.7.0-dev, reran scripts/check-readme-version.ps1, TaskFlow validate_changelog_format,
+        TaskFlow validate_task, git diff --check, and strict acceptance fixture mode.
+        reports/strict-live-acceptance.md now passes and records project_version 0.7.0-dev
+        for topic/code PaperRun scenarios.
+      agent: codex
+    last_run: '2026-05-10T21:30:34.944424'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: report
@@ -127,5 +141,5 @@ lock:
   at: '2026-05-10T21:12:20.003330'
 meta:
   created_at: '2026-05-10T20:06:51.044344'
-  updated_at: '2026-05-10T21:25:51.314239'
+  updated_at: '2026-05-10T21:30:34.944424'
   version: '1'
