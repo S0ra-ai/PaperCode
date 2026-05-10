@@ -1,5 +1,7 @@
 # TUI Paper Workbench Report
 
+> Historical path note: this report predates task-032. Any `packages/server` or `@paper-fucker/server` paths below are provenance only; the current paper_fucker runtime authority is `packages/opencode/src/paper`, and `packages/server` is intentionally absent.
+
 - Task: `task-029-tui-paper-workbench`
 - Version: `0.1.26-dev`
 - Branch: `feature/tui-paper-workbench`
