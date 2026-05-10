@@ -2,10 +2,36 @@
 :author        s0ra (https://github.com/S0ra-ai)
 :repo          
 :desc          记录项目的重大变更和版本历史
-:version       0.7.0-dev
+:version       0.8.0-dev
 :last_update   2026/05/11
 
 :history
+
+    0.8.0-dev - 2026/05/11 (c6499a2) [develop]
+        :brief 真实产品闭环补齐
+        - feat(crawler): 实现授权 live web crawl，Scrapling-first 并提供 stdlib HTTP fallback，不再返回未实现诊断
+        - feat(huggingface): HF papers 使用官方 Hub API live 记录，jobs 需要 token，Trackio 支持显式导出 metrics 作为产品证据
+        - feat(experiments): 新增 ExperimentEvidenceManifest.v1 ingestion，复现实验证据通过时允许 final export
+        - feat(acceptance): strict acceptance 增加 live crawler、HF live/no-mock boundary、final export pass checks
+        - test(paper): 新增 PaperRun final export pass 场景并扩展 crawler/HF bridge 测试
+        - chore(test): PaperRun 长耗时 focused 测试超时提升到 60s
+        :src
+            - research-tools/src/paper_fucker_tools/crawler.py - authorized live crawl with Scrapling adapter and urllib fallback
+            - research-tools/src/paper_fucker_tools/huggingface_loop.py - live papers, token-gated jobs, explicit Trackio export boundary
+            - packages/opencode/src/paper/orchestrator.ts - ExperimentEvidenceManifest.v1 evidence ingestion for reproduction-passed final export
+            - packages/opencode/src/paper/research/storage.ts - idempotent global index rebuild for concurrent PaperRun benchmarks
+            - scripts/live-paper-quality-benchmark.ts - added final scenario with final_export=final
+            - scripts/strict-acceptance.ps1 - added live-crawler-fetch, hf-live-research-loop, final-export-pass-run checks
+        :test
+            - research-tools/tests/test_crawler.py - local HTTP live crawl test
+            - research-tools/tests/test_huggingface_loop.py - HF papers/jobs/Trackio boundary tests
+            - packages/opencode/test/paper/paperrun-execution.test.ts - final export pass PaperRun test
+            - packages/opencode/test/paper/strict-acceptance.test.ts - strict check inventory updated
+        :verification
+            - python -m unittest discover -s research-tools/tests passed
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/paperrun-execution.test.ts test/paper/strict-acceptance.test.ts test/paper/huggingface-loop.test.ts test/paper/crawler.test.ts passed
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario final passed with final_export=final
 
     0.7.0-dev - 2026/05/11 (1db0157) [develop]
         :brief Agent Team capability acceptance and no-mock boundary
