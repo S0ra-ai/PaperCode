@@ -44,6 +44,10 @@ $RequiredChecks = @(
     "hard-fork-quality-egress",
     "hard-fork-public-branding",
     "observability-audit-coverage",
+    "agent-team-capability-fusion",
+    "paper-workbench-ux-sidebar",
+    "hf-no-mock-boundary",
+    "changelog-split-archives",
     "git-flow-cleanup"
 )
 
@@ -434,6 +438,56 @@ function Invoke-ObservabilityAuditCoverage {
     return "PaperRun diagnostics expose observability audit coverage for stage/capability/model/subagent/tool/egress/export/cost"
 }
 
+function Invoke-AgentTeamCapabilityFusion {
+    $agentTeam = Read-RepoText "packages/opencode/src/paper/agent-team.ts"
+    $capabilityPack = Read-RepoText "packages/opencode/src/paper/capability-pack.ts"
+    $harness = Read-RepoText "packages/opencode/src/paper/harness.ts"
+    $memory = Read-RepoText "packages/opencode/src/paper/memory-bank.ts"
+    $code = Read-RepoText "packages/opencode/src/paper/code-understanding.ts"
+    $crawler = Read-RepoText "packages/opencode/src/paper/crawler.ts"
+    $hf = Read-RepoText "packages/opencode/src/paper/huggingface-loop.ts"
+    Assert-HardFork ($agentTeam -match "PaperAgentTeamPolicy" -and $agentTeam -match "source_bound_only" -and $agentTeam -match "hf_jobs") "Agent Team policy is missing source-bound evidence or HF job approvals."
+    Assert-HardFork ($capabilityPack -match "paper-profile-skills" -and $capabilityPack -match "literature-mcp" -and $capabilityPack -match "crawler-data" -and $capabilityPack -match "huggingface-research") "Built-in capability packs are incomplete."
+    Assert-HardFork ($capabilityPack -match "python.web-crawler.scrapling" -and $capabilityPack -match "hf.datasets" -and $capabilityPack -match "hf.jobs" -and $capabilityPack -match "hf.trackio") "Crawler and HF capabilities are not fused into the built-in registry."
+    Assert-HardFork ($harness -match "approval_required" -and $harness -match "doom_loop" -and $harness -match "max_parallel") "Harness is missing approval, doom-loop, or concurrency controls."
+    Assert-HardFork ($memory -match "MemoryBank.v1" -and $memory -match "redacted") "MemoryBank contracts or redaction are missing."
+    Assert-HardFork ($code -match "CodeUnderstandingGraph.v1" -and $code -match "source_range") "Code understanding graph or source ranges are missing."
+    Assert-HardFork ($crawler -match "CrawlComplianceReport.v1" -and $crawler -match "license_conflict" -and $crawler -match "robots_blocked") "Crawler policy gates are missing."
+    Assert-HardFork ($hf -match "HFResearchLoopPlan.v1" -and $hf -match "hfJobToExperimentRun" -and $hf -match "HFTrackioRecord.v1") "HF research loop contracts or experiment integration are missing."
+    return "Agent Team, built-in capability packs, harness, memory, code understanding, crawler, and HF loop are fused"
+}
+
+function Invoke-PaperWorkbenchUXSidebar {
+    $dashboard = Read-RepoText "packages/opencode/src/cli/cmd/tui/routes/paper/index.tsx"
+    $workbench = Read-RepoText "packages/opencode/src/cli/cmd/tui/routes/paper/workbench.ts"
+    $tips = Read-RepoText "packages/opencode/src/cli/cmd/tui/feature-plugins/home/tips-view.tsx"
+    Assert-HardFork ($dashboard -match "formatted_total" -and $dashboard -match "tokens total" -and $dashboard -match "outline") "PaperRun sidebar does not preserve cost/token/context/outline."
+    Assert-HardFork ($dashboard -match "Agent Tree" -and $dashboard -match "Agent Team" -and $dashboard -match "Gate" -and $dashboard -match "Memory / Code") "PaperRun sidebar is missing Agent Tree, Agent Team, Gate, or Memory / Code sections."
+    Assert-HardFork ($workbench -match "PaperRunCostDiagnostics" -and $workbench -match "PaperRunOutlineState" -and $workbench -match "PaperRunGateSummary") "PaperRun sidebar state contracts are missing."
+    Assert-HardFork ($workbench -match "pause_question" -and $workbench -match "capability_health" -and $workbench -match "model_roles") "Paper workbench UX lacks pause questions, capability health, or model roles."
+    Assert-HardFork ($tips -match "PaperRun" -and $tips -match "Agent Tree" -and $tips -match "Claim Ledger") "Home guidance does not describe the PaperRun diagnostic workflow."
+    return "PaperRun workbench keeps cost/token/context/outline and PaperRun diagnostics visible"
+}
+
+function Invoke-HFNoMockBoundary {
+    $hfBridge = Read-RepoText "research-tools/src/paper_fucker_tools/huggingface_loop.py"
+    $hfTests = Read-RepoText "research-tools/tests/test_huggingface_loop.py"
+    Assert-HardFork ($hfBridge -match "network_not_authorized" -and $hfBridge -match "mode = `"blocked`"") "HF bridge does not block unauthorized product calls."
+    Assert-HardFork (-not ($hfBridge -match "network_not_authorized_mock_used")) "HF bridge still contains a mock fallback diagnostic."
+    Assert-HardFork ($hfTests -match "test_probe_blocks_when_network_is_not_authorized" -and $hfTests -match "fixture") "HF tests do not lock the no-mock product boundary."
+    return "HF product calls fail closed without authorized live access; fixture data is explicit only"
+}
+
+function Invoke-ChangelogSplitArchives {
+    $preferences = Read-RepoText ".plan/preferences.yaml"
+    Assert-HardFork ($preferences -match "archive_dir: docs/changelog" -and $preferences -match "minor_split_line_threshold") "TaskFlow changelog split preferences are missing."
+    $archive = Join-Path $RepoRoot "docs/changelog/v0/0.1.x.CHANGELOG"
+    Assert-HardFork (Test-Path -LiteralPath $archive) "0.1.x changelog archive is missing."
+    $archiveText = Get-Content -Raw -LiteralPath $archive
+    Assert-HardFork ($archiveText -match ":history" -and $archiveText -match "0\.1\.") "0.1.x changelog archive does not contain colon history entries."
+    return "TaskFlow changelog split preferences and 0.1.x archive are present"
+}
+
 function Write-Report {
     $report = Join-Path $RepoRoot $ReportPath
     $dir = Split-Path -Parent $report
@@ -488,6 +542,7 @@ Invoke-Check "server-tests" "Server tests" {
             "test/paper/code-to-paper.test.ts",
             "test/paper/export-pipeline.test.ts",
             "test/paper/observability-audit.test.ts",
+            "test/paper/agent-team-capability-acceptance.test.ts",
             "test/paper/strict-acceptance.test.ts"
         )
     }
@@ -550,6 +605,18 @@ Invoke-Check "hard-fork-public-branding" "Paper Fucker public branding and comma
 }
 Invoke-Check "observability-audit-coverage" "PaperRun observability audit coverage" {
     Invoke-ObservabilityAuditCoverage
+}
+Invoke-Check "agent-team-capability-fusion" "Agent Team and capability bus acceptance" {
+    Invoke-AgentTeamCapabilityFusion
+}
+Invoke-Check "paper-workbench-ux-sidebar" "PaperRun workbench UX sidebar acceptance" {
+    Invoke-PaperWorkbenchUXSidebar
+}
+Invoke-Check "hf-no-mock-boundary" "HF bridge does not mock product data" {
+    Invoke-HFNoMockBoundary
+}
+Invoke-Check "changelog-split-archives" "TaskFlow changelog split archives" {
+    Invoke-ChangelogSplitArchives
 }
 Invoke-Check "git-flow-cleanup" "Git Flow branch discipline" {
     Invoke-GitFlowCleanupCheck

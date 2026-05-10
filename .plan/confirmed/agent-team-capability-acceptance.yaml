@@ -1,6 +1,6 @@
 id: agent-team-capability-acceptance
 title: Agent Team Capability Acceptance
-status: in_progress
+status: done
 priority: critical
 owner: codex
 tags:
@@ -19,7 +19,7 @@ execution:
 steps:
 - id: acceptance-script
   title: 扩展 strict acceptance
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: 加入 Agent Team、Capability Pack、Harness、MemoryBank、Crawler、HF loop、内置
@@ -28,12 +28,26 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T21:14:56.315688'
+      level: info
+      message: Extending scripts/strict-acceptance.ps1 with Agent Team, capability
+        pack, harness, MemoryBank, crawler, HF loop, no-mock product boundary, and
+        changelog split checks.
+      agent: codex
+    - timestamp: '2026-05-10T21:25:40.998516'
+      level: info
+      message: Extended scripts/strict-acceptance.ps1 with agent-team-capability-fusion,
+        paper-workbench-ux-sidebar, hf-no-mock-boundary, and changelog-split-archives
+        checks. Added focused test target test/paper/agent-team-capability-acceptance.test.ts.
+        Fixture-mode strict acceptance passed and generated reports/strict-live-acceptance.md.
+      agent: codex
+    last_run: '2026-05-10T21:25:40.998516'
+    attempt_count: 2
   meta: {}
 - id: e2e-scenarios
   title: 新增端到端场景
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: 验证主题/代码/网页数据/HF dataset 混合输入能自动拆队、调用能力、写 ledger、生成 reviewable bundle
@@ -42,12 +56,25 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T21:25:41.817402'
+      level: info
+      message: Recording implemented mixed topic/code/web/HF scenario before completion.
+      agent: codex
+    - timestamp: '2026-05-10T21:25:50.505918'
+      level: info
+      message: 'Added packages/opencode/test/paper/agent-team-capability-acceptance.test.ts
+        covering mixed topic/code/web/HF data acceptance: built-in skill/MCP/Python
+        capability fusion, harness approval for crawler/HF jobs, recursive Agent Team
+        depth 3, crawler compliance, HF dataset source ledger conversion, and source-bound
+        evidence merge with missing-evidence rejection.'
+      agent: codex
+    last_run: '2026-05-10T21:25:50.505918'
+    attempt_count: 2
   meta: {}
 - id: brand-and-ux-smoke
   title: 验证中文工作台 UX 和品牌
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: 确保 Paper Fucker 用户入口、sidebar、Agent Team、capability/skills/MCP 健康状态、pause
@@ -56,12 +83,25 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T21:25:42.641918'
+      level: info
+      message: Recording implemented PaperRun workbench UX and branding smoke before
+        completion.
+      agent: codex
+    - timestamp: '2026-05-10T21:25:51.314239'
+      level: info
+      message: Strict acceptance now verifies Paper Fucker TUI/help smoke, PaperRun
+        workbench UX sidebar cost/token/context/outline, Agent Tree, Agent Team, Gate,
+        Memory/Code, pause questions, capability health, model roles, public branding,
+        and no legacy OpenCode command surface.
+      agent: codex
+    last_run: '2026-05-10T21:25:51.314239'
+    attempt_count: 2
   meta: {}
 - id: release
   title: 版本、CHANGELOG、README 与最终验证
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: 版本推进到 0.7.0-dev，TaskFlow 全部 done，develop 干净并推送，无 feature 分支残留。
@@ -69,8 +109,22 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T21:26:22.887452'
+      level: info
+      message: Work commit created; recording CHANGELOG 0.7.0-dev, syncing README,
+        rerunning strict fixture acceptance, and completing final TaskFlow validation.
+      agent: codex
+    - timestamp: '2026-05-10T21:30:34.944424'
+      level: info
+      message: Recorded CHANGELOG 0.7.0-dev for work commit 1db0157, updated README
+        to 0.7.0-dev, reran scripts/check-readme-version.ps1, TaskFlow validate_changelog_format,
+        TaskFlow validate_task, git diff --check, and strict acceptance fixture mode.
+        reports/strict-live-acceptance.md now passes and records project_version 0.7.0-dev
+        for topic/code PaperRun scenarios.
+      agent: codex
+    last_run: '2026-05-10T21:30:34.944424'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: report
@@ -87,5 +141,5 @@ lock:
   at: '2026-05-10T21:12:20.003330'
 meta:
   created_at: '2026-05-10T20:06:51.044344'
-  updated_at: '2026-05-10T21:12:24.086647'
+  updated_at: '2026-05-10T21:30:34.944424'
   version: '1'
