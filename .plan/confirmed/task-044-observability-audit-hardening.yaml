@@ -1,6 +1,6 @@
 id: task-044-observability-audit-hardening
 title: Harden OpenTelemetry, cost, tool trace, and data-egress audit coverage
-status: todo
+status: in_progress
 priority: medium
 owner: codex
 tags:
@@ -21,7 +21,7 @@ execution:
 steps:
 - id: task-044-step-01-red-tests
   title: Add observability audit tests
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: Cover spans/tool traces for stages, capabilities, model roles, subagents,
@@ -30,12 +30,25 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T07:35:04.549365'
+      level: info
+      message: Starting red tests for OpenTelemetry span coverage, tool trace/cost
+        diagnostics, and private-first data-egress audit evidence across PaperRun
+        stages and export pipeline.
+      agent: codex
+    - timestamp: '2026-05-10T07:36:47.270088'
+      level: info
+      message: Added failing observability audit test packages/opencode/test/paper/observability-audit.test.ts.
+        Red run failed because observability helpers are not implemented/exported
+        yet (recordPaperDataEgressAudit and related functions missing).
+      agent: codex
+    last_run: '2026-05-10T07:36:47.270088'
+    attempt_count: 2
   meta: {}
 - id: task-044-step-02-instrumentation
   title: Implement instrumentation helpers
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-044-step-01-red-tests
@@ -45,12 +58,27 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T07:36:54.946837'
+      level: info
+      message: Implementing central observability helpers for audit events, tool traces,
+        cost updates, data-egress audit, and stage/export renderer instrumentation.
+      agent: codex
+    - timestamp: '2026-05-10T07:41:28.845583'
+      level: info
+      message: 'Implemented packages/opencode/src/paper/observability.ts with durable
+        audit events, tool_trace fact recording, runtime cost updates, data-egress
+        audit recording, and audit summary aggregation. Export pipeline now records
+        export_renderer audit entries. PaperRun diagnostics includes audit summary.
+        Verification: observability + export-pipeline tests passed (4 pass, 0 fail,
+        29 expects); opencode typecheck passed.'
+      agent: codex
+    last_run: '2026-05-10T07:41:28.845583'
+    attempt_count: 2
   meta: {}
 - id: task-044-step-03-snapshot-strict
   title: Expose audit in snapshots and strict acceptance
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-044-step-02-instrumentation
@@ -60,8 +88,22 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T07:41:42.916261'
+      level: info
+      message: Exposing observability audit coverage in strict acceptance inventory
+        and source checks.
+      agent: codex
+    - timestamp: '2026-05-10T07:42:56.108662'
+      level: info
+      message: 'PaperRun snapshots expose diagnostics.audit with coverage and entries.
+        strict-acceptance.ps1 now includes observability-audit-coverage and checks
+        observability helpers, snapshot projection, and export renderer audit instrumentation.
+        Verification: observability-audit + strict-acceptance tests passed (4 pass,
+        0 fail, 43 expects); typecheck passed.'
+      agent: codex
+    last_run: '2026-05-10T07:42:56.108662'
+    attempt_count: 2
   meta: {}
 - id: task-044-step-04-doc-version
   title: Document 0.3.6-dev
@@ -105,7 +147,10 @@ outputs:
 trace:
   logs: []
   attempt_count: 0
+lock:
+  by: codex
+  at: '2026-05-10T07:34:53.793419'
 meta:
   created_at: '2026-05-10T06:13:14.337733'
-  updated_at: '2026-05-10T06:13:14.337733'
+  updated_at: '2026-05-10T07:42:56.108662'
   version: '1'
