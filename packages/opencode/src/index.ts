@@ -1,13 +1,8 @@
 import yargs from "yargs"
 import { hideBin } from "yargs/helpers"
 import { RunCommand } from "./cli/cmd/run"
-import { GenerateCommand } from "./cli/cmd/generate"
 import * as Log from "@opencode-ai/core/util/log"
-import { ConsoleCommand } from "./cli/cmd/account"
 import { ProvidersCommand } from "./cli/cmd/providers"
-import { AgentCommand } from "./cli/cmd/agent"
-import { UpgradeCommand } from "./cli/cmd/upgrade"
-import { UninstallCommand } from "./cli/cmd/uninstall"
 import { ModelsCommand } from "./cli/cmd/models"
 import { UI } from "./cli/ui"
 import { Installation } from "./installation"
@@ -17,19 +12,12 @@ import { FormatError } from "./cli/error"
 import { ServeCommand } from "./cli/cmd/serve"
 import { Filesystem } from "@/util/filesystem"
 import { DebugCommand } from "./cli/cmd/debug"
-import { StatsCommand } from "./cli/cmd/stats"
 import { McpCommand } from "./cli/cmd/mcp"
-import { GithubCommand } from "./cli/cmd/github"
 import { ExportCommand } from "./cli/cmd/export"
-import { ImportCommand } from "./cli/cmd/import"
 import { AttachCommand } from "./cli/cmd/tui/attach"
 import { TuiThreadCommand } from "./cli/cmd/tui/thread"
-import { AcpCommand } from "./cli/cmd/acp"
 import { EOL } from "os"
 import { WebCommand } from "./cli/cmd/web"
-import { PrCommand } from "./cli/cmd/pr"
-import { SessionCommand } from "./cli/cmd/session"
-import { DbCommand } from "./cli/cmd/db"
 import path from "path"
 import { Global } from "@opencode-ai/core/global"
 import { JsonMigration } from "@/storage/json-migration"
@@ -157,29 +145,17 @@ const cli = yargs(args)
   })
   .usage("")
   .completion("completion", "generate shell completion script")
-  .command(AcpCommand)
   .command(McpCommand)
   .command(TuiThreadCommand)
   .command(AttachCommand)
   .command(RunCommand)
-  .command(GenerateCommand)
   .command(DebugCommand)
-  .command(ConsoleCommand)
   .command(ProvidersCommand)
-  .command(AgentCommand)
-  .command(UpgradeCommand)
-  .command(UninstallCommand)
   .command(ServeCommand)
   .command(WebCommand)
   .command(ModelsCommand)
-  .command(StatsCommand)
   .command(ExportCommand)
-  .command(ImportCommand)
-  .command(GithubCommand)
-  .command(PrCommand)
-  .command(SessionCommand)
   .command(PluginCommand)
-  .command(DbCommand)
   .fail((msg, err) => {
     if (
       msg?.startsWith("Unknown argument") ||

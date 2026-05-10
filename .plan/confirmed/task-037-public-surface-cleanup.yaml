@@ -1,6 +1,6 @@
 id: task-037-public-surface-cleanup
 title: Clean public OpenCode surface into Paper Fucker product
-status: todo
+status: done
 priority: high
 owner: codex
 tags:
@@ -20,7 +20,7 @@ execution:
 steps:
 - id: task-037-step-01-red-surface-tests
   title: Add failing public-surface tests
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: Add tests/smokes asserting ASCII logo says Paper Fucker, default help
@@ -30,12 +30,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T12:28:55.540904'
+      level: info
+      message: Starting red public-surface tests for Paper Fucker branding and command
+        cleanup.
+      agent: codex
+    - timestamp: '2026-05-09T12:33:41.877830'
+      level: info
+      message: 'Added test/cli/public-surface.test.ts. Red run failed as expected:
+        UI.logo did not contain Paper Fucker and src/index.ts still registered legacy
+        public commands including AcpCommand.'
+      agent: codex
+    last_run: '2026-05-09T12:33:41.877830'
+    attempt_count: 2
   meta: {}
 - id: task-037-step-02-logo-banner
   title: Replace ASCII logo and banners
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-037-step-01-red-surface-tests
@@ -45,12 +57,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T12:33:42.394862'
+      level: info
+      message: Replacing CLI/TUI logo wordmark and public banner surface with Paper
+        Fucker branding.
+      agent: codex
+    - timestamp: '2026-05-09T12:41:44.026746'
+      level: info
+      message: Replaced CLI/TUI logo source with Paper Fucker wordmark through packages/opencode/src/cli/logo.ts
+        and packages/opencode/src/cli/ui.ts. Verified UI.logo() renders Paper Fucker
+        and no Open Code/OpenCode branding in public-surface test.
+      agent: codex
+    last_run: '2026-05-09T12:41:44.026746'
+    attempt_count: 2
   meta: {}
 - id: task-037-step-03-command-cleanup
   title: Clean public CLI and docs surface
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-037-step-02-logo-banner
@@ -61,12 +85,28 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T12:41:51.205268'
+      level: info
+      message: 'Cleaning default CLI/TUI public command surface: legacy chat/session/acp/github/pr
+        commands are hidden from default registry, public resume/session flags are
+        internal-only hidden compatibility flags, export command is reworded to PaperRun,
+        and TUI home tips are paper-workbench oriented.'
+      agent: codex
+    - timestamp: '2026-05-09T12:42:50.153553'
+      level: info
+      message: Default CLI command registry now omits legacy acp/agent/console/db/generate/github/import/pr/session/stats/upgrade/uninstall
+        surfaces. Public TUI/run/attach resume flags are hidden internal compatibility
+        flags, export is reworded as PaperRun export, and TUI home tips are Chinese
+        paper-workbench guidance. Verified with public-surface tests and CLI --help
+        smoke.
+      agent: codex
+    last_run: '2026-05-09T12:42:50.153553'
+    attempt_count: 2
   meta: {}
 - id: task-037-step-04-doc-version
   title: Update docs and version 0.2.6-dev
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-037-step-03-command-cleanup
@@ -76,12 +116,25 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T12:42:58.452304'
+      level: info
+      message: Preparing README/CHANGELOG/report update for version 0.2.6-dev and
+        public-surface cleanup traceability.
+      agent: codex
+    - timestamp: '2026-05-09T12:44:24.177768'
+      level: info
+      message: Updated README current version to 0.2.6-dev, added task-037 planning/source
+        entry, added CHANGELOG 0.2.6-dev colon-history entry with temporary commit
+        placeholder pending work commit hash, and created reports/public-surface-cleanup.md.
+        README/CHANGELOG version check passed.
+      agent: codex
+    last_run: '2026-05-09T12:44:24.177768'
+    attempt_count: 2
   meta: {}
 - id: task-037-step-05-verify
   title: Verify public surface cleanup
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-037-step-04-doc-version
@@ -92,8 +145,25 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-09T12:44:31.562447'
+      level: info
+      message: 'Starting task-037 verification: opencode targeted public-surface test,
+        opencode typecheck, preview tests, Python research-tools tests, README/CHANGELOG
+        version check, CLI help smoke, and TaskFlow validation.'
+      agent: codex
+    - timestamp: '2026-05-10T05:12:09.450271'
+      level: info
+      message: 'Verification complete for 0.2.6-dev public surface cleanup. CLI help
+        smoke shows Paper Fucker/PaperRun surface. Full opencode suite passed: 2544
+        pass, 38 skip, 2 todo, 0 fail, 16 snapshots, 7462 expects. Typecheck passed.
+        Preview tests passed: 2 pass, 0 fail, 9 expects. Python research-tools tests
+        passed: 4 OK. README/CHANGELOG version check passed. TaskFlow validate_task
+        passed with no warnings. Work commit: 66db257 feat(cli): clean public Paper
+        Fucker surface.'
+      agent: codex
+    last_run: '2026-05-10T05:12:09.450271'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -110,5 +180,5 @@ trace:
   attempt_count: 0
 meta:
   created_at: '2026-05-09T02:50:18.498235'
-  updated_at: '2026-05-09T02:50:18.498235'
+  updated_at: '2026-05-10T05:12:56.383297'
   version: '1'

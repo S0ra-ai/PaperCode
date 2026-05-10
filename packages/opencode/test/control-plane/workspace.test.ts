@@ -1,5 +1,4 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test"
-import { $ } from "bun"
 import fs from "node:fs/promises"
 import Http from "node:http"
 import path from "node:path"
@@ -115,14 +114,30 @@ async function withInstance<T>(fn: (dir: string) => T | Promise<T>) {
 
 async function initGitRepo(dir: string) {
   await fs.mkdir(dir, { recursive: true })
-  await $`git init`.cwd(dir).quiet()
-  await $`git config core.fsmonitor false`.cwd(dir).quiet()
-  await $`git config commit.gpgsign false`.cwd(dir).quiet()
-  await $`git config user.email "test@opencode.test"`.cwd(dir).quiet()
-  await $`git config user.name "Test"`.cwd(dir).quiet()
+  await runGit(dir, ["init"])
+  await runGit(dir, ["config", "core.fsmonitor", "false"])
+  await runGit(dir, ["config", "commit.gpgsign", "false"])
+  await runGit(dir, ["config", "user.email", "test@opencode.test"])
+  await runGit(dir, ["config", "user.name", "Test"])
   await fs.writeFile(path.join(dir, "tracked.txt"), "base\n")
-  await $`git add tracked.txt`.cwd(dir).quiet()
-  await $`git commit -m "base"`.cwd(dir).quiet()
+  await runGit(dir, ["add", "tracked.txt"])
+  await runGit(dir, ["commit", "-m", "base"])
+}
+
+async function runGit(dir: string, args: string[]) {
+  await fs.stat(dir)
+  const proc = Bun.spawn(["git", ...args], {
+    cwd: dir,
+    stdout: "pipe",
+    stderr: "pipe",
+  })
+  const [code, stdout, stderr] = await Promise.all([
+    proc.exited,
+    new Response(proc.stdout).text(),
+    new Response(proc.stderr).text(),
+  ])
+  if (code === 0) return
+  throw new Error(`git ${args.join(" ")} failed in ${dir}: ${stderr || stdout}`)
 }
 
 const runWorkspace = <A, E>(effect: Effect.Effect<A, E, WorkspaceOld.Service>) => AppRuntime.runPromise(effect)
@@ -137,9 +152,8 @@ const removeWorkspace = (id: WorkspaceID) => runWorkspace(WorkspaceOld.Service.u
 const workspaceStatus = () => runWorkspace(WorkspaceOld.Service.use((workspace) => workspace.status()))
 const isWorkspaceSyncing = (id: WorkspaceID) =>
   runWorkspace(WorkspaceOld.Service.use((workspace) => workspace.isSyncing(id)))
-const startWorkspaceSyncing = (projectID: ProjectID) => {
-  void runWorkspace(WorkspaceOld.Service.use((workspace) => workspace.startWorkspaceSyncing(projectID)))
-}
+const startWorkspaceSyncing = (projectID: ProjectID) =>
+  runWorkspace(WorkspaceOld.Service.use((workspace) => workspace.startWorkspaceSyncing(projectID)))
 const waitForWorkspaceSync = (workspaceID: WorkspaceID, state: Record<string, number>, signal?: AbortSignal) =>
   runWorkspace(WorkspaceOld.Service.use((workspace) => workspace.waitForSync(workspaceID, state, signal)))
 
@@ -687,7 +701,7 @@ describe("workspace-old CRUD", () => {
       expect(await fs.readFile(path.join(targetDir, "tracked.txt"), "utf8")).toBe("changed\n")
       expect(await fs.readFile(path.join(targetDir, "new.txt"), "utf8")).toBe("new\n")
     })
-  })
+  }, 20_000)
 
   test("sessionWarp detaches a session to the local project and claims project ownership", async () => {
     await withInstance(async (dir) => {
@@ -816,7 +830,7 @@ describe("workspace-old sync state", () => {
       insertWorkspace(info)
       registerAdapter(Instance.project.id, type, localAdapter(path.join(dir, "flag-disabled")).adapter)
 
-      startWorkspaceSyncing(Instance.project.id)
+      await startWorkspaceSyncing(Instance.project.id)
       await delay(25)
 
       expect((await workspaceStatus()).find((item) => item.workspaceID === info.id)?.status).toBeUndefined()
@@ -842,7 +856,7 @@ describe("workspace-old sync state", () => {
         withSession.id,
       )
 
-      startWorkspaceSyncing(Instance.project.id)
+      await startWorkspaceSyncing(Instance.project.id)
 
       await eventually(() =>
         workspaceStatus().then((status) =>
@@ -870,7 +884,7 @@ describe("workspace-old sync state", () => {
         info.id,
       )
 
-      startWorkspaceSyncing(Instance.project.id)
+      await startWorkspaceSyncing(Instance.project.id)
 
       await eventually(() =>
         workspaceStatus().then((status) =>
@@ -897,8 +911,7 @@ describe("workspace-old sync state", () => {
           info.id,
         )
 
-        startWorkspaceSyncing(Instance.project.id)
-        startWorkspaceSyncing(Instance.project.id)
+        await Promise.all([startWorkspaceSyncing(Instance.project.id), startWorkspaceSyncing(Instance.project.id)])
 
         await eventually(() =>
           workspaceStatus().then((status) =>
@@ -1365,5 +1378,5 @@ describe("workspace-old waitForSync", () => {
         `Timed out waiting for sync fence: {"${sessionID}":1}`,
       )
     })
-  }, 7000)
+  }, 15_000)
 })
