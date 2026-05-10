@@ -2,10 +2,25 @@
 :author        s0ra (https://github.com/S0ra-ai)
 :repo          
 :desc          记录项目的重大变更和版本历史
-:version       0.5.4-dev
+:version       0.5.5-dev
 :last_update   2026/05/11
 
 :history
+
+    0.5.5-dev - 2026/05/11 (399aeb2) [develop]
+        :brief PaperRun 右侧诊断栏
+        - feat(tui): PaperRun dashboard 新增固定右侧栏, 保留 OpenCode 原 cost/token/context 价值并改为 PaperRun 语义
+        - feat(tui): sidebar 展示运行概览、下一步动作、阻塞项、成本/上下文、论文大纲、Agent Tree、Gate 与最近调用诊断
+        - feat(tui): 新增 PaperRunCostDiagnostics、PaperRunOutlineState、PaperRunGateSummary 与 PaperRunSidebarState 派生状态
+        - test(tui): 覆盖 sidebar 成本、tokens、outline、Agent Tree、Gate 和 recent calls 映射
+        :src
+            - packages/opencode/src/cli/cmd/tui/routes/paper/workbench.ts - PaperRun sidebar state derivation
+            - packages/opencode/src/cli/cmd/tui/routes/paper/index.tsx - persistent right sidebar rendering
+            - packages/opencode/test/cli/tui/paper-workbench.test.ts - sidebar state assertions
+            - .plan/confirmed/paper-run-sidebar.yaml - TaskFlow execution logs
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/cli/tui/paper-workbench.test.ts test/cli/tui/paper-workbench-controls.test.ts passed: 5 pass, 0 fail, 44 expects
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
 
     0.5.4-dev - 2026/05/11 (9fa7acd) [develop]
         :brief 统一 CHANGELOG colon-history 缩进
