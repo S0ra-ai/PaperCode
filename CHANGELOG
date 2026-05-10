@@ -2,10 +2,29 @@
 :author        s0ra (https://github.com/S0ra-ai)
 :repo          
 :desc          记录项目的重大变更和版本历史
-:version       0.4.0-dev
+:version       0.4.1-dev
 :last_update   2026/05/10
 
 :history
+
+    0.4.1-dev - 2026/05/10 (fad39b1) [develop]
+    :brief 严格验收脚本增加逐项超时、进度报告与 focused 默认测试集
+        - fix(strict): scripts/strict-acceptance.ps1 新增 CheckTimeoutSeconds、FullWorkspaceSuite 与 FullWorkspaceTimeoutSeconds 参数
+        - fix(strict): 每个检查通过 Start-Job/Wait-Job 独立执行, 超时后清理子任务并报告 timed out after
+        - fix(strict): Invoke-Check 在 finally 中写入报告, 长流程失败或超时时保留已完成检查证据
+        - test(strict): strict-acceptance.test.ts 覆盖逐项超时、部分报告、focused 默认测试集与 full workspace opt-in
+        - docs(strict): reports/strict-live-acceptance.md 更新为 strict-live-focused 通过记录
+    :src
+        - scripts/strict-acceptance.ps1 - bounded strict live acceptance runner
+        - packages/opencode/test/paper/strict-acceptance.test.ts - timeout and suite-policy regression coverage
+        - reports/strict-live-acceptance.md - focused strict live acceptance evidence
+        - .plan/confirmed/task-047-strict-acceptance-timeouts.yaml - TaskFlow execution logs
+        - README.md - current behavior and version update
+        - CHANGELOG - 0.4.1-dev history entry
+    :verification
+        - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/strict-acceptance.test.ts passed: 5 pass, 0 fail, 43 expects
+        - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\strict-acceptance.ps1 -FixtureMode -CheckTimeoutSeconds 120 -ReportPath tmp/strict-acceptance-fixture.md passed
+        - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\strict-acceptance.ps1 -CheckTimeoutSeconds 300 -ReportPath reports/strict-live-acceptance.md passed in strict-live-focused mode
 
     0.4.0-dev - 2026/05/10 (b0452c8) [develop]
     :brief 运行真实 topic+code PaperRun 质量基准并生成后续硬化任务
