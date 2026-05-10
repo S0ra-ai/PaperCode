@@ -1,6 +1,6 @@
 id: capability-pack-harness
 title: Built-in Capability Pack and Harness Scheduler
-status: in_progress
+status: done
 priority: high
 owner: codex
 tags:
@@ -20,7 +20,7 @@ execution:
 steps:
 - id: capability-pack-contracts
   title: 定义内置 capability pack 契约
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: 定义 paper profile、literature、crawler、HF、code、experiment、writing、verification
@@ -29,12 +29,23 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T20:26:05.339297'
+      level: info
+      message: 开始定义内置 capability pack 契约，覆盖 paper profile、literature、crawler、HF、code、experiment、writing、verification
+        等 pack。
+      agent: codex
+    - timestamp: '2026-05-10T20:29:19.774780'
+      level: info
+      message: 已新增 packages/opencode/src/paper/capability-pack.ts，定义 PaperCapabilityPack.v1、内置
+        pack 清单和 builtinResearchCapabilities；defaultResearchCapabilities 现在来自内置能力包。
+      agent: codex
+    last_run: '2026-05-10T20:29:19.774780'
+    attempt_count: 2
   meta: {}
 - id: skill-mcp-fusion
   title: 融合内置 skills/MCP 到 registry
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: 将 paper_fucker 内置 skill、MCP 配置、first-party tools 注册为 runtime capabilities，避免要求用户手工安装。
@@ -42,12 +53,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T20:29:29.396973'
+      level: info
+      message: 开始融合内置 skills/MCP/Python/first-party tools 到 capability registry，并暴露
+        pack 元数据。
+      agent: codex
+    - timestamp: '2026-05-10T20:29:36.756869'
+      level: info
+      message: 已新增 packages/opencode/src/paper/capability-registry.ts，统一导出内置 skills/MCP/Python/first-party
+        tools 的 registry snapshot、按 stage 查询和 pack 元数据；paperCapabilities/paperDoctor
+        已暴露 packs。
+      agent: codex
+    last_run: '2026-05-10T20:29:36.756869'
+    attempt_count: 2
   meta: {}
 - id: harness-scheduler
   title: 实现 harness 调度层
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: 实现队列、优先级、并发、retry/backoff、approval gate、low-value expansion skip、doom-loop
@@ -56,12 +79,22 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T20:29:43.007445'
+      level: info
+      message: 开始实现 harness 调度层，覆盖队列、审批、并发、retry、去重、doom-loop 和 trace metadata。
+      agent: codex
+    - timestamp: '2026-05-10T20:29:48.335948'
+      level: info
+      message: 已新增 packages/opencode/src/paper/harness.ts，提供 PaperHarness.v1、队列、approval_required、并发上限、retry、重复调用
+        doom-loop 检测和 capability trace 绑定。
+      agent: codex
+    last_run: '2026-05-10T20:29:48.335948'
+    attempt_count: 2
   meta: {}
 - id: tests
   title: 验证能力层和 harness
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: 测试 stage 查询、权限过滤、MCP/skill fusion、审批阻断、重复调用检测、诊断输出。
@@ -69,12 +102,23 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T20:30:15.276944'
+      level: info
+      message: 开始运行 capability pack/harness、capabilities registry 相关测试和 typecheck。
+      agent: codex
+    - timestamp: '2026-05-10T20:30:39.343519'
+      level: info
+      message: 验证通过：npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/capability-harness.test.ts
+        test/paper/capabilities.test.ts；npx --yes bun@1.3.13 run --cwd packages/opencode
+        typecheck。
+      agent: codex
+    last_run: '2026-05-10T20:30:39.343519'
+    attempt_count: 2
   meta: {}
 - id: release
   title: 版本、CHANGELOG、README 与验证
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: 版本推进到 0.6.3-dev，更新 colon DSL CHANGELOG 与 README，并运行相关测试和格式校验。
@@ -82,8 +126,22 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T20:30:44.442238'
+      level: info
+      message: 开始提交 0.6.3-dev work commit，随后记录 CHANGELOG、README 版本和 TaskFlow 验证。
+      agent: codex
+    - timestamp: '2026-05-10T20:31:40.891386'
+      level: info
+      message: 完成 0.6.3-dev release sync。work commit 为 590d9f9，CHANGELOG 通过 TaskFlow
+        record_changelog_entry 记录真实 commit id；README 版本同步；验证通过：check-readme-version.ps1、check-changelog-format.ps1、TaskFlow
+        validate_changelog_format、TaskFlow validate_task capability-pack-harness、packages/opencode
+        capability/harness tests、packages/opencode typecheck、packages/preview test、research-tools
+        unittest（PYTHONPATH=research-tools/src）。CHANGELOG 拆分继续由 TaskFlow archive policy
+        管理。
+      agent: codex
+    last_run: '2026-05-10T20:31:40.891386'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -100,5 +158,5 @@ lock:
   at: '2026-05-10T20:23:19.406530'
 meta:
   created_at: '2026-05-10T20:06:05.790049'
-  updated_at: '2026-05-10T20:23:24.597061'
+  updated_at: '2026-05-10T20:31:40.891386'
   version: '1'
