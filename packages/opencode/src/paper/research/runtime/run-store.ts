@@ -309,7 +309,7 @@ export async function updateResearchRunStatus(
       await appendResearchEvent(
         runDir,
         {
-          type: "run.status_changed",
+          type: "run.status.changed",
           actor: "system",
           created_at: updatedAt,
           payload: { status },
