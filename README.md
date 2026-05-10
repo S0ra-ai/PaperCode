@@ -74,6 +74,14 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - The run dashboard shows controls, stage graph, ledgers, model roles, capability health, preview/export controls, and the right sidebar for cost/token/context, outline, Agent Tree, gates, blockers, and recent calls.
 - Final export requires passing gates. Forced drafts are allowed for review but remain visibly marked with failed checks.
 
+## Autonomous Continuation Protocol
+
+- When TaskFlow has no confirmed work, Codex must not stop at "all done"; it should run `scripts/autonomous-product-audit.ps1`, inspect the generated report, and create the next TaskFlow task for any failed check or credible improvement.
+- The autonomous loop is TaskFlow-first: validate the `paper_fucker` project binding, create a feature-named Git Flow branch from `develop`, create/claim a TaskFlow task, implement, validate, record step logs, update CHANGELOG/README, merge back to `develop`, push, and clean the feature branch.
+- The audit must cover product truth, not only tests: strict live evidence, live crawler/HF/final-export proof, no-mock boundaries, Paper Fucker brand surface, README/CHANGELOG version sync, colon DSL changelog shape, dangerous development residue, and Git Flow hygiene.
+- If the audit passes, Codex should still look for the next highest-value product hardening item: full workspace suite, real provider diversity, live HF Jobs with token approval, richer crawler compliance, TUI UX polish, or documentation drift.
+- Reports are part of the product memory. `reports/autonomous-product-audit.md` records the current self-audit result; `reports/strict-live-acceptance.md` remains the focused live product acceptance evidence.
+
 - `schemas/research/`: JSON Schema source of truth for research runs, events, artifacts, sources, tool traces, claims, drafts, reviews, exports, and checkpoints.
 - `packages/opencode/src/paper/`: authoritative paper_fucker TypeScript runtime inside the OpenCode hard fork. It owns AJV validation, OpenTelemetry span hooks, generated TypeScript contract types, run/event/artifact runtime APIs, permission/resource/cost/final-gate state, Python tool bridge calls, paper orchestration, profiles, authoring, preview binding, and rebuildable SQLite indexes.
 - `packages/opencode/src/paper/init/`: initialization and diagnostics flow for `~/.paper_fucker/config.json`, `tools.json`, encrypted `secrets.enc`, external tool discovery, and Full Access acknowledgement.
