@@ -1,0 +1,111 @@
+id: task-042-workbench-live-controls
+title: Turn the TUI workbench into live PaperRun controls
+status: todo
+priority: high
+owner: codex
+tags:
+- tui
+- workbench
+- controls
+- chinese
+depends_on:
+- task-041-real-intake-material-indexing
+description: Version 0.3.4-dev. Expand the Chinese TUI workbench from state display
+  into live controls for run start, pause guidance, resume/retry/cancel, preview,
+  export, provider role visibility, capability health, and skill/MCP status. Users
+  should not need to type tool commands for normal paper workflow operations.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-042-step-01-red-tests
+  title: Add live workbench tests
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Cover guidance input, resume/retry/cancel actions, preview/export controls,
+    model role display, capability health, Chinese labels, and no legacy chat-first
+    controls on the default path.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-042-step-02-controls
+  title: Implement TUI control state and actions
+  status: todo
+  owner: codex
+  depends_on:
+  - task-042-step-01-red-tests
+  description: Bind workbench actions to PaperRun APIs and keep state updates renderer-independent
+    for testability.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-042-step-03-health-skill-mcp
+  title: Show capability, MCP, and skill health
+  status: todo
+  owner: codex
+  depends_on:
+  - task-042-step-02-controls
+  description: Expose installed/enabled skills and MCP state in the workbench and
+    provide install/enable entrypoints where supported by the runtime.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-042-step-04-doc-version
+  title: Document 0.3.4-dev
+  status: todo
+  owner: codex
+  depends_on:
+  - task-042-step-03-health-skill-mcp
+  description: Update README, CHANGELOG, and report with real commit id.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-042-step-05-verify
+  title: Verify live workbench
+  status: todo
+  owner: codex
+  depends_on:
+  - task-042-step-04-doc-version
+  description: Run TUI workbench tests, local CLI help smoke, typecheck, version check,
+    and TaskFlow validate_task.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: file
+  path: packages/opencode/src/cli/cmd/tui/routes/paper
+  description: Live PaperRun TUI route controls
+- type: file
+  path: packages/opencode/test/cli/tui/paper-workbench-controls.test.ts
+  description: Workbench control tests
+- type: report
+  path: reports/workbench-live-controls.md
+  description: Implementation report
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-10T06:12:44.155279'
+  updated_at: '2026-05-10T06:12:44.155279'
+  version: '1'

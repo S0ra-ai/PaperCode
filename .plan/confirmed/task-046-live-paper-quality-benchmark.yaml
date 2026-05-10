@@ -1,0 +1,114 @@
+id: task-046-live-paper-quality-benchmark
+title: Run and record a live reviewable paper quality benchmark
+status: todo
+priority: medium
+owner: codex
+tags:
+- benchmark
+- live
+- quality
+- acceptance
+depends_on:
+- task-045-report-path-hygiene
+description: Version 0.4.0-dev. After the engine, controller, intake, TUI, export,
+  and audit hardening tasks land, run a real live benchmark that starts from a topic
+  and a code path, uses available live provider/search/toolchain capabilities, produces
+  a reviewable bundle, and records quality gaps with reviewer/authenticity evidence
+  instead of relying only on fixtures.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-046-step-01-design
+  title: Design live benchmark scenario
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Choose a realistic topic/code-path scenario, budget tier, profile,
+    data egress policy, provider roles, and success criteria that can run locally
+    with available services.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-046-step-02-run
+  title: Run live benchmark
+  status: todo
+  owner: codex
+  depends_on:
+  - task-046-step-01-design
+  description: Execute topic/code-to-paper flow with live provider/search/toolchain
+    smokes and capture bundle artifacts, claims, sources, experiments, reviewer findings,
+    and export files.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-046-step-03-quality-review
+  title: Review benchmark quality gaps
+  status: todo
+  owner: codex
+  depends_on:
+  - task-046-step-02-run
+  description: Record claim/source/experiment/export quality gaps and convert remaining
+    product gaps into new TaskFlow tasks if needed.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-046-step-04-doc-version
+  title: Document 0.4.0-dev
+  status: todo
+  owner: codex
+  depends_on:
+  - task-046-step-03-quality-review
+  description: Update README, CHANGELOG, and live benchmark report with real commit
+    id.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-046-step-05-verify
+  title: Verify live benchmark milestone
+  status: todo
+  owner: codex
+  depends_on:
+  - task-046-step-04-doc-version
+  description: Run strict acceptance, version check, TaskFlow validation, and clean
+    Git Flow branch checks.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: report
+  path: reports/live-paper-quality-benchmark.md
+  description: Live benchmark report
+- type: file
+  path: reports/strict-live-acceptance.md
+  description: Updated strict/live acceptance evidence
+- type: file
+  path: CHANGELOG
+  description: 0.4.0-dev changelog entry
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-10T06:13:38.838295'
+  updated_at: '2026-05-10T06:13:38.838295'
+  version: '1'

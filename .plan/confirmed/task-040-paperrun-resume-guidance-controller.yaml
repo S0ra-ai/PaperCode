@@ -1,0 +1,115 @@
+id: task-040-paperrun-resume-guidance-controller
+title: Add durable PaperRun resume, guidance, and control loop
+status: todo
+priority: critical
+owner: codex
+tags:
+- paperrun
+- resume
+- guidance
+- sse
+- controller
+depends_on:
+- task-039-paperrun-execution-engine
+description: Version 0.3.2-dev. Make PaperRun a durable controller with checkpoint
+  state, guidance queue, resume/retry/cancel controls, incremental SSE events, and
+  parent/internal session binding so users can steer a run from the TUI without shell
+  commands.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: task-040-step-01-red-tests
+  title: Add controller behavior tests
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Cover pause guidance queue, resume from checkpoint, retry failed stage,
+    cancel run, SSE event ordering, and internal session references.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-040-step-02-controller-state
+  title: Implement persisted controller state
+  status: todo
+  owner: codex
+  depends_on:
+  - task-040-step-01-red-tests
+  description: Persist controller snapshots, checkpoint facts, pause questions, guidance
+    answers, control commands, and internal session ids under the run directory.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-040-step-03-api-sse
+  title: Expose control API and streaming updates
+  status: todo
+  owner: codex
+  depends_on:
+  - task-040-step-02-controller-state
+  description: Add or extend /paper endpoints for resume/retry/cancel/guidance and
+    stream incremental events instead of one-shot snapshots.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-040-step-04-doc-version
+  title: Document 0.3.2-dev
+  status: todo
+  owner: codex
+  depends_on:
+  - task-040-step-03-api-sse
+  description: Update README, CHANGELOG, and controller report with real commit id
+    after implementation.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: task-040-step-05-verify
+  title: Verify controller loop
+  status: todo
+  owner: codex
+  depends_on:
+  - task-040-step-04-doc-version
+  description: Run targeted controller tests, opencode typecheck, README version check,
+    and TaskFlow validate_task.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: file
+  path: packages/opencode/src/paper/run-controller.ts
+  description: Durable PaperRun controller
+- type: file
+  path: packages/opencode/src/server/routes/instance/httpapi/handlers/paper.ts
+  description: Resume/retry/cancel/guidance handlers
+- type: file
+  path: packages/opencode/test/paper/paperrun-controller.test.ts
+  description: Controller tests
+- type: report
+  path: reports/paperrun-resume-guidance-controller.md
+  description: Implementation report
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-10T06:12:17.413319'
+  updated_at: '2026-05-10T06:12:17.413319'
+  version: '1'
