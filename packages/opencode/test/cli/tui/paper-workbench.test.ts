@@ -78,7 +78,17 @@ describe("TUI PaperRun workbench", () => {
     expect(state.stage_graph.map((stage) => stage.label)).toEqual(["输入整理", "研究规划"])
     expect(state.panels.map((panel) => panel.label)).toContain("Agent Tree")
     expect(state.panels.map((panel) => panel.label)).toContain("Source Ledger")
-    expect(state.controls.map((control) => control.label)).toEqual(["继续", "预览", "导出", "打开能力"])
+    expect(state.controls.map((control) => control.label)).toEqual([
+      "发送指导",
+      "继续运行",
+      "重试阶段",
+      "取消运行",
+      "打开预览",
+      "导出终稿",
+      "导出 forced draft",
+      "能力健康",
+      "模型角色",
+    ])
     expect(state.pause_questions[0]!.message).toBe("需要确认数据外传")
   })
 })
