@@ -1,6 +1,6 @@
 id: paper-agent-team-fabric
 title: PaperRun Agent Team Fabric
-status: todo
+status: in_progress
 priority: high
 owner: codex
 tags:
@@ -112,7 +112,10 @@ outputs:
 trace:
   logs: []
   attempt_count: 0
+lock:
+  by: codex
+  at: '2026-05-10T20:07:22.282837'
 meta:
   created_at: '2026-05-10T20:05:53.573106'
-  updated_at: '2026-05-10T20:05:53.573106'
+  updated_at: '2026-05-10T20:07:25.287267'
   version: '1'
