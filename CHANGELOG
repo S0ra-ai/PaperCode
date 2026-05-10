@@ -2,10 +2,31 @@
 :author        s0ra (https://github.com/S0ra-ai)
 :repo          
 :desc          记录项目的重大变更和版本历史
-:version       0.4.2-dev
+:version       0.4.3-dev
 :last_update   2026/05/10
 
 :history
+
+    0.4.3-dev - 2026/05/10 (7d5df2a) [develop]
+    :brief PDF 导出支持多 LaTeX 引擎 fallback 并修复 Windows TeX 路径/standalone LaTeX
+        - fix(export): PDF renderer 按 latexmk -> xelatex -> pdflatex -> lualatex -> tectonic 顺序尝试
+        - fix(export): 任一引擎失败后继续尝试下一引擎, 并把失败原因保留到 PDF diagnostics
+        - fix(export): 传给 LaTeX 引擎的 Windows 路径统一转为 `/`, 避免反斜杠被 TeX 解析为控制序列
+        - fix(export): Pandoc Markdown-to-LaTeX 使用 `-s -t latex`, 生成可直接编译的 standalone 文档
+        - test(export): 新增 latexmk 失败、xelatex 成功的 fallback 回归测试
+        - docs(report): 新增 reports/export-pdf-renderer-fallback.md 记录 live smoke 与语义
+    :src
+        - packages/opencode/src/paper/export-pipeline.ts - PDF fallback chain, path normalization, standalone LaTeX
+        - packages/opencode/test/paper/export-pipeline.test.ts - fallback regression coverage
+        - reports/export-pdf-renderer-fallback.md - live PDF fallback evidence
+        - .plan/confirmed/task-049-export-pdf-renderer-fallback.yaml - TaskFlow execution logs
+        - README.md - current behavior and version update
+        - CHANGELOG - 0.4.3-dev history entry
+    :verification
+        - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/export-pipeline.test.ts passed: 4 pass, 0 fail, 24 expects
+        - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+        - Direct pandoc -s + xelatex smoke generated tmp/pdf-fallback-smoke/smoke.pdf
+        - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts produced run-045f3eb0-cb86-4340-89b9-d0ee58464040 with forced Markdown/LaTeX/PDF/DOCX export and PDF status written
 
     0.4.2-dev - 2026/05/10 (18562fb) [develop]
     :brief 对齐 PaperRun 完成态、真实性 gate 与 reproduction_failure 阶段展示
