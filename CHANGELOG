@@ -2,10 +2,30 @@
 :author        s0ra (https://github.com/S0ra-ai)
 :repo          
 :desc          记录项目的重大变更和版本历史
-:version       0.3.3-dev
+:version       0.3.4-dev
 :last_update   2026/05/10
 
 :history
+
+    0.3.4-dev - 2026/05/10 (30479e1) [develop]
+    :brief TUI 论文工作台新增 PaperRun live controls 与能力健康显示
+        - feat(tui): PaperRun dashboard 新增发送指导、继续运行、重试阶段、取消运行、打开预览、导出终稿、导出 forced draft、能力健康、模型角色 controls
+        - feat(tui): 新增 renderer-independent API helpers, 自动调用 /paper/runs/:runID/guidance、/control、/preview、/export、/paper/capabilities、/paper/model-roles、/paper/doctor
+        - feat(tui): 显示 durable controller status、queued guidance 数、模型角色 provider/model、MCP/Skill/toolchain 健康状态
+        - fix(tui): dashboard state 对旧 snapshot 缺少 controller_state/model_roles 的情况保持兼容
+        - test(tui): 新增 live controls 测试, 更新中文 dashboard panel/control 断言
+        - docs(readme): 版本更新为 0.3.4-dev, 记录 live workbench controls
+    :src
+        - packages/opencode/src/cli/cmd/tui/routes/paper/workbench.ts - live control state, API helpers, capability/model/doctor adapters
+        - packages/opencode/src/cli/cmd/tui/routes/paper/index.tsx - visible controller, action, model-role, and health sections
+        - packages/opencode/test/cli/tui/paper-workbench-controls.test.ts - live control and API helper coverage
+        - packages/opencode/test/cli/tui/paper-workbench.test.ts - updated dashboard control assertions
+        - reports/workbench-live-controls.md - implementation report
+        - README.md - current behavior and version update
+        - CHANGELOG - 0.3.4-dev history entry
+    :verification
+        - npx --yes bun@1.3.13 --cwd packages/opencode test test/cli/tui/paper-workbench.test.ts test/cli/tui/paper-workbench-controls.test.ts passed: 5 pass, 0 fail, 38 expects
+        - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
 
     0.3.3-dev - 2026/05/10 (11d1042) [develop]
     :brief Intake 新增真实材料索引与 Source Ledger 记录

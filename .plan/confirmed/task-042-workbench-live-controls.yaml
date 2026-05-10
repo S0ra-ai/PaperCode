@@ -103,7 +103,7 @@ steps:
   meta: {}
 - id: task-042-step-04-doc-version
   title: Document 0.3.4-dev
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-042-step-03-health-skill-mcp
@@ -112,8 +112,21 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T07:11:40.653019'
+      level: info
+      message: 'Work commit created: 30479e1 feat(tui): add live paperrun workbench
+        controls. Updating colon CHANGELOG, README version, and implementation report
+        for 0.3.4-dev.'
+      agent: codex
+    - timestamp: '2026-05-10T07:12:42.726359'
+      level: info
+      message: Updated CHANGELOG colon DSL to 0.3.4-dev with real work commit 30479e1,
+        updated README version/status/project structure, added reports/workbench-live-controls.md,
+        and verified README/CHANGELOG sync passes.
+      agent: codex
+    last_run: '2026-05-10T07:12:42.726359'
+    attempt_count: 2
   meta: {}
 - id: task-042-step-05-verify
   title: Verify live workbench
@@ -148,5 +161,5 @@ lock:
   at: '2026-05-10T07:02:30.160806'
 meta:
   created_at: '2026-05-10T06:12:44.155279'
-  updated_at: '2026-05-10T07:11:11.465890'
+  updated_at: '2026-05-10T07:12:42.726359'
   version: '1'
