@@ -1,6 +1,6 @@
 # paper_fucker
 
-Current version: <!-- version:start -->0.3.4-dev<!-- version:end -->
+Current version: <!-- version:start -->0.3.5-dev<!-- version:end -->
 
 `paper_fucker` is a private-first, OpenCode-derived closed-loop paper system. It turns a topic, codebase, dataset, experiment log, or paper material set into a verifiable academic-paper bundle with research planning, source discovery, code understanding, experiment/reproduction support, ClaimLedger-first writing, authenticity gates, profile-aware formatting, preview, and export.
 
@@ -39,6 +39,7 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - PaperRun now has a durable controller state. Pause checkpoints, guidance queue, resume/retry/cancel controls, controller SSE events, and `controller_state` snapshots are persisted under each run so the TUI/API can steer runs without shell commands.
 - Intake now records a real `MaterialIndex.v1` for user-supplied code paths, paper files, datasets, and experiment logs. Indexed material receives source ranges and Source Ledger entries; secret-like paths, ignored directories, and unsupported binaries are skipped with explicit reasons.
 - The PaperRun TUI dashboard now exposes live Chinese controls for guidance, resume, retry, cancel, preview, final export, forced draft export, capability health, and model-role visibility. It calls the PaperRun APIs directly, so normal operation does not require shell commands.
+- PaperRun export now renders run-bound Markdown, LaTeX, PDF, DOCX, and `manifest.json` files when tools are available. Missing pandoc or LaTeX engines produce explicit diagnostics, while forced drafts are visibly marked with failed checks.
 - The automatic orchestrator now owns the default topic-to-paper stage graph and proceeds stage-by-stage unless a pause condition is raised.
 - Trusted template resolution now records `TemplateSpec.v1`, adopts clear high-confidence official templates automatically, and falls back to a CJC default when no venue is known.
 - Open literature and dataset discovery now records `SourceRecord.v1`, `LiteratureMap.v1`, `DataPlan.v1`, `DatasetCard.v1`, and direction feasibility artifacts with license and verification diagnostics.
@@ -72,6 +73,7 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - `packages/opencode/src/paper/authoring.ts`: run-bound authoring loop adapter for ClaimLedger-first drafts, profile-aware revision, verification, final/forced export, supplementary bundle, and code/data availability bundle.
 - `packages/opencode/src/paper/preview.ts`: read-only PreviewSnapshot adapter that binds drafts, export files, claim/citation/reviewer annotations, costs, agents, and tool diagnostics to a run.
 - `packages/opencode/src/paper/run.ts`: first-class `PaperRun` state projection over research runtime facts, including intake, stage graph, source ledger, claim ledger, experiment status, agent tree, diagnostics, pause questions, preview state, and export state.
+- `packages/opencode/src/paper/export-pipeline.ts`: run-bound export renderer pipeline for Markdown, LaTeX, PDF, DOCX, manifest generation, pandoc/LaTeX diagnostics, forced draft markings, and injectable test renderers.
 - `packages/opencode/src/cli/cmd/tui/routes/paper/`: Chinese PaperRun workbench route and prompt utilities. The home prompt parses topic, code paths, paper files, datasets, logs, target profile, language, and budget flags into `PaperRunCreateRequest`, then displays a live run dashboard with controller status, guidance/resume/retry/cancel actions, stage graph, Agent Tree, ledgers, diagnostics, model roles, MCP/Skill/toolchain health, preview, final export, and forced draft controls.
 - `packages/opencode/src/server/routes/instance/httpapi/groups/paper.ts`: `/paper` HttpApi schema group for PaperRun lifecycle, SSE, guidance, preview, export, capability, doctor, provider discovery, and model-role endpoints.
 - `packages/opencode/src/server/routes/instance/httpapi/handlers/paper.ts`: PaperRun HttpApi handlers that bind OpenCode instance context to workspace-first run storage and internal provider/model substrate.
@@ -129,6 +131,7 @@ Important early tasks:
 - `task-040-paperrun-resume-guidance-controller`: add durable PaperRun resume, guidance, cancel, checkpoint, and controller SSE state.
 - `task-041-real-intake-material-indexing`: index real input materials with source ranges, Source Ledger entries, and private-first filtering.
 - `task-042-workbench-live-controls`: expose PaperRun live controls, model roles, and capability health in the Chinese TUI workbench.
+- `task-043-export-renderer-pipeline`: render concrete PaperRun Markdown/LaTeX/PDF/DOCX files, manifest, diagnostics, and forced draft bundles.
 
 ## Branching
 

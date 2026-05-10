@@ -109,7 +109,7 @@ steps:
   meta: {}
 - id: task-043-step-04-doc-version
   title: Document 0.3.5-dev
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - task-043-step-03-api-preview
@@ -118,8 +118,21 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-10T07:27:34.681337'
+      level: info
+      message: 'Work commit created: 855a944 feat(export): render paperrun bundles
+        to files. Updating CHANGELOG, README, and export renderer report for 0.3.5-dev.'
+      agent: codex
+    - timestamp: '2026-05-10T07:28:49.527319'
+      level: info
+      message: Updated CHANGELOG colon DSL to 0.3.5-dev with real work commit 855a944,
+        updated README version/current status/project structure/planning task list,
+        added reports/export-renderer-pipeline.md, and verified README/CHANGELOG sync
+        passes.
+      agent: codex
+    last_run: '2026-05-10T07:28:49.527319'
+    attempt_count: 2
   meta: {}
 - id: task-043-step-05-verify
   title: Verify export renderer pipeline
@@ -154,5 +167,5 @@ lock:
   at: '2026-05-10T07:16:38.526948'
 meta:
   created_at: '2026-05-10T06:12:57.680903'
-  updated_at: '2026-05-10T07:27:05.815960'
+  updated_at: '2026-05-10T07:28:49.527319'
   version: '1'
