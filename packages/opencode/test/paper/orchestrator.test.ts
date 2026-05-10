@@ -63,7 +63,7 @@ describe("paper research orchestrator", () => {
     ])
   })
 
-  test("blocks instead of completing stages through a stub handler", async () => {
+  test("records blocked diagnostics from a stage handler", async () => {
     const { dir, options, handle } = await fixtureRun()
     try {
       const snapshot = await startPaperResearchRun(
@@ -72,6 +72,15 @@ describe("paper research orchestrator", () => {
           request: { topic: "paper orchestrator fixture" },
           max_stages: 2,
           capabilities: createResearchCapabilityRegistry([]),
+          handlers: {
+            planning: () => ({
+              block: {
+                reason: "capability_missing",
+                message: "Stage planning requires missing capabilities: opencode.task",
+                missing_capabilities: ["opencode.task"],
+              },
+            }),
+          },
         },
         options,
       )
@@ -83,7 +92,7 @@ describe("paper research orchestrator", () => {
       })
       expect(snapshot.stages.find((stage) => stage.id === "intake")?.status).toBe("succeeded")
       expect(snapshot.stages.find((stage) => stage.id === "planning")?.status).toBe("blocked")
-      expect(JSON.stringify(snapshot)).not.toContain("stub handler")
+      expect(JSON.stringify(snapshot)).not.toContain("placeholder handler")
 
       const artifacts = await readJsonlFacts(handle.run_dir, "artifact")
       expect(artifacts.some((artifact) => artifact.metadata?.artifact_schema === "BlockedDiagnostic.v1")).toBe(true)
