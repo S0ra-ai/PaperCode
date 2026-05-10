@@ -9,6 +9,7 @@ import { normalizeResearchIntake, recordResearchIntake, type ResearchIntakeReque
 import { analyzeCodebaseForPaper, recordCodeToPaperArtifacts, type CodeToPaperAnalysis } from "./code-to-paper"
 import { runPaperAuthoringLoop } from "./authoring"
 import { createPaperProfileRegistry, defaultPaperProfiles, type PaperProfileId } from "./profiles"
+import { indexResearchMaterials, recordMaterialIndex } from "./material-index"
 import { discoverAndRecordLiteratureData } from "./research/sources"
 import { planExperiments } from "./research/experiments/planning"
 import { recordExperimentLoop } from "./research/experiments/recording"
@@ -517,6 +518,18 @@ async function defaultAuthoring(runDir: string, request: ResearchIntakeRequest, 
 const DEFAULT_STAGE_HANDLERS: Partial<Record<PaperResearchStageId, PaperStageHandler>> = {
   intake: async ({ run_dir, request, options }) => {
     const result = await recordResearchIntake(run_dir, request, options)
+    const workspace = request.workspace_path
+    if (workspace) {
+      const materialIndex = await indexResearchMaterials({
+        workspace_path: workspace,
+        code_paths: request.code_paths,
+        paper_files: request.paper_files,
+        dataset_paths: request.dataset_paths,
+        experiment_logs: request.experiment_logs,
+        now: nowIso(options),
+      })
+      await recordMaterialIndex(run_dir, materialIndex, options)
+    }
     return {
       status: "succeeded",
       summary: `Research intake recorded for ${result.brief.workflow}.`,
