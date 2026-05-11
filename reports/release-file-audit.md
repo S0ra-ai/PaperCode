@@ -12,7 +12,7 @@
 
 ## packages/opencode npm pack
 
-- files: 721
+- files: 723
 - blocked: 0
 - status: passed
 
