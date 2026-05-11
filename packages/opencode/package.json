@@ -2,6 +2,7 @@
   "$schema": "https://json.schemastore.org/package.json",
   "version": "1.14.41",
   "name": "paper_fucker",
+  "author": "k1d (https://github.com/ZhuchenZhong)",
   "type": "module",
   "license": "MIT",
   "private": true,
