@@ -1,6 +1,6 @@
 id: pre-release-readiness-freeze
 title: release 前准备验收收口
-status: in_progress
+status: done
 priority: high
 owner: codex
 tags:
@@ -48,7 +48,7 @@ steps:
   meta: {}
 - id: record-085-dev
   title: 记录 0.8.5-dev 准备版本
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - readiness-validation
@@ -57,12 +57,24 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-11T09:38:54.970559'
+      level: info
+      message: Recording 0.8.5-dev against real work commit 9db955a, then syncing
+        README version from CHANGELOG.
+      agent: codex
+    - timestamp: '2026-05-11T09:39:43.423225'
+      level: info
+      message: CHANGELOG :version and latest history entry now record 0.8.5-dev with
+        real work commit 9db955a; README version marker synced to 0.8.5-dev; check-readme-version
+        and validate_changelog_format passed.
+      agent: codex
+    last_run: '2026-05-11T09:39:43.423225'
+    attempt_count: 2
   meta: {}
 - id: merge-readiness-to-develop
   title: 合回 develop 并清理 feature 分支
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - record-085-dev
@@ -72,8 +84,20 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-11T09:39:44.392561'
+      level: info
+      message: Preparing committed feature branch for Git Flow merge back to develop.
+        No release branch, tag, or main operation will be performed.
+      agent: codex
+    - timestamp: '2026-05-11T09:39:49.847517'
+      level: info
+      message: Feature branch is ready for TaskFlow finish_git_branch merge into develop
+        after the version sync commit. This readiness phase intentionally creates
+        no release branch, no tag, and no main changes.
+      agent: codex
+    last_run: '2026-05-11T09:39:49.847517'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -87,10 +111,7 @@ outputs:
 trace:
   logs: []
   attempt_count: 0
-lock:
-  by: codex
-  at: '2026-05-11T09:36:59.979675'
 meta:
   created_at: '2026-05-11T08:52:06.253277'
-  updated_at: '2026-05-11T09:38:28.627688'
+  updated_at: '2026-05-11T09:39:55.899991'
   version: '1'

@@ -1,6 +1,6 @@
 # Paper Fucker
 
-Current version: <!-- version:start -->0.8.4-dev<!-- version:end -->
+Current version: <!-- version:start -->0.8.5-dev<!-- version:end -->
 
 Paper Fucker is a private-first, OpenCode-derived paper workbench. It turns a topic, codebase, dataset, experiment log, PDF, Markdown, LaTeX, DOCX, or mixed research material into a reviewable paper bundle with source discovery, code understanding, experiment/reproduction support, ClaimLedger-first writing, authenticity gates, live preview, and export.
 
