@@ -1,6 +1,6 @@
 id: release-init-ux-polish
 title: Release init command UX polish
-status: todo
+status: done
 priority: high
 owner: codex
 tags:
@@ -77,7 +77,7 @@ steps:
   meta: {}
 - id: validate-and-sync-version
   title: Validate and sync version
-  status: in_progress
+  status: done
   owner: codex
   depends_on: []
   description: 运行测试、构建、init smoke、版本/CHANGELOG 校验，并记录 0.8.8。
@@ -85,9 +85,17 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    last_run: '2026-05-11T22:44:20.145572'
-    attempt_count: 1
+    logs:
+    - timestamp: '2026-05-11T22:48:10.148233'
+      level: info
+      message: 验证通过：targeted init/public-surface tests 13 pass；opencode typecheck
+        passed；bun run build passed and root paper_fucker.exe --version returned 0.8.8；paper_fucker.exe
+        init / init doctor 默认中文摘要且无 DB migration 噪声；--json 保留完整结构化输出；README version
+        check、changelog format -IncludeArchives、TaskFlow changelog format/versions
+        均通过。
+      agent: codex
+    last_run: '2026-05-11T22:48:10.148233'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -108,10 +116,7 @@ outputs:
 trace:
   logs: []
   attempt_count: 0
-lock:
-  by: codex
-  at: '2026-05-11T22:40:07.316717'
 meta:
   created_at: '2026-05-11T22:40:01.943610'
-  updated_at: '2026-05-11T22:44:20.145572'
+  updated_at: '2026-05-11T22:48:19.412468'
   version: '1'

@@ -1,6 +1,6 @@
 # Paper Fucker
 
-当前版本：<!-- version:start -->0.8.7<!-- version:end --> ｜ 作者：k1d ([ZhuchenZhong](https://github.com/ZhuchenZhong)) ｜ 状态：开发预览版 ｜ 许可证：private-first / UNLICENSED
+当前版本：<!-- version:start -->0.8.8<!-- version:end --> ｜ 作者：k1d ([ZhuchenZhong](https://github.com/ZhuchenZhong)) ｜ 状态：开发预览版 ｜ 许可证：private-first / UNLICENSED
 
 Paper Fucker 是一个中文优先、私有优先的可验证论文工作台。你可以给它一个研究主题、代码仓库、数据集、实验日志或已有论文材料，它会自动完成研究规划、资料检索、代码理解、实验复现、证据账本写作、真实性审查、实时预览和最终导出。
 
@@ -89,6 +89,7 @@ Run 页面会展示：
 - 需要你决策的中文 pause questions
 
 如果你要重新配置 provider、模型角色或本地工具链，重新运行 `.\paper_fucker.exe init` 即可刷新本地配置；`.\paper_fucker.exe init doctor` 会检查当前配置和工具状态。
+这两个命令默认输出中文摘要；脚本或自动化需要完整结构化结果时加 `--json`。
 
 ## 非交互模式
 

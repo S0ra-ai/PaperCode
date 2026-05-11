@@ -2,10 +2,34 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.8.7
+:version       0.8.8
 :last_update   2026/05/12
 
 :history
+
+    0.8.8 - 2026/05/12 (bdaa16b) [release/0.8.5]
+        :brief 修复初始化命令首次体验
+        - fix(init): init/doctor/reset 默认输出中文摘要，完整内部 JSON 改为 --json 模式
+        - fix(init): 默认配置恢复 DeepSeek provider 模板，避免 default_model 指向不存在 endpoint
+        - fix(cli): init/completion 跳过 session DB migration，非 init 命令使用真实 channel DB marker 避免重复 one-time migration 提示
+        - docs(readme): 说明 init/doctor 默认中文摘要，--json 才输出完整结构化结果
+        - test(init): 覆盖中文摘要输出、默认 DeepSeek endpoint 和 public surface 回归
+        :src
+            - packages/opencode/src/paper/init/format.ts - init/doctor/reset human-readable summary formatter
+            - packages/opencode/src/cli/cmd/init.ts - yargs init command uses summary by default and --json for machine output
+            - packages/opencode/src/paper/init/cli.ts - standalone init entry mirrors summary/json behavior
+            - packages/opencode/src/paper/init/wizard.ts - omit empty model override so default provider template is preserved
+            - packages/opencode/src/index.ts - skip DB migration for init/completion and check Database.Path marker
+        :doc
+            - README.md - init/doctor output contract for users and --json automation mode
+            - docs/internal/README.md - maintainer rule for user-readable init output
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/init/init.test.ts test/cli/public-surface.test.ts passed, 13 tests
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+            - bun run build passed; root paper_fucker.exe linked and --version returned 0.8.8
+            - paper_fucker.exe init --home .\\tmp\\init-ux-smoke-home printed Chinese summary without DB migration noise
+            - paper_fucker.exe init doctor --home .\\tmp\\init-ux-smoke-home printed Chinese health summary without DB migration noise
+            - paper_fucker.exe init --home .\\tmp\\init-ux-json-home --json preserved full machine-readable JSON output
 
     0.8.7 - 2026/05/12 (d0b7dd1) [release/0.8.5]
         :brief 修复 CLI 用户可见版本面跟随 CHANGELOG
