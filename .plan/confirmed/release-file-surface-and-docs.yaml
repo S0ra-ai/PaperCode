@@ -1,0 +1,164 @@
+id: release-file-surface-and-docs
+title: Release file surface and Chinese core docs
+status: in_progress
+priority: high
+owner: codex
+tags:
+- release
+- docs
+- packaging
+- audit
+depends_on: []
+description: On release/0.8.5, keep repository provenance tracked but exclude non-product
+  files from release artifacts, add release file audit automation, and make core documentation
+  Chinese-first before manual provider testing.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: release-archive-rules
+  title: Add source archive and package release file rules
+  status: done
+  owner: codex
+  depends_on: []
+  description: Add .gitattributes export-ignore and explicit package file controls
+    for opencode and preview packages.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T10:08:44.379474'
+      level: info
+      message: Starting release archive and package surface controls on release/0.8.5.
+      agent: codex
+    - timestamp: '2026-05-11T10:12:28.426200'
+      level: info
+      message: Added .gitattributes export-ignore rules and package-level files whitelists
+        for packages/opencode and packages/preview.
+      agent: codex
+    last_run: '2026-05-11T10:12:28.426200'
+    attempt_count: 2
+  meta: {}
+- id: release-file-audit
+  title: Add release file audit script and report
+  status: done
+  owner: codex
+  depends_on: []
+  description: Create scripts/check-release-files.ps1 and generate reports/release-file-audit.md
+    with source archive and npm pack diagnostics.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T10:12:39.973214'
+      level: info
+      message: Adding release file audit script.
+      agent: codex
+    - timestamp: '2026-05-11T10:12:46.231170'
+      level: info
+      message: Added scripts/check-release-files.ps1 to audit git archive, npm pack
+        surfaces, and binary publish manifest; report path is reports/release-file-audit.md.
+      agent: codex
+    last_run: '2026-05-11T10:12:46.231170'
+    attempt_count: 2
+  meta: {}
+- id: chinese-core-docs
+  title: Make core documentation Chinese-first
+  status: done
+  owner: codex
+  depends_on: []
+  description: Rewrite README, docs/project-structure.md, docs/changelog/README.md,
+    and specs/project.md in Chinese-first style.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T10:12:52.817304'
+      level: info
+      message: Rewriting core documentation in Chinese-first style.
+      agent: codex
+    - timestamp: '2026-05-11T10:12:58.974303'
+      level: info
+      message: Rewrote README.md, docs/project-structure.md, docs/changelog/README.md,
+        and specs/project.md as Chinese-first core documentation while preserving
+        technical literals.
+      agent: codex
+    last_run: '2026-05-11T10:12:58.974303'
+    attempt_count: 2
+  meta: {}
+- id: validation
+  title: Run release file, version, changelog, and smoke validations
+  status: done
+  owner: codex
+  depends_on: []
+  description: Run release file audit, README version check, changelog format checks,
+    selected opencode test, opencode typecheck, preview test, and Python tests.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T10:13:06.259726'
+      level: info
+      message: Starting release file audit and follow-up validations.
+      agent: codex
+    - timestamp: '2026-05-11T10:20:03.986053'
+      level: info
+      message: 'Validation passed: check-release-files.ps1, check-readme-version.ps1,
+        check-changelog-format.ps1, TaskFlow validate_changelog_format, TaskFlow validate_task,
+        opencode strict-acceptance focused test, opencode typecheck, preview tests,
+        and Python tests with PYTHONPATH=research-tools/src. The exact bare Python
+        command failed because PYTHONPATH was not set and could not import paper_fucker_tools.'
+      agent: codex
+    last_run: '2026-05-11T10:20:03.986053'
+    attempt_count: 2
+  meta: {}
+- id: changelog-and-commit
+  title: Record changelog with real commit and finalize task
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Commit work, write CHANGELOG colon DSL with real commit id, rerun checks,
+    amend/follow-up as needed, mark TaskFlow done.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: file
+  path: .gitattributes
+  description: GitHub source archive export-ignore rules.
+- type: file
+  path: scripts/check-release-files.ps1
+  description: Release artifact surface audit script.
+- type: file
+  path: reports/release-file-audit.md
+  description: Generated audit report.
+- type: file
+  path: README.md
+  description: Chinese-first root README.
+- type: file
+  path: docs/project-structure.md
+  description: Chinese project/release structure documentation.
+- type: file
+  path: docs/changelog/README.md
+  description: Chinese changelog archive policy.
+- type: file
+  path: specs/project.md
+  description: Chinese PaperRun/project substrate spec.
+trace:
+  logs: []
+  attempt_count: 0
+lock:
+  by: codex
+  at: '2026-05-11T10:08:36.641116'
+meta:
+  created_at: '2026-05-11T10:08:29.218551'
+  updated_at: '2026-05-11T10:20:03.986053'
+  version: '1'

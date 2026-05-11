@@ -5,6 +5,17 @@
   "type": "module",
   "license": "MIT",
   "private": true,
+  "files": [
+    "bin/",
+    "src/",
+    "migration/",
+    "README.md",
+    "bunfig.toml",
+    "drizzle.config.ts",
+    "parsers-config.ts",
+    "tsconfig.json",
+    "script/postinstall.mjs"
+  ],
   "scripts": {
     "typecheck": "tsgo --noEmit",
     "test": "bun test --timeout 60000",

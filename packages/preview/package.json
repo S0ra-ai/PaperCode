@@ -3,6 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "files": [
+    "index.html",
+    "src/"
+  ],
   "scripts": {
     "typecheck": "tsgo --noEmit",
     "test": "bun test --timeout 30000"

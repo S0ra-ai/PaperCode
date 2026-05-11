@@ -1,8 +1,8 @@
-# Changelog Archives
+# Changelog 归档
 
-`CHANGELOG` is the only current version source. It keeps the active development line so version checks remain fast and readable.
+根目录 `CHANGELOG` 是唯一当前版本源。README 的版本 marker 必须与根 `CHANGELOG` 最新 history entry 完全一致。
 
-Archived colon-history files live here for traceability:
+这个目录只保存历史 colon-history 归档，用于追溯旧阶段任务、commit id 和验收记录：
 
 - `v0/0.1.x.CHANGELOG`
 - `v0/0.2.x.CHANGELOG`
@@ -12,4 +12,4 @@ Archived colon-history files live here for traceability:
 - `v0/0.6.x.CHANGELOG`
 - `v0/0.7.x.CHANGELOG`
 
-Archive files preserve historical commit ids and TaskFlow verification notes. They do not drive the README version marker.
+归档文件不参与当前版本解析，也不会进入 release source archive。

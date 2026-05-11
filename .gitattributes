@@ -1,0 +1,48 @@
+# Keep release source archives focused on product/runtime files.
+# The repository still tracks these paths for audit, provenance, and development.
+/.plan/ export-ignore
+/.plan/** export-ignore
+/reports/ export-ignore
+/reports/** export-ignore
+/legacy/ export-ignore
+/legacy/** export-ignore
+/upstream/ export-ignore
+/upstream/** export-ignore
+/docs/changelog/v0/ export-ignore
+/docs/changelog/v0/** export-ignore
+
+# Local/runtime state must never appear in release archives.
+/.paper_fucker/local/ export-ignore
+/.paper_fucker/local/** export-ignore
+/.paper_fucker/runs/ export-ignore
+/.paper_fucker/runs/** export-ignore
+/node_modules/ export-ignore
+/node_modules/** export-ignore
+/.turbo/ export-ignore
+/.turbo/** export-ignore
+/tmp/ export-ignore
+/tmp/** export-ignore
+
+# Developer-only workspace metadata.
+/.husky/ export-ignore
+/.husky/** export-ignore
+/.vscode/ export-ignore
+/.vscode/** export-ignore
+/.zed/ export-ignore
+/.zed/** export-ignore
+
+# Tests, specs, and upstream marketing/documentation assets are not release artifacts.
+**/test/ export-ignore
+**/test/** export-ignore
+**/tests/ export-ignore
+**/tests/** export-ignore
+**/specs/ export-ignore
+**/specs/** export-ignore
+/packages/console/app/src/asset/lander/ export-ignore
+/packages/console/app/src/asset/lander/** export-ignore
+/packages/web/src/assets/lander/ export-ignore
+/packages/web/src/assets/lander/** export-ignore
+/packages/web/src/content/docs/ export-ignore
+/packages/web/src/content/docs/** export-ignore
+/packages/docs/ export-ignore
+/packages/docs/** export-ignore
