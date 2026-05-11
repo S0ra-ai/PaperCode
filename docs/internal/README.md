@@ -118,3 +118,13 @@ $env:PYTHONPATH = 'research-tools/src'; python -m unittest discover -s research-
 - 内部文档索引、归档策略或 TaskFlow 执行细节。
 
 这些内容留在本文件、`docs/project-structure.md` 或 TaskFlow step log 中。README 只服务外部读者判断“这是什么、能不能用、怎么开始、是否可信”。
+
+## README 安装说明规则
+
+对外 README 必须说明用户如何获得 `paper_fucker` 命令，不能只展示命令用法。
+
+- 尚未发布正式 installer、tag、npm 包或包管理器包时，安装章节必须标为“源码预览”，并提供 Windows 可执行的 Git+Bun+clone+`bun install` 路径。
+- 不得把尚未发布的 release installer、npm 包、Chocolatey、Scoop、Homebrew 或 GitHub release artifact 写成主安装方式。
+- 如果源码预览需要临时 PowerShell function 才能使用 `paper_fucker` 命令，README 必须明确说明该 function 只对当前 PowerShell 会话生效。
+- `paper_fucker init` 当前是非交互入口，README 示例应使用 `paper_fucker init --yes` 或提供完整参数，避免用户照抄后失败。
+- 可选外部工具只列能力影响和发现方式；不要把 Pandoc、LaTeX、Docker、Python 说成基础 TUI 必装项。
