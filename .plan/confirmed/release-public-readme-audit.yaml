@@ -1,0 +1,99 @@
+id: release-public-readme-audit
+title: 对外 README 信息边界审计
+status: done
+priority: high
+owner: codex
+tags:
+- release
+- docs
+- public-surface
+depends_on: []
+description: 收紧 GitHub 对外 README：移除内部文档入口、release 分支治理、内部脚本清单、审计目录细节，只保留外部读者需要的产品定位、TUI
+  使用、能力、隐私、导出和许可；内部内容迁移到 docs/internal/README.md。
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: audit-public-readme
+  title: 审计 README 对外信息边界
+  status: done
+  owner: codex
+  depends_on: []
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T10:48:30.969149'
+      level: info
+      message: 开始审计 README 对外信息边界，重点检查内部文档路径、release 流程、脚本清单、审计目录和维护者用语。
+      agent: codex
+    - timestamp: '2026-05-11T10:48:39.630216'
+      level: info
+      message: 发现 README 对外边界问题：文档入口列出了内部维护文档和归档策略；Release 测试章节暴露 release 分支、tag/main
+        策略、内部脚本和审计目录；从 GitHub 项目首页角度应移除，迁移到 docs/internal/README.md。
+      agent: codex
+    last_run: '2026-05-11T10:48:39.630216'
+    attempt_count: 2
+  meta: {}
+- id: rewrite-public-readme
+  title: 重写 README 对外部分并迁移内部内容
+  status: done
+  owner: codex
+  depends_on: []
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T10:48:44.291289'
+      level: info
+      message: 准备重写 README 尾部：移除内部文档入口和 Release 测试章节，增加外部友好的“文档与支持”“项目状态”说明；内部 release
+        检查入口并入 docs/internal/README.md。
+      agent: codex
+    - timestamp: '2026-05-11T10:50:11.818595'
+      level: info
+      message: README 已收紧为外部读者视角：顶部状态改为开发预览版；移除 release 分支、RC/tag/main 策略、内部脚本清单、内部目录清单和内部文档索引；保留
+        TUI 主入口、能力包、provider、preview/export、隐私、项目状态和许可证。docs/internal/README.md 增加
+        README 禁止项。
+      agent: codex
+    last_run: '2026-05-11T10:50:11.818595'
+    attempt_count: 2
+  meta: {}
+- id: validate-docs
+  title: 运行版本、格式、release 文件面和 TaskFlow 校验
+  status: done
+  owner: codex
+  depends_on: []
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T10:50:16.671852'
+      level: info
+      message: 运行 README/CHANGELOG/release 文件面校验和 TaskFlow 校验。
+      agent: codex
+    - timestamp: '2026-05-11T10:51:13.432326'
+      level: info
+      message: 验证通过：README forbidden-term grep 无命中；check-readme-version.ps1 passed；check-changelog-format.ps1
+        passed；check-release-files.ps1 passed；git diff --check passed；TaskFlow validate_changelog_format
+        passed；TaskFlow validate_task release-public-readme-audit passed。工作提交 ccb8e2d。
+      agent: codex
+    last_run: '2026-05-11T10:51:13.432326'
+    attempt_count: 2
+  meta: {}
+outputs:
+- type: file
+  path: README.md
+  description: 对外 GitHub README
+- type: file
+  path: docs/internal/README.md
+  description: 内部维护入口
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-11T10:48:22.885691'
+  updated_at: '2026-05-11T10:51:22.496540'
+  version: '1'
