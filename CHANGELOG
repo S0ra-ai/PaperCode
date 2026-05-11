@@ -7,6 +7,26 @@
 
 :history
 
+    0.8.5-dev - 2026/05/11 (7a391d7) [release/0.8.5]
+        :brief GitHub README 对外化与内部文档拆分
+        - docs(readme): README 重写为中文 GitHub 首页，优先展示产品定位、核心能力、快速开始、典型流程、多 provider、Preview/export 与隐私策略
+        - docs(internal): 新增 docs/internal/README.md，承接架构边界、release 分支规则、TaskFlow 约束、release 文件面和验收命令
+        - docs(structure): project structure 标注为内部维护文档，并链接对外 README 与内部维护入口
+        - fix(version): README/changelog 校验脚本显式按 UTF-8 读取文件，允许中文行版本 marker 且避免 Windows PowerShell 5.1 mojibake
+        :src
+            - README.md - external GitHub-facing project README
+            - docs/internal/README.md - maintainer/internal documentation split
+            - docs/project-structure.md - internal documentation marker
+            - scripts/check-readme-version.ps1 - UTF-8-safe README version marker parsing
+            - scripts/check-changelog-format.ps1 - UTF-8-safe colon DSL indentation parsing
+        :verification
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-changelog-format.ps1 passed
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-release-files.ps1 passed
+            - git diff --check passed
+            - TaskFlow validate_changelog_format passed
+            - TaskFlow validate_task release-public-internal-docs passed
+
     0.8.5-dev - 2026/05/11 (f455ec8) [release/0.8.5]
         :brief release 文件面治理与中文核心文档收口
         - chore(release): 新增 .gitattributes export-ignore，GitHub source archive 不再携带 TaskFlow、reports、legacy、upstream、本地 runtime、测试树、spec 和上游营销素材

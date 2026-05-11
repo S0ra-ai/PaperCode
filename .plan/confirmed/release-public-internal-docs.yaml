@@ -1,6 +1,6 @@
 id: release-public-internal-docs
 title: Release public README and internal documentation split
-status: in_progress
+status: done
 priority: high
 owner: codex
 tags:
@@ -115,12 +115,18 @@ steps:
         git diff --check, TaskFlow validate_changelog_format, and TaskFlow validate_task
         release-public-internal-docs.
       agent: codex
-    last_run: '2026-05-11T10:33:38.046682'
-    attempt_count: 2
+    - timestamp: '2026-05-11T10:36:32.267231'
+      level: info
+      message: Passed check-readme-version, check-changelog-format, check-release-files,
+        git diff --check, TaskFlow validate_changelog_format, and TaskFlow validate_task.
+        Also made changelog format checker UTF-8-safe for Windows PowerShell 5.1.
+      agent: codex
+    last_run: '2026-05-11T10:36:32.267231'
+    attempt_count: 3
   meta: {}
 - id: changelog-commit
   title: Commit and record changelog
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: Commit work, record CHANGELOG with real commit id, rerun checks, and
@@ -129,8 +135,20 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-11T10:34:17.223241'
+      level: info
+      message: Work commit created as 7d38466; recording CHANGELOG with the real commit
+        id.
+      agent: codex
+    - timestamp: '2026-05-11T10:36:54.833623'
+      level: info
+      message: Recorded CHANGELOG entry for amended real work commit 7a391d7 and reran
+        README version, changelog format, release file audit, git diff check, and
+        TaskFlow validations successfully.
+      agent: codex
+    last_run: '2026-05-11T10:36:54.833623'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -148,10 +166,7 @@ outputs:
 trace:
   logs: []
   attempt_count: 0
-lock:
-  by: codex
-  at: '2026-05-11T10:28:31.594002'
 meta:
   created_at: '2026-05-11T10:28:25.829000'
-  updated_at: '2026-05-11T10:33:38.046682'
+  updated_at: '2026-05-11T10:36:59.656848'
   version: '1'
