@@ -12,6 +12,7 @@ import * as Log from "@opencode-ai/core/util/log"
 void Log.init({ print: false })
 
 const originalHttpApi = Flag.OPENCODE_EXPERIMENTAL_HTTPAPI
+let previousPaperHome: string | undefined
 
 function app() {
   Flag.OPENCODE_EXPERIMENTAL_HTTPAPI = true
@@ -52,6 +53,9 @@ function runPath(template: string, runID: string) {
 }
 
 afterEach(async () => {
+  if (previousPaperHome === undefined) delete process.env.PAPER_FUCKER_TEST_HOME
+  else process.env.PAPER_FUCKER_TEST_HOME = previousPaperHome
+  previousPaperHome = undefined
   stopAllPaperRunLivePreviews()
   Flag.OPENCODE_EXPERIMENTAL_HTTPAPI = originalHttpApi
   await disposeAllInstances()
@@ -61,6 +65,8 @@ afterEach(async () => {
 describe("PaperRun HttpApi", () => {
   test("serves PaperRun lifecycle, diagnostics, capability, provider, and role endpoints", async () => {
     await using tmp = await tmpdir({ git: true, config: { formatter: false, lsp: false } })
+    previousPaperHome = process.env.PAPER_FUCKER_TEST_HOME
+    process.env.PAPER_FUCKER_TEST_HOME = tmp.path
     const headers = { "x-opencode-directory": tmp.path }
 
     const create = await app().request(PaperPaths.runs, {
@@ -136,5 +142,18 @@ describe("PaperRun HttpApi", () => {
     const modelRoles = await app().request(PaperPaths.modelRoles, { headers })
     expect(modelRoles.status).toBe(200)
     expect((await modelRoles.json()).roles.writer.model_id).toBe("deepseek-v4-pro")
+
+    const inventory = await app().request(PaperPaths.modelInventory, { headers })
+    expect(inventory.status).toBe(200)
+    const inventoryBody = await inventory.json()
+    expect(inventoryBody.inventory.decision_model).toBe("deepseek/deepseek-v4-pro")
+    expect(inventoryBody.inventory.allowlist).toContain("deepseek/deepseek-v4-pro")
+
+    const routing = await app().request(PaperPaths.modelRoutingDecision, {
+      ...json({ role: "writer", task_scale: "large", difficulty: "high" }),
+      headers: { ...headers, "content-type": "application/json" },
+    })
+    expect(routing.status).toBe(200)
+    expect((await routing.json()).selected_model).toBe("deepseek/deepseek-v4-pro")
   })
 })

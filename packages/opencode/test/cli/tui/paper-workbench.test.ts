@@ -164,6 +164,7 @@ describe("TUI PaperRun workbench", () => {
       "导出终稿",
       "导出 forced draft",
       "能力健康",
+      "模型工作台",
       "模型角色",
     ])
     expect(state.pause_questions[0]!.message).toBe("需要确认数据外传")

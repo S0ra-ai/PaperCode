@@ -411,7 +411,7 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
       (isEmpty, wasEmpty) => {
         // only trigger when we transition into an empty-provider state
         if (!isEmpty || wasEmpty) return
-        dialog.replace(() => <DialogProviderList />)
+        dialog.replace(() => <DialogPaperModelRoles />)
       },
     ),
   )
@@ -463,11 +463,12 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
       },
     },
     {
-      title: "Paper model roles",
-      value: "paper.model_roles",
+      title: "Paper Fucker 模型工作台",
+      value: "paper.model_workbench",
       category: "Paper",
       slash: {
-        name: "paper-models",
+        name: "models",
+        aliases: ["paper-models", "model-workbench"],
       },
       onSelect: () => {
         dialog.replace(() => <DialogPaperModelRoles />)
@@ -579,9 +580,9 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
       },
     },
     {
-      title: "Connect provider",
+      title: "Provider fallback",
       value: "provider.connect",
-      suggested: !connected(),
+      suggested: false,
       slash: {
         name: "connect",
       },

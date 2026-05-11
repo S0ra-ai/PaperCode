@@ -53,12 +53,31 @@ export const ProviderDiscoverPayload = Schema.Struct({
   api_key: Schema.String,
   compatibility: Schema.Literal("openai-compatible"),
   timeout_ms: Schema.optional(Schema.Number),
+  persist: Schema.optional(Schema.Boolean),
+  allow_models: Schema.optional(StringArray),
+  decision_model: Schema.optional(Schema.String),
 })
 
 export const ModelRoleAssignmentPayload = Schema.Struct({
   default_model: Schema.String,
   roles: Schema.optional(Schema.Record(Schema.String, Schema.String)),
   subagents: Schema.optional(Schema.Record(Schema.String, Schema.String)),
+})
+
+export const ModelInventoryAllowlistPayload = Schema.Struct({
+  allowlist: StringArray,
+  decision_model: Schema.optional(Schema.String),
+  roles: Schema.optional(Schema.Record(Schema.String, Schema.String)),
+})
+
+export const ModelRoutingDecisionPayload = Schema.Struct({
+  role: Schema.String,
+  stage: Schema.optional(Schema.String),
+  difficulty: Schema.optional(Schema.Literals(["low", "medium", "high"])),
+  task_scale: Schema.optional(Schema.Literals(["small", "medium", "large"])),
+  budget_tier: Schema.optional(BudgetTier),
+  required_capabilities: Schema.optional(StringArray),
+  forced_model: Schema.optional(Schema.String),
 })
 
 export const PaperPaths = {
@@ -72,6 +91,8 @@ export const PaperPaths = {
   capabilities: `${root}/capabilities`,
   doctor: `${root}/doctor`,
   providersDiscover: `${root}/providers/discover`,
+  modelInventory: `${root}/model-inventory`,
+  modelRoutingDecision: `${root}/model-routing/decision`,
   modelRoles: `${root}/model-roles`,
 } as const
 
@@ -207,6 +228,37 @@ export const PaperApi = HttpApi.make("paper")
             identifier: "paper.model_roles",
             summary: "Get model roles",
             description: "Return the provider-agnostic model role routing defaults for paper agents.",
+          }),
+        ),
+        HttpApiEndpoint.get("modelInventory", PaperPaths.modelInventory, {
+          success: described(AnyJson, "Paper model inventory and allowlist"),
+        }).annotateMerge(
+          OpenApi.annotations({
+            identifier: "paper.model_inventory",
+            summary: "Get model inventory",
+            description: "Return discovered models, user allowlist, the main decision model, and dynamic routing preview.",
+          }),
+        ),
+        HttpApiEndpoint.post("modelInventoryAllowlist", PaperPaths.modelInventory, {
+          payload: ModelInventoryAllowlistPayload,
+          success: described(AnyJson, "Updated paper model allowlist"),
+          error: HttpApiError.BadRequest,
+        }).annotateMerge(
+          OpenApi.annotations({
+            identifier: "paper.model_inventory.allowlist",
+            summary: "Update model allowlist",
+            description: "Persist the models that the Paper Fucker decision model and agent team may use.",
+          }),
+        ),
+        HttpApiEndpoint.post("modelRoutingDecision", PaperPaths.modelRoutingDecision, {
+          payload: ModelRoutingDecisionPayload,
+          success: described(AnyJson, "Paper model routing decision"),
+          error: HttpApiError.BadRequest,
+        }).annotateMerge(
+          OpenApi.annotations({
+            identifier: "paper.model_routing.decision",
+            summary: "Preview model routing",
+            description: "Ask the Paper Fucker model router which allowlisted model would be used for a stage or role.",
           }),
         ),
         HttpApiEndpoint.post("modelRolesAssign", PaperPaths.modelRoles, {

@@ -1,6 +1,6 @@
 # Paper Fucker
 
-当前版本：<!-- version:start -->0.8.8<!-- version:end --> ｜ 作者：k1d ([ZhuchenZhong](https://github.com/ZhuchenZhong)) ｜ 状态：开发预览版 ｜ 许可证：private-first / UNLICENSED
+当前版本：<!-- version:start -->0.8.8<!-- version:end --> ｜ 作者：k1d ([ZhuchenZhong](https://github.com/ZhuchenZhong)) ｜ 状态：pre-release 稳定中 ｜ 许可证：private-first / UNLICENSED
 
 Paper Fucker 是一个中文优先、私有优先的可验证论文工作台。你可以给它一个研究主题、代码仓库、数据集、实验日志或已有论文材料，它会自动完成研究规划、资料检索、代码理解、实验复现、证据账本写作、真实性审查、实时预览和最终导出。
 
@@ -11,7 +11,8 @@ Paper Fucker 是一个中文优先、私有优先的可验证论文工作台。�
 - **主题出论文**：从研究主题开始，检索资料、规划实验、生成 ClaimLedger 和可审查论文包。
 - **代码出论文**：读取指定仓库，提取方法、架构、实验入口和 source range，避免凭空描述代码。
 - **材料出论文**：整合 PDF、Markdown、LaTeX、DOCX、数据集和实验日志。
-- **多模型协作**：planner、literature、code、experiment、writer、reviewer、citation、summarizer、subagent 等角色可以使用不同 provider/model。
+- **模型工作台**：在 TUI 中添加 provider、拉取模型列表、勾选允许模型、选择主决策模型，并可强制指定阶段模型。
+- **多模型协作**：主决策模型会在允许列表内为 planner、literature、code、experiment、writer、reviewer、citation、summarizer、subagent 等角色动态选择模型。
 - **递归 Agent Team**：面向大代码库和复杂研究任务，agent 可以继续派生子 agent，最终自底向上合并带证据的结论。
 - **实时网页 Preview**：写作、引用、审稿、成本、agent 和导出状态可以在 token-protected localhost 页面实时查看。
 - **真实性 Gate**：无证据 claim、引用缺失、license/source 冲突或复现失败会阻断 final export；forced draft 会显著标记失败项。
@@ -77,6 +78,7 @@ TUI 首页可以直接输入：
 - `基于 E:\Project\some-repo 写一篇系统论文`
 - `读取 ./paper-draft.md、./data 和 ./logs，补齐实验、引用和最终导出`
 - `目标 Nature，使用 submission_candidate 模式审查这篇论文`
+- `打开模型工作台，添加一个 OpenAI-compatible provider 并选择可用模型`
 
 Run 页面会展示：
 
@@ -85,11 +87,14 @@ Run 页面会展示：
 - 成本、token/context、论文大纲
 - Source Ledger、Claim Ledger、实验/复现状态
 - MCP、skills、toolchain、provider/model role 健康状态
+- 模型工作台：provider、模型允许列表、主决策模型和最近路由决策
 - Preview 与 Export 控制
 - 需要你决策的中文 pause questions
 
 如果你要重新配置 provider、模型角色或本地工具链，重新运行 `.\paper_fucker.exe init` 即可刷新本地配置；`.\paper_fucker.exe init doctor` 会检查当前配置和工具状态。
 这两个命令默认输出中文摘要；脚本或自动化需要完整结构化结果时加 `--json`。
+
+模型配置优先在 TUI「模型工作台」完成：选择内置 provider 或自定义 OpenAI-compatible `base_url`，系统调用 `/models` 取得模型列表；只有你勾选进入允许列表的模型，才会被主决策模型、Agent Team 和递归子 agent 使用。你也可以把某个阶段固定到指定模型。
 
 ## 非交互模式
 
@@ -144,16 +149,18 @@ Paper Fucker 把常用论文研究能力作为内置 capability packs 融合进�
 
 TUI 会在能力健康区显示 MCP、Skill 和 toolchain 状态。缺少 secret、外部工具、网络授权或数据外传授权时，系统会暂停并用中文说明需要你处理什么。
 
+`nature-paper` 是 first-party 内置 skill。初始化和 doctor 会检查它是否存在，并可同步到本机 Codex skill 目录；Nature profile 运行时会刷新 Nature 官方作者指南，而不是依赖过期常量。
+
 ## Provider 与模型
 
-DeepSeek 只是默认样例，不是唯一支持模型。任何 OpenCode substrate 支持的 provider/model 都可以接入，并按角色分配。
+DeepSeek 只是默认样例，不是唯一支持模型。任何 OpenCode substrate 支持的 provider/model 都可以进入模型工作台；自定义 OpenAI-compatible provider 会先调用 `/models`，再由你选择哪些模型允许使用。
 
 ```powershell
 .\paper_fucker.exe init
 .\paper_fucker.exe init doctor
 ```
 
-Provider public config 存在 `~/.paper_fucker/providers/`，secret 存在 `~/.paper_fucker/local/provider-secrets.json`。API key 不应进入 git。
+Provider public config 存在 `~/.paper_fucker/providers/`，模型候选池存在 `~/.paper_fucker/model-inventory.json`，secret 存在 `~/.paper_fucker/local/provider-secrets.json`。API key 不应进入 git。
 
 ## Preview 与导出
 

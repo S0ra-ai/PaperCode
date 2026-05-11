@@ -8,6 +8,7 @@ import {
   getPaperRunSnapshot,
   paperCapabilities,
   paperDoctor,
+  paperModelWorkbench,
   paperModelRoles,
   type PaperRunCreateRequest,
   PaperRunNotFoundError,
@@ -15,7 +16,9 @@ import {
   recordPaperRunGuidance,
   subscribePaperRunEvents,
 } from "@/paper/run"
-import { discoverOpenAICompatibleModels } from "@/paper/model-discovery"
+import { discoverOpenAICompatibleModels, saveProviderEndpointConfig } from "@/paper/model-discovery"
+import { loadPaperModelInventory, routePaperModel, updatePaperModelAllowlist, upsertDiscoveredModels } from "@/paper/model-inventory"
+import { PAPER_MODEL_ROLES, type PaperModelRole } from "@/paper/model-router"
 import { resolveAllModelRoleAssignments } from "@/paper/model-roles"
 import { Effect } from "effect"
 import * as Stream from "effect/Stream"
@@ -24,6 +27,8 @@ import { HttpApiBuilder, HttpApiError } from "effect/unstable/httpapi"
 import { InstanceHttpApi } from "../api"
 import {
   ModelRoleAssignmentPayload,
+  ModelInventoryAllowlistPayload,
+  ModelRoutingDecisionPayload,
   PaperControlPayload,
   PaperExportPayload,
   PaperGuidancePayload,
@@ -42,6 +47,10 @@ function mapPaperBadRequest() {
 
 function paperOptions(directory: string) {
   return { workspace: directory }
+}
+
+function paperGlobalOptions() {
+  return { home: process.env.PAPER_FUCKER_TEST_HOME ?? process.env.PAPER_FUCKER_HOME }
 }
 
 function normalizeCreatePayload(payload: typeof PaperRunCreatePayload.Type): PaperRunCreateRequest {
@@ -164,7 +173,8 @@ export const paperHandlers = HttpApiBuilder.group(InstanceHttpApi, "paper", (han
     })
 
     const doctor = Effect.fn("PaperHttpApi.doctor")(function* () {
-      return paperDoctor()
+      const instance = yield* InstanceState.context
+      return yield* Effect.promise(() => paperDoctor(paperOptions(instance.directory)))
     })
 
     const providersDiscover = Effect.fn("PaperHttpApi.providersDiscover")(function* () {
@@ -177,14 +187,67 @@ export const paperHandlers = HttpApiBuilder.group(InstanceHttpApi, "paper", (han
     const providersDiscoverOpenAI = Effect.fn("PaperHttpApi.providersDiscoverOpenAI")(function* (ctx: {
       payload: typeof ProviderDiscoverPayload.Type
     }) {
+      const instance = yield* InstanceState.context
       return yield* Effect.tryPromise({
-        try: () => discoverOpenAICompatibleModels(ctx.payload),
+        try: async () => {
+          const discovered = await discoverOpenAICompatibleModels(ctx.payload)
+          if (!ctx.payload.persist) return discovered
+          const options = paperGlobalOptions()
+          const saved = await saveProviderEndpointConfig(ctx.payload, options)
+          const inventory = await upsertDiscoveredModels(discovered, {
+            ...options,
+            allow: ctx.payload.allow_models ? [...ctx.payload.allow_models] : undefined,
+            decision_model: ctx.payload.decision_model,
+          })
+          return { ...discovered, saved, inventory }
+        },
         catch: mapPaperBadRequest,
       })
     })
 
     const modelRoles = Effect.fn("PaperHttpApi.modelRoles")(function* () {
       return paperModelRoles()
+    })
+
+    const modelInventory = Effect.fn("PaperHttpApi.modelInventory")(function* () {
+      return yield* Effect.promise(() => paperModelWorkbench(paperGlobalOptions()))
+    })
+
+    const modelInventoryAllowlist = Effect.fn("PaperHttpApi.modelInventoryAllowlist")(function* (ctx: {
+      payload: typeof ModelInventoryAllowlistPayload.Type
+    }) {
+      return yield* Effect.tryPromise({
+        try: async () => {
+          const inventory = await updatePaperModelAllowlist([...ctx.payload.allowlist], {
+            ...paperGlobalOptions(),
+            decision_model: ctx.payload.decision_model,
+            role_overrides: ctx.payload.roles as Partial<Record<PaperModelRole, string>> | undefined,
+          })
+          return { inventory, roles: resolveAllModelRoleAssignments({ default_model: inventory.decision_model ?? "deepseek/deepseek-v4-pro", roles: inventory.role_overrides }) }
+        },
+        catch: mapPaperBadRequest,
+      })
+    })
+
+    const modelRoutingDecision = Effect.fn("PaperHttpApi.modelRoutingDecision")(function* (ctx: {
+      payload: typeof ModelRoutingDecisionPayload.Type
+    }) {
+      return yield* Effect.tryPromise({
+        try: async () => {
+          if (!PAPER_MODEL_ROLES.includes(ctx.payload.role as PaperModelRole)) throw new Error("Unknown paper model role.")
+          const inventory = await loadPaperModelInventory(paperGlobalOptions())
+          return routePaperModel(inventory, {
+            role: ctx.payload.role as PaperModelRole,
+            stage: ctx.payload.stage,
+            difficulty: ctx.payload.difficulty,
+            task_scale: ctx.payload.task_scale,
+            budget_tier: ctx.payload.budget_tier,
+            required_capabilities: ctx.payload.required_capabilities as Parameters<typeof routePaperModel>[1]["required_capabilities"],
+            forced_model: ctx.payload.forced_model,
+          })
+        },
+        catch: mapPaperBadRequest,
+      })
     })
 
     const modelRolesAssign = Effect.fn("PaperHttpApi.modelRolesAssign")(function* (ctx: {
@@ -212,6 +275,9 @@ export const paperHandlers = HttpApiBuilder.group(InstanceHttpApi, "paper", (han
       .handle("providersDiscover", providersDiscover)
       .handle("providersDiscoverOpenAI", providersDiscoverOpenAI)
       .handle("modelRoles", modelRoles)
+      .handle("modelInventory", modelInventory)
+      .handle("modelInventoryAllowlist", modelInventoryAllowlist)
+      .handle("modelRoutingDecision", modelRoutingDecision)
       .handle("modelRolesAssign", modelRolesAssign)
   }),
 )

@@ -33,6 +33,8 @@ describe("init wizard", () => {
         model: "deepseek-v4-pro",
         api_key_secret: "DEEPSEEK_API_KEY",
       })
+      expect(result.skills.skill_id).toBe("nature-paper")
+      expect(result.skills.targets.find((target) => target.name === "codex")?.status).toBe("installed")
     } finally {
       await clean(dir)
     }
@@ -48,9 +50,11 @@ describe("init wizard", () => {
       expect(initText).toContain("Paper Fucker 初始化完成")
       expect(initText).toContain("配置目录:")
       expect(initText).toContain("Provider: deepseek -> deepseek-v4-pro")
+      expect(initText).toContain("Nature Skill:")
       expect(initText.trimStart().startsWith("{")).toBe(false)
       expect(doctorText).toContain("Paper Fucker Doctor")
       expect(doctorText).toContain("配置文件: 已存在")
+      expect(doctorText).toContain("Nature Skill: 已安装")
       expect(doctorText).toContain("需要完整机器可读诊断时，加 --json")
       expect(doctorText.trimStart().startsWith("{")).toBe(false)
     } finally {

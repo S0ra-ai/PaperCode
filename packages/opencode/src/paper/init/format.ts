@@ -8,6 +8,7 @@ type DoctorResult = {
   secrets_exists: boolean
   config?: InitWizardResult["config"]
   tools: InitWizardResult["tools"]
+  skills?: InitWizardResult["skills"] | Awaited<ReturnType<typeof import("../skill-install").inspectNatureSkill>>
 }
 
 function availableTools(tools: InitWizardResult["tools"]) {
@@ -34,6 +35,13 @@ function providerSummary(config: InitWizardResult["config"]) {
   return preview(endpoints.map((endpoint) => `${endpoint.name} -> ${endpoint.model}`), 4)
 }
 
+function targetInstalled(target: unknown) {
+  if (!target || typeof target !== "object") return false
+  const record = target as Record<string, unknown>
+  if (typeof record.exists === "boolean") return record.exists
+  return record.status === "installed" || record.status === "already_installed"
+}
+
 export function formatInitResult(result: InitWizardResult) {
   const available = availableTools(result.tools)
   const missing = missingTools(result.tools)
@@ -46,6 +54,7 @@ export function formatInitResult(result: InitWizardResult) {
     `实时预览: ${result.config.preview.auto_open ? "已启用" : "已关闭"}`,
     `默认模型: ${result.config.model_roles.default_model}`,
     `Provider: ${providerSummary(result.config)}`,
+    `Nature Skill: ${result.skills.restart_required ? "已安装，重启 Codex 后生效" : "已就绪"}`,
     `外部工具: ${available.length} 个可用${missing.length > 0 ? `，${missing.length} 个缺失` : ""}`,
     `可用工具: ${preview(available.map((tool) => tool.name))}`,
     `本地密钥: ${result.wrote_secrets ? "已写入加密密钥文件" : "未写入；可稍后添加 provider key"}`,
@@ -84,6 +93,12 @@ export function formatDoctorResult(result: DoctorResult) {
     `外部工具: ${available.length} 个可用${missing.length > 0 ? `，${missing.length} 个缺失` : ""}`,
     `可用工具: ${preview(available.map((tool) => tool.name))}`,
   )
+  if (result.skills) {
+    const sourceOk = "source_valid" in result.skills ? result.skills.source_valid : true
+    const codexTarget = result.skills.targets.find((target) => target.name === "codex")
+    const codexInstalled = targetInstalled(codexTarget)
+    lines.push(`Nature Skill: ${sourceOk && codexInstalled ? "已安装" : "缺失或未安装"}`)
+  }
 
   if (missing.length > 0) {
     lines.push(`缺失工具: ${preview(missing.map((tool) => tool.name))}`)

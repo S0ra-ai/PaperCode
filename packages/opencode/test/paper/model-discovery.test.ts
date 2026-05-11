@@ -9,6 +9,12 @@ import {
   providerSecretPath,
   saveProviderEndpointConfig,
 } from "../../src/paper/model-discovery"
+import {
+  loadPaperModelInventory,
+  routePaperModel,
+  updatePaperModelAllowlist,
+  upsertDiscoveredModels,
+} from "../../src/paper/model-inventory"
 import { resolveModelRoleAssignment } from "../../src/paper/model-roles"
 
 const tmpRoots: string[] = []
@@ -76,6 +82,58 @@ describe("paper provider model discovery", () => {
     expect(secretConfig).toContain("sk-local-only")
     expect(saved.config_path.startsWith(home)).toBe(true)
     expect(saved.secret_path.startsWith(path.join(home, ".paper_fucker", "local"))).toBe(true)
+  })
+
+  test("persists discovered models into a user allowlist and routes only allowlisted models", async () => {
+    const home = await tmpHome()
+    const discovery = await discoverOpenAICompatibleModels(
+      {
+        provider_id: "lab",
+        base_url: "https://lab.example/v1",
+        api_key: "sk-test-secret",
+        compatibility: "openai-compatible",
+      },
+      {
+        fetch: async () =>
+          Response.json({
+            data: [{ id: "paper-small" }, { id: "paper-pro-128k" }],
+          }),
+      },
+    )
+
+    await upsertDiscoveredModels(discovery, {
+      home,
+      allow: ["lab/paper-pro-128k"],
+      decision_model: "lab/paper-pro-128k",
+    })
+    const inventory = await loadPaperModelInventory({ home })
+
+    expect(inventory.decision_model).toBe("lab/paper-pro-128k")
+    expect(inventory.allowlist).toContain("lab/paper-pro-128k")
+    expect(inventory.candidates.find((candidate) => candidate.model_ref === "lab/paper-pro-128k")?.allowed).toBe(true)
+
+    const routed = routePaperModel(inventory, {
+      role: "writer",
+      task_scale: "large",
+      difficulty: "high",
+      budget_tier: "standard",
+    })
+    expect(routed.source).toBe("decision_model")
+    expect(routed.selected_model).toBeDefined()
+    expect(routed.allowed_models).toContain(routed.selected_model!)
+  })
+
+  test("blocks forced models that are not in the user allowlist", async () => {
+    const home = await tmpHome()
+    const inventory = await updatePaperModelAllowlist(["deepseek/deepseek-v4-pro"], { home })
+    const decision = routePaperModel(inventory, {
+      role: "reviewer",
+      forced_model: "openai/gpt-5.2",
+    })
+
+    expect(decision.source).toBe("blocked")
+    expect(decision.diagnostics).toContain("forced_model_not_allowed")
+    expect(decision.reason).toContain("不在允许列表")
   })
 
   test("ships a provider matrix smoke script that reads local secrets without echoing keys", async () => {
