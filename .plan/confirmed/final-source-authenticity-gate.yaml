@@ -1,6 +1,6 @@
 id: final-source-authenticity-gate
 title: 最终导出 source authenticity gate 硬化
-status: todo
+status: done
 priority: high
 owner: codex
 tags:
@@ -111,7 +111,7 @@ steps:
   meta: {}
 - id: validate-docs-release
   title: 验证、文档与版本收口
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - update-final-scenarios
@@ -121,8 +121,22 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-11T02:33:04.818719'
+      level: info
+      message: 'Work commit created: bec3df2 feat(verification): require verified
+        sources for final export. Updating README/CHANGELOG to 0.8.3-dev and running
+        release validations.'
+      agent: codex
+    - timestamp: '2026-05-11T02:41:03.172589'
+      level: info
+      message: 'Release validation passed: scripts/check-readme-version.ps1, git diff
+        --check, TaskFlow validate_task, validate_changelog_format, and focused scripts/strict-acceptance.ps1.
+        Strict report updated at reports/strict-live-acceptance.md; final-export-pass-run
+        passed under SourceEvidenceManifest.v1 + ExperimentEvidenceManifest.v1.'
+      agent: codex
+    last_run: '2026-05-11T02:41:03.172589'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -142,10 +156,7 @@ outputs:
 trace:
   logs: []
   attempt_count: 0
-lock:
-  by: codex
-  at: '2026-05-11T02:17:30.296564'
 meta:
   created_at: '2026-05-11T02:17:19.560743'
-  updated_at: '2026-05-11T02:27:05.976526'
+  updated_at: '2026-05-11T02:41:10.779342'
   version: '1'

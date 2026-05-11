@@ -1,6 +1,6 @@
 # paper_fucker
 
-Current version: <!-- version:start -->0.8.2-dev<!-- version:end -->
+Current version: <!-- version:start -->0.8.3-dev<!-- version:end -->
 
 `paper_fucker` is a private-first, OpenCode-derived closed-loop paper system. It turns a topic, codebase, dataset, experiment log, or paper material set into a verifiable academic-paper bundle with research planning, source discovery, code understanding, experiment/reproduction support, ClaimLedger-first writing, authenticity gates, profile-aware formatting, preview, and export.
 
@@ -37,6 +37,7 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - The paper authoring loop now binds drafts to run artifacts, applies profile-aware revision metadata, creates read-only preview snapshots, runs reviewer/authenticity checks, blocks unsafe final export, and emits forced draft, supplementary, and availability bundles.
 - Strict live acceptance is available through `scripts/strict-acceptance.ps1`; it validates TaskFlow, version sync, tracked secret hygiene, opencode/preview/Python/typecheck suites, local Paper Fucker CLI/TUI smoke, DeepSeek live provider smoke, Exa MCP live smoke, Nature skill/profile, pandoc, LaTeX, DOCX, topic-to-paper, code-to-paper, hard-fork paper core, PaperRun API/TUI, Agent Tree, private-first egress, observability audit coverage, public branding, and Git Flow branch discipline.
 - Strict live acceptance is bounded by per-check timeouts and writes partial progress after every check. The default mode runs a focused paper-critical suite for local milestone validation; `-FullWorkspaceSuite` preserves the slower full `packages/opencode test` path for extended runs.
+- The 0.8.3-dev line hardens the final source authenticity gate: reproduction evidence alone cannot produce a final export unless cited sources are verified and clear-license through `SourceEvidenceManifest.v1` or equivalent live source verification.
 - The 0.8.2-dev line hardens full workspace acceptance: `reports/strict-live-full-acceptance.md` now records a passed strict-live-full run with full `packages/opencode test`, preview, Python, typecheck, live provider, Exa, Nature, export tools, crawler, HF, topic/code/final PaperRun smoke, hard-fork, Agent Team, sidebar, no-mock, changelog, and Git Flow checks.
 - The 0.8.1-dev line adds the autonomous continuation loop: when TaskFlow is empty, Codex runs a product audit, turns failed checks or credible improvements into new TaskFlow work, executes them through Git Flow, and keeps README/CHANGELOG/reports aligned.
 - The 0.8.0-dev line closes the live product loop milestone: authorized crawler fetches real HTTP content, Hugging Face papers use live Hub API records, HF jobs are token-gated, Trackio accepts explicit exported metrics, and `ExperimentEvidenceManifest.v1` can drive a reproduction-passed `final` export.
@@ -60,7 +61,7 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - Open literature and dataset discovery now records `SourceRecord.v1`, `LiteratureMap.v1`, `DataPlan.v1`, `DatasetCard.v1`, and direction feasibility artifacts with license and verification diagnostics.
 - The experiment loop now plans proposed/baseline/ablation runs, records host exploration, requires container reproduction for final claims, and classifies environment/resource/method failures.
 - ClaimLedger-first writing now binds claims to citations before Markdown draft generation, streams draft chunks, annotates unsupported claims, and records diff/rollback metadata.
-- The final authenticity gate now blocks invalid references, unsupported claims, dataset license failures, and failed container reproduction while preserving non-blocking reviewer warnings.
+- The final authenticity gate now blocks invalid references, unverified or non-clear cited sources, unsupported claims, dataset license failures, and failed container reproduction while preserving non-blocking reviewer warnings.
 - Export bundles now produce Markdown/LaTeX/PDF/DOCX manifests, block final exports when the authenticity gate fails, and allow clearly marked forced drafts with failed checks attached.
 - The repository root is paper_fucker-first; upstream localized OpenCode README files are preserved under `upstream/opencode-readmes/`.
 - The imported OpenCode package is now the paper_fucker product core: OpenCode substrate capabilities remain internal, while paper_fucker domain runtime surfaces live in `packages/opencode/src/paper`.
