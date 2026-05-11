@@ -1,6 +1,6 @@
 # paper_fucker
 
-Current version: <!-- version:start -->0.8.3-dev<!-- version:end -->
+Current version: <!-- version:start -->0.8.4-dev<!-- version:end -->
 
 `paper_fucker` is a private-first, OpenCode-derived closed-loop paper system. It turns a topic, codebase, dataset, experiment log, or paper material set into a verifiable academic-paper bundle with research planning, source discovery, code understanding, experiment/reproduction support, ClaimLedger-first writing, authenticity gates, profile-aware formatting, preview, and export.
 
@@ -37,6 +37,7 @@ The repository is governed by TaskFlow. The active implementation plan lives in 
 - The paper authoring loop now binds drafts to run artifacts, applies profile-aware revision metadata, creates read-only preview snapshots, runs reviewer/authenticity checks, blocks unsafe final export, and emits forced draft, supplementary, and availability bundles.
 - Strict live acceptance is available through `scripts/strict-acceptance.ps1`; it validates TaskFlow, version sync, tracked secret hygiene, opencode/preview/Python/typecheck suites, local Paper Fucker CLI/TUI smoke, DeepSeek live provider smoke, Exa MCP live smoke, Nature skill/profile, pandoc, LaTeX, DOCX, topic-to-paper, code-to-paper, hard-fork paper core, PaperRun API/TUI, Agent Tree, private-first egress, observability audit coverage, public branding, and Git Flow branch discipline.
 - Strict live acceptance is bounded by per-check timeouts and writes partial progress after every check. The default mode runs a focused paper-critical suite for local milestone validation; `-FullWorkspaceSuite` preserves the slower full `packages/opencode test` path for extended runs.
+- The 0.8.4-dev line locks source authenticity into strict acceptance: final export smoke now parses the live benchmark summary, requires `SourceEvidenceManifest.v1`, requires `final_gate=passed`, rejects failed checks, and hardens PaperRun JSON persistence against Windows file-lock races.
 - The 0.8.3-dev line hardens the final source authenticity gate: reproduction evidence alone cannot produce a final export unless cited sources are verified and clear-license through `SourceEvidenceManifest.v1` or equivalent live source verification.
 - The 0.8.2-dev line hardens full workspace acceptance: `reports/strict-live-full-acceptance.md` now records a passed strict-live-full run with full `packages/opencode test`, preview, Python, typecheck, live provider, Exa, Nature, export tools, crawler, HF, topic/code/final PaperRun smoke, hard-fork, Agent Team, sidebar, no-mock, changelog, and Git Flow checks.
 - The 0.8.1-dev line adds the autonomous continuation loop: when TaskFlow is empty, Codex runs a product audit, turns failed checks or credible improvements into new TaskFlow work, executes them through Git Flow, and keeps README/CHANGELOG/reports aligned.
