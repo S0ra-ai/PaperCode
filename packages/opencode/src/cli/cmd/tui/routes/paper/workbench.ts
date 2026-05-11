@@ -25,6 +25,19 @@ export interface PaperWorkbenchApiInput {
   fetch: (input: string | URL | Request, init?: RequestInit) => Promise<Response>
 }
 
+export interface PaperWorkbenchPreviewInput extends PaperWorkbenchApiInput {
+  openUrl?: (url: string) => void | Promise<void>
+}
+
+export interface PaperWorkbenchPreviewResponse {
+  readonly: true
+  run_id: string
+  status: "ready" | "blocked"
+  url?: string
+  token?: string
+  snapshot?: unknown
+}
+
 export interface PaperWorkbenchHealthInput {
   mcp?: Record<string, string>
   skills?: Record<string, string>
@@ -893,12 +906,14 @@ export async function sendPaperWorkbenchControl(
   return readJsonResponse<PaperRunControllerState>(response, "PaperRun 控制失败")
 }
 
-export async function requestPaperWorkbenchPreview(input: PaperWorkbenchApiInput) {
+export async function requestPaperWorkbenchPreview(input: PaperWorkbenchPreviewInput): Promise<PaperWorkbenchPreviewResponse> {
   const response = await input.fetch(apiUrl(input.baseUrl, `paper/runs/${encodeURIComponent(input.runID)}/preview`), {
     method: "GET",
     headers: apiHeaders(input.directory),
   })
-  return readJsonResponse(response, "PaperRun Preview 读取失败")
+  const payload = await readJsonResponse<PaperWorkbenchPreviewResponse>(response, "PaperRun Preview 读取失败")
+  if (payload.url && input.openUrl) await input.openUrl(payload.url)
+  return payload
 }
 
 export async function requestPaperWorkbenchExport(input: PaperWorkbenchApiInput & { forced?: boolean }) {

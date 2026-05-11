@@ -1,0 +1,178 @@
+id: pre-release-doc-brand-structure
+title: pre-release 文档品牌与目录整理
+status: done
+priority: high
+owner: codex
+tags:
+- pre-release
+- docs
+- brand
+- structure
+- changelog
+depends_on: []
+description: 在 0.8.5-rc.1 前整理 README/docs/reports/changelog 和根目录结构，确保对外品牌为 Paper Fucker，主
+  CHANGELOG 拆分归档，项目目录入口清晰。
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: audit-doc-brand-structure
+  title: 审计文档、品牌和根目录状态
+  status: done
+  owner: codex
+  depends_on: []
+  description: 扫描 README/docs/reports/current runtime/TUI/CLI/HTTP API 中的用户可见品牌、历史
+    OpenCode 残留、CHANGELOG 行数和根目录噪声。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T08:52:41.129857'
+      level: info
+      message: Auditing current README/docs/reports/CHANGELOG/root directory and user-visible
+        branding before pre-release readiness cleanup.
+      agent: codex
+    - timestamp: '2026-05-11T09:14:48.733567'
+      level: info
+      message: 'Audit complete: root CHANGELOG was 983 lines; only docs/changelog/v0/0.1.x.CHANGELOG
+        existed; preview runtime exists with packages/preview token-protected read-only
+        server, SSE client, and packages/opencode/src/paper/preview.ts run-bound adapter;
+        public preview HTML and Paper HTTP API still used paper_fucker lowercase in
+        visible title/copy; README title/status needed Paper Fucker public brand and
+        clearer project structure/readiness docs.'
+      agent: codex
+    last_run: '2026-05-11T09:14:48.733567'
+    attempt_count: 2
+  meta: {}
+- id: split-main-changelog
+  title: 拆分主 CHANGELOG 历史归档
+  status: done
+  owner: codex
+  depends_on:
+  - audit-doc-brand-structure
+  description: 将较早版本历史移入 docs/changelog，主 CHANGELOG 保留近期 pre-release 相关历史和索引说明，并保持
+    colon DSL 校验通过。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T09:14:49.662026'
+      level: info
+      message: Splitting root CHANGELOG into active 0.8.x line plus docs/changelog/v0
+        minor archives.
+      agent: codex
+    - timestamp: '2026-05-11T09:18:17.327967'
+      level: info
+      message: Root CHANGELOG now keeps active 0.8.x entries only; archived historical
+        colon-history files under docs/changelog/v0/0.1.x.CHANGELOG through 0.7.x.CHANGELOG.
+        Colon DSL indentation checks passed for root and all archive files.
+      agent: codex
+    last_run: '2026-05-11T09:18:17.327967'
+    attempt_count: 2
+  meta: {}
+- id: sync-docs-and-structure
+  title: 同步 README 与项目结构文档
+  status: done
+  owner: codex
+  depends_on:
+  - split-main-changelog
+  description: 更新 README pre-release 状态、文档入口、项目结构说明和历史路径说明，明确 tracked/ignored .paper_fucker
+    边界。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T09:18:18.358559'
+      level: info
+      message: Synchronizing README, docs/project-structure.md, docs/changelog/README.md,
+        pre-release readiness report, preview public copy, and PaperRun HTTP API descriptions.
+      agent: codex
+    - timestamp: '2026-05-11T09:18:52.310479'
+      level: info
+      message: README now uses Paper Fucker as the public brand, documents release-readiness
+        vs release-branch boundaries, links docs/project-structure.md, and records
+        live preview status accurately. Added docs/project-structure.md, docs/changelog/README.md,
+        and reports/pre-release-readiness.md. Preview HTML/test and PaperRun HTTP
+        API descriptions now expose Paper Fucker branding.
+      agent: codex
+    last_run: '2026-05-11T09:18:52.310479'
+    attempt_count: 2
+  meta: {}
+- id: brand-surface-acceptance
+  title: 对外品牌验收
+  status: done
+  owner: codex
+  depends_on:
+  - sync-docs-and-structure
+  description: 补充/运行品牌检查，确保对外启动、help、TUI、doctor、README 当前表述使用 Paper Fucker；OpenCode
+    仅作为 substrate/provenance 出现。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T09:18:53.184836'
+      level: info
+      message: Running public brand and preview acceptance tests for README/preview/API/TUI
+        surfaces.
+      agent: codex
+    - timestamp: '2026-05-11T09:19:13.589250'
+      level: info
+      message: 'Brand acceptance passed: packages/preview test passed (2 pass), packages/opencode
+        public-surface + strict-acceptance focused tests passed (15 pass), and public
+        preview/API text no longer exposes lowercase paper_fucker or third-party Deerflow
+        branding in visible preview surfaces. Historical reports remain provenance
+        only.'
+      agent: codex
+    last_run: '2026-05-11T09:19:13.589250'
+    attempt_count: 2
+  meta: {}
+- id: validate-docs-structure
+  title: 验证文档和目录整理
+  status: done
+  owner: codex
+  depends_on:
+  - brand-surface-acceptance
+  description: 运行 changelog format、README version、品牌/结构扫描和 TaskFlow validate。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T09:19:14.755952'
+      level: info
+      message: Validating changelog archives, README version sync, TaskFlow task semantics,
+        and docs/brand structure before closing the task.
+      agent: codex
+    - timestamp: '2026-05-11T09:19:46.738776'
+      level: info
+      message: 'Validation passed: TaskFlow validate_task pre-release-doc-brand-structure
+        valid; TaskFlow validate_changelog_format valid; scripts/check-readme-version.ps1
+        passed; scripts/check-changelog-format.ps1 passed for root CHANGELOG and docs/changelog/v0/0.1.x
+        through 0.7.x archives; packages/preview test passed; packages/opencode public-surface
+        and strict-acceptance focused tests passed.'
+      agent: codex
+    last_run: '2026-05-11T09:19:46.738776'
+    attempt_count: 2
+  meta: {}
+outputs:
+- type: file
+  path: README.md
+- type: file
+  path: CHANGELOG
+- type: file
+  path: docs/changelog
+- type: file
+  path: docs/project-structure.md
+- type: file
+  path: reports/pre-release-readiness.md
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-11T08:51:11.916941'
+  updated_at: '2026-05-11T09:19:47.716472'
+  version: '1'

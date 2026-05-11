@@ -1,0 +1,96 @@
+id: pre-release-readiness-freeze
+title: release 前准备验收收口
+status: in_progress
+priority: high
+owner: codex
+tags:
+- pre-release
+- readiness
+- no-tag
+- develop
+depends_on:
+- pre-release-provider-matrix
+description: 不创建 release 分支、不打 tag、不操作 main；将文档品牌、目录整理、实时预览、init/reset 和 provider
+  matrix 的 release 前准备合并回 develop，并记录为 0.8.5-dev。正式 release/tag 等用户后续确认。
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: readiness-validation
+  title: 运行 release 前准备验收
+  status: done
+  owner: codex
+  depends_on: []
+  description: 运行 focused tests、preview/Python/typecheck、version sync、changelog format、TaskFlow
+    validate、strict acceptance 或必要 smoke。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T09:37:01.327169'
+      level: info
+      message: 'Running final readiness validation before committing: version sync,
+        changelog format, provider matrix pending_config report, targeted opencode/preview
+        tests, typecheck, Python tests, and tracked secret scan. No release branch,
+        tag, or main operation.'
+      agent: codex
+    - timestamp: '2026-05-11T09:38:28.627688'
+      level: info
+      message: 'Readiness validation passed: README/CHANGELOG version sync (0.8.4-dev
+        before final bump), root and archive changelog format, provider matrix pending_config
+        report, packages/preview test (2 pass), targeted opencode tests (26 pass),
+        opencode typecheck, Python unittest (18 tests), tracked secret scan no matches,
+        TaskFlow validate_task and validate_changelog_format passed.'
+      agent: codex
+    last_run: '2026-05-11T09:38:28.627688'
+    attempt_count: 2
+  meta: {}
+- id: record-085-dev
+  title: 记录 0.8.5-dev 准备版本
+  status: todo
+  owner: codex
+  depends_on:
+  - readiness-validation
+  description: 更新 README/CHANGELOG 到 0.8.5-dev，说明这是 release 前准备，不是 tagged pre-release。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: merge-readiness-to-develop
+  title: 合回 develop 并清理 feature 分支
+  status: todo
+  owner: codex
+  depends_on:
+  - record-085-dev
+  description: 按 Git Flow 合回 develop，推送 develop，清理 feature/pre-release-readiness；不打
+    tag，不创建 release 分支。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: file
+  path: CHANGELOG
+- type: file
+  path: README.md
+- type: file
+  path: reports/pre-release-readiness.md
+- type: file
+  path: reports/provider-matrix-smoke.md
+trace:
+  logs: []
+  attempt_count: 0
+lock:
+  by: codex
+  at: '2026-05-11T09:36:59.979675'
+meta:
+  created_at: '2026-05-11T08:52:06.253277'
+  updated_at: '2026-05-11T09:38:28.627688'
+  version: '1'

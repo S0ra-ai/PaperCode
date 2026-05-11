@@ -63,7 +63,7 @@ describe("preview server", () => {
 
       const html = await fetch(preview.url)
       expect(html.status).toBe(200)
-      expect(await html.text()).toContain("paper_fucker Preview")
+      expect(await html.text()).toContain("Paper Fucker Preview")
     } finally {
       preview.stop()
     }
