@@ -6,13 +6,13 @@
 
 ## GitHub Source Archive
 
-- files: 4050
+- files: 4049
 - blocked: 0
 - status: passed
 
 ## packages/opencode npm pack
 
-- files: 723
+- files: 722
 - blocked: 0
 - status: passed
 

@@ -1,6 +1,6 @@
 id: release-entrypoint-brand-init-fixes
 title: 修复入口品牌、provider 订阅残留与初始化体验
-status: todo
+status: done
 priority: high
 owner: codex
 tags:
@@ -77,27 +77,41 @@ steps:
   meta: {}
 - id: version
   title: 按 TaskFlow 新规则规范 CHANGELOG 唯一版本并同步 README
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   execution:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-11T22:20:05.488646'
+      level: info
+      message: 按新版 TaskFlow 版本规则处理完成：record_changelog_entry 写入 0.8.6 (e0d3c8a)；TaskFlow
+        自动将此前 8 条重复 0.8.5-dev 合并为单条历史线；README version marker 更新为 0.8.6；check-readme-version、check-changelog-format、validate_changelog_versions、validate_changelog_format
+        均通过。
+      agent: codex
+    last_run: '2026-05-11T22:20:05.488646'
+    attempt_count: 2
   meta: {}
 - id: final-verify
   title: 运行版本、格式、入口与 git 验收
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   execution:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-11T22:20:43.097755'
+      level: info
+      message: 最终验证通过：check-readme-version、check-changelog-format、validate_changelog_versions、validate_changelog_format、check-release-files、git
+        diff --check、TaskFlow validate_task 均通过；./paper_fucker.exe --help 与 init smoke
+        已验证；public surface 扫描确认用户可见订阅/Zen/Go/PAPEE 残留仅存在于负向测试断言。
+      agent: codex
+    last_run: '2026-05-11T22:20:43.097755'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -121,10 +135,7 @@ outputs:
 trace:
   logs: []
   attempt_count: 0
-lock:
-  by: codex
-  at: '2026-05-11T22:10:12.910675'
 meta:
   created_at: '2026-05-11T22:10:08.533537'
-  updated_at: '2026-05-11T22:13:53.788321'
+  updated_at: '2026-05-11T22:21:04.651871'
   version: '1'
