@@ -3,9 +3,31 @@
 :repo          
 :desc          记录项目的重大变更和版本历史
 :version       0.8.5-dev
-:last_update   2026/05/11
+:last_update   2026/05/12
 
 :history
+
+    0.8.5-dev - 2026/05/12 (a7484d0) [release/0.8.5]
+        :brief 作者元数据统一为 k1d
+        - docs(changelog): root CHANGELOG 与 docs/changelog/v0 归档 changelog 的 :author 统一为 k1d (https://github.com/ZhuchenZhong)
+        - docs(readme): README 顶部元信息增加作者 k1d，并链接 ZhuchenZhong GitHub
+        - chore(package): root package.json 与 packages/opencode/package.json 增加 author 字段
+        - note: repository URL 仍保留 S0ra-ai/paper_fucker，因为这是当前远端仓库位置
+        :src
+            - CHANGELOG - current author metadata and history entry
+            - README.md - public author metadata
+            - package.json - root package author metadata
+            - packages/opencode/package.json - package author metadata
+            - docs/changelog/v0/*.CHANGELOG - archived author metadata
+            - reports/release-file-audit.md - refreshed release file audit
+        :verification
+            - rg author metadata check against README/package/changelog passed
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-changelog-format.ps1 passed
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-release-files.ps1 passed
+            - git diff --check passed
+            - TaskFlow validate_changelog_format passed
+            - TaskFlow validate_task release-author-metadata-k1d passed
 
     0.8.5-dev - 2026/05/12 (40b90b9) [release/0.8.5]
         :brief 源码编译后生成根目录可执行文件
