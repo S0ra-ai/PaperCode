@@ -1,0 +1,122 @@
+:project       paper_fucker - 可验证论文研究自动化系统
+:author        s0ra (https://github.com/S0ra-ai)
+:repo          
+:desc          0.4.x 历史变更归档，主 CHANGELOG 仅保留当前活跃版本线
+:version       0.4.4-dev
+:last_update   2026/05/11
+
+:history
+
+    0.4.4-dev - 2026/05/10 (713835c) [develop]
+        :brief 默认 PaperRun 引擎自动记录完整 observability audit 覆盖
+        - fix(observability): 新增 recordDefaultPaperRunObservability, 自动记录 model_role/capability/subagent/tool/data_egress/cost
+        - fix(run): createPaperRun 在默认 stage graph 之后写入 observability baseline, 不再依赖测试或调用方手动补 audit
+        - fix(strict): strict acceptance 的 Git Flow 检查允许 `fix/*` 活动分支, 与当前分支策略一致
+        - fix(strict): Write-Report 对 Windows 短暂文件占用增加重试, 避免阶段性报告写入偶发失败
+        - test(observability): 新增默认 PaperRun coverage 回归, 要求 missing_kinds 为空
+        - test(strict): 覆盖 active task work 可在 feature/fix 分支上运行 strict acceptance, 并检查报告写入重试
+        - docs(report): 新增 reports/default-observability-coverage.md 记录 live benchmark coverage
+        :src
+            - packages/opencode/src/paper/observability.ts - default run observability recorder
+            - packages/opencode/src/paper/run.ts - default engine audit integration
+            - packages/opencode/test/paper/observability-audit.test.ts - default coverage regression
+            - scripts/strict-acceptance.ps1 - Git Flow active branch validation
+            - packages/opencode/test/paper/strict-acceptance.test.ts - feature/fix branch validation coverage
+            - reports/default-observability-coverage.md - live audit coverage evidence
+            - .plan/confirmed/task-050-default-observability-coverage.yaml - TaskFlow execution logs
+            - README.md - current behavior and version update
+            - CHANGELOG - 0.4.4-dev history entry
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/observability-audit.test.ts passed: 2 pass, 0 fail, 22 expects
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts produced empty missing_kinds with counts stage=28, capability=12, model_role=8, subagent=1, tool=1, data_egress=1, export_renderer=4, cost=1
+
+    0.4.3-dev - 2026/05/10 (7d5df2a) [develop]
+        :brief PDF 导出支持多 LaTeX 引擎 fallback 并修复 Windows TeX 路径/standalone LaTeX
+        - fix(export): PDF renderer 按 latexmk -> xelatex -> pdflatex -> lualatex -> tectonic 顺序尝试
+        - fix(export): 任一引擎失败后继续尝试下一引擎, 并把失败原因保留到 PDF diagnostics
+        - fix(export): 传给 LaTeX 引擎的 Windows 路径统一转为 `/`, 避免反斜杠被 TeX 解析为控制序列
+        - fix(export): Pandoc Markdown-to-LaTeX 使用 `-s -t latex`, 生成可直接编译的 standalone 文档
+        - test(export): 新增 latexmk 失败、xelatex 成功的 fallback 回归测试
+        - docs(report): 新增 reports/export-pdf-renderer-fallback.md 记录 live smoke 与语义
+        :src
+            - packages/opencode/src/paper/export-pipeline.ts - PDF fallback chain, path normalization, standalone LaTeX
+            - packages/opencode/test/paper/export-pipeline.test.ts - fallback regression coverage
+            - reports/export-pdf-renderer-fallback.md - live PDF fallback evidence
+            - .plan/confirmed/task-049-export-pdf-renderer-fallback.yaml - TaskFlow execution logs
+            - README.md - current behavior and version update
+            - CHANGELOG - 0.4.3-dev history entry
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/export-pipeline.test.ts passed: 4 pass, 0 fail, 24 expects
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+            - Direct pandoc -s + xelatex smoke generated tmp/pdf-fallback-smoke/smoke.pdf
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts produced run-045f3eb0-cb86-4340-89b9-d0ee58464040 with forced Markdown/LaTeX/PDF/DOCX export and PDF status written
+
+    0.4.2-dev - 2026/05/10 (18562fb) [develop]
+        :brief 对齐 PaperRun 完成态、真实性 gate 与 reproduction_failure 阶段展示
+        - fix(paperrun): PaperRun snapshot status 新增 blocked, 完整执行但 final gate 阻断时不再显示 running
+        - fix(controller): durable controller 新增 review_required, 用于已跑完但需要证据/复现/审查的 run
+        - fix(stage): final gate 的 reproduction_failure 反投影到 reproduction stage, 避免复现阶段成功但最终 gate 因复现失败阻断的矛盾
+        - fix(runtime): 完整执行完成后内部 ResearchRun 可标记 succeeded, PaperRun eligibility 仍由 gate 投影为 blocked
+        - test(paperrun): 增加 completed-but-blocked run 终态回归断言
+        - docs(report): 新增 reports/paperrun-completion-gates.md 记录状态语义与验证
+        :src
+            - packages/opencode/src/paper/run.ts - PaperRun terminal status and reproduction gate projection
+            - packages/opencode/src/paper/run-controller.ts - review_required controller status
+            - packages/opencode/src/cli/cmd/tui/routes/paper/workbench.ts - Chinese controller label and fallback status projection
+            - packages/opencode/test/paper/paperrun-execution.test.ts - completed blocked run regression
+            - reports/paperrun-completion-gates.md - gate alignment report
+            - .plan/confirmed/task-048-paperrun-completion-gates.yaml - TaskFlow execution logs
+            - README.md - current behavior and version update
+            - CHANGELOG - 0.4.2-dev history entry
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/paperrun-execution.test.ts test/paper/paperrun-controller.test.ts test/cli/tui/paper-workbench-controls.test.ts passed: 4 pass, 0 fail, 48 expects
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+
+    0.4.1-dev - 2026/05/10 (fad39b1) [develop]
+        :brief 严格验收脚本增加逐项超时、进度报告与 focused 默认测试集
+        - fix(strict): scripts/strict-acceptance.ps1 新增 CheckTimeoutSeconds、FullWorkspaceSuite 与 FullWorkspaceTimeoutSeconds 参数
+        - fix(strict): 每个检查通过 Start-Job/Wait-Job 独立执行, 超时后清理子任务并报告 timed out after
+        - fix(strict): Invoke-Check 在 finally 中写入报告, 长流程失败或超时时保留已完成检查证据
+        - test(strict): strict-acceptance.test.ts 覆盖逐项超时、部分报告、focused 默认测试集与 full workspace opt-in
+        - docs(strict): reports/strict-live-acceptance.md 更新为 strict-live-focused 通过记录
+        :src
+            - scripts/strict-acceptance.ps1 - bounded strict live acceptance runner
+            - packages/opencode/test/paper/strict-acceptance.test.ts - timeout and suite-policy regression coverage
+            - reports/strict-live-acceptance.md - focused strict live acceptance evidence
+            - .plan/confirmed/task-047-strict-acceptance-timeouts.yaml - TaskFlow execution logs
+            - README.md - current behavior and version update
+            - CHANGELOG - 0.4.1-dev history entry
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/strict-acceptance.test.ts passed: 5 pass, 0 fail, 43 expects
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\strict-acceptance.ps1 -FixtureMode -CheckTimeoutSeconds 120 -ReportPath tmp/strict-acceptance-fixture.md passed
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\strict-acceptance.ps1 -CheckTimeoutSeconds 300 -ReportPath reports/strict-live-acceptance.md passed in strict-live-focused mode
+
+    0.4.0-dev - 2026/05/10 (b0452c8) [develop]
+        :brief 运行真实 topic+code PaperRun 质量基准并生成后续硬化任务
+        - feat(benchmark): 新增 scripts/live-paper-quality-benchmark.ts, 可复现创建真实 PaperRun、forced export 与 summary JSON
+        - feat(gitignore): 忽略 .paper_fucker/runs/, 防止 live PaperRun 产物进入 Git
+        - docs(benchmark): 新增 reports/live-paper-quality-benchmark.md, 记录 DeepSeek/Exa/Nature/toolchain/PaperRun 结果与质量缺口
+        - docs(strict): 更新 reports/strict-live-acceptance.md, 标记 task-046 strict rerun 因无超时保护需要硬化
+        - plan(taskflow): 新增 task-047..task-051, 覆盖 strict timeout、PaperRun terminal gate、PDF fallback、默认 audit coverage 与最终 benchmark 回归
+        - docs(readme): 版本更新为 0.4.0-dev, 记录 live benchmark 入口和后续硬化计划
+        :src
+            - scripts/live-paper-quality-benchmark.ts - reproducible topic+code PaperRun live benchmark
+            - reports/live-paper-quality-benchmark.md - benchmark evidence, artifacts, and quality gap review
+            - reports/strict-live-acceptance.md - latest task-046 strict attempt status and follow-up
+            - .gitignore - ignored .paper_fucker/runs/ runtime artifacts
+            - .plan/confirmed/task-047-strict-acceptance-timeouts.yaml - strict timeout hardening task
+            - .plan/confirmed/task-048-paperrun-completion-gates.yaml - terminal/gate alignment task
+            - .plan/confirmed/task-049-export-pdf-renderer-fallback.yaml - PDF renderer fallback task
+            - .plan/confirmed/task-050-default-observability-coverage.yaml - default audit coverage task
+            - .plan/confirmed/task-051-live-benchmark-regression-pass.yaml - milestone rerun task
+            - README.md - current behavior and version update
+            - CHANGELOG - 0.4.0-dev history entry
+        :verification
+            - DeepSeek /models + chat smoke passed for deepseek-v4-pro
+            - Exa MCP initialize passed
+            - nature-paper skill and Nature author guidance smoke passed
+            - pandoc Markdown-to-LaTeX and DOCX smokes passed; direct XeLaTeX PDF smoke passed
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/paperrun-execution.test.ts test/paper/code-to-paper.test.ts test/paper/export-pipeline.test.ts test/paper/observability-audit.test.ts passed: 7 pass, 0 fail, 49 expects
+            - scripts/live-paper-quality-benchmark.ts produced run-622f4660-3c8c-4dfe-b25f-04ef7484fd8f with 14/14 stages succeeded, 84 sources, 33 artifacts, 1 claim, 1 draft, forced Markdown/LaTeX/DOCX export, and documented final gate blockers
+

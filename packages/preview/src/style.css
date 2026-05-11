@@ -158,15 +158,6 @@ pre,
   color: var(--muted);
 }
 
-.deerflow-mark {
-  position: fixed;
-  right: 14px;
-  bottom: 10px;
-  color: rgba(32, 32, 29, 0.45);
-  font-size: 11px;
-  text-decoration: none;
-}
-
 @media (max-width: 720px) {
   .topbar {
     display: block;

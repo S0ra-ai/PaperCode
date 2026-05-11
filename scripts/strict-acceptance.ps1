@@ -571,11 +571,15 @@ function Invoke-HFNoMockBoundary {
 function Invoke-ChangelogSplitArchives {
     $preferences = Read-RepoText ".plan/preferences.yaml"
     Assert-HardFork ($preferences -match "archive_dir: docs/changelog" -and $preferences -match "minor_split_line_threshold") "TaskFlow changelog split preferences are missing."
-    $archive = Join-Path $RepoRoot "docs/changelog/v0/0.1.x.CHANGELOG"
-    Assert-HardFork (Test-Path -LiteralPath $archive) "0.1.x changelog archive is missing."
-    $archiveText = Get-Content -Raw -LiteralPath $archive
-    Assert-HardFork ($archiveText -match ":history" -and $archiveText -match "0\.1\.") "0.1.x changelog archive does not contain colon history entries."
-    return "TaskFlow changelog split preferences and 0.1.x archive are present"
+    $rootChangelog = Read-RepoText "CHANGELOG"
+    Assert-HardFork ($rootChangelog -match "0\.8\." -and -not ($rootChangelog -match "0\.7\.0-dev")) "Root CHANGELOG should keep the active line and archive older history."
+    foreach ($minor in @("0.1", "0.2", "0.3", "0.4", "0.5", "0.6", "0.7")) {
+        $archive = Join-Path $RepoRoot "docs/changelog/v0/$minor.x.CHANGELOG"
+        Assert-HardFork (Test-Path -LiteralPath $archive) "$minor.x changelog archive is missing."
+        $archiveText = Get-Content -Raw -LiteralPath $archive
+        Assert-HardFork ($archiveText -match ":history" -and $archiveText -match [regex]::Escape($minor + ".")) "$minor.x changelog archive does not contain colon history entries."
+    }
+    return "TaskFlow changelog split preferences and 0.1.x-0.7.x archives are present"
 }
 
 function Write-Report {

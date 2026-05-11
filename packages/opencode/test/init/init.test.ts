@@ -4,7 +4,7 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from "fs/promises"
 import { setTimeout as sleep } from "node:timers/promises"
 import os from "os"
 import path from "path"
-import { diagnoseInit, initPaths, readSecrets, runInitWizard } from "@/paper/init"
+import { diagnoseInit, initPaths, readSecrets, resetInitState, runInitWizard } from "@/paper/init"
 
 async function clean(dir: string, attempts = 30): Promise<void> {
   Bun.gc(true)
@@ -82,5 +82,50 @@ describe("init wizard", () => {
         },
       }),
     ).rejects.toThrow(/Full Access/)
+  })
+
+  test("backs up and resets only global plus ignored workspace state", async () => {
+    const home = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-reset-home-"))
+    const workspace = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-reset-workspace-"))
+    try {
+      const globalRoot = path.join(home, ".paper_fucker")
+      const workspaceRoot = path.join(workspace, ".paper_fucker")
+      const localDir = path.join(workspaceRoot, "local")
+      const runsDir = path.join(workspaceRoot, "runs")
+      const trackedSkillDir = path.join(workspaceRoot, "skills", "nature-paper")
+      await mkdir(globalRoot, { recursive: true })
+      await mkdir(localDir, { recursive: true })
+      await mkdir(path.join(runsDir, "run-1"), { recursive: true })
+      await mkdir(trackedSkillDir, { recursive: true })
+      await writeFile(path.join(globalRoot, "config.json"), "{}")
+      await writeFile(path.join(localDir, "provider-secrets.json"), "{}")
+      await writeFile(path.join(runsDir, "run-1", "snapshot.json"), "{}")
+      await writeFile(path.join(trackedSkillDir, "SKILL.md"), "# Nature")
+
+      const result = await resetInitState({
+        home,
+        workspace,
+        scope: "all",
+        backup: true,
+        yes: true,
+        now: new Date("2026-05-11T00:00:00Z"),
+      })
+
+      expect(result.backup_dir).toBe(path.join(home, ".paper_fucker_backups", "20260511T000000Z"))
+      expect(existsSync(globalRoot)).toBe(false)
+      expect(existsSync(localDir)).toBe(false)
+      expect(existsSync(runsDir)).toBe(false)
+      expect(existsSync(trackedSkillDir)).toBe(true)
+      expect(existsSync(path.join(result.backup_dir!, "global", "config.json"))).toBe(true)
+      expect(existsSync(path.join(result.backup_dir!, "workspace-local", "provider-secrets.json"))).toBe(true)
+      expect(existsSync(path.join(result.backup_dir!, "workspace-runs", "run-1", "snapshot.json"))).toBe(true)
+    } finally {
+      await clean(home)
+      await clean(workspace)
+    }
+  })
+
+  test("reset requires explicit confirmation", async () => {
+    await expect(resetInitState({ yes: false })).rejects.toThrow(/--yes/)
   })
 })

@@ -1,4 +1,5 @@
-import { createMemo, createSignal, onMount, Show } from "solid-js"
+import { createEffect, createMemo, createSignal, onMount, Show } from "solid-js"
+import open from "open"
 import { useRouteData } from "@tui/context/route"
 import { useSDK } from "@tui/context/sdk"
 import { useTheme } from "@tui/context/theme"
@@ -9,6 +10,7 @@ import {
   fetchPaperRunSnapshot,
   fetchPaperWorkbenchCapabilities,
   fetchPaperWorkbenchDoctor,
+  requestPaperWorkbenchPreview,
   paperWorkbenchHealthFromDoctor,
   type PaperRunSidebarState,
   type PaperWorkbenchHealthInput,
@@ -152,6 +154,7 @@ export function PaperRunDashboard() {
   const [capabilities, setCapabilities] = createSignal<ResearchCapability[]>([])
   const [health, setHealth] = createSignal<PaperWorkbenchHealthInput>({})
   const [error, setError] = createSignal<string>()
+  const [previewOpened, setPreviewOpened] = createSignal(false)
 
   onMount(() => {
     if (snapshot()) return
@@ -181,6 +184,21 @@ export function PaperRunDashboard() {
     })
       .then((payload) => setHealth(paperWorkbenchHealthFromDoctor(payload)))
       .catch(() => setHealth({}))
+  })
+
+  createEffect(() => {
+    const value = snapshot()
+    if (!value || previewOpened() || value.preview_state.status !== "ready") return
+    setPreviewOpened(true)
+    void requestPaperWorkbenchPreview({
+      baseUrl: sdk.url,
+      directory: sdk.directory,
+      fetch: sdk.fetch,
+      runID: value.run_id,
+      openUrl: (url) => {
+        void open(url).catch(() => {})
+      },
+    }).catch((cause) => setError(cause instanceof Error ? cause.message : "PaperRun Preview 打开失败"))
   })
 
   const state = createMemo(() => {

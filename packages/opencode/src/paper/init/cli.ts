@@ -1,11 +1,13 @@
 import { diagnoseInit, runInitWizard } from "./wizard"
+import { resetInitState, type InitResetScope } from "./reset"
 
 function usage() {
-  return `paper_fucker init|diagnostics [options]
+  return `paper_fucker init|doctor|diagnostics|reset [options]
 
 Commands:
   init --yes --full-access-ack [--home PATH] [--workspace PATH] [--tool name=path] [--secret name=value]
-  diagnostics [--home PATH]
+  doctor|diagnostics [--home PATH]
+  reset --scope all|global|workspace-local|workspace-runs --backup --yes [--home PATH] [--workspace PATH]
 `
 }
 
@@ -61,8 +63,19 @@ export async function main(argv = process.argv.slice(2)) {
     console.log(JSON.stringify(result, null, 2))
     return 0
   }
-  if (command === "diagnostics") {
+  if (command === "doctor" || command === "diagnostics") {
     console.log(JSON.stringify(await diagnoseInit(value(argv, "--home")), null, 2))
+    return 0
+  }
+  if (command === "reset") {
+    const result = await resetInitState({
+      scope: (value(argv, "--scope") ?? "all") as InitResetScope,
+      home: value(argv, "--home"),
+      workspace: value(argv, "--workspace"),
+      backup: !argv.includes("--no-backup"),
+      yes: argv.includes("--yes"),
+    })
+    console.log(JSON.stringify(result, null, 2))
     return 0
   }
   throw new Error(`Unknown command: ${command}`)

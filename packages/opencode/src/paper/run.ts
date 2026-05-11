@@ -1,5 +1,7 @@
 import path from "path"
 import { readFile } from "fs/promises"
+import { startPreviewServer, type PreviewServerHandle } from "../../../preview/src/server"
+import type { PreviewAnnotation, PreviewArtifactRef, PreviewSnapshot } from "../../../preview/src/protocol"
 import {
   appendResearchEvent,
   createResearchRun,
@@ -249,6 +251,24 @@ export interface PaperRun {
   snapshot: PaperRunSnapshot
 }
 
+export interface PaperRunPreviewResponse {
+  readonly: true
+  run_id: string
+  status: PaperRunSnapshot["preview_state"]["status"]
+  url: string
+  token: string
+  snapshot: PreviewSnapshot
+  drafts: ResearchDraft[]
+  exports: ResearchExport[]
+  export_state: PaperExportBundle
+  annotations: Array<{
+    claim_id: string
+    source_ids: string[]
+    artifact_ids: string[]
+  }>
+  diagnostics: PaperRunSnapshot["diagnostics"]
+}
+
 export interface PaperRunRuntimeOptions extends ResearchRuntimeOptions {
   workspace?: string
 }
@@ -259,6 +279,14 @@ export class PaperRunNotFoundError extends Error {
     this.name = "PaperRunNotFoundError"
   }
 }
+
+const livePreviewServers = new Map<
+  string,
+  {
+    handle: PreviewServerHandle
+    updated_at: string
+  }
+>()
 
 function defaultDataEgressPolicy(input?: Partial<DataEgressPolicy>): DataEgressPolicy {
   return {
@@ -592,6 +620,146 @@ function paperExportBundleFromResearch(runID: string, bundle: ExportBundle): Pap
   }
 }
 
+function numberValue(value: unknown) {
+  return typeof value === "number" && Number.isFinite(value) ? value : 0
+}
+
+function previewMimeType(kind: PreviewArtifactRef["kind"]) {
+  switch (kind) {
+    case "markdown":
+      return "text/markdown"
+    case "latex":
+      return "text/x-tex"
+    case "pdf":
+      return "application/pdf"
+    case "docx":
+      return "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+  }
+}
+
+function previewArtifactKind(format: string): PreviewArtifactRef["kind"] | undefined {
+  if (format === "markdown" || format === "latex" || format === "pdf" || format === "docx") return format
+  return undefined
+}
+
+function resolveRunFile(runDir: string, filePath: string) {
+  return path.isAbsolute(filePath) ? filePath : path.join(runDir, filePath)
+}
+
+async function markdownArtifactForPreview(
+  runDir: string,
+  snapshot: PaperRunSnapshot,
+): Promise<PreviewArtifactRef> {
+  const latest = snapshot.drafts.at(-1)
+  const content = latest
+    ? await readFile(resolveRunFile(runDir, latest.path), "utf8").catch(() => undefined)
+    : undefined
+  return {
+    kind: "markdown",
+    path: latest?.path,
+    mime_type: "text/markdown",
+    content: content ?? `# ${snapshot.topic}\n\nPaper Fucker Preview is waiting for a recorded draft artifact.`,
+    updated_at: snapshot.updated_at,
+  }
+}
+
+function previewAnnotations(snapshot: PaperRunSnapshot): PreviewAnnotation[] {
+  const claimAnnotations = snapshot.claim_ledger.map((claim): PreviewAnnotation => ({
+    id: `claim:${claim.claim_id}`,
+    kind: "claim",
+    severity: claim.status === "supported" ? "info" : "blocker",
+    message: `${claim.claim_id}: ${claim.text}`,
+    source: {
+      label: claim.source_ids.length > 0 ? claim.source_ids.join(", ") : claim.claim_id,
+    },
+    tui_ref: `claim-ledger:${claim.claim_id}`,
+  }))
+  const failedChecks = snapshot.export_state.failed_checks.map((check): PreviewAnnotation => ({
+    id: `gate:${check}`,
+    kind: "reviewer",
+    severity: "blocker",
+    message: check,
+    source: { label: "final_gate" },
+    tui_ref: `gate:${check}`,
+  }))
+  return [...claimAnnotations, ...failedChecks]
+}
+
+async function createPaperRunLivePreviewSnapshot(
+  runDir: string,
+  snapshot: PaperRunSnapshot,
+): Promise<PreviewSnapshot> {
+  const markdown = await markdownArtifactForPreview(runDir, snapshot)
+  const artifacts: PreviewSnapshot["artifacts"] = { markdown }
+  for (const file of snapshot.export_state.files ?? []) {
+    const kind = previewArtifactKind(file.format)
+    if (!kind) continue
+    artifacts[kind] = {
+      kind,
+      path: file.path,
+      mime_type: file.mime_type ?? previewMimeType(kind),
+      updated_at: snapshot.updated_at,
+    }
+  }
+  const cost = jsonRecord(snapshot.diagnostics.cost)
+  return {
+    schema_version: "preview.v1",
+    run_id: snapshot.run_id,
+    title: snapshot.topic,
+    readonly: true,
+    updated_at: snapshot.updated_at,
+    artifacts,
+    annotations: previewAnnotations(snapshot),
+    diagnostics: {
+      tools: Object.fromEntries(
+        snapshot.diagnostics.tool_traces.slice(-12).map((trace) => [
+          trace.tool_name,
+          {
+            status: trace.status,
+            message: trace.error,
+          },
+        ]),
+      ),
+      costs: {
+        llm_usd: numberValue(cost.llm_usd),
+        api_usd: numberValue(cost.api_usd),
+        total_usd: numberValue(cost.total_usd),
+      },
+      agents: snapshot.agent_tree.nodes.slice(-12).map((agent) => ({
+        name: agent.agent_id,
+        status: agent.status,
+        detail: `${agent.role} ${agent.provider_id}/${agent.model_id}`,
+      })),
+    },
+    render: {
+      state: "ready",
+      stage: "paperrun",
+      message: "PaperRun live preview ready",
+      updated_at: snapshot.updated_at,
+    },
+  }
+}
+
+function startOrReplaceLivePreview(runID: string, snapshot: PreviewSnapshot) {
+  const existing = livePreviewServers.get(runID)
+  existing?.handle.stop()
+  const handle = startPreviewServer({ snapshot })
+  livePreviewServers.set(runID, { handle, updated_at: snapshot.updated_at })
+  return handle
+}
+
+export function stopPaperRunLivePreview(runID: string) {
+  const existing = livePreviewServers.get(runID)
+  if (!existing) return false
+  existing.handle.stop()
+  livePreviewServers.delete(runID)
+  return true
+}
+
+export function stopAllPaperRunLivePreviews() {
+  for (const runID of [...livePreviewServers.keys()]) stopPaperRunLivePreview(runID)
+}
+
 function intakeFromRun(run: Awaited<ReturnType<typeof loadResearchRun>>): ResearchBrief {
   const metadata = jsonRecord(run.metadata)
   const intake = jsonRecord(metadata.paper_intake)
@@ -874,12 +1042,18 @@ export async function controlPaperRun(
   return state
 }
 
-export async function previewPaperRun(runID: string, options?: PaperRunRuntimeOptions) {
-  const snapshot = await getPaperRunSnapshot(runID, options)
+export async function previewPaperRun(runID: string, options?: PaperRunRuntimeOptions): Promise<PaperRunPreviewResponse> {
+  const runDir = await findPaperRunDir(runID, options)
+  const snapshot = await getPaperRunSnapshotFromDir(runDir)
+  const previewSnapshot = await createPaperRunLivePreviewSnapshot(runDir, snapshot)
+  const livePreview = startOrReplaceLivePreview(runID, previewSnapshot)
   return {
     readonly: true,
     run_id: runID,
     status: snapshot.preview_state.status,
+    url: livePreview.url,
+    token: livePreview.token,
+    snapshot: previewSnapshot,
     drafts: snapshot.drafts,
     exports: snapshot.exports,
     export_state: snapshot.export_state,
