@@ -1,0 +1,157 @@
+id: release-public-internal-docs
+title: Release public README and internal documentation split
+status: in_progress
+priority: high
+owner: codex
+tags:
+- release
+- docs
+- readme
+- github
+depends_on: []
+description: Rewrite README as an external GitHub landing page, move detailed architecture/release
+  operations into internal docs, and keep release file/version checks stable on release/0.8.5.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: readme-research-shape
+  title: Apply README reference shape
+  status: done
+  owner: codex
+  depends_on: []
+  description: Use GitHub and Google README guidance to shape public README around
+    value, quickstart, usage, help, and links instead of internal release notes.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T10:28:46.706012'
+      level: info
+      message: Reviewed GitHub README docs, GitHub quickstart guidance, and Google
+        README style guide. Public README should explain usefulness, getting started,
+        support, and links; deeper internal docs should not crowd the front page.
+      agent: codex
+    - timestamp: '2026-05-11T10:28:52.401096'
+      level: info
+      message: 'Adopted public README shape from references: value proposition, quickstart,
+        use cases, privacy, links, concise project structure; moved architecture/release
+        internals to docs/internal.'
+      agent: codex
+    last_run: '2026-05-11T10:28:52.401096'
+    attempt_count: 2
+  meta: {}
+- id: public-readme
+  title: Rewrite external README
+  status: done
+  owner: codex
+  depends_on: []
+  description: Make README Chinese-first, public-facing, with single version marker,
+    quickstart, use cases, provider setup, preview/export, privacy, and doc links.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T10:29:01.296278'
+      level: info
+      message: Rewriting README as external GitHub landing page.
+      agent: codex
+    - timestamp: '2026-05-11T10:29:41.238260'
+      level: info
+      message: Rewrote README as an external GitHub-facing Chinese landing page and
+        updated check-readme-version.ps1 to read UTF-8 explicitly so the version marker
+        can live on a Chinese line without duplicate rendering.
+      agent: codex
+    last_run: '2026-05-11T10:29:41.238260'
+    attempt_count: 2
+  meta: {}
+- id: internal-docs
+  title: Split internal documentation
+  status: done
+  owner: codex
+  depends_on: []
+  description: Create docs/internal/README.md and move architecture, TaskFlow, release
+    branch, validation, and release file policy details there.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T10:29:47.792844'
+      level: info
+      message: Creating internal maintainer documentation split for architecture,
+        TaskFlow, release file surface, and validations.
+      agent: codex
+    - timestamp: '2026-05-11T10:32:40.756654'
+      level: info
+      message: Created docs/internal/README.md as maintainer/internal documentation
+        and marked docs/project-structure.md as internal, leaving README as the external-facing
+        entry.
+      agent: codex
+    last_run: '2026-05-11T10:32:40.756654'
+    attempt_count: 2
+  meta: {}
+- id: validation
+  title: Run documentation and release checks
+  status: done
+  owner: codex
+  depends_on: []
+  description: Run README version, changelog format, release file audit, and TaskFlow
+    validations.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T10:32:52.267434'
+      level: info
+      message: Running README version, changelog, release file, and TaskFlow validations.
+      agent: codex
+    - timestamp: '2026-05-11T10:33:38.046682'
+      level: info
+      message: Passed check-readme-version, check-changelog-format, check-release-files,
+        git diff --check, TaskFlow validate_changelog_format, and TaskFlow validate_task
+        release-public-internal-docs.
+      agent: codex
+    last_run: '2026-05-11T10:33:38.046682'
+    attempt_count: 2
+  meta: {}
+- id: changelog-commit
+  title: Commit and record changelog
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Commit work, record CHANGELOG with real commit id, rerun checks, and
+    complete TaskFlow.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: file
+  path: README.md
+  description: External GitHub-facing README.
+- type: file
+  path: docs/internal/README.md
+  description: Internal maintainer documentation index.
+- type: file
+  path: docs/project-structure.md
+  description: Internal structure documentation link-aligned with README.
+- type: file
+  path: scripts/check-readme-version.ps1
+  description: UTF-8-safe version marker check.
+trace:
+  logs: []
+  attempt_count: 0
+lock:
+  by: codex
+  at: '2026-05-11T10:28:31.594002'
+meta:
+  created_at: '2026-05-11T10:28:25.829000'
+  updated_at: '2026-05-11T10:33:38.046682'
+  version: '1'

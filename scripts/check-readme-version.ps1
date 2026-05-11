@@ -13,8 +13,9 @@ if (-not (Test-Path -LiteralPath $readmePath)) {
     throw "README.md not found at $readmePath"
 }
 
-$changelog = Get-Content -Raw -LiteralPath $changelogPath
-$readme = Get-Content -Raw -LiteralPath $readmePath
+$utf8 = [System.Text.UTF8Encoding]::new($false)
+$changelog = [System.IO.File]::ReadAllText($changelogPath, $utf8)
+$readme = [System.IO.File]::ReadAllText($readmePath, $utf8)
 
 $metadataPattern = '(?m)^:version\s+([0-9A-Za-z][0-9A-Za-z.-]*)\s*$'
 if ($changelog -notmatch $metadataPattern) {

@@ -1,5 +1,7 @@
 # Paper Fucker 项目结构
 
+> 内部维护文档。对外项目介绍见根目录 `README.md`；release 和 TaskFlow 细节见 `docs/internal/README.md`。
+
 这个仓库同时承担产品源码、release 准备、TaskFlow 审计证据和上游来源追溯。仓库里保留的文件不等于 release 会发布的文件；release artifact 只应携带安装、运行和用户验证所需内容。
 
 ## 活跃产品运行时
