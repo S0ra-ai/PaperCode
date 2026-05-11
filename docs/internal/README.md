@@ -106,6 +106,15 @@ $env:PYTHONPATH = 'research-tools/src'; python -m unittest discover -s research-
 5. Provider/模型配置。
 6. Preview/export。
 7. 隐私与数据外传。
-8. 内部文档链接。
+8. 项目状态和许可证。
 
 不要把 TaskFlow、release 文件面、上游迁移细节、长验证日志放在 README 首屏。
+
+对外 README 不应出现：
+
+- 当前 git 分支、RC/tag/main 操作策略。
+- 维护者脚本清单，例如 `check-release-files.ps1` 或 `strict-acceptance.ps1`。
+- `.plan/`、`reports/`、`legacy/`、`upstream/` 等内部审计目录清单。
+- 内部文档索引、归档策略或 TaskFlow 执行细节。
+
+这些内容留在本文件、`docs/project-structure.md` 或 TaskFlow step log 中。README 只服务外部读者判断“这是什么、能不能用、怎么开始、是否可信”。

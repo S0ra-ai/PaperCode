@@ -1,6 +1,6 @@
 # Paper Fucker
 
-当前版本：<!-- version:start -->0.8.5-dev<!-- version:end --> ｜ 状态：`release/0.8.5` 手测准备中 ｜ 许可证：private-first / UNLICENSED
+当前版本：<!-- version:start -->0.8.5-dev<!-- version:end --> ｜ 状态：开发预览版 ｜ 许可证：private-first / UNLICENSED
 
 Paper Fucker 是一个中文优先、私有优先的可验证论文工作台。你可以给它一个研究主题、代码仓库、数据集、实验日志或已有论文材料，它会自动完成研究规划、资料检索、代码理解、实验复现、证据账本写作、真实性审查、实时预览和最终导出。
 
@@ -43,19 +43,11 @@ Run 页面会展示：
 - Preview 与 Export 控制
 - 需要你决策的中文 pause questions
 
-从零手测多个 provider 前，可以先备份并清理本地状态：
-
-```powershell
-paper_fucker init reset --scope all --backup --yes
-paper_fucker init
-.\scripts\provider-matrix-smoke.ps1
-```
-
-`reset` 只处理全局 `~/.paper_fucker`、工作区 ignored 的 `.paper_fucker/local/` 和 `.paper_fucker/runs/`。它不会删除仓库里的 tracked skills、commands、themes、glossary 或配置模板。
+如果你要重新配置 provider、模型角色或本地工具链，重新运行 `paper_fucker init` 即可进入初始化向导；`paper_fucker init doctor` 会检查当前配置和工具状态。
 
 ## 非交互模式
 
-CLI 适合脚本、自动化、CI smoke 或你明确想绕过 TUI 的场景。它不是主交互入口。
+CLI 适合脚本、自动化检查或你明确想绕过 TUI 的场景。它不是主交互入口。
 
 **主题出论文**
 
@@ -113,7 +105,6 @@ DeepSeek 只是默认样例，不是唯一支持模型。任何 OpenCode substra
 ```powershell
 paper_fucker init
 paper_fucker init doctor
-.\scripts\provider-matrix-smoke.ps1
 ```
 
 Provider public config 存在 `~/.paper_fucker/providers/`，secret 存在 `~/.paper_fucker/local/provider-secrets.json`。API key 不应进入 git。
@@ -136,28 +127,11 @@ Paper Fucker 默认 private-first：
 - secrets、ignored files、大二进制和敏感配置会自动排除。
 - 所有外部 tool/model/MCP 调用都会写入 audit/tool trace。
 
-## 文档入口
+## 项目状态
 
-- 对外说明：当前 `README.md`。
-- 内部维护文档：`docs/internal/README.md`。
-- 项目目录说明：`docs/project-structure.md`。
-- Changelog 归档策略：`docs/changelog/README.md`。
-- 版本历史：`CHANGELOG`。
+Paper Fucker 仍处于开发预览阶段，接口、TUI 布局和内置能力包可能继续调整。当前目标是让“主题/代码/材料到可审查论文包”的闭环先稳定下来，再进入更稳定的试用版本。
 
-## Release 测试
-
-当前 release 分支用于多 provider 手测和 RC 前稳定，不打 tag、不合并 `main`。
-
-常用检查：
-
-```powershell
-.\scripts\check-readme-version.ps1
-.\scripts\check-changelog-format.ps1
-.\scripts\check-release-files.ps1
-.\scripts\strict-acceptance.ps1 -CheckTimeoutSeconds 300
-```
-
-Release artifact 不携带 `.plan/`、`reports/`、`legacy/`、`upstream/`、本地 runtime、测试树和上游营销素材。仓库保留这些内容用于审计和追溯。
+版本历史见 `CHANGELOG`。发布包只包含安装、运行和用户验证所需内容，不包含开发、测试或本地运行资产。
 
 ## License
 
