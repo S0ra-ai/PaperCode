@@ -160,7 +160,7 @@ $binaryManifestPassed = (
 $lines = New-Object System.Collections.Generic.List[string]
 $lines.Add("# Release File Audit") | Out-Null
 $lines.Add("") | Out-Null
-$lines.Add(("- generated_at: {0}" -f (Get-Date -Format o))) | Out-Null
+$lines.Add("- generated_at: on-demand") | Out-Null
 $lines.Add(("- repo_root: {0}" -f $RepoRoot)) | Out-Null
 $lines.Add("- policy: keep provenance in git, keep release artifacts product/runtime only.") | Out-Null
 $lines.Add("") | Out-Null

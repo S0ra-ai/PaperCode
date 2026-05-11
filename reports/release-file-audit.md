@@ -1,12 +1,12 @@
 # Release File Audit
 
-- generated_at: 2026-05-11T18:19:58.1555626+08:00
+- generated_at: on-demand
 - repo_root: E:\Project\paper_fucker
 - policy: keep provenance in git, keep release artifacts product/runtime only.
 
 ## GitHub Source Archive
 
-- files: 4045
+- files: 4047
 - blocked: 0
 - status: passed
 
