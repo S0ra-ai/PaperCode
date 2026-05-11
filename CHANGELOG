@@ -2,10 +2,33 @@
 :author        s0ra (https://github.com/S0ra-ai)
 :repo          
 :desc          记录项目的重大变更和版本历史
-:version       0.8.1-dev
+:version       0.8.2-dev
 :last_update   2026/05/11
 
 :history
+
+    0.8.2-dev - 2026/05/11 (54bee71) [develop]
+        :brief 全仓 strict acceptance 验收硬化
+        - test(acceptance): 全量 packages/opencode test 纳入 strict-live-full 正式验收并通过 2586 pass / 0 fail
+        - fix(test): paper/research 临时目录清理加入 Windows EBUSY/EACCES/EPERM 重试与警告降级，避免清理句柄竞争污染产品断言
+        - fix(export): export diagnostics 测试改为注入失败 renderer，避免依赖本机 pandoc/LaTeX 可用性产生漂移
+        - test(httpapi): 同步 PaperRun control route 到 Effect HttpApi parity 白名单
+        - chore(strict): strict acceptance 失败详情保留更长尾部日志，便于后续定位 full suite 失败
+        - chore(audit): autonomous product audit 纳入 strict-live-full evidence 检查
+        :src
+            - scripts/strict-acceptance.ps1 - 扩大失败详情截断上限并记录失败命令末尾日志
+            - scripts/autonomous-product-audit.ps1 - 新增 full-workspace-evidence 检查，要求 reports/strict-live-full-acceptance.md 通过
+            - packages/opencode/test/research/*.test.ts - 临时目录 cleanup 加 maxRetries/retryDelay 并在最终失败时警告降级
+            - packages/opencode/test/paper/*.test.ts - 同步 cleanup 重试，降低 Windows 句柄释放竞态
+            - packages/opencode/test/research/export.test.ts - 使用 failedRenderers 固化 PDF/DOCX 诊断路径
+            - packages/opencode/test/server/httpapi-bridge.test.ts - 加入 POST /paper/runs/{runID}/control parity 期望
+        :reports
+            - reports/strict-live-full-acceptance.md - strict-live-full 全仓验收通过，包含 full packages/opencode test、preview、Python、typecheck、live provider、Exa、Nature、pandoc、LaTeX、DOCX、crawler、HF、topic/code/final PaperRun smoke
+            - reports/autonomous-product-audit.md - 自主审计通过并确认 full-workspace-evidence
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test --bail passed: 2586 pass, 38 skip, 2 todo, 0 fail
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\strict-acceptance.ps1 -FullWorkspaceSuite -CheckTimeoutSeconds 600 -FullWorkspaceTimeoutSeconds 2700 -ReportPath reports/strict-live-full-acceptance.md passed
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\autonomous-product-audit.ps1 -AllowActiveTask passed
 
     0.8.1-dev - 2026/05/11 (1c6692d) [develop]
         :brief 自驱产品审计与持续推进流程

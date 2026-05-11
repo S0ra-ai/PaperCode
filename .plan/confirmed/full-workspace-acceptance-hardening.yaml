@@ -1,6 +1,6 @@
 id: full-workspace-acceptance-hardening
 title: 全仓 strict acceptance 验收硬化
-status: in_progress
+status: done
 priority: high
 owner: codex
 tags:
@@ -115,7 +115,7 @@ steps:
   meta: {}
 - id: docs-version-validation
   title: 同步文档版本并验证
-  status: todo
+  status: done
   owner: codex
   depends_on:
   - audit-full-suite-evidence
@@ -125,8 +125,23 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-11T01:53:55.167754'
+      level: info
+      message: 'Work commit created: 54bee71 test(acceptance): harden full workspace
+        validation. Next: record CHANGELOG 0.8.2-dev with real commit id, update README
+        current version and full workspace acceptance notes, then run README/CHANGELOG
+        and TaskFlow validations.'
+      agent: codex
+    - timestamp: '2026-05-11T01:54:51.026541'
+      level: info
+      message: 'Recorded CHANGELOG 0.8.2-dev with work commit 54bee71, updated README
+        current version to 0.8.2-dev and documented reports/strict-live-full-acceptance.md
+        as full workspace evidence. Verification passed: scripts/check-readme-version.ps1,
+        git diff --check, TaskFlow validate_changelog_format.'
+      agent: codex
+    last_run: '2026-05-11T01:54:51.026541'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -147,10 +162,7 @@ outputs:
 trace:
   logs: []
   attempt_count: 0
-lock:
-  by: codex
-  at: '2026-05-10T23:32:49.252394'
 meta:
   created_at: '2026-05-10T23:32:40.294477'
-  updated_at: '2026-05-11T01:52:49.300849'
+  updated_at: '2026-05-11T01:57:11.553664'
   version: '1'
