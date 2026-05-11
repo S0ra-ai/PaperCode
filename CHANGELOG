@@ -7,6 +7,25 @@
 
 :history
 
+    0.8.5-dev - 2026/05/12 (3f60a80) [release/0.8.5]
+        :brief README 补齐 Windows 安装与首次启动路径
+        - docs(readme): 新增安装章节，说明当前开发预览版在 Windows 上使用 Git、Bun、clone 与 bun install 从源码运行
+        - docs(readme): 增加临时 PowerShell paper_fucker function，让源码预览用户能按 README 使用同一命令入口
+        - docs(readme): 区分基础 TUI 必需项与 Pandoc、LaTeX、Docker、Python 等按能力启用的可选外部工具
+        - docs(readme): 将初始化示例统一改为 paper_fucker init --yes，避免当前非交互 init 入口被照抄后失败
+        - docs(internal): 增加 README 安装说明维护规则，禁止把尚未发布的 installer/package 写成主安装方式
+        :src
+            - README.md - Windows source preview install and first-run instructions
+            - docs/internal/README.md - README install documentation rules
+        :verification
+            - function paper_fucker { bun run --cwd "E:\Project\paper_fucker\packages\opencode" --conditions=browser src/index.ts @args }; paper_fucker --help passed
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-changelog-format.ps1 passed
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-release-files.ps1 passed
+            - git diff --check passed
+            - TaskFlow validate_changelog_format passed
+            - TaskFlow validate_task release-readme-windows-install passed
+
     0.8.5-dev - 2026/05/11 (ccb8e2d) [release/0.8.5]
         :brief README 对外信息边界收紧
         - docs(readme): 顶部状态从 release 分支现场改为开发预览版，避免对外暴露内部发布执行状态
