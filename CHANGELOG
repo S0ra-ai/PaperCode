@@ -2,10 +2,30 @@
 :author        s0ra (https://github.com/S0ra-ai)
 :repo          
 :desc          记录项目的重大变更和版本历史
-:version       0.8.3-dev
+:version       0.8.4-dev
 :last_update   2026/05/11
 
 :history
+
+    0.8.4-dev - 2026/05/11 (e96072c) [develop]
+        :brief strict acceptance 锁定 verified source final gate
+        - test(acceptance): final-export-pass-run 读取 live benchmark summary，断言 final_export=final、failed_checks empty、SourceEvidenceManifest.v1 存在、final gate passed
+        - fix(runtime): PaperRun JSON 原子写入使用唯一 tmp 文件名，并对 Windows EPERM/EBUSY/EACCES/ENOTEMPTY replace 失败做短退避重试
+        - fix(acceptance): benchmark summary 使用 UTF-8 显式读取，避免中文默认语言在 Windows PowerShell 5.1 下被 ANSI 解码破坏
+        - test(runtime): 新增真实文件系统并发 writeJsonAtomic 测试，防止 PaperRun 状态写入在 live run 中竞态失败
+        - test(strict): focused strict server tests 纳入 runtime-state，并锁定完整 stdout 解析与 source evidence assertions
+        :src
+            - scripts/strict-acceptance.ps1 - live benchmark summary helper, source evidence final gate assertions, full stdout capture, UTF-8 summary parsing
+            - packages/opencode/src/paper/research/runtime/state.ts - unique tmp atomic writes and retrying replace for Windows file locks
+            - packages/opencode/test/paper/runtime-state.test.ts - real filesystem concurrent writeJsonAtomic regression
+            - packages/opencode/test/paper/strict-acceptance.test.ts - strict acceptance source-gate and UTF-8 parser coverage
+        :reports
+            - reports/strict-live-acceptance.md - focused strict live acceptance passed with topic/code/final PaperRun benchmark checks
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/runtime-state.test.ts test/paper/paperrun-execution.test.ts passed: 4 pass, 0 fail
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/strict-acceptance.test.ts passed: 10 pass, 0 fail
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\strict-acceptance.ps1 -CheckTimeoutSeconds 300 passed
 
     0.8.3-dev - 2026/05/11 (bec3df2) [develop]
         :brief 最终导出 source authenticity gate 硬化

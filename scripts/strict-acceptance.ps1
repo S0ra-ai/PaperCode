@@ -88,7 +88,8 @@ function Invoke-CheckedCommand {
         [string]$File,
         [string[]]$Arguments,
         [hashtable]$Environment = @{},
-        [int]$TimeoutSeconds = $CheckTimeoutSeconds
+        [int]$TimeoutSeconds = $CheckTimeoutSeconds,
+        [int]$OutputLineLimit = 12
     )
     $job = Start-Job -ScriptBlock {
         param(
@@ -144,7 +145,12 @@ function Invoke-CheckedCommand {
         $tail = ($last.output | Select-Object -Last 80) -join " "
         throw "$File $($Arguments -join ' ') failed with exit $($last.exit). Last output: $tail"
     }
-    return ($last.output | Select-Object -Last 12) -join " "
+    $output = if ($OutputLineLimit -le 0) {
+        $last.output
+    } else {
+        $last.output | Select-Object -Last $OutputLineLimit
+    }
+    return $output -join " "
 }
 
 function Invoke-Check {
@@ -388,6 +394,22 @@ print(json.dumps({"papers": len(papers["records"]), "jobs_mode": jobs["mode"], "
     return Invoke-PythonAcceptanceSnippet -Name "hf-live-research-loop.py" -Code $code -TimeoutSeconds 180
 }
 
+function Invoke-LivePaperBenchmark {
+    param([string]$Scenario)
+    $output = Invoke-CheckedCommand -File "npx" -Arguments @("--yes", "bun@1.3.13", "scripts/live-paper-quality-benchmark.ts", "--scenario", $Scenario) -OutputLineLimit 0
+    $match = [regex]::Match($output, '"summary_path"\s*:\s*"([^"]+)"')
+    Assert-StrictLive ($match.Success) "Live paper benchmark did not print summary_path for scenario $Scenario." | Out-Null
+    $relative = $match.Groups[1].Value -replace "/", [System.IO.Path]::DirectorySeparatorChar
+    $summaryPath = Join-Path $RepoRoot $relative
+    Assert-StrictLive (Test-Path -LiteralPath $summaryPath) "Live paper benchmark summary is missing: $relative" | Out-Null
+    $summaryText = [System.IO.File]::ReadAllText($summaryPath, [System.Text.Encoding]::UTF8)
+    $summary = $summaryText | ConvertFrom-Json
+    return [pscustomobject]@{
+        output = $output
+        summary = $summary
+    }
+}
+
 function Invoke-TrackedSecretScan {
     Push-Location $RepoRoot
     try {
@@ -607,6 +629,7 @@ Invoke-Check "server-tests" "Server tests" {
             "packages/opencode",
             "test",
             "test/paper/paperrun-execution.test.ts",
+            "test/paper/runtime-state.test.ts",
             "test/paper/code-to-paper.test.ts",
             "test/paper/export-pipeline.test.ts",
             "test/paper/observability-audit.test.ts",
@@ -657,13 +680,19 @@ Invoke-Check "hf-live-research-loop" "Hugging Face live papers and no-mock jobs/
     Invoke-HFLiveResearchLoop
 }
 Invoke-Check "topic-to-paper-live-run" "Topic-to-paper runtime smoke" {
-    Invoke-CheckedCommand "npx" @("--yes", "bun@1.3.13", "scripts/live-paper-quality-benchmark.ts", "--scenario", "topic")
+    (Invoke-LivePaperBenchmark "topic").output
 }
 Invoke-Check "code-to-paper-live-run" "Code-to-paper runtime smoke" {
-    Invoke-CheckedCommand "npx" @("--yes", "bun@1.3.13", "scripts/live-paper-quality-benchmark.ts", "--scenario", "code")
+    (Invoke-LivePaperBenchmark "code").output
 }
 Invoke-Check "final-export-pass-run" "Reproduction-pass final export runtime smoke" {
-    Invoke-CheckedCommand "npx" @("--yes", "bun@1.3.13", "scripts/live-paper-quality-benchmark.ts", "--scenario", "final")
+    $benchmark = Invoke-LivePaperBenchmark "final"
+    $summary = $benchmark.summary
+    Assert-StrictLive ($summary.final_export.status -eq "final") "Final benchmark did not produce final export." | Out-Null
+    Assert-StrictLive (@($summary.final_export.failed_checks).Count -eq 0) "Final benchmark returned failed checks." | Out-Null
+    Assert-StrictLive (@($summary.artifact_schemas) -contains "SourceEvidenceManifest.v1") "Final benchmark did not record SourceEvidenceManifest.v1." | Out-Null
+    Assert-StrictLive ($summary.diagnostics.final_gate.status -eq "passed") "Final benchmark final gate did not pass." | Out-Null
+    return "$($benchmark.output) SourceEvidenceManifest.v1 final_gate=passed"
 }
 Invoke-Check "hard-fork-paper-core" "Hard fork paper core migration" {
     Invoke-HardForkPaperCore

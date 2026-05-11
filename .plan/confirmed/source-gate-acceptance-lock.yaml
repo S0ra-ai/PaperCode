@@ -1,0 +1,117 @@
+id: source-gate-acceptance-lock
+title: strict acceptance 锁定 verified source final gate
+status: done
+priority: medium
+owner: codex
+tags:
+- acceptance
+- verification
+- source-ledger
+depends_on: []
+description: 在 0.8.3-dev source authenticity gate 基础上，补强 strict acceptance：final-export-pass-run
+  不只看 final_export=final，还读取 benchmark summary 并断言 SourceEvidenceManifest.v1、final
+  gate passed、final export 无 failed checks。版本目标 0.8.4-dev。
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: wire-summary-check
+  title: strict acceptance 读取 benchmark summary
+  status: done
+  owner: codex
+  depends_on: []
+  description: 新增 helper 解析 live-paper-quality-benchmark 输出和 summary JSON，并用于 topic/code/final
+    checks。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T02:45:43.965630'
+      level: info
+      message: Adding strict acceptance helper to parse live-paper-quality-benchmark
+        JSON output and summary files.
+      agent: codex
+    - timestamp: '2026-05-11T02:46:50.619810'
+      level: info
+      message: Added Invoke-LivePaperBenchmark helper to parse benchmark stdout summary_path
+        and load the generated summary JSON for strict acceptance assertions.
+      agent: codex
+    last_run: '2026-05-11T02:46:50.619810'
+    attempt_count: 2
+  meta: {}
+- id: assert-source-evidence-final
+  title: final-export-pass-run 断言 verified source evidence
+  status: done
+  owner: codex
+  depends_on:
+  - wire-summary-check
+  description: final check 必须确认 SourceEvidenceManifest.v1、final_export=final、final_gate
+    passed、failed_checks empty。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T02:46:56.649459'
+      level: info
+      message: Asserting SourceEvidenceManifest.v1, final gate passed, final export
+        final, and no failed checks in final-export-pass-run.
+      agent: codex
+    - timestamp: '2026-05-11T02:47:02.800364'
+      level: info
+      message: final-export-pass-run now reads benchmark summary and asserts final_export.status=final,
+        final_export.failed_checks empty, artifact_schemas includes SourceEvidenceManifest.v1,
+        and diagnostics.final_gate.status=passed.
+      agent: codex
+    last_run: '2026-05-11T02:47:02.800364'
+    attempt_count: 2
+  meta: {}
+- id: validate-release
+  title: 验证并发布 0.8.4-dev
+  status: done
+  owner: codex
+  depends_on:
+  - assert-source-evidence-final
+  description: 运行 strict acceptance tests、focused strict、版本同步、TaskFlow 校验，提交并合回 develop。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T02:56:26.566592'
+      level: info
+      message: 'Strict acceptance uncovered a real Windows PaperRun persistence failure:
+        writeJsonAtomic can hit EPERM while replacing run.json during live benchmark
+        runs. Expanding task scope to harden runtime writes before release.'
+      agent: codex
+    - timestamp: '2026-05-11T03:45:11.742850'
+      level: info
+      message: 'Validated 0.8.4-dev source-gate acceptance lock. Evidence: runtime-state
+        + paperrun-execution tests passed (4 pass, 0 fail); strict-acceptance test
+        passed (10 pass, 0 fail); packages/opencode typecheck passed; README/CHANGELOG
+        version check passed; CHANGELOG colon DSL validation passed; default strict
+        live acceptance passed with topic/code/final PaperRun benchmark checks, SourceEvidenceManifest.v1
+        and final_gate=passed assertions, report updated at reports/strict-live-acceptance.md.'
+      agent: codex
+    last_run: '2026-05-11T03:45:11.742850'
+    attempt_count: 2
+  meta: {}
+outputs:
+- type: file
+  path: scripts/strict-acceptance.ps1
+- type: file
+  path: packages/opencode/test/paper/strict-acceptance.test.ts
+- type: file
+  path: reports/strict-live-acceptance.md
+- type: file
+  path: README.md
+- type: file
+  path: CHANGELOG
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-11T02:45:33.551382'
+  updated_at: '2026-05-11T03:46:15.407751'
+  version: '1'

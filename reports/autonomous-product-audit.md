@@ -1,16 +1,16 @@
 ﻿# Autonomous Product Audit
 
-- Generated: 2026-05-11T10:41:22.2210660+08:00
+- Generated: 2026-05-11T11:45:37.9426189+08:00
 - Status: passed
 - Allow active task: False
 
 | Check | Status | Detail |
 | --- | --- | --- |
-| `taskflow-queue` | pass | TaskFlow queue is empty; done=72. |
-| `version-sync` | pass | README version 0.8.3-dev matches CHANGELOG latest version. |
+| `taskflow-queue` | pass | TaskFlow queue is empty; done=73. |
+| `version-sync` | pass | README version 0.8.4-dev matches CHANGELOG latest version. |
 | `changelog-shape` | pass | CHANGELOG keeps colon DSL header/history and real commit ids. |
 | `strict-live-evidence` | pass | Latest strict live report proves focused live crawler, HF, topic/code, and final export pass scenarios. |
 | `full-workspace-evidence` | pass | Latest full workspace strict acceptance report is passed and includes server/full workspace coverage. |
 | `dangerous-residue` | pass | No dangerous TODO/FIXME/not-implemented/mock residue found in product paper paths. |
 | `brand-surface` | pass | Paper Fucker and PaperRun remain the documented user-visible product surface. |
-| `git-flow` | pass | Branch feature/product-closure-hardening follows Git Flow; forbidden local branches absent; working entries=5. |
+| `git-flow` | pass | Branch feature/source-gate-acceptance-lock follows Git Flow; forbidden local branches absent; working entries=5. |
