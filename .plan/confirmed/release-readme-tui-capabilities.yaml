@@ -1,0 +1,155 @@
+id: release-readme-tui-capabilities
+title: Release README TUI and built-in capabilities documentation
+status: in_progress
+priority: high
+owner: codex
+tags:
+- release
+- docs
+- readme
+- tui
+- capabilities
+depends_on: []
+description: Make the public README TUI-first and document built-in MCP, skills, and
+  capability packs so the project is not presented as CLI-only.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: inspect-real-capabilities
+  title: Inspect real TUI and capability surfaces
+  status: done
+  owner: codex
+  depends_on: []
+  description: Confirm actual TUI entry, MCP config, skill registry, and built-in
+    capability packs before writing docs.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T10:40:56.015472'
+      level: info
+      message: Inspecting README, TUI workbench, .paper_fucker config, and capability-pack.ts
+        before editing docs.
+      agent: codex
+    - timestamp: '2026-05-11T10:41:04.799749'
+      level: info
+      message: Confirmed TUI default entry is paper_fucker; home tips expose paper
+        workbench, skills list, and mcp add; .paper_fucker/paper_fucker.jsonc has
+        Exa remote MCP enabled; built-in capability packs cover paper-profile-skills,
+        literature-mcp, crawler-data, huggingface-research, code-experiment-core,
+        and writing-verification-export.
+      agent: codex
+    last_run: '2026-05-11T10:41:04.799749'
+    attempt_count: 2
+  meta: {}
+- id: rewrite-readme-tui-first
+  title: Rewrite README as TUI-first usage guide
+  status: done
+  owner: codex
+  depends_on: []
+  description: Make paper_fucker TUI the primary path and move CLI commands to non-interactive/automation
+    sections.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T10:41:16.491543'
+      level: info
+      message: Rewriting public README so the default path is interactive TUI workbench,
+        not CLI-only commands.
+      agent: codex
+    - timestamp: '2026-05-11T10:41:59.701495'
+      level: info
+      message: README now presents paper_fucker TUI workbench as the recommended usage
+        path and moves CLI examples into a non-interactive mode section.
+      agent: codex
+    last_run: '2026-05-11T10:41:59.701495'
+    attempt_count: 2
+  meta: {}
+- id: document-builtins
+  title: Document built-in MCP/skills/capability packs
+  status: done
+  owner: codex
+  depends_on: []
+  description: Add README and internal docs sections for Exa MCP, profile skills,
+    crawler/Scrapling, HF research, OpenCode substrate tools, Python tools, and export/gate
+    tools.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T10:42:08.047282'
+      level: info
+      message: Documenting built-in MCP, skills, and capability packs in README and
+        internal docs.
+      agent: codex
+    - timestamp: '2026-05-11T10:42:13.619134'
+      level: info
+      message: 'README now documents built-in capability packs: profile skills, literature
+        MCP, crawler/Scrapling, Hugging Face research, OpenCode code/experiment core,
+        and writing/verification/export; internal docs record the same maintenance
+        invariant.'
+      agent: codex
+    last_run: '2026-05-11T10:42:13.619134'
+    attempt_count: 2
+  meta: {}
+- id: validation
+  title: Run doc and release validations
+  status: done
+  owner: codex
+  depends_on: []
+  description: Run version, changelog, release file, and TaskFlow validations.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T10:42:19.635141'
+      level: info
+      message: Running version, changelog, release file, TaskFlow, and README content
+        validations.
+      agent: codex
+    - timestamp: '2026-05-11T10:42:51.630291'
+      level: info
+      message: Passed check-readme-version, check-changelog-format, check-release-files,
+        TaskFlow validate_changelog_format, TaskFlow validate_task, git diff --check,
+        and README grep checks for TUI-first and built-in capability pack content.
+      agent: codex
+    last_run: '2026-05-11T10:42:51.630291'
+    attempt_count: 2
+  meta: {}
+- id: changelog-commit
+  title: Commit and record changelog
+  status: todo
+  owner: codex
+  depends_on: []
+  description: Commit work, write CHANGELOG with real commit id, rerun checks, and
+    complete TaskFlow.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: file
+  path: README.md
+  description: TUI-first public README with built-in capabilities.
+- type: file
+  path: docs/internal/README.md
+  description: Internal notes on capability packs and docs split.
+trace:
+  logs: []
+  attempt_count: 0
+lock:
+  by: codex
+  at: '2026-05-11T10:40:44.808607'
+meta:
+  created_at: '2026-05-11T10:40:38.580517'
+  updated_at: '2026-05-11T10:42:51.630291'
+  version: '1'

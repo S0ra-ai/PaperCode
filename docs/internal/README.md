@@ -22,6 +22,19 @@
 
 旧 OpenCode chat/session 能力只作为内部 substrate，不再是用户默认产品形态。用户主状态是 `PaperRun`。
 
+## 内置能力包
+
+README 必须把 TUI 和内置能力作为主路径，而不是表现成 CLI-only 工具。当前内置 capability packs 来自 `packages/opencode/src/paper/capability-pack.ts`：
+
+- `paper-profile-skills`：Nature、IEEE、ACM 等投稿 profile skill。
+- `literature-mcp`：Exa、Crossref、Semantic Scholar、arXiv。
+- `crawler-data`：Scrapling-first crawler 与可选 Scrapling MCP。
+- `huggingface-research`：HF docs、papers、datasets、models、Spaces、Jobs、Trackio。
+- `code-experiment-core`：OpenCode read/grep/glob/task/shell、Jupyter skill、Python experiment log parser、dataset metadata probe。
+- `writing-verification-export`：ClaimLedger、SourceLedger、review gate、export bundle。
+
+`.paper_fucker/paper_fucker.jsonc` 中 Exa remote MCP 默认启用。README 可以展示该事实，但不要暗示所有外部 MCP 都无需凭据或网络授权。
+
 ## Release 分支规则
 
 当前稳定流程：

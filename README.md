@@ -16,13 +16,32 @@ Paper Fucker 是一个中文优先、私有优先的可验证论文工作台。�
 - **实时网页 Preview**：写作、引用、审稿、成本、agent 和导出状态可以在 token-protected localhost 页面实时查看。
 - **真实性 Gate**：无证据 claim、引用缺失、license/source 冲突或复现失败会阻断 final export；forced draft 会显著标记失败项。
 
-## 快速开始
+## 推荐使用方式：TUI 论文工作台
 
 ```powershell
 paper_fucker init
 paper_fucker init doctor
-paper_fucker run "写一篇关于小样本代码智能体评测方法的论文"
+paper_fucker
 ```
+
+`paper_fucker` 默认打开中文 TUI 论文工作台。你不需要手动输入 tool 命令，也不需要自己串联 MCP、skills 或子 agent；系统会从你的自然语言输入中解析 `PaperRun`，自动编排 stage graph、Agent Team、能力调用和 Gate。
+
+TUI 首页可以直接输入：
+
+- `写一篇关于小样本代码智能体评测方法的论文`
+- `基于 E:\Project\some-repo 写一篇系统论文`
+- `读取 ./paper-draft.md、./data 和 ./logs，补齐实验、引用和最终导出`
+- `目标 Nature，使用 submission_candidate 模式审查这篇论文`
+
+Run 页面会展示：
+
+- stage graph 与当前状态
+- Agent Tree / Agent Team
+- 成本、token/context、论文大纲
+- Source Ledger、Claim Ledger、实验/复现状态
+- MCP、skills、toolchain、provider/model role 健康状态
+- Preview 与 Export 控制
+- 需要你决策的中文 pause questions
 
 从零手测多个 provider 前，可以先备份并清理本地状态：
 
@@ -34,7 +53,9 @@ paper_fucker init
 
 `reset` 只处理全局 `~/.paper_fucker`、工作区 ignored 的 `.paper_fucker/local/` 和 `.paper_fucker/runs/`。它不会删除仓库里的 tracked skills、commands、themes、glossary 或配置模板。
 
-## 典型流程
+## 非交互模式
+
+CLI 适合脚本、自动化、CI smoke 或你明确想绕过 TUI 的场景。它不是主交互入口。
 
 **主题出论文**
 
@@ -55,6 +76,35 @@ paper_fucker run --code . --paper-files .\paper-draft.md --dataset-paths .\data 
 ```
 
 运行过程中，TUI 会显示 stage graph、Agent Tree、成本/token、论文大纲、source ledger、claim ledger、实验状态、Gate 和阻塞项。需要人工决策时，系统会用中文 pause question 询问；不需要你持续输入命令。
+
+## 内置 MCP、Skills 与能力包
+
+Paper Fucker 把常用论文研究能力作为内置 capability packs 融合进产品，不要求用户逐个手工安装后才能开始。
+
+| 能力包 | 默认状态 | 包含能力 |
+| --- | --- | --- |
+| `paper-profile-skills` | 内置启用 | `nature-paper`、IEEE、ACM 等投稿 profile skill，用于结构、声明、模板和导出检查 |
+| `literature-mcp` | 自动链接 | Exa remote MCP、Crossref、Semantic Scholar、arXiv，用于文献、数据和 source verification |
+| `crawler-data` | 内置启用 | Scrapling-first crawler、可选 Scrapling MCP，用于网页数据获取、抽取和 license/source 诊断 |
+| `huggingface-research` | 默认可用，按需配置 secret | Hugging Face docs、papers、datasets、models、Spaces、Jobs、Trackio，用于 ML 研究和实验闭环 |
+| `code-experiment-core` | 内置启用 | OpenCode read/grep/glob/task/shell、Jupyter skill、Python log parser、dataset metadata probe |
+| `writing-verification-export` | 内置启用 | ClaimLedger、SourceLedger、authenticity review gate、export bundle |
+
+仓库已内置 Exa remote MCP 默认配置：
+
+```jsonc
+{
+  "mcp": {
+    "exa": {
+      "type": "remote",
+      "url": "https://mcp.exa.ai/mcp",
+      "enabled": true
+    }
+  }
+}
+```
+
+TUI 会在能力健康区显示 MCP、Skill 和 toolchain 状态。缺少 secret、外部工具、网络授权或数据外传授权时，系统会暂停并用中文说明需要你处理什么。
 
 ## Provider 与模型
 
