@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, test } from "bun:test"
+import { existsSync } from "fs"
 import { mkdtemp, readFile, rm } from "fs/promises"
 import path from "path"
 import os from "os"
@@ -11,6 +12,7 @@ import {
 import { resolveModelRoleAssignment } from "../../src/paper/model-roles"
 
 const tmpRoots: string[] = []
+const repoRoot = path.resolve(import.meta.dir, "../../../..")
 
 async function tmpHome() {
   const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-models-"))
@@ -74,6 +76,21 @@ describe("paper provider model discovery", () => {
     expect(secretConfig).toContain("sk-local-only")
     expect(saved.config_path.startsWith(home)).toBe(true)
     expect(saved.secret_path.startsWith(path.join(home, ".paper_fucker", "local"))).toBe(true)
+  })
+
+  test("ships a provider matrix smoke script that reads local secrets without echoing keys", async () => {
+    const scriptPath = path.join(repoRoot, "scripts", "provider-matrix-smoke.ps1")
+    expect(existsSync(scriptPath)).toBe(true)
+    const script = await readFile(scriptPath, "utf8")
+
+    expect(script).toContain(".paper_fucker")
+    expect(script).toContain("providers")
+    expect(script).toContain("provider-secrets.json")
+    expect(script).toContain("/models")
+    expect(script).toContain("/chat/completions")
+    expect(script).toContain("reports/provider-matrix-smoke.md")
+    expect(script).toContain("pending_config")
+    expect(script).not.toContain("Write-Output $apiKey")
   })
 })
 

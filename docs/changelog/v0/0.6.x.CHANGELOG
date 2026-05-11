@@ -1,0 +1,166 @@
+:project       paper_fucker - 可验证论文研究自动化系统
+:author        s0ra (https://github.com/S0ra-ai)
+:repo          
+:desc          0.6.x 历史变更归档，主 CHANGELOG 仅保留当前活跃版本线
+:version       0.6.6-dev
+:last_update   2026/05/11
+
+:history
+
+    0.6.6-dev - 2026/05/11 (1c1c2a5) [develop]
+        :brief Hugging Face / ML-Intern research loop
+        - feat(hf): 新增 ML-Intern-inspired HF research loop contracts, 覆盖 docs/papers/datasets/models/spaces/jobs/trackio
+        - feat(hf): HF records 可转换为 Source Ledger, HF jobs 可转换为 ExperimentRun 并记录 tool trace
+        - feat(capability): Hugging Face capability pack 增加 hf.models、hf.spaces、hf.trackio
+        - feat(experiment): experiment loop capability resolution 接入 hf.jobs 与 hf.trackio
+        - feat(python): 新增 hf_research_probe bridge, 产品默认未授权网络时 blocked/failed, fixture 仅作为显式测试输入
+        - test(hf): 覆盖 HF capability plan、source ledger、job experiment conversion、未授权网络禁止 mock
+        :src
+            - packages/opencode/src/paper/huggingface-loop.ts - HF research loop contracts, source conversion, job-to-experiment conversion, diagnostics
+            - packages/opencode/src/paper/capability-pack.ts - HF models/spaces/trackio capabilities
+            - packages/opencode/src/paper/experiment-loop.ts - HF jobs/trackio experiment capability integration
+            - packages/opencode/src/paper/run.ts - PaperRun HF diagnostics summary
+            - research-tools/src/paper_fucker_tools/huggingface_loop.py - HF Python bridge with explicit fixture/live-only behavior
+            - research-tools/src/paper_fucker_tools/mcp_tools.py - hf_research_probe registry entry
+        :test
+            - packages/opencode/test/paper/huggingface-loop.test.ts - HF research loop contract tests
+            - packages/opencode/test/paper/experiment-loop.test.ts - HF experiment capability regression
+            - research-tools/tests/test_huggingface_loop.py - Python bridge product no-mock enforcement tests
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/huggingface-loop.test.ts test/paper/experiment-loop.test.ts test/paper/capability-harness.test.ts
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 --cwd packages/preview test
+            - PYTHONPATH=research-tools/src python -m unittest discover -s research-tools/tests
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1
+            - TaskFlow validate_changelog_format
+            - TaskFlow validate_task ml-intern-hf-research-loop
+            - git diff --check
+
+    0.6.5-dev - 2026/05/11 (b188ae0) [develop]
+        :brief Crawler 数据采集与 Source Ledger gate
+        - feat(crawler): 新增 WebCrawlPlan、CrawlSourceRecord、CrawledDataset、CrawlComplianceReport 和 gate summary
+        - feat(crawler): 爬虫结果可转换为 ResearchSource web ledger、source_snapshot artifact 和 tool trace
+        - feat(python): 新增 Scrapling-first crawler bridge、fixture HTML extraction 和 web_crawl_probe 工具
+        - feat(run): PaperRun diagnostics 增加 crawler source、license、robots 阻断统计
+        - test(crawler): 覆盖爬虫契约、license/robots gate、artifact/tool trace 与 Python fixture crawler
+        :src
+            - packages/opencode/src/paper/crawler.ts - crawler artifact contracts, policy checks, ledger conversion, diagnostics
+            - packages/opencode/src/paper/run.ts - PaperRun crawler diagnostics summary
+            - research-tools/src/paper_fucker_tools/crawler.py - Scrapling availability and fixture crawler bridge
+            - research-tools/src/paper_fucker_tools/mcp_tools.py - web_crawl_probe registry entry
+        :test
+            - packages/opencode/test/paper/crawler.test.ts - TS crawler contract and gate tests
+            - research-tools/tests/test_crawler.py - Python crawler adapter and MCP probe tests
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/crawler.test.ts test/paper/capability-harness.test.ts
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 --cwd packages/preview test
+            - PYTHONPATH=research-tools/src python -m unittest discover -s research-tools/tests
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1
+            - TaskFlow validate_changelog_format
+            - TaskFlow validate_task crawler-data-acquisition
+
+    0.6.4-dev - 2026/05/11 (86b5b08) [develop]
+        :brief MemoryBank 与代码理解层
+        - feat(memory): 新增 MemoryBank.v1, 支持 scope、share policy、provenance、retention、secret/path redaction 与查询摘要
+        - feat(code): 新增 CodeUnderstandingGraph.v1, 记录 package/file/symbol/source range/test/benchmark surface 与 coverage
+        - feat(agent-team): Agent Team member 可绑定 memory_entry_ids, 让队友学习与 artifact provenance 可追踪
+        - feat(paperrun): PaperRun snapshot 增加 memory_bank 与 code_understanding diagnostics
+        - feat(tui): 右侧栏新增 Memory / Code 摘要, 显示 memory、redaction、code files、symbols 和 experiment surfaces
+        - test(memory): 覆盖 redaction、查询、retention、source range、experiment surface 与 Agent Team memory 归属
+        :src
+            - packages/opencode/src/paper/memory-bank.ts - MemoryBank contracts and runtime
+            - packages/opencode/src/paper/code-understanding.ts - CodeUnderstandingGraph contracts and helpers
+            - packages/opencode/src/paper/agent-team.ts - member memory bindings
+            - packages/opencode/src/paper/run.ts - PaperRun memory/code snapshot diagnostics
+            - packages/opencode/src/cli/cmd/tui/routes/paper/workbench.ts - sidebar knowledge state
+            - packages/opencode/src/cli/cmd/tui/routes/paper/index.tsx - Memory / Code sidebar section
+        :test
+            - packages/opencode/test/paper/memory-code-understanding.test.ts - memory and code graph coverage
+            - packages/opencode/test/cli/tui/paper-workbench.test.ts - sidebar regression
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/memory-code-understanding.test.ts test/paper/agent-team.test.ts test/cli/tui/paper-workbench.test.ts passed: 9 pass, 0 fail, 58 expects
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+
+    0.6.3-dev - 2026/05/11 (590d9f9) [develop]
+        :brief 内置 capability pack 与 harness 调度层
+        - feat(capability): 新增内置 PaperCapabilityPack, 覆盖 paper profiles、literature MCP、crawler、Hugging Face、code/experiment、writing/verification/export
+        - feat(registry): 新增 PaperCapabilityRegistry snapshot 与按 stage 查询, skills/MCP/Python/first-party tools 自动融合
+        - feat(harness): 新增 PaperHarness 队列、approval gate、并发上限、retry、doom-loop 检测和 capability trace 绑定
+        - feat(api): /paper/capabilities 与 doctor 暴露内置 pack 元数据, 论文能力不再依赖用户手动安装
+        - test(capability): 覆盖 pack fusion、stage 查询、审批、trace、retry 与重复调用跳过
+        :src
+            - packages/opencode/src/paper/capability-pack.ts - built-in capability pack definitions
+            - packages/opencode/src/paper/capability-registry.ts - registry snapshot and stage-scoped queries
+            - packages/opencode/src/paper/harness.ts - capability harness scheduler
+            - packages/opencode/src/paper/capabilities.ts - default capabilities sourced from packs
+            - packages/opencode/src/paper/run.ts - capabilities/doctor pack exposure
+            - packages/opencode/src/paper/index.ts - paper core export surface
+        :test
+            - packages/opencode/test/paper/capability-harness.test.ts - capability pack and harness coverage
+            - packages/opencode/test/paper/capabilities.test.ts - default registry regression
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/capability-harness.test.ts test/paper/capabilities.test.ts passed: 7 pass, 0 fail, 25 expects
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+
+    0.6.2-dev - 2026/05/11 (408a187) [develop]
+        :brief PaperRun Agent Team 协作层
+        - feat(agent-team): 新增 PaperAgentTeam、成员、任务板、mailbox、harness decision 与 source-bound evidence merge
+        - feat(paperrun): PaperRun snapshot 增加 agent_team, 将 Agent Tree 升级为 team-aware 运行状态
+        - feat(tui): 右侧栏和 dashboard 增加 Agent Team 成员、队列、活跃任务、未读 mailbox 与 team depth 摘要
+        - test(agent-team): 覆盖多模型队友、权限收紧、任务派发、mailbox、harness 停止条件和 evidence-only merge
+        - docs(references): 记录 Claude Code subagents/skills、smolagents/ML-Intern 与 Scrapling 借鉴规则
+        :src
+            - packages/opencode/src/paper/agent-team.ts - PaperRun Agent Team contracts and runtime
+            - packages/opencode/src/paper/run.ts - PaperRun snapshot agent_team projection
+            - packages/opencode/src/cli/cmd/tui/routes/paper/workbench.ts - sidebar Agent Team state
+            - packages/opencode/src/cli/cmd/tui/routes/paper/index.tsx - TUI Agent Team sidebar section
+            - packages/opencode/src/paper/index.ts - paper core export surface
+            - reports/references/agent-team-and-ml-intern.md - reference synthesis
+        :test
+            - packages/opencode/test/paper/agent-team.test.ts - Agent Team Fabric coverage
+            - packages/opencode/test/cli/tui/paper-workbench.test.ts - TUI sidebar Agent Team mapping
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/agent-team.test.ts test/paper/agents.test.ts passed: 7 pass, 0 fail, 40 expects
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/cli/tui/paper-workbench.test.ts passed: 4 pass, 0 fail, 33 expects
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+
+    0.6.1-dev - 2026/05/11 (affb5f1) [develop]
+        :brief strict live-run 证据升级
+        - test(acceptance): topic-to-paper-live-run 与 code-to-paper-live-run 改为执行真实 PaperRun benchmark, 不再用 fixture e2e 测试冒充 live-run 证据
+        - feat(script): live-paper-quality-benchmark 支持 topic/code 场景, 输出场景化 summary 并断言 stage/artifact/source/claim/draft/review/preview/export/audit 证据
+        - test(script): strict-acceptance 测试覆盖 live PaperRun benchmark 调用路径
+        - fix(acceptance): Exa MCP initialize clientInfo version 改为读取 README 当前版本, 避免 stale 版本写死
+        - report(acceptance): strict-live-acceptance 报告刷新为 benchmark-backed PaperRun 证据
+        :src
+            - scripts/live-paper-quality-benchmark.ts - topic/code PaperRun benchmark evidence
+            - scripts/strict-acceptance.ps1 - strict live-run benchmark wiring and project version lookup
+            - packages/opencode/test/paper/strict-acceptance.test.ts - benchmark evidence regression tests
+            - reports/strict-live-acceptance.md - refreshed strict live acceptance report
+            - .plan/confirmed/strict-live-run-evidence.yaml - TaskFlow execution logs
+        :verification
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario topic passed
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario code passed
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/strict-acceptance.test.ts passed: 9 pass, 0 fail, 52 expects
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\strict-acceptance.ps1 -CheckTimeoutSeconds 300 passed
+
+    0.6.0-dev - 2026/05/11 (0e792d7) [develop]
+        :brief 递归 Agent 与论文工作台综合验收
+        - test(acceptance): 综合验收递归 Agent Fabric、PaperRun 右侧栏、中文工作台流程、品牌表面与 strict live acceptance
+        - fix(acceptance): strict-acceptance.ps1 保持 ASCII-safe, 避免 Windows PowerShell 非 UTF-8 解析失败
+        - fix(acceptance): strict branding 检查避开 PowerShell 只读 $HOME 变量, 并匹配真实 PaperRunSidebar/home 入口
+        - test(acceptance): strict-acceptance 测试覆盖 ASCII-safe 与 PowerShell 保留变量回归
+        - report(acceptance): 刷新 reports/strict-live-acceptance.md, 覆盖 live provider、Exa、Nature、pandoc、LaTeX、DOCX、topic/code paper smoke 与 Git Flow
+        :src
+            - scripts/strict-acceptance.ps1 - strict live acceptance and branding checks
+            - packages/opencode/test/paper/strict-acceptance.test.ts - PowerShell safety regression tests
+            - reports/strict-live-acceptance.md - strict live acceptance report
+            - .plan/confirmed/recursive-agent-sidebar-acceptance.yaml - TaskFlow execution logs
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/agents.test.ts test/cli/tui/paper-workbench.test.ts test/cli/tui/paper-workbench-controls.test.ts test/cli/public-surface.test.ts test/paper/hard-fork-acceptance.test.ts test/paper/strict-acceptance.test.ts passed: 25 pass, 0 fail, 195 expects
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+            - npx --yes bun@1.3.13 --cwd packages/preview test passed: 2 pass, 0 fail, 9 expects
+            - python -m unittest discover -s research-tools/tests passed: 5 tests
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\strict-acceptance.ps1 -CheckTimeoutSeconds 300 passed
+

@@ -1,0 +1,180 @@
+:project       paper_fucker - 可验证论文研究自动化系统
+:author        s0ra (https://github.com/S0ra-ai)
+:repo          
+:desc          0.5.x 历史变更归档，主 CHANGELOG 仅保留当前活跃版本线
+:version       0.5.7-dev
+:last_update   2026/05/11
+
+:history
+
+    0.5.7-dev - 2026/05/11 (1c09b71) [develop]
+        :brief Paper Fucker 品牌表面审计
+        - fix(tui): 旧 session/sidebar footer 与 plugin sidebar footer 改为 Paper Fucker 品牌
+        - fix(api): paper provider discovery OpenAPI 描述改为 provider-agnostic, 不再暴露旧 OpenCode 产品措辞
+        - test(brand): public-surface 测试覆盖 sidebar footer 与 paper API 品牌残留
+        - chore(acceptance): strict acceptance 扩展品牌检查到 TUI home、tips、dashboard、sidebars 与 paper API
+        :src
+            - packages/opencode/src/cli/cmd/tui/routes/session/sidebar.tsx - session sidebar footer brand
+            - packages/opencode/src/cli/cmd/tui/feature-plugins/sidebar/footer.tsx - plugin sidebar footer brand
+            - packages/opencode/src/server/routes/instance/httpapi/groups/paper.ts - provider discovery wording
+            - packages/opencode/test/cli/public-surface.test.ts - brand regression tests
+            - scripts/strict-acceptance.ps1 - strict branding checks
+            - .plan/confirmed/brand-surface-audit.yaml - TaskFlow execution logs
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/cli/public-surface.test.ts test/paper/strict-acceptance.test.ts passed: 11 pass, 0 fail, 100 expects
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-changelog-format.ps1 passed
+            - TaskFlow validate_task brand-surface-audit passed
+
+    0.5.6-dev - 2026/05/11 (002f011) [develop]
+        :brief 明确 PaperRun 工作台用户流程
+        - feat(tui): 首页 placeholder 和标题改为主题/代码/材料/数据/日志输入后自动创建 PaperRun 的流程表达
+        - feat(tui): tips 明确 reviewable_bundle、submission_candidate、右侧栏诊断与运行态递归 agent 停止语义
+        - feat(tui): PaperRun 侧栏标题改为中文, 下一步动作改为中文暂停问题表达
+        - docs(readme): 新增用户使用流程, 覆盖 intake、自动 stage graph、暂停条件、dashboard/sidebar、final export 与 forced draft
+        - test(tui): 覆盖 submission intent 解析和用户可见 tips
+        :src
+            - packages/opencode/src/cli/cmd/tui/routes/home.tsx - workbench intake placeholders and header copy
+            - packages/opencode/src/cli/cmd/tui/feature-plugins/home/tips-view.tsx - PaperRun flow tips
+            - packages/opencode/src/cli/cmd/tui/routes/paper/index.tsx - Chinese sidebar title
+            - packages/opencode/src/cli/cmd/tui/routes/paper/workbench.ts - Chinese next-action copy
+            - packages/opencode/test/cli/public-surface.test.ts - tips assertions
+            - packages/opencode/test/cli/tui/paper-workbench.test.ts - submission mode parse test
+            - README.md - user flow documentation
+            - .plan/confirmed/paper-workbench-ux-flow.yaml - TaskFlow execution logs
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/cli/tui/paper-workbench.test.ts test/cli/public-surface.test.ts passed: 8 pass, 0 fail, 77 expects
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+
+    0.5.5-dev - 2026/05/11 (399aeb2) [develop]
+        :brief PaperRun 右侧诊断栏
+        - feat(tui): PaperRun dashboard 新增固定右侧栏, 保留 OpenCode 原 cost/token/context 价值并改为 PaperRun 语义
+        - feat(tui): sidebar 展示运行概览、下一步动作、阻塞项、成本/上下文、论文大纲、Agent Tree、Gate 与最近调用诊断
+        - feat(tui): 新增 PaperRunCostDiagnostics、PaperRunOutlineState、PaperRunGateSummary 与 PaperRunSidebarState 派生状态
+        - test(tui): 覆盖 sidebar 成本、tokens、outline、Agent Tree、Gate 和 recent calls 映射
+        :src
+            - packages/opencode/src/cli/cmd/tui/routes/paper/workbench.ts - PaperRun sidebar state derivation
+            - packages/opencode/src/cli/cmd/tui/routes/paper/index.tsx - persistent right sidebar rendering
+            - packages/opencode/test/cli/tui/paper-workbench.test.ts - sidebar state assertions
+            - .plan/confirmed/paper-run-sidebar.yaml - TaskFlow execution logs
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/cli/tui/paper-workbench.test.ts test/cli/tui/paper-workbench-controls.test.ts passed: 5 pass, 0 fail, 44 expects
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+
+    0.5.4-dev - 2026/05/11 (9fa7acd) [develop]
+        :brief 统一 CHANGELOG colon-history 缩进
+        - docs(changelog): 将历史版本行统一为 4 空格缩进, 修复 0.1.9-dev 等早期条目掉到 0 缩进的问题
+        - docs(changelog): 将版本字段统一为 8 空格缩进, :src/:doc/:verification 等字段内容统一为 12 空格缩进
+        - chore(script): 新增 scripts/check-changelog-format.ps1, 防止后续 CHANGELOG 缩进回退
+        :src
+            - CHANGELOG - full colon-history indentation normalization
+            - scripts/check-changelog-format.ps1 - changelog format regression check
+            - .plan/confirmed/changelog-format-normalization.yaml - TaskFlow execution logs
+        :verification
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-changelog-format.ps1 passed
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
+            - TaskFlow validate_task changelog-format-normalization passed
+
+    0.5.4-dev - 2026/05/11 (f514f02) [develop]
+        :brief 递归 PaperRun Agent Fabric
+        - feat(agent): 新增 RecursiveAgentPolicy.v1 与 AgentExpansionDecision, 子 agent 不再受预算档固定深度限制
+        - feat(agent): 子 agent 可继续派生子 agent, 由 cost/time/concurrency/context/permission/data-egress/license/authenticity/coverage 条件停止
+        - feat(agent): AgentTree 记录 children、permissions、recursive_policy 与 agent.spawned/completed/blocked/expansion_skipped 事件
+        - fix(runtime): appendResearchEvent 对 deterministic idFactory 重入做 event_id 去重, 避免恢复/导出阶段写坏 SQLite index
+        - fix(export): forced draft 在 final gate blocker 为空时仍携带 final_gate_not_passed
+        - test(agent): 覆盖 depth 3 递归、多模型子 agent、权限收窄、循环防护、gate-aware 阻断
+        :src
+            - packages/opencode/src/paper/agents.ts - recursive agent policy, expansion decisions, permissions, events
+            - packages/opencode/src/paper/budget.ts - unbounded depth policy with budget resource caps
+            - packages/opencode/src/paper/run.ts - PaperRun AgentTree snapshot and forced export blocker normalization
+            - packages/opencode/src/paper/research/runtime/run-store.ts - unique event id fallback
+            - packages/opencode/src/paper/observability.ts - root agent spawned event
+            - packages/opencode/test/paper/agents.test.ts - recursive agent fabric tests
+            - packages/opencode/test/paper/hard-fork-acceptance.test.ts - unbounded agent acceptance updates
+            - packages/opencode/test/cli/tui/paper-workbench-controls.test.ts - recursive policy fixture
+            - .plan/confirmed/recursive-agent-fabric.yaml - TaskFlow execution logs
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/agents.test.ts test/paper/hard-fork-acceptance.test.ts test/cli/tui/paper-workbench-controls.test.ts passed: 10 pass, 0 fail, 64 expects
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+
+    0.5.3-dev - 2026/05/10 (ab28a53) [develop]
+        :brief 移除 tracked 文档中的 secret-like 示例 token
+        - fix(security): github/README.md 中的 ANTHROPIC_API_KEY 示例从 sk-ant 形态改为 <provider-api-key>
+        - fix(security): github/README.md 中的 MOCK_TOKEN 示例从 github_pat 形态改为 <github-token>
+        - docs(report): 新增 reports/tracked-secret-example-cleanup.md 记录扫描证据
+        :src
+            - github/README.md - non-secret placeholders for provider/GitHub token examples
+            - reports/tracked-secret-example-cleanup.md - cleanup report
+            - .plan/confirmed/task-054-tracked-secret-example-cleanup.yaml - TaskFlow execution logs
+            - README.md - current status and version update
+            - CHANGELOG - 0.5.3-dev history entry
+        :verification
+            - git grep -n -P "(?<![A-Za-z0-9])sk-[A-Za-z0-9._-]{20,}" -- . ':!CHANGELOG' ':!reports' ':!tmp' returned no matches
+            - git grep -n -P "github_pat_[A-Za-z0-9_]{10,}" -- . ':!CHANGELOG' ':!reports' ':!tmp' returned no matches
+            - TaskFlow validate_task task-054-tracked-secret-example-cleanup passed
+
+    0.5.2-dev - 2026/05/10 (d266530) [develop]
+        :brief 清理 TUI 首页模型 provider 与代码示例文案
+        - fix(tui): 首页 code-to-paper placeholder 从 `--code packages/opencode` 改为 `--code .`, 避免把用户引向上游目录名
+        - fix(tui): provider 提示从 OpenCode provider 改为通用模型 provider, 保留 OpenAI-compatible 与 DeepSeek 示例
+        - fix(i18n): 首页 tips 标签从 Tip 改为 提示
+        - fix(i18n): 内置主题切换提示改为中文
+        - docs(report): 新增 reports/tui-provider-copy-cleanup.md 记录用户可见文案清理与扫描证据
+        :src
+            - packages/opencode/src/cli/cmd/tui/routes/home.tsx - home placeholder copy
+            - packages/opencode/src/cli/cmd/tui/feature-plugins/home/tips-view.tsx - provider/theme/tip copy
+            - reports/tui-provider-copy-cleanup.md - cleanup report
+            - .plan/confirmed/task-053-tui-provider-copy-cleanup.yaml - TaskFlow execution logs
+            - README.md - current status and version update
+            - CHANGELOG - 0.5.2-dev history entry
+        :verification
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+            - current TUI copy scan found no OpenCode provider/Open Code/Tip/English theme/--code packages/opencode matches in home tips
+
+    0.5.1-dev - 2026/05/10 (878cdfb) [develop]
+        :brief 清理当前运行时残留的 Phase 1 stub 命名
+        - fix(runtime): ResearchStageStub/createNotImplementedStageStub/phaseOneStageStubs 改为 ResearchStageBlockingDiagnostic/createStageBlockingDiagnostic
+        - fix(runtime): stage blocking diagnostic 使用 blocked 语义, 不再把当前论文阶段描述为 not_implemented
+        - fix(authenticity): provenance guard 改为阻断 placeholder/synthetic/fake, 保留真实性 gate 约束但移除当前 stub 来源类型
+        - fix(python-tools): DOCX 工具 canonical name 改为 docx_generation, 移除 docx_generation_stub registry 入口
+        - docs(python-tools): Python tool model 注释改为 OpenCode paper core, 不再引用已删除 server sidecar
+        - test(runtime): 更新 guard/orchestrator 测试, 覆盖 blocking diagnostic 与缺失能力阻断记录
+        - test(python-tools): 新增 docx_generation registry 与实际 DOCX 写出测试
+        - docs(report): 新增 reports/remove-stub-leftovers.md 记录清理和扫描证据
+        :src
+            - packages/opencode/src/paper/research/runtime/guards.ts - blocking diagnostics and authenticity provenance guard
+            - packages/opencode/test/research/guards.test.ts - guard tests
+            - packages/opencode/test/paper/orchestrator.test.ts - blocked diagnostic orchestration test wording
+            - research-tools/src/paper_fucker_tools/mcp_tools.py - canonical DOCX tool name
+            - research-tools/src/paper_fucker_tools/models.py - current paper runtime wording
+            - research-tools/tests/test_tools.py - DOCX tool registry/write test
+            - reports/remove-stub-leftovers.md - cleanup report
+            - .plan/confirmed/task-052-remove-stub-leftovers.yaml - TaskFlow execution logs
+            - README.md - current status and version update
+            - CHANGELOG - 0.5.1-dev history entry
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/research/guards.test.ts test/paper/orchestrator.test.ts passed: 6 pass, 0 fail, 14 expects
+            - $env:PYTHONPATH='research-tools/src'; python -m unittest discover -s research-tools/tests passed: 5 tests OK
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+            - focused current-code scan found no phaseOneStageStubs/ResearchStageStub/createNotImplementedStageStub/not_implemented/docx_generation_stub/stub handler/packages/server/@paper-fucker/server/server runtime matches
+
+    0.5.0-dev - 2026/05/10 (cf7aad5) [develop]
+        :brief Live PaperRun 基准回归通过并收口 0.4.x 质量缺口
+        - test(benchmark): 重新执行真实 topic+code PaperRun, 记录 run-ee44237e-e1cc-40d5-abee-611dbc9a8222
+        - test(strict): focused strict acceptance 通过, 覆盖 TaskFlow、版本同步、secret scan、server/preview/Python/typecheck、CLI/TUI、DeepSeek、Exa、Nature、pandoc、LaTeX、DOCX、topic/code run 与 hard-fork checks
+        - test(paperrun): 确认完整执行后 PaperRun snapshot 正确显示 blocked, 不再卡在 running
+        - test(gate): reproduction_failure 正确投影到 reproduction stage, final export 被阻断, forced draft 明确携带失败检查
+        - test(export): forced Markdown/LaTeX/PDF/DOCX 均写出, PDF fallback 成功且保留 latexmk 失败诊断
+        - test(observability): stage/capability/model_role/subagent/tool/data_egress/export_renderer/cost audit 覆盖完整, missing_kinds 为空
+        - docs(report): 重写 reports/live-paper-quality-benchmark.md 为 0.5.0-dev 回归报告, 记录 0.4.0 缺口到 0.5.0 结果的闭环
+        :src
+            - reports/live-paper-quality-benchmark.md - live PaperRun benchmark regression report
+            - reports/strict-live-acceptance.md - focused strict acceptance evidence
+            - .plan/confirmed/task-051-live-benchmark-regression-pass.yaml - TaskFlow execution logs
+            - README.md - current behavior and version update
+            - CHANGELOG - 0.5.0-dev history entry
+        :verification
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts produced blocked reviewable run with forced Markdown/LaTeX/PDF/DOCX export, PDF written, and empty missing_kinds
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\strict-acceptance.ps1 -CheckTimeoutSeconds 300 passed
+

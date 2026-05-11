@@ -89,7 +89,7 @@ export const PaperApi = HttpApi.make("paper")
           OpenApi.annotations({
             identifier: "paper.runs.create",
             summary: "Create PaperRun",
-            description: "Create a first-class paper_fucker PaperRun from topic, code, data, logs, or paper materials.",
+            description: "Create a first-class Paper Fucker PaperRun from topic, code, data, logs, or paper materials.",
           }),
         ),
         HttpApiEndpoint.get("getRun", PaperPaths.run, {
@@ -176,7 +176,7 @@ export const PaperApi = HttpApi.make("paper")
           OpenApi.annotations({
             identifier: "paper.doctor",
             summary: "Run paper doctor",
-            description: "Inspect paper_fucker runtime health, defaults, storage, language, MCP, and skill readiness.",
+            description: "Inspect Paper Fucker runtime health, defaults, storage, language, MCP, and skill readiness.",
           }),
         ),
         HttpApiEndpoint.get("providersDiscover", PaperPaths.providersDiscover, {
@@ -224,7 +224,7 @@ export const PaperApi = HttpApi.make("paper")
       .annotateMerge(
         OpenApi.annotations({
           title: "paper",
-          description: "First-class PaperRun routes for the paper_fucker论文工作台.",
+          description: "First-class PaperRun routes for the Paper Fucker 论文工作台.",
         }),
       )
       .middleware(InstanceContextMiddleware)
@@ -233,7 +233,7 @@ export const PaperApi = HttpApi.make("paper")
   )
   .annotateMerge(
     OpenApi.annotations({
-      title: "paper_fucker PaperRun HttpApi",
+      title: "Paper Fucker PaperRun HttpApi",
       version: "0.2.2-dev",
       description:
         "PaperRun API for research intake, stage graph, ledgers, guidance, preview, export, and diagnostics.",

@@ -37,6 +37,7 @@ describe("public Paper Fucker surface", () => {
     for (const command of forbiddenCommands) {
       expect(index).not.toContain(`.command(${command})`)
     }
+    expect(index).toContain(".command(InitCommand)")
   })
 
   test("public CLI help strings use PaperRun and hide legacy chat/session wording", async () => {
@@ -44,6 +45,7 @@ describe("public Paper Fucker surface", () => {
     const attach = await source("cli/cmd/tui/attach.ts")
     const run = await source("cli/cmd/run.ts")
     const exportCommand = await source("cli/cmd/export.ts")
+    const initCommand = await source("cli/cmd/init.ts")
 
     for (const text of [thread, attach, run, exportCommand]) {
       expect(text).not.toContain("continue the last session")
@@ -56,6 +58,10 @@ describe("public Paper Fucker surface", () => {
     expect(exportCommand).toContain('describe: "export a PaperRun bundle as JSON"')
     expect(exportCommand).not.toContain("export session data as JSON")
     expect(exportCommand).not.toContain("session id to export")
+    expect(initCommand).toContain('command: "init [action]"')
+    expect(initCommand).toContain("initialize, inspect, or reset local Paper Fucker state")
+    expect(initCommand).toContain("reset")
+    expect(initCommand).toContain("doctor")
   })
 
   test("TUI home tips are paper workbench oriented", async () => {
