@@ -1,5 +1,7 @@
-import { mkdir, readFile, rename, writeFile } from "fs/promises"
+import { randomUUID } from "crypto"
+import { mkdir, readFile, rename, rm, writeFile } from "fs/promises"
 import path from "path"
+import { setTimeout as sleep } from "timers/promises"
 import { RESEARCH_SCHEMA_VERSION, type ResearchSchemaVersion } from "../contracts"
 import {
   createCostState,
@@ -14,6 +16,9 @@ import {
 import type { ResearchStorageScope } from "./paths"
 
 export const RUNTIME_STATE_FILE = "runtime-state.json"
+
+const ATOMIC_REPLACE_RETRY_CODES = new Set(["EPERM", "EBUSY", "EACCES", "ENOTEMPTY"])
+const ATOMIC_REPLACE_RETRY_DELAYS_MS = [10, 25, 50, 100, 200, 400]
 
 export type ResearchFinalGateState = {
   status: "open" | "passed" | "blocked"
@@ -42,9 +47,32 @@ export type CreateRuntimeStateInput = {
 
 export async function writeJsonAtomic(file: string, value: unknown) {
   await mkdir(path.dirname(file), { recursive: true })
-  const tmp = `${file}.${process.pid}.${Date.now()}.tmp`
+  const tmp = `${file}.${process.pid}.${Date.now()}.${randomUUID()}.tmp`
   await writeFile(tmp, `${JSON.stringify(value, null, 2)}\n`)
-  await rename(tmp, file)
+  try {
+    await renameWithRetry(tmp, file)
+  } catch (error) {
+    await rm(tmp, { force: true }).catch(() => undefined)
+    throw error
+  }
+}
+
+function isRetryableAtomicReplaceError(error: unknown) {
+  const code = typeof error === "object" && error && "code" in error ? String(error.code) : ""
+  return ATOMIC_REPLACE_RETRY_CODES.has(code)
+}
+
+async function renameWithRetry(source: string, destination: string) {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      await rename(source, destination)
+      return
+    } catch (error) {
+      const delay = ATOMIC_REPLACE_RETRY_DELAYS_MS[attempt]
+      if (delay === undefined || !isRetryableAtomicReplaceError(error)) throw error
+      await sleep(delay)
+    }
+  }
 }
 
 export async function readJsonFile<T>(file: string): Promise<T> {
