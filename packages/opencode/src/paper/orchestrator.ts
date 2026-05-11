@@ -16,7 +16,7 @@ import { discoverAndRecordLiteratureData } from "./research/sources"
 import { planExperiments } from "./research/experiments/planning"
 import { recordExperimentLoop } from "./research/experiments/recording"
 import { composeClaimLedger, composeDraftPaper } from "./research/writing"
-import type { DataPlan } from "./research/sources"
+import type { DataPlan, SourceCandidate, SourceRecord } from "./research/sources"
 import type { ExperimentMetricDirection, ResultReport, ExperimentPlan, ExperimentRunner } from "./research/experiments"
 import type { ClaimLedger } from "./research/writing"
 
@@ -307,6 +307,13 @@ type ExperimentEvidenceManifest = {
   provenance?: string
 }
 
+type SourceEvidenceManifest = {
+  schema_version: "SourceEvidenceManifest.v1"
+  created_at?: string
+  provenance?: string
+  sources: SourceCandidate[]
+}
+
 const defaultExecutionCache = new Map<string, DefaultExecutionCache>()
 
 function defaultCache(runDir: string) {
@@ -354,29 +361,33 @@ async function defaultSourceDiscovery(runDir: string, request: ResearchIntakeReq
   const brief = normalizeResearchIntake(request)
   const now = nowIso(options)
   const sequence = ++defaultDiscoverySequence
+  const sourceEvidence = await loadSourceEvidenceManifest(runDir, request, options)
   cache.source = await discoverAndRecordLiteratureData(
     runDir,
     {
       topic: brief.topic,
       full_access: false,
-      literature_candidates: [
-        {
-          source_id: `paper:${slug(brief.topic)}:seed:${sequence}`,
-          kind: "paper",
-          title: `${brief.topic} source discovery seed ${sequence}`,
-          url: `https://arxiv.org/search/?query=${encodeURIComponent(brief.topic)}`,
-          provider: "paper_fucker-default-source-discovery",
-          license: { status: "clear", expression: "arXiv non-exclusive distribution" },
-          version: { value: "search-seed", retrieved_at: now },
-          verification: {
-            status: "unverified",
-            method: "default-source-seed",
-            checked_at: now,
-            diagnostics: ["Live source verification has not been completed; final claims stay gated."],
-          },
-          topics: [brief.topic],
-        },
-      ],
+      literature_candidates:
+        sourceEvidence && sourceEvidence.sources.length > 0
+          ? sourceEvidence.sources
+          : [
+              {
+                source_id: `paper:${slug(brief.topic)}:seed:${sequence}`,
+                kind: "paper",
+                title: `${brief.topic} source discovery seed ${sequence}`,
+                url: `https://arxiv.org/search/?query=${encodeURIComponent(brief.topic)}`,
+                provider: "paper_fucker-default-source-discovery",
+                license: { status: "clear", expression: "arXiv non-exclusive distribution" },
+                version: { value: "search-seed", retrieved_at: now },
+                verification: {
+                  status: "unverified",
+                  method: "default-source-seed",
+                  checked_at: now,
+                  diagnostics: ["Live source verification has not been completed; final claims stay gated."],
+                },
+                topics: [brief.topic],
+              },
+            ],
       min_verified_sources: 1,
       now,
     },
@@ -427,6 +438,26 @@ function isExperimentEvidenceManifest(value: unknown): value is ExperimentEviden
   return candidate.schema_version === "ExperimentEvidenceManifest.v1" && typeof candidate.metric_values === "object"
 }
 
+function isSourceCandidate(value: unknown): value is SourceCandidate {
+  if (!value || typeof value !== "object") return false
+  const candidate = value as Partial<SourceCandidate>
+  return (
+    typeof candidate.source_id === "string" &&
+    typeof candidate.title === "string" &&
+    typeof candidate.url === "string" &&
+    typeof candidate.provider === "string" &&
+    Boolean(candidate.license) &&
+    Boolean(candidate.version) &&
+    Boolean(candidate.verification)
+  )
+}
+
+function isSourceEvidenceManifest(value: unknown): value is SourceEvidenceManifest {
+  if (!value || typeof value !== "object") return false
+  const candidate = value as Partial<SourceEvidenceManifest>
+  return candidate.schema_version === "SourceEvidenceManifest.v1" && Array.isArray(candidate.sources)
+}
+
 async function loadExperimentEvidenceManifest(
   runDir: string,
   request: ResearchIntakeRequest,
@@ -471,6 +502,62 @@ async function loadExperimentEvidenceManifest(
     return parsed
   }
   return undefined
+}
+
+async function loadSourceEvidenceManifest(
+  runDir: string,
+  request: ResearchIntakeRequest,
+  options?: ResearchRuntimeOptions,
+): Promise<SourceEvidenceManifest | undefined> {
+  const inputPaths = [...(request.paper_files ?? []), ...(request.experiment_logs ?? [])]
+  for (const inputPath of inputPaths) {
+    const resolved = resolveInputPath(request, inputPath)
+    let parsed: unknown
+    try {
+      parsed = JSON.parse(await readFile(resolved, "utf8"))
+    } catch {
+      continue
+    }
+    if (!isSourceEvidenceManifest(parsed)) continue
+    const sources = parsed.sources.filter(isSourceCandidate)
+    const manifest: SourceEvidenceManifest = { ...parsed, sources }
+    await writeResearchArtifact(
+      runDir,
+      {
+        kind: "source_snapshot",
+        logical_path: `sources/evidence/${path.basename(resolved)}`,
+        data: manifest,
+        metadata: {
+          artifact_schema: "SourceEvidenceManifest.v1",
+          source_path: resolved,
+          provenance: manifest.provenance ?? "user_supplied_source_evidence",
+        },
+      },
+      options,
+    )
+    await appendResearchEvent(
+      runDir,
+      {
+        type: "sources.evidencemanifest.loaded",
+        actor: "system",
+        payload: {
+          source_path: resolved,
+          provenance: manifest.provenance ?? "user_supplied_source_evidence",
+          source_count: sources.length,
+          verified_source_count: sources.filter((source) => source.verification.status === "verified").length,
+        },
+      },
+      options,
+    )
+    return manifest
+  }
+  return undefined
+}
+
+function verifiedClearSourceIds(sources: SourceRecord[]) {
+  return sources
+    .filter((source) => source.verification.status === "verified" && source.license.status === "clear")
+    .map((source) => source.source_id)
 }
 
 function metricDirection(plan: ExperimentPlan, metricName: string, evidence: ExperimentEvidenceManifest): ExperimentMetricDirection {
@@ -554,7 +641,7 @@ async function defaultClaimLedger(
   if (cache.claims) return cache.claims
   const sources = await defaultSourceDiscovery(runDir, request, options)
   const code = (request.code_paths ?? []).length > 0 ? await defaultCodeAnalysis(runDir, request, options) : undefined
-  const sourceIds = sources.literature.sources.map((source) => source.source_id)
+  const sourceIds = verifiedClearSourceIds(sources.literature.sources)
   const evidenceArtifactIds = [
     sources.artifacts.literature.artifact_id,
     sources.artifacts.data_plan.artifact_id,
@@ -584,7 +671,13 @@ async function defaultResultReport(
   runDir: string,
   request: ResearchIntakeRequest,
   options?: ResearchRuntimeOptions,
-): Promise<{ dataPlan: DataPlan; resultReport: ResultReport; sourceIds: string[]; evidenceArtifactIds: string[] }> {
+): Promise<{
+  dataPlan: DataPlan
+  resultReport: ResultReport
+  sourceIds: string[]
+  sourceRecords: SourceRecord[]
+  evidenceArtifactIds: string[]
+}> {
   const cache = defaultCache(runDir)
   if (cache.result) return cache.result
   const claims = await defaultClaimLedger(runDir, request, options)
@@ -593,6 +686,7 @@ async function defaultResultReport(
     dataPlan: experiment.sources.data_plan,
     resultReport: experiment.loop.report,
     sourceIds: claims.sourceIds,
+    sourceRecords: experiment.sources.literature.sources,
     evidenceArtifactIds: [...claims.evidenceArtifactIds, experiment.loop.artifacts.result_report.artifact_id],
   }
   return cache.result
@@ -611,6 +705,7 @@ async function defaultAuthoring(runDir: string, request: ResearchIntakeRequest, 
       data_plan: result.dataPlan,
       result_report: result.resultReport,
       available_source_ids: result.sourceIds,
+      source_records: result.sourceRecords,
       model_reviews: [
         {
           model: "paper_fucker-default-reviewer",

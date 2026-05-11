@@ -1,5 +1,5 @@
 import { withSpan } from "../telemetry"
-import { checkClaimSupport, checkDataAndExperiments, checkReferences } from "./checks"
+import { checkClaimSupport, checkDataAndExperiments, checkReferences, checkSourceAuthenticity } from "./checks"
 import { runMultiModelReview } from "./review"
 import type { BlockingReport, VerificationGateInput, VerificationGateResult, VerificationFinding } from "./schemas"
 
@@ -34,6 +34,7 @@ export function evaluateVerificationGate(input: VerificationGateInput): Verifica
       const reviewReport = runMultiModelReview(input.model_reviews, createdAt)
       const findings = [
         ...checkReferences(input),
+        ...checkSourceAuthenticity(input),
         ...checkClaimSupport(input),
         ...checkDataAndExperiments(input),
         ...reviewReport.findings,
