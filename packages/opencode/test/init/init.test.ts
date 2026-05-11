@@ -16,6 +16,20 @@ async function clean(dir: string, attempts = 30): Promise<void> {
 }
 
 describe("init wizard", () => {
+  test("uses bounded access by default so first-run init works without Full Access acknowledgement", async () => {
+    const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-init-default-"))
+    try {
+      const result = await runInitWizard({ home: dir })
+
+      expect(result.config.access.mode).toBe("bounded")
+      expect(result.config.access.bounded_hours).toBe(24)
+      expect(result.config.access.full_access_acknowledged).toBe(false)
+      expect(result.config.language.default).toBe("zh-CN")
+    } finally {
+      await clean(dir)
+    }
+  })
+
   test("writes config, linked tools, encrypted secrets, and diagnostics under ~/.paper_fucker", async () => {
     const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-init-test-"))
     try {

@@ -115,7 +115,7 @@ export function defaultConfig(input: {
   models?: PaperFuckerConfig["models"]
   model_roles?: Partial<ModelRoleConfig>
 }): PaperFuckerConfig {
-  const mode = input.access?.mode ?? "full_access"
+  const mode = input.access?.mode ?? "bounded"
   const acknowledged = input.access?.full_access_acknowledged ?? false
   if (mode === "full_access" && !acknowledged) {
     throw new Error("Full Access mode requires explicit risk acknowledgement.")
@@ -152,7 +152,7 @@ export function defaultConfig(input: {
     budgets: input.budgets ?? {},
     access: {
       mode,
-      bounded_hours: input.access?.bounded_hours,
+      bounded_hours: mode === "bounded" ? (input.access?.bounded_hours ?? 24) : input.access?.bounded_hours,
       full_access_acknowledged: acknowledged,
       acknowledged_at: acknowledged ? input.now : undefined,
     },

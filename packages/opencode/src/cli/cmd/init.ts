@@ -24,7 +24,7 @@ export const InitCommand = effectCmd({
         choices: ["doctor", "diagnostics", "reset"] as const,
       })
       .option("yes", {
-        describe: "confirm non-interactive init or reset",
+        describe: "accept safe init defaults or confirm reset",
         type: "boolean",
       })
       .option("home", {
@@ -50,11 +50,11 @@ export const InitCommand = effectCmd({
         type: "string",
       })
       .option("full-access-ack", {
-        describe: "acknowledge Full Access risk for local automation",
+        describe: "enable Full Access mode and acknowledge local automation risk",
         type: "boolean",
       })
       .option("bounded", {
-        describe: "use bounded access instead of Full Access",
+        describe: "use bounded access mode (default)",
         type: "boolean",
       })
       .option("bounded-hours", {
@@ -103,7 +103,7 @@ export const InitCommand = effectCmd({
         )
         return
       }
-      if (!args.yes) throw new Error("Non-interactive init currently requires --yes.")
+      const fullAccess = Boolean(args.fullAccessAck) && !args.bounded
       console.log(
         JSON.stringify(
           await runInitWizard({
@@ -113,9 +113,9 @@ export const InitCommand = effectCmd({
             secrets: readPairs(args.secret),
             secrets_passphrase: args.secretsPassphrase,
             access: {
-              mode: args.bounded ? "bounded" : "full_access",
+              mode: fullAccess ? "full_access" : "bounded",
               bounded_hours: args.boundedHours,
-              full_access_acknowledged: Boolean(args.fullAccessAck),
+              full_access_acknowledged: fullAccess,
             },
             preview: {
               auto_open: !args.noPreviewAutoOpen,

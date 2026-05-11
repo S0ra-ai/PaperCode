@@ -127,5 +127,5 @@ $env:PYTHONPATH = 'research-tools/src'; python -m unittest discover -s research-
 - 不得把尚未发布的 release installer、npm 包、Chocolatey、Scoop、Homebrew 或 GitHub release artifact 写成主安装方式。
 - 源码编译完成后，仓库根目录必须有当前平台可执行文件；Windows 是 `paper_fucker.exe`，macOS/Linux 是 `paper_fucker`。
 - Windows 源码预览示例应使用 `.\paper_fucker.exe`，不要要求用户创建临时 PowerShell function。
-- `paper_fucker init` 当前是非交互入口，README 示例应使用 `paper_fucker init --yes` 或提供完整参数，避免用户照抄后失败。
+- `paper_fucker init` 必须能以 bounded access 安全默认值直接完成；README 示例优先使用 `paper_fucker init`，Full Access 只能通过显式 `--full-access-ack` 启用。
 - 可选外部工具只列能力影响和发现方式；不要把 Pandoc、LaTeX、Docker、Python 说成基础 TUI 必装项。

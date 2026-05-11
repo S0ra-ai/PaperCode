@@ -137,7 +137,7 @@ export const dict = {
   "provider.connect.apiKey.placeholder": "API anahtarı",
   "provider.connect.apiKey.required": "API anahtarı gerekli",
   "provider.connect.opencodeZen.line1":
-    "paper_fucker Zen, kodlama ajanları için seçilmiş güvenilir optimize edilmiş modellere erişim sağlar.",
+    "paper_fucker provider, kodlama ajanları için seçilmiş güvenilir optimize edilmiş modellere erişim sağlar.",
   "provider.connect.opencodeZen.line2":
     "Tek bir API anahtarıyla Claude, GPT, Gemini, GLM ve daha fazlası gibi modellere erişebilirsiniz.",
   "provider.connect.opencodeZen.visit.prefix": "",

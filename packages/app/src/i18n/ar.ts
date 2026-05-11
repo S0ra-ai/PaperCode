@@ -121,7 +121,7 @@ export const dict = {
   "provider.connect.apiKey.placeholder": "مفتاح API",
   "provider.connect.apiKey.required": "مفتاح API مطلوب",
   "provider.connect.opencodeZen.line1":
-    "يمنحك paper_fucker Zen الوصول إلى مجموعة مختارة من النماذج الموثوقة والمحسنة لوكلاء البرمجة.",
+    "يمنحك paper_fucker provider الوصول إلى مجموعة مختارة من النماذج الموثوقة والمحسنة لوكلاء البرمجة.",
   "provider.connect.opencodeZen.line2":
     "باستخدام مفتاح API واحد، ستحصل على إمكانية الوصول إلى نماذج مثل Claude و GPT و Gemini و GLM والمزيد.",
   "provider.connect.opencodeZen.visit.prefix": "قم بزيارة ",
