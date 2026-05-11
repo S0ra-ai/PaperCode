@@ -1,0 +1,111 @@
+id: release-cli-version-surface
+title: Release CLI version surface follows CHANGELOG
+status: todo
+priority: high
+owner: codex
+tags:
+- release
+- version
+- cli
+depends_on: []
+description: 修复源码构建后的 paper_fucker.exe --version 仍显示内部预览构建号的问题，使用户可见 CLI 版本跟随根 CHANGELOG
+  唯一版本源，并补充验证。
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: audit-version-surface
+  title: Audit current version surfaces
+  status: done
+  owner: codex
+  depends_on: []
+  description: 确认 CHANGELOG/README 与 paper_fucker.exe --version 的当前差异。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T22:25:56.538449'
+      level: info
+      message: 确认根 CHANGELOG/README 当前为 0.8.6，但源码构建出的 paper_fucker.exe --version 仍显示内部预览构建号
+        0.0.0-release/0.8.5-202605112217，需要把用户可见 CLI version 绑定到 CHANGELOG 唯一版本源。
+      agent: codex
+    last_run: '2026-05-11T22:25:56.538449'
+    attempt_count: 2
+  meta: {}
+- id: fix-cli-version-source
+  title: Inject CHANGELOG version into CLI build
+  status: done
+  owner: codex
+  depends_on: []
+  description: 构建时解析根 CHANGELOG :version，并让 CLI --version 使用产品版本。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T22:27:08.412763'
+      level: info
+      message: 新增 ProductVersion，并在 build.ts 从根 CHANGELOG :version 注入 PAPER_FUCKER_VERSION；CLI
+        --version、debug 输出与 TUI sidebar 改为显示产品版本，内部 InstallationVersion 继续保留为构建通道版本。
+      agent: codex
+    last_run: '2026-05-11T22:27:08.412763'
+    attempt_count: 2
+  meta: {}
+- id: validate-version-smoke
+  title: Validate build and version smoke
+  status: done
+  owner: codex
+  depends_on: []
+  description: 运行相关测试、typecheck、构建和 paper_fucker.exe --version smoke。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T22:28:15.421793'
+      level: info
+      message: 验证通过：public-surface/init tests 12 pass；opencode typecheck 通过；bun run
+        build 通过且内部 smoke 输出 0.8.6；根目录 paper_fucker.exe --version 输出 0.8.6；paper_fucker.exe
+        init --home tmp smoke 成功，默认 bounded access。
+      agent: codex
+    last_run: '2026-05-11T22:28:15.421793'
+    attempt_count: 2
+  meta: {}
+- id: sync-changelog-readme
+  title: Record changelog and README version
+  status: in_progress
+  owner: codex
+  depends_on: []
+  description: 按 TaskFlow 建议版本记录真实 work commit，并同步 README。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    last_run: '2026-05-11T22:28:19.969471'
+    attempt_count: 1
+  meta: {}
+outputs:
+- type: file
+  path: packages/opencode/src/index.ts
+  description: CLI --version 使用产品版本。
+- type: file
+  path: packages/opencode/script/build.ts
+  description: 构建时从根 CHANGELOG 注入产品版本。
+- type: file
+  path: CHANGELOG
+  description: 记录真实 commit id 的版本条目。
+- type: file
+  path: README.md
+  description: 当前版本同步。
+trace:
+  logs: []
+  attempt_count: 0
+lock:
+  by: codex
+  at: '2026-05-11T22:25:36.092698'
+meta:
+  created_at: '2026-05-11T22:25:32.562574'
+  updated_at: '2026-05-11T22:28:19.969471'
+  version: '1'
