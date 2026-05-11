@@ -16,10 +16,54 @@ Paper Fucker 是一个中文优先、私有优先的可验证论文工作台。�
 - **实时网页 Preview**：写作、引用、审稿、成本、agent 和导出状态可以在 token-protected localhost 页面实时查看。
 - **真实性 Gate**：无证据 claim、引用缺失、license/source 冲突或复现失败会阻断 final export；forced draft 会显著标记失败项。
 
+## 安装
+
+当前版本仍是开发预览版。正式发布包可用后，Windows 用户会直接获得 `paper_fucker` 命令；在此之前，推荐先从源码运行。
+
+### Windows 源码预览
+
+前置要求：
+
+- Windows 10 1809 或更高版本。
+- Git for Windows。
+- Bun。Windows 安装方式见 [Bun 官方安装文档](https://bun.sh/docs/installation)。
+
+在 PowerShell 中执行：
+
+```powershell
+winget install --id Git.Git -e
+powershell -c "irm bun.sh/install.ps1 | iex"
+bun --version
+
+git clone https://github.com/S0ra-ai/paper_fucker.git
+cd paper_fucker
+bun install
+```
+
+源码预览版可以先在当前 PowerShell 会话里创建一个临时命令：
+
+```powershell
+$env:PAPER_FUCKER_REPO = (Get-Location).Path
+function paper_fucker { bun run --cwd "$env:PAPER_FUCKER_REPO\packages\opencode" --conditions=browser src/index.ts @args }
+
+paper_fucker --help
+```
+
+关闭 PowerShell 后这个临时命令会失效；重新打开终端时，再进入仓库目录并重新执行上面的 `$env:PAPER_FUCKER_REPO` 和 `function paper_fucker` 两行即可。
+
+### 可选外部工具
+
+基础 TUI 只需要 Git 和 Bun。以下工具按能力启用，缺失时 `paper_fucker init doctor` 会提示：
+
+- Pandoc：Markdown、LaTeX、DOCX 转换。
+- LaTeX 引擎：TeX Live、MiKTeX 或 Tectonic，用于 PDF 生成。
+- Docker Desktop：容器复现实验。
+- Python 3.11+：爬虫、数据处理和部分 research tools。
+
 ## 推荐使用方式：TUI 论文工作台
 
 ```powershell
-paper_fucker init
+paper_fucker init --yes
 paper_fucker init doctor
 paper_fucker
 ```
@@ -43,7 +87,7 @@ Run 页面会展示：
 - Preview 与 Export 控制
 - 需要你决策的中文 pause questions
 
-如果你要重新配置 provider、模型角色或本地工具链，重新运行 `paper_fucker init` 即可进入初始化向导；`paper_fucker init doctor` 会检查当前配置和工具状态。
+如果你要重新配置 provider、模型角色或本地工具链，重新运行 `paper_fucker init --yes` 即可刷新本地配置；`paper_fucker init doctor` 会检查当前配置和工具状态。
 
 ## 非交互模式
 
@@ -103,7 +147,7 @@ TUI 会在能力健康区显示 MCP、Skill 和 toolchain 状态。缺少 secret
 DeepSeek 只是默认样例，不是唯一支持模型。任何 OpenCode substrate 支持的 provider/model 都可以接入，并按角色分配。
 
 ```powershell
-paper_fucker init
+paper_fucker init --yes
 paper_fucker init doctor
 ```
 
