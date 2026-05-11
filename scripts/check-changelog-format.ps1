@@ -8,7 +8,8 @@ if (-not (Test-Path -LiteralPath $Path)) {
   throw "CHANGELOG not found: $Path"
 }
 
-$lines = Get-Content -LiteralPath $Path
+$utf8 = [System.Text.UTF8Encoding]::new($false)
+$lines = [System.IO.File]::ReadAllLines((Resolve-Path -LiteralPath $Path).Path, $utf8)
 $inHistory = $false
 $currentSection = $null
 $problems = New-Object System.Collections.Generic.List[string]
