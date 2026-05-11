@@ -62,7 +62,7 @@ function Format-Detail {
     $text = $text -replace "System\.Management\.Automation\.RemoteException", ""
     $text = $text -replace "\r?\n", " "
     $text = $text -replace "\|", "/"
-    if ($text.Length -gt 500) { return $text.Substring(0, 500) + "..." }
+    if ($text.Length -gt 2000) { return $text.Substring(0, 2000) + "..." }
     return $text
 }
 
@@ -141,7 +141,8 @@ function Invoke-CheckedCommand {
     }
     $last = @($result)[-1]
     if ([int]$last.exit -ne 0) {
-        throw "$File $($Arguments -join ' ') failed with exit $($last.exit). $($last.output -join ' ')"
+        $tail = ($last.output | Select-Object -Last 80) -join " "
+        throw "$File $($Arguments -join ' ') failed with exit $($last.exit). Last output: $tail"
     }
     return ($last.output | Select-Object -Last 12) -join " "
 }
