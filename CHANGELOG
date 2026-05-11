@@ -7,6 +7,24 @@
 
 :history
 
+    0.8.5-dev - 2026/05/11 (ccb8e2d) [release/0.8.5]
+        :brief README 对外信息边界收紧
+        - docs(readme): 顶部状态从 release 分支现场改为开发预览版，避免对外暴露内部发布执行状态
+        - docs(readme): 移除内部文档入口、release 测试、tag/main 策略、维护者脚本清单和内部审计目录清单
+        - docs(readme): 保留外部用户需要的 TUI 主入口、内置能力包、provider/model、Preview/export、隐私和项目状态
+        - docs(internal): 增加 README 写作禁止项，明确内部 release、TaskFlow、审计目录和维护脚本不得写入对外首页
+        :src
+            - README.md - public GitHub README surface tightened
+            - docs/internal/README.md - README public surface rules
+        :verification
+            - rg public-surface forbidden terms against README.md passed
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-changelog-format.ps1 passed
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-release-files.ps1 passed
+            - git diff --check passed
+            - TaskFlow validate_changelog_format passed
+            - TaskFlow validate_task release-public-readme-audit passed
+
     0.8.5-dev - 2026/05/11 (f82b5f7) [release/0.8.5]
         :brief README 补齐 TUI 主入口与内置能力包
         - docs(readme): 快速开始改为 TUI-first，明确 paper_fucker 默认打开中文论文工作台，CLI 仅作为非交互/自动化入口
