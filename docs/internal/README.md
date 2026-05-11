@@ -128,4 +128,5 @@ $env:PYTHONPATH = 'research-tools/src'; python -m unittest discover -s research-
 - 源码编译完成后，仓库根目录必须有当前平台可执行文件；Windows 是 `paper_fucker.exe`，macOS/Linux 是 `paper_fucker`。
 - Windows 源码预览示例应使用 `.\paper_fucker.exe`，不要要求用户创建临时 PowerShell function。
 - `paper_fucker init` 必须能以 bounded access 安全默认值直接完成；README 示例优先使用 `paper_fucker init`，Full Access 只能通过显式 `--full-access-ack` 启用。
+- `paper_fucker init` / `paper_fucker init doctor` 默认必须输出用户可读中文摘要；完整 JSON 只能作为 `--json` 机器接口提供。
 - 可选外部工具只列能力影响和发现方式；不要把 Pandoc、LaTeX、Docker、Python 说成基础 TUI 必装项。
