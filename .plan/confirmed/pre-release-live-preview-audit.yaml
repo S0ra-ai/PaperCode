@@ -1,0 +1,115 @@
+id: pre-release-live-preview-audit
+title: pre-release 实时网页预览验收
+status: done
+priority: high
+owner: codex
+tags:
+- pre-release
+- preview
+- ux
+- paperrun
+depends_on:
+- pre-release-doc-brand-structure
+description: 确认并补齐用户提到的写作进度实时网页预览：PaperRun 写作/导出过程应能通过 token-protected preview/SSE
+  页面实时查看，pre-release 前形成验收报告。
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: audit-preview-flow
+  title: 审计当前 Preview/PaperRun 实时链路
+  status: done
+  owner: codex
+  depends_on: []
+  description: 确认 preview server、run-bound preview snapshot、SSE/annotation/source/cost
+    状态是否覆盖写作进度实时查看。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T09:20:15.415521'
+      level: info
+      message: Auditing current preview flow from PaperRun authoring adapter, /paper/runs/:id/preview
+        API, TUI Preview control, packages/preview server/SSE, and init preview auto_open
+        config.
+      agent: codex
+    - timestamp: '2026-05-11T09:23:47.388024'
+      level: info
+      message: Audit found preview package, SSE client, and run-bound adapter existed,
+        but /paper/runs/:id/preview only returned data and the TUI did not open a
+        browser URL. This was a real UX gap for the requested live web preview.
+      agent: codex
+    last_run: '2026-05-11T09:23:47.388024'
+    attempt_count: 2
+  meta: {}
+- id: close-preview-gaps
+  title: 补齐实时预览缺口
+  status: done
+  owner: codex
+  depends_on:
+  - audit-preview-flow
+  description: 如发现缺口，补齐 PaperRun preview/update/open controls 与只读实时状态；如已完善，形成明确验收证据。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T09:23:48.259728'
+      level: info
+      message: 'Implemented PaperRun live preview server wiring: /paper/runs/:id/preview
+        now builds a preview.v1 snapshot, starts a token-protected localhost preview
+        server, returns URL/token/snapshot, and the TUI dashboard auto-opens the preview
+        URL for ready runs.'
+      agent: codex
+    - timestamp: '2026-05-11T09:25:45.533029'
+      level: info
+      message: 'Closed preview UX gap: added PaperRunPreviewResponse with live preview
+        URL/token/snapshot; /paper/runs/:id/preview starts/replaces a token-protected
+        localhost preview server; TUI dashboard auto-opens the returned URL for preview-ready
+        runs; tests stop live preview servers after use.'
+      agent: codex
+    last_run: '2026-05-11T09:25:45.533029'
+    attempt_count: 2
+  meta: {}
+- id: preview-acceptance-tests
+  title: 运行预览验收
+  status: done
+  owner: codex
+  depends_on:
+  - close-preview-gaps
+  description: 运行 packages/preview tests、PaperRun preview/export 相关 tests，并生成 reports/live-preview-acceptance.md。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T09:25:46.563512'
+      level: info
+      message: Running preview acceptance tests, PaperRun API/TUI preview tests, and
+        opencode typecheck.
+      agent: codex
+    - timestamp: '2026-05-11T09:25:54.039406'
+      level: info
+      message: 'Validation passed: npx --yes bun@1.3.13 --cwd packages/preview test
+        (2 pass); npx --yes bun@1.3.13 --cwd packages/opencode test test/cli/tui/paper-workbench-controls.test.ts
+        test/paper/run-api.test.ts (3 pass); npx --yes bun@1.3.13 run --cwd packages/opencode
+        typecheck passed.'
+      agent: codex
+    last_run: '2026-05-11T09:25:54.039406'
+    attempt_count: 2
+  meta: {}
+outputs:
+- type: file
+  path: reports/live-preview-acceptance.md
+- type: file
+  path: packages/preview/test
+- type: file
+  path: packages/opencode/test/paper
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-11T08:51:22.716591'
+  updated_at: '2026-05-11T09:25:58.690889'
+  version: '1'

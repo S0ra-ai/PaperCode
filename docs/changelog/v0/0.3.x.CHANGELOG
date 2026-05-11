@@ -1,0 +1,181 @@
+:project       paper_fucker - 可验证论文研究自动化系统
+:author        s0ra (https://github.com/S0ra-ai)
+:repo          
+:desc          0.3.x 历史变更归档，主 CHANGELOG 仅保留当前活跃版本线
+:version       0.3.7-dev
+:last_update   2026/05/11
+
+:history
+
+    0.3.7-dev - 2026/05/10 (55167c9) [develop]
+        :brief 报告路径卫生清理, 标记迁移前 server 路径为历史证据
+        - docs(reports): 为 25 个 task-032 前报告添加 historical path note, 避免将 packages/server 误读为当前架构
+        - docs(readme): 说明历史报告可保留 packages/server/@paper-fucker/server 作为 provenance, 当前权威路径为 packages/opencode/src/paper
+        - docs(report): 新增 report-path-hygiene 审计报告, 区分当前文档、历史证据、迁移/缺失断言
+        - note(history): CHANGELOG 与已完成 TaskFlow logs 保留旧路径, 不重写真实历史提交与验证记录
+        :src
+            - README.md - current path/provenance policy and version update
+            - reports/report-path-hygiene.md - audit result and future documentation policy
+            - reports/* - pre-hard-fork reports marked with historical path note
+            - .plan/confirmed/task-045-report-path-hygiene.yaml - TaskFlow execution evidence
+            - CHANGELOG - 0.3.7-dev history entry
+        :verification
+            - rg audit confirmed pre-hard-fork report server-path references are marked as historical provenance
+            - CHANGELOG and TaskFlow completed-task logs intentionally retained as historical evidence
+
+    0.3.6-dev - 2026/05/10 (7d335eb) [develop]
+        :brief PaperRun 新增 observability audit、cost、tool trace 与 data-egress 诊断
+        - feat(observability): 新增 PaperObservabilityAudit.v1 与 summary coverage, 覆盖 stage、capability、model_role、subagent、tool、data_egress、export_renderer、cost
+        - feat(runtime): 新增 recordPaperToolTrace、recordPaperCostUsage、recordPaperDataEgressAudit 与 recordPaperObservabilityAudit
+        - feat(snapshot): PaperRun diagnostics 新增 audit summary, 从 durable run events 聚合审计覆盖与缺口
+        - feat(export): export renderer pipeline 为每个 format 写入 export_renderer audit event
+        - feat(strict): strict acceptance 新增 observability-audit-coverage 检查
+        - test(observability): 新增 snapshot 级审计测试, 验证 tool trace、cost、egress 与 coverage 可查询
+        - docs(readme): 版本更新为 0.3.6-dev, 记录 observability audit hardening
+        :src
+            - packages/opencode/src/paper/observability.ts - audit helpers, tool trace, cost, data egress, and summary projection
+            - packages/opencode/src/paper/run.ts - diagnostics.audit snapshot projection
+            - packages/opencode/src/paper/export-pipeline.ts - export_renderer audit events
+            - packages/opencode/src/paper/index.ts - observability public exports
+            - packages/opencode/test/paper/observability-audit.test.ts - observability coverage tests
+            - packages/opencode/test/paper/strict-acceptance.test.ts - strict inventory update
+            - scripts/strict-acceptance.ps1 - observability audit coverage check
+            - reports/observability-audit-hardening.md - implementation report
+            - README.md - current behavior and version update
+            - CHANGELOG - 0.3.6-dev history entry
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/observability-audit.test.ts test/paper/export-pipeline.test.ts passed: 4 pass, 0 fail, 29 expects
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/observability-audit.test.ts test/paper/strict-acceptance.test.ts passed: 4 pass, 0 fail, 43 expects
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+
+    0.3.5-dev - 2026/05/10 (855a944) [develop]
+        :brief PaperRun export pipeline 写出真实文件与 manifest
+        - feat(export): 新增 run-bound export pipeline, 写出 Markdown、LaTeX、PDF、DOCX 与 manifest.json
+        - feat(export): 默认发现 pandoc、latexmk、xelatex、pdflatex、lualatex、tectonic, 并支持测试/调用方注入 renderer 或 command runner
+        - feat(api): /paper/runs/:runID/export 现在返回 concrete files、manifest_path、tool_diagnostics 与 failed_checks
+        - feat(preview): preview payload 暴露 exports 与 export_state, 使预览端可读取具体导出文件和阻断原因
+        - fix(export): 缺少 pandoc/LaTeX engine 时写入 actionable diagnostics, 不再假装 PDF/DOCX 成功
+        - test(export): 新增 export-pipeline 测试, 覆盖 final export、forced draft、manifest、缺工具诊断与 API forced export 文件返回
+        - docs(readme): 版本更新为 0.3.5-dev, 记录真实 export renderer pipeline
+        :src
+            - packages/opencode/src/paper/export-pipeline.ts - run-bound renderer pipeline and external tool diagnostics
+            - packages/opencode/src/paper/research/export/recording.ts - recordExportBundle wiring to renderer pipeline
+            - packages/opencode/src/paper/research/export/schemas.ts - manifest metadata fields
+            - packages/opencode/src/paper/run.ts - PaperRun export API file/manifest response and preview export state
+            - packages/opencode/src/paper/index.ts - export pipeline public exports
+            - packages/opencode/test/paper/export-pipeline.test.ts - renderer pipeline coverage
+            - packages/opencode/test/paper/run-api.test.ts - export API concrete file assertions
+            - reports/export-renderer-pipeline.md - implementation report
+            - README.md - current behavior and version update
+            - CHANGELOG - 0.3.5-dev history entry
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/export-pipeline.test.ts test/paper/authoring.test.ts test/paper/run-api.test.ts passed: 7 pass, 0 fail, 63 expects
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/run-api.test.ts passed: 1 pass, 0 fail, 27 expects
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+
+    0.3.4-dev - 2026/05/10 (30479e1) [develop]
+        :brief TUI 论文工作台新增 PaperRun live controls 与能力健康显示
+        - feat(tui): PaperRun dashboard 新增发送指导、继续运行、重试阶段、取消运行、打开预览、导出终稿、导出 forced draft、能力健康、模型角色 controls
+        - feat(tui): 新增 renderer-independent API helpers, 自动调用 /paper/runs/:runID/guidance、/control、/preview、/export、/paper/capabilities、/paper/model-roles、/paper/doctor
+        - feat(tui): 显示 durable controller status、queued guidance 数、模型角色 provider/model、MCP/Skill/toolchain 健康状态
+        - fix(tui): dashboard state 对旧 snapshot 缺少 controller_state/model_roles 的情况保持兼容
+        - test(tui): 新增 live controls 测试, 更新中文 dashboard panel/control 断言
+        - docs(readme): 版本更新为 0.3.4-dev, 记录 live workbench controls
+        :src
+            - packages/opencode/src/cli/cmd/tui/routes/paper/workbench.ts - live control state, API helpers, capability/model/doctor adapters
+            - packages/opencode/src/cli/cmd/tui/routes/paper/index.tsx - visible controller, action, model-role, and health sections
+            - packages/opencode/test/cli/tui/paper-workbench-controls.test.ts - live control and API helper coverage
+            - packages/opencode/test/cli/tui/paper-workbench.test.ts - updated dashboard control assertions
+            - reports/workbench-live-controls.md - implementation report
+            - README.md - current behavior and version update
+            - CHANGELOG - 0.3.4-dev history entry
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/cli/tui/paper-workbench.test.ts test/cli/tui/paper-workbench-controls.test.ts passed: 5 pass, 0 fail, 38 expects
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+
+    0.3.3-dev - 2026/05/10 (11d1042) [develop]
+        :brief Intake 新增真实材料索引与 Source Ledger 记录
+        - feat(intake): 新增 MaterialIndex.v1, 支持 code_paths、paper_files、dataset_paths、experiment_logs 的 workspace-safe 索引
+        - feat(materials): 记录 mime、bytes、sha256、source_range、text_preview 与 material source_id
+        - feat(source-ledger): PaperRun intake 写入 MaterialIndex artifact, 并为 indexed materials 创建 Source Ledger entries
+        - fix(egress): `.env`、secret-like paths、.git/node_modules、unsupported binary files 默认跳过并记录 skip reason
+        - test(materials): 覆盖材料索引、source ranges、secret/binary skip、PaperRun intake artifact/source ledger 写入
+        - docs(readme): 版本更新为 0.3.3-dev, 记录真实 material intake
+        :src
+            - packages/opencode/src/paper/material-index.ts - MaterialIndex runtime and recording helpers
+            - packages/opencode/src/paper/orchestrator.ts - intake stage material index wiring
+            - packages/opencode/src/paper/index.ts - material index public exports
+            - packages/opencode/test/paper/material-index.test.ts - material index tests
+            - reports/real-intake-material-indexing.md - implementation report
+            - README.md - current behavior and version update
+            - CHANGELOG - 0.3.3-dev history entry
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/material-index.test.ts passed: 2 pass, 0 fail, 11 expects
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+
+    0.3.2-dev - 2026/05/10 (644922b) [develop]
+        :brief 新增持久化 PaperRun controller、guidance queue 与控制 API
+        - feat(controller): 新增 PaperRunController.v1, 持久化 checkpoints、guidance_queue、controls、internal_sessions 与 controller status
+        - feat(paperrun): PaperRun snapshot 新增 controller_state, 创建 run 后同步 controller 状态
+        - feat(guidance): recordPaperRunGuidance 同步写入 durable guidance queue, resume/retry 后标记 queued guidance 为 applied
+        - feat(api): 新增 /paper/runs/:runID/control, 支持 resume/retry/cancel, SSE 同时输出 paper.run.snapshot 与 paper.run.controller
+        - fix(runtime): run.status_changed 事件改为符合 research contract 的 run.status.changed
+        - test(paperrun): 新增 durable controller 测试并扩展 run-api control endpoint 覆盖
+        - docs(readme): 版本更新为 0.3.2-dev, 记录 PaperRun controller 控制闭环
+        :src
+            - packages/opencode/src/paper/run-controller.ts - durable controller state, guidance queue, controls, and SSE serialization
+            - packages/opencode/src/paper/run.ts - controller_state projection, guidance queue wiring, controlPaperRun, and controller SSE
+            - packages/opencode/src/paper/index.ts - controller public exports
+            - packages/opencode/src/paper/research/runtime/run-store.ts - contract-safe status event name
+            - packages/opencode/src/server/routes/instance/httpapi/groups/paper.ts - /paper/runs/:runID/control schema and route
+            - packages/opencode/src/server/routes/instance/httpapi/handlers/paper.ts - control endpoint handler
+            - packages/opencode/test/paper/paperrun-controller.test.ts - controller behavior tests
+            - packages/opencode/test/paper/run-api.test.ts - API control endpoint coverage
+            - reports/paperrun-resume-guidance-controller.md - implementation report
+            - README.md - current behavior and version update
+            - CHANGELOG - 0.3.2-dev history entry
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/paperrun-controller.test.ts test/paper/run-api.test.ts passed: 2 pass, 0 fail, 36 expects
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+
+    0.3.1-dev - 2026/05/10 (e78a169) [develop]
+        :brief PaperRun 创建默认驱动论文 stage engine
+        - feat(paperrun): createPaperRun 默认调用 startPaperResearchRun, 创建 run 后直接推进 14-stage paper graph
+        - feat(orchestrator): 新增默认具体 stage handlers, 记录 planning、source/data discovery、code-to-paper、experiment diagnostics、ClaimLedger、draft、profile check、verification 与 forced export bundle
+        - feat(runtime): PaperRun stage snapshot 识别 paperorchestrator.stage.completed, API/TUI 创建路径能返回已推进的 stage 状态
+        - fix(runtime): 全局 run index 对重复 run_dir/run_id 更稳健, 避免 Windows/index refresh 竞态造成 SQLite primary key 冲突
+        - fix(paperrun): 无效 code_paths 转换为 PaperRun blocked diagnostic, 不再让 /paper/runs 创建返回 HTTP 400
+        - test(paperrun): 新增 paperrun-execution 测试, 禁止默认产品路径依赖 fixture handler injection
+        - docs(readme): 版本更新为 0.3.1-dev, 记录 PaperRun 默认执行引擎
+        :src
+            - packages/opencode/src/paper/orchestrator.ts - default concrete paper stage handlers and run-scoped execution cache
+            - packages/opencode/src/paper/run.ts - createPaperRun to stage engine wiring and orchestrator completion status projection
+            - packages/opencode/src/paper/research/runtime/run-store.ts - normalized run_dir duplicate guard during index refresh
+            - packages/opencode/src/paper/research/storage.ts - duplicate run_id guard during global index rebuild
+            - packages/opencode/test/paper/paperrun-execution.test.ts - default PaperRun execution coverage
+            - reports/paperrun-execution-engine.md - implementation report
+            - README.md - current behavior and version update
+            - CHANGELOG - 0.3.1-dev history entry
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/run-api.test.ts test/cli/tui/paper-workbench.test.ts test/paper/paperrun-execution.test.ts passed: 5 pass, 0 fail, 56 expects
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+
+    0.3.0-dev - 2026/05/10 (9fdb7dc) [develop]
+        :brief OpenCode hard fork 最终验收为 Paper Fucker 论文工作台
+        - test(acceptance): 新增 hard-fork acceptance 覆盖 paper core 迁移、PaperRun API/TUI、submission 预算档、多层多模型 Agent Tree、private-first data egress、forced draft 阻断原因
+        - test(strict): strict acceptance 新增 hard-fork-paper-core、hard-fork-paperrun-api-tui、hard-fork-agent-tree、hard-fork-quality-egress、hard-fork-public-branding 检查
+        - fix(strict): TUI smoke 改用仓库内 Paper Fucker CLI help, 不依赖全局 opencode 命令
+        - docs(report): 新增 hard fork acceptance 报告, strict live acceptance 覆盖 live provider、Exa、Nature skill/profile、pandoc、LaTeX、DOCX、topic-to-paper 与 code-to-paper
+        - docs(readme): 版本更新为 0.3.0-dev, 记录 PaperRun-first hard fork 验收状态
+        :src
+            - packages/opencode/test/paper/hard-fork-acceptance.test.ts - final hard fork product acceptance coverage
+            - packages/opencode/test/paper/strict-acceptance.test.ts - strict script required check list for hard fork checks
+            - scripts/strict-acceptance.ps1 - strict live acceptance hard fork checks and local CLI smoke
+            - reports/strict-live-acceptance.md - strict live acceptance report
+            - reports/hard-fork-acceptance.md - final hard fork acceptance report
+            - README.md - public hard fork status and version update
+            - CHANGELOG - 0.3.0-dev history entry
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/strict-acceptance.test.ts test/paper/hard-fork-acceptance.test.ts passed: 6 pass, 0 fail, 53 expects
+            - scripts/strict-acceptance.ps1 passed with TaskFlow, version sync, tracked secret scan, opencode tests, preview tests, Python tests, typecheck, local Paper Fucker CLI smoke, DeepSeek live provider, Exa live search, Nature skill/profile, pandoc, LaTeX, DOCX, topic-to-paper, code-to-paper, hard fork checks, and Git Flow cleanup
+

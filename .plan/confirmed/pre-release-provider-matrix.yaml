@@ -1,0 +1,116 @@
+id: pre-release-provider-matrix
+title: pre-release 多 provider matrix smoke
+status: done
+priority: high
+owner: codex
+tags:
+- pre-release
+- provider
+- models
+- smoke
+depends_on:
+- pre-release-init-reset-entry
+description: 增加 provider matrix smoke 脚本和报告，读取已配置 provider，逐个执行 /models 与最小 chat completion；无
+  provider 时给出待配置诊断，不阻断 RC。
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: design-provider-config-read
+  title: 确定 provider 配置读取路径
+  status: done
+  owner: codex
+  depends_on: []
+  description: 读取 ~/.paper_fucker/providers 与 ~/.paper_fucker/local/provider-secrets.json，兼容
+    env secret 和 OpenAI-compatible endpoint。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T09:33:33.330214'
+      level: info
+      message: Designing provider matrix smoke around ~/.paper_fucker/providers/*.json
+        public config and ~/.paper_fucker/local/provider-secrets.json secrets, with
+        no key echoing and待配置 diagnostics when no providers exist.
+      agent: codex
+    - timestamp: '2026-05-11T09:36:05.836650'
+      level: info
+      message: Provider matrix reads public configs from ~/.paper_fucker/providers/*.json
+        and secrets from ~/.paper_fucker/local/provider-secrets.json via api_key_ref.
+        It treats no configured providers as pending_config and never prints API keys.
+      agent: codex
+    last_run: '2026-05-11T09:36:05.836650'
+    attempt_count: 2
+  meta: {}
+- id: implement-provider-matrix-smoke
+  title: 实现 provider matrix smoke 脚本
+  status: done
+  owner: codex
+  depends_on:
+  - design-provider-config-read
+  description: 新增 scripts/provider-matrix-smoke.ps1，生成 reports/provider-matrix-smoke.md，逐
+    provider 记录 models/chat 状态和失败原因。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T09:36:13.657893'
+      level: info
+      message: Provider matrix smoke script implemented; normalizing TaskFlow step
+        transition.
+      agent: codex
+    - timestamp: '2026-05-11T09:36:22.799722'
+      level: info
+      message: Added scripts/provider-matrix-smoke.ps1. It calls /models for each
+        OpenAI-compatible provider, selects the first discovered model, optionally
+        runs a minimal /chat/completions smoke, and writes reports/provider-matrix-smoke.md.
+        RC readiness does not require all providers to pass before the user configures
+        them.
+      agent: codex
+    last_run: '2026-05-11T09:36:22.799722'
+    attempt_count: 2
+  meta: {}
+- id: provider-matrix-tests
+  title: 测试 provider matrix 行为
+  status: done
+  owner: codex
+  depends_on:
+  - implement-provider-matrix-smoke
+  description: 覆盖无 provider 待配置、fixture provider、secret 缺失和报告生成。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T09:36:07.333687'
+      level: info
+      message: Running provider matrix script with an empty temp home, model-discovery
+        tests, and opencode typecheck.
+      agent: codex
+    - timestamp: '2026-05-11T09:36:23.746203'
+      level: info
+      message: 'Validation passed: provider-matrix-smoke.ps1 with empty temp home
+        generated reports/provider-matrix-smoke.md status pending_config; npx --yes
+        bun@1.3.13 --cwd packages/opencode test test/paper/model-discovery.test.ts
+        passed (4 pass); npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+        passed.'
+      agent: codex
+    last_run: '2026-05-11T09:36:23.746203'
+    attempt_count: 2
+  meta: {}
+outputs:
+- type: file
+  path: scripts/provider-matrix-smoke.ps1
+- type: file
+  path: reports/provider-matrix-smoke.md
+- type: file
+  path: packages/opencode/test/paper/model-discovery.test.ts
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-11T08:51:43.843575'
+  updated_at: '2026-05-11T09:36:28.455483'
+  version: '1'

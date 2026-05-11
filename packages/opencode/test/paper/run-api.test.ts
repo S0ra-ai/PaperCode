@@ -2,6 +2,7 @@ import { afterEach, describe, expect, test } from "bun:test"
 import { ConfigProvider, Layer } from "effect"
 import { HttpRouter } from "effect/unstable/http"
 import { Flag } from "@opencode-ai/core/flag/flag"
+import { stopAllPaperRunLivePreviews } from "../../src/paper/run"
 import { PaperPaths } from "../../src/server/routes/instance/httpapi/groups/paper"
 import { ExperimentalHttpApiServer } from "../../src/server/routes/instance/httpapi/server"
 import { resetDatabase } from "../fixture/db"
@@ -51,6 +52,7 @@ function runPath(template: string, runID: string) {
 }
 
 afterEach(async () => {
+  stopAllPaperRunLivePreviews()
   Flag.OPENCODE_EXPERIMENTAL_HTTPAPI = originalHttpApi
   await disposeAllInstances()
   await resetDatabase()
@@ -102,7 +104,10 @@ describe("PaperRun HttpApi", () => {
 
     const preview = await app().request(runPath(PaperPaths.preview, runID), { headers })
     expect(preview.status).toBe(200)
-    expect((await preview.json()).readonly).toBe(true)
+    const previewBody = await preview.json()
+    expect(previewBody.readonly).toBe(true)
+    expect(previewBody.url).toContain("http://127.0.0.1:")
+    expect(previewBody.snapshot.schema_version).toBe("preview.v1")
 
     const exportResponse = await app().request(runPath(PaperPaths.export, runID), {
       ...json({ forced: true }),

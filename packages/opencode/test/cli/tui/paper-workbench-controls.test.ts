@@ -153,7 +153,14 @@ describe("TUI PaperRun live controls", () => {
       const url = String(input)
       if (url.endsWith("/guidance")) return Response.json({ accepted: true, run_id: "run-live-controls" })
       if (url.endsWith("/control")) return Response.json({ status: "running", run_id: "run-live-controls" })
-      if (url.endsWith("/preview")) return Response.json({ readonly: true, run_id: "run-live-controls" })
+      if (url.endsWith("/preview")) {
+        return Response.json({
+          readonly: true,
+          run_id: "run-live-controls",
+          status: "ready",
+          url: "http://127.0.0.1:49152/preview?token=test",
+        })
+      }
       if (url.endsWith("/export")) return Response.json({ status: "forced_draft", run_id: "run-live-controls" })
       if (url.endsWith("/capabilities")) return Response.json({ capabilities: [{ name: "exa" }] })
       if (url.endsWith("/model-roles")) return Response.json({ roles: { writer: { provider_id: "deepseek", model_id: "deepseek-v4-pro" } } })
@@ -175,12 +182,18 @@ describe("TUI PaperRun live controls", () => {
       stage: "literature",
       fetch: fakeFetch,
     })
-    await requestPaperWorkbenchPreview({
+    const opened: string[] = []
+    const preview = await requestPaperWorkbenchPreview({
       baseUrl: "http://localhost:4096",
       directory: "E:/Project/paper_fucker",
       runID: "run-live-controls",
       fetch: fakeFetch,
+      openUrl: (url) => {
+        opened.push(url)
+      },
     })
+    expect(preview.url).toBe("http://127.0.0.1:49152/preview?token=test")
+    expect(opened).toEqual(["http://127.0.0.1:49152/preview?token=test"])
     await requestPaperWorkbenchExport({
       baseUrl: "http://localhost:4096",
       directory: "E:/Project/paper_fucker",

@@ -1,4 +1,5 @@
 export * from "./config"
 export * from "./discovery"
+export * from "./reset"
 export * from "./secrets"
 export * from "./wizard"
