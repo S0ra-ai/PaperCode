@@ -1,0 +1,105 @@
+id: release-readme-windows-install
+title: README 补齐 Windows 安装与首次启动
+status: done
+priority: high
+owner: codex
+tags:
+- release
+- docs
+- install
+- windows
+depends_on: []
+description: 在对外 README 中增加 Windows 用户可执行的安装、源码预览运行、首次初始化、TUI 启动和可选外部工具说明，避免只展示 paper_fucker
+  命令而缺少获得命令的方法。
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: inspect-install-surface
+  title: 确认当前安装和启动入口
+  status: done
+  owner: codex
+  depends_on: []
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T21:14:56.642526'
+      level: info
+      message: 确认当前安装和启动入口：源码预览运行、release install 脚本、package bin 和 init 命令行为。
+      agent: codex
+    - timestamp: '2026-05-11T21:15:03.406555'
+      level: info
+      message: 确认当前开发预览版尚未发布正式 Windows installer/tag；仓库有 release install 脚本但依赖 GitHub
+        release artifact，不适合作为当前 README 主路径。可用路径是 Windows 源码预览安装：安装 Git+Bun，clone
+        release branch，bun install，使用 bun run dev -- <args> 启动；未来正式 release 后再把 npm/binary
+        installer 作为主路径。Bun 官方 Windows 安装命令已核对为 powershell -c "irm bun.sh/install.ps1|iex"。
+      agent: codex
+    last_run: '2026-05-11T21:15:03.406555'
+    attempt_count: 2
+  meta: {}
+- id: write-windows-install-docs
+  title: 补齐 README Windows 安装与启动说明
+  status: done
+  owner: codex
+  depends_on: []
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T21:15:10.559676'
+      level: info
+      message: 准备编辑 README：在 TUI 使用前增加安装章节，含 Windows PowerShell 源码预览安装、首次初始化、启动 TUI、可选
+        Pandoc/LaTeX/Docker/Python 外部工具、正式 release 后安装方式占位；内部 README 增加安装说明必须区分已发布与源码预览的规则。
+      agent: codex
+    - timestamp: '2026-05-11T21:16:36.096074'
+      level: info
+      message: README 新增安装章节：Windows 源码预览路径包括 Git、Bun、clone、bun install、临时 PowerShell
+        paper_fucker function、paper_fucker --help；说明基础 TUI 只需要 Git+Bun，Pandoc/LaTeX/Docker/Python
+        是按能力启用的可选工具；所有 init 示例更新为 paper_fucker init --yes。docs/internal/README.md
+        增加 README 安装说明维护规则。
+      agent: codex
+    last_run: '2026-05-11T21:16:36.096074'
+    attempt_count: 2
+  meta: {}
+- id: validate-install-docs
+  title: 运行 README/CHANGELOG/release 文件面和 TaskFlow 校验
+  status: done
+  owner: codex
+  depends_on: []
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T21:16:41.463196'
+      level: info
+      message: 运行 README 安装说明相关校验：命令 smoke、版本一致性、CHANGELOG 格式、release 文件面、TaskFlow
+        校验和 diff 检查。
+      agent: codex
+    - timestamp: '2026-05-11T21:17:39.967678'
+      level: info
+      message: 验证通过：README 中临时 PowerShell function 可启动 paper_fucker --help 并显示 Paper
+        Fucker banner；check-readme-version.ps1 passed；check-changelog-format.ps1 passed；check-release-files.ps1
+        passed；git diff --check passed；TaskFlow validate_changelog_format passed；TaskFlow
+        validate_task release-readme-windows-install passed。工作提交 3f60a80。
+      agent: codex
+    last_run: '2026-05-11T21:17:39.967678'
+    attempt_count: 2
+  meta: {}
+outputs:
+- type: file
+  path: README.md
+  description: 对外 Windows 安装与首次启动说明
+- type: file
+  path: docs/internal/README.md
+  description: 内部 README 安装说明维护规则
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-11T21:14:41.351278'
+  updated_at: '2026-05-11T21:17:48.377112'
+  version: '1'
