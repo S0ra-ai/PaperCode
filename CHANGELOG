@@ -7,6 +7,37 @@
 
 :history
 
+    0.8.5-dev - 2026/05/12 (40b90b9) [release/0.8.5]
+        :brief 源码编译后生成根目录可执行文件
+        - build(root): 新增根目录 build 脚本，执行当前平台 packages/opencode 二进制编译后复制根目录可执行文件
+        - build(link): 新增 scripts/link-root-executable.ts，Windows 生成 paper_fucker.exe，macOS/Linux 生成 paper_fucker
+        - build(opencode): 跨平台 optional dependency 安装改用 --no-save，避免 build 污染 package.json 或 bun.lock
+        - fix(script): TEAM_MEMBERS 缺失时 release/changelog 脚本使用空团队成员列表继续执行
+        - docs(readme): Windows 源码预览流程改为 bun run build 后运行 .\paper_fucker.exe，移除临时 PowerShell function 方案
+        - chore(gitignore): 忽略根目录本地编译产物 paper_fucker 与 paper_fucker.exe
+        :src
+            - package.json - root build and link:bin scripts
+            - scripts/link-root-executable.ts - current-platform root executable linker
+            - packages/opencode/script/build.ts - no-save dependency install during build
+            - packages/script/src/index.ts - optional TEAM_MEMBERS handling
+            - script/raw-changelog.ts - optional TEAM_MEMBERS handling
+            - README.md - source build and root executable instructions
+            - docs/internal/README.md - README install contract
+            - .gitignore - ignored root build artifacts
+            - reports/release-file-audit.md - refreshed release file audit
+        :verification
+            - bun run build passed and generated .\paper_fucker.exe
+            - .\paper_fucker.exe --version passed
+            - .\paper_fucker.exe --help passed
+            - bun script\raw-changelog.ts --help passed without .github/TEAM_MEMBERS
+            - bun run typecheck passed
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-changelog-format.ps1 passed
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-release-files.ps1 passed
+            - git diff --check passed
+            - TaskFlow validate_changelog_format passed
+            - TaskFlow validate_task release-root-executable-build passed
+
     0.8.5-dev - 2026/05/12 (3f60a80) [release/0.8.5]
         :brief README 补齐 Windows 安装与首次启动路径
         - docs(readme): 新增安装章节，说明当前开发预览版在 Windows 上使用 Git、Bun、clone 与 bun install 从源码运行
