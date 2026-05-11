@@ -1,6 +1,6 @@
 id: release-file-surface-and-docs
 title: Release file surface and Chinese core docs
-status: in_progress
+status: done
 priority: high
 owner: codex
 tags:
@@ -118,7 +118,7 @@ steps:
   meta: {}
 - id: changelog-and-commit
   title: Record changelog with real commit and finalize task
-  status: todo
+  status: done
   owner: codex
   depends_on: []
   description: Commit work, write CHANGELOG colon DSL with real commit id, rerun checks,
@@ -127,8 +127,20 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-11T10:20:29.079772'
+      level: info
+      message: Work commit created as f455ec8; recording CHANGELOG with the real work
+        commit id.
+      agent: codex
+    - timestamp: '2026-05-11T10:21:12.641635'
+      level: info
+      message: Recorded CHANGELOG entry for real work commit f455ec8 and reran README
+        version, changelog format, release file audit, TaskFlow changelog validation,
+        and TaskFlow task validation successfully.
+      agent: codex
+    last_run: '2026-05-11T10:21:12.641635'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -155,10 +167,7 @@ outputs:
 trace:
   logs: []
   attempt_count: 0
-lock:
-  by: codex
-  at: '2026-05-11T10:08:36.641116'
 meta:
   created_at: '2026-05-11T10:08:29.218551'
-  updated_at: '2026-05-11T10:20:03.986053'
+  updated_at: '2026-05-11T10:21:16.924914'
   version: '1'
