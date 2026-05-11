@@ -12,8 +12,11 @@ const cleanup: string[] = []
 async function clean(dir: string, attempts = 30): Promise<void> {
   Bun.gc(true)
   await sleep(100)
-  return rm(dir, { recursive: true, force: true }).catch((error) => {
-    if (attempts <= 1) throw error
+  return rm(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 }).catch((error) => {
+    if (attempts <= 1) {
+      console.warn(`Could not remove temporary PaperRun execution test directory ${dir}: ${String(error)}`)
+      return
+    }
     return clean(dir, attempts - 1)
   })
 }

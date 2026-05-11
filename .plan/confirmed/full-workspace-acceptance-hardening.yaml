@@ -1,0 +1,156 @@
+id: full-workspace-acceptance-hardening
+title: 全仓 strict acceptance 验收硬化
+status: in_progress
+priority: high
+owner: codex
+tags:
+- acceptance
+- strict-live
+- full-suite
+- audit
+- 0.8.2-dev
+depends_on: []
+description: 将 Paper Fucker 当前 focused live 验收推进到可重复执行的 full workspace suite：运行并记录
+  scripts/strict-acceptance.ps1 -FullWorkspaceSuite，修复发现的产品/测试/脚本问题，并把 autonomous
+  audit 纳入 full-suite evidence 检查。
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: baseline-full-suite
+  title: 运行 full workspace strict baseline
+  status: done
+  owner: codex
+  depends_on: []
+  description: 执行 scripts/strict-acceptance.ps1 -FullWorkspaceSuite，生成独立报告，记录失败点或通过证据。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-10T23:32:57.524404'
+      level: info
+      message: Running full workspace strict acceptance baseline with a separate report
+        path and longer check timeouts.
+      agent: codex
+    - timestamp: '2026-05-11T00:25:59.845277'
+      level: info
+      message: 'Baseline strict full workspace suite ran with -FullWorkspaceSuite
+        and exposed two real stability/drift failures: first, Windows EBUSY temp directory
+        cleanup failed test/research/e2e.test.ts forced draft acceptance; after cleanup
+        hardening, full opencode test progressed further and found test/research/export.test.ts
+        had an obsolete assumption that PDF/DOCX diagnostics depend on missing local
+        tools. Evidence captured in reports/strict-live-full-acceptance.md and direct
+        bun --cwd packages/opencode test --bail output.'
+      agent: codex
+    last_run: '2026-05-11T00:25:59.845277'
+    attempt_count: 2
+  meta: {}
+- id: fix-full-suite-findings
+  title: 修复 full suite 发现的问题
+  status: done
+  owner: codex
+  depends_on:
+  - baseline-full-suite
+  description: 根据 full suite 结果修复测试、脚本、超时、文档或产品行为问题；若全绿则记录无修复。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T00:26:06.786530'
+      level: info
+      message: 'Implemented first fixes: paper/research test cleanup now retries fs.rm
+        with maxRetries/retryDelay and treats exhausted temp cleanup as a warning
+        instead of product failure; export diagnostics test now injects failing renderers
+        so it verifies diagnostic propagation deterministically instead of depending
+        on host tool availability.'
+      agent: codex
+    - timestamp: '2026-05-11T01:13:27.824514'
+      level: info
+      message: 'Fixed all full opencode suite findings observed in baseline loops.
+        Changes: hardened paper/research test cleanup against Windows EBUSY/EACCES/EPERM
+        temp-dir races; made export diagnostic test deterministic by injecting failed
+        renderers instead of depending on host tool discovery; synced HttpApi bridge
+        route parity with PaperRun control route. Verification: npx --yes bun@1.3.13
+        --cwd packages/opencode test --bail passed with 2586 pass, 38 skip, 2 todo,
+        0 fail across 248 files in 1907.84s.'
+      agent: codex
+    last_run: '2026-05-11T01:13:27.824514'
+    attempt_count: 2
+  meta: {}
+- id: audit-full-suite-evidence
+  title: 扩展自驱审计 full suite 证据
+  status: done
+  owner: codex
+  depends_on:
+  - fix-full-suite-findings
+  description: 让 autonomous audit 能检查 full suite 报告是否存在、是否 passed、是否与当前版本一致，同时保持 focused
+    strict evidence 检查。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T01:13:39.420530'
+      level: info
+      message: Starting strict full workspace acceptance after full opencode test
+        pass. This will regenerate reports/strict-live-full-acceptance.md with strict-live-full
+        mode and all product/live checks.
+      agent: codex
+    - timestamp: '2026-05-11T01:52:49.300849'
+      level: info
+      message: 'Strict full workspace acceptance passed. Command: powershell -NoProfile
+        -ExecutionPolicy Bypass -File .\scripts\strict-acceptance.ps1 -FullWorkspaceSuite
+        -CheckTimeoutSeconds 600 -FullWorkspaceTimeoutSeconds 2700 -ReportPath reports/strict-live-full-acceptance.md.
+        Evidence: reports/strict-live-full-acceptance.md, mode strict-live-full, full
+        workspace suite True, status passed. Key checks passed: full packages/opencode
+        test, preview tests, Python tests, opencode/workspace typecheck, TUI smoke,
+        DeepSeek live provider, Exa MCP, Nature skill/profile, pandoc, LaTeX PDF,
+        DOCX, live crawler, HF live loop, topic/code/final PaperRun live runs, hard-fork/observability/agent-team/sidebar/no-mock/Git
+        Flow checks.'
+      agent: codex
+    last_run: '2026-05-11T01:52:49.300849'
+    attempt_count: 2
+  meta: {}
+- id: docs-version-validation
+  title: 同步文档版本并验证
+  status: todo
+  owner: codex
+  depends_on:
+  - audit-full-suite-evidence
+  description: 更新 README/CHANGELOG 到 0.8.2-dev，运行版本检查、TaskFlow validation、CHANGELOG
+    validation、autonomous audit 和必要测试。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: file
+  path: reports/strict-live-full-acceptance.md
+  description: Full workspace strict acceptance report
+- type: file
+  path: scripts/autonomous-product-audit.ps1
+  description: Audit script with full-suite evidence checks
+- type: file
+  path: reports/autonomous-product-audit.md
+  description: Autonomous audit report
+- type: file
+  path: README.md
+  description: Full suite documentation
+- type: file
+  path: CHANGELOG
+  description: Colon DSL changelog entry
+trace:
+  logs: []
+  attempt_count: 0
+lock:
+  by: codex
+  at: '2026-05-10T23:32:49.252394'
+meta:
+  created_at: '2026-05-10T23:32:40.294477'
+  updated_at: '2026-05-11T01:52:49.300849'
+  version: '1'

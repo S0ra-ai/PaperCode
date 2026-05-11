@@ -19,7 +19,7 @@ const cleanup: string[] = []
 async function clean(dir: string, attempts = 30): Promise<void> {
   Bun.gc(true)
   await sleep(100)
-  return rm(dir, { recursive: true, force: true }).catch((error) => {
+  return rm(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 }).catch((error) => {
     if (attempts <= 1) {
       if (error && typeof error === "object" && "code" in error) {
         const code = (error as NodeJS.ErrnoException).code

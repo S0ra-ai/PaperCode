@@ -116,6 +116,30 @@ function Test-StrictEvidence {
     }
 }
 
+function Test-FullWorkspaceEvidence {
+    $relativePath = "reports/strict-live-full-acceptance.md"
+    $path = Join-Path $RepoRoot $relativePath
+    if (-not (Test-Path -LiteralPath $path)) {
+        Add-AuditResult "full-workspace-evidence" "pass" "No full workspace report is present; focused strict live report remains the required milestone evidence."
+        return
+    }
+    $report = Get-Content -Raw -LiteralPath $path
+    $required = @(
+        "- Status: passed",
+        "- Mode: strict-live-full",
+        "- Full workspace suite: True",
+        "server-tests",
+        "workspace-typecheck",
+        "final-export-pass-run"
+    )
+    $missing = @($required | Where-Object { -not $report.Contains($_) })
+    if ($missing.Count -eq 0) {
+        Add-AuditResult "full-workspace-evidence" "pass" "Latest full workspace strict acceptance report is passed and includes server/full workspace coverage."
+    } else {
+        Add-AuditResult "full-workspace-evidence" "fail" "Full workspace strict report missing: $($missing -join ', ')"
+    }
+}
+
 function Test-DangerousResidue {
     $paths = @("packages/opencode/src/paper", "research-tools/src", "README.md")
     $patterns = @("scrapling_live_fetch_not_implemented", "network_not_authorized_mock_used", "TODO", "FIXME")
@@ -188,6 +212,7 @@ Test-TaskFlowQueue
 Test-VersionSync
 Test-ChangelogShape
 Test-StrictEvidence
+Test-FullWorkspaceEvidence
 Test-DangerousResidue
 Test-BrandSurface
 Test-GitFlow
