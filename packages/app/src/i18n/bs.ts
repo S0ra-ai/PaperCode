@@ -133,7 +133,7 @@ export const dict = {
   "provider.connect.apiKey.placeholder": "API ključ",
   "provider.connect.apiKey.required": "API ključ je obavezan",
   "provider.connect.opencodeZen.line1":
-    "paper_fucker Zen ti daje pristup kuriranom skupu pouzdanih, optimizovanih modela za coding agente.",
+    "paper_fucker provider ti daje pristup kuriranom skupu pouzdanih, optimizovanih modela za coding agente.",
   "provider.connect.opencodeZen.line2":
     "Sa jednim API ključem dobijaš pristup modelima kao što su Claude, GPT, Gemini, GLM i drugi.",
   "provider.connect.opencodeZen.visit.prefix": "Posjeti ",

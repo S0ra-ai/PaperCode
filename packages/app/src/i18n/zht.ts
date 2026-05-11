@@ -136,7 +136,7 @@ export const dict = {
   "provider.connect.apiKey.label": "{{provider}} API 金鑰",
   "provider.connect.apiKey.placeholder": "API 金鑰",
   "provider.connect.apiKey.required": "API 金鑰為必填",
-  "provider.connect.opencodeZen.line1": "paper_fucker Zen 為你提供一組精選的可靠最佳化模型，用於程式碼代理程式。",
+  "provider.connect.opencodeZen.line1": "paper_fucker provider 為你提供一組精選的可靠最佳化模型，用於程式碼代理程式。",
   "provider.connect.opencodeZen.line2": "只需一個 API 金鑰，你就能使用 Claude、GPT、Gemini、GLM 等模型。",
   "provider.connect.opencodeZen.visit.prefix": "造訪 ",
   "provider.connect.opencodeZen.visit.link": "paper-fucker.local/zen",

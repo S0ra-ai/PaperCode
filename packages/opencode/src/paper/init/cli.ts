@@ -5,7 +5,8 @@ function usage() {
   return `paper_fucker init|doctor|diagnostics|reset [options]
 
 Commands:
-  init --yes --full-access-ack [--home PATH] [--workspace PATH] [--tool name=path] [--secret name=value]
+  init [--yes] [--home PATH] [--workspace PATH] [--tool name=path] [--secret name=value]
+  init --full-access-ack [--home PATH] [--workspace PATH]
   doctor|diagnostics [--home PATH]
   reset --scope all|global|workspace-local|workspace-runs --backup --yes [--home PATH] [--workspace PATH]
 `
@@ -41,7 +42,7 @@ export async function main(argv = process.argv.slice(2)) {
     return 0
   }
   if (command === "init") {
-    if (!argv.includes("--yes")) throw new Error("Non-interactive init currently requires --yes.")
+    const fullAccess = argv.includes("--full-access-ack") && !argv.includes("--bounded")
     const result = await runInitWizard({
       home: value(argv, "--home"),
       workspace: value(argv, "--workspace"),
@@ -49,9 +50,9 @@ export async function main(argv = process.argv.slice(2)) {
       secrets: readPairs(collect(argv, "--secret")),
       secrets_passphrase: value(argv, "--secrets-passphrase"),
       access: {
-        mode: argv.includes("--bounded") ? "bounded" : "full_access",
+        mode: fullAccess ? "full_access" : "bounded",
         bounded_hours: value(argv, "--bounded-hours") ? Number(value(argv, "--bounded-hours")) : undefined,
-        full_access_acknowledged: argv.includes("--full-access-ack"),
+        full_access_acknowledged: fullAccess,
       },
       preview: {
         auto_open: !argv.includes("--no-preview-auto-open"),

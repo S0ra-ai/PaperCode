@@ -1,0 +1,130 @@
+id: release-entrypoint-brand-init-fixes
+title: 修复入口品牌、provider 订阅残留与初始化体验
+status: todo
+priority: high
+owner: codex
+tags:
+- release
+- tui
+- init
+- branding
+- changelog
+depends_on: []
+description: Release 分支稳定修复：修正 TUI ASCII Paper Fucker 字形，移除用户可见 OpenCode 订阅 provider
+  入口，改进 paper_fucker init 默认安全初始化体验，并按新版 TaskFlow 版本规则统一 CHANGELOG 唯一版本。
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: audit
+  title: 审计入口品牌、provider 和 init 行为
+  status: done
+  owner: codex
+  depends_on: []
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T22:10:28.649488'
+      level: info
+      message: 确认问题点：packages/opencode/src/cli/logo.ts 的左侧字形把 PAPER 的 R 画成 E，TUI provider
+        dialog 将 opencode/opencode-go 订阅 provider 放在 Popular，init 命令默认 full_access
+        且无 --yes 直接失败；TaskFlow validate_changelog_versions 报告 root CHANGELOG 有 8 条重复
+        0.8.5-dev，需要同步规范为唯一版本。
+      agent: codex
+    last_run: '2026-05-11T22:10:28.649488'
+    attempt_count: 2
+  meta: {}
+- id: fix-runtime
+  title: 修复 Paper Fucker 字形、provider 列表和 init 默认访问模式
+  status: done
+  owner: codex
+  depends_on: []
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T22:13:21.833670'
+      level: info
+      message: 已修复：logo.ts 左侧字形改为清晰 PAPER；provider dialog 过滤 opencode/opencode-go
+        订阅 provider 并移除 Zen/Go upsell 文案；session TUI 移除 Go upsell 弹窗；retry 限额提示改为中性
+        provider usage limit；init 默认 bounded access，24 小时默认窗口，paper_fucker init 与
+        init --yes 均无需 Full Access ack。
+      agent: codex
+    last_run: '2026-05-11T22:13:21.833670'
+    attempt_count: 2
+  meta: {}
+- id: tests
+  title: 补充/更新测试并运行针对性验证
+  status: done
+  owner: codex
+  depends_on: []
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T22:13:53.788321'
+      level: info
+      message: 针对性验证通过：npx --yes bun@1.3.13 --cwd packages/opencode test test/init/init.test.ts
+        test/cli/public-surface.test.ts -> 11 pass / 0 fail；npx --yes bun@1.3.13 run
+        --cwd packages/opencode typecheck 通过。
+      agent: codex
+    last_run: '2026-05-11T22:13:53.788321'
+    attempt_count: 2
+  meta: {}
+- id: version
+  title: 按 TaskFlow 新规则规范 CHANGELOG 唯一版本并同步 README
+  status: todo
+  owner: codex
+  depends_on: []
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: final-verify
+  title: 运行版本、格式、入口与 git 验收
+  status: todo
+  owner: codex
+  depends_on: []
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: file
+  path: packages/opencode/src/cli/logo.ts
+- type: file
+  path: packages/opencode/src/cli/cmd/tui/component/dialog-provider.tsx
+- type: file
+  path: packages/opencode/src/cli/cmd/init.ts
+- type: file
+  path: packages/opencode/src/paper/init/cli.ts
+- type: file
+  path: packages/opencode/src/paper/init/config.ts
+- type: file
+  path: packages/opencode/test/init/init.test.ts
+- type: file
+  path: packages/opencode/test/cli/public-surface.test.ts
+- type: file
+  path: CHANGELOG
+- type: file
+  path: README.md
+trace:
+  logs: []
+  attempt_count: 0
+lock:
+  by: codex
+  at: '2026-05-11T22:10:12.910675'
+meta:
+  created_at: '2026-05-11T22:10:08.533537'
+  updated_at: '2026-05-11T22:13:53.788321'
+  version: '1'

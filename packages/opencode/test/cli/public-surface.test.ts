@@ -95,4 +95,17 @@ describe("public Paper Fucker surface", () => {
     expect(paperApi).toContain("Return provider/model discovery data")
     expect(paperApi).not.toContain("OpenCode provider/model discovery data")
   })
+
+  test("provider connection dialog hides OpenCode subscription products", async () => {
+    const providerDialog = await source("cli/cmd/tui/component/dialog-provider.tsx")
+    const sessionRoute = await source("cli/cmd/tui/routes/session/index.tsx")
+    const retry = await source("session/retry.ts")
+
+    expect(providerDialog).toContain("HIDDEN_SUBSCRIPTION_PROVIDERS")
+    expect(providerDialog).not.toContain("Low cost subscription")
+    expect(providerDialog).not.toContain("paper_fucker Zen")
+    expect(providerDialog).not.toContain("paper_fucker Go")
+    expect(sessionRoute).not.toContain("DialogGoUpsell")
+    expect(retry).not.toContain("subscribe to Go")
+  })
 })

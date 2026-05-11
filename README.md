@@ -45,7 +45,7 @@ bun run build
 
 ```powershell
 .\paper_fucker.exe --help
-.\paper_fucker.exe init --yes
+.\paper_fucker.exe init
 .\paper_fucker.exe init doctor
 .\paper_fucker.exe
 ```
@@ -64,7 +64,7 @@ macOS / Linux 上是 `./paper_fucker`。生成的根目录可执行文件是本�
 ## 推荐使用方式：TUI 论文工作台
 
 ```powershell
-.\paper_fucker.exe init --yes
+.\paper_fucker.exe init
 .\paper_fucker.exe init doctor
 .\paper_fucker.exe
 ```
@@ -88,7 +88,7 @@ Run 页面会展示：
 - Preview 与 Export 控制
 - 需要你决策的中文 pause questions
 
-如果你要重新配置 provider、模型角色或本地工具链，重新运行 `.\paper_fucker.exe init --yes` 即可刷新本地配置；`.\paper_fucker.exe init doctor` 会检查当前配置和工具状态。
+如果你要重新配置 provider、模型角色或本地工具链，重新运行 `.\paper_fucker.exe init` 即可刷新本地配置；`.\paper_fucker.exe init doctor` 会检查当前配置和工具状态。
 
 ## 非交互模式
 
@@ -148,7 +148,7 @@ TUI 会在能力健康区显示 MCP、Skill 和 toolchain 状态。缺少 secret
 DeepSeek 只是默认样例，不是唯一支持模型。任何 OpenCode substrate 支持的 provider/model 都可以接入，并按角色分配。
 
 ```powershell
-.\paper_fucker.exe init --yes
+.\paper_fucker.exe init
 .\paper_fucker.exe init doctor
 ```
 

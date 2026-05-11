@@ -133,7 +133,7 @@ export const dict = {
   "provider.connect.apiKey.placeholder": "API-nøgle",
   "provider.connect.apiKey.required": "API-nøgle er påkrævet",
   "provider.connect.opencodeZen.line1":
-    "paper_fucker Zen giver dig adgang til et udvalg af pålidelige optimerede modeller til kodningsagenter.",
+    "paper_fucker provider giver dig adgang til et udvalg af pålidelige optimerede modeller til kodningsagenter.",
   "provider.connect.opencodeZen.line2":
     "Med en enkelt API-nøgle får du adgang til modeller som Claude, GPT, Gemini, GLM og flere.",
   "provider.connect.opencodeZen.visit.prefix": "Besøg ",

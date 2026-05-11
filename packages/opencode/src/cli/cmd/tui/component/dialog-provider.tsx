@@ -17,15 +17,14 @@ import { isConsoleManagedProvider } from "@tui/util/provider-origin"
 import { useConnected } from "./use-connected"
 
 const PROVIDER_PRIORITY: Record<string, number> = {
-  opencode: 0,
-  "opencode-go": 1,
-  openai: 2,
-  "github-copilot": 3,
-  anthropic: 4,
-  google: 5,
+  openai: 0,
+  "github-copilot": 1,
+  anthropic: 2,
+  google: 3,
 }
 
-const CUSTOM_PROVIDER_OPTION_VALUE = "__opencode_custom_provider__"
+const HIDDEN_SUBSCRIPTION_PROVIDERS = new Set(["opencode", "opencode-go"])
+const CUSTOM_PROVIDER_OPTION_VALUE = "__paper_fucker_custom_provider__"
 const CUSTOM_PROVIDER_ID = /^[a-z0-9][a-z0-9-_]*$/
 
 type ProviderOptionBase = {
@@ -47,7 +46,7 @@ type ProviderOption =
 export function providerOptions(list: { id: string; name: string }[]): ProviderOption[] {
   return [
     ...pipe(
-      list,
+      list.filter((provider) => !HIDDEN_SUBSCRIPTION_PROVIDERS.has(provider.id)),
       sortBy((x) => PROVIDER_PRIORITY[x.id] ?? 99),
       map((provider) => ({
         type: "provider" as const,
@@ -55,10 +54,8 @@ export function providerOptions(list: { id: string; name: string }[]): ProviderO
         value: provider.id,
         providerID: provider.id,
         description: {
-          opencode: "(Recommended)",
           anthropic: "(API key)",
           openai: "(ChatGPT Plus/Pro or API key)",
-          "opencode-go": "Low cost subscription for everyone",
         }[provider.id],
         category: provider.id in PROVIDER_PRIORITY ? "Popular" : "Providers",
       })),
@@ -339,38 +336,11 @@ function ApiMethod(props: ApiMethodProps) {
   const sdk = useSDK()
   const sync = useSync()
   const toast = useToast()
-  const { theme } = useTheme()
 
   return (
     <DialogPrompt
       title={props.title}
       placeholder="API key"
-      description={
-        {
-          opencode: (
-            <box gap={1}>
-              <text fg={theme.textMuted}>
-                paper_fucker Zen gives you access to all the best coding models at the cheapest prices with a single API
-                key.
-              </text>
-              <text fg={theme.text}>
-                Go to <span style={{ fg: theme.primary }}>https://paper-fucker.local/zen</span> to get a key
-              </text>
-            </box>
-          ),
-          "opencode-go": (
-            <box gap={1}>
-              <text fg={theme.textMuted}>
-                paper_fucker Go is a $10 per month subscription that provides reliable access to popular open coding models
-                with generous usage limits.
-              </text>
-              <text fg={theme.text}>
-                Go to <span style={{ fg: theme.primary }}>https://paper-fucker.local/zen</span> and enable paper_fucker Go
-              </text>
-            </box>
-          ),
-        }[props.providerID] ?? undefined
-      }
       onConfirm={async (value) => {
         if (!value) return
         await sdk.client.auth.set({

@@ -133,7 +133,7 @@ export const dict = {
   "provider.connect.apiKey.placeholder": "คีย์ API",
   "provider.connect.apiKey.required": "ต้องใช้คีย์ API",
   "provider.connect.opencodeZen.line1":
-    "paper_fucker Zen ให้คุณเข้าถึงชุดโมเดลที่เชื่อถือได้และปรับแต่งแล้วสำหรับเอเจนต์การเขียนโค้ด",
+    "paper_fucker provider ให้คุณเข้าถึงชุดโมเดลที่เชื่อถือได้และปรับแต่งแล้วสำหรับเอเจนต์การเขียนโค้ด",
   "provider.connect.opencodeZen.line2":
     "ด้วยคีย์ API เดียวคุณจะได้รับการเข้าถึงโมเดล เช่น Claude, GPT, Gemini, GLM และอื่น ๆ",
   "provider.connect.opencodeZen.visit.prefix": "เยี่ยมชม ",
