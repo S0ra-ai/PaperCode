@@ -38,18 +38,19 @@ bun --version
 git clone https://github.com/S0ra-ai/paper_fucker.git
 cd paper_fucker
 bun install
+bun run build
 ```
 
-源码预览版可以先在当前 PowerShell 会话里创建一个临时命令：
+编译完成后，项目根目录会生成当前平台可执行文件。Windows 上是：
 
 ```powershell
-$env:PAPER_FUCKER_REPO = (Get-Location).Path
-function paper_fucker { bun run --cwd "$env:PAPER_FUCKER_REPO\packages\opencode" --conditions=browser src/index.ts @args }
-
-paper_fucker --help
+.\paper_fucker.exe --help
+.\paper_fucker.exe init --yes
+.\paper_fucker.exe init doctor
+.\paper_fucker.exe
 ```
 
-关闭 PowerShell 后这个临时命令会失效；重新打开终端时，再进入仓库目录并重新执行上面的 `$env:PAPER_FUCKER_REPO` 和 `function paper_fucker` 两行即可。
+macOS / Linux 上是 `./paper_fucker`。生成的根目录可执行文件是本地编译产物，不进入 git。
 
 ### 可选外部工具
 
@@ -63,12 +64,12 @@ paper_fucker --help
 ## 推荐使用方式：TUI 论文工作台
 
 ```powershell
-paper_fucker init --yes
-paper_fucker init doctor
-paper_fucker
+.\paper_fucker.exe init --yes
+.\paper_fucker.exe init doctor
+.\paper_fucker.exe
 ```
 
-`paper_fucker` 默认打开中文 TUI 论文工作台。你不需要手动输入 tool 命令，也不需要自己串联 MCP、skills 或子 agent；系统会从你的自然语言输入中解析 `PaperRun`，自动编排 stage graph、Agent Team、能力调用和 Gate。
+`paper_fucker` 默认打开中文 TUI 论文工作台。Windows 源码编译用户从仓库根目录运行 `.\paper_fucker.exe`；正式安装版会直接提供 `paper_fucker` 命令。你不需要手动输入 tool 命令，也不需要自己串联 MCP、skills 或子 agent；系统会从你的自然语言输入中解析 `PaperRun`，自动编排 stage graph、Agent Team、能力调用和 Gate。
 
 TUI 首页可以直接输入：
 
@@ -87,7 +88,7 @@ Run 页面会展示：
 - Preview 与 Export 控制
 - 需要你决策的中文 pause questions
 
-如果你要重新配置 provider、模型角色或本地工具链，重新运行 `paper_fucker init --yes` 即可刷新本地配置；`paper_fucker init doctor` 会检查当前配置和工具状态。
+如果你要重新配置 provider、模型角色或本地工具链，重新运行 `.\paper_fucker.exe init --yes` 即可刷新本地配置；`.\paper_fucker.exe init doctor` 会检查当前配置和工具状态。
 
 ## 非交互模式
 
@@ -96,19 +97,19 @@ CLI 适合脚本、自动化检查或你明确想绕过 TUI 的场景。它不�
 **主题出论文**
 
 ```powershell
-paper_fucker run "基于多智能体协作的软件工程论文生成系统"
+.\paper_fucker.exe run "基于多智能体协作的软件工程论文生成系统"
 ```
 
 **代码仓库出论文**
 
 ```powershell
-paper_fucker run --code E:\Project\some-repo "把这个项目整理成一篇系统论文"
+.\paper_fucker.exe run --code E:\Project\some-repo "把这个项目整理成一篇系统论文"
 ```
 
 **混合材料出论文**
 
 ```powershell
-paper_fucker run --code . --paper-files .\paper-draft.md --dataset-paths .\data "补齐实验、引用和最终导出"
+.\paper_fucker.exe run --code . --paper-files .\paper-draft.md --dataset-paths .\data "补齐实验、引用和最终导出"
 ```
 
 运行过程中，TUI 会显示 stage graph、Agent Tree、成本/token、论文大纲、source ledger、claim ledger、实验状态、Gate 和阻塞项。需要人工决策时，系统会用中文 pause question 询问；不需要你持续输入命令。
@@ -147,8 +148,8 @@ TUI 会在能力健康区显示 MCP、Skill 和 toolchain 状态。缺少 secret
 DeepSeek 只是默认样例，不是唯一支持模型。任何 OpenCode substrate 支持的 provider/model 都可以接入，并按角色分配。
 
 ```powershell
-paper_fucker init --yes
-paper_fucker init doctor
+.\paper_fucker.exe init --yes
+.\paper_fucker.exe init doctor
 ```
 
 Provider public config 存在 `~/.paper_fucker/providers/`，secret 存在 `~/.paper_fucker/local/provider-secrets.json`。API key 不应进入 git。

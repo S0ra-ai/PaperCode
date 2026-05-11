@@ -123,8 +123,9 @@ $env:PYTHONPATH = 'research-tools/src'; python -m unittest discover -s research-
 
 对外 README 必须说明用户如何获得 `paper_fucker` 命令，不能只展示命令用法。
 
-- 尚未发布正式 installer、tag、npm 包或包管理器包时，安装章节必须标为“源码预览”，并提供 Windows 可执行的 Git+Bun+clone+`bun install` 路径。
+- 尚未发布正式 installer、tag、npm 包或包管理器包时，安装章节必须标为“源码预览”，并提供 Windows 可执行的 Git+Bun+clone+`bun install`+`bun run build` 路径。
 - 不得把尚未发布的 release installer、npm 包、Chocolatey、Scoop、Homebrew 或 GitHub release artifact 写成主安装方式。
-- 如果源码预览需要临时 PowerShell function 才能使用 `paper_fucker` 命令，README 必须明确说明该 function 只对当前 PowerShell 会话生效。
+- 源码编译完成后，仓库根目录必须有当前平台可执行文件；Windows 是 `paper_fucker.exe`，macOS/Linux 是 `paper_fucker`。
+- Windows 源码预览示例应使用 `.\paper_fucker.exe`，不要要求用户创建临时 PowerShell function。
 - `paper_fucker init` 当前是非交互入口，README 示例应使用 `paper_fucker init --yes` 或提供完整参数，避免用户照抄后失败。
 - 可选外部工具只列能力影响和发现方式；不要把 Pandoc、LaTeX、Docker、Python 说成基础 TUI 必装项。
