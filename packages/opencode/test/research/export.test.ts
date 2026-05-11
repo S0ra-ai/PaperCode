@@ -16,8 +16,11 @@ const now = "2026-05-09T00:00:00Z"
 async function clean(dir: string, attempts = 30): Promise<void> {
   Bun.gc(true)
   await sleep(100)
-  return rm(dir, { recursive: true, force: true }).catch((error) => {
-    if (attempts <= 1) throw error
+  return rm(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 }).catch((error) => {
+    if (attempts <= 1) {
+      console.warn(`Could not remove temporary export test directory ${dir}: ${String(error)}`)
+      return
+    }
     return clean(dir, attempts - 1)
   })
 }
@@ -56,6 +59,19 @@ function gate(status: ResearchFinalGateState["status"], blockers: string[] = [])
 const successfulRenderers: ExportRenderer = {
   pdf: async () => ({ status: "written", bytes: new TextEncoder().encode("%PDF fixture"), diagnostics: [] }),
   docx: async () => ({ status: "written", bytes: new TextEncoder().encode("DOCX fixture"), diagnostics: [] }),
+}
+
+const failedRenderers: ExportRenderer = {
+  pdf: async () => ({
+    status: "failed",
+    bytes: new Uint8Array(),
+    diagnostics: ["missing external renderer: pdf"],
+  }),
+  docx: async () => ({
+    status: "failed",
+    bytes: new Uint8Array(),
+    diagnostics: ["missing external renderer: docx"],
+  }),
 }
 
 describe("export bundles", () => {
@@ -136,7 +152,7 @@ describe("export bundles", () => {
     }
   })
 
-  test("records missing external tool diagnostics for PDF and DOCX", async () => {
+  test("records renderer diagnostics for failed PDF and DOCX exports", async () => {
     const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-export-diagnostics-test-"))
     try {
       const workspace = path.join(dir, "workspace")
@@ -152,6 +168,7 @@ describe("export bundles", () => {
           draft: draft(),
           final_gate: gate("passed"),
           source_artifact_ids: [],
+          renderers: failedRenderers,
           now,
         },
         options,

@@ -13,7 +13,7 @@ const created: string[] = []
 async function clean(dir: string, attempts = 80): Promise<void> {
   Bun.gc(true)
   await sleep(150)
-  return rm(dir, { recursive: true, force: true }).catch((error) => {
+  return rm(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 }).catch((error) => {
     const retryable =
       typeof error === "object" &&
       error !== null &&
