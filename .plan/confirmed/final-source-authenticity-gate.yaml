@@ -1,0 +1,162 @@
+id: final-source-authenticity-gate
+title: 最终导出 source authenticity gate 硬化
+status: done
+priority: high
+owner: codex
+tags:
+- verification
+- authenticity
+- source-ledger
+- final-export
+depends_on: []
+description: 修复当前最终导出只要求 claim/reproduction 而没有强制引用来源 verified 的缺口：新增 SourceEvidenceManifest
+  输入、ClaimLedger 只采纳已验证来源、verification gate 阻断 unverified/failed/restricted source，strict
+  live final 场景使用真实来源清单而不是未验证 seed。版本目标 0.8.3-dev。
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: audit-source-gate-gap
+  title: 确认最终导出来源验证缺口
+  status: done
+  owner: codex
+  depends_on: []
+  description: 审计 defaultSourceDiscovery、ClaimLedger 与 verification gate，记录当前 final
+    场景可由未验证来源通过的风险。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T02:17:46.422046'
+      level: info
+      message: Auditing final source authenticity gate gap.
+      agent: codex
+    - timestamp: '2026-05-11T02:17:54.358098'
+      level: info
+      message: 审计确认缺口：defaultSourceDiscovery 生成 unverified search seed；defaultClaimLedger
+        仍把所有 literature source_ids 作为 claim source；verification gate 只校验 citation
+        source_id 是否存在于 available_source_ids，不校验 SourceRecord.verification.status
+        或 license.status。因此 reproduction pass 的 final scenario 可能在未验证来源下通过。修复方向：SourceEvidenceManifest.v1
+        + clear/verified source-only ClaimLedger + verification source authenticity
+        blocker。
+      agent: codex
+    last_run: '2026-05-11T02:17:54.358098'
+    attempt_count: 2
+  meta: {}
+- id: implement-source-evidence-manifest
+  title: 实现 SourceEvidenceManifest 与 verified source 绑定
+  status: done
+  owner: codex
+  depends_on:
+  - audit-source-gate-gap
+  description: PaperRun 默认发现优先读取用户提供的 SourceEvidenceManifest.v1；ClaimLedger 只将 clear+verified
+    来源作为 claim source；verification gate 阻断未验证/失败/非 clear 引用。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T02:18:02.093491'
+      level: info
+      message: Implementing SourceEvidenceManifest.v1 loading, verified-source-only
+        ClaimLedger source binding, and source authenticity verification blockers.
+      agent: codex
+    - timestamp: '2026-05-11T02:23:27.887313'
+      level: info
+      message: 'Implemented SourceEvidenceManifest.v1 ingestion from paper_files/experiment_logs,
+        source evidence artifacts/events, clear+verified source-only ClaimLedger binding,
+        and verification blockers for unverified/failed/non-clear source records.
+        Targeted typecheck passed: npx --yes bun@1.3.13 run --cwd packages/opencode
+        typecheck.'
+      agent: codex
+    last_run: '2026-05-11T02:23:27.887313'
+    attempt_count: 2
+  meta: {}
+- id: update-final-scenarios
+  title: 更新 final export 场景与测试
+  status: done
+  owner: codex
+  depends_on:
+  - implement-source-evidence-manifest
+  description: 让 final export pass 测试和 live benchmark 提供 verified source evidence；新增
+    reproduction pass 但 source 未验证时 final export 被阻断的测试。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T02:23:36.133978'
+      level: info
+      message: Updating final export tests and live quality benchmark to require verified
+        source evidence alongside reproduction evidence.
+      agent: codex
+    - timestamp: '2026-05-11T02:25:25.699603'
+      level: info
+      message: 'Updated PaperRun final tests and live benchmark final scenario to
+        provide SourceEvidenceManifest.v1 plus ExperimentEvidenceManifest.v1. Verification
+        passed: paperrun-execution.test.ts 3 pass / 0 fail; export-pipeline + strict-acceptance
+        tests 14 pass / 0 fail; scripts/live-paper-quality-benchmark.ts --scenario
+        final succeeded with final_export=final and artifacts=35.'
+      agent: codex
+    - timestamp: '2026-05-11T02:27:05.976526'
+      level: info
+      message: 'Additional verification gate unit coverage added: unverified cited
+        source now blocks final export with unverified_source category. Verification
+        passed: npx --yes bun@1.3.13 --cwd packages/opencode test test/research/verification.test.ts
+        (7 pass / 0 fail) and typecheck passed.'
+      agent: codex
+    last_run: '2026-05-11T02:25:25.699603'
+    attempt_count: 2
+  meta: {}
+- id: validate-docs-release
+  title: 验证、文档与版本收口
+  status: done
+  owner: codex
+  depends_on:
+  - update-final-scenarios
+  description: 运行相关 tests、strict focused、README/CHANGELOG 版本同步到 0.8.3-dev、TaskFlow
+    校验，并按 Git Flow 合回 develop。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T02:33:04.818719'
+      level: info
+      message: 'Work commit created: bec3df2 feat(verification): require verified
+        sources for final export. Updating README/CHANGELOG to 0.8.3-dev and running
+        release validations.'
+      agent: codex
+    - timestamp: '2026-05-11T02:41:03.172589'
+      level: info
+      message: 'Release validation passed: scripts/check-readme-version.ps1, git diff
+        --check, TaskFlow validate_task, validate_changelog_format, and focused scripts/strict-acceptance.ps1.
+        Strict report updated at reports/strict-live-acceptance.md; final-export-pass-run
+        passed under SourceEvidenceManifest.v1 + ExperimentEvidenceManifest.v1.'
+      agent: codex
+    last_run: '2026-05-11T02:41:03.172589'
+    attempt_count: 2
+  meta: {}
+outputs:
+- type: file
+  path: packages/opencode/src/paper/orchestrator.ts
+- type: file
+  path: packages/opencode/src/paper/research/verification/*
+- type: file
+  path: packages/opencode/test/paper/paperrun-execution.test.ts
+- type: file
+  path: scripts/live-paper-quality-benchmark.ts
+- type: file
+  path: reports/strict-live-acceptance.md
+- type: file
+  path: README.md
+- type: file
+  path: CHANGELOG
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-11T02:17:19.560743'
+  updated_at: '2026-05-11T02:41:10.779342'
+  version: '1'

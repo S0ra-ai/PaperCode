@@ -59,6 +59,32 @@ async function fixtureWorkspace() {
   return { dir, workspace, home }
 }
 
+function verifiedSourceEvidence(topic: string) {
+  return {
+    schema_version: "SourceEvidenceManifest.v1",
+    created_at: now,
+    provenance: "unit-test-verified-source-evidence",
+    sources: [
+      {
+        source_id: "paper:verified-source:evidence",
+        kind: "paper",
+        title: `${topic} verified source`,
+        url: "https://arxiv.org/abs/2401.00001",
+        provider: "unit-test-source-manifest",
+        license: { status: "clear", expression: "arXiv non-exclusive distribution" },
+        version: { value: "v1", retrieved_at: now },
+        verification: {
+          status: "verified",
+          method: "unit-test-source-manifest",
+          checked_at: now,
+          diagnostics: [],
+        },
+        topics: [topic],
+      },
+    ],
+  }
+}
+
 afterEach(async () => {
   while (cleanup.length > 0) {
     const dir = cleanup.pop()
@@ -111,6 +137,7 @@ describe("PaperRun default execution engine", () => {
 
   test("experiment evidence manifest allows final export when reproduction passes", async () => {
     const { workspace, home } = await fixtureWorkspace()
+    await writeFile(path.join(workspace, "source-evidence.json"), JSON.stringify(verifiedSourceEvidence("带复现实验证据的最终论文导出"), null, 2))
     await writeFile(
       path.join(workspace, "experiment-evidence.json"),
       JSON.stringify(
@@ -140,6 +167,7 @@ describe("PaperRun default execution engine", () => {
         topic: "带复现实验证据的最终论文导出",
         workspace_path: workspace,
         code_paths: ["src"],
+        paper_files: ["source-evidence.json"],
         experiment_logs: ["experiment-evidence.json"],
         target_profile: "generic-preprint",
         language: "zh-CN",
@@ -154,5 +182,50 @@ describe("PaperRun default execution engine", () => {
     expect(run.snapshot.experiment_status.reproduction_gate).toBe("passed")
     expect(run.snapshot.stage_graph.stages.find((stage) => stage.id === "reproduction")?.status).toBe("succeeded")
     expect(run.snapshot.artifacts.some((artifact) => artifact.metadata?.artifact_schema === "ExperimentEvidenceManifest.v1")).toBe(true)
+    expect(run.snapshot.artifacts.some((artifact) => artifact.metadata?.artifact_schema === "SourceEvidenceManifest.v1")).toBe(true)
+  })
+
+  test("reproduction evidence alone cannot bypass verified source requirements", async () => {
+    const { workspace, home } = await fixtureWorkspace()
+    await writeFile(
+      path.join(workspace, "experiment-evidence.json"),
+      JSON.stringify(
+        {
+          schema_version: "ExperimentEvidenceManifest.v1",
+          created_at: now,
+          provenance: "unit-test-local-reproduction",
+          primary_metric: "accuracy",
+          metric_direction: "higher_better",
+          metric_values: {
+            "host:proposed": 0.94,
+            "container:proposed": 0.94,
+            "host:baseline": 0.81,
+            "container:baseline": 0.81,
+            "host:ablation": 0.89,
+            "container:ablation": 0.89,
+          },
+          container_image: "paper-fucker/local-reproduction",
+          container_digest: "sha256:unit-test",
+        },
+        null,
+        2,
+      ),
+    )
+    const run = await createPaperRun(
+      {
+        topic: "缺少验证来源时禁止最终导出",
+        workspace_path: workspace,
+        code_paths: ["src"],
+        experiment_logs: ["experiment-evidence.json"],
+        target_profile: "generic-preprint",
+        language: "zh-CN",
+        budget_tier: "standard",
+      },
+      runtimeOptions(workspace, home),
+    )
+
+    expect(run.snapshot.experiment_status.reproduction_gate).toBe("blocked")
+    expect(run.snapshot.export_state.status).toBe("blocked")
+    expect(run.snapshot.export_state.failed_checks).toContain("unsupported_claim")
   })
 })

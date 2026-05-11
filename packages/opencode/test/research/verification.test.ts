@@ -77,6 +77,23 @@ function dataPlan(status: "clear" | "restricted" = "clear") {
   })
 }
 
+function sourceRecords(status: "verified" | "unverified" | "failed" = "verified", license: "clear" | "restricted" = "clear") {
+  return [
+    {
+      schema_version: "SourceRecord.v1" as const,
+      source_id: "paper-a",
+      kind: "paper" as const,
+      title: "Paper A",
+      url: "https://example.org/paper-a",
+      provider: "fixture",
+      license: { status: license, expression: license === "clear" ? "open" : "restricted" },
+      version: { value: "v1", retrieved_at: now },
+      verification: { status, method: "fixture", checked_at: now },
+      retrieved_at: now,
+    },
+  ]
+}
+
 async function resultReport(reproduced = true) {
   const plan = planExperiments({ topic: "retrieval", method_name: "reranker", dataset_ids: ["dataset-a"], now })
   const hostRuns = await runHostExploration(
@@ -168,6 +185,20 @@ describe("verification final gate", () => {
       now,
     })
     expect(gate.blocking_report.blockers.map((item) => item.category)).toContain("reproduction_failure")
+  })
+
+  test("blocks final export when cited sources are not verified", async () => {
+    const fixture = supportedFixture()
+    const gate = evaluateVerificationGate({
+      ...fixture,
+      data_plan: dataPlan("clear"),
+      result_report: await resultReport(true),
+      available_source_ids: ["paper-a", "dataset-a"],
+      source_records: sourceRecords("unverified"),
+      model_reviews: reviews({ model: "deepseek-v4-pro", verdict: "pass" }, { model: "deepseek-v4-pro-review", verdict: "pass" }),
+      now,
+    })
+    expect(gate.blocking_report.blockers.map((item) => item.category)).toContain("unverified_source")
   })
 
   test("keeps reviewer warnings non-blocking", async () => {
