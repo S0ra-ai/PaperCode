@@ -21,8 +21,11 @@ const now = "2026-05-09T00:00:00Z"
 async function clean(dir: string, attempts = 80): Promise<void> {
   Bun.gc(true)
   await sleep(200)
-  return rm(dir, { recursive: true, force: true }).catch((error) => {
-    if (attempts <= 1) throw error
+  return rm(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 }).catch((error) => {
+    if (attempts <= 1) {
+      console.warn(`Could not remove temporary e2e test directory ${dir}: ${String(error)}`)
+      return
+    }
     return clean(dir, attempts - 1)
   })
 }
