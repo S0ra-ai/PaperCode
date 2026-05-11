@@ -1,6 +1,6 @@
 id: release-cli-version-surface
 title: Release CLI version surface follows CHANGELOG
-status: todo
+status: done
 priority: high
 owner: codex
 tags:
@@ -74,7 +74,7 @@ steps:
   meta: {}
 - id: sync-changelog-readme
   title: Record changelog and README version
-  status: in_progress
+  status: done
   owner: codex
   depends_on: []
   description: 按 TaskFlow 建议版本记录真实 work commit，并同步 README。
@@ -82,9 +82,16 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    last_run: '2026-05-11T22:28:19.969471'
-    attempt_count: 1
+    logs:
+    - timestamp: '2026-05-11T22:35:55.627234'
+      level: info
+      message: CHANGELOG/README 同步到 0.8.7；根 CHANGELOG 与 docs/changelog/v0/*.CHANGELOG
+        已统一为 header 空行、:history 空行、4-space version、8-space section/top-level bullets、12-space
+        section bullets；check-changelog-format.ps1 增加 -IncludeArchives、尾随空白和单空行校验；README
+        版本校验与 TaskFlow changelog format/versions 校验均通过。
+      agent: codex
+    last_run: '2026-05-11T22:35:55.627234'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -102,10 +109,7 @@ outputs:
 trace:
   logs: []
   attempt_count: 0
-lock:
-  by: codex
-  at: '2026-05-11T22:25:36.092698'
 meta:
   created_at: '2026-05-11T22:25:32.562574'
-  updated_at: '2026-05-11T22:28:19.969471'
+  updated_at: '2026-05-11T22:36:04.033746'
   version: '1'

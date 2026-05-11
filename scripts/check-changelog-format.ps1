@@ -1,69 +1,113 @@
 param(
-  [string]$Path = "CHANGELOG"
+  [string[]]$Path = @("CHANGELOG"),
+  [switch]$IncludeArchives
 )
 
 $ErrorActionPreference = "Stop"
 
-if (-not (Test-Path -LiteralPath $Path)) {
-  throw "CHANGELOG not found: $Path"
-}
+$repoRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..")).Path
 
 $utf8 = [System.Text.UTF8Encoding]::new($false)
-$lines = [System.IO.File]::ReadAllLines((Resolve-Path -LiteralPath $Path).Path, $utf8)
-$inHistory = $false
-$currentSection = $null
 $problems = New-Object System.Collections.Generic.List[string]
 
-for ($i = 0; $i -lt $lines.Count; $i++) {
-  $line = $lines[$i]
-  $lineNumber = $i + 1
-  $trim = $line.Trim()
-
-  if ($line -match "`t") {
-    $problems.Add("line ${lineNumber}: tabs are not allowed")
+$paths = New-Object System.Collections.Generic.List[string]
+foreach ($item in $Path) {
+  if (-not (Test-Path -LiteralPath $item)) {
+    throw "CHANGELOG not found: $item"
   }
+  $paths.Add((Resolve-Path -LiteralPath $item).Path)
+}
 
-  if ($trim -eq ":history") {
-    if ($line -ne ":history") {
-      $problems.Add("line ${lineNumber}: :history must not be indented")
+if ($IncludeArchives) {
+  $archiveRoot = Join-Path $repoRoot "docs/changelog/v0"
+  if (Test-Path -LiteralPath $archiveRoot) {
+    Get-ChildItem -LiteralPath $archiveRoot -Filter "*.CHANGELOG" | Sort-Object FullName | ForEach-Object {
+      if (-not $paths.Contains($_.FullName)) {
+        $paths.Add($_.FullName)
+      }
     }
-    $inHistory = $true
-    $currentSection = $null
-    continue
   }
+}
 
-  if (-not $inHistory -or $trim.Length -eq 0) {
-    continue
+foreach ($resolvedPath in $paths) {
+  $displayPath = if ($resolvedPath.StartsWith($repoRoot)) {
+    $resolvedPath.Substring($repoRoot.Length).TrimStart("\", "/").Replace("\", "/")
+  } else {
+    $resolvedPath.Replace("\", "/")
   }
+  $lines = [System.IO.File]::ReadAllLines($resolvedPath, $utf8)
+  $inHistory = $false
+  $currentSection = $null
 
-  $isVersion = $trim -match '^\d+(?:\.\d+)+(?:-[A-Za-z0-9.]+)?\s+-\s+\d{4}/\d{2}/\d{2}\s+\([0-9A-Za-z]+\)\s+\[[^\]]+\]$'
-  if ($isVersion) {
-    if ($line -ne "    $trim") {
-      $problems.Add("line ${lineNumber}: version entries must use 4-space indentation")
+  for ($i = 0; $i -lt $lines.Count; $i++) {
+    $line = $lines[$i]
+    $lineNumber = $i + 1
+    $trim = $line.Trim()
+
+    if ($line -match "`t") {
+      $problems.Add("${displayPath}:${lineNumber}: tabs are not allowed")
     }
-    $currentSection = $null
-    continue
-  }
 
-  if ($trim -match '^:([A-Za-z_]+)(?:\s+.*)?$') {
-    if ($line -ne "        $trim") {
-      $problems.Add("line ${lineNumber}: section headers must use 8-space indentation")
+    if ($line -ne $line.TrimEnd()) {
+      $problems.Add("${displayPath}:${lineNumber}: trailing whitespace is not allowed")
     }
-    $currentSection = $matches[1]
-    continue
-  }
 
-  if ($trim -match '^- ') {
-    $expected = if ($currentSection -and $currentSection -ne "brief") { "            $trim" } else { "        $trim" }
-    if ($line -ne $expected) {
-      $problems.Add("line ${lineNumber}: list items have invalid indentation for section '$currentSection'")
+    if ($trim -eq ":history") {
+      if ($line -ne ":history") {
+        $problems.Add("${displayPath}:${lineNumber}: :history must not be indented")
+      }
+      if ($i -eq 0 -or $lines[$i - 1].Trim().Length -ne 0) {
+        $problems.Add("${displayPath}:${lineNumber}: :history must be preceded by one blank line")
+      }
+      if ($i -gt 1 -and $lines[$i - 2].Trim().Length -eq 0) {
+        $problems.Add("${displayPath}:${lineNumber}: :history must not be preceded by multiple blank lines")
+      }
+      $inHistory = $true
+      $currentSection = $null
+      continue
     }
-    continue
-  }
 
-  $expectedContinuation = if ($currentSection -and $currentSection -ne "brief") { "            $trim" } else { "        $trim" }
-  if ($line -ne $expectedContinuation) {
-    $problems.Add("line ${lineNumber}: continuation has invalid indentation for section '$currentSection'")
+    if (-not $inHistory -or $trim.Length -eq 0) {
+      continue
+    }
+
+    $isVersion = $trim -match '^\d+(?:\.\d+)+(?:-[A-Za-z0-9.]+)?\s+-\s+\d{4}/\d{2}/\d{2}\s+\([0-9A-Za-z]+\)\s+\[[^\]]+\]$'
+    if ($isVersion) {
+      if ($line -ne "    $trim") {
+        $problems.Add("${displayPath}:${lineNumber}: version entries must use 4-space indentation")
+      }
+
+      if ($i -eq 0 -or $lines[$i - 1].Trim().Length -ne 0) {
+        $problems.Add("${displayPath}:${lineNumber}: version entries must be preceded by one blank line")
+      }
+      if ($i -gt 1 -and $lines[$i - 2].Trim().Length -eq 0) {
+        $problems.Add("${displayPath}:${lineNumber}: version entries must not be preceded by multiple blank lines")
+      }
+
+      $currentSection = $null
+      continue
+    }
+
+    if ($trim -match '^:([A-Za-z_]+)(?:\s+.*)?$') {
+      if ($line -ne "        $trim") {
+        $problems.Add("${displayPath}:${lineNumber}: section headers must use 8-space indentation")
+      }
+      $currentSection = $matches[1]
+      continue
+    }
+
+    if ($trim -match '^- ') {
+      $expected = if ($currentSection -and $currentSection -ne "brief") { "            $trim" } else { "        $trim" }
+      if ($line -ne $expected) {
+        $problems.Add("${displayPath}:${lineNumber}: list items have invalid indentation for section '$currentSection'")
+      }
+      continue
+    }
+
+    $expectedContinuation = if ($currentSection -and $currentSection -ne "brief") { "            $trim" } else { "        $trim" }
+    if ($line -ne $expectedContinuation) {
+      $problems.Add("${displayPath}:${lineNumber}: continuation has invalid indentation for section '$currentSection'")
+    }
   }
 }
 
@@ -72,4 +116,4 @@ if ($problems.Count -gt 0) {
   exit 1
 }
 
-Write-Output "CHANGELOG colon-history indentation is valid."
+Write-Output "CHANGELOG colon-history indentation is valid for $($paths.Count) file(s)."

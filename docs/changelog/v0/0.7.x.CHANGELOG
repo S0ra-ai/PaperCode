@@ -1,6 +1,6 @@
 :project       paper_fucker - 可验证论文研究自动化系统
 :author        k1d (https://github.com/ZhuchenZhong)
-:repo          
+:repo
 :desc          0.7.x 历史变更归档，主 CHANGELOG 仅保留当前活跃版本线
 :version       0.7.0-dev
 :last_update   2026/05/11
@@ -27,4 +27,3 @@
             - TaskFlow validate_task agent-team-capability-acceptance
             - TaskFlow validate_changelog_format
             - git diff --check
-
