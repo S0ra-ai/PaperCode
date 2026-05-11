@@ -1,6 +1,6 @@
 ﻿# Autonomous Product Audit
 
-- Generated: 2026-05-11T11:45:37.9426189+08:00
+- Generated: 2026-05-11T11:50:11.2425527+08:00
 - Status: passed
 - Allow active task: False
 
@@ -13,4 +13,4 @@
 | `full-workspace-evidence` | pass | Latest full workspace strict acceptance report is passed and includes server/full workspace coverage. |
 | `dangerous-residue` | pass | No dangerous TODO/FIXME/not-implemented/mock residue found in product paper paths. |
 | `brand-surface` | pass | Paper Fucker and PaperRun remain the documented user-visible product surface. |
-| `git-flow` | pass | Branch feature/source-gate-acceptance-lock follows Git Flow; forbidden local branches absent; working entries=5. |
+| `git-flow` | pass | Branch develop follows Git Flow; forbidden local branches absent; working entries=0. |
