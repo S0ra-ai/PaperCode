@@ -40,6 +40,20 @@ describe("public Paper Fucker surface", () => {
     expect(index).toContain(".command(InitCommand)")
   })
 
+  test("user-facing version surfaces follow the product version", async () => {
+    const index = await source("index.ts")
+    const debug = await source("cli/cmd/debug/index.ts")
+    const sidebar = await source("cli/cmd/tui/routes/session/sidebar.tsx")
+    const build = await fs.readFile(path.join(root, "script", "build.ts"), "utf8")
+
+    expect(index).toContain('ProductVersion')
+    expect(index).toContain('.version("version", "show version number", ProductVersion)')
+    expect(debug).toContain("paper_fucker version: ${ProductVersion}")
+    expect(sidebar).toContain("{ProductVersion}")
+    expect(build).toContain("CHANGELOG")
+    expect(build).toContain("PAPER_FUCKER_VERSION")
+  })
+
   test("public CLI help strings use PaperRun and hide legacy chat/session wording", async () => {
     const thread = await source("cli/cmd/tui/thread.ts")
     const attach = await source("cli/cmd/tui/attach.ts")

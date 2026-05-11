@@ -9,6 +9,7 @@ import { createSolidTransformPlugin } from "@opentui/solid/bun-plugin"
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const dir = path.resolve(__dirname, "..")
+const root = path.resolve(dir, "../..")
 
 process.chdir(dir)
 
@@ -16,6 +17,15 @@ await import("./generate.ts")
 
 import { Script } from "@opencode-ai/script"
 import pkg from "../package.json"
+
+async function readProductVersion() {
+  const changelog = await Bun.file(path.join(root, "CHANGELOG")).text()
+  const match = /^:version\s+(.+)$/m.exec(changelog)
+  if (!match) throw new Error("CHANGELOG is missing a :version entry")
+  return match[1]!.trim()
+}
+
+const productVersion = await readProductVersion()
 
 // Load migrations from migration directories
 const migrationDirs = (
@@ -216,11 +226,12 @@ for (const item of targets) {
     files: embeddedFileMap ? { "opencode-web-ui.gen.ts": embeddedFileMap } : {},
     entrypoints: ["./src/index.ts", parserWorker, workerPath, ...(embeddedFileMap ? ["opencode-web-ui.gen.ts"] : [])],
     define: {
-      OPENCODE_VERSION: `'${Script.version}'`,
+      OPENCODE_VERSION: JSON.stringify(Script.version),
+      PAPER_FUCKER_VERSION: JSON.stringify(productVersion),
       OPENCODE_MIGRATIONS: JSON.stringify(migrations),
       OTUI_TREE_SITTER_WORKER_PATH: bunfsRoot + workerRelativePath,
       OPENCODE_WORKER_PATH: workerPath,
-      OPENCODE_CHANNEL: `'${Script.channel}'`,
+      OPENCODE_CHANNEL: JSON.stringify(Script.channel),
       OPENCODE_LIBC: item.os === "linux" ? `'${item.abi ?? "glibc"}'` : "",
     },
   })
