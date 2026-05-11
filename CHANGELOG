@@ -2,10 +2,42 @@
 :author        s0ra (https://github.com/S0ra-ai)
 :repo          
 :desc          记录项目的重大变更和版本历史
-:version       0.8.4-dev
+:version       0.8.5-dev
 :last_update   2026/05/11
 
 :history
+
+    0.8.5-dev - 2026/05/11 (9db955a) [develop]
+        :brief release 前 readiness 整理与初始化重置
+        - docs(readme): 对外品牌统一为 Paper Fucker，并补充 release readiness 与 release branch/tag 边界
+        - chore(changelog): 主 CHANGELOG 仅保留 0.8.x 活跃线，0.1.x-0.7.x 移入 docs/changelog/v0 归档
+        - feat(preview): PaperRun preview endpoint 启动 token-protected localhost 预览服务，TUI dashboard 自动打开 preview URL
+        - feat(init): 顶层 CLI 新增 paper_fucker init/doctor/reset，reset 备份后只清理全局与 ignored runtime/local 状态
+        - feat(provider): 新增 provider matrix smoke，逐 provider 调用 /models 与最小 chat completion 并生成报告
+        - test(readiness): 覆盖 init/reset、provider discovery、preview server、PaperRun API/TUI preview、public surface 与 strict acceptance inventory
+        :src
+            - README.md - Paper Fucker public brand, release readiness flow, init/reset/provider smoke usage
+            - CHANGELOG - active 0.8.x line retained after archive split
+            - docs/project-structure.md - root directory and tracked/ignored state boundary
+            - docs/changelog/v0/*.CHANGELOG - historical 0.1.x-0.7.x colon-history archives
+            - packages/opencode/src/paper/run.ts - live preview snapshot/server response and preview server lifecycle helpers
+            - packages/opencode/src/cli/cmd/tui/routes/paper/index.tsx - automatic preview URL opening for ready PaperRuns
+            - packages/opencode/src/cli/cmd/init.ts - public init/doctor/reset CLI command
+            - packages/opencode/src/paper/init/reset.ts - backup-first reset implementation
+            - scripts/provider-matrix-smoke.ps1 - provider matrix live smoke report script
+        :reports
+            - reports/pre-release-readiness.md - release readiness summary and no-tag boundary
+            - reports/live-preview-acceptance.md - live preview acceptance evidence
+            - reports/provider-matrix-smoke.md - pending_config provider matrix report
+        :verification
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed before final bump
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-changelog-format.ps1 passed for root and 0.1.x-0.7.x archives
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\provider-matrix-smoke.ps1 -Home <empty-test-home> passed with pending_config report
+            - npx --yes bun@1.3.13 --cwd packages/preview test passed: 2 pass, 0 fail
+            - npx --yes bun@1.3.13 --cwd packages/opencode test targeted readiness suite passed: 26 pass, 0 fail
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+            - python -m unittest discover -s research-tools/tests passed: 18 tests
+            - git grep tracked secret scan for provider-shaped API keys found no matches
 
     0.8.4-dev - 2026/05/11 (e96072c) [develop]
         :brief strict acceptance 锁定 verified source final gate
