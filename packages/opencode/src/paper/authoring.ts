@@ -10,6 +10,7 @@ import {
   writeResearchArtifact,
 } from "./research/runtime"
 import type { DataPlan } from "./research/sources"
+import type { SourceRecord } from "./research/sources/schemas"
 import { withSpan } from "./research/telemetry"
 import {
   composeDraftPaper,
@@ -60,6 +61,7 @@ export type RunPaperAuthoringLoopInput = {
   data_plan: DataPlan
   result_report: ResultReport
   available_source_ids: string[]
+  source_records?: SourceRecord[]
   model_reviews: ModelReviewInput[]
   target_profile?: string
   code_artifact_ids?: string[]
@@ -292,6 +294,7 @@ export async function runPaperAuthoringLoop(
           data_plan: input.data_plan,
           result_report: input.result_report,
           available_source_ids: input.available_source_ids,
+          source_records: input.source_records,
           model_reviews: input.model_reviews,
           now: input.now,
         },

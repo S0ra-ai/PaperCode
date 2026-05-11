@@ -2,10 +2,32 @@
 :author        s0ra (https://github.com/S0ra-ai)
 :repo          
 :desc          记录项目的重大变更和版本历史
-:version       0.8.2-dev
+:version       0.8.3-dev
 :last_update   2026/05/11
 
 :history
+
+    0.8.3-dev - 2026/05/11 (bec3df2) [develop]
+        :brief 最终导出 source authenticity gate 硬化
+        - feat(verification): final export 现在要求引用来源必须 clear license 且 verification.status=verified
+        - feat(orchestrator): 新增 SourceEvidenceManifest.v1 ingestion，从 paper_files/experiment_logs 读取用户或工具提供的验证来源清单
+        - feat(claim-ledger): 默认 ClaimLedger 只绑定 clear+verified source，未验证 seed 不能支撑 final claims
+        - test(paperrun): final export pass 场景同时提供 SourceEvidenceManifest 与 ExperimentEvidenceManifest
+        - test(verification): reproduction pass 但 source 未验证时 final export 被阻断
+        - chore(benchmark): live final benchmark 生成 verified source evidence，避免把未验证 search seed 当作最终论文证据
+        :src
+            - packages/opencode/src/paper/orchestrator.ts - SourceEvidenceManifest.v1 loading, verified source binding, final benchmark support
+            - packages/opencode/src/paper/research/verification/checks.ts - unverified_source/source_license_failure blockers
+            - packages/opencode/src/paper/research/verification/gate.ts - source authenticity checks in final gate
+            - packages/opencode/src/paper/research/verification/schemas.ts - source_records and new finding categories
+            - packages/opencode/src/paper/authoring.ts - passes source records into final authenticity gate
+            - scripts/live-paper-quality-benchmark.ts - final scenario includes verified source manifest
+        :verification
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/paperrun-execution.test.ts passed: 3 pass, 0 fail
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/research/verification.test.ts passed: 7 pass, 0 fail
+            - npx --yes bun@1.3.13 --cwd packages/opencode test focused paper-critical suite passed: 30 pass, 0 fail
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario final passed with final_export=final and SourceEvidenceManifest.v1
 
     0.8.2-dev - 2026/05/11 (54bee71) [develop]
         :brief 全仓 strict acceptance 验收硬化

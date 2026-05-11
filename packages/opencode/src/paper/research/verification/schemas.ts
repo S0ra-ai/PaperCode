@@ -1,9 +1,12 @@
 import type { DataPlan } from "../sources"
 import type { ResultReport } from "../experiments"
 import type { ClaimLedger, DraftPaper } from "../writing"
+import type { SourceRecord } from "../sources/schemas"
 
 export type VerificationFindingCategory =
   | "invalid_reference"
+  | "unverified_source"
+  | "source_license_failure"
   | "unsupported_claim"
   | "dataset_license_failure"
   | "reproduction_failure"
@@ -54,6 +57,7 @@ export type VerificationGateInput = {
   data_plan: DataPlan
   result_report: ResultReport
   available_source_ids: string[]
+  source_records?: SourceRecord[]
   model_reviews: ModelReviewInput[]
   now?: string
 }

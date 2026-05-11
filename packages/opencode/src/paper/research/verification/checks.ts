@@ -58,6 +58,56 @@ export function checkClaimSupport(input: VerificationGateInput): VerificationFin
   )
 }
 
+export function checkSourceAuthenticity(input: VerificationGateInput): VerificationFinding[] {
+  return withSpan(
+    "research.verification.source_authenticity",
+    {
+      "paper_fucker.research.sources.records": input.source_records?.length ?? 0,
+    },
+    () => {
+      if (!input.source_records) return []
+      const records = new Map(input.source_records.map((source) => [source.source_id, source]))
+      const citedSourceIds = Array.from(new Set(input.ledger.entries.flatMap((entry) => entry.source_ids)))
+      return citedSourceIds.flatMap((sourceId) => {
+        const source = records.get(sourceId)
+        if (!source) return []
+        const findings: VerificationFinding[] = []
+        if (source.verification.status !== "verified") {
+          findings.push(
+            finding({
+              category: "unverified_source",
+              severity: "blocker",
+              message: `Source ${sourceId} is ${source.verification.status}; final export requires verified sources.`,
+              claim_ids: input.ledger.entries
+                .filter((entry) => entry.source_ids.includes(sourceId))
+                .map((entry) => entry.claim_id),
+              source_ids: [sourceId],
+              artifact_ids: [],
+              required_action: "Verify the source through an approved live source/MCP check or provide SourceEvidenceManifest.v1.",
+            }),
+          )
+        }
+        if (source.license.status !== "clear") {
+          findings.push(
+            finding({
+              category: "source_license_failure",
+              severity: "blocker",
+              message: `Source ${sourceId} has ${source.license.status} license status.`,
+              claim_ids: input.ledger.entries
+                .filter((entry) => entry.source_ids.includes(sourceId))
+                .map((entry) => entry.claim_id),
+              source_ids: [sourceId],
+              artifact_ids: [],
+              required_action: "Replace the source with clear-license evidence or pause for user approval.",
+            }),
+          )
+        }
+        return findings
+      })
+    },
+  )
+}
+
 export function checkDataAndExperiments(input: VerificationGateInput): VerificationFinding[] {
   return withSpan(
     "research.verification.data_experiments",
