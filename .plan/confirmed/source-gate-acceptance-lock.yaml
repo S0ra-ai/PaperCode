@@ -1,6 +1,6 @@
 id: source-gate-acceptance-lock
 title: strict acceptance 锁定 verified source final gate
-status: todo
+status: done
 priority: medium
 owner: codex
 tags:
@@ -69,7 +69,7 @@ steps:
   meta: {}
 - id: validate-release
   title: 验证并发布 0.8.4-dev
-  status: in_progress
+  status: done
   owner: codex
   depends_on:
   - assert-source-evidence-final
@@ -85,8 +85,17 @@ steps:
         writeJsonAtomic can hit EPERM while replacing run.json during live benchmark
         runs. Expanding task scope to harden runtime writes before release.'
       agent: codex
-    last_run: '2026-05-11T02:56:26.566592'
-    attempt_count: 1
+    - timestamp: '2026-05-11T03:45:11.742850'
+      level: info
+      message: 'Validated 0.8.4-dev source-gate acceptance lock. Evidence: runtime-state
+        + paperrun-execution tests passed (4 pass, 0 fail); strict-acceptance test
+        passed (10 pass, 0 fail); packages/opencode typecheck passed; README/CHANGELOG
+        version check passed; CHANGELOG colon DSL validation passed; default strict
+        live acceptance passed with topic/code/final PaperRun benchmark checks, SourceEvidenceManifest.v1
+        and final_gate=passed assertions, report updated at reports/strict-live-acceptance.md.'
+      agent: codex
+    last_run: '2026-05-11T03:45:11.742850'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -102,10 +111,7 @@ outputs:
 trace:
   logs: []
   attempt_count: 0
-lock:
-  by: codex
-  at: '2026-05-11T02:56:21.134565'
 meta:
   created_at: '2026-05-11T02:45:33.551382'
-  updated_at: '2026-05-11T02:56:26.566592'
+  updated_at: '2026-05-11T03:46:15.407751'
   version: '1'
