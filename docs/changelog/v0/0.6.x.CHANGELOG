@@ -1,6 +1,6 @@
 :project       paper_fucker - 可验证论文研究自动化系统
 :author        k1d (https://github.com/ZhuchenZhong)
-:repo          
+:repo
 :desc          0.6.x 历史变更归档，主 CHANGELOG 仅保留当前活跃版本线
 :version       0.6.6-dev
 :last_update   2026/05/11
@@ -163,4 +163,3 @@
             - npx --yes bun@1.3.13 --cwd packages/preview test passed: 2 pass, 0 fail, 9 expects
             - python -m unittest discover -s research-tools/tests passed: 5 tests
             - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\strict-acceptance.ps1 -CheckTimeoutSeconds 300 passed
-

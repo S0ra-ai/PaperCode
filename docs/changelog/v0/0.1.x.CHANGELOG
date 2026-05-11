@@ -1,12 +1,11 @@
 :project       paper_fucker - 可验证论文研究自动化系统
 :author        k1d (https://github.com/ZhuchenZhong)
-:repo          
+:repo
 :desc          记录项目的重大变更和版本历史
 :version       0.1.27-dev
 :last_update   2026/05/09
 
 :history
-
 
     0.1.27-dev - 2026/05/09 (5bc5d8b) [develop]
         :brief 新增 run-bound 论文写作、预览、审稿与导出闭环
@@ -30,6 +29,7 @@
             - npx --yes bun@1.3.13 run typecheck passed
             - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
             - TaskFlow validate_task task-030-paper-authoring-loop passed
+
     0.1.26-dev - 2026/05/09 (8e82c90) [develop]
         :brief 将 TUI 首屏改为中文论文工作台
         - feat(tui): 新增 TuiPaperWorkbenchState.v1 与 TuiResearchRunState.v1 renderer-independent 状态 adapter

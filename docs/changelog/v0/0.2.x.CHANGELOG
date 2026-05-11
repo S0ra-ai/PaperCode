@@ -1,6 +1,6 @@
 :project       paper_fucker - 可验证论文研究自动化系统
 :author        k1d (https://github.com/ZhuchenZhong)
-:repo          
+:repo
 :desc          0.2.x 历史变更归档，主 CHANGELOG 仅保留当前活跃版本线
 :version       0.2.6-dev
 :last_update   2026/05/11
@@ -213,4 +213,3 @@
             - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\strict-acceptance.ps1 passed
             - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
             - TaskFlow validate_task task-031-strict-live-acceptance passed
-
