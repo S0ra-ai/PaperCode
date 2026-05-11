@@ -5,8 +5,23 @@ import { useTheme } from "@tui/context/theme"
 import { useDialog } from "@tui/ui/dialog"
 
 type ModelRolesPayload = {
-  default_model: string
+  inventory?: {
+    decision_model?: string
+    allowlist: string[]
+    candidates: Array<{
+      model_ref: string
+      display_name: string
+      allowed: boolean
+      smoke_status: string
+    }>
+  }
   roles: Record<string, { provider_id: string; model_id: string }>
+  routing?: Array<{
+    role: string
+    selected_model?: string
+    source: string
+    reason: string
+  }>
 }
 
 export function DialogPaperModelRoles() {
@@ -14,7 +29,7 @@ export function DialogPaperModelRoles() {
   const { theme } = useTheme()
   const dialog = useDialog()
   const [roles] = createResource(async () => {
-    const response = await sdk.fetch(new URL("paper/model-roles", sdk.url), {
+    const response = await sdk.fetch(new URL("paper/model-inventory", sdk.url), {
       headers: {
         ...(sdk.directory ? { "x-opencode-directory": sdk.directory } : {}),
       },
@@ -27,7 +42,7 @@ export function DialogPaperModelRoles() {
     <box paddingLeft={2} paddingRight={2} gap={1} paddingBottom={1}>
       <box flexDirection="row" justifyContent="space-between">
         <text fg={theme.text} attributes={TextAttributes.BOLD}>
-          模型角色
+          模型工作台
         </text>
         <text fg={theme.textMuted} onMouseUp={() => dialog.clear()}>
           esc
@@ -36,7 +51,40 @@ export function DialogPaperModelRoles() {
       <Show when={roles()} fallback={<text fg={theme.textMuted}>读取中...</text>}>
         {(payload) => (
           <box flexDirection="column" gap={1}>
-            <text fg={theme.text}>默认 {payload().default_model}</text>
+            <text fg={theme.text}>模型工作台</text>
+            <text fg={theme.textMuted}>主决策模型 {payload().inventory?.decision_model ?? "未配置"}</text>
+            <text fg={theme.textMuted}>
+              允许模型 {payload().inventory?.allowlist.length ?? 0}/{payload().inventory?.candidates.length ?? 0}
+            </text>
+            <Show when={(payload().inventory?.candidates.length ?? 0) > 0}>
+              <box flexDirection="column" gap={0}>
+                <text fg={theme.textMuted}>候选模型</text>
+                <For each={(payload().inventory?.candidates ?? []).slice(0, 12)}>
+                  {(candidate) => (
+                    <box flexDirection="row" gap={1}>
+                      <text fg={candidate.allowed ? theme.accent : theme.textMuted}>{candidate.allowed ? "✓" : "·"}</text>
+                      <text fg={theme.text}>{candidate.model_ref}</text>
+                      <text fg={theme.textMuted}>{candidate.smoke_status}</text>
+                    </box>
+                  )}
+                </For>
+              </box>
+            </Show>
+            <Show when={(payload().routing?.length ?? 0) > 0}>
+              <box flexDirection="column" gap={0}>
+                <text fg={theme.textMuted}>动态路由预览</text>
+                <For each={payload().routing ?? []}>
+                  {(decision) => (
+                    <box flexDirection="row" gap={1}>
+                      <text fg={theme.textMuted}>{decision.role}</text>
+                      <text fg={decision.source === "blocked" ? theme.warning : theme.text}>
+                        {decision.selected_model ?? decision.reason}
+                      </text>
+                    </box>
+                  )}
+                </For>
+              </box>
+            </Show>
             <For each={Object.entries(payload().roles)}>
               {([role, model]) => (
                 <box flexDirection="row" gap={1}>

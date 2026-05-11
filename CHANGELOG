@@ -79,130 +79,46 @@
             - rg subscription/Zen/Go/PAPEE public surface scan passed except negative-test assertions
 
     0.8.5-dev - 2026/05/11 (9db955a) [develop]
-        :brief 作者元数据统一为 k1d; 源码编译后生成根目录可执行文件; README 补齐 Windows 安装与首次启动路径; README 对外信息边界收紧; README 补齐 TUI 主入口与内置能力包; GitHub README 对外化与内部文档拆分; release 文件面治理与中文核心文档收口; release 前 readiness 整理与初始化重置
-        - docs(changelog): root CHANGELOG 与 docs/changelog/v0 归档 changelog 的 :author 统一为 k1d (https://github.com/ZhuchenZhong)
-        - docs(readme): README 顶部元信息增加作者 k1d，并链接 ZhuchenZhong GitHub
-        - chore(package): root package.json 与 packages/opencode/package.json 增加 author 字段
-        - note: repository URL 仍保留 S0ra-ai/paper_fucker，因为这是当前远端仓库位置
-        - build(root): 新增根目录 build 脚本，执行当前平台 packages/opencode 二进制编译后复制根目录可执行文件
-        - build(link): 新增 scripts/link-root-executable.ts，Windows 生成 paper_fucker.exe，macOS/Linux 生成 paper_fucker
-        - build(opencode): 跨平台 optional dependency 安装改用 --no-save，避免 build 污染 package.json 或 bun.lock
-        - fix(script): TEAM_MEMBERS 缺失时 release/changelog 脚本使用空团队成员列表继续执行
-        - docs(readme): Windows 源码预览流程改为 bun run build 后运行 .\paper_fucker.exe，移除临时 PowerShell function 方案
-        - chore(gitignore): 忽略根目录本地编译产物 paper_fucker 与 paper_fucker.exe
-        - docs(readme): 新增安装章节，说明当前开发预览版在 Windows 上使用 Git、Bun、clone 与 bun install 从源码运行
-        - docs(readme): 增加临时 PowerShell paper_fucker function，让源码预览用户能按 README 使用同一命令入口
-        - docs(readme): 区分基础 TUI 必需项与 Pandoc、LaTeX、Docker、Python 等按能力启用的可选外部工具
-        - docs(readme): 将初始化示例统一改为 paper_fucker init --yes，避免当前非交互 init 入口被照抄后失败
-        - docs(internal): 增加 README 安装说明维护规则，禁止把尚未发布的 installer/package 写成主安装方式
-        - docs(readme): 顶部状态从 release 分支现场改为开发预览版，避免对外暴露内部发布执行状态
-        - docs(readme): 移除内部文档入口、release 测试、tag/main 策略、维护者脚本清单和内部审计目录清单
-        - docs(readme): 保留外部用户需要的 TUI 主入口、内置能力包、provider/model、Preview/export、隐私和项目状态
-        - docs(internal): 增加 README 写作禁止项，明确内部 release、TaskFlow、审计目录和维护脚本不得写入对外首页
-        - docs(readme): 快速开始改为 TUI-first，明确 paper_fucker 默认打开中文论文工作台，CLI 仅作为非交互/自动化入口
-        - docs(readme): 增加 TUI 首页自然语言输入示例、Run 页面 stage graph、Agent Tree、成本/token、大纲、ledger、能力健康、Preview/Export 和 pause questions
-        - docs(capabilities): 记录内置 capability packs，包括 paper-profile-skills、literature-mcp、crawler-data、huggingface-research、code-experiment-core、writing-verification-export
-        - docs(mcp): 说明 Exa remote MCP 默认配置，并明确外部 MCP/secret/network 授权由 TUI 健康区和 pause question 引导
-        - docs(internal): 内部文档增加 README 必须 TUI-first、内置能力包来自 capability-pack.ts 的维护约束
-        - docs(readme): README 重写为中文 GitHub 首页，优先展示产品定位、核心能力、快速开始、典型流程、多 provider、Preview/export 与隐私策略
-        - docs(internal): 新增 docs/internal/README.md，承接架构边界、release 分支规则、TaskFlow 约束、release 文件面和验收命令
-        - docs(structure): project structure 标注为内部维护文档，并链接对外 README 与内部维护入口
-        - fix(version): README/changelog 校验脚本显式按 UTF-8 读取文件，允许中文行版本 marker 且避免 Windows PowerShell 5.1 mojibake
-        - chore(release): 新增 .gitattributes export-ignore，GitHub source archive 不再携带 TaskFlow、reports、legacy、upstream、本地 runtime、测试树、spec 和上游营销素材
-        - chore(package): packages/opencode 与 packages/preview 增加 npm files 白名单，避免 test/spec/fixture/历史证据进入 pack
-        - test(release): 新增 scripts/check-release-files.ps1，审计 source archive、npm pack 和二进制 publish manifest，并生成 release-file-audit 报告
-        - docs(readme): README 改为中文主文档，补充默认语言、release 文件策略、初始化、多 provider 测试和实时 Preview 说明
-        - docs(structure): 中文化 project structure、changelog archive policy 与 PaperRun project model
-        - docs(readme): 对外品牌统一为 Paper Fucker，并补充 release readiness 与 release branch/tag 边界
-        - chore(changelog): 主 CHANGELOG 仅保留 0.8.x 活跃线，0.1.x-0.7.x 移入 docs/changelog/v0 归档
-        - feat(preview): PaperRun preview endpoint 启动 token-protected localhost 预览服务，TUI dashboard 自动打开 preview URL
-        - feat(init): 顶层 CLI 新增 paper_fucker init/doctor/reset，reset 备份后只清理全局与 ignored runtime/local 状态
-        - feat(provider): 新增 provider matrix smoke，逐 provider 调用 /models 与最小 chat completion 并生成报告
-        - test(readiness): 覆盖 init/reset、provider discovery、preview server、PaperRun API/TUI preview、public surface 与 strict acceptance inventory
-        :commits
-            - 9db955a [develop] release 前 readiness 整理与初始化重置
-            - f455ec8 [release/0.8.5] release 文件面治理与中文核心文档收口
-            - 7a391d7 [release/0.8.5] GitHub README 对外化与内部文档拆分
-            - f82b5f7 [release/0.8.5] README 补齐 TUI 主入口与内置能力包
-            - ccb8e2d [release/0.8.5] README 对外信息边界收紧
-            - 3f60a80 [release/0.8.5] README 补齐 Windows 安装与首次启动路径
-            - 40b90b9 [release/0.8.5] 源码编译后生成根目录可执行文件
-            - a7484d0 [release/0.8.5] 作者元数据统一为 k1d
+        :brief release 前 readiness、中文文档、文件发布面和初始化入口收口
+        :docs
+            - README 改为中文 GitHub 首页，保留 TUI-first、内置 capability packs、多 provider、Preview/export、隐私和 Windows 源码运行路径
+            - 内部维护说明移入 docs/internal/README.md，README 不再暴露 TaskFlow、release 测试脚本、审计目录和维护者命令
+            - docs/project-structure、docs/changelog/README 与 specs/project 统一为 PaperRun、release 文件面和 changelog 归档语义
+            - root CHANGELOG 与 docs/changelog/v0 归档 changelog 作者统一为 k1d (https://github.com/ZhuchenZhong)
+        :build
+            - 根目录新增 build/link 脚本，源码编译后在仓库根目录生成 paper_fucker.exe 或 paper_fucker
+            - packages/opencode build 的 optional dependency 安装改为 --no-save，避免污染 package.json 或 bun.lock
+            - root package.json、packages/opencode/package.json 增加 author 元数据，仓库 URL 仍指向当前 S0ra-ai/paper_fucker 远端
+        :release
+            - .gitattributes 增加 export-ignore，GitHub source archive 排除 TaskFlow、reports、legacy、upstream、本地 runtime、测试树和上游营销素材
+            - packages/opencode 与 packages/preview 增加 npm files 白名单，避免 test/spec/fixture/历史证据进入 pack
+            - scripts/check-release-files.ps1 生成 release-file-audit 报告并校验 source archive、npm pack 与二进制发布面
+        :init
+            - 顶层 CLI 增加 paper_fucker init/doctor/reset，reset 只清理全局和 ignored runtime/local 状态并先备份
+            - Windows 源码预览流程改为 bun run build 后直接运行 .\paper_fucker.exe
+            - provider matrix smoke 支持逐 provider 调用 /models 和最小 chat completion，并在无配置时生成 pending_config 报告
+        :preview
+            - PaperRun preview endpoint 启动 token-protected localhost 预览服务
+            - TUI dashboard 在 Preview ready 时自动打开只读实时预览 URL
         :src
-            - CHANGELOG - current author metadata and history entry
-            - README.md - public author metadata
-            - package.json - root package author metadata
-            - packages/opencode/package.json - package author metadata
-            - docs/changelog/v0/*.CHANGELOG - archived author metadata
-            - reports/release-file-audit.md - refreshed release file audit
-            - package.json - root build and link:bin scripts
-            - scripts/link-root-executable.ts - current-platform root executable linker
-            - packages/opencode/script/build.ts - no-save dependency install during build
-            - packages/script/src/index.ts - optional TEAM_MEMBERS handling
-            - script/raw-changelog.ts - optional TEAM_MEMBERS handling
-            - README.md - source build and root executable instructions
-            - docs/internal/README.md - README install contract
-            - .gitignore - ignored root build artifacts
-            - README.md - Windows source preview install and first-run instructions
-            - docs/internal/README.md - README install documentation rules
-            - README.md - public GitHub README surface tightened
-            - docs/internal/README.md - README public surface rules
-            - README.md - TUI-first public usage and built-in capability documentation
-            - docs/internal/README.md - internal capability-pack and README writing invariant
-            - README.md - external GitHub-facing project README
-            - docs/internal/README.md - maintainer/internal documentation split
-            - docs/project-structure.md - internal documentation marker
-            - scripts/check-readme-version.ps1 - UTF-8-safe README version marker parsing
-            - scripts/check-changelog-format.ps1 - UTF-8-safe colon DSL indentation parsing
-            - .gitattributes - GitHub source archive export-ignore release surface rules
-            - packages/opencode/package.json - npm pack files whitelist
-            - packages/preview/package.json - preview package files whitelist
-            - scripts/check-release-files.ps1 - release artifact surface audit
-            - README.md - Chinese-first product, testing, release, and file surface documentation
-            - docs/project-structure.md - repository vs release artifact structure
-            - docs/changelog/README.md - changelog archive policy
-            - specs/project.md - PaperRun project/substrate model
-            - README.md - Paper Fucker public brand, release readiness flow, init/reset/provider smoke usage
-            - CHANGELOG - active 0.8.x line retained after archive split
-            - docs/project-structure.md - root directory and tracked/ignored state boundary
-            - docs/changelog/v0/*.CHANGELOG - historical 0.1.x-0.7.x colon-history archives
-            - packages/opencode/src/paper/run.ts - live preview snapshot/server response and preview server lifecycle helpers
-            - packages/opencode/src/cli/cmd/tui/routes/paper/index.tsx - automatic preview URL opening for ready PaperRuns
-            - packages/opencode/src/cli/cmd/init.ts - public init/doctor/reset CLI command
-            - packages/opencode/src/paper/init/reset.ts - backup-first reset implementation
-            - scripts/provider-matrix-smoke.ps1 - provider matrix live smoke report script
+            - README.md - 中文对外首页和 Windows 源码运行说明
+            - docs/internal/README.md - 内部维护和 README 边界规则
+            - docs/project-structure.md - 仓库目录、tracked/ignored state 和 release artifact 边界
+            - docs/changelog/v0/*.CHANGELOG - 0.1.x-0.7.x 历史归档
+            - scripts/link-root-executable.ts - 根目录可执行文件链接器
+            - scripts/check-release-files.ps1 - release 文件面审计
+            - scripts/provider-matrix-smoke.ps1 - provider matrix smoke 报告
+            - packages/opencode/src/paper/run.ts - live preview server response 和 PaperRun preview lifecycle
+            - packages/opencode/src/cli/cmd/init.ts - init/doctor/reset 入口
         :verification
-            - rg author metadata check against README/package/changelog passed
             - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
-            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-changelog-format.ps1 passed
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-changelog-format.ps1 passed for root and archives
             - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-release-files.ps1 passed
-            - git diff --check passed
-            - TaskFlow validate_changelog_format passed
-            - TaskFlow validate_task release-author-metadata-k1d passed
             - bun run build passed and generated .\paper_fucker.exe
-            - .\paper_fucker.exe --version passed
-            - .\paper_fucker.exe --help passed
-            - bun script\raw-changelog.ts --help passed without .github/TEAM_MEMBERS
-            - bun run typecheck passed
-            - TaskFlow validate_task release-root-executable-build passed
-            - function paper_fucker { bun run --cwd "E:\Project\paper_fucker\packages\opencode" --conditions=browser src/index.ts @args }; paper_fucker --help passed
-            - TaskFlow validate_task release-readme-windows-install passed
-            - rg public-surface forbidden terms against README.md passed
-            - TaskFlow validate_task release-public-readme-audit passed
-            - TaskFlow validate_task release-readme-tui-capabilities passed
-            - README grep checks for TUI-first and built-in capability packs passed
-            - TaskFlow validate_task release-public-internal-docs passed
-            - TaskFlow validate_task release-file-surface-and-docs passed
-            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/strict-acceptance.test.ts passed: 10 pass, 0 fail
+            - npx --yes bun@1.3.13 --cwd packages/opencode test targeted readiness suite passed: 26 pass, 0 fail
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
             - npx --yes bun@1.3.13 --cwd packages/preview test passed: 2 pass, 0 fail
             - PYTHONPATH=research-tools/src python -m unittest discover -s research-tools/tests passed: 18 tests
-            - note: bare python -m unittest discover -s research-tools/tests fails without PYTHONPATH because paper_fucker_tools is under research-tools/src
-            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed before final bump
-            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-changelog-format.ps1 passed for root and 0.1.x-0.7.x archives
-            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\provider-matrix-smoke.ps1 -Home <empty-test-home> passed with pending_config report
-            - npx --yes bun@1.3.13 --cwd packages/opencode test targeted readiness suite passed: 26 pass, 0 fail
-            - python -m unittest discover -s research-tools/tests passed: 18 tests
             - git grep tracked secret scan for provider-shaped API keys found no matches
         :reports
             - reports/release-file-audit.md - passed release file audit

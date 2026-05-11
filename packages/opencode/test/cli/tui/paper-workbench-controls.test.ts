@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test"
 import {
   createPaperRunDashboardState,
   fetchPaperWorkbenchCapabilities,
+  fetchPaperWorkbenchModelInventory,
   fetchPaperWorkbenchModelRoles,
   requestPaperWorkbenchExport,
   requestPaperWorkbenchPreview,
@@ -81,6 +82,58 @@ function snapshot(): PaperRunSnapshot {
         citation_checker: { provider_id: "local", model_id: "citation-checker" },
         cheap_summarizer: { provider_id: "local", model_id: "small" },
       },
+      model_inventory: {
+        schema_version: "PaperModelInventory.v1",
+        updated_at: "2026-05-10T00:00:00Z",
+        decision_model: "deepseek/deepseek-v4-pro",
+        allowlist: ["deepseek/deepseek-v4-pro", "openrouter/reviewer-large"],
+        role_overrides: {},
+        candidates: [
+          {
+            provider_id: "deepseek",
+            model_id: "deepseek-v4-pro",
+            model_ref: "deepseek/deepseek-v4-pro",
+            display_name: "DeepSeek v4 pro",
+            source: "manual",
+            capabilities: ["general"],
+            cost_hint: "standard",
+            context_hint: "long",
+            smoke_status: "passed",
+            allowed: true,
+            discovered_at: "2026-05-10T00:00:00Z",
+          },
+          {
+            provider_id: "openrouter",
+            model_id: "reviewer-large",
+            model_ref: "openrouter/reviewer-large",
+            display_name: "Reviewer Large",
+            source: "manual",
+            capabilities: ["review"],
+            cost_hint: "expensive",
+            context_hint: "long",
+            smoke_status: "untested",
+            allowed: true,
+            discovered_at: "2026-05-10T00:00:00Z",
+          },
+        ],
+      },
+      model_routing: [
+        {
+          schema_version: "ModelRoutingDecision.v1",
+          decision_id: "decision-1",
+          created_at: "2026-05-10T00:00:00Z",
+          role: "writer",
+          source: "decision_model",
+          decision_model: "deepseek/deepseek-v4-pro",
+          selected_model: "deepseek/deepseek-v4-pro",
+          provider_id: "deepseek",
+          model_id: "deepseek-v4-pro",
+          candidate_count: 2,
+          allowed_models: ["deepseek/deepseek-v4-pro", "openrouter/reviewer-large"],
+          reason: "主决策模型选择写作模型。",
+          diagnostics: [],
+        },
+      ],
       cost: {},
       final_gate: { status: "blocked" },
       tool_traces: [],
@@ -141,6 +194,12 @@ describe("TUI PaperRun live controls", () => {
       label: "写作模型",
       provider_model: "deepseek/deepseek-v4-pro",
     })
+    expect(state.model_workbench).toMatchObject({
+      decision_model: "deepseek/deepseek-v4-pro",
+      allowed_models: 2,
+      candidates: 2,
+      recent_decision: "deepseek/deepseek-v4-pro",
+    })
     expect(state.capability_health.map((item) => item.label)).toContain("Exa MCP")
     expect(state.capability_health.map((item) => item.label)).toContain("Nature Paper Skill")
     expect(state.capability_health.map((item) => item.status_label)).toContain("已启用")
@@ -163,6 +222,16 @@ describe("TUI PaperRun live controls", () => {
       }
       if (url.endsWith("/export")) return Response.json({ status: "forced_draft", run_id: "run-live-controls" })
       if (url.endsWith("/capabilities")) return Response.json({ capabilities: [{ name: "exa" }] })
+      if (url.endsWith("/model-inventory")) {
+        return Response.json({
+          inventory: {
+            decision_model: "deepseek/deepseek-v4-pro",
+            allowlist: ["deepseek/deepseek-v4-pro"],
+            candidates: [],
+          },
+          routing: [],
+        })
+      }
       if (url.endsWith("/model-roles")) return Response.json({ roles: { writer: { provider_id: "deepseek", model_id: "deepseek-v4-pro" } } })
       throw new Error(`unexpected url ${url}`)
     }
@@ -211,6 +280,11 @@ describe("TUI PaperRun live controls", () => {
       directory: "E:/Project/paper_fucker",
       fetch: fakeFetch,
     })
+    await fetchPaperWorkbenchModelInventory({
+      baseUrl: "http://localhost:4096",
+      directory: "E:/Project/paper_fucker",
+      fetch: fakeFetch,
+    })
 
     expect(calls.map((call) => call.url)).toEqual([
       "http://localhost:4096/paper/runs/run-live-controls/guidance",
@@ -219,6 +293,7 @@ describe("TUI PaperRun live controls", () => {
       "http://localhost:4096/paper/runs/run-live-controls/export",
       "http://localhost:4096/paper/capabilities",
       "http://localhost:4096/paper/model-roles",
+      "http://localhost:4096/paper/model-inventory",
     ])
     expect(JSON.parse(String(calls[0]!.init.body))).toEqual({ message: "优先补充方法贡献" })
     expect(JSON.parse(String(calls[1]!.init.body))).toEqual({ action: "retry", stage: "literature" })

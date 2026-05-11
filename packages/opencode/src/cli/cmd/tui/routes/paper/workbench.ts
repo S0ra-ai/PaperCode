@@ -2,7 +2,7 @@ import type { PromptInfo } from "@tui/component/prompt/history"
 import type { PaperRunCreateRequest, PaperRunSnapshot } from "@/paper/run"
 import type { PaperProfileId } from "@/paper/profiles"
 import type { ResearchCapability, ResearchCapabilityType } from "@/paper/capabilities"
-import type { OpenCodeModelRef, PaperModelRole } from "@/paper/model-router"
+import type { ModelRoutingDecision, OpenCodeModelRef, PaperModelInventory, PaperModelRole } from "@/paper"
 import type { PaperRunControlAction, PaperRunControllerState } from "@/paper/run-controller"
 import { summarizePaperAgentTeam } from "@/paper/agent-team"
 
@@ -56,7 +56,7 @@ export interface PaperWorkbenchControl {
   enabled: boolean
   method: "GET" | "POST"
   endpoint: string
-  kind: "guidance" | "control" | "preview" | "export" | "capability" | "model_roles"
+  kind: "guidance" | "control" | "preview" | "export" | "capability" | "model_roles" | "model_inventory"
   danger?: boolean
   payload?: Record<string, unknown>
 }
@@ -67,6 +67,14 @@ export interface PaperWorkbenchModelRoleState {
   provider_id: string
   model_id: string
   provider_model: string
+}
+
+export interface PaperWorkbenchModelWorkbenchState {
+  decision_model?: string
+  allowed_models: number
+  candidates: number
+  recent_decision?: string
+  blocked_decisions: number
 }
 
 export interface PaperWorkbenchCapabilityHealthState {
@@ -188,6 +196,7 @@ export interface PaperDashboardState {
   }>
   controls: PaperWorkbenchControl[]
   model_roles: PaperWorkbenchModelRoleState[]
+  model_workbench: PaperWorkbenchModelWorkbenchState
   capability_health: PaperWorkbenchCapabilityHealthState[]
   pause_questions: Array<{
     id: string
@@ -561,6 +570,15 @@ function createLiveControls(snapshot: PaperRunSnapshot, controller: PaperRunCont
       kind: "capability",
     },
     {
+      id: "model_workbench",
+      label: "模型工作台",
+      description: "配置 provider、模型允许列表、主决策模型和阶段强制模型。",
+      enabled: true,
+      method: "GET",
+      endpoint: "/paper/model-inventory",
+      kind: "model_inventory",
+    },
+    {
       id: "model_roles",
       label: "模型角色",
       description: "查看 planner、writer、reviewer、subagent 等角色模型路由。",
@@ -570,6 +588,21 @@ function createLiveControls(snapshot: PaperRunSnapshot, controller: PaperRunCont
       kind: "model_roles",
     },
   ]
+}
+
+function modelWorkbenchState(snapshot: PaperRunSnapshot): PaperWorkbenchModelWorkbenchState {
+  const inventory = objectValue(snapshot.diagnostics.model_inventory)
+  const routing = Array.isArray(snapshot.diagnostics.model_routing)
+    ? (snapshot.diagnostics.model_routing as ModelRoutingDecision[])
+    : []
+  const recent = routing.findLast((item) => typeof item.selected_model === "string")
+  return {
+    decision_model: typeof inventory.decision_model === "string" ? inventory.decision_model : undefined,
+    allowed_models: arrayValue(inventory.allowlist).length,
+    candidates: arrayValue(inventory.candidates).length || arrayValue(inventory.allowlist).length,
+    recent_decision: recent?.selected_model,
+    blocked_decisions: routing.filter((item) => item.source === "blocked").length,
+  }
 }
 
 function modelRoleState(roles: Record<string, OpenCodeModelRef>): PaperWorkbenchModelRoleState[] {
@@ -877,6 +910,7 @@ export function createPaperRunDashboardState(
     ],
     controls: createLiveControls(snapshot, controller),
     model_roles: modelRoleState(snapshot.diagnostics.model_roles ?? {}),
+    model_workbench: modelWorkbenchState(snapshot),
     capability_health: capabilityHealthState(options.capabilities, options.health),
     pause_questions: snapshot.pause_questions.map((question) => ({
       id: question.question_id,
@@ -939,6 +973,17 @@ export async function fetchPaperWorkbenchModelRoles(input: Omit<PaperWorkbenchAp
     headers: apiHeaders(input.directory),
   })
   return readJsonResponse(response, "PaperRun 模型角色读取失败")
+}
+
+export async function fetchPaperWorkbenchModelInventory(input: Omit<PaperWorkbenchApiInput, "runID">) {
+  const response = await input.fetch(apiUrl(input.baseUrl, "paper/model-inventory"), {
+    method: "GET",
+    headers: apiHeaders(input.directory),
+  })
+  return readJsonResponse<{ inventory: PaperModelInventory; routing: ModelRoutingDecision[] }>(
+    response,
+    "PaperRun 模型工作台读取失败",
+  )
 }
 
 export async function fetchPaperWorkbenchDoctor(input: Omit<PaperWorkbenchApiInput, "runID">) {

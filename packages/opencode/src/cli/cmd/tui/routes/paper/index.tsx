@@ -272,7 +272,27 @@ export function PaperRunDashboard() {
               </box>
 
               <box flexDirection="column" gap={0}>
-                <text fg={theme.textMuted}>模型角色</text>
+                <text fg={theme.textMuted}>模型工作台</text>
+                <box flexDirection="row" gap={2}>
+                  <text>主决策模型</text>
+                  <text fg={theme.textMuted}>{view().model_workbench.decision_model ?? "未配置"}</text>
+                </box>
+                <box flexDirection="row" gap={2}>
+                  <text>允许模型</text>
+                  <text fg={theme.textMuted}>
+                    {view().model_workbench.allowed_models}/{view().model_workbench.candidates}
+                  </text>
+                </box>
+                <Show when={view().model_workbench.recent_decision}>
+                  <box flexDirection="row" gap={2}>
+                    <text>最近选择</text>
+                    <text fg={theme.textMuted}>{view().model_workbench.recent_decision}</text>
+                  </box>
+                </Show>
+              </box>
+
+              <box flexDirection="column" gap={0}>
+                <text fg={theme.textMuted}>阶段模型</text>
                 {view().model_roles.map((role) => (
                   <box flexDirection="row" gap={2}>
                     <text>{role.label}</text>

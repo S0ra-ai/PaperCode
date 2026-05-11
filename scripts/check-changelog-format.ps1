@@ -38,6 +38,10 @@ foreach ($resolvedPath in $paths) {
   $lines = [System.IO.File]::ReadAllLines($resolvedPath, $utf8)
   $inHistory = $false
   $currentSection = $null
+  $currentVersion = $null
+  $currentVersionLine = 0
+  $currentVersionItems = 0
+  $isRootChangelog = $displayPath -eq "CHANGELOG"
 
   for ($i = 0; $i -lt $lines.Count; $i++) {
     $line = $lines[$i]
@@ -73,6 +77,9 @@ foreach ($resolvedPath in $paths) {
 
     $isVersion = $trim -match '^\d+(?:\.\d+)+(?:-[A-Za-z0-9.]+)?\s+-\s+\d{4}/\d{2}/\d{2}\s+\([0-9A-Za-z]+\)\s+\[[^\]]+\]$'
     if ($isVersion) {
+      if ($isRootChangelog -and $currentVersion -and $currentVersionItems -gt 45) {
+        $problems.Add("${displayPath}:${currentVersionLine}: version '$currentVersion' has $currentVersionItems list items; split or summarize the entry")
+      }
       if ($line -ne "    $trim") {
         $problems.Add("${displayPath}:${lineNumber}: version entries must use 4-space indentation")
       }
@@ -85,6 +92,9 @@ foreach ($resolvedPath in $paths) {
       }
 
       $currentSection = $null
+      $currentVersion = $trim
+      $currentVersionLine = $lineNumber
+      $currentVersionItems = 0
       continue
     }
 
@@ -93,10 +103,17 @@ foreach ($resolvedPath in $paths) {
         $problems.Add("${displayPath}:${lineNumber}: section headers must use 8-space indentation")
       }
       $currentSection = $matches[1]
+      if ($isRootChangelog -and $currentSection -eq "commits") {
+        $problems.Add("${displayPath}:${lineNumber}: root CHANGELOG entries must not use :commits aggregation blocks")
+      }
+      if ($isRootChangelog -and $currentSection -eq "brief" -and $trim.Length -gt 160) {
+        $problems.Add("${displayPath}:${lineNumber}: :brief is too long; summarize and move details into grouped sections")
+      }
       continue
     }
 
     if ($trim -match '^- ') {
+      $currentVersionItems += 1
       $expected = if ($currentSection -and $currentSection -ne "brief") { "            $trim" } else { "        $trim" }
       if ($line -ne $expected) {
         $problems.Add("${displayPath}:${lineNumber}: list items have invalid indentation for section '$currentSection'")
@@ -108,6 +125,10 @@ foreach ($resolvedPath in $paths) {
     if ($line -ne $expectedContinuation) {
       $problems.Add("${displayPath}:${lineNumber}: continuation has invalid indentation for section '$currentSection'")
     }
+  }
+
+  if ($isRootChangelog -and $currentVersion -and $currentVersionItems -gt 45) {
+    $problems.Add("${displayPath}:${currentVersionLine}: version '$currentVersion' has $currentVersionItems list items; split or summarize the entry")
   }
 }
 

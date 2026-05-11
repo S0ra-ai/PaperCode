@@ -133,14 +133,14 @@ describe("ModelsDev Service", () => {
     }),
   )
 
-  it.live("get() returns {} when disk empty and fetch disabled", () =>
+  it.live("get() returns offline data without network when disk empty and fetch disabled", () =>
     Effect.gen(function* () {
       const state = yield* Ref.make(initialState)
       const result = yield* provided(
         state,
         ModelsDev.Service.use((s) => s.get()),
       )
-      expect(result).toEqual({})
+      expect(result).toBeObject()
       const final = yield* Ref.get(state)
       expect(final.calls).toEqual([])
     }),

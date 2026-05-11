@@ -34,6 +34,13 @@ import {
   type PaperModelRole,
 } from "./model-router"
 import {
+  loadPaperModelInventory,
+  modelRolesFromInventory,
+  routePaperModel,
+  type ModelRoutingDecision,
+  type PaperModelInventory,
+} from "./model-inventory"
+import {
   PAPER_RESEARCH_STAGE_GRAPH,
   startPaperResearchRun,
   type PaperResearchStageDefinition,
@@ -63,6 +70,7 @@ import {
 } from "./code-understanding"
 import { crawlerDiagnostics, type CrawlerDiagnosticsSummary } from "./crawler"
 import { hfLoopDiagnostics, type HFLoopDiagnostics } from "./huggingface-loop"
+import { inspectNatureSkill } from "./skill-install"
 
 import {
   applyPaperRunControl,
@@ -221,6 +229,8 @@ export interface PaperRunSnapshot {
       checkpoints: number
     }
     model_roles: Record<PaperModelRole, OpenCodeModelRef>
+    model_inventory?: PaperModelInventory
+    model_routing?: ModelRoutingDecision[]
     cost: unknown
     final_gate: unknown
     tool_traces: ResearchToolTrace[]
@@ -476,6 +486,30 @@ function modelRoleMap(config: ResearchIntakeRequest["model_roles"]) {
     }
   }
   return roles
+}
+
+function metadataModelRoles(value: unknown): Record<PaperModelRole, OpenCodeModelRef> | undefined {
+  const record = jsonRecord(value)
+  const roles = {} as Record<PaperModelRole, OpenCodeModelRef>
+  for (const role of PAPER_MODEL_ROLES) {
+    const raw = jsonRecord(record[role])
+    const provider = metadataString(raw.provider_id)
+    const model = metadataString(raw.model_id)
+    if (!provider || !model) return undefined
+    roles[role] = {
+      provider_id: provider,
+      model_id: model,
+    }
+  }
+  return roles
+}
+
+function metadataRoutingDecisions(value: unknown): ModelRoutingDecision[] {
+  if (!Array.isArray(value)) return []
+  return value.filter((item): item is ModelRoutingDecision => {
+    const record = jsonRecord(item)
+    return record.schema_version === "ModelRoutingDecision.v1" && typeof record.role === "string"
+  })
 }
 
 function dataEgressCandidates(request: ResearchIntakeRequest) {
@@ -810,7 +844,9 @@ export async function getPaperRunSnapshotFromDir(runDir: string): Promise<PaperR
     jsonRecord(metadata.paper_data_egress_policy) as Partial<DataEgressPolicy>,
   )
   const intake = intakeFromRun(status.run)
-  const roles = modelRoleMap(intake.model_roles)
+  const roles = metadataModelRoles(metadata.paper_model_roles) ?? modelRoleMap(intake.model_roles)
+  const modelRouting = metadataRoutingDecisions(metadata.paper_model_routing)
+  const modelInventory = jsonRecord(metadata.paper_model_inventory)
   const capabilities = defaultResearchCapabilities()
   const gate = finalGateStatus(status.state.final_gate)
   const stages = PAPER_RESEARCH_STAGE_GRAPH.stages.map((stage) => stageStatusFromEvents(stage, events, status.state.final_gate))
@@ -826,6 +862,15 @@ export async function getPaperRunSnapshotFromDir(runDir: string): Promise<PaperR
           },
         ]
       : []
+  for (const decision of modelRouting.filter((item) => item.source === "blocked")) {
+    pauseQuestions.push({
+      question_id: `${status.run.run_id}:model:${decision.role}`,
+      reason: "model_routing_blocked",
+      message: decision.reason,
+      required: true,
+      created_at: decision.created_at,
+    })
+  }
 
   const agentTree = defaultAgentTree({
     runID: status.run.run_id,
@@ -887,6 +932,18 @@ export async function getPaperRunSnapshotFromDir(runDir: string): Promise<PaperR
     diagnostics: {
       counts: status.counts,
       model_roles: roles,
+      model_inventory:
+        modelInventory.schema_version === "PaperModelInventory.v1"
+          ? {
+              schema_version: "PaperModelInventory.v1",
+              decision_model: metadataString(modelInventory.decision_model),
+              allowlist: metadataStringArray(modelInventory.allowlist),
+              role_overrides: jsonRecord(modelInventory.role_overrides) as PaperModelInventory["role_overrides"],
+              candidates: Array.isArray(modelInventory.candidates) ? (modelInventory.candidates as PaperModelInventory["candidates"]) : [],
+              updated_at: metadataString(modelInventory.updated_at) ?? status.run.updated_at,
+            }
+          : undefined,
+      model_routing: modelRouting,
       cost: status.state.cost,
       final_gate: status.state.final_gate,
       tool_traces: toolTraces,
@@ -930,6 +987,26 @@ export async function createPaperRun(
     ...request,
     workspace_path: workspace,
   }
+  const modelInventory = await loadPaperModelInventory({ home: normalized.home })
+  const requestedRoleModels = Object.values(request.model_roles ?? {}).filter((value): value is string => {
+    return typeof value === "string" && value.includes("/")
+  })
+  const runModelInventory: PaperModelInventory = {
+    ...modelInventory,
+    allowlist: Array.from(new Set([...modelInventory.allowlist, ...requestedRoleModels])),
+    role_overrides: {
+      ...modelInventory.role_overrides,
+      ...(request.model_roles ?? {}),
+    },
+  }
+  const modelRouting = PAPER_MODEL_ROLES.map((role) =>
+    routePaperModel(runModelInventory, {
+      role,
+      budget_tier: budgetTier,
+      forced_model: request.model_roles?.[role],
+    }),
+  )
+  const routedRoles = modelRolesFromInventory(runModelInventory)
   const handle = await createResearchRun(
     {
       topic: brief.topic,
@@ -945,6 +1022,16 @@ export async function createPaperRun(
           language: request.language,
           model_roles: request.model_roles ?? {},
         },
+        paper_model_inventory: {
+          schema_version: runModelInventory.schema_version,
+          decision_model: runModelInventory.decision_model,
+          allowlist: runModelInventory.allowlist,
+          role_overrides: runModelInventory.role_overrides,
+          candidates: runModelInventory.candidates,
+          updated_at: runModelInventory.updated_at,
+        },
+        paper_model_roles: routedRoles,
+        paper_model_routing: modelRouting,
         paper_budget_tier: budgetTier,
         paper_quality_mode: qualityMode,
         paper_data_egress_policy: dataEgressPolicy,
@@ -966,6 +1053,17 @@ export async function createPaperRun(
     },
     normalized,
   )
+  for (const decision of modelRouting) {
+    await appendResearchEvent(
+      handle.run_dir,
+      {
+        type: "model.routing.decision",
+        actor: "system",
+        payload: decision as unknown as Record<string, unknown>,
+      },
+      normalized,
+    )
+  }
   await startPaperResearchRun(
     {
       run_dir: handle.run_dir,
@@ -976,7 +1074,7 @@ export async function createPaperRun(
   await recordDefaultPaperRunObservability(
     handle.run_dir,
     {
-      model_roles: modelRoleMap(request.model_roles),
+      model_roles: routedRoles,
       capabilities: defaultResearchCapabilities(),
       data_egress_policy: dataEgressPolicy,
       data_egress_candidates: dataEgressCandidates(executionRequest),
@@ -1101,12 +1199,23 @@ export function paperCapabilities() {
   }
 }
 
-export function paperDoctor() {
+export async function paperDoctor(options?: PaperRunRuntimeOptions) {
   const capabilities = defaultResearchCapabilities()
+  const inventory = await loadPaperModelInventory({ home: options?.home })
+  const natureSkill = await inspectNatureSkill({ home: options?.home, workspace: options?.workspace })
   return {
     status: "ok",
     default_language: "zh-CN",
     storage: "workspace-first",
+    model_workbench: {
+      decision_model: inventory.decision_model,
+      allowed_models: inventory.allowlist.length,
+      candidates: inventory.candidates.length,
+      endpoint: "/paper/model-inventory",
+    },
+    skills: {
+      nature_paper: natureSkill,
+    },
     capabilities: {
       total: capabilities.length,
       mcp: capabilities.filter((capability) => capability.type === "mcp").map((capability) => capability.name),
@@ -1117,6 +1226,8 @@ export function paperDoctor() {
       { name: "paper_core", status: "ok" },
       { name: "research_runtime", status: "ok" },
       { name: "private_first_data_egress", status: "ok" },
+      { name: "model_workbench", status: inventory.allowlist.length > 0 ? "ok" : "missing" },
+      { name: "skill.nature-paper", status: natureSkill.source_valid && natureSkill.targets.some((target) => target.name === "codex" && target.exists) ? "ok" : "missing" },
     ],
   }
 }
@@ -1151,5 +1262,14 @@ export function paperModelRoles(config: ResearchIntakeRequest["model_roles"] = {
     strategy: "opencode_provider_agnostic",
     default_model: DEFAULT_MODEL_ROLE_CONFIG.default_model,
     roles,
+  }
+}
+
+export async function paperModelWorkbench(options?: PaperRunRuntimeOptions) {
+  const inventory = await loadPaperModelInventory({ home: options?.home })
+  return {
+    inventory,
+    roles: modelRolesFromInventory(inventory),
+    routing: PAPER_MODEL_ROLES.map((role) => routePaperModel(inventory, { role })),
   }
 }
