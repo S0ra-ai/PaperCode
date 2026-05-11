@@ -5,6 +5,7 @@ import { setTimeout as sleep } from "node:timers/promises"
 import os from "os"
 import path from "path"
 import { diagnoseInit, initPaths, readSecrets, resetInitState, runInitWizard } from "@/paper/init"
+import { formatDoctorResult, formatInitResult } from "@/paper/init/format"
 
 async function clean(dir: string, attempts = 30): Promise<void> {
   Bun.gc(true)
@@ -25,6 +26,33 @@ describe("init wizard", () => {
       expect(result.config.access.bounded_hours).toBe(24)
       expect(result.config.access.full_access_acknowledged).toBe(false)
       expect(result.config.language.default).toBe("zh-CN")
+      expect(result.config.models.default_endpoint).toBe("deepseek")
+      expect(result.config.models.endpoints).toContainEqual({
+        name: "deepseek",
+        base_url: "https://api.deepseek.com/v1",
+        model: "deepseek-v4-pro",
+        api_key_secret: "DEEPSEEK_API_KEY",
+      })
+    } finally {
+      await clean(dir)
+    }
+  })
+
+  test("formats init and doctor output as Chinese summaries by default", async () => {
+    const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-init-format-"))
+    try {
+      const result = await runInitWizard({ home: dir })
+      const initText = formatInitResult(result)
+      const doctorText = formatDoctorResult(await diagnoseInit(dir))
+
+      expect(initText).toContain("Paper Fucker 初始化完成")
+      expect(initText).toContain("配置目录:")
+      expect(initText).toContain("Provider: deepseek -> deepseek-v4-pro")
+      expect(initText.trimStart().startsWith("{")).toBe(false)
+      expect(doctorText).toContain("Paper Fucker Doctor")
+      expect(doctorText).toContain("配置文件: 已存在")
+      expect(doctorText).toContain("需要完整机器可读诊断时，加 --json")
+      expect(doctorText.trimStart().startsWith("{")).toBe(false)
     } finally {
       await clean(dir)
     }

@@ -1,14 +1,15 @@
 import { diagnoseInit, runInitWizard } from "./wizard"
 import { resetInitState, type InitResetScope } from "./reset"
+import { formatDoctorResult, formatInitResult, formatResetResult } from "./format"
 
 function usage() {
   return `paper_fucker init|doctor|diagnostics|reset [options]
 
 Commands:
-  init [--yes] [--home PATH] [--workspace PATH] [--tool name=path] [--secret name=value]
-  init --full-access-ack [--home PATH] [--workspace PATH]
-  doctor|diagnostics [--home PATH]
-  reset --scope all|global|workspace-local|workspace-runs --backup --yes [--home PATH] [--workspace PATH]
+  init [--yes] [--json] [--home PATH] [--workspace PATH] [--tool name=path] [--secret name=value]
+  init --full-access-ack [--json] [--home PATH] [--workspace PATH]
+  doctor|diagnostics [--json] [--home PATH]
+  reset --scope all|global|workspace-local|workspace-runs --backup --yes [--json] [--home PATH] [--workspace PATH]
 `
 }
 
@@ -37,6 +38,7 @@ function value(args: string[], flag: string) {
 
 export async function main(argv = process.argv.slice(2)) {
   const command = argv[0]
+  const json = argv.includes("--json")
   if (!command || command === "--help" || command === "-h") {
     console.log(usage())
     return 0
@@ -61,11 +63,12 @@ export async function main(argv = process.argv.slice(2)) {
         total_soft_usd: value(argv, "--total-budget") ? Number(value(argv, "--total-budget")) : undefined,
       },
     })
-    console.log(JSON.stringify(result, null, 2))
+    console.log(json ? JSON.stringify(result, null, 2) : formatInitResult(result))
     return 0
   }
   if (command === "doctor" || command === "diagnostics") {
-    console.log(JSON.stringify(await diagnoseInit(value(argv, "--home")), null, 2))
+    const result = await diagnoseInit(value(argv, "--home"))
+    console.log(json ? JSON.stringify(result, null, 2) : formatDoctorResult(result))
     return 0
   }
   if (command === "reset") {
@@ -76,7 +79,7 @@ export async function main(argv = process.argv.slice(2)) {
       backup: !argv.includes("--no-backup"),
       yes: argv.includes("--yes"),
     })
-    console.log(JSON.stringify(result, null, 2))
+    console.log(json ? JSON.stringify(result, null, 2) : formatResetResult(result))
     return 0
   }
   throw new Error(`Unknown command: ${command}`)

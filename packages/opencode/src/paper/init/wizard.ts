@@ -56,10 +56,12 @@ export async function runInitWizard(input: InitWizardInput): Promise<InitWizardR
         budgets: input.budgets,
         preview: input.preview,
         model_roles: input.model_roles,
-        models: {
-          default_endpoint: input.models?.default_endpoint,
-          endpoints: input.models?.endpoints ?? [],
-        },
+        models: input.models
+          ? {
+              default_endpoint: input.models.default_endpoint,
+              endpoints: input.models.endpoints ?? [],
+            }
+          : undefined,
       })
       await writeConfig(paths, config)
       await writeToolLinks(paths, input.tool_links ?? {})

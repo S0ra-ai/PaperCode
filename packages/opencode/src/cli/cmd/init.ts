@@ -1,5 +1,6 @@
 import { Effect } from "effect"
 import { diagnoseInit, resetInitState, runInitWizard, type InitResetScope } from "@/paper/init"
+import { formatDoctorResult, formatInitResult, formatResetResult } from "@/paper/init/format"
 import { effectCmd } from "../effect-cmd"
 
 function readPairs(values: string[] | undefined) {
@@ -25,6 +26,10 @@ export const InitCommand = effectCmd({
       })
       .option("yes", {
         describe: "accept safe init defaults or confirm reset",
+        type: "boolean",
+      })
+      .option("json", {
+        describe: "print full machine-readable JSON output",
         type: "boolean",
       })
       .option("home", {
@@ -84,50 +89,41 @@ export const InitCommand = effectCmd({
     return yield* Effect.promise(async () => {
       const action = args.action
       if (action === "doctor" || action === "diagnostics") {
-        console.log(JSON.stringify(await diagnoseInit(args.home), null, 2))
+        const result = await diagnoseInit(args.home)
+        console.log(args.json ? JSON.stringify(result, null, 2) : formatDoctorResult(result))
         return
       }
       if (action === "reset") {
-        console.log(
-          JSON.stringify(
-            await resetInitState({
-              scope: args.scope as InitResetScope,
-              home: args.home,
-              workspace: args.workspace,
-              backup: args.backup,
-              yes: Boolean(args.yes),
-            }),
-            null,
-            2,
-          ),
-        )
+        const result = await resetInitState({
+          scope: args.scope as InitResetScope,
+          home: args.home,
+          workspace: args.workspace,
+          backup: args.backup,
+          yes: Boolean(args.yes),
+        })
+        console.log(args.json ? JSON.stringify(result, null, 2) : formatResetResult(result))
         return
       }
       const fullAccess = Boolean(args.fullAccessAck) && !args.bounded
-      console.log(
-        JSON.stringify(
-          await runInitWizard({
-            home: args.home,
-            workspace: args.workspace,
-            tool_links: readPairs(args.tool),
-            secrets: readPairs(args.secret),
-            secrets_passphrase: args.secretsPassphrase,
-            access: {
-              mode: fullAccess ? "full_access" : "bounded",
-              bounded_hours: args.boundedHours,
-              full_access_acknowledged: fullAccess,
-            },
-            preview: {
-              auto_open: !args.noPreviewAutoOpen,
-            },
-            budgets: {
-              total_soft_usd: args.totalBudget,
-            },
-          }),
-          null,
-          2,
-        ),
-      )
+      const result = await runInitWizard({
+        home: args.home,
+        workspace: args.workspace,
+        tool_links: readPairs(args.tool),
+        secrets: readPairs(args.secret),
+        secrets_passphrase: args.secretsPassphrase,
+        access: {
+          mode: fullAccess ? "full_access" : "bounded",
+          bounded_hours: args.boundedHours,
+          full_access_acknowledged: fullAccess,
+        },
+        preview: {
+          auto_open: !args.noPreviewAutoOpen,
+        },
+        budgets: {
+          total_soft_usd: args.totalBudget,
+        },
+      })
+      console.log(args.json ? JSON.stringify(result, null, 2) : formatInitResult(result))
     })
   }),
 })
