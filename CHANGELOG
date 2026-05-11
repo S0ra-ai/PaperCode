@@ -7,6 +7,24 @@
 
 :history
 
+    0.8.5-dev - 2026/05/11 (f82b5f7) [release/0.8.5]
+        :brief README 补齐 TUI 主入口与内置能力包
+        - docs(readme): 快速开始改为 TUI-first，明确 paper_fucker 默认打开中文论文工作台，CLI 仅作为非交互/自动化入口
+        - docs(readme): 增加 TUI 首页自然语言输入示例、Run 页面 stage graph、Agent Tree、成本/token、大纲、ledger、能力健康、Preview/Export 和 pause questions
+        - docs(capabilities): 记录内置 capability packs，包括 paper-profile-skills、literature-mcp、crawler-data、huggingface-research、code-experiment-core、writing-verification-export
+        - docs(mcp): 说明 Exa remote MCP 默认配置，并明确外部 MCP/secret/network 授权由 TUI 健康区和 pause question 引导
+        - docs(internal): 内部文档增加 README 必须 TUI-first、内置能力包来自 capability-pack.ts 的维护约束
+        :src
+            - README.md - TUI-first public usage and built-in capability documentation
+            - docs/internal/README.md - internal capability-pack and README writing invariant
+        :verification
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-changelog-format.ps1 passed
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-release-files.ps1 passed
+            - TaskFlow validate_changelog_format passed
+            - TaskFlow validate_task release-readme-tui-capabilities passed
+            - README grep checks for TUI-first and built-in capability packs passed
+
     0.8.5-dev - 2026/05/11 (7a391d7) [release/0.8.5]
         :brief GitHub README 对外化与内部文档拆分
         - docs(readme): README 重写为中文 GitHub 首页，优先展示产品定位、核心能力、快速开始、典型流程、多 provider、Preview/export 与隐私策略
