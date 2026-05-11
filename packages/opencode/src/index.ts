@@ -19,8 +19,6 @@ import { AttachCommand } from "./cli/cmd/tui/attach"
 import { TuiThreadCommand } from "./cli/cmd/tui/thread"
 import { EOL } from "os"
 import { WebCommand } from "./cli/cmd/web"
-import path from "path"
-import { Global } from "@opencode-ai/core/global"
 import { JsonMigration } from "@/storage/json-migration"
 import { Database } from "@/storage/db"
 import { errorMessage } from "./util/error"
@@ -108,8 +106,11 @@ const cli = yargs(args)
       run_id: processMetadata.runID,
     })
 
-    const marker = path.join(Global.Path.data, "paper_fucker.db")
-    if (!(await Filesystem.exists(marker))) {
+    const positionals = Array.isArray(opts._) ? opts._ : []
+    const command = String(positionals[0] ?? "")
+    const skipDatabaseMigration = command === "init" || command === "completion"
+    const marker = Database.Path
+    if (!skipDatabaseMigration && marker !== ":memory:" && !(await Filesystem.exists(marker))) {
       const tty = process.stderr.isTTY
       process.stderr.write("Performing one time database migration, may take a few minutes..." + EOL)
       const width = 36

@@ -1,0 +1,117 @@
+id: release-init-ux-polish
+title: Release init command UX polish
+status: todo
+priority: high
+owner: codex
+tags:
+- release
+- init
+- ux
+- cli
+depends_on: []
+description: 修复 paper_fucker init/doctor 首次使用体验：默认输出中文摘要，JSON 仅作为 --json 模式；避免每次 CLI
+  都重复显示 one-time migration；补充 CLI 输出回归测试。
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: audit-current-init-ux
+  title: Audit current init UX
+  status: done
+  owner: codex
+  depends_on: []
+  description: 确认 init/doctor 输出 JSON 和 migration marker 反复触发的原因。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T22:43:38.519869'
+      level: info
+      message: 确认问题根因：init/doctor 直接 console.log(JSON.stringify(...))，默认输出内部结构；runInitWizard
+        在未传 models 时仍传入空 endpoints，导致 default_model 指向 DeepSeek 但 provider endpoint
+        为空；CLI 迁移 marker 固定检查 paper_fucker.db，而 release channel 实际数据库为 paper_fucker-release-0.8.5.db，导致反复显示
+        one-time migration。
+      agent: codex
+    last_run: '2026-05-11T22:43:38.519869'
+    attempt_count: 2
+  meta: {}
+- id: implement-human-output
+  title: Implement human-readable init output
+  status: done
+  owner: codex
+  depends_on: []
+  description: 新增中文摘要 formatter 和 --json 选项，默认不给用户打印完整内部 JSON。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T22:43:59.036172'
+      level: info
+      message: 新增 paper/init/format.ts，默认输出中文初始化/doctor/reset 摘要；init/doctor/reset
+        均支持 --json 输出完整机器可读 JSON；默认配置恢复 DeepSeek provider 模板但不写入密钥；补充 init formatter
+        回归测试。
+      agent: codex
+    last_run: '2026-05-11T22:43:59.036172'
+    attempt_count: 2
+  meta: {}
+- id: fix-migration-marker
+  title: Fix migration marker
+  status: done
+  owner: codex
+  depends_on: []
+  description: 迁移后写入 paper_fucker.db marker 或等价状态，防止每次 CLI 重复 one-time migration 提示。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T22:44:12.881878'
+      level: info
+      message: CLI 迁移 marker 改为 Database.Path，匹配 release channel 的 paper_fucker-release-0.8.5.db；init/completion
+        命令跳过 session DB migration，初始化命令不再出现数据库迁移噪声。
+      agent: codex
+    last_run: '2026-05-11T22:44:12.881878'
+    attempt_count: 2
+  meta: {}
+- id: validate-and-sync-version
+  title: Validate and sync version
+  status: in_progress
+  owner: codex
+  depends_on: []
+  description: 运行测试、构建、init smoke、版本/CHANGELOG 校验，并记录 0.8.8。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    last_run: '2026-05-11T22:44:20.145572'
+    attempt_count: 1
+  meta: {}
+outputs:
+- type: file
+  path: packages/opencode/src/cli/cmd/init.ts
+  description: init/doctor/reset 中文摘要输出和 --json 模式。
+- type: file
+  path: packages/opencode/src/index.ts
+  description: 迁移完成后写入 marker，避免重复 one-time migration 提示。
+- type: file
+  path: packages/opencode/test/init/init.test.ts
+  description: init 输出摘要与 JSON formatter 回归测试。
+- type: file
+  path: CHANGELOG
+  description: 0.8.8 版本记录。
+- type: file
+  path: README.md
+  description: 当前版本同步。
+trace:
+  logs: []
+  attempt_count: 0
+lock:
+  by: codex
+  at: '2026-05-11T22:40:07.316717'
+meta:
+  created_at: '2026-05-11T22:40:01.943610'
+  updated_at: '2026-05-11T22:44:20.145572'
+  version: '1'
