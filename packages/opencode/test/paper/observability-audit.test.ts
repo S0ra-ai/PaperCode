@@ -6,6 +6,8 @@ import path from "path"
 import {
   createPaperRun,
   getPaperRunSnapshot,
+  PAPER_MODEL_ROLES,
+  type PaperModelRole,
   recordPaperCostUsage,
   recordPaperDataEgressAudit,
   recordPaperObservabilityAudit,
@@ -15,6 +17,11 @@ import type { ResearchRuntimeOptions } from "@/paper/research/runtime"
 
 const now = "2026-05-10T00:00:00Z"
 const created: string[] = []
+const TEST_MODEL = "test-provider/test-model"
+
+function testModelRoles(): Record<PaperModelRole, string> {
+  return Object.fromEntries(PAPER_MODEL_ROLES.map((role) => [role, TEST_MODEL])) as Record<PaperModelRole, string>
+}
 
 async function clean(dir: string, attempts = 80): Promise<void> {
   Bun.gc(true)
@@ -59,6 +66,7 @@ async function newPaperRun() {
         denied_patterns: ["**/.env*"],
         external_model_full_text: false,
       },
+      model_roles: testModelRoles(),
     },
     options,
   )
