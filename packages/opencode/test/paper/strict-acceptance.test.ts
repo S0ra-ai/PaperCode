@@ -21,6 +21,7 @@ const requiredChecks = [
   "pandoc-conversion",
   "latex-pdf-generation",
   "docx-generation",
+  "live-preview-browser-smoke",
   "live-crawler-fetch",
   "hf-live-research-loop",
   "topic-to-paper-live-run",

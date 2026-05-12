@@ -72,8 +72,14 @@ describe("hard fork acceptance", () => {
           ...request,
           workspace_path: workspace,
           model_roles: {
+            planner: "deepseek/deepseek-v4-pro",
+            literature_researcher: "deepseek/deepseek-v4-pro",
+            code_analyst: "deepseek/deepseek-v4-pro",
+            experiment_designer: "deepseek/deepseek-v4-pro",
             writer: "deepseek/deepseek-v4-pro",
             reviewer: "openai/gpt-5.2",
+            citation_checker: "deepseek/deepseek-v4-pro",
+            cheap_summarizer: "deepseek/deepseek-v4-pro",
           },
           data_egress_policy: {
             allowed_paths: ["packages/opencode"],
@@ -90,13 +96,13 @@ describe("hard fork acceptance", () => {
       expect(run.snapshot.stage_graph.stages).toHaveLength(14)
       expect(run.snapshot.agent_tree.max_depth).toBeNull()
       expect(run.snapshot.agent_tree.recursive_policy.depth_policy).toBe("unbounded")
-      expect(run.snapshot.diagnostics.model_roles.writer.model_id).toBe("deepseek-v4-pro")
-      expect(run.snapshot.diagnostics.model_roles.reviewer.model_id).toBe("gpt-5.2")
+      expect(run.snapshot.diagnostics.model_roles.writer?.model_id).toBe("deepseek-v4-pro")
+      expect(run.snapshot.diagnostics.model_roles.reviewer?.model_id).toBe("gpt-5.2")
       expect(run.snapshot.internal_sessions).toEqual([])
 
       const forced = await exportPaperRun(run.run_id, { forced: true }, runtimeOptions(workspace, home))
-      expect(forced.status).toBe("forced_draft")
-      expect(forced.failed_checks).toContain("final_gate_not_passed")
+      expect(forced.status).toBe("blocked")
+      expect(forced.failed_checks).toContain("draft_missing")
     } finally {
       await clean(dir)
     }

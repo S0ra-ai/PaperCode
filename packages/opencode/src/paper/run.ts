@@ -29,7 +29,6 @@ import { builtinPaperCapabilityPacks } from "./capability-pack"
 import { normalizeResearchIntake, type ResearchBrief, type ResearchIntakeRequest } from "./intake"
 import {
   createModelRoleRouter,
-  DEFAULT_MODEL_ROLE_CONFIG,
   PAPER_MODEL_ROLES,
   type OpenCodeModelRef,
   type PaperModelRole,
@@ -245,7 +244,7 @@ export interface PaperRunSnapshot {
       exports: number
       checkpoints: number
     }
-    model_roles: Record<PaperModelRole, OpenCodeModelRef>
+    model_roles: Partial<Record<PaperModelRole, OpenCodeModelRef>>
     model_inventory?: PaperModelInventory
     model_routing?: ModelRoutingDecision[]
     cost: unknown
@@ -536,7 +535,7 @@ function defaultAgentTree(input: {
   runID: string
   tier: BudgetTier
   capabilities: ResearchCapability[]
-  writer: OpenCodeModelRef
+  writer?: OpenCodeModelRef
 }): AgentTree {
   const policy = budgetTierPolicy(input.tier)
   const permissionDefaults: AgentPermissionEnvelope = {
@@ -555,8 +554,8 @@ function defaultAgentTree(input: {
         agent_id: `${input.runID}:root`,
         depth: 0,
         role: "root_run_agent",
-        provider_id: input.writer.provider_id,
-        model_id: input.writer.model_id,
+        provider_id: input.writer?.provider_id ?? "unconfigured",
+        model_id: input.writer?.model_id ?? "unconfigured",
         capabilities: input.capabilities.map((capability) => capability.name),
         budget: {
           tier: input.tier,
@@ -567,19 +566,23 @@ function defaultAgentTree(input: {
         tool_traces: [],
         children: [],
         permissions: permissionDefaults,
-        status: "running",
+        status: input.writer ? "running" : "blocked",
       },
     ],
   }
 }
 
 function modelRoleMap(config: ResearchIntakeRequest["model_roles"]) {
+  if (!config) return {}
+  const firstConfigured = Object.values(config).find((value): value is string => typeof value === "string" && value.includes("/"))
+  if (!firstConfigured) return {}
   const router = createModelRoleRouter({
-    default_model: DEFAULT_MODEL_ROLE_CONFIG.default_model,
+    default_model: firstConfigured,
     roles: config,
   })
-  const roles = {} as Record<PaperModelRole, OpenCodeModelRef>
+  const roles: Partial<Record<PaperModelRole, OpenCodeModelRef>> = {}
   for (const role of PAPER_MODEL_ROLES) {
+    if (!config[role]) continue
     const resolved = router.resolve(role)
     roles[role] = {
       provider_id: resolved.provider_id,
@@ -589,14 +592,14 @@ function modelRoleMap(config: ResearchIntakeRequest["model_roles"]) {
   return roles
 }
 
-function metadataModelRoles(value: unknown): Record<PaperModelRole, OpenCodeModelRef> | undefined {
+function metadataModelRoles(value: unknown): Partial<Record<PaperModelRole, OpenCodeModelRef>> | undefined {
   const record = jsonRecord(value)
-  const roles = {} as Record<PaperModelRole, OpenCodeModelRef>
+  const roles: Partial<Record<PaperModelRole, OpenCodeModelRef>> = {}
   for (const role of PAPER_MODEL_ROLES) {
     const raw = jsonRecord(record[role])
     const provider = metadataString(raw.provider_id)
     const model = metadataString(raw.model_id)
-    if (!provider || !model) return undefined
+    if (!provider || !model) continue
     roles[role] = {
       provider_id: provider,
       model_id: model,
@@ -678,7 +681,8 @@ function fallbackDraftPaper(input: {
   claimIDs?: string[]
   createdAt: string
 }): DraftPaper {
-  const markdown = input.markdown ?? `# ${input.title}\n\nNo recorded Markdown draft was available for this PaperRun.`
+  const markdown =
+    input.markdown ?? "尚未生成草稿。\n\n当前 PaperRun 还没有真实 DraftPaper artifact；final export 会继续保持阻断。"
   return {
     schema_version: "DraftPaper.v1",
     draft_id: `draft:${input.runID}`,
@@ -688,7 +692,7 @@ function fallbackDraftPaper(input: {
     sections: [
       {
         section_id: "paper",
-        title: "Paper",
+        title: input.markdown ? "Paper" : "草稿状态",
         level: 1,
         markdown,
         claim_ids: input.claimIDs ?? [],
@@ -709,15 +713,17 @@ async function loadLatestDraftPaper(input: {
   const latest = input.drafts.at(-1)
   if (!latest) {
     return {
-      draft: fallbackDraftPaper({
-        runID: input.run.run_id,
-        title: input.run.topic,
-        createdAt: input.run.updated_at,
-      }),
+      draft: undefined,
       sourceArtifactIDs: [] as string[],
     }
   }
   const markdown = await readFile(path.join(input.runDir, latest.path), "utf8").catch(() => undefined)
+  if (!markdown) {
+    return {
+      draft: undefined,
+      sourceArtifactIDs: latest.artifact_ids,
+    }
+  }
   return {
     draft: fallbackDraftPaper({
       runID: input.run.run_id,
@@ -793,7 +799,7 @@ async function markdownArtifactForPreview(
     kind: "markdown",
     path: latest?.path,
     mime_type: "text/markdown",
-    content: content ?? `# ${snapshot.topic}\n\nPaper Fucker Preview is waiting for a recorded draft artifact.`,
+    content: content ?? "尚未生成草稿。\n\n实时预览会在 drafting stage 写入真实 DraftPaper artifact 后自动刷新。",
     updated_at: snapshot.updated_at,
   }
 }
@@ -1165,13 +1171,34 @@ export async function createPaperRun(
       normalized,
     )
   }
-  await startPaperResearchRun(
-    {
-      run_dir: handle.run_dir,
-      request: executionRequest,
-    },
-    normalized,
-  )
+  const blockedModelRouting = modelRouting.filter((decision) => decision.source === "blocked")
+  if (blockedModelRouting.length > 0) {
+    await appendResearchEvent(
+      handle.run_dir,
+      {
+        type: "paper.stage.blocked",
+        actor: "system",
+        payload: {
+          stage: "planning",
+          message: "未配置可用模型，PaperRun 已暂停。请先在 /models 中添加 provider、勾选允许模型并选择主决策模型。",
+          diagnostics: blockedModelRouting.map((decision) => ({
+            role: decision.role,
+            reason: decision.reason,
+            diagnostics: decision.diagnostics,
+          })),
+        },
+      },
+      normalized,
+    )
+  } else {
+    await startPaperResearchRun(
+      {
+        run_dir: handle.run_dir,
+        request: executionRequest,
+      },
+      normalized,
+    )
+  }
   await recordDefaultPaperRunObservability(
     handle.run_dir,
     {
@@ -1289,6 +1316,18 @@ export async function exportPaperRun(
 
   const drafts = await readJsonlFacts(runDir, "draft")
   const latest = await loadLatestDraftPaper({ runDir, run: status.run, drafts })
+  if (!latest.draft) {
+    const snapshot = await getPaperRunSnapshotFromDir(runDir)
+    await publishPaperRunSnapshot(snapshot, runDir)
+    return {
+      run_id: runID,
+      status: "blocked",
+      formats: [],
+      artifact_ids: [],
+      failed_checks: ["draft_missing"],
+      message: "没有真实草稿 artifact，不能生成 final export 或 forced draft。",
+    }
+  }
   const exported = await recordExportBundle(
     runDir,
     {
@@ -1348,22 +1387,21 @@ export function discoverPaperProviders(
   providers: Record<string, { id: string; name: string; models: Record<string, unknown> }> = {},
 ) {
   const entries = Object.entries(providers)
-  const normalized =
-    entries.length > 0
-      ? entries.map(([id, provider]) => ({
-          id,
-          name: provider.name,
-          models: Object.keys(provider.models ?? {}),
-        }))
-      : [
-          {
-            id: "deepseek",
-            name: "DeepSeek",
-            models: ["deepseek-v4-pro"],
-          },
-        ]
+  const normalized = entries.map(([id, provider]) => ({
+    id,
+    name: provider.name,
+    models: Object.keys(provider.models ?? {}),
+  }))
   return {
-    default_model: DEFAULT_MODEL_ROLE_CONFIG.default_model,
+    default_model: undefined,
+    sample_templates: [
+      {
+        id: "deepseek",
+        name: "DeepSeek",
+        models: ["deepseek-v4-pro"],
+        auto_enabled: false,
+      },
+    ],
     providers: normalized,
   }
 }
@@ -1372,7 +1410,7 @@ export function paperModelRoles(config: ResearchIntakeRequest["model_roles"] = {
   const roles = modelRoleMap(config)
   return {
     strategy: "opencode_provider_agnostic",
-    default_model: DEFAULT_MODEL_ROLE_CONFIG.default_model,
+    default_model: undefined,
     roles,
   }
 }

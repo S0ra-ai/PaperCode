@@ -56,6 +56,12 @@ export function DialogPaperModelRoles() {
             <text fg={theme.textMuted}>
               允许模型 {payload().inventory?.allowlist.length ?? 0}/{payload().inventory?.candidates.length ?? 0}
             </text>
+            <Show when={(payload().inventory?.allowlist.length ?? 0) === 0}>
+              <box flexDirection="column" gap={0}>
+                <text fg={theme.warning}>尚未配置可用模型。</text>
+                <text fg={theme.textMuted}>请添加 provider，拉取 /models，勾选允许模型，并选择主决策模型。</text>
+              </box>
+            </Show>
             <Show when={(payload().inventory?.candidates.length ?? 0) > 0}>
               <box flexDirection="column" gap={0}>
                 <text fg={theme.textMuted}>候选模型</text>

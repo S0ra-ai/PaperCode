@@ -3,7 +3,7 @@ import path from "path"
 import { mkdir, readFile } from "fs/promises"
 import { existsSync } from "fs"
 import { writeJsonAtomic } from "../research/runtime/state"
-import { DEFAULT_MODEL_ROLE_CONFIG, type ModelRoleConfig } from "../model-router"
+import type { ModelRoleConfig } from "../model-router"
 
 export const INIT_CONFIG_VERSION = "config.v1" as const
 export const INIT_SECRETS_VERSION = "secrets.v1" as const
@@ -27,7 +27,8 @@ export type PaperFuckerConfig = {
     default_endpoint?: string
     endpoints: ModelEndpointConfig[]
   }
-  model_roles: ModelRoleConfig & {
+  model_roles: Omit<ModelRoleConfig, "default_model"> & {
+    default_model?: string
     strategy: "opencode_provider_agnostic"
   }
   workspace: {
@@ -128,19 +129,11 @@ export function defaultConfig(input: {
       default: "zh-CN",
     },
     models: input.models ?? {
-      default_endpoint: "deepseek",
-      endpoints: [
-        {
-          name: "deepseek",
-          base_url: "https://api.deepseek.com/v1",
-          model: "deepseek-v4-pro",
-          api_key_secret: "DEEPSEEK_API_KEY",
-        },
-      ],
+      endpoints: [],
     },
     model_roles: {
       strategy: "opencode_provider_agnostic",
-      default_model: input.model_roles?.default_model ?? DEFAULT_MODEL_ROLE_CONFIG.default_model,
+      default_model: input.model_roles?.default_model,
       roles: input.model_roles?.roles ?? {},
     },
     workspace: {

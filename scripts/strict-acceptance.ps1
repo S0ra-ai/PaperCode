@@ -36,6 +36,7 @@ $RequiredChecks = @(
     "pandoc-conversion",
     "latex-pdf-generation",
     "docx-generation",
+    "live-preview-browser-smoke",
     "live-crawler-fetch",
     "hf-live-research-loop",
     "topic-to-paper-live-run",
@@ -676,6 +677,9 @@ Invoke-Check "latex-pdf-generation" "LaTeX PDF generation" {
 }
 Invoke-Check "docx-generation" "DOCX generation" {
     Invoke-DocxGeneration
+}
+Invoke-Check "live-preview-browser-smoke" "Browser-visible preview SSE and read-only boundary" {
+    Invoke-CheckedCommand -File "powershell" -Arguments @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\scripts\live-preview-browser-smoke.ps1") -TimeoutSeconds 120
 }
 Invoke-Check "live-crawler-fetch" "Authorized live crawler fetch" {
     Invoke-LiveCrawlerFetch

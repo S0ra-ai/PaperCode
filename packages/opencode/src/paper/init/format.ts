@@ -35,6 +35,10 @@ function providerSummary(config: InitWizardResult["config"]) {
   return preview(endpoints.map((endpoint) => `${endpoint.name} -> ${endpoint.model}`), 4)
 }
 
+function modelSummary(config: InitWizardResult["config"]) {
+  return config.model_roles.default_model || "未配置模型"
+}
+
 function targetInstalled(target: unknown) {
   if (!target || typeof target !== "object") return false
   const record = target as Record<string, unknown>
@@ -52,7 +56,7 @@ export function formatInitResult(result: InitWizardResult) {
     `默认语言: ${result.config.language.default}`,
     `访问模式: ${accessLabel(result.config)}`,
     `实时预览: ${result.config.preview.auto_open ? "已启用" : "已关闭"}`,
-    `默认模型: ${result.config.model_roles.default_model}`,
+    `默认模型: ${modelSummary(result.config)}`,
     `Provider: ${providerSummary(result.config)}`,
     `Nature Skill: ${result.skills.restart_required ? "已安装，重启 Codex 后生效" : "已就绪"}`,
     `外部工具: ${available.length} 个可用${missing.length > 0 ? `，${missing.length} 个缺失` : ""}`,
@@ -84,7 +88,7 @@ export function formatDoctorResult(result: DoctorResult) {
       `默认语言: ${config.language.default}`,
       `访问模式: ${accessLabel(config)}`,
       `实时预览: ${config.preview.auto_open ? "已启用" : "已关闭"}`,
-      `默认模型: ${config.model_roles.default_model}`,
+      `默认模型: ${modelSummary(config)}`,
       `Provider: ${providerSummary(config)}`,
     )
   }
