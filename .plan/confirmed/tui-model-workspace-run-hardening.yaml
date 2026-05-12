@@ -144,7 +144,7 @@ steps:
   meta: {}
 - id: step-6-merge-cleanup
   title: 合回 develop 并清理功能分支
-  status: todo
+  status: in_progress
   owner: codex
   depends_on:
   - step-5-tests-docs-version
@@ -152,8 +152,14 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-12T14:56:28.158729'
+      level: info
+      message: Preparing to merge feature/tui-model-workspace-run-hardening back into
+        develop with Git Flow branch cleanup.
+      agent: codex
+    last_run: '2026-05-12T14:56:28.158729'
+    attempt_count: 1
   meta: {}
 outputs:
 - type: directory
@@ -176,5 +182,5 @@ lock:
   at: '2026-05-12T13:53:42.188998'
 meta:
   created_at: '2026-05-12T13:53:33.833232'
-  updated_at: '2026-05-12T14:55:32.718340'
+  updated_at: '2026-05-12T14:56:28.158729'
   version: '1'
