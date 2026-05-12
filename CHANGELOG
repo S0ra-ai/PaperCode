@@ -2,10 +2,36 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.9.0.1-dev
+:version       0.9.1-dev
 :last_update   2026/05/12
 
 :history
+
+    0.9.1-dev - 2026/05/12 (f7ad0bc) [develop]
+        :brief 产品级硬化模型空态、命令白名单、实时 Preview smoke 与 draft/export 真实性
+        - feat(model): PaperModelInventory 初始态改为空 allowlist、无主决策模型，DeepSeek 仅保留为可选样例模板
+        - feat(run): 无模型或无主决策模型时 PaperRun 写入中文 blocked diagnostics 和 pause question，不继续伪装执行后续 stage
+        - feat(tui): 输入栏无模型时只显示“未配置模型”和 /models 引导，不再显示 GLM、DeepSeek 或旧 OpenCode fallback
+        - feat(commands): PaperVisibleCommandRegistry 接入 command palette 与 slash autocomplete，隐藏旧 chat/session/provider 命令面
+        - feat(preview): 新增浏览器级 live Preview smoke，验证 token、只读写阻断和 SSE draft/stage/agent/cost/gate 刷新
+        - fix(export): 没有真实 DraftPaper artifact 时 Preview 显示“尚未生成草稿”，final/forced export 均以 draft_missing 阻断
+        - fix(boundary): Hugging Face 产品网络边界改为 network_blocked_without_authorization，不再出现 mock_only 语义
+        - test(paperrun): 需要完整执行 stage graph 的测试显式声明测试模型角色，保留真实无模型阻断语义
+        :src
+            - packages/opencode/src/paper/model-inventory.ts - empty model inventory and blocked routing diagnostics
+            - packages/opencode/src/paper/run.ts - no-model PaperRun pause and no-placeholder draft/export behavior
+            - packages/opencode/src/cli/cmd/tui/component/prompt/index.tsx - no-model prompt footer guidance
+            - packages/opencode/src/cli/cmd/tui/component/dialog-command.tsx - visible command filtering
+            - packages/opencode/src/cli/cmd/tui/component/prompt/autocomplete.tsx - slash command allowlist filtering
+            - packages/opencode/test/paper/* - configured-model fixtures for full PaperRun execution tests
+            - scripts/live-preview-browser-smoke.ps1 - browser-visible Preview SSE smoke
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test passed, 2604 pass / 0 fail
+            - npx --yes bun@1.3.13 --cwd packages/opencode test targeted hardening suites passed, 18 tests
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+            - npx --yes bun@1.3.13 --cwd packages/preview test passed, 3 tests
+            - python -m unittest discover -s research-tools/tests passed, 18 tests
+            - scripts/live-preview-browser-smoke.ps1 passed and wrote reports/live-preview-browser-smoke.md
 
     0.9.0.1-dev - 2026/05/12 (9036219) [develop]
         :brief 修复 research-tools 裸 unittest 入口

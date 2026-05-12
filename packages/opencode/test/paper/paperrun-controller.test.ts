@@ -8,13 +8,20 @@ import {
   createPaperRun,
   getPaperRunSnapshot,
   loadPaperRunControllerState,
+  PAPER_MODEL_ROLES,
   recordPaperRunGuidance,
   subscribePaperRunEvents,
+  type PaperModelRole,
   type PaperRunRuntimeOptions,
 } from "@/paper"
 
 const now = "2026-05-10T01:00:00Z"
 const cleanup: string[] = []
+const TEST_MODEL = "test-provider/test-model"
+
+function testModelRoles(): Record<PaperModelRole, string> {
+  return Object.fromEntries(PAPER_MODEL_ROLES.map((role) => [role, TEST_MODEL])) as Record<PaperModelRole, string>
+}
 
 async function clean(dir: string, attempts = 30): Promise<void> {
   Bun.gc(true)
@@ -68,6 +75,7 @@ describe("PaperRun durable controller", () => {
         workspace_path: workspace,
         code_paths: ["missing-source-dir"],
         language: "zh-CN",
+        model_roles: testModelRoles(),
       },
       options,
     )

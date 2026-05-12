@@ -26,13 +26,9 @@ describe("init wizard", () => {
       expect(result.config.access.bounded_hours).toBe(24)
       expect(result.config.access.full_access_acknowledged).toBe(false)
       expect(result.config.language.default).toBe("zh-CN")
-      expect(result.config.models.default_endpoint).toBe("deepseek")
-      expect(result.config.models.endpoints).toContainEqual({
-        name: "deepseek",
-        base_url: "https://api.deepseek.com/v1",
-        model: "deepseek-v4-pro",
-        api_key_secret: "DEEPSEEK_API_KEY",
-      })
+      expect(result.config.models.default_endpoint).toBeUndefined()
+      expect(result.config.models.endpoints).toEqual([])
+      expect(result.config.model_roles.default_model).toBeUndefined()
       expect(result.skills.skill_id).toBe("nature-paper")
       expect(result.skills.targets.find((target) => target.name === "codex")?.status).toBe("installed")
     } finally {
@@ -49,7 +45,8 @@ describe("init wizard", () => {
 
       expect(initText).toContain("Paper Fucker 初始化完成")
       expect(initText).toContain("配置目录:")
-      expect(initText).toContain("Provider: deepseek -> deepseek-v4-pro")
+      expect(initText).toContain("默认模型: 未配置模型")
+      expect(initText).toContain("Provider: 尚未配置 provider")
       expect(initText).toContain("Nature Skill:")
       expect(initText.trimStart().startsWith("{")).toBe(false)
       expect(doctorText).toContain("Paper Fucker Doctor")
@@ -96,7 +93,7 @@ describe("init wizard", () => {
       expect(existsSync(paths.secrets)).toBe(true)
       expect(result.config.access.full_access_acknowledged).toBe(true)
       expect(result.config.workspace.default_root).toBe(workspace)
-      expect(result.config.model_roles.default_model).toBe("deepseek/deepseek-v4-pro")
+      expect(result.config.model_roles.default_model).toBeUndefined()
       expect(result.config.model_roles.strategy).toBe("opencode_provider_agnostic")
       expect(result.tools.tools.pandoc.status).toBe("available")
       expect(result.tools.tools.pandoc.source).toBe("config")

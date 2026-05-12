@@ -3,10 +3,21 @@ import { mkdir, mkdtemp, rm, writeFile } from "fs/promises"
 import { setTimeout as sleep } from "node:timers/promises"
 import os from "os"
 import path from "path"
-import { createPaperRun, indexResearchMaterials, type PaperRunRuntimeOptions } from "@/paper"
+import {
+  createPaperRun,
+  indexResearchMaterials,
+  PAPER_MODEL_ROLES,
+  type PaperModelRole,
+  type PaperRunRuntimeOptions,
+} from "@/paper"
 
 const cleanup: string[] = []
 const now = "2026-05-10T02:00:00Z"
+const TEST_MODEL = "test-provider/test-model"
+
+function testModelRoles(): Record<PaperModelRole, string> {
+  return Object.fromEntries(PAPER_MODEL_ROLES.map((role) => [role, TEST_MODEL])) as Record<PaperModelRole, string>
+}
 
 async function clean(dir: string, attempts = 30): Promise<void> {
   Bun.gc(true)
@@ -91,10 +102,11 @@ describe("Research material index", () => {
         topic: "材料索引生成论文",
         workspace_path: workspace,
         code_paths: ["src"],
-        paper_files: ["paper/draft.md", ".env"],
-        dataset_paths: ["data/scores.csv"],
-        experiment_logs: ["logs/run.log"],
-      },
+      paper_files: ["paper/draft.md", ".env"],
+      dataset_paths: ["data/scores.csv"],
+      experiment_logs: ["logs/run.log"],
+      model_roles: testModelRoles(),
+    },
       runtimeOptions(workspace, home),
     )
 

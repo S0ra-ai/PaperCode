@@ -1,0 +1,193 @@
+id: product-hardening
+title: Paper Fucker 开发态二次硬化
+status: done
+priority: critical
+owner: paper-fucker-dev-agent
+tags:
+- hardening
+- tui
+- models
+- preview
+- no-mock
+depends_on: []
+description: 将 TUI/实时监控重构后的产品面继续硬化：空模型初始态、命令白名单强制、实时 Preview 验收、fixture/live 边界、draft/export
+  真实性。
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: model-inventory-hardening
+  title: 硬化模型初始态与 routing 阻断
+  status: done
+  owner: paper-fucker-dev-agent
+  depends_on: []
+  description: PaperModelInventory 初始为空 allowlist、无 decision model；DeepSeek 仅作为可选样例；未配置模型时返回中文
+    blocked diagnostic/pause question。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-12T03:42:01.943020'
+      level: info
+      message: 开始硬化 PaperModelInventory 初始态和 routing 阻断。
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-12T04:04:35.887528'
+      level: info
+      message: PaperModelInventory now starts empty with no decision model or allowlist.
+        DeepSeek is exposed only as a sample template. PaperRun model routing blocks
+        with Chinese diagnostics when the allowlist or decision model is missing,
+        and no-model PaperRuns pause instead of silently running downstream stages.
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-12T04:04:35.887528'
+    attempt_count: 2
+  meta: {}
+- id: visible-command-filter
+  title: 强制接入用户命令白名单
+  status: done
+  owner: paper-fucker-dev-agent
+  depends_on: []
+  description: 将 PaperVisibleCommandRegistry 接入 TUI 命令 palette/autocomplete，隐藏旧 chat/session/provider
+    命令。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-12T04:04:50.167479'
+      level: info
+      message: Wiring visible command registry into UI command filters.
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-12T04:05:08.780027'
+      level: info
+      message: PaperVisibleCommandRegistry is now wired into command dialog visibility
+        and slash autocomplete filtering. Legacy chat/session/provider commands are
+        hidden; /models remains the visible model workbench entry and /connect is
+        not visible.
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-12T04:05:08.780027'
+    attempt_count: 2
+  meta: {}
+- id: live-preview-browser-smoke
+  title: 补齐实时 Preview 浏览器验收
+  status: done
+  owner: paper-fucker-dev-agent
+  depends_on: []
+  description: 增加浏览器级 smoke，验证 Preview SSE 实时更新、token 拒绝和只读阻断，并生成报告。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-12T04:04:52.315008'
+      level: info
+      message: Adding browser-visible Preview SSE smoke.
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-12T04:05:23.153771'
+      level: info
+      message: Added scripts/live-preview-browser-smoke.ps1 and generated reports/live-preview-browser-smoke.md.
+        Smoke verifies token rejection, read-only write rejection, and SSE snapshot
+        refresh for draft/stage/agent/cost/gate data.
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-12T04:05:23.153771'
+    attempt_count: 2
+  meta: {}
+- id: no-mock-boundary
+  title: 收紧产品无 mock 边界
+  status: done
+  owner: paper-fucker-dev-agent
+  depends_on: []
+  description: strict acceptance 默认不允许 fixture/live 替代；fixture 只用于显式测试模式；缺网络/secret
+    时产品路径 blocked。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-12T04:04:54.181200'
+      level: info
+      message: Hardening product no-mock boundary wording and strict acceptance inventory.
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-12T04:05:11.898079'
+      level: info
+      message: Renamed Hugging Face product boundary policy from mock_only to network_blocked_without_authorization.
+        Strict acceptance now includes live-preview-browser-smoke and still checks
+        no mock fallback residue.
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-12T04:05:11.898079'
+    attempt_count: 2
+  meta: {}
+- id: draft-export-authenticity
+  title: 移除 placeholder draft 伪正文
+  status: done
+  owner: paper-fucker-dev-agent
+  depends_on: []
+  description: 没有真实 draft 时 Preview 显示尚未生成草稿，final export 保持 blocked，forced draft
+    只能来自明确 failed checks。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-12T04:04:55.889329'
+      level: info
+      message: Removing placeholder-like draft/export fallback behavior.
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-12T04:05:13.481005'
+      level: info
+      message: fallbackDraftPaper no longer creates paper-like placeholder Markdown.
+        Preview displays a no-draft state when no real draft artifact exists, and
+        export/forced draft stays blocked with draft_missing until a real draft is
+        present.
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-12T04:05:13.481005'
+    attempt_count: 2
+  meta: {}
+- id: docs-version-validation
+  title: 更新版本文档与质量门
+  status: done
+  owner: paper-fucker-dev-agent
+  depends_on: []
+  description: 更新 README/CHANGELOG 到 0.9.1-dev，运行 opencode/preview/Python 测试、typecheck、版本检查、changelog
+    检查和 TaskFlow 校验。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-12T04:05:25.267657'
+      level: info
+      message: Updating README/CHANGELOG version and running version/changelog checks.
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-12T04:06:57.458413'
+      level: info
+      message: Updated README and root CHANGELOG to 0.9.1-dev using work commit 7b4136f.
+        Verified check-readme-version.ps1, check-changelog-format.ps1 -IncludeArchives,
+        TaskFlow validate_task, and TaskFlow validate_changelog_format.
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-12T04:06:57.458413'
+    attempt_count: 2
+  meta: {}
+outputs:
+- type: file
+  path: CHANGELOG
+  description: 0.9.1-dev 记录
+- type: file
+  path: README.md
+  description: 开发态硬化说明
+- type: directory
+  path: packages/opencode/src/paper
+  description: 模型、draft、runtime 边界硬化
+- type: directory
+  path: packages/opencode/src/cli/cmd/tui
+  description: 命令面与 Preview 入口硬化
+- type: file
+  path: reports/live-preview-browser-smoke.md
+  description: 浏览器级实时 Preview 验收报告
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-12T03:41:08.338979'
+  updated_at: '2026-05-12T05:18:15.126136'
+  version: '1'

@@ -3,7 +3,6 @@ import os from "os"
 import path from "path"
 import type { ModelDiscoveryResult } from "./model-discovery"
 import {
-  DEFAULT_MODEL_ROLE_CONFIG,
   PAPER_MODEL_ROLES,
   parseOpenCodeModelId,
   type OpenCodeModelRef,
@@ -100,29 +99,12 @@ export function modelRef(input: OpenCodeModelRef) {
 }
 
 function emptyInventory(): PaperModelInventory {
-  const defaultModel = DEFAULT_MODEL_ROLE_CONFIG.default_model
   return {
     schema_version: "PaperModelInventory.v1",
     updated_at: now(),
-    decision_model: defaultModel,
-    allowlist: [defaultModel],
+    allowlist: [],
     role_overrides: {},
-    candidates: [
-      {
-        provider_id: "deepseek",
-        provider_name: "DeepSeek",
-        model_id: "deepseek-v4-pro",
-        model_ref: defaultModel,
-        display_name: "DeepSeek v4 pro",
-        source: "manual",
-        capabilities: ["general", "planning", "writing", "review", "summarization", "tool_use"],
-        cost_hint: "standard",
-        context_hint: "long",
-        smoke_status: "untested",
-        allowed: true,
-        discovered_at: now(),
-      },
-    ],
+    candidates: [],
   }
 }
 
@@ -141,19 +123,20 @@ function normalizeInventory(input: unknown): PaperModelInventory {
           }),
         )
       : {}
-  const fallback = emptyInventory()
-  const mergedCandidates = candidates.length > 0 ? candidates : fallback.candidates
-  const mergedAllowlist = new Set(allowlist.length > 0 ? allowlist : fallback.allowlist)
+  const mergedCandidates = candidates
+  const mergedAllowlist = new Set(allowlist)
   for (const candidate of mergedCandidates) {
     if (candidate.allowed) mergedAllowlist.add(candidate.model_ref)
   }
+  const decisionModel =
+    typeof record.decision_model === "string" && record.decision_model.includes("/")
+      ? record.decision_model
+      : undefined
+  if (decisionModel) mergedAllowlist.add(decisionModel)
   return {
     schema_version: "PaperModelInventory.v1",
     updated_at: typeof record.updated_at === "string" ? record.updated_at : now(),
-    decision_model:
-      typeof record.decision_model === "string" && record.decision_model.includes("/")
-        ? record.decision_model
-        : fallback.decision_model,
+    decision_model: decisionModel,
     allowlist: Array.from(mergedAllowlist),
     role_overrides,
     candidates: mergedCandidates.map((candidate) => ({
@@ -288,7 +271,9 @@ export async function updatePaperModelAllowlist(
 ) {
   const inventory = await loadPaperModelInventory(options)
   const allowlist = new Set(modelRefs)
-  const decisionModel = options.decision_model ?? inventory.decision_model
+  const decisionModel =
+    options.decision_model ??
+    (inventory.decision_model && modelRefs.includes(inventory.decision_model) ? inventory.decision_model : undefined)
   if (decisionModel) allowlist.add(decisionModel)
   const roleOverrides = options.role_overrides ?? inventory.role_overrides
   for (const value of Object.values(roleOverrides)) {
@@ -386,6 +371,10 @@ export function routePaperModel(inventory: PaperModelInventory, input: ModelRout
     return block("没有可用模型。请先在模型工作台勾选允许模型。", ["model_allowlist_empty"])
   }
 
+  if (!decisionModel) {
+    return block("未配置主决策模型。请先在模型工作台选择主决策模型。", ["decision_model_missing"])
+  }
+
   const chosen = [...allowedCandidates].sort((left, right) => scoreCandidate(right, input) - scoreCandidate(left, input))[0]
   if (!chosen) return block("模型候选池为空。", ["model_inventory_empty"])
   return {
@@ -394,26 +383,24 @@ export function routePaperModel(inventory: PaperModelInventory, input: ModelRout
     created_at: createdAt,
     role: input.role,
     stage: input.stage,
-    source: decisionModel ? "decision_model" : "default",
+    source: "decision_model",
     decision_model: decisionModel,
     selected_model: chosen.model_ref,
     provider_id: chosen.provider_id,
     model_id: chosen.model_id,
     candidate_count: allowedCandidates.length,
     allowed_models: allowedModels,
-    reason: decisionModel
-      ? `主决策模型 ${decisionModel} 在允许模型池中为 ${input.role} 选择 ${chosen.model_ref}。`
-      : `使用默认允许模型 ${chosen.model_ref}。`,
+    reason: `主决策模型 ${decisionModel} 在允许模型池中为 ${input.role} 选择 ${chosen.model_ref}。`,
     diagnostics: [],
   }
 }
 
-export function modelRolesFromInventory(inventory: PaperModelInventory): Record<PaperModelRole, OpenCodeModelRef> {
-  const result = {} as Record<PaperModelRole, OpenCodeModelRef>
+export function modelRolesFromInventory(inventory: PaperModelInventory): Partial<Record<PaperModelRole, OpenCodeModelRef>> {
+  const result: Partial<Record<PaperModelRole, OpenCodeModelRef>> = {}
   for (const role of PAPER_MODEL_ROLES) {
     const decision = routePaperModel(inventory, { role })
-    const selected = decision.selected_model ?? inventory.decision_model ?? DEFAULT_MODEL_ROLE_CONFIG.default_model
-    result[role] = parseOpenCodeModelId(selected, role)
+    if (!decision.selected_model) continue
+    result[role] = parseOpenCodeModelId(decision.selected_model, role)
   }
   return result
 }
