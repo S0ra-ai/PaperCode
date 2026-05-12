@@ -1143,6 +1143,7 @@ export function Prompt(props: PromptProps) {
     const current = local.model.variant.current()
     return !!current
   })
+  const hasSelectedModel = createMemo(() => Boolean(local.model.current()))
 
   const agentMetaAlpha = createFadeIn(() => !!local.agent.current(), animationsEnabled)
   const modelMetaAlpha = createFadeIn(() => !!local.agent.current() && store.mode === "normal", animationsEnabled)
@@ -1464,24 +1465,35 @@ export function Prompt(props: PromptProps) {
                         {store.mode === "shell" ? "动作" : "PaperRun"}
                       </text>
                       <Show when={store.mode === "normal"}>
-                        <box flexDirection="row" gap={1}>
-                          <text fg={fadeColor(theme.textMuted, modelMetaAlpha())}>·</text>
-                          <text
-                            flexShrink={0}
-                            fg={fadeColor(keybind.leader ? theme.textMuted : theme.text, modelMetaAlpha())}
-                          >
-                            {local.model.parsed().model}
-                          </text>
-                          <text fg={fadeColor(theme.textMuted, modelMetaAlpha())}>{currentProviderLabel()}</text>
-                          <Show when={showVariant()}>
-                            <text fg={fadeColor(theme.textMuted, variantMetaAlpha())}>·</text>
-                            <text>
-                              <span style={{ fg: fadeColor(theme.warning, variantMetaAlpha()), bold: true }}>
-                                {local.model.variant.current()}
-                              </span>
+                        <Show
+                          when={hasSelectedModel()}
+                          fallback={
+                            <box flexDirection="row" gap={1}>
+                              <text fg={fadeColor(theme.textMuted, modelMetaAlpha())}>·</text>
+                              <text fg={fadeColor(theme.warning, modelMetaAlpha())}>未配置模型</text>
+                              <text fg={fadeColor(theme.textMuted, modelMetaAlpha())}>输入 /models 添加 provider</text>
+                            </box>
+                          }
+                        >
+                          <box flexDirection="row" gap={1}>
+                            <text fg={fadeColor(theme.textMuted, modelMetaAlpha())}>·</text>
+                            <text
+                              flexShrink={0}
+                              fg={fadeColor(keybind.leader ? theme.textMuted : theme.text, modelMetaAlpha())}
+                            >
+                              {local.model.parsed().model}
                             </text>
-                          </Show>
-                        </box>
+                            <text fg={fadeColor(theme.textMuted, modelMetaAlpha())}>{currentProviderLabel()}</text>
+                            <Show when={showVariant()}>
+                              <text fg={fadeColor(theme.textMuted, variantMetaAlpha())}>·</text>
+                              <text>
+                                <span style={{ fg: fadeColor(theme.warning, variantMetaAlpha()), bold: true }}>
+                                  {local.model.variant.current()}
+                                </span>
+                              </text>
+                            </Show>
+                          </box>
+                        </Show>
                       </Show>
                     </>
                   )}

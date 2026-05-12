@@ -23,7 +23,7 @@ export interface HFResearchLoopPlan {
   query: string
   capabilities: HFResearchLoopCapability[]
   approval_policy: {
-    network_default: "mock_only" | "explicit_allow_network"
+    network_default: "network_blocked_without_authorization" | "explicit_allow_network"
     remote_jobs_require_approval: true
     upload_requires_approval: true
   }

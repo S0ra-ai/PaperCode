@@ -13,6 +13,7 @@ import { useTuiConfig } from "../../context/tui-config"
 import { useTheme, selectedForeground } from "@tui/context/theme"
 import { SplitBorder } from "@tui/component/border"
 import { useCommandDialog } from "@tui/component/dialog-command"
+import { isPaperVisibleSlashCommand } from "../../paper-visible-commands"
 import { useTerminalDimensions } from "@opentui/solid"
 import { Locale } from "@/util/locale"
 import type { PromptInfo } from "./history"
@@ -403,6 +404,7 @@ export function Autocomplete(props: {
 
     for (const serverCommand of sync.data.command) {
       if (serverCommand.source === "skill") continue
+      if (!isPaperVisibleSlashCommand(serverCommand.name)) continue
       const label = serverCommand.source === "mcp" ? ":mcp" : ""
       results.push({
         display: "/" + serverCommand.name + label,

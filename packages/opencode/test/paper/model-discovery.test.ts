@@ -31,6 +31,19 @@ afterEach(async () => {
 })
 
 describe("paper provider model discovery", () => {
+  test("starts with an empty model inventory and blocks routing until the user configures models", async () => {
+    const home = await tmpHome()
+    const inventory = await loadPaperModelInventory({ home })
+    expect(inventory.decision_model).toBeUndefined()
+    expect(inventory.allowlist).toEqual([])
+    expect(inventory.candidates).toEqual([])
+
+    const decision = routePaperModel(inventory, { role: "writer" })
+    expect(decision.source).toBe("blocked")
+    expect(decision.reason).toContain("模型工作台")
+    expect(decision.diagnostics).toContain("model_allowlist_empty")
+  })
+
   test("discovers OpenAI-compatible /v1/models without leaking API keys", async () => {
     const calls: Array<{ url: string; auth?: string }> = []
     const result = await discoverOpenAICompatibleModels(
@@ -125,7 +138,10 @@ describe("paper provider model discovery", () => {
 
   test("blocks forced models that are not in the user allowlist", async () => {
     const home = await tmpHome()
-    const inventory = await updatePaperModelAllowlist(["deepseek/deepseek-v4-pro"], { home })
+    const inventory = await updatePaperModelAllowlist(["deepseek/deepseek-v4-pro"], {
+      home,
+      decision_model: "deepseek/deepseek-v4-pro",
+    })
     const decision = routePaperModel(inventory, {
       role: "reviewer",
       forced_model: "openai/gpt-5.2",
