@@ -81,8 +81,13 @@ describe("PaperRun HttpApi", () => {
     expect(create.status).toBe(200)
     const created = await create.json()
     expect(created.run.intake.topic).toBe("代码仓库生成可验证论文")
+    expect(created.run.status).toBe("blocked")
     expect(created.run.stage_graph.stages.map((stage: { id: string }) => stage.id)).toContain("intake")
+    expect(
+      created.run.pause_questions.some((question: { message: string }) => question.message.includes("模型工作台")),
+    ).toBe(true)
     expect(created.run.agent_tree.nodes[0].role).toBe("root_run_agent")
+    expect(created.run.agent_tree.nodes[0].provider_id).toBe("unconfigured")
 
     const runID = created.run.run_id as string
     const get = await app().request(runPath(PaperPaths.run, runID), { headers })
@@ -130,9 +135,8 @@ describe("PaperRun HttpApi", () => {
     })
     expect(exportResponse.status).toBe(200)
     const exported = await exportResponse.json()
-    expect(exported.status).toBe("forced_draft")
-    expect(exported.files.some((file: { format: string; status: string }) => file.format === "markdown" && file.status === "written")).toBe(true)
-    expect(exported.manifest_path).toContain("manifest.json")
+    expect(exported.status).toBe("blocked")
+    expect(exported.failed_checks).toContain("draft_missing")
 
     const capabilities = await app().request(PaperPaths.capabilities, { headers })
     expect(capabilities.status).toBe(200)
@@ -146,23 +150,28 @@ describe("PaperRun HttpApi", () => {
 
     const providers = await app().request(PaperPaths.providersDiscover, { headers })
     expect(providers.status).toBe(200)
-    expect((await providers.json()).default_model).toBe("deepseek/deepseek-v4-pro")
+    const providersBody = await providers.json()
+    expect(providersBody.default_model).toBeUndefined()
+    expect(providersBody.sample_templates.find((provider: { id: string }) => provider.id === "deepseek").auto_enabled).toBe(false)
 
     const modelRoles = await app().request(PaperPaths.modelRoles, { headers })
     expect(modelRoles.status).toBe(200)
-    expect((await modelRoles.json()).roles.writer.model_id).toBe("deepseek-v4-pro")
+    expect((await modelRoles.json()).roles).toEqual({})
 
     const inventory = await app().request(PaperPaths.modelInventory, { headers })
     expect(inventory.status).toBe(200)
     const inventoryBody = await inventory.json()
-    expect(inventoryBody.inventory.decision_model).toBe("deepseek/deepseek-v4-pro")
-    expect(inventoryBody.inventory.allowlist).toContain("deepseek/deepseek-v4-pro")
+    expect(inventoryBody.inventory.decision_model).toBeUndefined()
+    expect(inventoryBody.inventory.allowlist).toEqual([])
+    expect(inventoryBody.routing.every((decision: { source: string }) => decision.source === "blocked")).toBe(true)
 
     const routing = await app().request(PaperPaths.modelRoutingDecision, {
       ...json({ role: "writer", task_scale: "large", difficulty: "high" }),
       headers: { ...headers, "content-type": "application/json" },
     })
     expect(routing.status).toBe(200)
-    expect((await routing.json()).selected_model).toBe("deepseek/deepseek-v4-pro")
+    const routingBody = await routing.json()
+    expect(routingBody.source).toBe("blocked")
+    expect(routingBody.diagnostics).toContain("model_allowlist_empty")
   })
 })

@@ -13,6 +13,7 @@ import {
 } from "solid-js"
 import { useKeyboard } from "@opentui/solid"
 import { useKeybind } from "@tui/context/keybind"
+import { isPaperVisibleCommand, isPaperVisibleSlashCommand } from "../paper-visible-commands"
 
 type Context = ReturnType<typeof init>
 const ctx = createContext<Context>()
@@ -28,6 +29,19 @@ export type CommandOption = DialogSelectOption<string> & {
   slash?: Slash
   hidden?: boolean
   enabled?: boolean
+}
+
+export function isPaperVisibleCommandOption(
+  option: Pick<CommandOption, "category" | "enabled" | "hidden" | "slash" | "title" | "value">,
+) {
+  if (option.enabled === false || option.hidden) return false
+  if (!option.slash) {
+    if (option.category === "Agent" || option.category === "Provider") return false
+    if (option.category === "Session") return false
+    return true
+  }
+  if (isPaperVisibleCommand(option.slash.name) && option.value.startsWith("session.")) return false
+  return isPaperVisibleSlashCommand(option.slash.name)
 }
 
 function init() {
@@ -46,7 +60,7 @@ function init() {
   })
 
   const isEnabled = (option: CommandOption) => option.enabled !== false
-  const isVisible = (option: CommandOption) => isEnabled(option) && !option.hidden
+  const isVisible = isPaperVisibleCommandOption
 
   const visibleOptions = createMemo(() => entries().filter((option) => isVisible(option)))
   const suggestedOptions = createMemo(() =>
@@ -88,6 +102,7 @@ function init() {
       return visibleOptions().flatMap((option) => {
         const slash = option.slash
         if (!slash) return []
+        if (!isPaperVisibleSlashCommand(slash.name)) return []
         return {
           display: "/" + slash.name,
           description: option.description ?? option.title,

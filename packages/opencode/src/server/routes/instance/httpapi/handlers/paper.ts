@@ -18,7 +18,13 @@ import {
   subscribeToPaperRunLiveEvents,
 } from "@/paper/run"
 import { discoverOpenAICompatibleModels, saveProviderEndpointConfig } from "@/paper/model-discovery"
-import { loadPaperModelInventory, routePaperModel, updatePaperModelAllowlist, upsertDiscoveredModels } from "@/paper/model-inventory"
+import {
+  loadPaperModelInventory,
+  modelRolesFromInventory,
+  routePaperModel,
+  updatePaperModelAllowlist,
+  upsertDiscoveredModels,
+} from "@/paper/model-inventory"
 import { PAPER_MODEL_ROLES, type PaperModelRole } from "@/paper/model-router"
 import { resolveAllModelRoleAssignments } from "@/paper/model-roles"
 import { Effect, Queue } from "effect"
@@ -250,7 +256,7 @@ export const paperHandlers = HttpApiBuilder.group(InstanceHttpApi, "paper", (han
             decision_model: ctx.payload.decision_model,
             role_overrides: ctx.payload.roles as Partial<Record<PaperModelRole, string>> | undefined,
           })
-          return { inventory, roles: resolveAllModelRoleAssignments({ default_model: inventory.decision_model ?? "deepseek/deepseek-v4-pro", roles: inventory.role_overrides }) }
+          return { inventory, roles: modelRolesFromInventory(inventory) }
         },
         catch: mapPaperBadRequest,
       })
