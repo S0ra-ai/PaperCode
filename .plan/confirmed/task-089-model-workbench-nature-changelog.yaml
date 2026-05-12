@@ -1,0 +1,190 @@
+id: task-089-model-workbench-nature-changelog
+title: 模型工作台、Nature Skill 内置与 Changelog 收口
+status: done
+priority: critical
+owner: codex
+tags:
+- release
+- tui
+- model-routing
+- skills
+- changelog
+depends_on: []
+description: 在 release/0.8.5 稳定阶段实现 Paper Fucker 模型工作台、动态模型 allowlist 决策、Nature Paper
+  Skill 内置安装检查，并收口 root CHANGELOG 巨型条目与缩进治理。
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: inspect
+  title: 核对现有模型、TUI、skill 和 changelog 代码边界
+  status: done
+  owner: codex
+  depends_on: []
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T22:59:08.590327'
+      level: info
+      message: 开始核对现有模型、TUI、skill 和 changelog 代码边界。
+      agent: codex
+    - timestamp: '2026-05-11T22:59:14.462043'
+      level: info
+      message: 已核对 release/0.8.5、README/CHANGELOG 版本、model-discovery/model-router/model-roles、Paper
+        API、TUI PaperRun dashboard、capability pack、Nature skill 与本机 skill 安装状态。结论：仓库内置
+        Nature skill 已存在，本机 Codex/agents skill 未安装；模型路由仍为静态 role/default model；root
+        CHANGELOG 仍有 0.8.5-dev 巨型聚合条目。
+      agent: codex
+    last_run: '2026-05-11T22:59:14.462043'
+    attempt_count: 2
+  meta: {}
+- id: model-workbench
+  title: 实现模型候选池、允许列表、主决策模型和动态路由接口
+  status: done
+  owner: codex
+  depends_on:
+  - inspect
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T23:02:17.338838'
+      level: info
+      message: 开始实现模型候选池、允许列表、主决策模型和动态路由接口。
+      agent: codex
+    - timestamp: '2026-05-11T23:13:45.109259'
+      level: info
+      message: 新增 PaperModelInventory、模型 allowlist、主决策模型、动态 routePaperModel 决策、PaperRun
+        model_routing diagnostics 与 pause question 阻断。typecheck 初步通过。
+      agent: codex
+    last_run: '2026-05-11T23:13:45.109259'
+    attempt_count: 2
+  meta: {}
+- id: tui-api
+  title: 接入 Paper API、中文 TUI 模型工作台和 sidebar 状态
+  status: done
+  owner: codex
+  depends_on:
+  - model-workbench
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T23:13:50.352889'
+      level: info
+      message: 开始补 Paper API、TUI 模型工作台和 sidebar 状态的测试与收尾。
+      agent: codex
+    - timestamp: '2026-05-11T23:19:00.208433'
+      level: info
+      message: Paper API 新增 /paper/model-inventory 与 /paper/model-routing/decision；provider
+        discovery persist 时写 provider config 与 model inventory；TUI 模型工作台对接 /paper/model-inventory，dashboard
+        展示主决策模型、allowlist、候选数与最近路由。目标测试通过。
+      agent: codex
+    last_run: '2026-05-11T23:19:00.208433'
+    attempt_count: 2
+  meta: {}
+- id: nature-skill
+  title: 强化 Nature skill 内置检查并安装到本机 Codex/agents skill 目录
+  status: done
+  owner: codex
+  depends_on:
+  - inspect
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T23:19:06.643344'
+      level: info
+      message: 开始收尾 Nature skill 内置检查与本机安装记录。
+      agent: codex
+    - timestamp: '2026-05-11T23:19:12.979716'
+      level: info
+      message: 新增 skill-install.ts，init 自动幂等安装 nature-paper 到 Codex/agents skill 目录，doctor
+        输出 Nature skill 状态；已在本机安装 C:\Users\13750\.codex\skills\nature-paper\SKILL.md
+        与 C:\Users\13750\.agents\skills\nature-paper\SKILL.md。
+      agent: codex
+    last_run: '2026-05-11T23:19:12.979716'
+    attempt_count: 2
+  meta: {}
+- id: changelog-docs
+  title: 收口 CHANGELOG、README 和 changelog shape 检查
+  status: done
+  owner: codex
+  depends_on:
+  - tui-api
+  - nature-skill
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T23:19:18.630277'
+      level: info
+      message: 开始收口 CHANGELOG、README 和 changelog shape 检查。
+      agent: codex
+    - timestamp: '2026-05-11T23:48:37.398340'
+      level: info
+      message: CHANGELOG root 收口完成：新增 0.8.9 entry 记录 work commit 60de6c7，README version
+        marker 同步 0.8.9；scripts/check-changelog-format.ps1 增加 root active shape 检查，阻断
+        :commits 聚合块、超长 brief 和巨型条目；README 补充 pre-release 稳定状态、模型工作台、Nature skill
+        和内置能力说明。
+      agent: codex
+    last_run: '2026-05-11T23:48:37.398340'
+    attempt_count: 2
+  meta: {}
+- id: verify
+  title: 运行目标测试、版本检查和 TaskFlow 校验
+  status: done
+  owner: codex
+  depends_on:
+  - changelog-docs
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-11T23:48:42.268022'
+      level: info
+      message: 开始最终验证：目标 opencode suites、typecheck、preview tests、Python research-tools、README/CHANGELOG
+        checks、TaskFlow changelog validation。
+      agent: codex
+    - timestamp: '2026-05-12T00:11:16.832385'
+      level: info
+      message: 最终验证通过：npx --yes bun@1.3.13 --cwd packages/opencode test 全量通过 2598
+        pass / 0 fail；targeted model/workbench/api/init/provider suites 51 pass；npx
+        --yes bun@1.3.13 run --cwd packages/opencode typecheck passed；npx --yes bun@1.3.13
+        --cwd packages/preview test passed；PYTHONPATH=research-tools/src python -m
+        unittest discover -s research-tools/tests passed 18 tests；scripts/check-readme-version.ps1
+        passed；scripts/check-changelog-format.ps1 -IncludeArchives passed；TaskFlow
+        validate_changelog_format、validate_changelog_versions、validate_task passed；git
+        diff --check passed。Root CHANGELOG 已将内部 release/0.8.5 分支标记收口为 [pre-release]，并新增检查阻断
+        root CHANGELOG 暴露 [release/... ]。
+      agent: codex
+    last_run: '2026-05-12T00:11:16.832385'
+    attempt_count: 2
+  meta: {}
+outputs:
+- type: directory
+  path: packages/opencode/src/paper
+  description: 模型候选池、动态路由、Nature skill 检查与 Paper API 支持
+- type: directory
+  path: packages/opencode/src/cli/cmd/tui
+  description: 中文模型工作台与右侧栏状态
+- type: file
+  path: CHANGELOG
+  description: 按 version 收口后的 colon DSL changelog
+- type: file
+  path: scripts/check-changelog-format.ps1
+  description: 增强 changelog shape 检查
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-11T22:58:54.605841'
+  updated_at: '2026-05-12T00:11:28.887773'
+  version: '1'
