@@ -111,8 +111,12 @@ steps:
         passed；TaskFlow validate_task、validate_changelog_format、validate_changelog_versions
         passed。
       agent: paper-fucker-dev-agent
-    last_run: '2026-05-12T07:45:17.679957'
-    attempt_count: 2
+    - timestamp: '2026-05-12T07:45:54.615562'
+      level: info
+      message: 版本记录已提交：2016242 同步 0.9.2-dev 版本记录；实现提交：86722f9 修复 TUI 模型工作台与研究深度切换。
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-12T07:45:54.615562'
+    attempt_count: 3
   meta: {}
 outputs:
 - type: file
@@ -130,10 +134,7 @@ outputs:
 trace:
   logs: []
   attempt_count: 0
-lock:
-  by: paper-fucker-dev-agent
-  at: '2026-05-12T07:14:35.026694'
 meta:
   created_at: '2026-05-12T07:14:23.302814'
-  updated_at: '2026-05-12T07:45:17.679957'
+  updated_at: '2026-05-12T07:46:17.547522'
   version: '1'
