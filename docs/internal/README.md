@@ -40,7 +40,7 @@ README 必须把 TUI 和内置能力作为主路径，而不是表现成 CLI-onl
 当前稳定流程：
 
 1. `develop` 完成 readiness。
-2. 创建 `release/0.8.5` 进入手测和 RC 前稳定。
+2. 创建 `release/<version>` 进入手测和 RC 前稳定。
 3. 用户在 release 分支重新初始化多个 provider/key/model role。
 4. 发现问题就在 release 分支修复。
 5. 测试通过后，由用户明确确认是否打 RC tag 或进入正式 release。

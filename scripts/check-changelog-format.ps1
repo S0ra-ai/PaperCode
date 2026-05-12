@@ -83,6 +83,9 @@ foreach ($resolvedPath in $paths) {
       if ($line -ne "    $trim") {
         $problems.Add("${displayPath}:${lineNumber}: version entries must use 4-space indentation")
       }
+      if ($isRootChangelog -and $trim -match '\[release/') {
+        $problems.Add("${displayPath}:${lineNumber}: root CHANGELOG must not expose internal release branch names")
+      }
 
       if ($i -eq 0 -or $lines[$i - 1].Trim().Length -ne 0) {
         $problems.Add("${displayPath}:${lineNumber}: version entries must be preceded by one blank line")

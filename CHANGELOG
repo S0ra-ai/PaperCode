@@ -2,12 +2,36 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.8.8
+:version       0.8.9
 :last_update   2026/05/12
 
 :history
 
-    0.8.8 - 2026/05/12 (bdaa16b) [release/0.8.5]
+    0.8.9 - 2026/05/12 (60de6c7) [pre-release]
+        :brief 模型工作台、动态模型路由与 Nature Skill 内置
+        - feat(model): 新增 PaperModelInventory，记录 provider/model 候选池、allowlist、主决策模型、role overrides、smoke 状态和成本/上下文提示
+        - feat(router): PaperRun 通过 allowlist 动态选择 planner、writer、reviewer、citation、subagent 等角色模型，强制指定未授权模型时生成 pause question
+        - feat(api): 新增 /paper/model-inventory 与 /paper/model-routing/decision，并支持 provider discovery persist 后写入模型候选池
+        - feat(tui): 中文 TUI 新增 Paper Fucker 模型工作台入口，右侧栏显示主决策模型、可用模型数、最近路由和 role 状态
+        - feat(skill): init/doctor 检查并幂等安装内置 nature-paper skill 到 Codex 与 agents skill 目录
+        - docs(readme): README 更新为 0.8.9 pre-release 稳定状态，补充模型工作台、Nature skill 与内置能力说明
+        - chore(changelog): root CHANGELOG 收口 0.8.5-dev 巨型条目，禁止 active changelog 出现 :commits 聚合块、异常缩进和超长聚合项
+        :src
+            - packages/opencode/src/paper/model-inventory.ts - model inventory, allowlist and routing decisions
+            - packages/opencode/src/paper/skill-install.ts - first-party nature-paper skill inspection and local install
+            - packages/opencode/src/paper/run.ts - PaperRun model routing diagnostics and pause questions
+            - packages/opencode/src/server/routes/instance/httpapi/groups/paper.ts - model inventory and routing HttpApi contracts
+            - packages/opencode/src/server/routes/instance/httpapi/handlers/paper.ts - provider discovery persistence and model workbench handlers
+            - packages/opencode/src/cli/cmd/tui/component/dialog-paper-model-roles.tsx - Chinese model workbench dialog
+            - packages/opencode/src/cli/cmd/tui/routes/paper/index.tsx - PaperRun sidebar model workbench summary
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test targeted model/workbench/api/init suites passed, 51 tests
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+            - npx --yes bun@1.3.13 --cwd packages/preview test passed
+            - PYTHONPATH=research-tools/src python -m unittest discover -s research-tools/tests passed, 18 tests
+            - scripts/check-readme-version.ps1 and scripts/check-changelog-format.ps1 -IncludeArchives passed
+
+    0.8.8 - 2026/05/12 (bdaa16b) [pre-release]
         :brief 修复初始化命令首次体验
         - fix(init): init/doctor/reset 默认输出中文摘要，完整内部 JSON 改为 --json 模式
         - fix(init): 默认配置恢复 DeepSeek provider 模板，避免 default_model 指向不存在 endpoint
@@ -31,7 +55,7 @@
             - paper_fucker.exe init doctor --home .\\tmp\\init-ux-smoke-home printed Chinese health summary without DB migration noise
             - paper_fucker.exe init --home .\\tmp\\init-ux-json-home --json preserved full machine-readable JSON output
 
-    0.8.7 - 2026/05/12 (d0b7dd1) [release/0.8.5]
+    0.8.7 - 2026/05/12 (d0b7dd1) [pre-release]
         :brief 修复 CLI 用户可见版本面跟随 CHANGELOG
         - fix(version): 构建时从根 CHANGELOG :version 注入 PAPER_FUCKER_VERSION
         - fix(cli): paper_fucker --version、debug 与 TUI sidebar 使用产品版本，不再暴露内部预览构建号
@@ -48,7 +72,7 @@
             - bun run build passed; build smoke paper_fucker --version returned 0.8.7 after CHANGELOG/README sync
             - paper_fucker.exe init --home .\\tmp\\init-version-smoke-home passed with bounded defaults
 
-    0.8.6 - 2026/05/12 (e0d3c8a) [release/0.8.5]
+    0.8.6 - 2026/05/12 (e0d3c8a) [pre-release]
         :brief 修复首次运行入口、品牌字形与 provider 订阅残留
         - fix(tui): Paper Fucker TUI ASCII 字形修正为清晰 PAPER，不再显示 PAPEE/Pepee 误读字形
         - fix(provider): TUI 与 embedded Web provider 列表隐藏 opencode/opencode-go 订阅入口，移除 Zen/Go upsell 弹窗和订阅文案
