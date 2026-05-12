@@ -17,6 +17,7 @@ describe("paper model role router", () => {
       "reviewer",
       "citation_checker",
       "cheap_summarizer",
+      "subagent",
     ])
   })
 
