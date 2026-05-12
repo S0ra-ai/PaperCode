@@ -10,6 +10,7 @@ import {
   saveProviderEndpointConfig,
 } from "../../src/paper/model-discovery"
 import {
+  candidatesFromBuiltinProviders,
   loadPaperModelInventory,
   routePaperModel,
   updatePaperModelAllowlist,
@@ -150,6 +151,33 @@ describe("paper provider model discovery", () => {
     expect(decision.source).toBe("blocked")
     expect(decision.diagnostics).toContain("forced_model_not_allowed")
     expect(decision.reason).toContain("不在允许列表")
+  })
+
+  test("persists built-in OpenCode provider models into the Paper allowlist", async () => {
+    const home = await tmpHome()
+    const candidates = candidatesFromBuiltinProviders({
+      "github-copilot": {
+        name: "GitHub Copilot",
+        models: {
+          "claude-opus-4.7": { name: "Claude Opus 4.7" },
+        },
+      },
+    })
+    const inventory = await updatePaperModelAllowlist(["github-copilot/claude-opus-4.7"], {
+      home,
+      decision_model: "github-copilot/claude-opus-4.7",
+      candidates,
+    })
+
+    expect(inventory.candidates.find((candidate) => candidate.model_ref === "github-copilot/claude-opus-4.7")).toMatchObject({
+      provider_id: "github-copilot",
+      source: "opencode_builtin",
+      allowed: true,
+    })
+    expect(routePaperModel(inventory, { role: "planner" })).toMatchObject({
+      source: "decision_model",
+      selected_model: "github-copilot/claude-opus-4.7",
+    })
   })
 
   test("ships a provider matrix smoke script that reads local secrets without echoing keys", async () => {

@@ -13,6 +13,7 @@ export type PromptInfo = {
   input: string
   mode?: "normal" | "shell"
   budget_tier?: PaperPromptBudgetTier
+  workspace_path?: string
   parts: (
     | Omit<FilePart, "id" | "messageID" | "sessionID">
     | Omit<AgentPart, "id" | "messageID" | "sessionID">

@@ -458,6 +458,7 @@ export function parsePaperWorkbenchPrompt(prompt: string | PromptInfo): PaperRun
 
   return {
     topic: normalizedTopic,
+    workspace_path: typeof prompt === "string" ? undefined : prompt.workspace_path,
     code_paths: codePaths,
     paper_files: paperFiles,
     dataset_paths: datasetPaths,

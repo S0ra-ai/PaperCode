@@ -44,6 +44,16 @@ describe("TUI PaperRun workbench", () => {
     expect(request.quality_mode).toBe("reviewable_bundle")
   })
 
+  test("uses the current conversation workspace path as PaperRun workspace", () => {
+    const request = parsePaperWorkbenchPrompt({
+      input: "基于当前目录生成论文",
+      parts: [],
+      workspace_path: "E:/Project/example-paper",
+    })
+
+    expect(request.workspace_path).toBe("E:/Project/example-paper")
+  })
+
   test("submission research depth enables submission candidate checks", () => {
     const request = parsePaperWorkbenchPrompt({
       input: "准备 Nature 风格投稿候选包",
