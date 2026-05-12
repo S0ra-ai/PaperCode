@@ -13,7 +13,6 @@ import {
   onMount,
   batch,
   Show,
-  on,
 } from "solid-js"
 import { win32DisableProcessedInput, win32InstallCtrlCGuard } from "./win32"
 import { Flag } from "@opencode-ai/core/flag/flag"
@@ -29,7 +28,6 @@ import { StartupLoading } from "@tui/component/startup-loading"
 import { SyncProvider, useSync } from "@tui/context/sync"
 import { SyncProviderV2 } from "@tui/context/sync-v2"
 import { LocalProvider, useLocal } from "@tui/context/local"
-import { DialogPaperModelRoles } from "@tui/component/dialog-paper-model-roles"
 import { DialogStatus } from "@tui/component/dialog-status"
 import { DialogThemeList } from "@tui/component/dialog-theme-list"
 import { DialogHelp } from "./ui/dialog-help"
@@ -40,6 +38,8 @@ import { KeybindProvider, useKeybind } from "@tui/context/keybind"
 import { ThemeProvider, useTheme } from "@tui/context/theme"
 import { Home } from "@tui/routes/home"
 import { PaperRunDashboard } from "@tui/routes/paper"
+import { PaperModelWorkbenchPage } from "@tui/routes/paper-models"
+import { PaperFolderPickerPage } from "@tui/routes/paper-folder"
 import { Session } from "@tui/routes/session"
 import { PromptHistoryProvider } from "./component/prompt/history"
 import { FrecencyProvider } from "./component/prompt/frecency"
@@ -61,10 +61,6 @@ import { createTuiApi } from "@/cli/cmd/tui/plugin/api"
 import { TuiPluginRuntime } from "@/cli/cmd/tui/plugin/runtime"
 import type { RouteMap } from "@/cli/cmd/tui/plugin/api"
 import { FormatError, FormatUnknownError } from "@/cli/error"
-import path from "path"
-import { stat } from "fs/promises"
-import { DialogPrompt } from "./ui/dialog-prompt"
-import { setPaperConversationWorkspace } from "@tui/util/paper-conversation-workspace"
 
 import type { EventSource } from "./context/sdk"
 
@@ -249,21 +245,6 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
     renderer,
   })
 
-  async function choosePaperWorkspaceDirectory() {
-    const value = await DialogPrompt.show(dialog, "选择当前对话工作目录", {
-      placeholder: "例如 E:\\Project\\paper_fucker 或 ./examples",
-      description: () => <text fg={theme.textMuted}>只影响当前 TUI 对话里的新 PaperRun，不写入全局配置。</text>,
-    })
-    if (!value) return
-    const resolved = path.resolve(value.trim())
-    const info = await stat(resolved).catch(() => undefined)
-    if (!info?.isDirectory()) {
-      toast.show({ variant: "error", message: `目录不可用：${resolved}` })
-      return
-    }
-    setPaperConversationWorkspace(resolved)
-    toast.show({ variant: "success", message: `当前对话工作目录：${resolved}` })
-  }
   const [ready, setReady] = createSignal(false)
   TuiPluginRuntime.init({
     api,
@@ -352,6 +333,16 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
       return
     }
 
+    if (route.data.type === "paper-models") {
+      renderer.setTerminalTitle("paper_fucker | models")
+      return
+    }
+
+    if (route.data.type === "paper-folder") {
+      renderer.setTerminalTitle("paper_fucker | folder")
+      return
+    }
+
     if (route.data.type === "plugin") {
       renderer.setTerminalTitle(`OC | ${route.data.id}`)
     }
@@ -419,17 +410,6 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
     })
   })
 
-  createEffect(
-    on(
-      () => sync.status === "complete" && sync.data.provider.length === 0,
-      (isEmpty, wasEmpty) => {
-        // only trigger when we transition into an empty-provider state
-        if (!isEmpty || wasEmpty) return
-        dialog.replace(() => <DialogPaperModelRoles />)
-      },
-    ),
-  )
-
   command.register(() => [
     {
       title: "Switch session",
@@ -464,7 +444,8 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
       category: "Agent",
       hidden: true,
       onSelect: () => {
-        dialog.replace(() => <DialogPaperModelRoles />)
+        route.navigate({ type: "paper-models" })
+        dialog.clear()
       },
     },
     {
@@ -476,7 +457,8 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
         aliases: ["paper-models", "model-workbench"],
       },
       onSelect: () => {
-        dialog.replace(() => <DialogPaperModelRoles />)
+        route.navigate({ type: "paper-models" })
+        dialog.clear()
       },
     },
     {
@@ -488,7 +470,8 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
         aliases: ["workspace", "cwd"],
       },
       onSelect: () => {
-        void choosePaperWorkspaceDirectory()
+        route.navigate({ type: "paper-folder" })
+        dialog.clear()
       },
     },
     {
@@ -534,7 +517,8 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
       category: "Agent",
       hidden: true,
       onSelect: () => {
-        dialog.replace(() => <DialogPaperModelRoles />)
+        route.navigate({ type: "paper-models" })
+        dialog.clear()
       },
     },
     {
@@ -543,7 +527,8 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
       category: "Agent",
       hidden: true,
       onSelect: () => {
-        dialog.replace(() => <DialogPaperModelRoles />)
+        route.navigate({ type: "paper-models" })
+        dialog.clear()
       },
     },
     {
@@ -571,7 +556,8 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
       category: "Agent",
       hidden: true,
       onSelect: () => {
-        dialog.replace(() => <DialogPaperModelRoles />)
+        route.navigate({ type: "paper-models" })
+        dialog.clear()
       },
     },
     {
@@ -589,7 +575,8 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
       suggested: false,
       hidden: true,
       onSelect: () => {
-        dialog.replace(() => <DialogPaperModelRoles />)
+        route.navigate({ type: "paper-models" })
+        dialog.clear()
       },
       category: "Provider",
     },
@@ -927,6 +914,12 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
           </Match>
           <Match when={route.data.type === "paper"}>
             <PaperRunDashboard />
+          </Match>
+          <Match when={route.data.type === "paper-models"}>
+            <PaperModelWorkbenchPage />
+          </Match>
+          <Match when={route.data.type === "paper-folder"}>
+            <PaperFolderPickerPage />
           </Match>
         </Switch>
       </Show>

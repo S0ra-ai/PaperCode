@@ -19,6 +19,16 @@ export interface PaperWorkbenchSubmitResult {
   snapshot: PaperRunSnapshot
 }
 
+export interface PaperApiErrorPayload {
+  error?: {
+    schema_version?: string
+    code?: string
+    message?: string
+    action?: string
+    log_path?: string
+  }
+}
+
 export interface PaperWorkbenchApiInput {
   baseUrl: string
   directory?: string
@@ -494,7 +504,13 @@ export async function submitPaperWorkbenchPrompt(
     headers: apiHeaders(input.directory, true),
     body: JSON.stringify(request),
   })
-  const payload = await readJsonResponse<{ run?: PaperRunSnapshot }>(response, "PaperRun 创建失败")
+  const payload = await readJsonResponse<{ run?: PaperRunSnapshot } & PaperApiErrorPayload>(response, "PaperRun 创建失败")
+  if (payload.error) {
+    const detail = [payload.error.message, payload.error.action, payload.error.log_path ? `日志目录：${payload.error.log_path}` : undefined]
+      .filter(Boolean)
+      .join(" ")
+    throw new Error(detail || "PaperRun 创建失败。")
+  }
   if (!payload.run?.run_id) throw new Error("PaperRun 创建响应缺少 run_id。")
   return {
     runID: payload.run.run_id,
