@@ -7,9 +7,12 @@ import { createSimpleContext } from "../../context/helper"
 import { appendFile, writeFile } from "fs/promises"
 import type { AgentPart, FilePart, TextPart } from "@opencode-ai/sdk/v2"
 
+export type PaperPromptBudgetTier = "quick" | "standard" | "deep" | "submission" | "custom"
+
 export type PromptInfo = {
   input: string
   mode?: "normal" | "shell"
+  budget_tier?: PaperPromptBudgetTier
   parts: (
     | Omit<FilePart, "id" | "messageID" | "sessionID">
     | Omit<AgentPart, "id" | "messageID" | "sessionID">

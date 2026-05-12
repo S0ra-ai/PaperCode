@@ -220,7 +220,7 @@ export function createDialogProviderOptions() {
 
 export function DialogProvider() {
   const options = createDialogProviderOptions()
-  return <DialogSelect title="Connect a provider" options={options()} />
+  return <DialogSelect title="添加 provider" options={options()} />
 }
 
 interface AutoMethodProps {
