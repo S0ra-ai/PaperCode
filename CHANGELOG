@@ -2,10 +2,24 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.9.2.1-dev
+:version       0.9.2.2-dev
 :last_update   2026/05/12
 
 :history
+
+    0.9.2.2-dev - 2026/05/12 (9a6c4e3) [develop]
+        :brief 防止 TUI 非 JSON 响应触发 fatal
+        - fix(tui): 新增 readTuiJsonResponse，服务返回空响应、HTML 或非 JSON 时转为中文诊断，不再暴露原生 Failed to parse JSON fatal
+        - fix(models): 模型工作台读取和更新 allowlist/决策模型时使用安全 JSON 解析，读取失败留在对话内展示错误
+        - fix(paperrun): PaperRun 创建和读取路径使用安全 JSON 解析，避免非 JSON 响应打崩 TUI
+        :src
+            - packages/opencode/src/cli/cmd/tui/util/http.ts - shared safe TUI JSON response reader
+            - packages/opencode/src/cli/cmd/tui/component/dialog-paper-model-roles.tsx - guarded model workbench requests
+            - packages/opencode/src/cli/cmd/tui/routes/paper/workbench.ts - guarded PaperRun JSON requests
+            - packages/opencode/test/cli/tui/paper-json-response.test.ts - non-JSON response regression tests
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/cli/tui/paper-json-response.test.ts test/cli/tui/paper-workbench.test.ts test/cli/tui/paper-visible-commands.test.ts test/paper/model-discovery.test.ts passed, 20 tests
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
 
     0.9.2.1-dev - 2026/05/12 (bc44385) [develop]
         :brief 修复 TUI Prompt 初始化顺序导致的启动崩溃
