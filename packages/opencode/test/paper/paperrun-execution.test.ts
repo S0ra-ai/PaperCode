@@ -3,9 +3,20 @@ import { mkdir, mkdtemp, rm, writeFile } from "fs/promises"
 import { setTimeout as sleep } from "node:timers/promises"
 import os from "os"
 import path from "path"
-import { createPaperRun, PAPER_RESEARCH_STAGE_IDS, type PaperRunRuntimeOptions } from "@/paper"
+import {
+  createPaperRun,
+  PAPER_MODEL_ROLES,
+  PAPER_RESEARCH_STAGE_IDS,
+  type PaperModelRole,
+  type PaperRunRuntimeOptions,
+} from "@/paper"
 
 const now = "2026-05-10T00:00:00Z"
+const TEST_MODEL = "test-provider/test-model"
+
+function testModelRoles(): Record<PaperModelRole, string> {
+  return Object.fromEntries(PAPER_MODEL_ROLES.map((role) => [role, TEST_MODEL])) as Record<PaperModelRole, string>
+}
 
 const cleanup: string[] = []
 
@@ -103,6 +114,7 @@ describe("PaperRun default execution engine", () => {
         target_profile: "generic-preprint",
         language: "zh-CN",
         budget_tier: "standard",
+        model_roles: testModelRoles(),
       },
       runtimeOptions(workspace, home),
     )
@@ -172,6 +184,7 @@ describe("PaperRun default execution engine", () => {
         target_profile: "generic-preprint",
         language: "zh-CN",
         budget_tier: "standard",
+        model_roles: testModelRoles(),
       },
       runtimeOptions(workspace, home),
     )
@@ -220,6 +233,7 @@ describe("PaperRun default execution engine", () => {
         target_profile: "generic-preprint",
         language: "zh-CN",
         budget_tier: "standard",
+        model_roles: testModelRoles(),
       },
       runtimeOptions(workspace, home),
     )
