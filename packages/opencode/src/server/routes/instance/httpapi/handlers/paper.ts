@@ -34,6 +34,8 @@ import * as Stream from "effect/Stream"
 import { HttpServerResponse } from "effect/unstable/http"
 import { HttpApiBuilder, HttpApiError } from "effect/unstable/httpapi"
 import * as Sse from "effect/unstable/encoding/Sse"
+import os from "os"
+import path from "path"
 import { InstanceHttpApi } from "../api"
 import {
   ModelRoleAssignmentPayload,
@@ -53,6 +55,33 @@ function mapPaperError(error: unknown) {
 
 function mapPaperBadRequest() {
   return new HttpApiError.BadRequest({})
+}
+
+function errorText(error: unknown) {
+  if (error instanceof Error) return error.message
+  if (typeof error === "string") return error
+  try {
+    return JSON.stringify(error)
+  } catch {
+    return String(error)
+  }
+}
+
+function paperLogDirectory(home = process.env.PAPER_FUCKER_TEST_HOME ?? process.env.PAPER_FUCKER_HOME ?? os.homedir()) {
+  return path.join(home, ".paper_fucker", "data", "log")
+}
+
+function paperRunCreateError(error: unknown) {
+  const message = errorText(error)
+  return {
+    error: {
+      schema_version: "PaperApiError.v1",
+      code: "paper_run_create_failed",
+      message: `PaperRun 创建失败：${message}`,
+      action: "请检查 /models 主决策模型、可用模型和 /folder 当前工作目录；详细堆栈见 Paper Fucker 日志。",
+      log_path: paperLogDirectory(),
+    },
+  }
 }
 
 function paperOptions(directory: string) {
@@ -106,14 +135,17 @@ export const paperHandlers = HttpApiBuilder.group(InstanceHttpApi, "paper", (han
       payload: typeof PaperRunCreatePayload.Type
     }) {
       const instance = yield* InstanceState.context
-      const run = yield* Effect.tryPromise({
-        try: () => createPaperRun(normalizeCreatePayload(ctx.payload), paperOptions(instance.directory)),
-        catch: mapPaperBadRequest,
+      return yield* Effect.promise(async () => {
+        try {
+          const run = await createPaperRun(normalizeCreatePayload(ctx.payload), paperOptions(instance.directory))
+          return {
+            run: run.snapshot,
+            run_dir: run.run_dir,
+          }
+        } catch (error) {
+          return paperRunCreateError(error)
+        }
       })
-      return {
-        run: run.snapshot,
-        run_dir: run.run_dir,
-      }
     })
 
     const getRun = Effect.fn("PaperHttpApi.getRun")(function* (ctx: { params: { runID: string } }) {
