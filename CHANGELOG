@@ -2,10 +2,16 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.9.0-dev
+:version       0.9.0.1-dev
 :last_update   2026/05/12
 
 :history
+
+    0.9.0.1-dev - 2026/05/12 (9036219) [develop]
+        :brief 修复 research-tools 裸 unittest 入口
+        - test(research-tools): tests 自举 research-tools/src 到 sys.path，使 python -m unittest discover -s research-tools/tests 可直接通过
+        :test
+            - python -m unittest discover -s research-tools/tests passed, 18 tests
 
     0.9.0-dev - 2026/05/12 (f04c7c8) [develop]
         :brief 开发态重置与 Paper Fucker TUI/实时监控重构
@@ -30,7 +36,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
             - npx --yes bun@1.3.13 --cwd packages/preview test passed, 3 pass / 0 fail
             - PYTHONPATH=research-tools/src python -m unittest discover -s research-tools/tests passed, 18 tests
-            - 裸 python -m unittest discover -s research-tools/tests fails without PYTHONPATH because package source is not on sys.path
+            - 裸 python unittest 入口问题已在 0.9.0.1-dev 修复
         :taskflow
             - 新增并执行 dev-reset-from-prerelease、tui-paper-workbench-surface、model-workbench-command-routing、environment-workbench、live-preview-monitor、visible-command-surface-audit、paper-workbench-ux-acceptance 任务链
 
