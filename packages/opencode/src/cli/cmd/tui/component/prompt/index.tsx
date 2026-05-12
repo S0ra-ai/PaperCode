@@ -17,7 +17,7 @@ import { editorSelectionKey, useEditorContext, type EditorSelection } from "@tui
 import { MessageID, PartID } from "@/session/schema"
 import { createStore, produce, unwrap } from "solid-js/store"
 import { useKeybind } from "@tui/context/keybind"
-import { usePromptHistory, type PromptInfo } from "./history"
+import { usePromptHistory, type PaperPromptBudgetTier, type PromptInfo } from "./history"
 import { computePromptTraits } from "./traits"
 import { assign } from "./part"
 import { usePromptStash } from "./stash"
@@ -88,6 +88,34 @@ const money = new Intl.NumberFormat("en-US", {
 function randomIndex(count: number) {
   if (count <= 0) return 0
   return Math.floor(Math.random() * count)
+}
+
+const PAPER_BUDGET_TIERS = ["quick", "standard", "deep", "submission", "custom"] as const
+const PAPER_BUDGET_LABELS: Record<PaperPromptBudgetTier, string> = {
+  quick: "快速",
+  standard: "标准",
+  deep: "深入",
+  submission: "投稿",
+  custom: "自定义",
+}
+
+function normalizePaperBudgetTier(value?: string): PaperPromptBudgetTier {
+  if (PAPER_BUDGET_TIERS.includes(value as PaperPromptBudgetTier)) return value as PaperPromptBudgetTier
+  return "standard"
+}
+
+function nextPaperBudgetTier(value?: string): PaperPromptBudgetTier {
+  const current = normalizePaperBudgetTier(value)
+  const index = PAPER_BUDGET_TIERS.indexOf(current)
+  return PAPER_BUDGET_TIERS[(index + 1) % PAPER_BUDGET_TIERS.length]!
+}
+
+function emptyPaperPrompt(budgetTier?: string): PromptInfo {
+  return {
+    input: "",
+    parts: [],
+    budget_tier: normalizePaperBudgetTier(budgetTier),
+  }
 }
 
 function fadeColor(color: RGBA, alpha: number) {
@@ -282,6 +310,18 @@ export function Prompt(props: PromptProps) {
     dialog.replace(() => <DialogPaperModelRoles />)
   }
 
+  const paperBudgetTier = createMemo(() => normalizePaperBudgetTier(store.prompt.budget_tier))
+
+  function cyclePaperBudgetTier() {
+    const next = nextPaperBudgetTier(store.prompt.budget_tier)
+    setStore("prompt", "budget_tier", next)
+    toast.show({
+      variant: "info",
+      message: `研究深度：${PAPER_BUDGET_LABELS[next]}`,
+      duration: 1600,
+    })
+  }
+
   function dismissEditorContext() {
     setDismissedEditorSelectionKey(editorSelectionKey(editorContext()))
     editor.clearSelection()
@@ -347,10 +387,7 @@ export function Prompt(props: PromptProps) {
     placeholder: number
   }>({
     placeholder: randomIndex(list().length),
-    prompt: {
-      input: "",
-      parts: [],
-    },
+    prompt: emptyPaperPrompt(),
     mode: "normal",
     extmarkToPartIndex: new Map(),
     interrupt: 0,
@@ -558,6 +595,7 @@ export function Prompt(props: PromptProps) {
             // keep only the non-text parts because the text parts were
             // already expanded inline
             parts: updatedNonTextParts,
+            budget_tier: paperBudgetTier(),
           })
           restoreExtmarksFromParts(updatedNonTextParts)
           input.cursorOffset = Bun.stringWidth(content)
@@ -576,6 +614,7 @@ export function Prompt(props: PromptProps) {
                 setStore("prompt", {
                   input: `/${skill} `,
                   parts: [],
+                  budget_tier: paperBudgetTier(),
                 })
                 input.gotoBufferEnd()
               }}
@@ -622,17 +661,14 @@ export function Prompt(props: PromptProps) {
     },
     set(prompt) {
       input.setText(prompt.input)
-      setStore("prompt", prompt)
+      setStore("prompt", { ...prompt, budget_tier: normalizePaperBudgetTier(prompt.budget_tier) })
       restoreExtmarksFromParts(prompt.parts)
       input.gotoBufferEnd()
     },
     reset() {
       input.clear()
       input.extmarks.clear()
-      setStore("prompt", {
-        input: "",
-        parts: [],
-      })
+      setStore("prompt", emptyPaperPrompt(store.prompt.budget_tier))
       setStore("extmarkToPartIndex", new Map())
     },
     submit() {
@@ -646,7 +682,7 @@ export function Prompt(props: PromptProps) {
     if (store.prompt.input) return
     if (saved && saved.prompt.input) {
       input.setText(saved.prompt.input)
-      setStore("prompt", saved.prompt)
+      setStore("prompt", { ...saved.prompt, budget_tier: normalizePaperBudgetTier(saved.prompt.budget_tier) })
       restoreExtmarksFromParts(saved.prompt.parts)
       input.cursorOffset = saved.cursor
     }
@@ -769,10 +805,11 @@ export function Prompt(props: PromptProps) {
         stash.push({
           input: store.prompt.input,
           parts: store.prompt.parts,
+          budget_tier: paperBudgetTier(),
         })
         input.extmarks.clear()
         input.clear()
-        setStore("prompt", { input: "", parts: [] })
+        setStore("prompt", emptyPaperPrompt(store.prompt.budget_tier))
         setStore("extmarkToPartIndex", new Map())
         dialog.clear()
       },
@@ -786,7 +823,7 @@ export function Prompt(props: PromptProps) {
         const entry = stash.pop()
         if (entry) {
           input.setText(entry.input)
-          setStore("prompt", { input: entry.input, parts: entry.parts })
+          setStore("prompt", { input: entry.input, parts: entry.parts, budget_tier: normalizePaperBudgetTier(entry.budget_tier) })
           restoreExtmarksFromParts(entry.parts)
           input.gotoBufferEnd()
         }
@@ -803,7 +840,11 @@ export function Prompt(props: PromptProps) {
           <DialogStash
             onSelect={(entry) => {
               input.setText(entry.input)
-              setStore("prompt", { input: entry.input, parts: entry.parts })
+              setStore("prompt", {
+                input: entry.input,
+                parts: entry.parts,
+                budget_tier: normalizePaperBudgetTier(entry.budget_tier),
+              })
               restoreExtmarksFromParts(entry.parts)
               input.gotoBufferEnd()
             }}
@@ -841,10 +882,7 @@ export function Prompt(props: PromptProps) {
         mode: store.mode,
       })
       input.extmarks.clear()
-      setStore("prompt", {
-        input: "",
-        parts: [],
-      })
+      setStore("prompt", emptyPaperPrompt(store.prompt.budget_tier))
       setStore("extmarkToPartIndex", new Map())
       props.onSubmit?.()
       input.clear()
@@ -1025,10 +1063,7 @@ export function Prompt(props: PromptProps) {
       mode: currentMode,
     })
     input.extmarks.clear()
-    setStore("prompt", {
-      input: "",
-      parts: [],
-    })
+    setStore("prompt", emptyPaperPrompt(store.prompt.budget_tier))
     setStore("extmarkToPartIndex", new Map())
     props.onSubmit?.()
 
@@ -1298,10 +1333,7 @@ export function Prompt(props: PromptProps) {
                 if (keybind.match("input_clear", e) && store.prompt.input !== "") {
                   input.clear()
                   input.extmarks.clear()
-                  setStore("prompt", {
-                    input: "",
-                    parts: [],
-                  })
+                  setStore("prompt", emptyPaperPrompt(store.prompt.budget_tier))
                   setStore("extmarkToPartIndex", new Map())
                   return
                 }
@@ -1326,6 +1358,11 @@ export function Prompt(props: PromptProps) {
                     return
                   }
                 }
+                if (store.mode === "normal" && keybind.match("paper_budget_cycle", e)) {
+                  cyclePaperBudgetTier()
+                  e.preventDefault()
+                  return
+                }
                 if (store.mode === "normal") autocomplete.onKeyDown(e)
                 if (!autocomplete.visible) {
                   if (
@@ -1337,7 +1374,7 @@ export function Prompt(props: PromptProps) {
 
                     if (item) {
                       input.setText(item.input)
-                      setStore("prompt", item)
+                      setStore("prompt", { ...item, budget_tier: normalizePaperBudgetTier(item.budget_tier) })
                       setStore("mode", item.mode ?? "normal")
                       restoreExtmarksFromParts(item.parts)
                       e.preventDefault()
@@ -1465,13 +1502,19 @@ export function Prompt(props: PromptProps) {
                         {store.mode === "shell" ? "动作" : "PaperRun"}
                       </text>
                       <Show when={store.mode === "normal"}>
+                        <box flexDirection="row" gap={1}>
+                          <text fg={fadeColor(theme.textMuted, modelMetaAlpha())}>·</text>
+                          <text fg={fadeColor(theme.secondary, modelMetaAlpha())}>
+                            {PAPER_BUDGET_LABELS[paperBudgetTier()]}研究
+                          </text>
+                        </box>
                         <Show
                           when={hasSelectedModel()}
                           fallback={
                             <box flexDirection="row" gap={1}>
                               <text fg={fadeColor(theme.textMuted, modelMetaAlpha())}>·</text>
                               <text fg={fadeColor(theme.warning, modelMetaAlpha())}>未配置模型</text>
-                              <text fg={fadeColor(theme.textMuted, modelMetaAlpha())}>输入 /models 添加 provider</text>
+                              <text fg={fadeColor(theme.textMuted, modelMetaAlpha())}>输入 /models 配置</text>
                             </box>
                           }
                         >
@@ -1670,9 +1713,14 @@ export function Prompt(props: PromptProps) {
                       )}
                     </Match>
                     <Match when={true}>
-                      <text fg={theme.text}>
-                        {keybind.print("command_list")} <span style={{ fg: theme.textMuted }}>模型 / 环境 / 预览</span>
-                      </text>
+                      <box flexDirection="row" gap={2}>
+                        <text fg={theme.text}>
+                          {keybind.print("paper_budget_cycle")} <span style={{ fg: theme.textMuted }}>深度</span>
+                        </text>
+                        <text fg={theme.text}>
+                          {keybind.print("command_list")} <span style={{ fg: theme.textMuted }}>模型 / 环境</span>
+                        </text>
+                      </box>
                     </Match>
                   </Switch>
                 </Match>

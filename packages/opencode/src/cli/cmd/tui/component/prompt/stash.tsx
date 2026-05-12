@@ -10,6 +10,7 @@ import type { PromptInfo } from "./history"
 export type StashEntry = {
   input: string
   parts: PromptInfo["parts"]
+  budget_tier?: PromptInfo["budget_tier"]
   timestamp: number
 }
 
