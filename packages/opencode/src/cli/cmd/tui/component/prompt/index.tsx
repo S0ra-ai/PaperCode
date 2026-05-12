@@ -924,6 +924,7 @@ export function Prompt(props: PromptProps) {
       input.clear()
       return true
     }
+    if (props.onSubmitPrompt) return false
     const selectedModel = local.model.current()
     if (!selectedModel) {
       void promptModelWarning()

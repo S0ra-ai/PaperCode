@@ -1,6 +1,6 @@
 # Paper Fucker
 
-当前版本：<!-- version:start -->0.9.2.4-dev<!-- version:end --> ｜ 作者：k1d ([ZhuchenZhong](https://github.com/ZhuchenZhong)) ｜ 状态：开发态 ｜ 许可证：private-first / UNLICENSED
+当前版本：<!-- version:start -->0.10.0-dev<!-- version:end --> ｜ 作者：k1d ([ZhuchenZhong](https://github.com/ZhuchenZhong)) ｜ 状态：开发态 ｜ 许可证：private-first / UNLICENSED
 
 Paper Fucker 是一个中文优先、私有优先的论文研究与产出工作台。你给它研究主题、代码仓库、数据集、实验日志或已有论文材料，它负责把任务推进成可审查论文包：研究规划、资料检索、代码理解、实验复现、证据账本、真实性审查、实时预览和最终导出。
 
@@ -53,13 +53,12 @@ macOS / Linux 编译后从仓库根目录运行：
 
 ## 模型工作台
 
-输入 `/models` 打开模型工作台。流程是：
+输入 `/models` 打开模型工作台。它分成四块：
 
-1. 选择内置 provider（例如 GitHub Copilot），或添加自定义 OpenAI-compatible `base_url`。
-2. 填写认证信息，系统调用 `/models` 拉取模型列表。
-3. 勾选允许 Paper Fucker 使用的模型。
-4. 选择主决策模型。
-5. 可选：为 planner、literature、code、experiment、writer、reviewer、citation、summarizer、subagent 等阶段强制指定模型。
+1. Provider 管理：选择内置 provider（例如 GitHub Copilot），或添加自定义 OpenAI-compatible `base_url`。
+2. 主模型：选择一个主决策模型，用来决定不同阶段和子 agent 默认使用哪些模型。
+3. 可用模型：勾选允许 Paper Fucker 使用的模型；不会默认全量启用候选模型。
+4. 阶段模型：planner、literature、code、experiment、writer、reviewer、citation、summarizer、subagent 可保持自动选择，也可强制指定已允许模型。
 
 从零启动时不会显示 GLM、DeepSeek 或任何旧 OpenCode fallback。未配置允许模型时，工作台只显示“未配置模型”，并引导你进入 `/models` 添加 provider、勾选允许模型和选择主决策模型。
 
