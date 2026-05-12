@@ -1,6 +1,6 @@
 id: tui-model-workspace-run-hardening
 title: TUI 模型、工作目录与 PaperRun 创建链路硬化
-status: in_progress
+status: done
 priority: high
 owner: codex
 tags:
@@ -144,7 +144,7 @@ steps:
   meta: {}
 - id: step-6-merge-cleanup
   title: 合回 develop 并清理功能分支
-  status: in_progress
+  status: done
   owner: codex
   depends_on:
   - step-5-tests-docs-version
@@ -158,8 +158,15 @@ steps:
       message: Preparing to merge feature/tui-model-workspace-run-hardening back into
         develop with Git Flow branch cleanup.
       agent: codex
-    last_run: '2026-05-12T14:56:28.158729'
-    attempt_count: 1
+    - timestamp: '2026-05-12T14:59:38.133296'
+      level: info
+      message: Merged feature/tui-model-workspace-run-hardening into develop with
+        --no-ff and deleted the local feature branch. TaskFlow finish_git_branch timed
+        out before changing git state, so merge was completed manually with the same
+        Git Flow target and no main/tag operations.
+      agent: codex
+    last_run: '2026-05-12T14:59:38.133296'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: directory
@@ -182,5 +189,5 @@ lock:
   at: '2026-05-12T13:53:42.188998'
 meta:
   created_at: '2026-05-12T13:53:33.833232'
-  updated_at: '2026-05-12T14:56:28.158729'
+  updated_at: '2026-05-12T14:59:38.133296'
   version: '1'
