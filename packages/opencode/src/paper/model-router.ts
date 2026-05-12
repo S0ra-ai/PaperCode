@@ -7,6 +7,7 @@ export const PAPER_MODEL_ROLES = [
   "reviewer",
   "citation_checker",
   "cheap_summarizer",
+  "subagent",
 ] as const
 
 export type PaperModelRole = (typeof PAPER_MODEL_ROLES)[number]
