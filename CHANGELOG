@@ -2,10 +2,30 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.10.0-dev
+:version       0.10.1-dev
 :last_update   2026/05/12
 
 :history
+
+    0.10.1-dev - 2026/05/12 (51712c9f) [feature/tui-model-workspace-run-hardening]
+        :brief 强化 TUI 模型工作台、工作目录选择和 PaperRun 创建诊断
+        - feat(tui): /models 改为独立全屏模型工作台，分离 Provider、候选模型、可用模型、主决策模型、阶段模型和诊断页面
+        - feat(models): 可用模型改为 allowlist 唯一事实源，候选模型只代表发现结果，批量多选后一次保存
+        - feat(workspace): /folder 改为全屏目录选择器，当前对话工作目录显示在首页并随 PaperRun workspace_path 发送
+        - fix(models): stale candidate.allowed 与 stale decision_model 不再反向污染 allowlist，历史 allowlist 缺候选元数据时返回明确诊断
+        - fix(tui): 首页输入 /models 或 /folder 直接进入对应工作台，Paper 首页禁用旧 shell 入口和旧模型 fallback
+        - fix(api): PaperRun 创建失败返回结构化中文 error/action/log_path，前端不再显示裸 _tag: BadRequest
+        :src
+            - packages/opencode/src/cli/cmd/tui/routes/paper-models.tsx - full-screen model workbench
+            - packages/opencode/src/cli/cmd/tui/routes/paper-folder.tsx - full-screen folder picker
+            - packages/opencode/src/paper/model-inventory.ts - allowlist and routing semantics
+            - packages/opencode/src/server/routes/instance/httpapi/handlers/paper.ts - structured PaperRun create diagnostics
+            - packages/opencode/src/cli/cmd/tui/component/prompt/index.tsx - PaperRun prompt model/workspace display and legacy shell guard
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test passed, 2615 pass, 0 fail
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+            - npx --yes bun@1.3.13 --cwd packages/preview test passed, 3 tests
+            - python -m unittest discover -s research-tools/tests passed, 18 tests
 
     0.10.0-dev - 2026/05/12 (fa7b3da7) [develop]
         :brief 重构 /models 模型工作台，支持 Provider 管理、主模型、可用模型和阶段模型自动/强制配置
