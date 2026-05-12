@@ -1,6 +1,6 @@
 id: model-provider-management-workspace
 title: 完善模型 provider 管理与当前对话工作目录选择
-status: in_progress
+status: done
 priority: high
 owner: paper-fucker-dev-agent
 tags:
@@ -17,7 +17,7 @@ execution:
 steps:
 - id: builtin-provider-inventory
   title: 内置 provider 进入 Paper 模型候选池
-  status: todo
+  status: done
   owner: paper-fucker-dev-agent
   depends_on: []
   description: 将 OpenCode provider/model 转为 PaperModelCandidate，并在 allowlist/决策模型保存时持久化候选。
@@ -25,12 +25,18 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-12T10:08:19.872794'
+      level: info
+      message: OpenCode 内置 provider/model 已通过 PaperModelCandidate 合并进 PaperModelInventory；GitHub
+        Copilot 等底座模型可被 allowlist 和主决策模型引用。
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-12T10:08:19.872794'
+    attempt_count: 2
   meta: {}
 - id: model-workbench-management
   title: 模型工作台管理能力与刷新
-  status: todo
+  status: done
   owner: paper-fucker-dev-agent
   depends_on: []
   description: 支持选择内置 provider/model、管理 allowlist/主决策模型，保存后通知首页刷新。
@@ -38,12 +44,17 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-12T10:08:22.212707'
+      level: info
+      message: /models 支持选择内置 provider/model，保存 allowlist、主决策模型和自定义 endpoint 后通知首页刷新。
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-12T10:08:22.212707'
+    attempt_count: 2
   meta: {}
 - id: conversation-workspace-command
   title: 当前对话工作目录命令
-  status: todo
+  status: done
   owner: paper-fucker-dev-agent
   depends_on: []
   description: 新增 /folder 命令，通过提示输入目录并在当前 TUI 会话内作为 PaperRun workspace_path 默认值。
@@ -51,12 +62,17 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-12T10:08:24.304950'
+      level: info
+      message: 新增 /folder（/workspace、/cwd）命令，选择的目录作为当前 TUI 会话新 PaperRun 的默认 workspace_path。
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-12T10:08:24.304950'
+    attempt_count: 2
   meta: {}
 - id: verify-management-flow
   title: 验证 provider 管理与工作目录流程
-  status: todo
+  status: done
   owner: paper-fucker-dev-agent
   depends_on: []
   description: 覆盖内置 provider、首页刷新、工作目录默认值和类型检查。
@@ -64,8 +80,19 @@ steps:
     mode: sequential
     retry: 0
   trace:
-    logs: []
-    attempt_count: 0
+    logs:
+    - timestamp: '2026-05-12T10:09:34.606518'
+      level: info
+      message: 开始记录验证：模型管理测试、PaperRun API、TUI JSON、命令白名单与 typecheck 已通过；README/changelog
+        版本和缩进检查已通过。
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-12T10:09:42.861468'
+      level: info
+      message: 验证通过：相关 opencode tests 24 个通过，opencode typecheck 通过，README 版本一致，CHANGELOG
+        colon DSL 缩进有效，TaskFlow task 校验通过。
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-12T10:09:42.861468'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -79,10 +106,7 @@ outputs:
 trace:
   logs: []
   attempt_count: 0
-lock:
-  by: paper-fucker-dev-agent
-  at: '2026-05-12T09:51:42.624265'
 meta:
   created_at: '2026-05-12T09:51:33.080478'
-  updated_at: '2026-05-12T09:51:50.767517'
+  updated_at: '2026-05-12T10:10:29.667955'
   version: '1'
