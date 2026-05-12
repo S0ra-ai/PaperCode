@@ -1,5 +1,5 @@
 import { BoxRenderable, RGBA, TextareaRenderable, MouseEvent, PasteEvent, decodePasteBytes } from "@opentui/core"
-import { createEffect, createMemo, onMount, createSignal, onCleanup, on, Show, Switch, Match } from "solid-js"
+import { createEffect, createMemo, createResource, onMount, createSignal, onCleanup, on, Show, Switch, Match } from "solid-js"
 import "opentui-spinner/solid"
 import path from "path"
 import { fileURLToPath } from "url"
@@ -52,6 +52,7 @@ import { DialogWorkspaceUnavailable } from "../dialog-workspace-unavailable"
 import { useArgs } from "@tui/context/args"
 import { Flag } from "@opencode-ai/core/flag/flag"
 import { WorkspaceLabel, type WorkspaceStatus } from "../workspace-label"
+import { readTuiJsonResponse } from "@tui/util/http"
 
 export type PromptProps = {
   sessionID?: string
@@ -97,6 +98,15 @@ const PAPER_BUDGET_LABELS: Record<PaperPromptBudgetTier, string> = {
   deep: "深入",
   submission: "投稿",
   custom: "自定义",
+}
+
+type PaperPromptModelInventoryPayload = {
+  inventory?: {
+    decision_model?: string
+    allowlist?: string[]
+    candidates?: unknown[]
+  }
+  error?: string
 }
 
 function normalizePaperBudgetTier(value?: string): PaperPromptBudgetTier {
@@ -213,7 +223,26 @@ export function Prompt(props: PromptProps) {
   const [workspaceCreating, setWorkspaceCreating] = createSignal(false)
   const [workspaceCreatingDots, setWorkspaceCreatingDots] = createSignal(3)
   const [warpNotice, setWarpNotice] = createSignal<string>()
-  const currentProviderLabel = createMemo(() => local.model.parsed().provider)
+  const [paperModelInventory] = createResource(async (): Promise<PaperPromptModelInventoryPayload> => {
+    try {
+      const response = await sdk.fetch(new URL("paper/model-inventory", sdk.url), {
+        headers: {
+          ...(sdk.directory ? { "x-opencode-directory": sdk.directory } : {}),
+        },
+      })
+      return await readTuiJsonResponse<PaperPromptModelInventoryPayload>(response, "模型状态读取失败")
+    } catch (error) {
+      return { error: error instanceof Error ? error.message : String(error), inventory: { allowlist: [], candidates: [] } }
+    }
+  })
+  const paperDecisionModel = createMemo(() => paperModelInventory()?.inventory?.decision_model)
+  const paperAllowedModelCount = createMemo(() => paperModelInventory()?.inventory?.allowlist?.length ?? 0)
+  const paperCandidateModelCount = createMemo(() => paperModelInventory()?.inventory?.candidates?.length ?? 0)
+  const currentProviderLabel = createMemo(() => {
+    const decision = paperDecisionModel()
+    if (!decision) return paperModelInventory()?.error ? "模型状态读取失败" : "输入 /models 配置"
+    return `允许 ${paperAllowedModelCount()}/${paperCandidateModelCount()}`
+  })
   const hasRightContent = createMemo(() => Boolean(props.right))
   const defaultWorkspaceID = createMemo(() => props.workspaceID ?? project.workspace.current())
 
@@ -1173,12 +1202,9 @@ export function Prompt(props: PromptProps) {
   })
 
   const showVariant = createMemo(() => {
-    const variants = local.model.variant.list()
-    if (variants.length === 0) return false
-    const current = local.model.variant.current()
-    return !!current
+    return false
   })
-  const hasSelectedModel = createMemo(() => Boolean(local.model.current()))
+  const hasSelectedModel = createMemo(() => Boolean(paperDecisionModel() && paperAllowedModelCount() > 0))
 
   const agentMetaAlpha = createFadeIn(() => !!local.agent.current(), animationsEnabled)
   const modelMetaAlpha = createFadeIn(() => !!local.agent.current() && store.mode === "normal", animationsEnabled)
@@ -1524,7 +1550,7 @@ export function Prompt(props: PromptProps) {
                               flexShrink={0}
                               fg={fadeColor(keybind.leader ? theme.textMuted : theme.text, modelMetaAlpha())}
                             >
-                              {local.model.parsed().model}
+                              {paperDecisionModel()}
                             </text>
                             <text fg={fadeColor(theme.textMuted, modelMetaAlpha())}>{currentProviderLabel()}</text>
                             <Show when={showVariant()}>
