@@ -1,6 +1,6 @@
 id: model-workbench-ui-hardening
 title: 模型工作台 UI 重构与阶段模型配置
-status: in_progress
+status: done
 priority: high
 owner: paper-fucker-dev-agent
 tags:
@@ -111,7 +111,7 @@ steps:
   meta: {}
 - id: verify-model-workbench
   title: 验证模型工作台流程
-  status: in_progress
+  status: done
   owner: paper-fucker-dev-agent
   depends_on: []
   description: 覆盖已配置模型后提交不再弹窗、内置 provider、allowlist、主模型、阶段 auto/override 与 typecheck。
@@ -124,8 +124,15 @@ steps:
       level: info
       message: 开始验证模型工作台重构：相关 TUI/PaperRun/model tests 和 typecheck。
       agent: paper-fucker-dev-agent
-    last_run: '2026-05-12T10:36:46.028004'
-    attempt_count: 1
+    - timestamp: '2026-05-12T10:38:25.600246'
+      level: info
+      message: 验证通过：npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/model-router.test.ts
+        test/paper/model-discovery.test.ts test/paper/run-api.test.ts test/cli/tui/paper-workbench.test.ts
+        test/cli/tui/paper-json-response.test.ts test/cli/tui/paper-visible-commands.test.ts
+        通过 28 tests；npx --yes bun@1.3.13 run --cwd packages/opencode typecheck 通过。
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-12T10:38:25.600246'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -137,10 +144,7 @@ outputs:
 trace:
   logs: []
   attempt_count: 0
-lock:
-  by: paper-fucker-dev-agent
-  at: '2026-05-12T10:18:39.916259'
 meta:
   created_at: '2026-05-12T10:18:33.379849'
-  updated_at: '2026-05-12T10:36:46.028004'
+  updated_at: '2026-05-12T10:40:34.817918'
   version: '1'
