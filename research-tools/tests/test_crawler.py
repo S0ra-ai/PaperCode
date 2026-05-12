@@ -1,8 +1,12 @@
 from __future__ import annotations
 
+import sys
 import unittest
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
 from threading import Thread
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from paper_fucker_tools.crawler import crawl_html_fixture, crawl_url, parse_html, scrapling_status
 from paper_fucker_tools.mcp_tools import TOOL_REGISTRY, call_tool

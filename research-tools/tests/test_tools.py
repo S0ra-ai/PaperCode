@@ -2,9 +2,12 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 import tempfile
 import unittest
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from paper_fucker_tools.external_tools import discover_external_tools, save_tool_link
 from paper_fucker_tools.mcp_tools import TOOL_REGISTRY, call_tool
