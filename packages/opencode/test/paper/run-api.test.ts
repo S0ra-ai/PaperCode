@@ -3,6 +3,7 @@ import { ConfigProvider, Layer } from "effect"
 import { HttpRouter } from "effect/unstable/http"
 import { Flag } from "@opencode-ai/core/flag/flag"
 import { stopAllPaperRunLivePreviews } from "../../src/paper/run"
+import { Server } from "../../src/server/server"
 import { PaperPaths } from "../../src/server/routes/instance/httpapi/groups/paper"
 import { ExperimentalHttpApiServer } from "../../src/server/routes/instance/httpapi/server"
 import { resetDatabase } from "../fixture/db"
@@ -63,6 +64,25 @@ afterEach(async () => {
 })
 
 describe("PaperRun HttpApi", () => {
+  test("serves Paper model inventory JSON through the default Hono TUI backend", async () => {
+    await using tmp = await tmpdir({ git: true, config: { formatter: false, lsp: false } })
+    previousPaperHome = process.env.PAPER_FUCKER_TEST_HOME
+    process.env.PAPER_FUCKER_TEST_HOME = tmp.path
+    Flag.OPENCODE_EXPERIMENTAL_HTTPAPI = false
+
+    const response = await Server.Legacy().app.request(PaperPaths.modelInventory, {
+      headers: { "x-opencode-directory": tmp.path },
+    })
+
+    expect(response.status).toBe(200)
+    expect(response.headers.get("content-type")).toContain("application/json")
+    const body = await response.json()
+    expect(body.inventory.schema_version).toBe("PaperModelInventory.v1")
+    expect(body.inventory.allowlist).toEqual([])
+    expect(body.roles).toEqual({})
+    expect(body.routing.every((decision: { source: string }) => decision.source === "blocked")).toBe(true)
+  })
+
   test("serves PaperRun lifecycle, diagnostics, capability, provider, and role endpoints", async () => {
     await using tmp = await tmpdir({ git: true, config: { formatter: false, lsp: false } })
     previousPaperHome = process.env.PAPER_FUCKER_TEST_HOME
