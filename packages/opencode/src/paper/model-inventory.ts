@@ -134,18 +134,15 @@ function normalizeInventory(input: unknown): PaperModelInventory {
       : {}
   const mergedCandidates = candidates
   const mergedAllowlist = new Set(allowlist)
-  for (const candidate of mergedCandidates) {
-    if (candidate.allowed) mergedAllowlist.add(candidate.model_ref)
-  }
   const decisionModel =
     typeof record.decision_model === "string" && record.decision_model.includes("/")
       ? record.decision_model
       : undefined
-  if (decisionModel) mergedAllowlist.add(decisionModel)
+  const validDecisionModel = decisionModel && mergedAllowlist.has(decisionModel) ? decisionModel : undefined
   return {
     schema_version: "PaperModelInventory.v1",
     updated_at: typeof record.updated_at === "string" ? record.updated_at : now(),
-    decision_model: decisionModel,
+    decision_model: validDecisionModel,
     allowlist: Array.from(mergedAllowlist),
     role_overrides,
     candidates: mergedCandidates.map((candidate) => ({
@@ -271,13 +268,12 @@ export function mergeModelCandidates(
   candidates: PaperModelCandidate[],
 ): PaperModelInventory {
   const allowlist = new Set(inventory.allowlist)
-  if (inventory.decision_model) allowlist.add(inventory.decision_model)
   const next = new Map(inventory.candidates.map((candidate) => [candidate.model_ref, candidate]))
   for (const candidate of candidates) {
     const previous = next.get(candidate.model_ref)
     next.set(candidate.model_ref, {
       ...candidate,
-      allowed: allowlist.has(candidate.model_ref) || previous?.allowed === true,
+      allowed: allowlist.has(candidate.model_ref),
       smoke_status: previous?.smoke_status ?? candidate.smoke_status,
       last_smoke_at: previous?.last_smoke_at,
       discovered_at: previous?.discovered_at ?? candidate.discovered_at,
@@ -288,7 +284,7 @@ export function mergeModelCandidates(
     allowlist: Array.from(allowlist),
     candidates: Array.from(next.values()).map((candidate) => ({
       ...candidate,
-      allowed: allowlist.has(candidate.model_ref) || candidate.allowed,
+      allowed: allowlist.has(candidate.model_ref),
     })),
   }
 }
@@ -298,20 +294,20 @@ export async function upsertDiscoveredModels(
   options: PaperModelInventoryStorageOptions & { allow?: string[]; decision_model?: string } = {},
 ) {
   const inventory = await loadPaperModelInventory(options)
+  const allowlist = new Set(inventory.allowlist)
+  for (const ref of options.allow ?? []) allowlist.add(ref)
+  const decisionModel = options.decision_model ?? inventory.decision_model
+  if (decisionModel) allowlist.add(decisionModel)
   const nextCandidates = new Map(inventory.candidates.map((candidate) => [candidate.model_ref, candidate]))
   for (const candidate of candidatesFromDiscovery(discovery)) {
     const previous = nextCandidates.get(candidate.model_ref)
     nextCandidates.set(candidate.model_ref, {
       ...candidate,
-      allowed: previous?.allowed ?? options.allow?.includes(candidate.model_ref) ?? false,
+      allowed: allowlist.has(candidate.model_ref),
       smoke_status: previous?.smoke_status ?? candidate.smoke_status,
       last_smoke_at: previous?.last_smoke_at,
     })
   }
-  const allowlist = new Set(inventory.allowlist)
-  for (const ref of options.allow ?? []) allowlist.add(ref)
-  const decisionModel = options.decision_model ?? inventory.decision_model
-  if (decisionModel) allowlist.add(decisionModel)
   return savePaperModelInventory(
     {
       ...inventory,
@@ -433,12 +429,35 @@ export function routePaperModel(inventory: PaperModelInventory, input: ModelRout
     }
   }
 
-  if (allowedCandidates.length === 0) {
+  if (allowedModels.length === 0) {
     return block("没有可用模型。请先在模型工作台勾选允许模型。", ["model_allowlist_empty"])
   }
 
   if (!decisionModel) {
     return block("未配置主决策模型。请先在模型工作台选择主决策模型。", ["decision_model_missing"])
+  }
+  if (!allowedModels.includes(decisionModel)) {
+    return block("主决策模型不在允许模型列表内。请在模型工作台重新选择。", ["decision_model_not_allowed"])
+  }
+
+  if (allowedCandidates.length === 0) {
+    const parsed = parseOpenCodeModelId(decisionModel, input.role)
+    return {
+      schema_version: "ModelRoutingDecision.v1",
+      decision_id: `${createdAt}:${input.role}:decision`,
+      created_at: createdAt,
+      role: input.role,
+      stage: input.stage,
+      source: "decision_model",
+      decision_model: decisionModel,
+      selected_model: decisionModel,
+      provider_id: parsed.provider_id,
+      model_id: parsed.model_id,
+      candidate_count: 0,
+      allowed_models: allowedModels,
+      reason: "主决策模型已配置，但候选模型元数据暂不可用；按历史可用模型配置继续。",
+      diagnostics: ["model_candidate_metadata_missing"],
+    }
   }
 
   const chosen = [...allowedCandidates].sort((left, right) => scoreCandidate(right, input) - scoreCandidate(left, input))[0]
