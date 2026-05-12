@@ -7,6 +7,7 @@ import { useDialog } from "@tui/ui/dialog"
 import { DialogPrompt } from "@tui/ui/dialog-prompt"
 import { DialogSelect } from "@tui/ui/dialog-select"
 import { useToast } from "@tui/ui/toast"
+import { readTuiJsonResponse } from "@tui/util/http"
 import { DialogProvider } from "./dialog-provider"
 
 type ModelRolesPayload = {
@@ -27,6 +28,7 @@ type ModelRolesPayload = {
     source: string
     reason: string
   }>
+  error?: string
 }
 
 export function DialogPaperModelRoles() {
@@ -34,14 +36,22 @@ export function DialogPaperModelRoles() {
   const { theme } = useTheme()
   const dialog = useDialog()
   const toast = useToast()
-  const [roles, { refetch }] = createResource(async () => {
-    const response = await sdk.fetch(new URL("paper/model-inventory", sdk.url), {
-      headers: {
-        ...(sdk.directory ? { "x-opencode-directory": sdk.directory } : {}),
-      },
-    })
-    if (!response.ok) throw new Error(`HTTP ${response.status}`)
-    return (await response.json()) as ModelRolesPayload
+  const [roles, { refetch }] = createResource(async (): Promise<ModelRolesPayload> => {
+    try {
+      const response = await sdk.fetch(new URL("paper/model-inventory", sdk.url), {
+        headers: {
+          ...(sdk.directory ? { "x-opencode-directory": sdk.directory } : {}),
+        },
+      })
+      return await readTuiJsonResponse<ModelRolesPayload>(response, "模型工作台读取失败")
+    } catch (error) {
+      return {
+        roles: {},
+        routing: [],
+        inventory: { allowlist: [], candidates: [] },
+        error: error instanceof Error ? error.message : String(error),
+      }
+    }
   })
 
   async function postJson<T>(path: string, payload: unknown): Promise<T> {
@@ -53,8 +63,7 @@ export function DialogPaperModelRoles() {
       },
       body: JSON.stringify(payload),
     })
-    if (!response.ok) throw new Error(`HTTP ${response.status}: ${await response.text().catch(() => "")}`)
-    return (await response.json()) as T
+    return await readTuiJsonResponse<T>(response, "模型工作台请求失败")
   }
 
   function candidateRefs(payload: ModelRolesPayload | undefined) {
@@ -71,9 +80,13 @@ export function DialogPaperModelRoles() {
     const decision = payload?.inventory?.decision_model && refs.includes(payload.inventory.decision_model)
       ? payload.inventory.decision_model
       : refs[0]
-    await postJson("paper/model-inventory", { allowlist: refs, decision_model: decision })
-    await refetch()
-    toast.show({ variant: "success", message: `已允许 ${refs.length} 个模型` })
+    try {
+      await postJson("paper/model-inventory", { allowlist: refs, decision_model: decision })
+      await refetch()
+      toast.show({ variant: "success", message: `已允许 ${refs.length} 个模型` })
+    } catch (error) {
+      toast.show({ variant: "error", message: error instanceof Error ? error.message : "模型允许列表更新失败" })
+    }
   }
 
   function chooseDecisionModel() {
@@ -92,10 +105,14 @@ export function DialogPaperModelRoles() {
           category: payload?.inventory?.allowlist.includes(ref) ? "已允许" : "候选",
           description: payload?.inventory?.decision_model === ref ? "当前主决策模型" : undefined,
           async onSelect(ctx) {
-            const allowlist = Array.from(new Set([...(payload?.inventory?.allowlist ?? []), ref]))
-            await postJson("paper/model-inventory", { allowlist, decision_model: ref })
-            ctx.replace(() => <DialogPaperModelRoles />)
-            toast.show({ variant: "success", message: `主决策模型：${ref}` })
+            try {
+              const allowlist = Array.from(new Set([...(payload?.inventory?.allowlist ?? []), ref]))
+              await postJson("paper/model-inventory", { allowlist, decision_model: ref })
+              ctx.replace(() => <DialogPaperModelRoles />)
+              toast.show({ variant: "success", message: `主决策模型：${ref}` })
+            } catch (error) {
+              toast.show({ variant: "error", message: error instanceof Error ? error.message : "主决策模型更新失败" })
+            }
           },
         }))}
         current={payload?.inventory?.decision_model}
@@ -181,6 +198,9 @@ export function DialogPaperModelRoles() {
             <text fg={theme.textMuted}>
               允许模型 {payload().inventory?.allowlist.length ?? 0}/{payload().inventory?.candidates.length ?? 0}
             </text>
+            <Show when={payload().error}>
+              {(error) => <text fg={theme.warning}>{error()}</text>}
+            </Show>
             <Show when={(payload().inventory?.allowlist.length ?? 0) === 0}>
               <box flexDirection="column" gap={0}>
                 <text fg={theme.warning}>尚未配置可用模型。</text>

@@ -5,6 +5,7 @@ import type { ResearchCapability, ResearchCapabilityType } from "@/paper/capabil
 import type { ModelRoutingDecision, OpenCodeModelRef, PaperModelInventory, PaperModelRole } from "@/paper"
 import type { PaperRunControlAction, PaperRunControllerState } from "@/paper/run-controller"
 import { summarizePaperAgentTeam } from "@/paper/agent-team"
+import { readTuiJsonResponse } from "@tui/util/http"
 
 export interface PaperWorkbenchSubmitInput {
   baseUrl: string
@@ -480,8 +481,7 @@ function apiHeaders(directory?: string, json = false) {
 }
 
 async function readJsonResponse<T>(response: Response, label: string): Promise<T> {
-  if (!response.ok) throw new Error(`${label}: HTTP ${response.status}`)
-  return (await response.json()) as T
+  return readTuiJsonResponse<T>(response, label)
 }
 
 export async function submitPaperWorkbenchPrompt(
@@ -493,8 +493,7 @@ export async function submitPaperWorkbenchPrompt(
     headers: apiHeaders(input.directory, true),
     body: JSON.stringify(request),
   })
-  if (!response.ok) throw new Error(`PaperRun 创建失败: HTTP ${response.status}`)
-  const payload = (await response.json()) as { run?: PaperRunSnapshot }
+  const payload = await readJsonResponse<{ run?: PaperRunSnapshot }>(response, "PaperRun 创建失败")
   if (!payload.run?.run_id) throw new Error("PaperRun 创建响应缺少 run_id。")
   return {
     runID: payload.run.run_id,
@@ -513,8 +512,7 @@ export async function fetchPaperRunSnapshot(input: {
       ...(input.directory ? { "x-opencode-directory": input.directory } : {}),
     },
   })
-  if (!response.ok) throw new Error(`PaperRun 读取失败: HTTP ${response.status}`)
-  const payload = (await response.json()) as { run?: PaperRunSnapshot }
+  const payload = await readJsonResponse<{ run?: PaperRunSnapshot }>(response, "PaperRun 读取失败")
   if (!payload.run?.run_id) throw new Error("PaperRun 读取响应缺少 run_id。")
   return payload.run
 }
