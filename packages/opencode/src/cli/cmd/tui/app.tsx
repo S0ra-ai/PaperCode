@@ -462,7 +462,6 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
     {
       title: "Model cycle",
       value: "model.cycle_recent",
-      keybind: "model_cycle_recent",
       category: "Agent",
       hidden: true,
       onSelect: () => {
@@ -472,7 +471,6 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
     {
       title: "Model cycle reverse",
       value: "model.cycle_recent_reverse",
-      keybind: "model_cycle_recent_reverse",
       category: "Agent",
       hidden: true,
       onSelect: () => {
@@ -482,7 +480,6 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
     {
       title: "Favorite cycle",
       value: "model.cycle_favorite",
-      keybind: "model_cycle_favorite",
       category: "Agent",
       hidden: true,
       onSelect: () => {
@@ -492,7 +489,6 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
     {
       title: "Favorite cycle reverse",
       value: "model.cycle_favorite_reverse",
-      keybind: "model_cycle_favorite_reverse",
       category: "Agent",
       hidden: true,
       onSelect: () => {
@@ -521,7 +517,6 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
     {
       title: "Agent cycle",
       value: "agent.cycle",
-      keybind: "agent_cycle",
       category: "Agent",
       hidden: true,
       onSelect: () => {
@@ -531,8 +526,8 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
     {
       title: "Variant cycle",
       value: "variant.cycle",
-      keybind: "variant_cycle",
       category: "Agent",
+      hidden: true,
       onSelect: () => {
         local.model.variant.cycle()
       },
@@ -550,7 +545,6 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
     {
       title: "Agent cycle reverse",
       value: "agent.cycle.reverse",
-      keybind: "agent_cycle_reverse",
       category: "Agent",
       hidden: true,
       onSelect: () => {

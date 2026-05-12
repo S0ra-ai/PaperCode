@@ -33,6 +33,28 @@ describe("TUI PaperRun workbench", () => {
     expect(request.language).toBe("zh-CN")
   })
 
+  test("uses the TUI-selected research depth when no prompt flag overrides it", () => {
+    const request = parsePaperWorkbenchPrompt({
+      input: "验证递归 agent 对大型仓库的论文产出能力",
+      parts: [],
+      budget_tier: "deep",
+    })
+
+    expect(request.budget_tier).toBe("deep")
+    expect(request.quality_mode).toBe("reviewable_bundle")
+  })
+
+  test("submission research depth enables submission candidate checks", () => {
+    const request = parsePaperWorkbenchPrompt({
+      input: "准备 Nature 风格投稿候选包",
+      parts: [],
+      budget_tier: "submission",
+    })
+
+    expect(request.budget_tier).toBe("submission")
+    expect(request.quality_mode).toBe("submission_candidate")
+  })
+
   test("classifies attached files into PaperRun material inputs", () => {
     const request = parsePaperWorkbenchPrompt({
       input: "基于这些材料生成论文",
