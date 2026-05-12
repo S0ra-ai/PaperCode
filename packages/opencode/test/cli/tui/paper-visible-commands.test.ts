@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test"
+import { ConfigKeybinds } from "../../../src/config/keybinds"
 import { isPaperVisibleCommandOption } from "../../../src/cli/cmd/tui/component/dialog-command"
 import { isPaperVisibleSlashCommand, PaperVisibleCommandRegistry } from "../../../src/cli/cmd/tui/paper-visible-commands"
 
@@ -46,5 +47,14 @@ describe("Paper Fucker visible command surface", () => {
         category: "Agent",
       }),
     ).toBe(false)
+  })
+
+  test("moves Shift+Tab from legacy agent switching to PaperRun research depth", () => {
+    const keybinds = ConfigKeybinds.Keybinds.parse({})
+
+    expect(keybinds.agent_cycle).toBe("none")
+    expect(keybinds.agent_cycle_reverse).toBe("none")
+    expect(keybinds.variant_cycle).toBe("none")
+    expect(keybinds.paper_budget_cycle).toBe("shift+tab")
   })
 })

@@ -356,6 +356,7 @@ function readFlagValue(token: string, tokens: string[], index: number) {
 export function parsePaperWorkbenchPrompt(prompt: string | PromptInfo): PaperRunCreateRequest {
   const input = typeof prompt === "string" ? prompt : prompt.input
   const parts = typeof prompt === "string" ? [] : prompt.parts
+  const promptBudget = typeof prompt === "string" ? undefined : prompt.budget_tier
   const tokens = tokenize(input.trim())
   const topic: string[] = []
   const codePaths: string[] = []
@@ -462,8 +463,8 @@ export function parsePaperWorkbenchPrompt(prompt: string | PromptInfo): PaperRun
     experiment_logs: experimentLogs,
     target_profile: profile,
     language: language ?? "zh-CN",
-    budget_tier: budget ?? "standard",
-    quality_mode: quality,
+    budget_tier: budget ?? promptBudget ?? "standard",
+    quality_mode: quality === "submission_candidate" || budget === "submission" || promptBudget === "submission" ? "submission_candidate" : quality,
   }
 }
 
