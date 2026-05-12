@@ -1,0 +1,88 @@
+id: model-provider-management-workspace
+title: 完善模型 provider 管理与当前对话工作目录选择
+status: in_progress
+priority: high
+owner: paper-fucker-dev-agent
+tags:
+- tui
+- models
+- providers
+- workspace
+depends_on: []
+description: Paper Fucker 模型工作台需要管理自定义与内置 OpenCode provider，支持 GitHub Copilot 等已有
+  provider 的模型进入 Paper allowlist；设置后首页立即显示主决策模型；新增选择工作目录命令，默认只影响当前 TUI 对话。
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: builtin-provider-inventory
+  title: 内置 provider 进入 Paper 模型候选池
+  status: todo
+  owner: paper-fucker-dev-agent
+  depends_on: []
+  description: 将 OpenCode provider/model 转为 PaperModelCandidate，并在 allowlist/决策模型保存时持久化候选。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: model-workbench-management
+  title: 模型工作台管理能力与刷新
+  status: todo
+  owner: paper-fucker-dev-agent
+  depends_on: []
+  description: 支持选择内置 provider/model、管理 allowlist/主决策模型，保存后通知首页刷新。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: conversation-workspace-command
+  title: 当前对话工作目录命令
+  status: todo
+  owner: paper-fucker-dev-agent
+  depends_on: []
+  description: 新增 /folder 命令，通过提示输入目录并在当前 TUI 会话内作为 PaperRun workspace_path 默认值。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: verify-management-flow
+  title: 验证 provider 管理与工作目录流程
+  status: todo
+  owner: paper-fucker-dev-agent
+  depends_on: []
+  description: 覆盖内置 provider、首页刷新、工作目录默认值和类型检查。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: file
+  path: packages/opencode/src/paper/model-inventory.ts
+- type: file
+  path: packages/opencode/src/cli/cmd/tui/component/dialog-paper-model-roles.tsx
+- type: file
+  path: packages/opencode/src/cli/cmd/tui/component/prompt/index.tsx
+- type: directory
+  path: packages/opencode/test
+trace:
+  logs: []
+  attempt_count: 0
+lock:
+  by: paper-fucker-dev-agent
+  at: '2026-05-12T09:51:42.624265'
+meta:
+  created_at: '2026-05-12T09:51:33.080478'
+  updated_at: '2026-05-12T09:51:50.767517'
+  version: '1'

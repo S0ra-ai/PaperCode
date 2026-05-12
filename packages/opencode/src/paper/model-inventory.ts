@@ -82,6 +82,15 @@ export interface PaperModelInventoryStorageOptions {
   home?: string
 }
 
+export type BuiltinProviderCatalog = Record<
+  string,
+  {
+    id?: string
+    name?: string
+    models?: Record<string, { id?: string; name?: string } | unknown>
+  }
+>
+
 function now() {
   return new Date().toISOString()
 }
@@ -232,6 +241,58 @@ export function candidatesFromDiscovery(discovery: ModelDiscoveryResult): PaperM
   })
 }
 
+export function candidatesFromBuiltinProviders(providers: BuiltinProviderCatalog): PaperModelCandidate[] {
+  const timestamp = now()
+  return Object.entries(providers).flatMap(([providerID, provider]) => {
+    return Object.entries(provider.models ?? {}).map(([modelID, rawModel]) => {
+      const model = rawModel && typeof rawModel === "object" ? (rawModel as { id?: string; name?: string }) : {}
+      const normalizedModelID = model.id ?? modelID
+      const ref = `${providerID}/${normalizedModelID}`
+      return {
+        provider_id: providerID,
+        provider_name: provider.name,
+        model_id: normalizedModelID,
+        model_ref: ref,
+        display_name: model.name ?? normalizedModelID,
+        source: "opencode_builtin" as const,
+        capabilities: inferCapabilities(normalizedModelID),
+        cost_hint: costHint(normalizedModelID),
+        context_hint: contextHint(normalizedModelID),
+        smoke_status: "untested" as const,
+        allowed: false,
+        discovered_at: timestamp,
+      }
+    })
+  })
+}
+
+export function mergeModelCandidates(
+  inventory: PaperModelInventory,
+  candidates: PaperModelCandidate[],
+): PaperModelInventory {
+  const allowlist = new Set(inventory.allowlist)
+  if (inventory.decision_model) allowlist.add(inventory.decision_model)
+  const next = new Map(inventory.candidates.map((candidate) => [candidate.model_ref, candidate]))
+  for (const candidate of candidates) {
+    const previous = next.get(candidate.model_ref)
+    next.set(candidate.model_ref, {
+      ...candidate,
+      allowed: allowlist.has(candidate.model_ref) || previous?.allowed === true,
+      smoke_status: previous?.smoke_status ?? candidate.smoke_status,
+      last_smoke_at: previous?.last_smoke_at,
+      discovered_at: previous?.discovered_at ?? candidate.discovered_at,
+    })
+  }
+  return {
+    ...inventory,
+    allowlist: Array.from(allowlist),
+    candidates: Array.from(next.values()).map((candidate) => ({
+      ...candidate,
+      allowed: allowlist.has(candidate.model_ref) || candidate.allowed,
+    })),
+  }
+}
+
 export async function upsertDiscoveredModels(
   discovery: ModelDiscoveryResult,
   options: PaperModelInventoryStorageOptions & { allow?: string[]; decision_model?: string } = {},
@@ -267,9 +328,14 @@ export async function upsertDiscoveredModels(
 
 export async function updatePaperModelAllowlist(
   modelRefs: string[],
-  options: PaperModelInventoryStorageOptions & { decision_model?: string; role_overrides?: Partial<Record<PaperModelRole, string>> } = {},
+  options: PaperModelInventoryStorageOptions & {
+    decision_model?: string
+    role_overrides?: Partial<Record<PaperModelRole, string>>
+    candidates?: PaperModelCandidate[]
+  } = {},
 ) {
-  const inventory = await loadPaperModelInventory(options)
+  const stored = await loadPaperModelInventory(options)
+  const inventory = options.candidates?.length ? mergeModelCandidates(stored, options.candidates) : stored
   const allowlist = new Set(modelRefs)
   const decisionModel =
     options.decision_model ??

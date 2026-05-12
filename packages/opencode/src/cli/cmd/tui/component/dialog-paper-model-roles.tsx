@@ -8,6 +8,7 @@ import { DialogPrompt } from "@tui/ui/dialog-prompt"
 import { DialogSelect } from "@tui/ui/dialog-select"
 import { useToast } from "@tui/ui/toast"
 import { readTuiJsonResponse } from "@tui/util/http"
+import { notifyPaperModelInventoryChanged } from "@tui/util/paper-model-inventory-events"
 import { DialogProvider } from "./dialog-provider"
 
 type ModelRolesPayload = {
@@ -15,10 +16,12 @@ type ModelRolesPayload = {
     decision_model?: string
     allowlist: string[]
     candidates: Array<{
+      provider_id?: string
       model_ref: string
       display_name: string
       allowed: boolean
       smoke_status: string
+      source?: string
     }>
   }
   roles: Record<string, { provider_id: string; model_id: string }>
@@ -83,6 +86,7 @@ export function DialogPaperModelRoles() {
     try {
       await postJson("paper/model-inventory", { allowlist: refs, decision_model: decision })
       await refetch()
+      notifyPaperModelInventoryChanged()
       toast.show({ variant: "success", message: `已允许 ${refs.length} 个模型` })
     } catch (error) {
       toast.show({ variant: "error", message: error instanceof Error ? error.message : "模型允许列表更新失败" })
@@ -109,6 +113,7 @@ export function DialogPaperModelRoles() {
               const allowlist = Array.from(new Set([...(payload?.inventory?.allowlist ?? []), ref]))
               await postJson("paper/model-inventory", { allowlist, decision_model: ref })
               ctx.replace(() => <DialogPaperModelRoles />)
+              notifyPaperModelInventoryChanged()
               toast.show({ variant: "success", message: `主决策模型：${ref}` })
             } catch (error) {
               toast.show({ variant: "error", message: error instanceof Error ? error.message : "主决策模型更新失败" })
@@ -153,6 +158,7 @@ export function DialogPaperModelRoles() {
         persist: true,
       })
       dialog.replace(() => <DialogPaperModelRoles />)
+      notifyPaperModelInventoryChanged()
       toast.show({ variant: "success", message: `已发现 ${result.models?.length ?? 0} 个模型` })
     } catch (error) {
       dialog.replace(() => <DialogPaperModelRoles />)
@@ -160,11 +166,44 @@ export function DialogPaperModelRoles() {
     }
   }
 
+  function chooseBuiltInModel() {
+    const payload = roles()
+    const candidates = payload?.inventory?.candidates ?? []
+    if (candidates.length === 0) {
+      dialog.replace(() => <DialogProvider />)
+      return
+    }
+    dialog.replace(() => (
+      <DialogSelect
+        title="选择内置 provider/model"
+        options={candidates.map((candidate) => ({
+          title: candidate.model_ref,
+          value: candidate.model_ref,
+          category: candidate.provider_id ?? "Provider",
+          description: `${candidate.display_name}${candidate.allowed ? " · 已允许" : ""}`,
+          async onSelect(ctx) {
+            try {
+              const allowlist = Array.from(new Set([...(payload?.inventory?.allowlist ?? []), candidate.model_ref]))
+              const decision = payload?.inventory?.decision_model ?? candidate.model_ref
+              await postJson("paper/model-inventory", { allowlist, decision_model: decision })
+              notifyPaperModelInventoryChanged()
+              ctx.replace(() => <DialogPaperModelRoles />)
+              toast.show({ variant: "success", message: `已允许 ${candidate.model_ref}` })
+            } catch (error) {
+              toast.show({ variant: "error", message: error instanceof Error ? error.message : "内置模型选择失败" })
+            }
+          },
+        }))}
+        current={payload?.inventory?.decision_model}
+      />
+    ))
+  }
+
   useKeyboard((evt) => {
     if (evt.ctrl || evt.meta) return
     if (evt.name === "a") {
       evt.preventDefault()
-      dialog.replace(() => <DialogProvider />)
+      chooseBuiltInModel()
     }
     if (evt.name === "c") {
       evt.preventDefault()
@@ -248,7 +287,7 @@ export function DialogPaperModelRoles() {
             </For>
             <box flexDirection="column" gap={0} paddingTop={1}>
               <text fg={theme.text}>c 自定义 OpenAI-compatible provider</text>
-              <text fg={theme.text}>a 添加内置 provider</text>
+              <text fg={theme.text}>a 选择内置 provider/model</text>
               <text fg={theme.text}>m 允许全部候选模型</text>
               <text fg={theme.text}>d 选择主决策模型</text>
             </box>

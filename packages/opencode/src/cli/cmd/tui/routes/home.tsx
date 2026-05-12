@@ -13,6 +13,7 @@ import { useEditorContext } from "@tui/context/editor"
 import { useSDK } from "@tui/context/sdk"
 import { useToast } from "@tui/ui/toast"
 import { submitPaperWorkbenchPrompt } from "./paper/workbench"
+import { getPaperConversationWorkspace } from "@tui/util/paper-conversation-workspace"
 
 let once = false
 const placeholder = {
@@ -103,7 +104,10 @@ export function Home() {
                     baseUrl: sdk.url,
                     directory: sdk.directory,
                     fetch: sdk.fetch,
-                    prompt,
+                    prompt: {
+                      ...prompt,
+                      workspace_path: getPaperConversationWorkspace() ?? prompt.workspace_path,
+                    },
                   })
                   router.navigate({
                     type: "paper",
