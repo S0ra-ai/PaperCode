@@ -1,0 +1,74 @@
+id: tui-copilot-model-workbench-routing
+title: 修复 Copilot 场景下模型工作台与 Paper 模型显示
+status: in_progress
+priority: high
+owner: paper-fucker-dev-agent
+tags:
+- tui
+- models
+- copilot
+- paper-api
+depends_on: []
+description: 默认 Hono 后端必须提供 Paper Fucker /paper/* API；/models 在 GitHub Copilot 底座模型存在时仍应读取
+  Paper 模型库存 JSON；未配置 Paper allowlist/决策模型时首页不得显示底座 Copilot/Claude 为 PaperRun 模型。
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: route-paper-api
+  title: 让默认 TUI 后端暴露 /paper/* JSON API
+  status: todo
+  owner: paper-fucker-dev-agent
+  depends_on: []
+  description: 把 Paper routes 从实验后端专属改为默认 Hono TUI 也可访问，并覆盖 /paper/model-inventory
+    JSON 回归。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: separate-paper-model-status
+  title: 首页模型状态只读取 Paper 模型库存
+  status: todo
+  owner: paper-fucker-dev-agent
+  depends_on: []
+  description: Prompt 状态栏不再复用 OpenCode 当前模型；未配置 Paper 模型时显示 /models 引导，配置后显示主决策模型。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: verify-copilot-workbench
+  title: 验证 Copilot/默认后端场景
+  status: todo
+  owner: paper-fucker-dev-agent
+  depends_on: []
+  description: 运行 TUI、Paper API、模型工作台相关测试和类型检查。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: file
+  path: packages/opencode/src/server/routes/instance/index.ts
+- type: file
+  path: packages/opencode/src/cli/cmd/tui/component/prompt/index.tsx
+- type: directory
+  path: packages/opencode/test
+trace:
+  logs: []
+  attempt_count: 0
+lock:
+  by: paper-fucker-dev-agent
+  at: '2026-05-12T09:34:56.965214'
+meta:
+  created_at: '2026-05-12T09:34:48.755126'
+  updated_at: '2026-05-12T09:35:11.407693'
+  version: '1'
