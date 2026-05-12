@@ -112,6 +112,25 @@ describe("TUI PaperRun workbench", () => {
     })
   })
 
+  test("surfaces structured Chinese PaperRun creation diagnostics", async () => {
+    await expect(
+      submitPaperWorkbenchPrompt({
+        baseUrl: "http://localhost:4096",
+        directory: "E:/Project/paper_fucker",
+        prompt: { input: "我想研究关于 agent team 的论文", parts: [] },
+        fetch: async () =>
+          Response.json({
+            error: {
+              code: "paper_run_create_failed",
+              message: "PaperRun 创建失败：workspace_path 缺失",
+              action: "请先用 /folder 选择当前工作目录。",
+              log_path: "C:/Users/13750/.paper_fucker/data/log",
+            },
+          }),
+      }),
+    ).rejects.toThrow("请先用 /folder 选择当前工作目录。")
+  })
+
   test("maps PaperRun snapshot to Chinese dashboard panels", () => {
     const snapshot = {
       run_id: "run-paper",

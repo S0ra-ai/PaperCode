@@ -99,6 +99,15 @@ export function Home() {
               right={<TuiPluginRuntime.Slot name="home_prompt_right" workspace_id={project.workspace.current()} />}
               placeholders={placeholder}
               onSubmitPrompt={async (prompt) => {
+                const command = prompt.input.trim().split(/\s+/)[0]?.toLowerCase()
+                if (command === "/models" || command === "/connect") {
+                  router.navigate({ type: "paper-models" })
+                  return true
+                }
+                if (command === "/folder" || command === "/workspace" || command === "/cwd") {
+                  router.navigate({ type: "paper-folder" })
+                  return true
+                }
                 try {
                   const result = await submitPaperWorkbenchPrompt({
                     baseUrl: sdk.url,
@@ -106,7 +115,7 @@ export function Home() {
                     fetch: sdk.fetch,
                     prompt: {
                       ...prompt,
-                      workspace_path: getPaperConversationWorkspace() ?? prompt.workspace_path,
+                      workspace_path: getPaperConversationWorkspace() ?? prompt.workspace_path ?? sdk.directory,
                     },
                   })
                   router.navigate({

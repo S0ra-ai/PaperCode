@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test } from "bun:test"
 import { existsSync } from "fs"
-import { mkdtemp, readFile, rm } from "fs/promises"
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "fs/promises"
 import path from "path"
 import os from "os"
 import {
@@ -12,6 +12,7 @@ import {
 import {
   candidatesFromBuiltinProviders,
   loadPaperModelInventory,
+  modelInventoryPath,
   routePaperModel,
   updatePaperModelAllowlist,
   upsertDiscoveredModels,
@@ -43,6 +44,61 @@ describe("paper provider model discovery", () => {
     expect(decision.source).toBe("blocked")
     expect(decision.reason).toContain("模型工作台")
     expect(decision.diagnostics).toContain("model_allowlist_empty")
+  })
+
+  test("does not treat stale candidate.allowed or decision_model as user allowlist", async () => {
+    const home = await tmpHome()
+    const file = modelInventoryPath(home)
+    await mkdir(path.dirname(file), { recursive: true })
+    await writeFile(
+      file,
+      JSON.stringify({
+        schema_version: "PaperModelInventory.v1",
+        updated_at: "2026-05-12T00:00:00Z",
+        decision_model: "lab/paper-pro",
+        allowlist: [],
+        role_overrides: {},
+        candidates: [
+          {
+            provider_id: "lab",
+            model_id: "paper-pro",
+            model_ref: "lab/paper-pro",
+            display_name: "Paper Pro",
+            source: "openai_compatible",
+            capabilities: ["general"],
+            cost_hint: "standard",
+            context_hint: "long",
+            smoke_status: "passed",
+            allowed: true,
+            discovered_at: "2026-05-12T00:00:00Z",
+          },
+        ],
+      }),
+      "utf8",
+    )
+
+    const inventory = await loadPaperModelInventory({ home })
+    expect(inventory.decision_model).toBeUndefined()
+    expect(inventory.allowlist).toEqual([])
+    expect(inventory.candidates[0]?.allowed).toBe(false)
+    expect(routePaperModel(inventory, { role: "planner" }).diagnostics).toContain("model_allowlist_empty")
+  })
+
+  test("can route a historical allowlisted decision model even when candidate metadata is unavailable", async () => {
+    const inventory = await updatePaperModelAllowlist(["lab/paper-pro"], {
+      home: await tmpHome(),
+      decision_model: "lab/paper-pro",
+    })
+
+    const decision = routePaperModel(inventory, { role: "planner" })
+    expect(decision).toMatchObject({
+      source: "decision_model",
+      selected_model: "lab/paper-pro",
+      provider_id: "lab",
+      model_id: "paper-pro",
+    })
+    expect(decision.candidate_count).toBe(0)
+    expect(decision.diagnostics).toContain("model_candidate_metadata_missing")
   })
 
   test("discovers OpenAI-compatible /v1/models without leaking API keys", async () => {

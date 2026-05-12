@@ -1,0 +1,186 @@
+id: tui-model-workspace-run-hardening
+title: TUI 模型、工作目录与 PaperRun 创建链路硬化
+status: in_progress
+priority: high
+owner: codex
+tags:
+- tui
+- models
+- paperrun
+- workspace
+- hardening
+depends_on: []
+description: 将 /models 从弹窗升级为独立模型工作台，收紧模型 allowlist 语义，重做工作目录选择，并修复 PaperRun 创建错误诊断。版本
+  0.10.1-dev。
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: step-1-taskflow-branch
+  title: 登记任务并创建 Git Flow 功能分支
+  status: done
+  owner: codex
+  depends_on: []
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-12T13:54:17.251969'
+      level: info
+      message: TaskFlow task created and claimed; prepare_git_branch blocked because
+        the new .plan task file is the expected dirty change.
+      agent: codex
+    - timestamp: '2026-05-12T13:54:33.259839'
+      level: info
+      message: Created feature/tui-model-workspace-run-hardening from develop. Dirty
+        .plan changes are the new TaskFlow task/index and will be committed with this
+        work.
+      agent: codex
+    last_run: '2026-05-12T13:54:33.259839'
+    attempt_count: 2
+  meta: {}
+- id: step-2-model-inventory
+  title: 收紧模型库存语义与结构化错误诊断
+  status: done
+  owner: codex
+  depends_on:
+  - step-1-taskflow-branch
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-12T13:54:59.883312'
+      level: info
+      message: Starting model inventory semantic hardening and structured Paper API
+        diagnostics.
+      agent: codex
+    - timestamp: '2026-05-12T14:28:18.018640'
+      level: info
+      message: 'Model inventory semantics hardened: allowlist is the only usable model
+        source; stale candidate.allowed and stale decision_model no longer auto-authorize
+        models; historical allowlisted decision models can route with metadata-missing
+        diagnostics.'
+      agent: codex
+    last_run: '2026-05-12T14:28:18.018640'
+    attempt_count: 2
+  meta: {}
+- id: step-3-model-workbench-page
+  title: 实现全屏 /models 模型工作台与多选可用模型
+  status: done
+  owner: codex
+  depends_on:
+  - step-2-model-inventory
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-12T14:28:27.135014'
+      level: info
+      message: Implementing full-screen /models workbench and command routing.
+      agent: codex
+    - timestamp: '2026-05-12T14:28:35.644022'
+      level: info
+      message: /models now routes to a full-screen Paper Model Workbench page with
+        Provider, candidate models, allowed models, decision model, stage model, and
+        diagnostics tabs. Removed the old DialogPaperModelRoles component and added
+        batch allowlist controls.
+      agent: codex
+    last_run: '2026-05-12T14:28:35.644022'
+    attempt_count: 2
+  meta: {}
+- id: step-4-workspace-picker
+  title: 实现 TUI 文件夹选择与当前工作目录显示
+  status: done
+  owner: codex
+  depends_on:
+  - step-3-model-workbench-page
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-12T14:28:43.000268'
+      level: info
+      message: Implementing full-screen /folder workbench and workspace_path propagation.
+      agent: codex
+    - timestamp: '2026-05-12T14:28:54.368682'
+      level: info
+      message: /folder now opens a full-screen TUI folder picker, updates the current
+        conversation workspace, and PaperRun creation payloads use the selected workspace_path.
+        Home prompt and footer show the current workspace.
+      agent: codex
+    last_run: '2026-05-12T14:28:54.368682'
+    attempt_count: 2
+  meta: {}
+- id: step-5-tests-docs-version
+  title: 补测试、README、CHANGELOG 与版本同步
+  status: done
+  owner: codex
+  depends_on:
+  - step-4-workspace-picker
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-12T14:55:20.016863'
+      level: info
+      message: Running final tests, version checks, changelog format checks, and TaskFlow
+        validations.
+      agent: codex
+    - timestamp: '2026-05-12T14:55:32.718340'
+      level: info
+      message: 'Verification passed: packages/opencode full test suite 2615 pass /
+        0 fail; packages/opencode typecheck passed; packages/preview test passed 3
+        tests; python unittest discover passed 18 tests; README version check passed;
+        CHANGELOG colon DSL check passed; TaskFlow validate_task and validate_changelog_format/versions
+        passed.'
+      agent: codex
+    last_run: '2026-05-12T14:55:32.718340'
+    attempt_count: 2
+  meta: {}
+- id: step-6-merge-cleanup
+  title: 合回 develop 并清理功能分支
+  status: in_progress
+  owner: codex
+  depends_on:
+  - step-5-tests-docs-version
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-12T14:56:28.158729'
+      level: info
+      message: Preparing to merge feature/tui-model-workspace-run-hardening back into
+        develop with Git Flow branch cleanup.
+      agent: codex
+    last_run: '2026-05-12T14:56:28.158729'
+    attempt_count: 1
+  meta: {}
+outputs:
+- type: directory
+  path: packages/opencode/src/cli/cmd/tui
+  description: Paper Fucker TUI model/workspace flow hardening
+- type: directory
+  path: packages/opencode/src/paper
+  description: model inventory and PaperRun error semantics
+- type: file
+  path: CHANGELOG
+  description: 0.10.1-dev colon DSL entry
+- type: file
+  path: README.md
+  description: version and TUI-first flow update
+trace:
+  logs: []
+  attempt_count: 0
+lock:
+  by: codex
+  at: '2026-05-12T13:53:42.188998'
+meta:
+  created_at: '2026-05-12T13:53:33.833232'
+  updated_at: '2026-05-12T14:56:28.158729'
+  version: '1'

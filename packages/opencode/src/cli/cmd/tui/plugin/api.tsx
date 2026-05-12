@@ -103,6 +103,8 @@ function routeCurrent(route: ReturnType<typeof useRoute>): TuiPluginApi["route"]
       },
     }
   }
+  if (route.data.type === "paper-models") return { name: "paper-models" }
+  if (route.data.type === "paper-folder") return { name: "paper-folder" }
 
   return {
     name: route.data.id,

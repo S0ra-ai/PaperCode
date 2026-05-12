@@ -35,7 +35,6 @@ import { Locale } from "@/util/locale"
 import { formatDuration } from "@/util/format"
 import { createColors, createFrames } from "../../ui/spinner.ts"
 import { useDialog } from "@tui/ui/dialog"
-import { DialogPaperModelRoles } from "../dialog-paper-model-roles"
 import { DialogAlert } from "../../ui/dialog-alert"
 import { useToast } from "../../ui/toast"
 import { useKV } from "../../context/kv"
@@ -54,6 +53,7 @@ import { Flag } from "@opencode-ai/core/flag/flag"
 import { WorkspaceLabel, type WorkspaceStatus } from "../workspace-label"
 import { readTuiJsonResponse } from "@tui/util/http"
 import { subscribePaperModelInventoryChanged } from "@tui/util/paper-model-inventory-events"
+import { getPaperConversationWorkspace, subscribePaperConversationWorkspace } from "@tui/util/paper-conversation-workspace"
 
 export type PromptProps = {
   sessionID?: string
@@ -224,6 +224,7 @@ export function Prompt(props: PromptProps) {
   const [workspaceCreating, setWorkspaceCreating] = createSignal(false)
   const [workspaceCreatingDots, setWorkspaceCreatingDots] = createSignal(3)
   const [warpNotice, setWarpNotice] = createSignal<string>()
+  const [paperWorkspacePath, setPaperWorkspacePath] = createSignal<string | undefined>(getPaperConversationWorkspace())
   const [paperModelInventory, { refetch: refetchPaperModelInventory }] = createResource(
     async (): Promise<PaperPromptModelInventoryPayload> => {
       try {
@@ -240,15 +241,23 @@ export function Prompt(props: PromptProps) {
   )
   onMount(() => {
     const unsubscribe = subscribePaperModelInventoryChanged(() => void refetchPaperModelInventory())
-    onCleanup(unsubscribe)
+    const unsubscribeWorkspace = subscribePaperConversationWorkspace(() => setPaperWorkspacePath(getPaperConversationWorkspace()))
+    onCleanup(() => {
+      unsubscribe()
+      unsubscribeWorkspace()
+    })
   })
   const paperDecisionModel = createMemo(() => paperModelInventory()?.inventory?.decision_model)
   const paperAllowedModelCount = createMemo(() => paperModelInventory()?.inventory?.allowlist?.length ?? 0)
-  const paperCandidateModelCount = createMemo(() => paperModelInventory()?.inventory?.candidates?.length ?? 0)
   const currentProviderLabel = createMemo(() => {
     const decision = paperDecisionModel()
     if (!decision) return paperModelInventory()?.error ? "模型状态读取失败" : "输入 /models 配置"
-    return `允许 ${paperAllowedModelCount()}/${paperCandidateModelCount()}`
+    return `可用 ${paperAllowedModelCount()}`
+  })
+  const paperWorkspaceLabel = createMemo(() => {
+    const value = paperWorkspacePath() ?? sdk.directory
+    if (!value) return "当前目录未读取"
+    return Locale.truncateMiddle(value, 42)
   })
   const hasRightContent = createMemo(() => Boolean(props.right))
   const defaultWorkspaceID = createMemo(() => props.workspaceID ?? project.workspace.current())
@@ -343,7 +352,8 @@ export function Prompt(props: PromptProps) {
       message: "请先在模型工作台配置可用模型",
       duration: 3000,
     })
-    dialog.replace(() => <DialogPaperModelRoles />)
+    route.navigate({ type: "paper-models" })
+    dialog.clear()
   }
 
   function dismissEditorContext() {
@@ -904,8 +914,6 @@ export function Prompt(props: PromptProps) {
     if (workspaceCreating()) return false
     if (autocomplete?.visible) return false
     if (!store.prompt.input) return false
-    const agent = local.agent.current()
-    if (!agent) return false
     const trimmed = store.prompt.input.trim()
     if (trimmed === "exit" || trimmed === "quit" || trimmed === ":q") {
       void exit()
@@ -915,7 +923,7 @@ export function Prompt(props: PromptProps) {
     if (handled) {
       history.append({
         ...store.prompt,
-        mode: store.mode,
+        mode: "normal",
       })
       input.extmarks.clear()
       setStore("prompt", emptyPaperPrompt(store.prompt.budget_tier))
@@ -925,6 +933,8 @@ export function Prompt(props: PromptProps) {
       return true
     }
     if (props.onSubmitPrompt) return false
+    const agent = local.agent.current()
+    if (!agent) return false
     const selectedModel = local.model.current()
     if (!selectedModel) {
       void promptModelWarning()
@@ -1379,7 +1389,7 @@ export function Prompt(props: PromptProps) {
                     return
                   }
                 }
-                if (e.name === "!" && input.visualCursor.offset === 0) {
+                if (!props.onSubmitPrompt && e.name === "!" && input.visualCursor.offset === 0) {
                   setStore("placeholder", randomIndex(shell().length))
                   setStore("mode", "shell")
                   e.preventDefault()
@@ -1409,7 +1419,7 @@ export function Prompt(props: PromptProps) {
                     if (item) {
                       input.setText(item.input)
                       setStore("prompt", { ...item, budget_tier: normalizePaperBudgetTier(item.budget_tier) })
-                      setStore("mode", item.mode ?? "normal")
+                      setStore("mode", props.onSubmitPrompt ? "normal" : (item.mode ?? "normal"))
                       restoreExtmarksFromParts(item.parts)
                       e.preventDefault()
                       if (direction === -1) input.cursorOffset = 0
@@ -1571,6 +1581,11 @@ export function Prompt(props: PromptProps) {
                             </Show>
                           </box>
                         </Show>
+                        <box flexDirection="row" gap={1}>
+                          <text fg={fadeColor(theme.textMuted, modelMetaAlpha())}>·</text>
+                          <text fg={fadeColor(theme.textMuted, modelMetaAlpha())}>目录</text>
+                          <text fg={fadeColor(theme.text, modelMetaAlpha())}>{paperWorkspaceLabel()}</text>
+                        </box>
                       </Show>
                     </>
                   )}

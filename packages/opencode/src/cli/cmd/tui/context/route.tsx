@@ -20,13 +20,21 @@ export type PaperRoute = {
   snapshot?: PaperRunSnapshot
 }
 
+export type PaperModelsRoute = {
+  type: "paper-models"
+}
+
+export type PaperFolderRoute = {
+  type: "paper-folder"
+}
+
 export type PluginRoute = {
   type: "plugin"
   id: string
   data?: Record<string, unknown>
 }
 
-export type Route = HomeRoute | SessionRoute | PaperRoute | PluginRoute
+export type Route = HomeRoute | SessionRoute | PaperRoute | PaperModelsRoute | PaperFolderRoute | PluginRoute
 
 export const { use: useRoute, provider: RouteProvider } = createSimpleContext({
   name: "Route",
