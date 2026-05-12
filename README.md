@@ -1,6 +1,6 @@
 # Paper Fucker
 
-当前版本：<!-- version:start -->0.9.2-dev<!-- version:end --> ｜ 作者：k1d ([ZhuchenZhong](https://github.com/ZhuchenZhong)) ｜ 状态：开发态 ｜ 许可证：private-first / UNLICENSED
+当前版本：<!-- version:start -->0.9.2.1-dev<!-- version:end --> ｜ 作者：k1d ([ZhuchenZhong](https://github.com/ZhuchenZhong)) ｜ 状态：开发态 ｜ 许可证：private-first / UNLICENSED
 
 Paper Fucker 是一个中文优先、私有优先的论文研究与产出工作台。你给它研究主题、代码仓库、数据集、实验日志或已有论文材料，它负责把任务推进成可审查论文包：研究规划、资料检索、代码理解、实验复现、证据账本、真实性审查、实时预览和最终导出。
 

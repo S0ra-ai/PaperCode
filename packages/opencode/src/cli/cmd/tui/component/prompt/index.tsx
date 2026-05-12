@@ -310,18 +310,6 @@ export function Prompt(props: PromptProps) {
     dialog.replace(() => <DialogPaperModelRoles />)
   }
 
-  const paperBudgetTier = createMemo(() => normalizePaperBudgetTier(store.prompt.budget_tier))
-
-  function cyclePaperBudgetTier() {
-    const next = nextPaperBudgetTier(store.prompt.budget_tier)
-    setStore("prompt", "budget_tier", next)
-    toast.show({
-      variant: "info",
-      message: `研究深度：${PAPER_BUDGET_LABELS[next]}`,
-      duration: 1600,
-    })
-  }
-
   function dismissEditorContext() {
     setDismissedEditorSelectionKey(editorSelectionKey(editorContext()))
     editor.clearSelection()
@@ -392,6 +380,18 @@ export function Prompt(props: PromptProps) {
     extmarkToPartIndex: new Map(),
     interrupt: 0,
   })
+
+  const paperBudgetTier = createMemo(() => normalizePaperBudgetTier(store.prompt.budget_tier))
+
+  function cyclePaperBudgetTier() {
+    const next = nextPaperBudgetTier(store.prompt.budget_tier)
+    setStore("prompt", "budget_tier", next)
+    toast.show({
+      variant: "info",
+      message: `研究深度：${PAPER_BUDGET_LABELS[next]}`,
+      duration: 1600,
+    })
+  }
 
   createEffect(
     on(
