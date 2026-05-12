@@ -2,10 +2,37 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.8.9
+:version       0.9.0-dev
 :last_update   2026/05/12
 
 :history
+
+    0.9.0-dev - 2026/05/12 (f04c7c8) [develop]
+        :brief 开发态重置与 Paper Fucker TUI/实时监控重构
+        - feat(tui): 首页改为中文 PaperRun 入口，移除 Build/Plan、Ask anything、CLI flag 示例和旧 agents/commands 提示
+        - feat(models): /models 成为模型工作台入口，隐藏 /connect、旧模型切换和 provider fallback，并在无配置时显示未配置模型
+        - feat(environment): 新增 PaperEnvironmentStatus，在 TUI 中展示模型、MCP、Skill、Pandoc、LaTeX、Docker、Python、Preview 和 Nature skill 状态
+        - feat(preview): PaperRun snapshot 更新发布实时事件，TUI 与 token-protected Web Preview 通过 SSE 持续更新
+        - chore(commands): 新增 PaperVisibleCommandRegistry，收口用户可见命令并隐藏旧 OpenCode 聊天/session/agent/variant/订阅入口
+        - docs(readme): README 改为开发态 TUI-first 对外说明，CLI 和 init/doctor 不再作为主流程
+        :src
+            - packages/opencode/src/cli/cmd/tui/app.tsx - 隐藏旧 OpenCode 用户命令并接入 Paper Fucker 模型工作台
+            - packages/opencode/src/cli/cmd/tui/component/prompt/index.tsx - 中文 PaperRun 输入、未配置模型引导和底部提示
+            - packages/opencode/src/cli/cmd/tui/routes/home.tsx - 首页自然语言研究输入示例
+            - packages/opencode/src/cli/cmd/tui/routes/paper/workbench.ts - PaperEnvironmentStatus、文件材料分类和 PaperRun SSE monitor
+            - packages/opencode/src/cli/cmd/tui/routes/paper/index.tsx - dashboard 订阅 live monitor 并显示环境与能力
+            - packages/opencode/src/paper/run.ts - PaperRun live event bus 与 snapshot 发布
+            - packages/opencode/src/server/routes/instance/httpapi/handlers/paper.ts - /paper/runs/:id/events live SSE
+            - packages/preview/src/server.ts - preview handle 支持 updateSnapshot
+            - packages/preview/src/render-queue.ts - replacement snapshot 推送
+        :test
+            - npx --yes bun@1.3.13 --cwd packages/opencode test passed, 2601 pass / 0 fail
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+            - npx --yes bun@1.3.13 --cwd packages/preview test passed, 3 pass / 0 fail
+            - PYTHONPATH=research-tools/src python -m unittest discover -s research-tools/tests passed, 18 tests
+            - 裸 python -m unittest discover -s research-tools/tests fails without PYTHONPATH because package source is not on sys.path
+        :taskflow
+            - 新增并执行 dev-reset-from-prerelease、tui-paper-workbench-surface、model-workbench-command-routing、environment-workbench、live-preview-monitor、visible-command-surface-audit、paper-workbench-ux-acceptance 任务链
 
     0.8.9 - 2026/05/12 (60de6c7) [pre-release]
         :brief 模型工作台、动态模型路由与 Nature Skill 内置
