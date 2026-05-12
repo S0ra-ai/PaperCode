@@ -53,6 +53,7 @@ import { useArgs } from "@tui/context/args"
 import { Flag } from "@opencode-ai/core/flag/flag"
 import { WorkspaceLabel, type WorkspaceStatus } from "../workspace-label"
 import { readTuiJsonResponse } from "@tui/util/http"
+import { subscribePaperModelInventoryChanged } from "@tui/util/paper-model-inventory-events"
 
 export type PromptProps = {
   sessionID?: string
@@ -223,17 +224,23 @@ export function Prompt(props: PromptProps) {
   const [workspaceCreating, setWorkspaceCreating] = createSignal(false)
   const [workspaceCreatingDots, setWorkspaceCreatingDots] = createSignal(3)
   const [warpNotice, setWarpNotice] = createSignal<string>()
-  const [paperModelInventory] = createResource(async (): Promise<PaperPromptModelInventoryPayload> => {
-    try {
-      const response = await sdk.fetch(new URL("paper/model-inventory", sdk.url), {
-        headers: {
-          ...(sdk.directory ? { "x-opencode-directory": sdk.directory } : {}),
-        },
-      })
-      return await readTuiJsonResponse<PaperPromptModelInventoryPayload>(response, "模型状态读取失败")
-    } catch (error) {
-      return { error: error instanceof Error ? error.message : String(error), inventory: { allowlist: [], candidates: [] } }
-    }
+  const [paperModelInventory, { refetch: refetchPaperModelInventory }] = createResource(
+    async (): Promise<PaperPromptModelInventoryPayload> => {
+      try {
+        const response = await sdk.fetch(new URL("paper/model-inventory", sdk.url), {
+          headers: {
+            ...(sdk.directory ? { "x-opencode-directory": sdk.directory } : {}),
+          },
+        })
+        return await readTuiJsonResponse<PaperPromptModelInventoryPayload>(response, "模型状态读取失败")
+      } catch (error) {
+        return { error: error instanceof Error ? error.message : String(error), inventory: { allowlist: [], candidates: [] } }
+      }
+    },
+  )
+  onMount(() => {
+    const unsubscribe = subscribePaperModelInventoryChanged(() => void refetchPaperModelInventory())
+    onCleanup(unsubscribe)
   })
   const paperDecisionModel = createMemo(() => paperModelInventory()?.inventory?.decision_model)
   const paperAllowedModelCount = createMemo(() => paperModelInventory()?.inventory?.allowlist?.length ?? 0)

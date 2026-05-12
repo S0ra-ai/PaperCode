@@ -61,6 +61,10 @@ import { createTuiApi } from "@/cli/cmd/tui/plugin/api"
 import { TuiPluginRuntime } from "@/cli/cmd/tui/plugin/runtime"
 import type { RouteMap } from "@/cli/cmd/tui/plugin/api"
 import { FormatError, FormatUnknownError } from "@/cli/error"
+import path from "path"
+import { stat } from "fs/promises"
+import { DialogPrompt } from "./ui/dialog-prompt"
+import { setPaperConversationWorkspace } from "@tui/util/paper-conversation-workspace"
 
 import type { EventSource } from "./context/sdk"
 
@@ -244,6 +248,22 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
     toast,
     renderer,
   })
+
+  async function choosePaperWorkspaceDirectory() {
+    const value = await DialogPrompt.show(dialog, "选择当前对话工作目录", {
+      placeholder: "例如 E:\\Project\\paper_fucker 或 ./examples",
+      description: () => <text fg={theme.textMuted}>只影响当前 TUI 对话里的新 PaperRun，不写入全局配置。</text>,
+    })
+    if (!value) return
+    const resolved = path.resolve(value.trim())
+    const info = await stat(resolved).catch(() => undefined)
+    if (!info?.isDirectory()) {
+      toast.show({ variant: "error", message: `目录不可用：${resolved}` })
+      return
+    }
+    setPaperConversationWorkspace(resolved)
+    toast.show({ variant: "success", message: `当前对话工作目录：${resolved}` })
+  }
   const [ready, setReady] = createSignal(false)
   TuiPluginRuntime.init({
     api,
@@ -457,6 +477,18 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
       },
       onSelect: () => {
         dialog.replace(() => <DialogPaperModelRoles />)
+      },
+    },
+    {
+      title: "选择当前对话工作目录",
+      value: "paper.workspace.folder",
+      category: "Paper",
+      slash: {
+        name: "folder",
+        aliases: ["workspace", "cwd"],
+      },
+      onSelect: () => {
+        void choosePaperWorkspaceDirectory()
       },
     },
     {

@@ -19,7 +19,9 @@ import {
 } from "@/paper/run"
 import { discoverOpenAICompatibleModels, saveProviderEndpointConfig } from "@/paper/model-discovery"
 import {
+  candidatesFromBuiltinProviders,
   loadPaperModelInventory,
+  mergeModelCandidates,
   modelRolesFromInventory,
   routePaperModel,
   updatePaperModelAllowlist,
@@ -54,7 +56,7 @@ function mapPaperBadRequest() {
 }
 
 function paperOptions(directory: string) {
-  return { workspace: directory }
+  return { ...paperGlobalOptions(), workspace: directory }
 }
 
 function paperGlobalOptions() {
@@ -243,18 +245,34 @@ export const paperHandlers = HttpApiBuilder.group(InstanceHttpApi, "paper", (han
     })
 
     const modelInventory = Effect.fn("PaperHttpApi.modelInventory")(function* () {
-      return yield* Effect.promise(() => paperModelWorkbench(paperGlobalOptions()))
+      const providers = yield* ModelsDev.Service.use((service) => service.get()).pipe(
+        Effect.catch(() => Effect.succeed({})),
+      )
+      return yield* Effect.promise(async () => {
+        const state = await paperModelWorkbench(paperGlobalOptions())
+        const inventory = mergeModelCandidates(state.inventory, candidatesFromBuiltinProviders(providers))
+        return {
+          ...state,
+          inventory,
+          roles: modelRolesFromInventory(inventory),
+          routing: PAPER_MODEL_ROLES.map((role) => routePaperModel(inventory, { role })),
+        }
+      })
     })
 
     const modelInventoryAllowlist = Effect.fn("PaperHttpApi.modelInventoryAllowlist")(function* (ctx: {
       payload: typeof ModelInventoryAllowlistPayload.Type
     }) {
+      const providers = yield* ModelsDev.Service.use((service) => service.get()).pipe(
+        Effect.catch(() => Effect.succeed({})),
+      )
       return yield* Effect.tryPromise({
         try: async () => {
           const inventory = await updatePaperModelAllowlist([...ctx.payload.allowlist], {
             ...paperGlobalOptions(),
             decision_model: ctx.payload.decision_model,
             role_overrides: ctx.payload.roles as Partial<Record<PaperModelRole, string>> | undefined,
+            candidates: candidatesFromBuiltinProviders(providers),
           })
           return { inventory, roles: modelRolesFromInventory(inventory) }
         },
