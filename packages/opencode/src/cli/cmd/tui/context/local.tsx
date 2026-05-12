@@ -185,16 +185,7 @@ export const { use: useLocal, provider: LocalProvider } = createSimpleContext({
           }
         }
 
-        const provider = sync.data.provider[0]
-        if (!provider) return undefined
-        const defaultModel = sync.data.provider_default[provider.id]
-        const firstModel = Object.values(provider.models)[0]
-        const model = defaultModel ?? firstModel?.id
-        if (!model) return undefined
-        return {
-          providerID: provider.id,
-          modelID: model,
-        }
+        return undefined
       })
 
       const currentModel = createMemo(() => {
@@ -202,7 +193,6 @@ export const { use: useLocal, provider: LocalProvider } = createSimpleContext({
         return (
           getFirstValidModel(
             () => a && modelStore.model[a.name],
-            () => a && a.model,
             fallbackModel,
           ) ?? undefined
         )
@@ -223,8 +213,8 @@ export const { use: useLocal, provider: LocalProvider } = createSimpleContext({
           const value = currentModel()
           if (!value) {
             return {
-              provider: "Connect a provider",
-              model: "No provider selected",
+              provider: "模型工作台",
+              model: "未配置模型",
               reasoning: false,
             }
           }

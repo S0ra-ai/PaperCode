@@ -38,10 +38,28 @@ export interface PaperWorkbenchPreviewResponse {
   snapshot?: unknown
 }
 
+export interface PaperRunLiveMonitor {
+  close: () => void
+}
+
+export interface PaperRunPreviewStream {
+  run_id: string
+  connected: boolean
+  last_event?: string
+}
+
 export interface PaperWorkbenchHealthInput {
   mcp?: Record<string, string>
   skills?: Record<string, string>
   toolchain?: Record<string, string>
+}
+
+export interface PaperEnvironmentStatus {
+  name: string
+  label: string
+  status: "available" | "missing" | "optional_missing" | "blocked" | "unknown"
+  message: string
+  next_action?: string
 }
 
 export interface PaperWorkbenchDashboardOptions {
@@ -197,6 +215,7 @@ export interface PaperDashboardState {
   controls: PaperWorkbenchControl[]
   model_roles: PaperWorkbenchModelRoleState[]
   model_workbench: PaperWorkbenchModelWorkbenchState
+  environment_status: PaperEnvironmentStatus[]
   capability_health: PaperWorkbenchCapabilityHealthState[]
   pause_questions: Array<{
     id: string
@@ -301,6 +320,33 @@ function pushValue(target: string[], value: string | undefined) {
   target.push(value.replace(/\\/g, "/"))
 }
 
+function classifyMaterialPath(input: {
+  path?: string
+  mime?: string
+  codePaths: string[]
+  paperFiles: string[]
+  datasetPaths: string[]
+  experimentLogs: string[]
+}) {
+  if (!input.path) return
+  const normalized = input.path.replace(/\\/g, "/")
+  const lower = normalized.toLowerCase()
+  const mime = input.mime?.toLowerCase() ?? ""
+  if (mime.includes("pdf") || /\.(pdf|md|markdown|tex|latex|docx?)$/.test(lower)) {
+    pushValue(input.paperFiles, normalized)
+    return
+  }
+  if (mime.includes("csv") || /\.(csv|tsv|jsonl?|parquet|xlsx?|sqlite|db)$/.test(lower)) {
+    pushValue(input.datasetPaths, normalized)
+    return
+  }
+  if (/\.(log|out|err|trace)$/.test(lower)) {
+    pushValue(input.experimentLogs, normalized)
+    return
+  }
+  pushValue(input.codePaths, normalized)
+}
+
 function readFlagValue(token: string, tokens: string[], index: number) {
   const eq = token.indexOf("=")
   if (eq !== -1) return { value: token.slice(eq + 1), next: index }
@@ -309,6 +355,7 @@ function readFlagValue(token: string, tokens: string[], index: number) {
 
 export function parsePaperWorkbenchPrompt(prompt: string | PromptInfo): PaperRunCreateRequest {
   const input = typeof prompt === "string" ? prompt : prompt.input
+  const parts = typeof prompt === "string" ? [] : prompt.parts
   const tokens = tokenize(input.trim())
   const topic: string[] = []
   const codePaths: string[] = []
@@ -387,6 +434,23 @@ export function parsePaperWorkbenchPrompt(prompt: string | PromptInfo): PaperRun
     topic.push(token)
   }
 
+  for (const part of parts) {
+    if (part.type !== "file") continue
+    const record = part as {
+      filename?: string
+      mime?: string
+      source?: { path?: string }
+    }
+    classifyMaterialPath({
+      path: record.source?.path ?? record.filename,
+      mime: record.mime,
+      codePaths,
+      paperFiles,
+      datasetPaths,
+      experimentLogs,
+    })
+  }
+
   const normalizedTopic = topic.join(" ").trim()
   if (!normalizedTopic) throw new Error("请输入论文主题，或在路径参数后补充研究目标。")
 
@@ -452,6 +516,95 @@ export async function fetchPaperRunSnapshot(input: {
   const payload = (await response.json()) as { run?: PaperRunSnapshot }
   if (!payload.run?.run_id) throw new Error("PaperRun 读取响应缺少 run_id。")
   return payload.run
+}
+
+type PaperRunStreamEvent = {
+  event?: string
+  data?: string
+}
+
+function parseSseChunk(buffer: string): { events: PaperRunStreamEvent[]; rest: string } {
+  const blocks = buffer.split(/\r?\n\r?\n/)
+  const rest = blocks.pop() ?? ""
+  const events = blocks
+    .map((block) => {
+      const event: PaperRunStreamEvent = {}
+      const data: string[] = []
+      for (const line of block.split(/\r?\n/)) {
+        if (line.startsWith("event:")) event.event = line.slice("event:".length).trim()
+        if (line.startsWith("data:")) data.push(line.slice("data:".length).trimStart())
+      }
+      if (data.length) event.data = data.join("\n")
+      return event
+    })
+    .filter((event) => event.event || event.data)
+  return { events, rest }
+}
+
+function snapshotFromSseData(data: string | undefined): PaperRunSnapshot | undefined {
+  if (!data) return
+  try {
+    const parsed = JSON.parse(data) as unknown
+    const record = parsed && typeof parsed === "object" ? (parsed as Record<string, unknown>) : {}
+    const snapshot = record.snapshot ?? parsed
+    if (snapshot && typeof snapshot === "object" && (snapshot as { schema_version?: string }).schema_version === "PaperRun.v1") {
+      return snapshot as PaperRunSnapshot
+    }
+  } catch {
+    return
+  }
+}
+
+export function subscribePaperRunLiveMonitor(
+  input: PaperWorkbenchApiInput & {
+    onSnapshot: (snapshot: PaperRunSnapshot) => void
+    onEvent?: (event: { event: string; data?: unknown }) => void
+    onError?: (error: Error) => void
+  },
+): PaperRunLiveMonitor {
+  const controller = new AbortController()
+  void input
+    .fetch(apiUrl(input.baseUrl, `paper/runs/${encodeURIComponent(input.runID)}/events`), {
+      method: "GET",
+      headers: apiHeaders(input.directory),
+      signal: controller.signal,
+    })
+    .then(async (response) => {
+      if (!response.ok) throw new Error(`PaperRun 实时流连接失败: HTTP ${response.status}`)
+      if (!response.body) throw new Error("PaperRun 实时流缺少响应体。")
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ""
+      while (!controller.signal.aborted) {
+        const next = await reader.read()
+        if (next.done) break
+        buffer += decoder.decode(next.value, { stream: true })
+        const parsed = parseSseChunk(buffer)
+        buffer = parsed.rest
+        for (const event of parsed.events) {
+          const snapshot = snapshotFromSseData(event.data)
+          if (snapshot) input.onSnapshot(snapshot)
+          if (input.onEvent) {
+            let data: unknown = event.data
+            if (event.data) {
+              try {
+                data = JSON.parse(event.data)
+              } catch {
+                data = event.data
+              }
+            }
+            input.onEvent({ event: event.event ?? "message", data })
+          }
+        }
+      }
+    })
+    .catch((error) => {
+      if (controller.signal.aborted) return
+      input.onError?.(error instanceof Error ? error : new Error(String(error)))
+    })
+  return {
+    close: () => controller.abort(),
+  }
 }
 
 function controlEndpoint(snapshot: PaperRunSnapshot, suffix: string) {
@@ -613,6 +766,51 @@ function modelRoleState(roles: Record<string, OpenCodeModelRef>): PaperWorkbench
     model_id: model.model_id,
     provider_model: `${model.provider_id}/${model.model_id}`,
   }))
+}
+
+function createPaperEnvironmentStatus(
+  snapshot: PaperRunSnapshot,
+  health?: PaperWorkbenchHealthInput,
+): PaperEnvironmentStatus[] {
+  const model = modelWorkbenchState(snapshot)
+  const toolchain = health?.toolchain ?? {}
+  const skill = health?.skills ?? {}
+  const statusOf = (name: string) => toolchain[name] ?? "unknown"
+  const available = (name: string) => ["available", "ok", "ready", "installed", "enabled"].includes(statusOf(name))
+  const optionalTool = (name: string, label: string, message: string): PaperEnvironmentStatus => ({
+    name,
+    label,
+    status: available(name) ? "available" : "optional_missing",
+    message: available(name) ? "已可用" : message,
+    next_action: available(name) ? undefined : "可稍后安装；缺失时相关导出或复现能力会降级。",
+  })
+  return [
+    {
+      name: "models",
+      label: "模型工作台",
+      status: model.allowed_models > 0 && model.decision_model ? "available" : "blocked",
+      message:
+        model.allowed_models > 0 && model.decision_model
+          ? `主决策模型 ${model.decision_model}`
+          : "尚未选择允许模型和主决策模型",
+      next_action: model.allowed_models > 0 && model.decision_model ? undefined : "打开 /models 配置 provider、允许模型和主决策模型。",
+    },
+    {
+      name: "skill.nature-paper",
+      label: "Nature Paper Skill",
+      status: ["installed", "enabled", "ok"].includes(skill["nature-paper"] ?? skill["skill.nature-paper"] ?? "")
+        ? "available"
+        : "optional_missing",
+      message: ["installed", "enabled", "ok"].includes(skill["nature-paper"] ?? skill["skill.nature-paper"] ?? "")
+        ? "已安装"
+        : "未检测到本机 skill；generic-preprint 仍可运行。",
+      next_action: "运行模型/环境工作台的 skill 检查，或重新执行 init 安装内置 skill。",
+    },
+    optionalTool("pandoc", "Pandoc", "缺失时 Markdown/LaTeX/DOCX 互转会降级。"),
+    optionalTool("xelatex", "LaTeX", "缺失时 PDF 编译会降级，可先输出 Markdown/LaTeX。"),
+    optionalTool("docker", "Docker", "缺失时容器复现不可用，本机实验和计划仍可运行。"),
+    optionalTool("python", "Python", "缺失时 Python research-tools 与数据处理能力不可用。"),
+  ]
 }
 
 function capabilityLabel(capability: Pick<ResearchCapability, "name" | "title" | "type">) {
@@ -911,6 +1109,7 @@ export function createPaperRunDashboardState(
     controls: createLiveControls(snapshot, controller),
     model_roles: modelRoleState(snapshot.diagnostics.model_roles ?? {}),
     model_workbench: modelWorkbenchState(snapshot),
+    environment_status: createPaperEnvironmentStatus(snapshot, options.health),
     capability_health: capabilityHealthState(options.capabilities, options.health),
     pause_questions: snapshot.pause_questions.map((question) => ({
       id: question.question_id,

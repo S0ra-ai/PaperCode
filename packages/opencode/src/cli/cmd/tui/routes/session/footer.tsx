@@ -56,7 +56,7 @@ export function Footer() {
         <Switch>
           <Match when={store.welcome}>
             <text fg={theme.text}>
-              Get started <span style={{ fg: theme.textMuted }}>/connect</span>
+              先配置模型 <span style={{ fg: theme.textMuted }}>/models</span>
             </text>
           </Match>
           <Match when={connected()}>

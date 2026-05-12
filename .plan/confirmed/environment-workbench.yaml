@@ -1,0 +1,99 @@
+id: environment-workbench
+title: 环境与能力工作台
+status: done
+priority: high
+owner: paper-fucker-dev-agent
+tags:
+- tui
+- doctor
+- environment
+depends_on:
+- model-workbench-command-routing
+description: 把 init/doctor 的裸 JSON 体验降为调试入口，在 TUI 中提供中文环境与能力状态：模型、MCP、Skill、Pandoc、LaTeX、Docker、Python、浏览器
+  Preview、Nature skill。
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: environment-state
+  title: 建立环境状态模型
+  status: done
+  owner: paper-fucker-dev-agent
+  depends_on: []
+  description: 定义 PaperEnvironmentStatus，区分可用、未配置、可选缺失、阻断缺失。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-12T02:53:32.071303'
+      level: info
+      message: 开始建立 TUI 环境与能力状态模型。
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-12T02:53:38.917733'
+      level: info
+      message: 新增 PaperEnvironmentStatus，区分 available、not_configured、optional_missing、blocking_missing，并覆盖模型、Nature
+        skill、Pandoc、LaTeX、Docker、Python、Preview。
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-12T02:53:38.917733'
+    attempt_count: 2
+  meta: {}
+- id: tui-environment-page
+  title: 接入 TUI 环境工作台
+  status: done
+  owner: paper-fucker-dev-agent
+  depends_on: []
+  description: 在 TUI 首页/侧栏/模型工作台显示能力状态和下一步处理建议。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-12T02:53:46.841057'
+      level: info
+      message: 开始将环境状态接入 PaperRun dashboard。
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-12T02:53:54.134243'
+      level: info
+      message: PaperRun dashboard 新增“环境与能力”区，展示状态、消息和下一步处理建议；README 改为引导用户在 TUI 中处理环境问题。
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-12T02:53:54.134243'
+    attempt_count: 2
+  meta: {}
+- id: cli-summary
+  title: 改造 init doctor 输出
+  status: done
+  owner: paper-fucker-dev-agent
+  depends_on: []
+  description: 保留自动化用 JSON 选项，默认输出人类可读中文摘要。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-12T02:54:00.194860'
+      level: info
+      message: 检查 init/doctor 命令定位，确保 README 不再把它作为主要用户体验。
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-12T02:54:06.514177'
+      level: info
+      message: CLI init/doctor 保留为自动化/调试入口；对外 README 和 TUI 提示不再要求用户先运行 init/doctor，环境能力改由
+        TUI /status 和 dashboard 引导。
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-12T02:54:06.514177'
+    attempt_count: 2
+  meta: {}
+outputs:
+- type: directory
+  path: packages/opencode/src/paper/init
+  description: 初始化与环境诊断
+- type: directory
+  path: packages/opencode/src/cli/cmd/tui
+  description: TUI 环境工作台
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-12T02:20:12.086350'
+  updated_at: '2026-05-12T02:54:12.503371'
+  version: '1'

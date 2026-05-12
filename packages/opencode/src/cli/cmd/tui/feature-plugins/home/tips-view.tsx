@@ -30,7 +30,7 @@ function parse(tip: string): TipPart[] {
   return parts
 }
 
-const NO_MODELS_TIP = "运行 {highlight}/connect{/highlight} 添加模型 provider，然后启动论文研究工作流"
+const NO_MODELS_TIP = "打开 {highlight}/models{/highlight} 配置模型 provider，然后启动论文研究工作流"
 
 export function Tips(props: { connected?: boolean }) {
   const theme = useTheme().theme
@@ -53,18 +53,18 @@ export function Tips(props: { connected?: boolean }) {
 
 const TIPS = [
   "输入主题即可创建 PaperRun，系统会自动规划文献、实验、写作、审稿和导出",
-  "输入 {highlight}--code <path>{/highlight} 和主题，可以从代码仓库生成有源码依据的论文草稿",
-  "输入 {highlight}--paper{/highlight}、{highlight}--data{/highlight}、{highlight}--log{/highlight} 可把论文材料、数据和实验日志纳入证据账本",
-  "使用 {highlight}--submission{/highlight} 会切换到 submission_candidate，执行更严格的投稿候选检查",
+  "把代码目录拖入输入框并说明主题，可以从代码仓库生成有源码依据的论文草稿",
+  "把 PDF、Markdown、LaTeX、DOCX、数据表或实验日志拖入输入框，系统会纳入证据账本",
+  "在输入中说明目标期刊或投稿候选，系统会切换到更严格的 submission_candidate 检查",
   "默认输出 {highlight}reviewable_bundle{/highlight}，包含证据账本、审稿报告、复现记录和导出文件",
   "使用 {highlight}@{/highlight} 后接文件名可以快速附加代码、PDF、Markdown、LaTeX 或实验记录",
   "PaperRun 页面右侧栏会显示 cost、token/context、大纲、Agent Tree、Gate 和最近调用",
-  "运行 {highlight}/paper{/highlight} 打开当前 PaperRun 的阶段图、Source Ledger、Claim Ledger 和右侧诊断栏",
-  "运行 {highlight}/models{/highlight} 或 {highlight}Ctrl+X M{/highlight} 查看并切换可用模型",
+  "PaperRun 页面会打开阶段图、Source Ledger、Claim Ledger 和右侧诊断栏",
+  "打开 {highlight}/models{/highlight} 查看 provider、允许模型和主决策模型",
   "在模型角色面板中为 planner、writer、reviewer、citation_checker 分配不同 provider/model",
-  "使用 {highlight}/connect{/highlight} 添加 OpenAI-compatible、DeepSeek 或其他模型 provider",
-  "运行 {highlight}/doctor{/highlight} 检查 MCP、skills、pandoc、LaTeX、Python 和容器工具链",
-  "运行 {highlight}/skills{/highlight} 查看 Nature、IEEE、ACM、Springer 等论文 profile skill",
+  "模型工作台支持内置 provider 和自定义 OpenAI-compatible provider",
+  "环境与能力区会检查 MCP、Skill、Pandoc、LaTeX、Python、Docker 和浏览器 Preview",
+  "内置 Nature、IEEE、ACM、Springer 等论文 profile skill 能力",
   "使用 Nature profile 时，系统会抓取并缓存最新官方作者指南，而不是依赖过期常量",
   "Source Ledger 中的每条文献、代码片段和数据记录都会绑定来源范围或外部证据",
   "Claim Ledger 先于正文生成；无证据 claim 会阻断 final export",
@@ -74,29 +74,20 @@ const TIPS = [
   "预算档 quick、standard、deep、submission 会控制并发、检索、容器复现和成本上限；子 agent 深度由运行态条件停止",
   "多层子 agent 会写入 Agent Tree，方便追踪每个 artifact 的来源和模型",
   "MCP 与 skills 是论文能力总线；文献检索、模板检查、实验和导出都会记录 tool trace",
-  "运行 {highlight}paper_fucker run \"主题\"{/highlight} 可在非交互模式下启动论文工作流",
-  "运行 {highlight}paper_fucker run \"基于 <path> 写一篇系统论文\"{/highlight} 可在 CLI 中提交代码出论文意图",
+  "默认使用 TUI 创建 PaperRun；CLI 仅作为自动化入口",
+  "输入代码路径和论文目标后，系统会自动识别 code-to-paper 意图",
   "在 PaperRun 页面打开 {highlight}Preview{/highlight} 面板可查看只读预览",
-  "运行 {highlight}paper_fucker export <run-id>{/highlight} 导出可审查论文 bundle",
+  "在 PaperRun 页面使用 {highlight}Export{/highlight} 生成可审查论文 bundle",
+  "使用 {highlight}/file{/highlight}、{highlight}/folder{/highlight}、{highlight}/data{/highlight} 或 {highlight}/log{/highlight} 补充材料",
+  "使用 {highlight}/status{/highlight} 查看模型、工具链、MCP、Skill 和 Preview 健康状态",
   themeTip,
-  "使用 {highlight}Ctrl+P{/highlight} 打开命令面板",
-  "使用 {highlight}F2{/highlight} 快速切换最近使用的模型",
+  "使用 {highlight}Ctrl+P{/highlight} 打开 Paper Fucker 命令面板",
+  "使用 {highlight}/models{/highlight} 管理允许模型池",
   "使用 {highlight}Ctrl+X B{/highlight} 显示或隐藏侧边栏",
   "使用 {highlight}Shift+Enter{/highlight} 或 {highlight}Ctrl+J{/highlight} 在输入框换行",
   "使用 {highlight}Escape{/highlight} 暂停当前自动推进，系统会把暂停原因写入 diagnostics",
-  "在 {highlight}~/.paper_fucker/config/tui.json{/highlight} 中保存全局 TUI 设置",
-  "在 {highlight}paper_fucker.json{/highlight} 中配置 MCP、skills、预算档和默认质量模式",
-  "在 {highlight}.paper_fucker/skills/{/highlight} 中安装团队私有论文 skill",
-  "在 {highlight}.paper_fucker/tools/{/highlight} 中添加 Python、R 或 shell 研究工具桥接",
-  "使用 {highlight}{env:VAR_NAME}{/highlight} 或 {highlight}{file:path}{/highlight} 引用本地配置值",
-  '设置 {highlight}"tools": {"bash": false}{/highlight} 可禁用指定工具',
-  '设置 {highlight}"mcp_*": false{/highlight} 可禁用某个 MCP server 的全部工具',
-  "权限 {highlight}external_directory{/highlight} 会保护项目外文件，防止未授权外传",
-  "权限 {highlight}doom_loop{/highlight} 会阻止无限工具调用循环",
-  "运行 {highlight}paper_fucker debug config{/highlight} 排查配置加载问题",
-  "使用 {highlight}--print-logs{/highlight} 在 stderr 查看详细诊断日志",
-  "创建 JSON theme 文件到 {highlight}.paper_fucker/themes/{/highlight} 可自定义论文工作台主题",
-  "运行 {highlight}docker run -it --rm ghcr.io/s0ra-ai/paper_fucker{/highlight} 可使用容器化工作台",
+  "缺少 Pandoc、LaTeX 或 Docker 时，系统会说明受影响能力，而不是阻断所有工作流",
+  "实时 Preview 是只读 localhost 页面，写作、审稿、引用和导出状态会持续更新",
   "运行 {highlight}/help{/highlight} 或 {highlight}Ctrl+X H{/highlight} 查看帮助",
   ...(process.platform === "win32"
     ? ["使用 {highlight}Ctrl+Z{/highlight} 撤销输入框中的改动"]

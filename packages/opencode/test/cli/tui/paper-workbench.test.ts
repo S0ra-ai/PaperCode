@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test"
 import {
   createPaperRunDashboardState,
   parsePaperWorkbenchPrompt,
+  subscribePaperRunLiveMonitor,
   submitPaperWorkbenchPrompt,
 } from "../../../src/cli/cmd/tui/routes/paper/workbench"
 import type { PaperRunSnapshot } from "../../../src/paper/run"
@@ -30,6 +31,23 @@ describe("TUI PaperRun workbench", () => {
     expect(request.budget_tier).toBe("submission")
     expect(request.quality_mode).toBe("submission_candidate")
     expect(request.language).toBe("zh-CN")
+  })
+
+  test("classifies attached files into PaperRun material inputs", () => {
+    const request = parsePaperWorkbenchPrompt({
+      input: "基于这些材料生成论文",
+      parts: [
+        { type: "file", url: "file:///docs/draft.pdf", mime: "application/pdf", filename: "draft.pdf", source: { type: "file", path: "docs/draft.pdf", text: { value: "", start: 0, end: 0 } } },
+        { type: "file", url: "file:///data/results.csv", mime: "text/csv", filename: "results.csv", source: { type: "file", path: "data/results.csv", text: { value: "", start: 0, end: 0 } } },
+        { type: "file", url: "file:///logs/run.log", mime: "text/plain", filename: "run.log", source: { type: "file", path: "logs/run.log", text: { value: "", start: 0, end: 0 } } },
+        { type: "file", url: "file:///src/index.ts", mime: "text/typescript", filename: "index.ts", source: { type: "file", path: "src/index.ts", text: { value: "", start: 0, end: 0 } } },
+      ],
+    })
+
+    expect(request.paper_files).toEqual(["docs/draft.pdf"])
+    expect(request.dataset_paths).toEqual(["data/results.csv"])
+    expect(request.experiment_logs).toEqual(["logs/run.log"])
+    expect(request.code_paths).toEqual(["src/index.ts"])
   })
 
   test("submits home prompt to /paper/runs instead of session chat", async () => {
@@ -167,6 +185,28 @@ describe("TUI PaperRun workbench", () => {
       "模型工作台",
       "模型角色",
     ])
+    expect(state.environment_status.map((item) => item.label)).toContain("模型工作台")
     expect(state.pause_questions[0]!.message).toBe("需要确认数据外传")
+  })
+
+  test("subscribes to PaperRun SSE snapshots for live monitor updates", async () => {
+    const snapshot = { schema_version: "PaperRun.v1", run_id: "run-live" } as PaperRunSnapshot
+    const stream = new ReadableStream({
+      start(controller) {
+        controller.enqueue(
+          new TextEncoder().encode(`event: paper.run.snapshot\ndata: ${JSON.stringify({ snapshot })}\n\n`),
+        )
+        controller.close()
+      },
+    })
+    const seen: PaperRunSnapshot[] = []
+    subscribePaperRunLiveMonitor({
+      baseUrl: "http://localhost:4096",
+      runID: "run-live",
+      fetch: async () => new Response(stream, { headers: { "content-type": "text/event-stream" } }),
+      onSnapshot: (value) => seen.push(value),
+    })
+    await new Promise((resolve) => setTimeout(resolve, 20))
+    expect(seen.map((item) => item.run_id)).toEqual(["run-live"])
   })
 })

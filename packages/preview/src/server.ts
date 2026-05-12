@@ -18,6 +18,7 @@ export type PreviewServerHandle = {
   queue: PreviewRenderQueue
   token: string
   url: string
+  updateSnapshot: (snapshot: PreviewSnapshot) => void
   stop: () => void
 }
 
@@ -94,6 +95,7 @@ export function startPreviewServer(options: PreviewServerOptions): PreviewServer
     queue,
     token,
     url: `http://${hostname}:${server.port}/preview?token=${encodeURIComponent(token)}`,
+    updateSnapshot: (snapshot) => queue.replaceSnapshot(snapshot),
     stop: () => server.stop(true),
   }
 }

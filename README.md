@@ -1,190 +1,105 @@
 # Paper Fucker
 
-当前版本：<!-- version:start -->0.8.9<!-- version:end --> ｜ 作者：k1d ([ZhuchenZhong](https://github.com/ZhuchenZhong)) ｜ 状态：pre-release 稳定中 ｜ 许可证：private-first / UNLICENSED
+当前版本：<!-- version:start -->0.9.0-dev<!-- version:end --> ｜ 作者：k1d ([ZhuchenZhong](https://github.com/ZhuchenZhong)) ｜ 状态：开发态 ｜ 许可证：private-first / UNLICENSED
 
-Paper Fucker 是一个中文优先、私有优先的可验证论文工作台。你可以给它一个研究主题、代码仓库、数据集、实验日志或已有论文材料，它会自动完成研究规划、资料检索、代码理解、实验复现、证据账本写作、真实性审查、实时预览和最终导出。
+Paper Fucker 是一个中文优先、私有优先的论文研究与产出工作台。你给它研究主题、代码仓库、数据集、实验日志或已有论文材料，它负责把任务推进成可审查论文包：研究规划、资料检索、代码理解、实验复现、证据账本、真实性审查、实时预览和最终导出。
 
-它不是“套壳聊天机器人”。OpenCode 只作为 provider/model、agent、tool、MCP、skill、权限和 TUI 底座；Paper Fucker 负责论文研究与产出闭环。
+它不是普通聊天界面。OpenCode 只作为模型、agent、tool、MCP、skill、权限和 TUI 底座；Paper Fucker 的主入口是论文工作台和 `PaperRun`。
 
-## 能做什么
+## 核心能力
 
-- **主题出论文**：从研究主题开始，检索资料、规划实验、生成 ClaimLedger 和可审查论文包。
-- **代码出论文**：读取指定仓库，提取方法、架构、实验入口和 source range，避免凭空描述代码。
-- **材料出论文**：整合 PDF、Markdown、LaTeX、DOCX、数据集和实验日志。
-- **模型工作台**：在 TUI 中添加 provider、拉取模型列表、勾选允许模型、选择主决策模型，并可强制指定阶段模型。
-- **多模型协作**：主决策模型会在允许列表内为 planner、literature、code、experiment、writer、reviewer、citation、summarizer、subagent 等角色动态选择模型。
-- **递归 Agent Team**：面向大代码库和复杂研究任务，agent 可以继续派生子 agent，最终自底向上合并带证据的结论。
-- **实时网页 Preview**：写作、引用、审稿、成本、agent 和导出状态可以在 token-protected localhost 页面实时查看。
-- **真实性 Gate**：无证据 claim、引用缺失、license/source 冲突或复现失败会阻断 final export；forced draft 会显著标记失败项。
+- 主题出论文：从研究问题开始，自动规划文献、数据、实验、ClaimLedger、草稿和审稿。
+- 代码出论文：读取代码仓库，提取方法、架构、实验入口和 source range，避免无来源描述。
+- 材料出论文：整合 PDF、Markdown、LaTeX、DOCX、数据表、实验日志和已有草稿。
+- 模型工作台：添加 provider，拉取模型列表，勾选允许模型，选择主决策模型，并按阶段强制指定模型。
+- 递归 Agent Team：面向大代码库或复杂研究，agent 可以继续派生子 agent，最终自底向上合并证据。
+- 内置能力包：Nature/IEEE/ACM/Springer profile、Exa 等文献检索、爬虫数据获取、Hugging Face 研究能力、实验工具链、写作与真实性 gate。
+- 实时 Web 监控：token-protected localhost 只读页面持续显示阶段、草稿、引用、agent、成本、gate 和导出状态。
 
-## 安装
+## 从源码运行
 
-当前版本仍是开发预览版。正式发布包可用后，Windows 用户会直接获得 `paper_fucker` 命令；在此之前，推荐先从源码运行。
+当前仍是开发态。正式安装包可用前，推荐从源码编译；编译完成后，仓库根目录会生成当前平台可执行文件。
 
-### Windows 源码预览
-
-前置要求：
-
-- Windows 10 1809 或更高版本。
-- Git for Windows。
-- Bun。Windows 安装方式见 [Bun 官方安装文档](https://bun.sh/docs/installation)。
-
-在 PowerShell 中执行：
+Windows PowerShell：
 
 ```powershell
 winget install --id Git.Git -e
 powershell -c "irm bun.sh/install.ps1 | iex"
-bun --version
-
 git clone https://github.com/S0ra-ai/paper_fucker.git
 cd paper_fucker
 bun install
 bun run build
-```
-
-编译完成后，项目根目录会生成当前平台可执行文件。Windows 上是：
-
-```powershell
-.\paper_fucker.exe --help
-.\paper_fucker.exe init
-.\paper_fucker.exe init doctor
 .\paper_fucker.exe
 ```
 
-macOS / Linux 上是 `./paper_fucker`。生成的根目录可执行文件是本地编译产物，不进入 git。
+macOS / Linux 编译后从仓库根目录运行：
 
-### 可选外部工具
-
-基础 TUI 只需要 Git 和 Bun。以下工具按能力启用，缺失时 `paper_fucker init doctor` 会提示：
-
-- Pandoc：Markdown、LaTeX、DOCX 转换。
-- LaTeX 引擎：TeX Live、MiKTeX 或 Tectonic，用于 PDF 生成。
-- Docker Desktop：容器复现实验。
-- Python 3.11+：爬虫、数据处理和部分 research tools。
-
-## 推荐使用方式：TUI 论文工作台
-
-```powershell
-.\paper_fucker.exe init
-.\paper_fucker.exe init doctor
-.\paper_fucker.exe
+```bash
+./paper_fucker
 ```
 
-`paper_fucker` 默认打开中文 TUI 论文工作台。Windows 源码编译用户从仓库根目录运行 `.\paper_fucker.exe`；正式安装版会直接提供 `paper_fucker` 命令。你不需要手动输入 tool 命令，也不需要自己串联 MCP、skills 或子 agent；系统会从你的自然语言输入中解析 `PaperRun`，自动编排 stage graph、Agent Team、能力调用和 Gate。
+根目录生成的 `paper_fucker.exe` 或 `paper_fucker` 是本地编译产物，不进入 git。
 
-TUI 首页可以直接输入：
+## TUI 使用流程
 
-- `写一篇关于小样本代码智能体评测方法的论文`
+启动后默认进入中文论文工作台。你可以直接输入：
+
+- `写一篇关于多智能体代码审查的论文`
 - `基于 E:\Project\some-repo 写一篇系统论文`
 - `读取 ./paper-draft.md、./data 和 ./logs，补齐实验、引用和最终导出`
-- `目标 Nature，使用 submission_candidate 模式审查这篇论文`
-- `打开模型工作台，添加一个 OpenAI-compatible provider 并选择可用模型`
+- `目标 Nature，生成 submission_candidate 检查包`
 
-Run 页面会展示：
+工作台会把输入解析为 `PaperRun`，自动推进 stage graph。只有在模型缺失、工具缺失、成本超限、数据外传授权、license/source 冲突、实验不可复现或真实性 gate 阻断时，才会用中文问题暂停。
 
-- stage graph 与当前状态
-- Agent Tree / Agent Team
-- 成本、token/context、论文大纲
-- Source Ledger、Claim Ledger、实验/复现状态
-- MCP、skills、toolchain、provider/model role 健康状态
-- 模型工作台：provider、模型允许列表、主决策模型和最近路由决策
-- Preview 与 Export 控制
-- 需要你决策的中文 pause questions
+## 模型工作台
 
-如果你要重新配置 provider、模型角色或本地工具链，重新运行 `.\paper_fucker.exe init` 即可刷新本地配置；`.\paper_fucker.exe init doctor` 会检查当前配置和工具状态。
-这两个命令默认输出中文摘要；脚本或自动化需要完整结构化结果时加 `--json`。
+输入 `/models` 打开模型工作台。流程是：
 
-模型配置优先在 TUI「模型工作台」完成：选择内置 provider 或自定义 OpenAI-compatible `base_url`，系统调用 `/models` 取得模型列表；只有你勾选进入允许列表的模型，才会被主决策模型、Agent Team 和递归子 agent 使用。你也可以把某个阶段固定到指定模型。
+1. 选择内置 provider，或添加自定义 OpenAI-compatible `base_url`。
+2. 填写认证信息，系统调用 `/models` 拉取模型列表。
+3. 勾选允许 Paper Fucker 使用的模型。
+4. 选择主决策模型。
+5. 可选：为 planner、literature、code、experiment、writer、reviewer、citation、summarizer、subagent 等阶段强制指定模型。
 
-## 非交互模式
+未配置允许模型时，工作台显示“未配置模型”，不会自动回退到旧 OpenCode provider 或任意默认模型。
 
-CLI 适合脚本、自动化检查或你明确想绕过 TUI 的场景。它不是主交互入口。
+## 材料与环境
 
-**主题出论文**
+你可以在输入框中拖入或引用文件和目录，也可以使用工作台命令：
 
-```powershell
-.\paper_fucker.exe run "基于多智能体协作的软件工程论文生成系统"
-```
+- `/file` 添加论文草稿、PDF、Markdown、LaTeX 或 DOCX。
+- `/folder` 添加代码仓库或资料目录。
+- `/data` 添加数据集。
+- `/log` 添加实验日志。
+- `/status` 查看模型、MCP、Skill、Pandoc、LaTeX、Docker、Python、浏览器 Preview 和 Nature skill 状态。
 
-**代码仓库出论文**
-
-```powershell
-.\paper_fucker.exe run --code E:\Project\some-repo "把这个项目整理成一篇系统论文"
-```
-
-**混合材料出论文**
-
-```powershell
-.\paper_fucker.exe run --code . --paper-files .\paper-draft.md --dataset-paths .\data "补齐实验、引用和最终导出"
-```
-
-运行过程中，TUI 会显示 stage graph、Agent Tree、成本/token、论文大纲、source ledger、claim ledger、实验状态、Gate 和阻塞项。需要人工决策时，系统会用中文 pause question 询问；不需要你持续输入命令。
-
-## 内置 MCP、Skills 与能力包
-
-Paper Fucker 把常用论文研究能力作为内置 capability packs 融合进产品，不要求用户逐个手工安装后才能开始。
-
-| 能力包 | 默认状态 | 包含能力 |
-| --- | --- | --- |
-| `paper-profile-skills` | 内置启用 | `nature-paper`、IEEE、ACM 等投稿 profile skill，用于结构、声明、模板和导出检查 |
-| `literature-mcp` | 自动链接 | Exa remote MCP、Crossref、Semantic Scholar、arXiv，用于文献、数据和 source verification |
-| `crawler-data` | 内置启用 | Scrapling-first crawler、可选 Scrapling MCP，用于网页数据获取、抽取和 license/source 诊断 |
-| `huggingface-research` | 默认可用，按需配置 secret | Hugging Face docs、papers、datasets、models、Spaces、Jobs、Trackio，用于 ML 研究和实验闭环 |
-| `code-experiment-core` | 内置启用 | OpenCode read/grep/glob/task/shell、Jupyter skill、Python log parser、dataset metadata probe |
-| `writing-verification-export` | 内置启用 | ClaimLedger、SourceLedger、authenticity review gate、export bundle |
-
-仓库已内置 Exa remote MCP 默认配置：
-
-```jsonc
-{
-  "mcp": {
-    "exa": {
-      "type": "remote",
-      "url": "https://mcp.exa.ai/mcp",
-      "enabled": true
-    }
-  }
-}
-```
-
-TUI 会在能力健康区显示 MCP、Skill 和 toolchain 状态。缺少 secret、外部工具、网络授权或数据外传授权时，系统会暂停并用中文说明需要你处理什么。
-
-`nature-paper` 是 first-party 内置 skill。初始化和 doctor 会检查它是否存在，并可同步到本机 Codex skill 目录；Nature profile 运行时会刷新 Nature 官方作者指南，而不是依赖过期常量。
-
-## Provider 与模型
-
-DeepSeek 只是默认样例，不是唯一支持模型。任何 OpenCode substrate 支持的 provider/model 都可以进入模型工作台；自定义 OpenAI-compatible provider 会先调用 `/models`，再由你选择哪些模型允许使用。
-
-```powershell
-.\paper_fucker.exe init
-.\paper_fucker.exe init doctor
-```
-
-Provider public config 存在 `~/.paper_fucker/providers/`，模型候选池存在 `~/.paper_fucker/model-inventory.json`，secret 存在 `~/.paper_fucker/local/provider-secrets.json`。API key 不应进入 git。
+Pandoc、LaTeX、Docker、Python 等是按能力启用的工具。缺失时系统会说明受影响功能：例如没有 LaTeX 仍可写作和导出 Markdown；没有 Docker 仍可做本地实验规划，但不能完成容器复现 gate。
 
 ## Preview 与导出
 
-PaperRun 会为草稿、引用、审稿意见、导出文件、成本、agent 和 tool diagnostics 生成只读 snapshot。TUI 中打开 Preview 后，会启动 token-protected localhost 服务并自动打开浏览器页面。
+PaperRun 运行时可以打开实时 Preview。页面只读、仅监听本机 localhost，并通过 token 保护；草稿、引用检查、审稿意见、agent 调用、成本/token、gate 和导出状态会持续更新。
 
 导出分两类：
 
 - `reviewable_bundle`：默认输出，包含论文草稿、证据账本、引用、实验/复现记录、审稿报告和导出文件。
-- `submission_candidate`：面向 Nature/IEEE/ACM/Springer 等 profile 的更严格候选包，必须通过 profile 与真实性检查。
+- `submission_candidate`：面向目标 profile 的更严格候选包，需要通过投稿材料和真实性检查。
 
-## 隐私与数据外传
+final export 必须通过真实性 gate。forced draft 可以输出，但会显著标记失败检查，不能伪装成最终稿。
+
+## 隐私
 
 Paper Fucker 默认 private-first：
 
 - 本地代码、数据和论文材料不会默认全文发给外部模型或 MCP。
 - 首次 run 会要求确认可外传的路径、摘要、片段和文件类型。
 - secrets、ignored files、大二进制和敏感配置会自动排除。
-- 所有外部 tool/model/MCP 调用都会写入 audit/tool trace。
+- 外部模型、MCP、Skill 和工具调用会写入 audit/tool trace。
 
 ## 项目状态
 
-Paper Fucker 仍处于开发预览阶段，接口、TUI 布局和内置能力包可能继续调整。当前目标是让“主题/代码/材料到可审查论文包”的闭环先稳定下来，再进入更稳定的试用版本。
+当前处于开发态，TUI、模型工作台、实时监控和导出闭环仍在快速迭代。目标是把“主题/代码/材料到可审查论文包”的完整流程稳定下来，再进入候选发布流程。
 
-版本历史见 `CHANGELOG`。发布包只包含安装、运行和用户验证所需内容，不包含开发、测试或本地运行资产。
+版本历史见 `CHANGELOG`。
 
 ## License
 

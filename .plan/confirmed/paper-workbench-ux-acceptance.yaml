@@ -1,0 +1,73 @@
+id: paper-workbench-ux-acceptance
+title: Paper Fucker 工作台 UX 验收
+status: todo
+priority: critical
+owner: paper-fucker-dev-agent
+tags:
+- acceptance
+- docs
+- changelog
+depends_on:
+- visible-command-surface-audit
+description: 端到端验收 TUI-first、模型工作台、环境工作台、实时 Preview 和旧 OpenCode 用户面清理，更新 README/CHANGELOG
+  并完成开发分支收口。
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: docs-version
+  title: 更新 README 和 CHANGELOG
+  status: todo
+  owner: paper-fucker-dev-agent
+  depends_on: []
+  description: README 记录 TUI-first、环境工作台和实时监控，CHANGELOG 记录 0.9.0-dev。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: quality-gates
+  title: 运行质量门
+  status: todo
+  owner: paper-fucker-dev-agent
+  depends_on: []
+  description: 运行 opencode/preview/Python 测试、typecheck、README 版本检查、CHANGELOG 格式检查。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+- id: taskflow-validate
+  title: 验证 TaskFlow 任务图
+  status: todo
+  owner: paper-fucker-dev-agent
+  depends_on: []
+  description: validate_task 与 validate_changelog_format 全部通过。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs: []
+    attempt_count: 0
+  meta: {}
+outputs:
+- type: file
+  path: README.md
+  description: TUI-first 对外文档
+- type: file
+  path: CHANGELOG
+  description: 0.9.0-dev colon DSL 记录
+- type: directory
+  path: reports
+  description: 验收报告
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-12T02:21:14.387309'
+  updated_at: '2026-05-12T02:21:14.387309'
+  version: '1'

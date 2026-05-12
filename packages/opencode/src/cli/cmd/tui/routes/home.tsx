@@ -17,12 +17,12 @@ import { submitPaperWorkbenchPrompt } from "./paper/workbench"
 let once = false
 const placeholder = {
   normal: [
-    "输入主题，系统会自动创建 PaperRun 并推进研究、写作、审稿和导出",
-    "指定代码仓库，例如：--code . 写一篇有源码依据的系统论文",
-    "加入材料，例如：--paper draft.pdf --data data.csv --log run.log 生成可审查论文包",
-    "目标投稿候选：--profile nature-paper --submission 主题或代码路径",
+    "输入你想研究的主题",
+    "描述你的代码仓库和想产出的论文方向",
+    "把论文草稿、数据或实验日志拖进来，再说明目标",
+    "说明目标期刊或会议，例如 Nature、IEEE、ACM 或预印本",
   ],
-  shell: ["paper_fucker doctor", "paper_fucker skills list", "paper_fucker mcp add exa --url https://mcp.exa.ai/mcp"],
+  shell: ["打开模型工作台", "检查环境与能力", "打开实时 Preview"],
 }
 
 export function Home() {

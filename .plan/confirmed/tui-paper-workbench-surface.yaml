@@ -1,0 +1,99 @@
+id: tui-paper-workbench-surface
+title: TUI 论文工作台用户面重构
+status: done
+priority: critical
+owner: paper-fucker-dev-agent
+tags:
+- tui
+- ux
+- brand
+depends_on:
+- dev-reset-from-prerelease
+description: 清理旧 OpenCode 聊天入口，把默认 TUI 首页、输入提示、底部提示、错误页和用户可见模式改成 Paper Fucker 中文论文工作台。
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: home-prompt
+  title: 改造首页输入和提示
+  status: done
+  owner: paper-fucker-dev-agent
+  depends_on: []
+  description: 首页改为中文 PaperRun 输入，移除 Ask anything、CLI flag 示例、Build/Plan 显示。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-12T02:51:32.093244'
+      level: info
+      message: 开始清理 TUI 首页、输入框和底部提示的旧聊天产品面。
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-12T02:51:37.889057'
+      level: info
+      message: 首页 prompt 改为中文 PaperRun 输入；移除 Ask anything、CLI flag 示例和 Build/Plan
+        用户显示；底部提示改为模型/环境/预览。
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-12T02:51:37.889057'
+    attempt_count: 2
+  meta: {}
+- id: error-surface
+  title: 改造错误页与品牌残留
+  status: done
+  owner: paper-fucker-dev-agent
+  depends_on: []
+  description: Fatal error 页面改为 Paper Fucker 中文诊断，不显示旧 issue/report 文案。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-12T02:51:46.168741'
+      level: info
+      message: 开始替换 fatal error 用户可见文案。
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-12T02:51:53.417966'
+      level: info
+      message: Fatal error 页面改为 Paper Fucker 中文诊断，移除 Please report an issue、Copy issue
+        URL 和 A fatal error occurred 旧文案。
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-12T02:51:53.417966'
+    attempt_count: 2
+  meta: {}
+- id: surface-tests
+  title: 增加 TUI 用户面回归测试
+  status: done
+  owner: paper-fucker-dev-agent
+  depends_on: []
+  description: 测试首页、提示、错误页不再出现旧 OpenCode 普通聊天用户面。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-12T02:52:00.347924'
+      level: info
+      message: 开始补充 TUI 用户面回归测试。
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-12T02:52:06.869524'
+      level: info
+      message: public-surface 与 paper-workbench 测试覆盖首页提示、错误页、无旧 Build/Plan/Ask anything
+        入口和中文 PaperRun 输入。
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-12T02:52:06.869524'
+    attempt_count: 2
+  meta: {}
+outputs:
+- type: directory
+  path: packages/opencode/src/cli/cmd/tui
+  description: TUI 用户面重构
+- type: directory
+  path: packages/opencode/test/cli
+  description: TUI 用户面测试
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-12T02:18:45.725769'
+  updated_at: '2026-05-12T02:52:15.262499'
+  version: '1'

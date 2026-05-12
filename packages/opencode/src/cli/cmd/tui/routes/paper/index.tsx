@@ -1,4 +1,4 @@
-import { createEffect, createMemo, createSignal, onMount, Show } from "solid-js"
+import { createEffect, createMemo, createSignal, onCleanup, onMount, Show } from "solid-js"
 import open from "open"
 import { useRouteData } from "@tui/context/route"
 import { useSDK } from "@tui/context/sdk"
@@ -12,6 +12,8 @@ import {
   fetchPaperWorkbenchDoctor,
   requestPaperWorkbenchPreview,
   paperWorkbenchHealthFromDoctor,
+  subscribePaperRunLiveMonitor,
+  type PaperRunLiveMonitor,
   type PaperRunSidebarState,
   type PaperWorkbenchHealthInput,
 } from "./workbench"
@@ -155,8 +157,17 @@ export function PaperRunDashboard() {
   const [health, setHealth] = createSignal<PaperWorkbenchHealthInput>({})
   const [error, setError] = createSignal<string>()
   const [previewOpened, setPreviewOpened] = createSignal(false)
+  let monitor: PaperRunLiveMonitor | undefined
 
   onMount(() => {
+    monitor = subscribePaperRunLiveMonitor({
+      baseUrl: sdk.url,
+      directory: sdk.directory,
+      fetch: sdk.fetch,
+      runID: route.runID,
+      onSnapshot: setSnapshot,
+      onError: (cause) => setError(cause.message),
+    })
     if (snapshot()) return
     void fetchPaperRunSnapshot({
       baseUrl: sdk.url,
@@ -167,6 +178,8 @@ export function PaperRunDashboard() {
       .then(setSnapshot)
       .catch((cause) => setError(cause instanceof Error ? cause.message : "PaperRun 读取失败"))
   })
+
+  onCleanup(() => monitor?.close())
 
   onMount(() => {
     void fetchPaperWorkbenchCapabilities({
@@ -297,6 +310,19 @@ export function PaperRunDashboard() {
                   <box flexDirection="row" gap={2}>
                     <text>{role.label}</text>
                     <text fg={theme.textMuted}>{role.provider_model}</text>
+                  </box>
+                ))}
+              </box>
+
+              <box flexDirection="column" gap={0}>
+                <text fg={theme.textMuted}>环境与能力</text>
+                {view().environment_status.map((item) => (
+                  <box flexDirection="row" gap={2}>
+                    <text>{item.label}</text>
+                    <text fg={item.status === "blocked" ? theme.error : item.status === "optional_missing" ? theme.warning : theme.textMuted}>
+                      {item.status === "available" ? "可用" : item.status === "blocked" ? "需配置" : "可选缺失"}
+                    </text>
+                    <text fg={theme.textMuted}>{item.message}</text>
                   </box>
                 ))}
               </box>

@@ -88,4 +88,23 @@ describe("preview server", () => {
     expect(queue.current().artifacts.markdown?.content).toBe("second")
     expect(queue.current().artifacts.latex?.content).toBe("second")
   })
+
+  test("pushes replacement snapshots to live preview subscribers", async () => {
+    const preview = startPreviewServer({ snapshot: snapshot(), token: "test-token" })
+    try {
+      const events = await fetch(`http://127.0.0.1:${preview.server.port}/events?token=test-token`)
+      const reader = events.body!.getReader()
+      await reader.read()
+      preview.updateSnapshot({
+        ...snapshot(),
+        title: "Updated Preview",
+        updated_at: "2026-05-08T00:01:00Z",
+      })
+      const next = await reader.read()
+      await reader.cancel()
+      expect(new TextDecoder().decode(next.value)).toContain("Updated Preview")
+    } finally {
+      preview.stop()
+    }
+  })
 })
