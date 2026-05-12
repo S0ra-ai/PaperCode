@@ -1,0 +1,99 @@
+id: model-workbench-command-routing
+title: 模型工作台命令与路由收口
+status: done
+priority: critical
+owner: paper-fucker-dev-agent
+tags:
+- tui
+- models
+- routing
+depends_on:
+- tui-paper-workbench-surface
+description: 让 /models 成为唯一模型配置入口，隐藏 /connect 与旧模型切换入口；禁止未配置模型时从旧 provider fallback
+  自动选择模型。
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: command-registry
+  title: 收口 /models 与 /connect
+  status: done
+  owner: paper-fucker-dev-agent
+  depends_on: []
+  description: /models 只打开 Paper Fucker 模型工作台；/connect 隐藏或作为兼容别名进入模型工作台。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-12T02:52:26.240689'
+      level: info
+      message: 开始收口模型命令：/models 保留为唯一模型工作台入口，旧 /connect 入口隐藏。
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-12T02:52:33.868192'
+      level: info
+      message: /models 打开 Paper Fucker 模型工作台；/connect、旧模型切换、agent、variant、MCP 切换都从用户命令面隐藏或转为内部入口。
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-12T02:52:33.868192'
+    attempt_count: 2
+  meta: {}
+- id: model-fallback
+  title: 禁用旧模型自动 fallback
+  status: done
+  owner: paper-fucker-dev-agent
+  depends_on: []
+  description: 没有允许模型或决策模型时显示未配置模型，并阻断发送或引导配置。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-12T02:52:41.171967'
+      level: info
+      message: 开始禁用旧 provider/model 自动 fallback 的用户可见效果。
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-12T02:52:53.377856'
+      level: info
+      message: 无显式模型选择时 LocalContext 显示“未配置模型/模型工作台”，不再把第一个 OpenCode provider 或 GLM
+        等 fallback 暴露给用户。
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-12T02:52:53.377856'
+    attempt_count: 2
+  meta: {}
+- id: routing-tests
+  title: 覆盖命令面和模型回退测试
+  status: done
+  owner: paper-fucker-dev-agent
+  depends_on: []
+  description: 测试无模型不显示 GLM，/connect 不出现在用户命令列表，/models 行为唯一。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-12T02:53:01.369146'
+      level: info
+      message: 开始补充命令面与模型回退回归测试。
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-12T02:53:08.429144'
+      level: info
+      message: public-surface 测试断言 /connect、/agents、/variants、provider.connect、旧 DialogModel
+        和 /skills 不出现在用户可见命令面；断言“未配置模型”显示。
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-12T02:53:08.429144'
+    attempt_count: 2
+  meta: {}
+outputs:
+- type: directory
+  path: packages/opencode/src/cli/cmd/tui
+  description: 模型工作台命令入口
+- type: directory
+  path: packages/opencode/src/paper
+  description: 模型 inventory 与路由状态
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-12T02:19:38.396474'
+  updated_at: '2026-05-12T02:53:17.526882'
+  version: '1'

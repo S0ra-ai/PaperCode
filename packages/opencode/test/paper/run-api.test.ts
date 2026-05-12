@@ -92,7 +92,16 @@ describe("PaperRun HttpApi", () => {
     const events = await app().request(runPath(PaperPaths.events, runID), { headers })
     expect(events.status).toBe(200)
     expect(events.headers.get("content-type")).toContain("text/event-stream")
-    expect(await events.text()).toContain("event: paper.run.snapshot")
+    const eventReader = events.body!.getReader()
+    let eventText = ""
+    while (!eventText.includes("event: stage.updated")) {
+      const next = await eventReader.read()
+      if (next.done) break
+      eventText += new TextDecoder().decode(next.value)
+    }
+    await eventReader.cancel()
+    expect(eventText).toContain("event: paper.run.snapshot")
+    expect(eventText).toContain("event: stage.updated")
 
     const guidance = await app().request(runPath(PaperPaths.guidance, runID), {
       ...json({ message: "优先补充方法贡献边界" }),

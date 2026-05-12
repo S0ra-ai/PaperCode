@@ -41,20 +41,18 @@ function View(props: { api: TuiPluginApi }) {
           </text>
           <box flexGrow={1} gap={1}>
             <box flexDirection="row" justifyContent="space-between">
-              <text fg={theme().text}>
-                <b>Getting started</b>
+            <text fg={theme().text}>
+                <b>开始配置</b>
               </text>
               <text fg={theme().textMuted} onMouseDown={() => props.api.kv.set("dismissed_getting_started", true)}>
                 ✕
               </text>
             </box>
-            <text fg={theme().textMuted}>paper_fucker includes free models so you can start immediately.</text>
-            <text fg={theme().textMuted}>
-              Connect from 75+ providers to use other models, including Claude, GPT, Gemini etc
-            </text>
+            <text fg={theme().textMuted}>先在模型工作台选择 provider、允许模型和主决策模型。</text>
+            <text fg={theme().textMuted}>缺失 Pandoc、LaTeX、Docker 等可选能力时，论文流程会按能力降级。</text>
             <box flexDirection="row" gap={1} justifyContent="space-between">
-              <text fg={theme().text}>Connect provider</text>
-              <text fg={theme().textMuted}>/connect</text>
+              <text fg={theme().text}>模型工作台</text>
+              <text fg={theme().textMuted}>/models</text>
             </box>
           </box>
         </box>

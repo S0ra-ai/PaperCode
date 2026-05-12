@@ -1,0 +1,74 @@
+id: dev-reset-from-prerelease
+title: 退出预发布并回到 develop 开发线
+status: done
+priority: critical
+owner: paper-fucker-dev-agent
+tags:
+- git-flow
+- development-reset
+depends_on: []
+description: 停止 release/0.8.5 预发布推进，不打 tag、不操作 main；把 release 分支上的有效变更快进到 develop，作为后续开发基础。
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: merge-release-work
+  title: 将 release 有效提交带回 develop
+  status: done
+  owner: paper-fucker-dev-agent
+  depends_on: []
+  description: 确认 release/0.8.5 是 develop 的后续提交链，并将 develop 快进到该工作线。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-12T02:21:56.855193'
+      level: info
+      message: 开始记录 develop 快进 release/0.8.5 有效工作线。
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-12T02:22:04.492007'
+      level: info
+      message: develop 已从 c47688c 快进到 release/0.8.5 的 91a1e91，未创建 tag，未操作 main。
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-12T02:22:04.492007'
+    attempt_count: 2
+  meta: {}
+- id: record-dev-boundary
+  title: 记录不再继续 pre-release
+  status: done
+  owner: paper-fucker-dev-agent
+  depends_on: []
+  description: 在 TaskFlow、README/CHANGELOG 或相关开发状态说明中记录当前回到开发状态，不打 tag、不合并 main。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-12T02:50:48.740934'
+      level: info
+      message: 开始记录开发态边界：README 已从 pre-release 稳定状态改为 0.9.0-dev 开发态；当前不创建 RC、不打 tag、不操作
+        main。
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-12T02:50:55.544037'
+      level: info
+      message: 开发态边界已落实到 README：状态为开发态，版本线切到 0.9.0-dev；当前实现不打 tag、不发布 RC、不操作 main，后续从
+        develop/feature 分支继续开发。
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-12T02:50:55.544037'
+    attempt_count: 2
+  meta: {}
+outputs:
+- type: file
+  path: CHANGELOG
+  description: 记录开发态重置与 0.9.x-dev 起点
+- type: file
+  path: .plan/index.yaml
+  description: TaskFlow 新任务与状态
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-12T02:17:56.475209'
+  updated_at: '2026-05-12T02:51:02.062918'
+  version: '1'

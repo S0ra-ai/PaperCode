@@ -19,7 +19,6 @@ import { win32DisableProcessedInput, win32InstallCtrlCGuard } from "./win32"
 import { Flag } from "@opencode-ai/core/flag/flag"
 import semver from "semver"
 import { DialogProvider, useDialog } from "@tui/ui/dialog"
-import { DialogProvider as DialogProviderList } from "@tui/component/dialog-provider"
 import { ErrorComponent } from "@tui/component/error-component"
 import { PluginRouteMissing } from "@tui/component/plugin-route-missing"
 import { ProjectProvider } from "@tui/context/project"
@@ -30,15 +29,11 @@ import { StartupLoading } from "@tui/component/startup-loading"
 import { SyncProvider, useSync } from "@tui/context/sync"
 import { SyncProviderV2 } from "@tui/context/sync-v2"
 import { LocalProvider, useLocal } from "@tui/context/local"
-import { DialogModel } from "@tui/component/dialog-model"
-import { useConnected } from "@tui/component/use-connected"
-import { DialogMcp } from "@tui/component/dialog-mcp"
 import { DialogPaperModelRoles } from "@tui/component/dialog-paper-model-roles"
 import { DialogStatus } from "@tui/component/dialog-status"
 import { DialogThemeList } from "@tui/component/dialog-theme-list"
 import { DialogHelp } from "./ui/dialog-help"
 import { CommandProvider, useCommandDialog } from "@tui/component/dialog-command"
-import { DialogAgent } from "@tui/component/dialog-agent"
 import { DialogSessionList } from "@tui/component/dialog-session-list"
 import { DialogConsoleOrg } from "@tui/component/dialog-console-org"
 import { KeybindProvider, useKeybind } from "@tui/context/keybind"
@@ -68,7 +63,6 @@ import type { RouteMap } from "@/cli/cmd/tui/plugin/api"
 import { FormatError, FormatUnknownError } from "@/cli/error"
 
 import type { EventSource } from "./context/sdk"
-import { DialogVariant } from "./component/dialog-variant"
 
 function rendererConfig(_config: TuiConfig.Info): CliRendererConfig {
   const mouseEnabled = !Flag.OPENCODE_DISABLE_MOUSE && (_config.mouse ?? true)
@@ -416,18 +410,14 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
     ),
   )
 
-  const connected = useConnected()
   command.register(() => [
     {
       title: "Switch session",
       value: "session.list",
       keybind: "session_list",
       category: "Session",
+      hidden: true,
       suggested: sync.data.session.length > 0,
-      slash: {
-        name: "sessions",
-        aliases: ["resume", "continue"],
-      },
       onSelect: () => {
         dialog.replace(() => <DialogSessionList />)
       },
@@ -438,10 +428,7 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
       value: "session.new",
       keybind: "session_new",
       category: "Session",
-      slash: {
-        name: "new",
-        aliases: ["clear"],
-      },
+      hidden: true,
       onSelect: () => {
         route.navigate({
           type: "home",
@@ -450,16 +437,14 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
       },
     },
     {
-      title: "Switch model",
+      title: "内部模型切换",
       value: "model.list",
       keybind: "model_list",
-      suggested: true,
+      suggested: false,
       category: "Agent",
-      slash: {
-        name: "models",
-      },
+      hidden: true,
       onSelect: () => {
-        dialog.replace(() => <DialogModel />)
+        dialog.replace(() => <DialogPaperModelRoles />)
       },
     },
     {
@@ -515,26 +500,22 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
       },
     },
     {
-      title: "Switch agent",
+      title: "内部 agent 切换",
       value: "agent.list",
       keybind: "agent_list",
       category: "Agent",
-      slash: {
-        name: "agents",
-      },
+      hidden: true,
       onSelect: () => {
-        dialog.replace(() => <DialogAgent />)
+        dialog.replace(() => <DialogPaperModelRoles />)
       },
     },
     {
-      title: "Toggle MCPs",
+      title: "内部 MCP 切换",
       value: "mcp.list",
       category: "Agent",
-      slash: {
-        name: "mcps",
-      },
+      hidden: true,
       onSelect: () => {
-        dialog.replace(() => <DialogMcp />)
+        dialog.replace(() => <DialogPaperModelRoles />)
       },
     },
     {
@@ -557,16 +538,13 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
       },
     },
     {
-      title: "Switch model variant",
+      title: "内部模型变体切换",
       value: "variant.list",
       keybind: "variant_list",
       category: "Agent",
-      hidden: local.model.variant.list().length === 0,
-      slash: {
-        name: "variants",
-      },
+      hidden: true,
       onSelect: () => {
-        dialog.replace(() => <DialogVariant />)
+        dialog.replace(() => <DialogPaperModelRoles />)
       },
     },
     {
@@ -580,14 +558,12 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
       },
     },
     {
-      title: "Provider fallback",
-      value: "provider.connect",
+      title: "模型工作台兼容入口",
+      value: "paper.model_workbench.compat",
       suggested: false,
-      slash: {
-        name: "connect",
-      },
+      hidden: true,
       onSelect: () => {
-        dialog.replace(() => <DialogProviderList />)
+        dialog.replace(() => <DialogPaperModelRoles />)
       },
       category: "Provider",
     },

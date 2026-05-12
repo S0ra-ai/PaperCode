@@ -46,6 +46,11 @@ export class PreviewRenderQueue {
     return this.snapshot
   }
 
+  replaceSnapshot(snapshot: PreviewSnapshot) {
+    this.snapshot = snapshot
+    this.publish({ type: "snapshot", snapshot })
+  }
+
   subscribe(subscriber: PreviewSubscriber) {
     this.subscribers.add(subscriber)
     subscriber({ type: "snapshot", snapshot: this.snapshot })

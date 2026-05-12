@@ -35,7 +35,7 @@ import { Locale } from "@/util/locale"
 import { formatDuration } from "@/util/format"
 import { createColors, createFrames } from "../../ui/spinner.ts"
 import { useDialog } from "@tui/ui/dialog"
-import { DialogProvider as DialogProviderConnect } from "../dialog-provider"
+import { DialogPaperModelRoles } from "../dialog-paper-model-roles"
 import { DialogAlert } from "../../ui/dialog-alert"
 import { useToast } from "../../ui/toast"
 import { useKV } from "../../context/kv"
@@ -276,12 +276,10 @@ export function Prompt(props: PromptProps) {
   function promptModelWarning() {
     toast.show({
       variant: "warning",
-      message: "Connect a provider to send prompts",
+      message: "请先在模型工作台配置可用模型",
       duration: 3000,
     })
-    if (sync.data.provider.length === 0) {
-      dialog.replace(() => <DialogProviderConnect />)
-    }
+    dialog.replace(() => <DialogPaperModelRoles />)
   }
 
   function dismissEditorContext() {
@@ -566,12 +564,10 @@ export function Prompt(props: PromptProps) {
         },
       },
       {
-        title: "Skills",
+        title: "内部 Skill 选择",
         value: "prompt.skills",
-        category: "Prompt",
-        slash: {
-          name: "skills",
-        },
+        category: "Internal",
+        hidden: true,
         onSelect: () => {
           dialog.replace(() => (
             <DialogSkill
@@ -1161,10 +1157,10 @@ export function Prompt(props: PromptProps) {
     if (store.mode === "shell") {
       if (!shell().length) return undefined
       const example = shell()[store.placeholder % shell().length]
-      return `Run a command... "${example}"`
+      return `输入要执行的动作，例如：“${example}”`
     }
     if (!list().length) return undefined
-    return `Ask anything... "${list()[store.placeholder % list().length]}"`
+    return list()[store.placeholder % list().length]
   })
 
   const workspaceLabel = createMemo<
@@ -1465,7 +1461,7 @@ export function Prompt(props: PromptProps) {
                   {(agent) => (
                     <>
                       <text fg={fadeColor(highlight(), agentMetaAlpha())}>
-                        {store.mode === "shell" ? "Shell" : Locale.titlecase(agent().name)}
+                        {store.mode === "shell" ? "动作" : "PaperRun"}
                       </text>
                       <Show when={store.mode === "normal"}>
                         <box flexDirection="row" gap={1}>
@@ -1663,17 +1659,14 @@ export function Prompt(props: PromptProps) {
                     </Match>
                     <Match when={true}>
                       <text fg={theme.text}>
-                        {keybind.print("agent_cycle")} <span style={{ fg: theme.textMuted }}>agents</span>
+                        {keybind.print("command_list")} <span style={{ fg: theme.textMuted }}>模型 / 环境 / 预览</span>
                       </text>
                     </Match>
                   </Switch>
-                  <text fg={theme.text}>
-                    {keybind.print("command_list")} <span style={{ fg: theme.textMuted }}>commands</span>
-                  </text>
                 </Match>
                 <Match when={store.mode === "shell"}>
                   <text fg={theme.text}>
-                    esc <span style={{ fg: theme.textMuted }}>exit shell mode</span>
+                    esc <span style={{ fg: theme.textMuted }}>退出动作输入</span>
                   </text>
                 </Match>
               </Switch>

@@ -6,6 +6,7 @@ import {
   discoverPaperProviders,
   exportPaperRun,
   getPaperRunSnapshot,
+  initialPaperRunLiveEvents,
   paperCapabilities,
   paperDoctor,
   paperModelWorkbench,
@@ -14,16 +15,17 @@ import {
   PaperRunNotFoundError,
   previewPaperRun,
   recordPaperRunGuidance,
-  subscribePaperRunEvents,
+  subscribeToPaperRunLiveEvents,
 } from "@/paper/run"
 import { discoverOpenAICompatibleModels, saveProviderEndpointConfig } from "@/paper/model-discovery"
 import { loadPaperModelInventory, routePaperModel, updatePaperModelAllowlist, upsertDiscoveredModels } from "@/paper/model-inventory"
 import { PAPER_MODEL_ROLES, type PaperModelRole } from "@/paper/model-router"
 import { resolveAllModelRoleAssignments } from "@/paper/model-roles"
-import { Effect } from "effect"
+import { Effect, Queue } from "effect"
 import * as Stream from "effect/Stream"
 import { HttpServerResponse } from "effect/unstable/http"
 import { HttpApiBuilder, HttpApiError } from "effect/unstable/httpapi"
+import * as Sse from "effect/unstable/encoding/Sse"
 import { InstanceHttpApi } from "../api"
 import {
   ModelRoleAssignmentPayload,
@@ -51,6 +53,15 @@ function paperOptions(directory: string) {
 
 function paperGlobalOptions() {
   return { home: process.env.PAPER_FUCKER_TEST_HOME ?? process.env.PAPER_FUCKER_HOME }
+}
+
+function paperSseEvent(event: string, data: unknown): Sse.Event {
+  return {
+    _tag: "Event",
+    event,
+    id: undefined,
+    data: JSON.stringify(data),
+  }
 }
 
 function normalizeCreatePayload(payload: typeof PaperRunCreatePayload.Type): PaperRunCreateRequest {
@@ -108,11 +119,27 @@ export const paperHandlers = HttpApiBuilder.group(InstanceHttpApi, "paper", (han
 
     const events = Effect.fn("PaperHttpApi.events")(function* (ctx: { params: { runID: string } }) {
       const instance = yield* InstanceState.context
-      const text = yield* Effect.tryPromise({
-        try: () => subscribePaperRunEvents(ctx.params.runID, paperOptions(instance.directory)),
+      const snapshot = yield* Effect.tryPromise({
+        try: () => getPaperRunSnapshot(ctx.params.runID, paperOptions(instance.directory)),
         catch: mapPaperError,
       })
-      return HttpServerResponse.stream(Stream.make(text).pipe(Stream.encodeText), {
+      const liveEvents = Stream.callback<ReturnType<typeof initialPaperRunLiveEvents>[number]>((queue) => {
+        const unsubscribe = subscribeToPaperRunLiveEvents(ctx.params.runID, (event) => Queue.offerUnsafe(queue, event))
+        return Effect.acquireRelease(Effect.void, () => Effect.sync(unsubscribe))
+      })
+      const heartbeat = Stream.tick("10 seconds").pipe(
+        Stream.drop(1),
+        Stream.map(() => ({
+          event: "paper.run.heartbeat" as const,
+          data: { run_id: ctx.params.runID, updated_at: new Date().toISOString() },
+        })),
+      )
+      return HttpServerResponse.stream(Stream.fromIterable(initialPaperRunLiveEvents(snapshot)).pipe(
+        Stream.concat(liveEvents.pipe(Stream.merge(heartbeat, { haltStrategy: "left" }))),
+        Stream.map((event) => paperSseEvent(event.event, event.data)),
+        Stream.pipeThroughChannel(Sse.encode()),
+        Stream.encodeText,
+      ), {
         contentType: "text/event-stream",
         headers: {
           "Cache-Control": "no-cache, no-transform",

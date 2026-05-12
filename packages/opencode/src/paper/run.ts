@@ -1,4 +1,5 @@
 import path from "path"
+import { EventEmitter } from "events"
 import { readFile } from "fs/promises"
 import { startPreviewServer, type PreviewServerHandle } from "../../../preview/src/server"
 import type { PreviewAnnotation, PreviewArtifactRef, PreviewSnapshot } from "../../../preview/src/protocol"
@@ -169,6 +170,22 @@ export interface PaperRunEvent {
   payload: Record<string, unknown>
 }
 
+export interface PaperRunLiveEvent {
+  event:
+    | "paper.run.snapshot"
+    | "stage.updated"
+    | "draft.updated"
+    | "agent.updated"
+    | "model.routing_decision"
+    | "diagnostics.cost_updated"
+    | "gate.summary_updated"
+    | "preview.updated"
+    | "export.updated"
+  run_id: string
+  created_at: string
+  data: Record<string, unknown>
+}
+
 export interface PaperExportBundle {
   run_id: string
   status: "blocked" | "final" | "forced_draft"
@@ -297,6 +314,90 @@ const livePreviewServers = new Map<
     updated_at: string
   }
 >()
+
+const paperRunLiveBus = new EventEmitter()
+
+function paperRunLiveEventsFromSnapshot(snapshot: PaperRunSnapshot): PaperRunLiveEvent[] {
+  const now = new Date().toISOString()
+  const events: PaperRunLiveEvent[] = [
+    {
+      event: "paper.run.snapshot",
+      run_id: snapshot.run_id,
+      created_at: now,
+      data: { snapshot },
+    },
+    ...snapshot.stage_graph.stages.map((stage) => ({
+      event: "stage.updated" as const,
+      run_id: snapshot.run_id,
+      created_at: now,
+      data: { stage },
+    })),
+    ...snapshot.drafts.slice(-1).map((draft) => ({
+      event: "draft.updated" as const,
+      run_id: snapshot.run_id,
+      created_at: now,
+      data: { draft },
+    })),
+    ...snapshot.agent_tree.nodes.slice(-8).map((agent) => ({
+      event: "agent.updated" as const,
+      run_id: snapshot.run_id,
+      created_at: now,
+      data: { agent },
+    })),
+    ...(snapshot.diagnostics.model_routing ?? []).slice(-8).map((decision) => ({
+      event: "model.routing_decision" as const,
+      run_id: snapshot.run_id,
+      created_at: now,
+      data: { decision },
+    })),
+    {
+      event: "diagnostics.cost_updated",
+      run_id: snapshot.run_id,
+      created_at: now,
+      data: { cost: snapshot.diagnostics.cost },
+    },
+    {
+      event: "gate.summary_updated",
+      run_id: snapshot.run_id,
+      created_at: now,
+      data: { final_gate: snapshot.diagnostics.final_gate, export_state: snapshot.export_state },
+    },
+    {
+      event: "preview.updated",
+      run_id: snapshot.run_id,
+      created_at: now,
+      data: { preview_state: snapshot.preview_state },
+    },
+    {
+      event: "export.updated",
+      run_id: snapshot.run_id,
+      created_at: now,
+      data: { export_state: snapshot.export_state },
+    },
+  ]
+  return events
+}
+
+export function initialPaperRunLiveEvents(snapshot: PaperRunSnapshot) {
+  return paperRunLiveEventsFromSnapshot(snapshot)
+}
+
+export function subscribeToPaperRunLiveEvents(runID: string, listener: (event: PaperRunLiveEvent) => void) {
+  const handler = (event: PaperRunLiveEvent) => {
+    if (event.run_id === runID) listener(event)
+  }
+  paperRunLiveBus.on("event", handler)
+  return () => paperRunLiveBus.off("event", handler)
+}
+
+async function publishPaperRunSnapshot(snapshot: PaperRunSnapshot, runDir?: string) {
+  for (const event of paperRunLiveEventsFromSnapshot(snapshot)) paperRunLiveBus.emit("event", event)
+  const existing = livePreviewServers.get(snapshot.run_id)
+  if (!existing || !runDir) return
+  const previewSnapshot = await createPaperRunLivePreviewSnapshot(runDir, snapshot)
+  existing.handle.updateSnapshot(previewSnapshot)
+  existing.updated_at = previewSnapshot.updated_at
+}
 
 function defaultDataEgressPolicy(input?: Partial<DataEgressPolicy>): DataEgressPolicy {
   return {
@@ -1088,19 +1189,24 @@ export async function createPaperRun(
   if (terminalStatus) await updateResearchRunStatus(handle.run_dir, terminalStatus, normalized)
   const snapshot = await getPaperRunSnapshotFromDir(handle.run_dir)
   const controller = await initializePaperRunControllerState(handle.run_dir, snapshot, normalized)
+  const finalSnapshot = {
+    ...(await getPaperRunSnapshotFromDir(handle.run_dir)),
+    controller_state: controller,
+  }
+  await publishPaperRunSnapshot(finalSnapshot, handle.run_dir)
   return {
     run_id: handle.run.run_id,
     run_dir: handle.run_dir,
-    snapshot: {
-      ...(await getPaperRunSnapshotFromDir(handle.run_dir)),
-      controller_state: controller,
-    },
+    snapshot: finalSnapshot,
   }
 }
 
 export async function subscribePaperRunEvents(runID: string, options?: PaperRunRuntimeOptions) {
   const snapshot = await getPaperRunSnapshot(runID, options)
-  return `event: paper.run.snapshot\ndata: ${JSON.stringify(snapshot)}\n\n${controllerSseEvent(snapshot.controller_state)}`
+  return [
+    ...initialPaperRunLiveEvents(snapshot).map((event) => `event: ${event.event}\ndata: ${JSON.stringify(event.data)}\n\n`),
+    controllerSseEvent(snapshot.controller_state),
+  ].join("")
 }
 
 export async function recordPaperRunGuidance(
@@ -1121,6 +1227,7 @@ export async function recordPaperRunGuidance(
     options,
   )
   await enqueuePaperRunGuidance(runDir, { message: input.message, event_id: event.event_id }, options)
+  await publishPaperRunSnapshot(await getPaperRunSnapshotFromDir(runDir), runDir)
   return {
     accepted: true,
     run_id: runID,
@@ -1137,6 +1244,7 @@ export async function controlPaperRun(
   const runDir = await findPaperRunDir(runID, options)
   const state = await applyPaperRunControl(runDir, input, options)
   if (input.action === "cancel") await updateResearchRunStatus(runDir, "cancelled", options)
+  await publishPaperRunSnapshot(await getPaperRunSnapshotFromDir(runDir), runDir)
   return state
 }
 
@@ -1145,6 +1253,7 @@ export async function previewPaperRun(runID: string, options?: PaperRunRuntimeOp
   const snapshot = await getPaperRunSnapshotFromDir(runDir)
   const previewSnapshot = await createPaperRunLivePreviewSnapshot(runDir, snapshot)
   const livePreview = startOrReplaceLivePreview(runID, previewSnapshot)
+  await publishPaperRunSnapshot(snapshot, runDir)
   return {
     readonly: true,
     run_id: runID,
@@ -1174,6 +1283,7 @@ export async function exportPaperRun(
   const finalGate = normalizeFinalGateState(status.state.final_gate, status.run.updated_at)
   if (finalGate.status !== "passed" && !input.forced) {
     const snapshot = await getPaperRunSnapshotFromDir(runDir)
+    await publishPaperRunSnapshot(snapshot, runDir)
     return snapshot.export_state
   }
 
@@ -1189,7 +1299,9 @@ export async function exportPaperRun(
     },
     options,
   )
-  return paperExportBundleFromResearch(runID, exported.bundle)
+  const bundle = paperExportBundleFromResearch(runID, exported.bundle)
+  await publishPaperRunSnapshot(await getPaperRunSnapshotFromDir(runDir), runDir)
+  return bundle
 }
 
 export function paperCapabilities() {
