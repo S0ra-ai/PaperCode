@@ -3,7 +3,7 @@ import {
   DEFAULT_MODEL_ROLE_CONFIG,
   PAPER_MODEL_ROLES,
   createModelRoleRouter,
-  parseOpenCodeModelId,
+  parsePaperModelId,
 } from "@/paper"
 
 describe("paper model role router", () => {
@@ -30,11 +30,11 @@ describe("paper model role router", () => {
       model_id: "deepseek-v4-pro",
       source: "default",
     })
-    expect(router.strategy).toBe("opencode_provider_agnostic")
+    expect(router.strategy).toBe("paper_provider_agnostic")
     expect(DEFAULT_MODEL_ROLE_CONFIG.default_model).toBe("deepseek/deepseek-v4-pro")
   })
 
-  test("supports per-role overrides for any OpenCode provider/model id", () => {
+  test("supports per-role overrides for any provider/model id", () => {
     const router = createModelRoleRouter({
       default_model: "openrouter/anthropic/claude-3.7-sonnet",
       roles: {
@@ -63,14 +63,14 @@ describe("paper model role router", () => {
     })
   })
 
-  test("reports invalid OpenCode model identifiers with role context", () => {
-    expect(parseOpenCodeModelId("deepseek/deepseek-v4-pro")).toEqual({
+  test("reports invalid Paper Fucker model identifiers with role context", () => {
+    expect(parsePaperModelId("deepseek/deepseek-v4-pro")).toEqual({
       provider_id: "deepseek",
       model_id: "deepseek-v4-pro",
     })
 
     expect(() => createModelRoleRouter({ default_model: "missing-provider" }).resolve("writer")).toThrow(
-      'Invalid OpenCode model id for role "writer": missing-provider',
+      'Invalid Paper Fucker model id for role "writer": missing-provider',
     )
   })
 })

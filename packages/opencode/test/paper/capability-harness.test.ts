@@ -13,12 +13,13 @@ import {
 } from "../../src/paper"
 
 describe("built-in capability packs and harness scheduler", () => {
-  test("fuses skills, MCP, OpenCode tools, Python tools, and first-party tools into built-in packs", () => {
+  test("fuses skills, MCP, local tools, Python tools, and first-party tools into built-in packs", () => {
     const packs = builtinPaperCapabilityPacks()
     const capabilities = defaultResearchCapabilities()
 
     expect(packs.map((pack) => pack.id)).toEqual([
       "paper-profile-skills",
+      "paper-figure-skills",
       "literature-mcp",
       "crawler-data",
       "huggingface-research",
@@ -28,6 +29,8 @@ describe("built-in capability packs and harness scheduler", () => {
     expect(capabilities.map((capability) => capability.name)).toEqual(
       expect.arrayContaining([
         "skill.nature-paper",
+        "skill.architecture-diagram",
+        "skill.paper-framework-figure-studio-pro",
         "exa",
         "python.web-crawler.scrapling",
         "hf.datasets",

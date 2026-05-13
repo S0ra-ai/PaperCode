@@ -1,24 +1,26 @@
 # Paper Fucker
 
-当前版本：<!-- version:start -->0.10.2-dev<!-- version:end --> ｜ 作者：k1d ([ZhuchenZhong](https://github.com/ZhuchenZhong)) ｜ 状态：开发态 ｜ 许可证：private-first / UNLICENSED
+当前版本：<!-- version:start -->0.11.0-dev<!-- version:end --> ｜ 作者：k1d ([ZhuchenZhong](https://github.com/ZhuchenZhong)) ｜ 状态：开发态 ｜ 许可证：private-first / UNLICENSED
 
-Paper Fucker 是一个中文优先、私有优先的论文研究与产出工作台。你给它研究主题、代码仓库、数据集、实验日志或已有论文材料，它负责把任务推进成可审查论文包：研究规划、资料检索、代码理解、实验复现、证据账本、真实性审查、实时预览和最终导出。
+Paper Fucker 是一个中文优先、私有优先的论文研究工作台。你输入主题，或拖入论文、代码、数据和实验日志，它会把任务组织成可恢复、可审查的 `PaperRun`：研究规划、资料检索、代码理解、实验设计、复现记录、证据账本、真实性审查、实时预览和导出。
 
-它不是普通聊天界面。OpenCode 只作为模型、agent、tool、MCP、skill、权限和 TUI 底座；Paper Fucker 的主入口是论文工作台和 `PaperRun`。
+## 能力图
 
-## 核心能力
+```text
+主题 / 论文 / 代码 / 数据 / 日志
+        |
+        v
+    PaperRun
+        |
+        +-- 模型工作台：provider、allowlist、主决策模型、阶段模型
+        +-- 资料与网页：文献 MCP、托管浏览器采集、source ledger
+        +-- 代码与实验：代码图谱、机器/GPU/工具链诊断、复现 gate
+        +-- 论文图示：architecture-diagram、framework figure studio
+        +-- 写作与审查：ClaimLedger、引用检查、真实性 gate、forced draft 标记
+        +-- 预览与恢复：只读 Preview、全局 run index、/resume
+```
 
-- 主题出论文：从研究问题开始，自动规划文献、数据、实验、ClaimLedger、草稿和审稿。
-- 代码出论文：读取代码仓库，提取方法、架构、实验入口和 source range，避免无来源描述。
-- 材料出论文：整合 PDF、Markdown、LaTeX、DOCX、数据表、实验日志和已有草稿。
-- 模型工作台：添加 provider，拉取模型列表，勾选允许模型，选择主决策模型，并按阶段强制指定模型。
-- 递归 Agent Team：面向大代码库或复杂研究，agent 可以继续派生子 agent，最终自底向上合并证据。
-- 内置能力包：Nature/IEEE/ACM/Springer profile、Exa 等文献检索、爬虫数据获取、Hugging Face 研究能力、实验工具链、写作与真实性 gate。
-- 实时 Web 监控：token-protected localhost 只读页面持续显示阶段、草稿、引用、agent、成本、gate 和导出状态。
-
-## 从源码运行
-
-当前仍是开发态。正式安装包可用前，推荐从源码编译；编译完成后，仓库根目录会生成当前平台可执行文件。
+## 快速开始
 
 Windows PowerShell：
 
@@ -32,77 +34,82 @@ bun run build
 .\paper_fucker.exe
 ```
 
-macOS / Linux 编译后从仓库根目录运行：
+macOS / Linux：
 
 ```bash
+git clone https://github.com/S0ra-ai/paper_fucker.git
+cd paper_fucker
+bun install
+bun run build
 ./paper_fucker
 ```
 
-根目录生成的 `paper_fucker.exe` 或 `paper_fucker` 是本地编译产物，不进入 git。
+初始化与诊断：
 
-## TUI 使用流程
+```bash
+paper_fucker init
+paper_fucker init doctor
+paper_fucker runs list
+paper_fucker resume <run-id>
+```
 
-启动后默认进入中文论文工作台。你可以直接输入：
+## TUI 工作流
 
-- `写一篇关于多智能体代码审查的论文`
-- `基于 E:\Project\some-repo 写一篇系统论文`
-- `读取 ./paper-draft.md、./data 和 ./logs，补齐实验、引用和最终导出`
-- `目标 Nature，生成 submission_candidate 检查包`
+启动后第一屏就是论文工作台。输入提示为“输入主题，或拖入论文、代码、数据”。
 
-工作台会把输入解析为 `PaperRun`，自动推进 stage graph。只有在模型缺失、工具缺失、成本超限、数据外传授权、license/source 冲突、实验不可复现或真实性 gate 阻断时，才会用中文问题暂停。
+常用命令：
 
-## 模型工作台
-
-输入 `/models` 打开全屏模型工作台。它分成四个核心区域：
-
-1. Provider 注册：已配置内置 provider、已配置自定义 provider、未注册 provider 分页管理；支持登录、添加、禁用、刷新和 smoke。
-2. 主模型：从可用模型中选择主决策模型和备用决策模型。
-3. 可用模型：滚动多选列表，批量勾选允许 Paper Fucker 使用的模型；候选不等于可用。
-4. 阶段模型：planner、literature、code、experiment、writer、reviewer、citation、summarizer、subagent 支持自动选择、动态选择或强制指定。
-
-从零启动时不会显示 GLM、DeepSeek 或任何旧 OpenCode fallback。未配置允许模型时，工作台只显示“未配置模型”，并引导你进入 `/models` 添加 provider、勾选允许模型和选择主决策模型。
-
-## 材料与环境
-
-你可以在输入框中拖入或引用文件和目录，也可以使用工作台命令。TUI 最低终端尺寸为 `96x28`，推荐 `120x34`；窗口过小时会显示中文提示并暂停渲染，避免布局错乱。
-
+- `/models` 配置 provider、允许模型、主决策模型和阶段模型。
+- `/folder` 选择当前 TUI 对话工作区；只有选择后，新 run 才会写入该工作区的 `.paper_fucker/runs`。
 - `/file` 添加论文草稿、PDF、Markdown、LaTeX 或 DOCX。
-- `/folder` 优先打开系统目录选择器；不可用时回退到中文 TUI 目录选择器。Windows 回退界面支持驱动器选择。
 - `/data` 添加数据集。
 - `/log` 添加实验日志。
-- `/status` 查看模型、MCP、Skill、Pandoc、LaTeX、Docker、Python、浏览器 Preview 和 Nature skill 状态。
+- `/status` 查看模型、MCP、Skill 和工具链状态。
+- `/resume` 打开历史 `PaperRun` 选择器。
 
-Pandoc、LaTeX、Docker、Python 等是按能力启用的工具。缺失时系统会说明受影响功能：例如没有 LaTeX 仍可写作和导出 Markdown；没有 Docker 仍可做本地实验规划，但不能完成容器复现 gate。
+默认情况下，`PaperRun` 写入 `~/.paper_fucker/runs/<run-id>`。选择工作区或显式传入 `storage_scope: "workspace"` 后，才写入 `<workspace>/.paper_fucker/runs/<run-id>`。
 
-## Preview 与导出
+## 论文能力
 
-PaperRun 运行时可以打开实时 Preview。页面只读、仅监听本机 localhost，并通过 token 保护；草稿、引用检查、审稿意见、agent 调用、成本/token、gate 和导出状态会持续更新。
-
-导出分两类：
-
-- `reviewable_bundle`：默认输出，包含论文草稿、证据账本、引用、实验/复现记录、审稿报告和导出文件。
-- `submission_candidate`：面向目标 profile 的更严格候选包，需要通过投稿材料和真实性检查。
-
-final export 必须通过真实性 gate。forced draft 可以输出，但会显著标记失败检查，不能伪装成最终稿。
+- 论文 profile：Nature、IEEE、ACM、Springer 等结构与材料检查。
+- 图示能力：内置 `architecture-diagram` 和 `paper-framework-figure-studio-pro`，用于系统架构图、方法流程图和 framework figure。
+- 网页采集：`bb-browser` 作为 Paper Fucker 托管能力诊断和安装，不要求用户手工准备浏览器采集栈。
+- 机器环境：侧边栏显示 OS、CPU、内存、磁盘、GPU/CUDA/ROCm、编译器、Python/uv/pip/conda、Node/Bun、Docker、WSL 和虚拟化工具状态。
+- 历史恢复：全局 run index 可列出 home/workspace 两类 run，CLI 和 TUI 都支持恢复。
 
 ## 隐私
 
 Paper Fucker 默认 private-first：
 
+- 不读取 `.opencode/`、`~/.config/opencode/` 或旧 auth/config/session/cache。
+- 只使用 `~/.paper_fucker/`、项目 `.paper_fucker/` 和 `PAPER_FUCKER_*` 环境变量。
 - 本地代码、数据和论文材料不会默认全文发给外部模型或 MCP。
-- 首次 run 会要求确认可外传的路径、摘要、片段和文件类型。
-- secrets、ignored files、大二进制和敏感配置会自动排除。
-- 外部模型、MCP、Skill 和工具调用会写入 audit/tool trace。
+- secrets、ignored files、大二进制和敏感配置会被排除。
+- 外部模型、MCP、Skill 和工具调用写入 audit/tool trace。
 
-## 项目状态
+## 系统要求
 
-当前处于开发态，TUI、模型工作台、实时监控和导出闭环仍在快速迭代。目标是把“主题/代码/材料到可审查论文包”的完整流程稳定下来，再进入候选发布流程。
+- Bun 1.3.x
+- Git
+- 终端尺寸最低 `96x28`，推荐 `120x34`
+- 可选：Python、uv、Pandoc、LaTeX、Docker、CUDA/ROCm、Node、编译器工具链
 
-版本历史见 `CHANGELOG`。
+缺少可选工具不会阻止基础论文工作台启动；doctor 和右侧栏会说明缺失项影响哪些实验、导出或复现能力。
+
+## FAQ
+
+**没有模型能启动吗？**  
+可以启动，但 `PaperRun` 会暂停并引导你进入 `/models` 添加 provider、勾选允许模型并选择主决策模型。
+
+**默认会污染当前仓库吗？**  
+不会。默认 run 存在用户 home 的 `~/.paper_fucker/runs`。只有你选择当前目录作为工作区，才会写入工作区 `.paper_fucker/runs`。
+
+**可以恢复历史任务吗？**  
+可以。TUI 使用 `/resume`，CLI 使用 `paper_fucker runs list` 和 `paper_fucker resume <run-id>`。
+
+**第三方来源在哪里？**  
+第三方快照、skills 和托管能力边界记录在 `NOTICE.md`。内部维护说明放在 `docs/internal/`。
 
 ## License
 
 本项目当前是 private-first，除非后续书面修改许可证，否则保留所有权利。
-
-第三方快照保留其原始许可证。OpenCode 上游来源与许可证边界记录在 `NOTICE.md`。
-

@@ -1,0 +1,107 @@
+id: task-110-readme-brand-repo-cleanup
+title: README brand and repository cleanup for 0.10.7-dev
+status: done
+priority: high
+owner: codex-paper-fucker
+tags:
+- paper
+- brand
+- readme
+- cleanup
+- 0.10.7-dev
+depends_on:
+- task-109-machine-sidebar-experiment-env
+description: Delete tracked legacy/, remove user-visible OpenCode product residue
+  and upsell/subscription wording, and rewrite README as a clear Chinese GitHub product
+  homepage with version aligned to CHANGELOG.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: remove-legacy
+  title: Delete tracked legacy directory
+  status: done
+  owner: codex-paper-fucker
+  depends_on: []
+  description: Remove tracked legacy/ content directly, without archiving.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-13T02:06:08.257686'
+      level: info
+      message: Deleted tracked legacy/ after resolving and verifying the absolute
+        target path stayed under the repository root.
+      agent: codex-paper-fucker
+    last_run: '2026-05-13T02:06:08.257686'
+    attempt_count: 2
+  meta: {}
+- id: public-brand-scan
+  title: Clean public brand surfaces
+  status: done
+  owner: codex-paper-fucker
+  depends_on:
+  - remove-legacy
+  description: Scan README/help/doctor/toasts/glossary/commands/tool docs for upstream
+    OpenCode product semantics and remove user-visible leftovers where first-party.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-13T02:17:05.509954'
+      level: info
+      message: 'Cleaned user-visible brand residue: removed upstream model front matter
+        from .paper_fucker commands, deleted old glossary/tool docs, switched Paper
+        TUI headers/temp names/model source/strategy strings to Paper Fucker naming,
+        hid upstream managed provider entries, and verified focused public-surface/model
+        tests pass.'
+      agent: codex-paper-fucker
+    last_run: '2026-05-13T02:17:05.509954'
+    attempt_count: 2
+  meta: {}
+- id: rewrite-readme-notice
+  title: Rewrite README and NOTICE
+  status: done
+  owner: codex-paper-fucker
+  depends_on:
+  - public-brand-scan
+  description: Create a concise Chinese TUI-first GitHub README and update NOTICE/license
+    boundary content.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-13T02:17:11.125283'
+      level: info
+      message: Reviewing rewritten README/NOTICE before closing the cleanup task.
+      agent: codex-paper-fucker
+    - timestamp: '2026-05-13T02:17:39.653378'
+      level: info
+      message: Rewrote README as Chinese TUI-first GitHub product homepage at target
+        0.11.0-dev, and updated NOTICE with bundled architecture-diagram, paper-framework-figure-studio-pro,
+        and managed bb-browser boundaries. Final README/CHANGELOG version sync remains
+        the explicit task-111 version-changelog step.
+      agent: codex-paper-fucker
+    last_run: '2026-05-13T02:17:39.653378'
+    attempt_count: 2
+  meta: {}
+outputs:
+- type: directory
+  path: legacy
+  description: Deleted tracked legacy directory
+- type: file
+  path: README.md
+  description: Public Chinese product README
+- type: file
+  path: NOTICE.md
+  description: Third-party source boundary notes
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-13T01:37:29.791035'
+  updated_at: '2026-05-13T02:17:50.109311'
+  version: '1'

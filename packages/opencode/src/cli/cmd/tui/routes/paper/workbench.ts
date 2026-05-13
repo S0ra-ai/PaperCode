@@ -2,7 +2,7 @@ import type { PromptInfo } from "@tui/component/prompt/history"
 import type { PaperRunCreateRequest, PaperRunSnapshot } from "@/paper/run"
 import type { PaperProfileId } from "@/paper/profiles"
 import type { ResearchCapability, ResearchCapabilityType } from "@/paper/capabilities"
-import type { ModelRoutingDecision, OpenCodeModelRef, PaperModelInventory, PaperModelRole } from "@/paper"
+import type { ModelRoutingDecision, PaperModelRef, PaperModelInventory, PaperModelRole } from "@/paper"
 import type { PaperRunControlAction, PaperRunControllerState } from "@/paper/run-controller"
 import { summarizePaperAgentTeam } from "@/paper/agent-team"
 import { readTuiJsonResponse } from "@tui/util/http"
@@ -10,7 +10,7 @@ import { readTuiJsonResponse } from "@tui/util/http"
 export interface PaperWorkbenchSubmitInput {
   baseUrl: string
   directory?: string
-  prompt: PromptInfo
+  prompt: PromptInfo & Pick<PaperRunCreateRequest, "storage_scope">
   fetch: (input: string | URL | Request, init?: RequestInit) => Promise<Response>
 }
 
@@ -200,6 +200,19 @@ export interface PaperRunSidebarState {
     code_symbols: number
     experiment_surfaces: number
   }
+  machine: {
+    os: string
+    cpu: string
+    memory: string
+    disk?: string
+    workspace: string
+    run_root: string
+    gpu_mode: string
+    gpu_devices: string[]
+    available: number
+    optional_missing: number
+    blocked: number
+  }
 }
 
 export interface PaperDashboardState {
@@ -364,7 +377,9 @@ function readFlagValue(token: string, tokens: string[], index: number) {
   return { value: tokens[index + 1], next: index + 1 }
 }
 
-export function parsePaperWorkbenchPrompt(prompt: string | PromptInfo): PaperRunCreateRequest {
+export function parsePaperWorkbenchPrompt(
+  prompt: string | (PromptInfo & Pick<PaperRunCreateRequest, "storage_scope">),
+): PaperRunCreateRequest {
   const input = typeof prompt === "string" ? prompt : prompt.input
   const parts = typeof prompt === "string" ? [] : prompt.parts
   const promptBudget = typeof prompt === "string" ? undefined : prompt.budget_tier
@@ -469,6 +484,7 @@ export function parsePaperWorkbenchPrompt(prompt: string | PromptInfo): PaperRun
   return {
     topic: normalizedTopic,
     workspace_path: typeof prompt === "string" ? undefined : prompt.workspace_path,
+    storage_scope: typeof prompt === "string" ? "home" : prompt.storage_scope ?? "home",
     code_paths: codePaths,
     paper_files: paperFiles,
     dataset_paths: datasetPaths,
@@ -487,7 +503,7 @@ function apiUrl(baseUrl: string, path: string) {
 function apiHeaders(directory?: string, json = false) {
   return {
     ...(json ? { "content-type": "application/json" } : {}),
-    ...(directory ? { "x-opencode-directory": directory } : {}),
+    ...(directory ? { "x-paper-fucker-directory": directory } : {}),
   }
 }
 
@@ -525,9 +541,7 @@ export async function fetchPaperRunSnapshot(input: {
   fetch: (input: string | URL | Request, init?: RequestInit) => Promise<Response>
 }) {
   const response = await input.fetch(apiUrl(input.baseUrl, `paper/runs/${encodeURIComponent(input.runID)}`), {
-    headers: {
-      ...(input.directory ? { "x-opencode-directory": input.directory } : {}),
-    },
+    headers: apiHeaders(input.directory),
   })
   const payload = await readJsonResponse<{ run?: PaperRunSnapshot }>(response, "PaperRun 读取失败")
   if (!payload.run?.run_id) throw new Error("PaperRun 读取响应缺少 run_id。")
@@ -774,7 +788,7 @@ function modelWorkbenchState(snapshot: PaperRunSnapshot): PaperWorkbenchModelWor
   }
 }
 
-function modelRoleState(roles: Record<string, OpenCodeModelRef>): PaperWorkbenchModelRoleState[] {
+function modelRoleState(roles: Record<string, PaperModelRef>): PaperWorkbenchModelRoleState[] {
   return Object.entries(roles).map(([role, model]) => ({
     role,
     label: MODEL_ROLE_LABELS[role] ?? role,
@@ -879,6 +893,19 @@ function objectValue(value: unknown): Record<string, unknown> {
 
 function numericValue(value: unknown) {
   return typeof value === "number" && Number.isFinite(value) ? value : 0
+}
+
+function formatBytes(value: unknown) {
+  const bytes = numericValue(value)
+  if (!bytes) return "unknown"
+  const units = ["B", "KB", "MB", "GB", "TB"]
+  let amount = bytes
+  let index = 0
+  while (amount >= 1024 && index < units.length - 1) {
+    amount /= 1024
+    index++
+  }
+  return `${amount.toFixed(index === 0 ? 0 : 1)} ${units[index]}`
 }
 
 function arrayValue(value: unknown) {
@@ -1045,6 +1072,8 @@ export function createPaperRunSidebarState(snapshot: PaperRunSnapshot): PaperRun
   const team = summarizePaperAgentTeam(snapshot.agent_team)
   const memory = objectValue(snapshot.diagnostics.memory)
   const code = objectValue(snapshot.diagnostics.code_understanding)
+  const machine = snapshot.diagnostics.machine_profile
+  const environment = snapshot.diagnostics.experiment_environment
   const recentAgents = nodes.slice(-4).map((agent) => ({
     id: agent.agent_id,
     role: agent.role,
@@ -1086,6 +1115,35 @@ export function createPaperRunSidebarState(snapshot: PaperRunSnapshot): PaperRun
       code_symbols: numericValue(code.symbols),
       experiment_surfaces: numericValue(code.experiment_surfaces),
     },
+    machine:
+      machine && environment
+        ? {
+            os: `${machine.os.platform} ${machine.os.release} ${machine.os.arch}`,
+            cpu: `${machine.cpu.model} / ${machine.cpu.cores} cores`,
+            memory: `${formatBytes(machine.memory.free_bytes)} free / ${formatBytes(machine.memory.total_bytes)} total`,
+            disk: machine.disk
+              ? `${formatBytes(machine.disk.free_bytes)} free / ${formatBytes(machine.disk.total_bytes)} total`
+              : undefined,
+            workspace: machine.workspace,
+            run_root: machine.default_run_root,
+            gpu_mode: machine.gpu.mode === "gpu" ? "GPU" : "CPU-only",
+            gpu_devices: machine.gpu.devices.map((device) => `${device.vendor} ${device.name}`),
+            available: environment.available.length,
+            optional_missing: environment.optional_missing.length,
+            blocked: environment.blocked.length,
+          }
+        : {
+            os: "未检测",
+            cpu: "未检测",
+            memory: "未检测",
+            workspace: snapshot.workspace,
+            run_root: String(snapshot.diagnostics.runtime_root ?? ""),
+            gpu_mode: "未检测",
+            gpu_devices: [],
+            available: 0,
+            optional_missing: 0,
+            blocked: 0,
+          },
   }
 }
 

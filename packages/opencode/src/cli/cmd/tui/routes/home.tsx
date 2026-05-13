@@ -18,12 +18,7 @@ import { getPaperConversationWorkspace } from "@tui/util/paper-conversation-work
 
 let once = false
 const placeholder = {
-  normal: [
-    "输入你想研究的主题",
-    "描述你的代码仓库和想产出的论文方向",
-    "把论文草稿、数据或实验日志拖进来，再说明目标",
-    "说明目标期刊或会议，例如 Nature、IEEE、ACM 或预印本",
-  ],
+  normal: ["输入主题，或拖入论文、代码、数据"],
   shell: ["打开模型工作台", "检查环境与能力", "打开实时 Preview"],
 }
 
@@ -84,9 +79,7 @@ export function Home() {
           </TuiPluginRuntime.Slot>
         </box>
         <box flexDirection="column" alignItems="center" maxWidth={panelWidth()} paddingTop={1} paddingBottom={1} flexShrink={0}>
-          <text>paper_fucker 论文工作台</text>
-          <text>主题 / 代码 / 论文材料 / 数据 / 实验日志 → PaperRun</text>
-          <text>自动编排 Agent · MCP · Skills，仅在授权、成本、真实性或复现风险时暂停</text>
+          <text>你的私人专属研究助手</text>
         </box>
         <box height={1} minHeight={0} flexShrink={1} />
         <box width="100%" maxWidth={panelWidth()} zIndex={1000} paddingTop={1} flexShrink={0}>
@@ -111,14 +104,20 @@ export function Home() {
                   router.navigate({ type: "paper-folder" })
                   return true
                 }
+                if (command === "/resume") {
+                  router.navigate({ type: "paper-resume" })
+                  return true
+                }
                 try {
+                  const conversationWorkspace = getPaperConversationWorkspace()
                   const result = await submitPaperWorkbenchPrompt({
                     baseUrl: sdk.url,
                     directory: sdk.directory,
                     fetch: sdk.fetch,
                     prompt: {
                       ...prompt,
-                      workspace_path: getPaperConversationWorkspace() ?? prompt.workspace_path ?? sdk.directory,
+                      workspace_path: conversationWorkspace ?? prompt.workspace_path ?? sdk.directory,
+                      storage_scope: conversationWorkspace ? "workspace" : "home",
                     },
                   })
                   router.navigate({
