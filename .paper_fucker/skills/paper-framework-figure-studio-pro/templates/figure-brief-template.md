@@ -19,7 +19,7 @@
 - Style family:
 - Color semantics:
 - Saved atlas/reference Markdown embeds rendered:
-  - `![Atlas label](C:/Users/qu_yw/.codex/skills/paper-framework-figure-studio-pro/assets/subtype-atlas/boards/<board>.png)` in Codex, or package-relative/source asset equivalent in ChatGPT
+  - `![Atlas label](assets/subtype-atlas/boards/<board>.png)` from the Paper Fucker skill root, or a package-relative/source asset equivalent
 - Inline non-target concept/example images displayed:
 - Concept/example requirement:
   - concept_example_required: false / true

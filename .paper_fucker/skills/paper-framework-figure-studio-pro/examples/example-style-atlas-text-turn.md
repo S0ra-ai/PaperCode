@@ -8,7 +8,7 @@
 
 相关已保存风格图：
 
-![Visual Communication Styles](C:/Users/qu_yw/.codex/skills/paper-framework-figure-studio-pro/assets/subtype-atlas/boards/visual-communication-styles.png)
+![Visual Communication Styles](../assets/subtype-atlas/boards/visual-communication-styles.png)
 
 建议比较 6 个方向：
 
@@ -36,7 +36,7 @@
 - **saved_reference_images_displayed：**
   - assets/subtype-atlas/boards/visual-communication-styles.png
 - **saved_reference_markdown_embeds_rendered：**
-  - `![Visual Communication Styles](C:/Users/qu_yw/.codex/skills/paper-framework-figure-studio-pro/assets/subtype-atlas/boards/visual-communication-styles.png)`
+  - `![Visual Communication Styles](../assets/subtype-atlas/boards/visual-communication-styles.png)`
 - **missing_reference_images：** []
 - **reference_display_mode：** relevant_style
 - **reference_display_render_status：** rendered
