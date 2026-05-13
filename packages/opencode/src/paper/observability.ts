@@ -10,7 +10,7 @@ import {
 import { applyCostUsage, type ResearchCostUsage } from "./research/runtime/policy"
 import { evaluateDataEgressPolicy, type DataEgressEvaluationResult, type DataEgressPolicy } from "./data-egress"
 import type { ResearchCapability } from "./capabilities"
-import type { OpenCodeModelRef } from "./model-router"
+import type { PaperModelRef } from "./model-router"
 
 export const PAPER_OBSERVABILITY_REQUIRED_KINDS = [
   "stage",
@@ -81,7 +81,7 @@ export interface RecordPaperCostUsageInput extends ResearchCostUsage {
 }
 
 export interface RecordDefaultPaperRunObservabilityInput {
-  model_roles: Record<string, OpenCodeModelRef>
+  model_roles: Record<string, PaperModelRef>
   capabilities: ResearchCapability[]
   data_egress_policy: DataEgressPolicy
   data_egress_candidates: string[]

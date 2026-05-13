@@ -298,7 +298,7 @@ describe("TUI PaperRun live controls", () => {
     expect(JSON.parse(String(calls[0]!.init.body))).toEqual({ message: "优先补充方法贡献" })
     expect(JSON.parse(String(calls[1]!.init.body))).toEqual({ action: "retry", stage: "literature" })
     expect(JSON.parse(String(calls[3]!.init.body))).toEqual({ forced: true })
-    expect((calls[1]!.init.headers as Record<string, string>)["x-opencode-directory"]).toBe(
+    expect((calls[1]!.init.headers as Record<string, string>)["x-paper-fucker-directory"]).toBe(
       "E:/Project/paper_fucker",
     )
   })

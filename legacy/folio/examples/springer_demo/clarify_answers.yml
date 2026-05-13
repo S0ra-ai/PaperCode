@@ -1,7 +1,0 @@
-# SPDX-License-Identifier: MPL-2.0
-# Clarify answers for the (skeleton) Springer LNCS sample.
-topic: A short survey of n-gram language models
-length_pages: 6
-audience: graduate students
-language: en
-style: springer-lncs

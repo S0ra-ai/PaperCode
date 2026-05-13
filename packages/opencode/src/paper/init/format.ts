@@ -9,6 +9,7 @@ type DoctorResult = {
   config?: InitWizardResult["config"]
   tools: InitWizardResult["tools"]
   skills?: InitWizardResult["skills"] | Awaited<ReturnType<typeof import("../skill-install").inspectNatureSkill>>
+  managed_capabilities?: InitWizardResult["managed_capabilities"]
 }
 
 function availableTools(tools: InitWizardResult["tools"]) {
@@ -39,11 +40,8 @@ function modelSummary(config: InitWizardResult["config"]) {
   return config.model_roles.default_model || "未配置模型"
 }
 
-function targetInstalled(target: unknown) {
-  if (!target || typeof target !== "object") return false
-  const record = target as Record<string, unknown>
-  if (typeof record.exists === "boolean") return record.exists
-  return record.status === "installed" || record.status === "already_installed"
+function groupedLine(label: string, values: string[]) {
+  return [`${label}:`, ...(values.length > 0 ? values.map((value) => `  - ${value}`) : ["  - 无"])]
 }
 
 export function formatInitResult(result: InitWizardResult) {
@@ -58,7 +56,7 @@ export function formatInitResult(result: InitWizardResult) {
     `实时预览: ${result.config.preview.auto_open ? "已启用" : "已关闭"}`,
     `默认模型: ${modelSummary(result.config)}`,
     `Provider: ${providerSummary(result.config)}`,
-    `Nature Skill: ${result.skills.restart_required ? "已安装，重启 Codex 后生效" : "已就绪"}`,
+    `Nature Skill: ${result.skills.restart_required ? "已安装，重启 Paper Fucker 后生效" : "已就绪"}`,
     `外部工具: ${available.length} 个可用${missing.length > 0 ? `，${missing.length} 个缺失` : ""}`,
     `可用工具: ${preview(available.map((tool) => tool.name))}`,
     `本地密钥: ${result.wrote_secrets ? "已写入加密密钥文件" : "未写入；可稍后添加 provider key"}`,
@@ -74,46 +72,63 @@ export function formatDoctorResult(result: DoctorResult) {
   const available = availableTools(result.tools)
   const missing = missingTools(result.tools)
   const config = result.config
+  const configured = [
+    `配置目录 ${result.paths.root}`,
+    ...(result.config_exists ? ["配置文件已存在"] : []),
+    ...(result.tools_exists ? ["工具缓存已存在"] : []),
+    ...(result.secrets_exists ? ["本地密钥已配置"] : []),
+    ...(config
+      ? [
+          `默认语言 ${config.language.default}`,
+          `访问模式 ${accessLabel(config)}`,
+          `实时预览 ${config.preview.auto_open ? "已启用" : "已关闭"}`,
+        ]
+      : []),
+    ...(available.length > 0 ? [`可用工具 ${preview(available.map((tool) => tool.name))}`] : []),
+  ]
+
+  const unconfigured = [
+    ...(!result.config_exists ? ["配置文件缺失"] : []),
+    ...(!result.tools_exists ? ["工具缓存缺失"] : []),
+    ...(!result.secrets_exists ? ["本地密钥未配置"] : []),
+    ...(config ? [`默认模型 ${modelSummary(config)}`, `Provider ${providerSummary(config)}`].filter((item) => item.includes("未配置") || item.includes("尚未配置")) : []),
+  ]
+
+  const optionalMissing = [
+    ...missing.map((tool) => `${tool.name} 缺失；只影响对应实验/导出能力`),
+    ...(result.managed_capabilities ?? [])
+      .filter((capability) => capability.status === "optional_missing")
+      .map((capability) => `${capability.display_name}: ${capability.impact}`),
+  ]
+
+  const blocked = [
+    ...(config?.model_roles.default_model ? [] : ["未选择主决策模型；PaperRun 会暂停在模型工作台"]),
+    ...(result.managed_capabilities ?? [])
+      .filter((capability) => capability.status === "missing")
+      .map((capability) => `${capability.display_name}: ${capability.impact}`),
+  ]
+
+  const nextSteps = []
+  if (!result.config_exists) nextSteps.push("先运行 paper_fucker init 创建本地配置")
+  if (!result.secrets_exists) nextSteps.push("添加 provider key 后再运行 provider smoke")
+  if (!config?.model_roles.default_model) nextSteps.push("进入 /models 添加 provider、勾选允许模型并选择主决策模型")
+  if (optionalMissing.length > 0) nextSteps.push("按需运行 paper_fucker init 修复可选工具或 Skill")
+  if (nextSteps.length === 0) nextSteps.push("基础环境可用，可以打开 paper_fucker 开始测试")
+  nextSteps.push("需要完整机器可读诊断时，加 --json")
+
   const lines = [
     "Paper Fucker Doctor",
     "",
-    `配置目录: ${result.paths.root}`,
-    `配置文件: ${result.config_exists ? "已存在" : "缺失"}`,
-    `工具缓存: ${result.tools_exists ? "已存在" : "缺失"}`,
-    `本地密钥: ${result.secrets_exists ? "已配置" : "未配置"}`,
+    ...groupedLine("已配置", configured),
+    "",
+    ...groupedLine("未配置", unconfigured),
+    "",
+    ...groupedLine("可选缺失", optionalMissing),
+    "",
+    ...groupedLine("阻断缺失", blocked),
+    "",
+    ...groupedLine("下一步建议", nextSteps),
   ]
-
-  if (config) {
-    lines.push(
-      `默认语言: ${config.language.default}`,
-      `访问模式: ${accessLabel(config)}`,
-      `实时预览: ${config.preview.auto_open ? "已启用" : "已关闭"}`,
-      `默认模型: ${modelSummary(config)}`,
-      `Provider: ${providerSummary(config)}`,
-    )
-  }
-
-  lines.push(
-    `外部工具: ${available.length} 个可用${missing.length > 0 ? `，${missing.length} 个缺失` : ""}`,
-    `可用工具: ${preview(available.map((tool) => tool.name))}`,
-  )
-  if (result.skills) {
-    const sourceOk = "source_valid" in result.skills ? result.skills.source_valid : true
-    const codexTarget = result.skills.targets.find((target) => target.name === "codex")
-    const codexInstalled = targetInstalled(codexTarget)
-    lines.push(`Nature Skill: ${sourceOk && codexInstalled ? "已安装" : "缺失或未安装"}`)
-  }
-
-  if (missing.length > 0) {
-    lines.push(`缺失工具: ${preview(missing.map((tool) => tool.name))}`)
-  }
-
-  lines.push("", "建议:")
-  if (!result.config_exists) lines.push("  - 先运行 paper_fucker init 创建本地配置")
-  if (!result.secrets_exists) lines.push("  - 还没有本地密钥；添加 provider key 后可运行 provider smoke")
-  if (missing.length > 0) lines.push("  - 缺失的外部工具只影响对应能力，基础 TUI 仍可启动")
-  if (result.config_exists && missing.length === 0) lines.push("  - 基础环境可用，可以打开 paper_fucker 开始测试")
-  lines.push("  - 需要完整机器可读诊断时，加 --json")
 
   return lines.join("\n")
 }

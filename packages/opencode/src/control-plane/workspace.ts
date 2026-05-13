@@ -564,8 +564,6 @@ export const layer = Layer.effect(
         PAPER_FUCKER_AUTH_CONTENT: authContent,
         PAPER_FUCKER_WORKSPACE_ID: config.id,
         PAPER_FUCKER_EXPERIMENTAL_WORKSPACES: "true",
-        OPENCODE_AUTH_CONTENT: authContent,
-        OPENCODE_WORKSPACE_ID: config.id,
         OPENCODE_EXPERIMENTAL_WORKSPACES: "true",
         OTEL_EXPORTER_OTLP_HEADERS: process.env.OTEL_EXPORTER_OTLP_HEADERS,
         OTEL_EXPORTER_OTLP_ENDPOINT: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,

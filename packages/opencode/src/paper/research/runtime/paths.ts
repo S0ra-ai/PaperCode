@@ -12,6 +12,7 @@ export type ResearchStorageScope = "workspace" | "home"
 export type ResearchPathOptions = {
   workspace?: string
   home?: string
+  storage_scope?: ResearchStorageScope
 }
 
 export type ResearchRunRoot = {
@@ -51,16 +52,16 @@ async function ensureWritableDirectory(dir: string) {
 }
 
 export async function chooseRunRoot(options: ResearchPathOptions): Promise<ResearchRunRoot> {
-  const workspace = resolveResearchWorkspace(options.workspace)
-  const workspaceRoot = workspaceRunRoot(workspace)
-  try {
-    await ensureWritableDirectory(workspaceRoot)
-    return { root: workspaceRoot, scope: "workspace" }
-  } catch {
+  if (options.storage_scope === "home" || !options.storage_scope) {
     const root = homeRunRoot(options.home)
     await ensureWritableDirectory(root)
     return { root, scope: "home" }
   }
+
+  const workspace = resolveResearchWorkspace(options.workspace)
+  const workspaceRoot = workspaceRunRoot(workspace)
+  await ensureWritableDirectory(workspaceRoot)
+  return { root: workspaceRoot, scope: "workspace" }
 }
 
 async function safeRunDirs(root: string) {

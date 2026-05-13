@@ -28,13 +28,17 @@ export type PaperFolderRoute = {
   type: "paper-folder"
 }
 
+export type PaperResumeRoute = {
+  type: "paper-resume"
+}
+
 export type PluginRoute = {
   type: "plugin"
   id: string
   data?: Record<string, unknown>
 }
 
-export type Route = HomeRoute | SessionRoute | PaperRoute | PaperModelsRoute | PaperFolderRoute | PluginRoute
+export type Route = HomeRoute | SessionRoute | PaperRoute | PaperModelsRoute | PaperFolderRoute | PaperResumeRoute | PluginRoute
 
 export const { use: useRoute, provider: RouteProvider } = createSimpleContext({
   name: "Route",

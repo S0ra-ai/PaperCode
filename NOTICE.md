@@ -30,3 +30,35 @@ file or directory explicitly carries a different third-party license.
 
 OpenCode source files were imported as a root overlay snapshot without upstream
 git history. Active upstream GitHub workflows were not imported.
+
+## Architecture Diagram Skill
+
+- Project: architecture-diagram-generator
+- Repository: https://github.com/Cocoon-AI/architecture-diagram-generator
+- Local location: `.paper_fucker/skills/architecture-diagram`
+- License: MIT
+
+Paper Fucker bundles this as an optional built-in research diagram skill for
+HTML/SVG architecture and system diagrams.
+
+## Paper Framework Figure Studio Pro
+
+- Project: paper-framework-figure-studio-pro
+- Repository: https://github.com/c-narcissus/paper-framework-figure-studio-pro
+- Local location: `.paper_fucker/skills/paper-framework-figure-studio-pro`
+- License: MIT-0
+
+Paper Fucker bundles this as an optional built-in research figure skill for
+publication-ready framework, pipeline, method overview, and agent workflow
+figures. The bundled package keeps its local `LICENSE` and metadata.
+
+## bb-browser
+
+- Project: bb-browser
+- Repository: https://github.com/epiral/bb-browser
+- Local status: managed capability, not vendored as first-party product source
+
+Paper Fucker treats bb-browser as an optional managed browser and web-data
+acquisition capability. It is diagnosed by `paper_fucker init doctor` and should
+be installed through Paper Fucker-managed setup rather than requiring manual
+user installation.

@@ -2,10 +2,40 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.10.2-dev
+:version       0.11.0-dev
 :last_update   2026/05/13
 
 :history
+
+    0.11.0-dev - 2026/05/13 (b0db5090) [develop]
+        :brief 将 Paper Fucker 推进为更独立的论文研究工作台，补齐配置隔离、历史恢复、机器环境、内置论文 skills 和公开文档
+        :capabilities
+            - feat(skills): 将 architecture-diagram 与 paper-framework-figure-studio-pro 纳入 Paper Fucker 托管能力和 doctor 检查
+            - feat(browser): 将 bb-browser 作为托管网页采集能力诊断和安装，避免要求用户手工准备浏览器采集栈
+            - feat(capabilities): 论文能力注册表补齐文献、代码、数据、图示、导出和真实性 gate 的 Paper Fucker 描述
+        :runtime
+            - feat(config): 全局配置、auth、模型缓存和测试 home 只读取 PAPER_FUCKER_* 与 .paper_fucker 路径，不再继承旧 OpenCode 配置
+            - feat(runs): PaperRun 默认写入 ~/.paper_fucker/runs，只有显式 workspace storage 才写入工作区 .paper_fucker/runs
+            - feat(resume): 新增全局 run index、history/list/resume API，以及 paper_fucker runs list 和 paper_fucker resume
+            - feat(init): init/doctor 输出中文分组诊断，并把托管 skills、MCP、工具链和机器能力纳入报告
+        :tui
+            - feat(tui): 首页文案收敛为“你的私人专属研究助手”，输入提示改为“输入主题，或拖入论文、代码、数据”
+            - feat(tui): 新增 /resume 历史任务选择器，退出 PaperRun 时显示 run id、状态、路径、token/cost、Preview 和恢复命令
+            - feat(machine): 右侧栏新增机器页，展示 OS、CPU、内存、磁盘、GPU、编译器、运行环境和能力缺失影响
+            - fix(models): Paper 模型源、策略、工作区 header、临时文件和上游托管 provider 入口改为 Paper Fucker 可见命名
+        :docs
+            - docs(readme): 重写中文 GitHub 首页，覆盖能力图、TUI-first 快速开始、隐私、系统要求和 FAQ
+            - docs(notice): 记录 architecture-diagram、paper-framework-figure-studio-pro 与 bb-browser 的第三方来源和能力边界
+            - fix(skills): 将内置 paper-framework-figure-studio-pro 的 atlas 引用改为包内相对路径，避免泄露本地 Codex 安装路径
+            - chore(repo): 删除 tracked legacy/ 与上游 glossary/tool/command 残留，保留内部底座包名作为实现细节
+        :test
+            - test(product): 覆盖 init/doctor、配置隔离、home/workspace run 存储、resume、机器侧栏、模型注册和公开品牌表面
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test passed, 2623 pass, 0 fail
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+            - npx --yes bun@1.3.13 --cwd packages/preview test passed, 3 tests
+            - python -m unittest discover -s research-tools/tests passed, 18 tests
+            - scripts/check-readme-version.ps1 and scripts/check-changelog-format.ps1 passed
 
     0.10.2-dev - 2026/05/13 (2e3d297e) [feature/tui-terminal-model-brand-hardening]
         :brief 硬化终端尺寸保护、模型工作台、目录选择、PaperRun schema 和品牌表面

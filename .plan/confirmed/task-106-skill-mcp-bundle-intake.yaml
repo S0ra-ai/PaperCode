@@ -1,0 +1,111 @@
+id: task-106-skill-mcp-bundle-intake
+title: Skill MCP bundle intake for 0.10.3-dev
+status: done
+priority: high
+owner: codex-paper-fucker
+tags:
+- paper
+- skills
+- mcp
+- 0.10.3-dev
+depends_on: []
+description: Intake the newly added architecture-diagram and paper-framework-figure-studio-pro
+  skills, register Paper-managed capability boundaries, and preserve current TaskFlow
+  state changes as the 0.10.3-dev slice.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: inspect-skill-assets
+  title: Inspect newly added skill assets
+  status: done
+  owner: codex-paper-fucker
+  depends_on: []
+  description: Review .paper_fucker/skills/architecture-diagram and .paper_fucker/skills/paper-framework-figure-studio-pro
+    metadata without overwriting user-provided content.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-13T01:43:22.522025'
+      level: info
+      message: Inspected .paper_fucker/skills/architecture-diagram and .paper_fucker/skills/paper-framework-figure-studio-pro.
+        architecture-diagram exposes SKILL.md with MIT notice; figure studio exposes
+        metadata.json, SKILL.md, LICENSE, templates, examples, and subtype atlas assets
+        with MIT-0 metadata. Noted bb-browser as managed capability rather than vendored
+        product source.
+      agent: codex-paper-fucker
+    - timestamp: '2026-05-13T01:43:29.333435'
+      level: warning
+      message: Git Flow branch preparation is deferred because the repository was
+        already dirty on develop with pre-existing TaskFlow and skill intake changes;
+        continuing through TaskFlow locks/logs without destructive cleanup.
+      agent: codex-paper-fucker
+    last_run: '2026-05-13T01:43:22.522025'
+    attempt_count: 2
+  meta: {}
+- id: register-paper-capabilities
+  title: Register paper-relevant managed capabilities
+  status: done
+  owner: codex-paper-fucker
+  depends_on:
+  - inspect-skill-assets
+  description: Add architecture diagram, figure studio, and bb-browser managed capability
+    semantics to Paper Fucker capability/doctor surfaces.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-13T01:44:14.171579'
+      level: info
+      message: Registered paper-figure-skills capability pack with skill.architecture-diagram
+        and skill.paper-framework-figure-studio-pro, added managed skill.bb-browser
+        to crawler/data acquisition pack, renamed user-facing local tool titles away
+        from OpenCode, and added PaperManagedCapability inspection through inspectPaperManagedCapabilities.
+        Focused run-api test passed after registration.
+      agent: codex-paper-fucker
+    last_run: '2026-05-13T01:44:14.171579'
+    attempt_count: 2
+  meta: {}
+- id: notice-license-boundaries
+  title: Document NOTICE and boundary notes
+  status: done
+  owner: codex-paper-fucker
+  depends_on:
+  - register-paper-capabilities
+  description: Update NOTICE/README-facing notes for third-party skill origins, license
+    boundaries, and Paper-managed installation semantics.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-13T01:44:23.687475'
+      level: info
+      message: Updated NOTICE.md with third-party source, local location, and license
+        boundaries for architecture-diagram-generator (MIT), paper-framework-figure-studio-pro
+        (MIT-0), and bb-browser as an optional managed capability that is diagnosed
+        but not vendored as first-party source.
+      agent: codex-paper-fucker
+    last_run: '2026-05-13T01:44:23.687475'
+    attempt_count: 2
+  meta: {}
+outputs:
+- type: directory
+  path: .paper_fucker/skills
+  description: Tracked Paper-managed skill bundle assets
+- type: file
+  path: packages/opencode/src/paper/capability-pack.ts
+  description: Capability registry updates
+- type: file
+  path: NOTICE.md
+  description: Third-party source and license boundary notes
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-13T01:36:45.539387'
+  updated_at: '2026-05-13T01:44:27.561305'
+  version: '1'

@@ -4,8 +4,8 @@ import path from "path"
 import type { ModelDiscoveryResult } from "./model-discovery"
 import {
   PAPER_MODEL_ROLES,
-  parseOpenCodeModelId,
-  type OpenCodeModelRef,
+  parsePaperModelId,
+  type PaperModelRef,
   type PaperModelRole,
 } from "./model-router"
 
@@ -30,7 +30,7 @@ export interface PaperModelCandidate {
   model_ref: string
   display_name: string
   owned_by?: string
-  source: "opencode_builtin" | "openai_compatible" | "manual"
+  source: "paper_builtin" | "openai_compatible" | "manual"
   capabilities: PaperModelCapability[]
   cost_hint: "unknown" | "cheap" | "standard" | "expensive"
   context_hint: "unknown" | "short" | "standard" | "long"
@@ -128,7 +128,7 @@ export function modelInventoryPath(home = os.homedir()) {
   return path.join(paperHome(home), "model-inventory.json")
 }
 
-export function modelRef(input: OpenCodeModelRef) {
+export function modelRef(input: PaperModelRef) {
   return `${input.provider_id}/${input.model_id}`
 }
 
@@ -145,7 +145,7 @@ function emptyInventory(): PaperModelInventory {
 }
 
 function providerKindFromSource(source: PaperModelCandidate["source"]): PaperProviderRegistrationKind {
-  if (source === "opencode_builtin") return "builtin"
+  if (source === "paper_builtin") return "builtin"
   if (source === "openai_compatible") return "openai_compatible"
   return "manual"
 }
@@ -341,7 +341,7 @@ export function candidatesFromBuiltinProviders(providers: BuiltinProviderCatalog
         model_id: normalizedModelID,
         model_ref: ref,
         display_name: model.name ?? normalizedModelID,
-        source: "opencode_builtin" as const,
+        source: "paper_builtin" as const,
         capabilities: inferCapabilities(normalizedModelID),
         cost_hint: costHint(normalizedModelID),
         context_hint: contextHint(normalizedModelID),
@@ -550,7 +550,7 @@ export function routePaperModel(inventory: PaperModelInventory, input: ModelRout
     if (!allowedModels.includes(forced)) {
       return block(`用户强制模型 ${forced} 不在允许列表内。`, ["forced_model_not_allowed"])
     }
-    const parsed = parseOpenCodeModelId(forced, input.role)
+    const parsed = parsePaperModelId(forced, input.role)
     return {
       schema_version: "ModelRoutingDecision.v1",
       decision_id: `${createdAt}:${input.role}:forced`,
@@ -581,7 +581,7 @@ export function routePaperModel(inventory: PaperModelInventory, input: ModelRout
   }
 
   if (allowedCandidates.length === 0) {
-    const parsed = parseOpenCodeModelId(decisionModel, input.role)
+    const parsed = parsePaperModelId(decisionModel, input.role)
     return {
       schema_version: "ModelRoutingDecision.v1",
       decision_id: `${createdAt}:${input.role}:decision`,
@@ -620,12 +620,12 @@ export function routePaperModel(inventory: PaperModelInventory, input: ModelRout
   }
 }
 
-export function modelRolesFromInventory(inventory: PaperModelInventory): Partial<Record<PaperModelRole, OpenCodeModelRef>> {
-  const result: Partial<Record<PaperModelRole, OpenCodeModelRef>> = {}
+export function modelRolesFromInventory(inventory: PaperModelInventory): Partial<Record<PaperModelRole, PaperModelRef>> {
+  const result: Partial<Record<PaperModelRole, PaperModelRef>> = {}
   for (const role of PAPER_MODEL_ROLES) {
     const decision = routePaperModel(inventory, { role })
     if (!decision.selected_model) continue
-    result[role] = parseOpenCodeModelId(decision.selected_model, role)
+    result[role] = parsePaperModelId(decision.selected_model, role)
   }
   return result
 }

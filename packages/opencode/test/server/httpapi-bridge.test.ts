@@ -235,6 +235,7 @@ describe("HttpApi server", () => {
       "GET /paper/model-inventory",
       "GET /paper/model-roles",
       "GET /paper/providers/discover",
+      "GET /paper/runs",
       "GET /paper/runs/{runID}",
       "GET /paper/runs/{runID}/events",
       "GET /paper/runs/{runID}/preview",
@@ -249,6 +250,7 @@ describe("HttpApi server", () => {
       "POST /paper/runs/{runID}/control",
       "POST /paper/runs/{runID}/export",
       "POST /paper/runs/{runID}/guidance",
+      "POST /paper/runs/{runID}/resume",
     ])
   })
 

@@ -13,7 +13,13 @@ import type { ModelRoleConfig } from "../model-router"
 import { discoverInitTools, type ToolDiscoveryReport } from "./discovery"
 import { writeSecrets } from "./secrets"
 import { withSpan } from "../research/telemetry"
-import { inspectNatureSkill, installNaturePaperSkill, type PaperSkillInstallResult } from "../skill-install"
+import {
+  inspectPaperManagedCapabilities,
+  inspectNatureSkill,
+  installNaturePaperSkill,
+  type PaperManagedCapability,
+  type PaperSkillInstallResult,
+} from "../skill-install"
 
 export type InitWizardInput = {
   home?: string
@@ -36,6 +42,7 @@ export type InitWizardResult = {
   config: PaperFuckerConfig
   tools: ToolDiscoveryReport
   skills: PaperSkillInstallResult
+  managed_capabilities: PaperManagedCapability[]
   wrote_secrets: boolean
 }
 
@@ -75,10 +82,14 @@ export async function runInitWizard(input: InitWizardInput): Promise<InitWizardR
         home: input.home,
         workspace: input.workspace,
       })
+      const managedCapabilities = await inspectPaperManagedCapabilities({
+        home: input.home,
+        workspace: input.workspace,
+      })
       span.setAttribute("paper_fucker.init.tools.available", Object.values(tools.tools).filter((tool) => tool.status === "available").length)
       span.setAttribute("paper_fucker.init.secrets.written", wroteSecrets)
       span.setAttribute("paper_fucker.init.skills.nature.restart_required", skills.restart_required)
-      return { paths, config, tools, skills, wrote_secrets: wroteSecrets }
+      return { paths, config, tools, skills, managed_capabilities: managedCapabilities, wrote_secrets: wroteSecrets }
     },
   )
 }
@@ -95,5 +106,6 @@ export async function diagnoseInit(home?: string) {
     config,
     tools,
     skills: await inspectNatureSkill({ home, workspace: config?.workspace?.default_root }),
+    managed_capabilities: await inspectPaperManagedCapabilities({ home, workspace: config?.workspace?.default_root }),
   }
 }

@@ -21,6 +21,7 @@ describe("TUI PaperRun workbench", () => {
     expect(request.target_profile).toBe("nature-paper")
     expect(request.language).toBe("en-US")
     expect(request.quality_mode).toBe("reviewable_bundle")
+    expect(request.storage_scope).toBe("home")
   })
 
   test("parses submission intent into stricter PaperRun quality mode", () => {
@@ -52,6 +53,19 @@ describe("TUI PaperRun workbench", () => {
     })
 
     expect(request.workspace_path).toBe("E:/Project/example-paper")
+    expect(request.storage_scope).toBe("home")
+  })
+
+  test("can explicitly request workspace PaperRun storage from the TUI", () => {
+    const request = parsePaperWorkbenchPrompt({
+      input: "基于当前目录生成论文",
+      parts: [],
+      workspace_path: "E:/Project/example-paper",
+      storage_scope: "workspace",
+    })
+
+    expect(request.workspace_path).toBe("E:/Project/example-paper")
+    expect(request.storage_scope).toBe("workspace")
   })
 
   test("submission research depth enables submission candidate checks", () => {
@@ -105,10 +119,11 @@ describe("TUI PaperRun workbench", () => {
     expect(calls).toHaveLength(1)
     expect(calls[0]!.url).toBe("http://localhost:4096/paper/runs")
     expect(calls[0]!.init.method).toBe("POST")
-    expect((calls[0]!.init.headers as Record<string, string>)["x-opencode-directory"]).toBe("E:/Project/paper_fucker")
+    expect((calls[0]!.init.headers as Record<string, string>)["x-paper-fucker-directory"]).toBe("E:/Project/paper_fucker")
     expect(JSON.parse(String(calls[0]!.init.body))).toMatchObject({
       topic: "生成论文",
       code_paths: ["packages/opencode"],
+      storage_scope: "home",
     })
   })
 
@@ -177,6 +192,20 @@ describe("TUI PaperRun workbench", () => {
       diagnostics: {
         counts: { events: 3, artifacts: 4 },
         cost: { total_usd: 0.42, llm_usd: 0.4, api_usd: 0.02, budget: { total_soft_usd: 5 }, alerts: [] },
+        machine_profile: {
+          os: { platform: "win32", release: "10.0", arch: "x64", hostname: "test" },
+          cpu: { model: "test cpu", cores: 8 },
+          memory: { free_bytes: 1024, total_bytes: 2048 },
+          disk: { path: "E:/Project/paper_fucker", free_bytes: 4096, total_bytes: 8192 },
+          workspace: "E:/Project/paper_fucker",
+          default_run_root: "C:/Users/test/.paper_fucker/runs",
+          gpu: { mode: "cpu-only", devices: [], cuda: { status: "optional_missing" }, rocm: { status: "optional_missing" } },
+        },
+        experiment_environment: {
+          available: [{ id: "python" }],
+          optional_missing: [{ id: "docker" }],
+          blocked: [],
+        },
         final_gate: { status: "blocked", blockers: ["unsupported_claim"] },
         tool_traces: [
           {
@@ -224,6 +253,8 @@ describe("TUI PaperRun workbench", () => {
       reproduction_gate: "blocked",
     })
     expect(state.sidebar.diagnostics.recent_calls[0]!.name).toBe("model.writer")
+    expect(state.sidebar.machine.gpu_mode).toBe("CPU-only")
+    expect(state.sidebar.machine.optional_missing).toBe(1)
     expect(state.controls.map((control) => control.label)).toEqual([
       "发送指导",
       "继续运行",

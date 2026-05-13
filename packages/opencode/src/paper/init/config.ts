@@ -29,7 +29,7 @@ export type PaperFuckerConfig = {
   }
   model_roles: Omit<ModelRoleConfig, "default_model"> & {
     default_model?: string
-    strategy: "opencode_provider_agnostic"
+    strategy: "paper_provider_agnostic"
   }
   workspace: {
     default_root?: string
@@ -132,7 +132,7 @@ export function defaultConfig(input: {
       endpoints: [],
     },
     model_roles: {
-      strategy: "opencode_provider_agnostic",
+      strategy: "paper_provider_agnostic",
       default_model: input.model_roles?.default_model,
       roles: input.model_roles?.roles ?? {},
     },

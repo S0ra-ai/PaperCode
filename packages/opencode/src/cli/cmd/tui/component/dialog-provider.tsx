@@ -13,7 +13,7 @@ import { DialogModel } from "./dialog-model"
 import { useKeyboard } from "@opentui/solid"
 import * as Clipboard from "@tui/util/clipboard"
 import { useToast } from "../ui/toast"
-import { isConsoleManagedProvider } from "@tui/util/provider-origin"
+import { isConsoleManagedProvider, isHiddenManagedProvider } from "@tui/util/provider-origin"
 import { useConnected } from "./use-connected"
 
 const PROVIDER_PRIORITY: Record<string, number> = {
@@ -23,7 +23,6 @@ const PROVIDER_PRIORITY: Record<string, number> = {
   google: 3,
 }
 
-const HIDDEN_SUBSCRIPTION_PROVIDERS = new Set(["opencode", "opencode-go"])
 const CUSTOM_PROVIDER_OPTION_VALUE = "__paper_fucker_custom_provider__"
 const CUSTOM_PROVIDER_ID = /^[a-z0-9][a-z0-9-_]*$/
 
@@ -46,7 +45,7 @@ type ProviderOption =
 export function providerOptions(list: { id: string; name: string }[]): ProviderOption[] {
   return [
     ...pipe(
-      list.filter((provider) => !HIDDEN_SUBSCRIPTION_PROVIDERS.has(provider.id)),
+      list.filter((provider) => !isHiddenManagedProvider(provider.id)),
       sortBy((x) => PROVIDER_PRIORITY[x.id] ?? 99),
       map((provider) => ({
         type: "provider" as const,

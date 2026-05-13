@@ -43,6 +43,7 @@ export type ResearchRuntimeOptions = ResearchPathOptions & {
 export type CreateResearchRunInput = {
   topic: string
   workspace?: string
+  storage_scope?: ResearchStorageScope
   run_id?: string
   permission?: ResearchPermissionInput
   budget?: ResearchCostBudget
@@ -243,7 +244,7 @@ export async function createResearchRun(
       const createdAt = nowIso(options)
       const workspace = path.resolve(input.workspace ?? options?.workspace ?? process.cwd())
       const runId = input.run_id ?? nextResearchId("run", options)
-      const runRoot = await chooseRunRoot({ workspace, home: options?.home })
+      const runRoot = await chooseRunRoot({ workspace, home: options?.home, storage_scope: input.storage_scope })
       const runDir = runDirectoryPath(runRoot.root, runId)
       await initializeFactFiles(runDir)
 

@@ -57,7 +57,7 @@ export const layer = Layer.effect(
     const decode = Schema.decodeUnknownOption(Info)
 
     const all = Effect.fn("Auth.all")(function* () {
-      const authContent = process.env.PAPER_FUCKER_AUTH_CONTENT ?? process.env.OPENCODE_AUTH_CONTENT
+      const authContent = process.env.PAPER_FUCKER_AUTH_CONTENT
       if (authContent) {
         try {
           return JSON.parse(authContent)
