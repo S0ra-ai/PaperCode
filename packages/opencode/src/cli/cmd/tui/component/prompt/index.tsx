@@ -54,6 +54,7 @@ import { WorkspaceLabel, type WorkspaceStatus } from "../workspace-label"
 import { readTuiJsonResponse } from "@tui/util/http"
 import { subscribePaperModelInventoryChanged } from "@tui/util/paper-model-inventory-events"
 import { getPaperConversationWorkspace, subscribePaperConversationWorkspace } from "@tui/util/paper-conversation-workspace"
+import { truncateDisplayMiddle } from "@tui/util/text-width"
 
 export type PromptProps = {
   sessionID?: string
@@ -257,7 +258,7 @@ export function Prompt(props: PromptProps) {
   const paperWorkspaceLabel = createMemo(() => {
     const value = paperWorkspacePath() ?? sdk.directory
     if (!value) return "当前目录未读取"
-    return Locale.truncateMiddle(value, 42)
+    return truncateDisplayMiddle(value, Math.max(18, Math.min(38, Math.floor(dimensions().width * 0.24))))
   })
   const hasRightContent = createMemo(() => Boolean(props.right))
   const defaultWorkspaceID = createMemo(() => props.workspaceID ?? project.workspace.current())
@@ -1566,9 +1567,10 @@ export function Prompt(props: PromptProps) {
                             <text fg={fadeColor(theme.textMuted, modelMetaAlpha())}>·</text>
                             <text
                               flexShrink={0}
+                              wrapMode="none"
                               fg={fadeColor(keybind.leader ? theme.textMuted : theme.text, modelMetaAlpha())}
                             >
-                              {paperDecisionModel()}
+                              {truncateDisplayMiddle(paperDecisionModel() ?? "", Math.max(18, Math.min(34, Math.floor(dimensions().width * 0.26))))}
                             </text>
                             <text fg={fadeColor(theme.textMuted, modelMetaAlpha())}>{currentProviderLabel()}</text>
                             <Show when={showVariant()}>
@@ -1584,7 +1586,7 @@ export function Prompt(props: PromptProps) {
                         <box flexDirection="row" gap={1}>
                           <text fg={fadeColor(theme.textMuted, modelMetaAlpha())}>·</text>
                           <text fg={fadeColor(theme.textMuted, modelMetaAlpha())}>目录</text>
-                          <text fg={fadeColor(theme.text, modelMetaAlpha())}>{paperWorkspaceLabel()}</text>
+                          <text fg={fadeColor(theme.text, modelMetaAlpha())} wrapMode="none">{paperWorkspaceLabel()}</text>
                         </box>
                       </Show>
                     </>

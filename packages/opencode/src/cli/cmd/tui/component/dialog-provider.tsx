@@ -86,10 +86,10 @@ export function createDialogProviderOptions() {
 
   async function promptCustomProviderID(): Promise<string | undefined> {
     const value = await DialogPrompt.show(dialog, "Other", {
-      placeholder: "Provider id",
+      placeholder: "provider id",
       description: () => (
         <text fg={theme.textMuted}>
-          This only stores a credential. Configure the provider in paper_fucker.json to use it.
+          这里仅保存认证信息；自定义 OpenAI-compatible provider 请优先在 /models 中注册 base_url 并刷新模型。
         </text>
       ),
     })
@@ -101,7 +101,7 @@ export function createDialogProviderOptions() {
     toast.show({
       variant: "error",
       message:
-        "Provider ids must start with a lowercase letter or number and only use lowercase letters, numbers, hyphens, and underscores",
+        "Provider id 必须以小写字母或数字开头，只能包含小写字母、数字、连字符和下划线。",
     })
     return promptCustomProviderID()
   }
@@ -150,7 +150,7 @@ export function createDialogProviderOptions() {
                 dialog.replace(
                   () => (
                     <DialogSelect
-                      title="Select auth method"
+              title="选择认证方式"
                       options={methods.map((x, index) => ({
                         title: x.label,
                         value: index,
@@ -240,7 +240,7 @@ function AutoMethod(props: AutoMethodProps) {
     if (evt.name === "c" && !evt.ctrl && !evt.meta) {
       const code = props.authorization.instructions.match(/[A-Z0-9]{4}-[A-Z0-9]{4,5}/)?.[0] ?? props.authorization.url
       Clipboard.copy(code)
-        .then(() => toast.show({ message: "Copied to clipboard", variant: "info" }))
+        .then(() => toast.show({ message: "已复制到剪贴板", variant: "info" }))
         .catch(toast.error)
     }
   })
@@ -273,9 +273,9 @@ function AutoMethod(props: AutoMethodProps) {
         <Link href={props.authorization.url} fg={theme.primary} />
         <text fg={theme.textMuted}>{props.authorization.instructions}</text>
       </box>
-      <text fg={theme.textMuted}>Waiting for authorization...</text>
+      <text fg={theme.textMuted}>等待授权完成...</text>
       <text fg={theme.text}>
-        c <span style={{ fg: theme.textMuted }}>copy</span>
+        c <span style={{ fg: theme.textMuted }}>复制验证码</span>
       </text>
     </box>
   )
@@ -297,7 +297,7 @@ function CodeMethod(props: CodeMethodProps) {
   return (
     <DialogPrompt
       title={props.title}
-      placeholder="Authorization code"
+      placeholder="授权码"
       onConfirm={async (value) => {
         const { error } = await sdk.client.provider.oauth.callback({
           providerID: props.providerID,
@@ -317,7 +317,7 @@ function CodeMethod(props: CodeMethodProps) {
           <text fg={theme.textMuted}>{props.authorization.instructions}</text>
           <Link href={props.authorization.url} fg={theme.primary} />
           <Show when={error()}>
-            <text fg={theme.error}>Invalid code</text>
+            <text fg={theme.error}>授权码无效</text>
           </Show>
         </box>
       )}
@@ -356,7 +356,7 @@ function ApiMethod(props: ApiMethodProps) {
         if (props.custom && !sync.data.provider_next.all.some((provider) => provider.id === props.providerID)) {
           toast.show({
             variant: "info",
-            message: `Saved credential for ${props.providerID}. Configure it in paper_fucker.json to use it.`,
+            message: `已保存 ${props.providerID} 的认证信息。请在 /models 中注册 endpoint 后使用。`,
           })
           dialog.clear()
           return

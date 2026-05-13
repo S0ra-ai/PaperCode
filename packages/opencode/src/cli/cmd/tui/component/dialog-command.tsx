@@ -183,5 +183,5 @@ function DialogCommand(props: { options: CommandOption[]; suggestedOptions: Comm
     if (ref?.filter) return props.options
     return [...props.suggestedOptions, ...props.options]
   }
-  return <DialogSelect ref={(r) => (ref = r)} title="Commands" options={list()} />
+  return <DialogSelect ref={(r) => (ref = r)} title="Paper Fucker 命令" options={list()} />
 }

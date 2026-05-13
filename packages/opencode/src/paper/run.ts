@@ -1044,8 +1044,11 @@ export async function getPaperRunSnapshotFromDir(runDir: string): Promise<PaperR
           ? {
               schema_version: "PaperModelInventory.v1",
               decision_model: metadataString(modelInventory.decision_model),
+              backup_decision_model: metadataString(modelInventory.backup_decision_model),
               allowlist: metadataStringArray(modelInventory.allowlist),
               role_overrides: jsonRecord(modelInventory.role_overrides) as PaperModelInventory["role_overrides"],
+              provider_registrations: jsonRecord(modelInventory.provider_registrations) as PaperModelInventory["provider_registrations"],
+              stage_model_policies: jsonRecord(modelInventory.stage_model_policies) as PaperModelInventory["stage_model_policies"],
               candidates: Array.isArray(modelInventory.candidates) ? (modelInventory.candidates as PaperModelInventory["candidates"]) : [],
               updated_at: metadataString(modelInventory.updated_at) ?? status.run.updated_at,
             }

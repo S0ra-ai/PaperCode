@@ -480,7 +480,7 @@ export function Session() {
         if (!selectedModel) {
           toast.show({
             variant: "warning",
-            message: "Connect a provider to summarize this session",
+            message: "请先在 /models 配置 provider 与可用模型后再生成摘要",
             duration: 3000,
           })
           return

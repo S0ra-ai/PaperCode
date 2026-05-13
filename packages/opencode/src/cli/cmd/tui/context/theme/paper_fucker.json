@@ -1,25 +1,25 @@
 {
   "$schema": "https://paper-fucker.local/theme.json",
   "defs": {
-    "darkStep1": "#0a0a0a",
-    "darkStep2": "#141414",
-    "darkStep3": "#1e1e1e",
-    "darkStep4": "#282828",
-    "darkStep5": "#323232",
-    "darkStep6": "#3c3c3c",
-    "darkStep7": "#484848",
-    "darkStep8": "#606060",
-    "darkStep9": "#fab283",
-    "darkStep10": "#ffc09f",
-    "darkStep11": "#808080",
-    "darkStep12": "#eeeeee",
-    "darkSecondary": "#5c9cf5",
-    "darkAccent": "#9d7cd8",
-    "darkRed": "#e06c75",
-    "darkOrange": "#f5a742",
-    "darkGreen": "#7fd88f",
-    "darkCyan": "#56b6c2",
-    "darkYellow": "#e5c07b",
+    "darkStep1": "#05070a",
+    "darkStep2": "#0b1117",
+    "darkStep3": "#111a22",
+    "darkStep4": "#172330",
+    "darkStep5": "#203041",
+    "darkStep6": "#2c4053",
+    "darkStep7": "#40556b",
+    "darkStep8": "#6b7f92",
+    "darkStep9": "#4aa3ff",
+    "darkStep10": "#7bc0ff",
+    "darkStep11": "#91a1ad",
+    "darkStep12": "#f5f1e8",
+    "darkSecondary": "#5fb8ff",
+    "darkAccent": "#d8b15f",
+    "darkRed": "#ff6b7a",
+    "darkOrange": "#e7a33f",
+    "darkGreen": "#68d391",
+    "darkCyan": "#64d2c8",
+    "darkYellow": "#f0d27a",
     "lightStep1": "#ffffff",
     "lightStep2": "#fafafa",
     "lightStep3": "#f5f5f5",
@@ -240,6 +240,14 @@
     "syntaxPunctuation": {
       "dark": "darkStep12",
       "light": "lightStep12"
+    },
+    "selectedListItemText": {
+      "dark": "darkStep1",
+      "light": "lightStep1"
+    },
+    "backgroundMenu": {
+      "dark": "darkStep2",
+      "light": "lightStep2"
     }
   }
 }

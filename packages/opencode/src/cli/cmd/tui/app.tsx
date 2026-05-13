@@ -61,6 +61,8 @@ import { createTuiApi } from "@/cli/cmd/tui/plugin/api"
 import { TuiPluginRuntime } from "@/cli/cmd/tui/plugin/runtime"
 import type { RouteMap } from "@/cli/cmd/tui/plugin/api"
 import { FormatError, FormatUnknownError } from "@/cli/error"
+import { currentTerminalCapability, terminalCapabilityGuard, terminalTooSmallMessage } from "@tui/util/terminal-size"
+import { openPaperNativePicker } from "@tui/util/paper-native-picker"
 
 import type { EventSource } from "./context/sdk"
 
@@ -127,6 +129,13 @@ export function tui(input: {
 
     const onBeforeExit = async () => {
       await TuiPluginRuntime.dispose()
+    }
+
+    const terminal = currentTerminalCapability()
+    if (!terminal.can_render) {
+      process.stderr.write(`${terminalTooSmallMessage(terminal)}\n`)
+      await onExit()
+      return
     }
 
     const renderer = await createCliRenderer(rendererConfig(input.config))
@@ -227,6 +236,12 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
     routeRev()
     return routes.get(name)?.at(-1)?.render
   }
+  const terminalGuard = createMemo(() =>
+    terminalCapabilityGuard({
+      columns: dimensions().width,
+      rows: dimensions().height,
+    }),
+  )
 
   const api = createTuiApi({
     command,
@@ -324,7 +339,7 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
       }
 
       const title = session.title.length > 40 ? session.title.slice(0, 37) + "..." : session.title
-      renderer.setTerminalTitle(`OC | ${title}`)
+      renderer.setTerminalTitle(`paper_fucker | ${title}`)
       return
     }
 
@@ -344,7 +359,7 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
     }
 
     if (route.data.type === "plugin") {
-      renderer.setTerminalTitle(`OC | ${route.data.id}`)
+      renderer.setTerminalTitle(`paper_fucker | ${route.data.id}`)
     }
   })
 
@@ -410,6 +425,16 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
     })
   })
 
+  function appendMaterialPaths(flag: "--file" | "--data" | "--log", paths: string[]) {
+    const ref = promptRef.current
+    if (!ref) return
+    const quoted = paths.map((item) => `"${item.replaceAll('"', '\\"')}"`).join(" ")
+    ref.set({
+      ...ref.current,
+      input: `${ref.current.input ? `${ref.current.input} ` : ""}${flag} ${quoted}`.trim(),
+    })
+  }
+
   command.register(() => [
     {
       title: "Switch session",
@@ -471,6 +496,48 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
       },
       onSelect: () => {
         route.navigate({ type: "paper-folder" })
+        dialog.clear()
+      },
+    },
+    {
+      title: "添加论文材料文件",
+      value: "paper.material.file",
+      category: "Paper",
+      slash: {
+        name: "file",
+        aliases: ["paper"],
+      },
+      onSelect: async () => {
+        const result = await openPaperNativePicker({ mode: "file", title: "Paper Fucker 选择论文材料", initialPath: sdk.directory, multi: true })
+        if (result?.paths.length) appendMaterialPaths("--file", result.paths)
+        dialog.clear()
+      },
+    },
+    {
+      title: "添加数据文件",
+      value: "paper.material.data",
+      category: "Paper",
+      slash: {
+        name: "data",
+        aliases: ["dataset"],
+      },
+      onSelect: async () => {
+        const result = await openPaperNativePicker({ mode: "file", title: "Paper Fucker 选择数据文件", initialPath: sdk.directory, multi: true })
+        if (result?.paths.length) appendMaterialPaths("--data", result.paths)
+        dialog.clear()
+      },
+    },
+    {
+      title: "添加实验日志",
+      value: "paper.material.log",
+      category: "Paper",
+      slash: {
+        name: "log",
+        aliases: ["logs"],
+      },
+      onSelect: async () => {
+        const result = await openPaperNativePicker({ mode: "file", title: "Paper Fucker 选择实验日志", initialPath: sdk.directory, multi: true })
+        if (result?.paths.length) appendMaterialPaths("--log", result.paths)
         dialog.clear()
       },
     },
@@ -905,27 +972,54 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
         <TimeToFirstDraw />
       </Show>
       <Show when={ready()}>
-        <Switch>
-          <Match when={route.data.type === "home"}>
-            <Home />
-          </Match>
-          <Match when={route.data.type === "session"}>
-            <Session />
-          </Match>
-          <Match when={route.data.type === "paper"}>
-            <PaperRunDashboard />
-          </Match>
-          <Match when={route.data.type === "paper-models"}>
-            <PaperModelWorkbenchPage />
-          </Match>
-          <Match when={route.data.type === "paper-folder"}>
-            <PaperFolderPickerPage />
-          </Match>
-        </Switch>
+        <Show when={terminalGuard().can_render} fallback={<TerminalTooSmall state={terminalGuard()} />}>
+          <Switch>
+            <Match when={route.data.type === "home"}>
+              <Home />
+            </Match>
+            <Match when={route.data.type === "session"}>
+              <Session />
+            </Match>
+            <Match when={route.data.type === "paper"}>
+              <PaperRunDashboard />
+            </Match>
+            <Match when={route.data.type === "paper-models"}>
+              <PaperModelWorkbenchPage />
+            </Match>
+            <Match when={route.data.type === "paper-folder"}>
+              <PaperFolderPickerPage />
+            </Match>
+          </Switch>
+        </Show>
       </Show>
       {plugin()}
       <TuiPluginRuntime.Slot name="app" />
       <StartupLoading ready={ready} />
+    </box>
+  )
+}
+
+function TerminalTooSmall(props: { state: ReturnType<typeof terminalCapabilityGuard> }) {
+  const { theme } = useTheme()
+  return (
+    <box width="100%" height="100%" alignItems="center" justifyContent="center" padding={2}>
+      <box
+        flexDirection="column"
+        gap={1}
+        padding={2}
+        border
+        borderColor={theme.warning}
+        backgroundColor={theme.backgroundPanel}
+        maxWidth={72}
+      >
+        <text fg={theme.warning}>终端窗口过小，Paper Fucker 暂停渲染 TUI。</text>
+        <text fg={theme.text}>
+          当前尺寸 {props.state.columns}x{props.state.rows}，最低需要 {props.state.min_columns}x{props.state.min_rows}。
+        </text>
+        <text fg={theme.textMuted}>
+          推荐尺寸 {props.state.recommended_columns}x{props.state.recommended_rows}。放大窗口后会自动恢复当前页面。
+        </text>
+      </box>
     </box>
   )
 }

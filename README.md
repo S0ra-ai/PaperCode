@@ -1,6 +1,6 @@
 # Paper Fucker
 
-当前版本：<!-- version:start -->0.10.1-dev<!-- version:end --> ｜ 作者：k1d ([ZhuchenZhong](https://github.com/ZhuchenZhong)) ｜ 状态：开发态 ｜ 许可证：private-first / UNLICENSED
+当前版本：<!-- version:start -->0.10.2-dev<!-- version:end --> ｜ 作者：k1d ([ZhuchenZhong](https://github.com/ZhuchenZhong)) ｜ 状态：开发态 ｜ 许可证：private-first / UNLICENSED
 
 Paper Fucker 是一个中文优先、私有优先的论文研究与产出工作台。你给它研究主题、代码仓库、数据集、实验日志或已有论文材料，它负责把任务推进成可审查论文包：研究规划、资料检索、代码理解、实验复现、证据账本、真实性审查、实时预览和最终导出。
 
@@ -53,23 +53,21 @@ macOS / Linux 编译后从仓库根目录运行：
 
 ## 模型工作台
 
-输入 `/models` 打开全屏模型工作台。它分成六个页面：
+输入 `/models` 打开全屏模型工作台。它分成四个核心区域：
 
-1. Provider：管理内置 provider（例如 GitHub Copilot）和自定义 OpenAI-compatible `base_url`。
-2. 候选模型：查看从 provider 发现到的模型；候选不等于可用。
-3. 可用模型：批量勾选允许 Paper Fucker 使用的模型；不会默认全量启用候选模型。
-4. 主决策模型：只能从可用模型中选择，用来决定不同阶段和子 agent 默认使用哪些模型。
-5. 阶段模型：planner、literature、code、experiment、writer、reviewer、citation、summarizer、subagent 可保持自动选择，也可强制指定已允许模型。
-6. 诊断：查看 provider、allowlist、主模型和路由预览状态。
+1. Provider 注册：已配置内置 provider、已配置自定义 provider、未注册 provider 分页管理；支持登录、添加、禁用、刷新和 smoke。
+2. 主模型：从可用模型中选择主决策模型和备用决策模型。
+3. 可用模型：滚动多选列表，批量勾选允许 Paper Fucker 使用的模型；候选不等于可用。
+4. 阶段模型：planner、literature、code、experiment、writer、reviewer、citation、summarizer、subagent 支持自动选择、动态选择或强制指定。
 
 从零启动时不会显示 GLM、DeepSeek 或任何旧 OpenCode fallback。未配置允许模型时，工作台只显示“未配置模型”，并引导你进入 `/models` 添加 provider、勾选允许模型和选择主决策模型。
 
 ## 材料与环境
 
-你可以在输入框中拖入或引用文件和目录，也可以使用工作台命令：
+你可以在输入框中拖入或引用文件和目录，也可以使用工作台命令。TUI 最低终端尺寸为 `96x28`，推荐 `120x34`；窗口过小时会显示中文提示并暂停渲染，避免布局错乱。
 
 - `/file` 添加论文草稿、PDF、Markdown、LaTeX 或 DOCX。
-- `/folder` 打开目录选择页面，选择当前对话工作目录；之后新建的 PaperRun 默认在这个目录下读取代码仓库或资料。
+- `/folder` 优先打开系统目录选择器；不可用时回退到中文 TUI 目录选择器。Windows 回退界面支持驱动器选择。
 - `/data` 添加数据集。
 - `/log` 添加实验日志。
 - `/status` 查看模型、MCP、Skill、Pandoc、LaTeX、Docker、Python、浏览器 Preview 和 Nature skill 状态。

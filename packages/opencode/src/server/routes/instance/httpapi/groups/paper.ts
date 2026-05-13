@@ -67,7 +67,11 @@ export const ModelRoleAssignmentPayload = Schema.Struct({
 export const ModelInventoryAllowlistPayload = Schema.Struct({
   allowlist: StringArray,
   decision_model: Schema.optional(Schema.String),
+  backup_decision_model: Schema.optional(Schema.String),
   roles: Schema.optional(Schema.Record(Schema.String, Schema.String)),
+  registered_provider_ids: Schema.optional(StringArray),
+  provider_registrations: Schema.optional(Schema.Record(Schema.String, Schema.Any)),
+  stage_model_policies: Schema.optional(Schema.Record(Schema.String, Schema.Any)),
 })
 
 export const ModelRoutingDecisionPayload = Schema.Struct({
