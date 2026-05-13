@@ -40,7 +40,12 @@ export interface PaperModelCandidate {
   last_smoke_at?: string
 }
 
-export type PaperProviderRegistrationKind = "builtin" | "openai_compatible" | "manual"
+export type PaperProviderRegistrationKind =
+  | "builtin"
+  | "chatgpt_subscription"
+  | "copilot_subscription"
+  | "openai_compatible"
+  | "manual"
 export type PaperProviderRegistrationStatus = "registered" | "disabled" | "needs_auth"
 
 export interface PaperProviderRegistration {
@@ -446,28 +451,52 @@ export async function updatePaperModelAllowlist(
 ) {
   const stored = await loadPaperModelInventory(options)
   const inventory = options.candidates?.length ? mergeModelCandidates(stored, options.candidates) : stored
-  const allowlist = new Set(modelRefs)
-  const decisionModel =
+  const explicitRegistrations = options.provider_registrations !== undefined
+  const providerRegistrations = explicitRegistrations
+    ? { ...(options.provider_registrations ?? {}) }
+    : inventory.provider_registrations
+  const registeredProviderIDs = new Set(
+    Object.values(providerRegistrations)
+      .filter((registration) => registration.status === "registered")
+      .map((registration) => registration.provider_id),
+  )
+  const isRegisteredRef = (ref: string) => !explicitRegistrations || registeredProviderIDs.has(ref.split("/")[0] ?? "")
+  const scopedCandidates = explicitRegistrations
+    ? inventory.candidates.filter((candidate) => registeredProviderIDs.has(candidate.provider_id))
+    : inventory.candidates
+  const allowlist = new Set(modelRefs.filter((ref) => ref.includes("/") && isRegisteredRef(ref)))
+  const decisionModelCandidate =
     options.decision_model ??
     (inventory.decision_model && modelRefs.includes(inventory.decision_model) ? inventory.decision_model : undefined)
+  const decisionModel = decisionModelCandidate && isRegisteredRef(decisionModelCandidate) ? decisionModelCandidate : undefined
   if (decisionModel) allowlist.add(decisionModel)
-  const backupDecisionModel =
+  const backupDecisionModelCandidate =
     options.backup_decision_model ??
     (inventory.backup_decision_model && modelRefs.includes(inventory.backup_decision_model)
       ? inventory.backup_decision_model
       : undefined)
+  const backupDecisionModel =
+    backupDecisionModelCandidate &&
+    backupDecisionModelCandidate !== decisionModel &&
+    isRegisteredRef(backupDecisionModelCandidate)
+      ? backupDecisionModelCandidate
+      : undefined
   if (backupDecisionModel) allowlist.add(backupDecisionModel)
   const roleOverrides = options.role_overrides ?? inventory.role_overrides
   for (const value of Object.values(roleOverrides)) {
-    if (value) allowlist.add(value)
+    if (value && isRegisteredRef(value)) allowlist.add(value)
   }
-  const stageModelPolicies = options.stage_model_policies ?? inventory.stage_model_policies
+  const rawStageModelPolicies = options.stage_model_policies ?? inventory.stage_model_policies
+  const stageModelPolicies = Object.fromEntries(
+    Object.entries(rawStageModelPolicies).map(([role, policy]) => {
+      if (policy?.mode === "forced" && policy.model_ref && !isRegisteredRef(policy.model_ref)) {
+        return [role, { role: role as PaperModelRole, mode: "auto" satisfies PaperStageModelPolicyMode }]
+      }
+      return [role, policy]
+    }),
+  ) as Partial<Record<PaperModelRole, PaperStageModelPolicy>>
   for (const policy of Object.values(stageModelPolicies)) {
-    if (policy?.mode === "forced" && policy.model_ref) allowlist.add(policy.model_ref)
-  }
-  const providerRegistrations = {
-    ...inventory.provider_registrations,
-    ...(options.provider_registrations ?? {}),
+    if (policy?.mode === "forced" && policy.model_ref && isRegisteredRef(policy.model_ref)) allowlist.add(policy.model_ref)
   }
   return savePaperModelInventory(
     {
@@ -478,7 +507,7 @@ export async function updatePaperModelAllowlist(
       role_overrides: roleOverrides,
       provider_registrations: providerRegistrations,
       stage_model_policies: stageModelPolicies,
-      candidates: inventory.candidates.map((candidate) => ({
+      candidates: scopedCandidates.map((candidate) => ({
         ...candidate,
         allowed: allowlist.has(candidate.model_ref),
       })),

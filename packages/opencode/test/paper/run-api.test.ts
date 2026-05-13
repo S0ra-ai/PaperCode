@@ -6,6 +6,7 @@ import { ConfigProvider, Layer } from "effect"
 import { HttpRouter } from "effect/unstable/http"
 import { Flag } from "@opencode-ai/core/flag/flag"
 import { stopAllPaperRunLivePreviews } from "../../src/paper/run"
+import { createResearchRun } from "../../src/paper/research/runtime"
 import { Server } from "../../src/server/server"
 import { PaperPaths } from "../../src/server/routes/instance/httpapi/groups/paper"
 import { ExperimentalHttpApiServer } from "../../src/server/routes/instance/httpapi/server"
@@ -67,6 +68,25 @@ afterEach(async () => {
 })
 
 describe("PaperRun HttpApi", () => {
+  test("generates a fresh PaperRun id when a generated run id already exists", async () => {
+    await using tmp = await tmpdir({ git: true, config: { formatter: false, lsp: false } })
+    let eventIndex = 0
+    const options = {
+      workspace: tmp.path,
+      home: tmp.path,
+      idFactory: (kind: "run" | "event" | "artifact") =>
+        kind === "run" ? "run-fixed" : `${kind}-${++eventIndex}`,
+    }
+
+    const first = await createResearchRun({ topic: "first" }, options)
+    const second = await createResearchRun({ topic: "second" }, options)
+
+    expect(first.run.run_id).toBe("run-fixed")
+    expect(second.run.run_id).not.toBe("run-fixed")
+    expect(second.run.run_id.startsWith("run-")).toBe(true)
+    expect(existsSync(second.run_dir)).toBe(true)
+  })
+
   test("serves Paper model inventory JSON through the default Hono TUI backend", async () => {
     await using tmp = await tmpdir({ git: true, config: { formatter: false, lsp: false } })
     previousPaperHome = process.env.PAPER_FUCKER_TEST_HOME

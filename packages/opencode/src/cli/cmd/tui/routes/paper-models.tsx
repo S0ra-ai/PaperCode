@@ -4,6 +4,7 @@ import { createEffect, createMemo, createResource, createSignal, For, Match, Sho
 import { PAPER_MODEL_ROLES, type PaperModelRole } from "@/paper/model-router"
 import { useRoute } from "@tui/context/route"
 import { useSDK } from "@tui/context/sdk"
+import { useSync } from "@tui/context/sync"
 import { useTheme } from "@tui/context/theme"
 import { useDialog } from "@tui/ui/dialog"
 import { DialogPrompt } from "@tui/ui/dialog-prompt"
@@ -30,7 +31,7 @@ type PaperCandidate = {
 type ProviderRegistration = {
   provider_id: string
   provider_name?: string
-  kind: "builtin" | "openai_compatible" | "manual"
+  kind: "builtin" | "chatgpt_subscription" | "copilot_subscription" | "openai_compatible" | "manual"
   status: "registered" | "disabled" | "needs_auth"
   model_count: number
   allowed_count: number
@@ -66,25 +67,14 @@ type ModelInventoryPayload = {
   error?: string
 }
 
-type Section = "provider" | "decision" | "available" | "stage" | "diagnostics"
-type ProviderPage = "configured_builtin" | "configured_custom" | "unregistered"
+type Section = "registered" | "models" | "stage"
 
-type ProviderRow =
-  | { kind: "registration"; registration: ProviderRegistration }
-  | { kind: "unregistered"; provider: BuiltinProviderSummary }
+type ProviderRow = { kind: "registration"; registration: ProviderRegistration }
 
 const SECTIONS: Array<{ id: Section; label: string }> = [
-  { id: "provider", label: "Provider 注册" },
-  { id: "decision", label: "主模型" },
-  { id: "available", label: "可用模型" },
-  { id: "stage", label: "阶段模型" },
-  { id: "diagnostics", label: "诊断" },
-]
-
-const PROVIDER_PAGES: Array<{ id: ProviderPage; label: string }> = [
-  { id: "configured_builtin", label: "已配置内置" },
-  { id: "configured_custom", label: "已配置自定义" },
-  { id: "unregistered", label: "未注册" },
+  { id: "registered", label: "已注册" },
+  { id: "models", label: "所有模型" },
+  { id: "stage", label: "全流程模型" },
 ]
 
 const ROLE_LABELS: Record<PaperModelRole, string> = {
@@ -136,15 +126,27 @@ function registeredProviderIDs(registrations: Record<string, ProviderRegistratio
     .map((registration) => registration.provider_id)
 }
 
+function providerCategory(registration: ProviderRegistration) {
+  if (registration.kind === "chatgpt_subscription" || registration.provider_id === "openai") return "ChatGPT 订阅"
+  if (registration.kind === "copilot_subscription" || registration.provider_id === "github-copilot") return "Copilot CLI 订阅"
+  return "其他 provider"
+}
+
+function providerKindFor(providerID: string): ProviderRegistration["kind"] {
+  if (providerID === "openai") return "chatgpt_subscription"
+  if (providerID === "github-copilot") return "copilot_subscription"
+  return "builtin"
+}
+
 export function PaperModelWorkbenchPage() {
   const sdk = useSDK()
+  const sync = useSync()
   const router = useRoute()
   const dialog = useDialog()
   const toast = useToast()
   const { theme } = useTheme()
   const dimensions = useTerminalDimensions()
   const [sectionIndex, setSectionIndex] = createSignal(0)
-  const [providerPageIndex, setProviderPageIndex] = createSignal(0)
   const [selected, setSelected] = createSignal(0)
   const [scrollOffset, setScrollOffset] = createSignal(0)
   const [filter, setFilter] = createSignal("")
@@ -180,7 +182,7 @@ export function PaperModelWorkbenchPage() {
   const candidates = createMemo(() => sortCandidates((inventory().candidates ?? []).filter((candidate) => activeProviderIDs().has(candidate.provider_id))))
   const allowedCandidates = createMemo(() => sortCandidates(candidates().filter((candidate) => draftAllowlist().has(candidate.model_ref))))
   const currentSection = createMemo(() => SECTIONS[sectionIndex()]!.id)
-  const currentProviderPage = createMemo(() => PROVIDER_PAGES[providerPageIndex()]!.id)
+  const connectedProviders = createMemo(() => new Set(sync.data.provider_next.connected ?? []))
 
   createEffect(
     on(
@@ -210,31 +212,25 @@ export function PaperModelWorkbenchPage() {
     )
   })
 
-  const providerRows = createMemo<ProviderRow[]>(() => {
-    const list = Object.values(registrations()).sort((left, right) => left.provider_id.localeCompare(right.provider_id, "en", { numeric: true }))
-    const page = currentProviderPage()
-    if (page === "configured_builtin") return list.filter((registration) => registration.kind === "builtin" && registration.status === "registered").map((registration) => ({ kind: "registration", registration }))
-    if (page === "configured_custom") return list.filter((registration) => registration.kind !== "builtin" && registration.status === "registered").map((registration) => ({ kind: "registration", registration }))
-    const registered = new Set(Object.keys(registrations()).filter((id) => registrations()[id]?.status === "registered"))
-    return builtinProviders()
-      .filter((provider) => !registered.has(provider.provider_id))
-      .sort((left, right) => left.provider_id.localeCompare(right.provider_id, "en", { numeric: true }))
-      .map((provider) => ({ kind: "unregistered", provider }))
-  })
+  const providerRows = createMemo<ProviderRow[]>(() =>
+    Object.values(registrations())
+      .filter((registration) => registration.status === "registered")
+      .sort((left, right) => {
+        const categoryCompare = providerCategory(left).localeCompare(providerCategory(right), "zh-CN")
+        return categoryCompare || left.provider_id.localeCompare(right.provider_id, "en", { numeric: true })
+      })
+      .map((registration) => ({ kind: "registration", registration })),
+  )
 
   const visibleCandidates = createMemo(() => {
     if (editingRole()) return allowedCandidates().filter((candidate) => includesQuery(candidate, filter()))
-    if (currentSection() === "decision" || currentSection() === "available") {
-      const base = currentSection() === "available" ? candidates() : allowedCandidates()
-      return base.filter((candidate) => includesQuery(candidate, filter()))
-    }
+    if (currentSection() === "models") return candidates().filter((candidate) => includesQuery(candidate, filter()))
     return []
   })
 
   const rowCount = createMemo(() => {
-    if (currentSection() === "provider") return providerRows().length
+    if (currentSection() === "registered") return providerRows().length
     if (currentSection() === "stage" && !editingRole()) return PAPER_MODEL_ROLES.length
-    if (currentSection() === "diagnostics") return payload()?.routing?.length ?? 0
     return visibleCandidates().length
   })
   const listHeight = createMemo(() => Math.max(8, dimensions().height - 15))
@@ -255,7 +251,7 @@ export function PaperModelWorkbenchPage() {
     setScrollOffset(0)
   }
 
-  createEffect(on([currentSection, currentProviderPage, filter, editingRole], resetList))
+  createEffect(on([currentSection, filter, editingRole], resetList))
 
   function move(delta: number) {
     const count = rowCount()
@@ -334,7 +330,7 @@ export function PaperModelWorkbenchPage() {
       [provider.provider_id]: {
         provider_id: provider.provider_id,
         provider_name: provider.provider_name,
-        kind: "builtin",
+        kind: providerKindFor(provider.provider_id),
         status: "registered",
         model_count: provider.model_count,
         allowed_count: 0,
@@ -344,21 +340,40 @@ export function PaperModelWorkbenchPage() {
     toast.show({ variant: "info", message: `已加入 ${provider.provider_name ?? provider.provider_id}，保存后会缓存模型。` })
   }
 
-  function disableSelectedProvider() {
+  function deleteSelectedProvider() {
     const row = providerRows()[selected()]
     if (row?.kind !== "registration") return
     const providerID = row.registration.provider_id
-    setDraftRegistrations((current) => ({
-      ...current,
-      [providerID]: {
-        ...row.registration,
-        status: "disabled",
-      },
-    }))
+    setDraftRegistrations((current) => Object.fromEntries(Object.entries(current).filter(([id]) => id !== providerID)))
     setDraftAllowlist((current) => new Set([...current].filter((ref) => !ref.startsWith(`${providerID}/`))))
     if (draftDecision()?.startsWith(`${providerID}/`)) setDraftDecision(undefined)
     if (draftBackupDecision()?.startsWith(`${providerID}/`)) setDraftBackupDecision(undefined)
-    toast.show({ variant: "warning", message: `已禁用 ${providerID}，保存后生效。` })
+    setDraftStagePolicies((policies) =>
+      Object.fromEntries(
+        Object.entries(policies).map(([role, policy]) => [
+          role,
+          policy?.model_ref?.startsWith(`${providerID}/`) ? { role: role as PaperModelRole, mode: "auto" } : policy,
+        ]),
+      ),
+    )
+    toast.show({ variant: "warning", message: `已删除 ${providerID}，保存后会清理它的模型。` })
+  }
+
+  function registerSubscriptionProvider(providerID: "openai" | "github-copilot") {
+    const provider = builtinProviders().find((item) => item.provider_id === providerID) ?? {
+      provider_id: providerID,
+      provider_name: providerID === "openai" ? "ChatGPT 订阅" : "GitHub Copilot",
+      model_count: 0,
+      registered: false,
+    }
+    registerBuiltin(provider)
+    if (!connectedProviders().has(providerID)) {
+      dialog.replace(() => <DialogProvider />)
+      toast.show({
+        variant: "info",
+        message: providerID === "openai" ? "请在登录面板完成 ChatGPT / OpenAI 授权。" : "请在登录面板完成 GitHub Copilot 授权。",
+      })
+    }
   }
 
   async function addOpenAICompatibleProvider() {
@@ -385,7 +400,7 @@ export function PaperModelWorkbenchPage() {
     })
     await refetch()
     notifyPaperModelInventoryChanged()
-    setSectionIndex(2)
+    setSectionIndex(1)
     toast.show({ variant: "success", message: `已发现 ${result.models?.length ?? 0} 个模型。` })
   }
 
@@ -406,19 +421,9 @@ export function PaperModelWorkbenchPage() {
       return
     }
     const section = currentSection()
-    if (section === "provider") {
-      const row = providerRows()[selected()]
-      if (row?.kind === "unregistered") registerBuiltin(row.provider)
-      return
-    }
-    if (section === "available") {
+    if (section === "models") {
       const candidate = visibleCandidates()[selected()]
       if (candidate) toggleAllowed(candidate.model_ref)
-      return
-    }
-    if (section === "decision") {
-      const candidate = visibleCandidates()[selected()]
-      if (candidate) setDraftDecision(candidate.model_ref)
       return
     }
     if (section === "stage") {
@@ -440,8 +445,7 @@ export function PaperModelWorkbenchPage() {
       return
     }
     if (evt.name === "tab") {
-      if (currentSection() === "provider" && !evt.shift) setProviderPageIndex((index) => (index + 1) % PROVIDER_PAGES.length)
-      else setSectionIndex((index) => (index + (evt.shift ? -1 : 1) + SECTIONS.length) % SECTIONS.length)
+      setSectionIndex((index) => (index + (evt.shift ? -1 : 1) + SECTIONS.length) % SECTIONS.length)
       evt.preventDefault()
       return
     }
@@ -468,19 +472,31 @@ export function PaperModelWorkbenchPage() {
       evt.preventDefault()
       return
     }
-    if (!evt.ctrl && evt.name === "a" && currentSection() === "available") {
+    if (!evt.ctrl && evt.name === "a" && currentSection() === "models") {
       selectAllVisible()
       evt.preventDefault()
       return
     }
-    if (!evt.ctrl && evt.name === "n" && currentSection() === "available") {
+    if (!evt.ctrl && evt.name === "n" && currentSection() === "models") {
       clearVisible()
       evt.preventDefault()
       return
     }
-    if (!evt.ctrl && evt.name === "b" && currentSection() === "decision") {
+    if (!evt.ctrl && evt.name === "m" && currentSection() === "models") {
       const candidate = visibleCandidates()[selected()]
-      if (candidate) setDraftBackupDecision(candidate.model_ref)
+      if (candidate) {
+        if (!draftAllowlist().has(candidate.model_ref)) toggleAllowed(candidate.model_ref)
+        setDraftDecision(candidate.model_ref)
+      }
+      evt.preventDefault()
+      return
+    }
+    if (!evt.ctrl && evt.name === "b" && currentSection() === "models") {
+      const candidate = visibleCandidates()[selected()]
+      if (candidate) {
+        if (!draftAllowlist().has(candidate.model_ref)) toggleAllowed(candidate.model_ref)
+        setDraftBackupDecision(candidate.model_ref)
+      }
       evt.preventDefault()
       return
     }
@@ -490,8 +506,18 @@ export function PaperModelWorkbenchPage() {
       evt.preventDefault()
       return
     }
-    if (!evt.ctrl && evt.name === "d" && currentSection() === "provider") {
-      disableSelectedProvider()
+    if (!evt.ctrl && evt.name === "d" && currentSection() === "registered") {
+      deleteSelectedProvider()
+      evt.preventDefault()
+      return
+    }
+    if (!evt.ctrl && evt.name === "g" && currentSection() === "registered") {
+      registerSubscriptionProvider("openai")
+      evt.preventDefault()
+      return
+    }
+    if (!evt.ctrl && evt.name === "p" && currentSection() === "registered") {
+      registerSubscriptionProvider("github-copilot")
       evt.preventDefault()
       return
     }
@@ -502,7 +528,7 @@ export function PaperModelWorkbenchPage() {
       evt.preventDefault()
       return
     }
-    if (!evt.ctrl && evt.name === "l") {
+    if (!evt.ctrl && evt.name === "l" && currentSection() === "registered") {
       dialog.replace(() => <DialogProvider />)
       evt.preventDefault()
       return
@@ -525,7 +551,6 @@ export function PaperModelWorkbenchPage() {
   const activeCandidateRows = createMemo(() => visibleCandidates().slice(visibleStart(), visibleEnd()))
   const activeProviderRows = createMemo(() => providerRows().slice(visibleStart(), visibleEnd()))
   const activeRoles = createMemo(() => PAPER_MODEL_ROLES.slice(visibleStart(), visibleEnd()))
-  const activeRouting = createMemo(() => (payload()?.routing ?? []).slice(visibleStart(), visibleEnd()))
   const compact = createMemo(() => dimensions().width < 118)
   const detailWidth = createMemo(() => (compact() ? 0 : 34))
 
@@ -534,7 +559,7 @@ export function PaperModelWorkbenchPage() {
       <box flexDirection="row" justifyContent="space-between" alignItems="center">
         <box flexDirection="column">
           <text fg={theme.text} attributes={TextAttributes.BOLD}>Paper Fucker 模型工作台</text>
-          <text fg={theme.textMuted}>注册 provider、选择可用模型、设置决策模型和阶段策略。</text>
+          <text fg={theme.textMuted}>管理 provider、候选模型、决策模型和全流程路由。</text>
         </box>
         <text fg={dirty() ? theme.warning : theme.textMuted}>{dirty() ? "有未保存修改 Ctrl+S 保存" : "Esc 返回首页"}</text>
       </box>
@@ -568,20 +593,11 @@ export function PaperModelWorkbenchPage() {
               </box>
             )}
           </For>
-          <Show when={currentSection() === "provider"}>
-            <box paddingTop={1} flexDirection="column">
-              <For each={PROVIDER_PAGES}>
-                {(page, index) => (
-                  <text fg={index() === providerPageIndex() ? theme.secondary : theme.textMuted}>
-                    Tab {index() + 1}. {page.label}
-                  </text>
-                )}
-              </For>
-            </box>
-          </Show>
           <box paddingTop={1} flexDirection="column">
-            <text fg={theme.textMuted}>c 自定义 provider</text>
-            <text fg={theme.textMuted}>l 内置 provider 登录</text>
+            <text fg={theme.textMuted}>g ChatGPT 订阅</text>
+            <text fg={theme.textMuted}>p Copilot CLI 订阅</text>
+            <text fg={theme.textMuted}>c 其他 provider</text>
+            <text fg={theme.textMuted}>d 删除已注册</text>
             <text fg={theme.textMuted}>Ctrl+S 保存</text>
           </box>
         </box>
@@ -590,7 +606,7 @@ export function PaperModelWorkbenchPage() {
           <Show when={payload()?.error}>
             {(error) => <text fg={theme.warning}>{error()}</text>}
           </Show>
-          <Show when={currentSection() === "available" || currentSection() === "decision" || editingRole()}>
+          <Show when={currentSection() === "models" || editingRole()}>
             <input
               placeholder="搜索 provider、模型名或来源"
               cursorColor={theme.primary}
@@ -602,47 +618,39 @@ export function PaperModelWorkbenchPage() {
 
           <box flexDirection="column" height={listHeight()} minHeight={0} overflow="hidden">
             <Switch>
-              <Match when={currentSection() === "provider"}>
+              <Match when={currentSection() === "registered"}>
                 <For each={activeProviderRows()}>
                   {(row, index) => {
                     const active = createMemo(() => index() + scrollOffset() === selected())
+                    const connected = createMemo(() =>
+                      row.kind === "registration" && (row.registration.kind === "openai_compatible" || row.registration.kind === "manual" || connectedProviders().has(row.registration.provider_id)),
+                    )
                     return (
                       <box backgroundColor={active() ? theme.primary : undefined} paddingLeft={1} gap={1}>
-                        <Show
-                          when={row.kind === "registration"}
-                          fallback={
-                            <>
-                              <text fg={active() ? theme.selectedListItemText : theme.textMuted}>＋</text>
-                              <text fg={active() ? theme.selectedListItemText : theme.text}>
-                                {providerLabel(row.kind === "unregistered" ? row.provider.provider_id : undefined, row.kind === "unregistered" ? row.provider.provider_name : undefined)}
-                              </text>
-                              <text fg={active() ? theme.selectedListItemText : theme.textMuted}>{row.kind === "unregistered" ? row.provider.model_count : 0} models</text>
-                            </>
-                          }
-                        >
-                          <>
-                            <text fg={active() ? theme.selectedListItemText : theme.success}>●</text>
-                            <text fg={active() ? theme.selectedListItemText : theme.text}>
-                              {providerLabel(row.kind === "registration" ? row.registration.provider_id : undefined, row.kind === "registration" ? row.registration.provider_name : undefined)}
-                            </text>
-                            <text fg={active() ? theme.selectedListItemText : theme.textMuted}>
-                              {row.kind === "registration" ? `${row.registration.allowed_count}/${row.registration.model_count}` : ""}
-                            </text>
-                            <text fg={active() ? theme.selectedListItemText : theme.textMuted}>{row.kind === "registration" ? row.registration.kind : ""}</text>
-                          </>
-                        </Show>
+                        <text fg={active() ? theme.selectedListItemText : theme.success}>●</text>
+                        <text fg={active() ? theme.selectedListItemText : theme.text}>
+                          {providerLabel(row.registration.provider_id, row.registration.provider_name)}
+                        </text>
+                        <text fg={active() ? theme.selectedListItemText : theme.textMuted}>
+                          {row.registration.allowed_count}/{row.registration.model_count}
+                        </text>
+                        <text fg={active() ? theme.selectedListItemText : theme.textMuted}>{providerCategory(row.registration)}</text>
+                        <text fg={active() ? theme.selectedListItemText : connected() ? theme.success : theme.warning}>
+                          {connected() ? "可用" : "需授权"}
+                        </text>
                       </box>
                     )
                   }}
                 </For>
                 <Show when={providerRows().length === 0}>
-                  <text fg={theme.warning}>
-                    {currentProviderPage() === "unregistered" ? "没有未注册内置 provider。" : "还没有配置这一类 provider。按 c 添加自定义 endpoint，或切到未注册页选择内置 provider。"}
-                  </text>
+                  <box flexDirection="column" gap={1}>
+                    <text fg={theme.warning}>还没有注册 provider。</text>
+                    <text fg={theme.textMuted}>按 g 添加 ChatGPT 订阅，按 p 添加 Copilot CLI 订阅，按 c 添加其他 OpenAI-compatible provider。</text>
+                  </box>
                 </Show>
               </Match>
 
-              <Match when={currentSection() === "available" || currentSection() === "decision" || editingRole()}>
+              <Match when={currentSection() === "models" || editingRole()}>
                 <Show when={editingRole()}>
                   {(role) => <text fg={theme.accent}>为 {ROLE_LABELS[role()]} 选择强制模型；Esc 返回阶段列表。</text>}
                 </Show>
@@ -660,15 +668,21 @@ export function PaperModelWorkbenchPage() {
                         </text>
                         <text fg={active() ? theme.selectedListItemText : theme.textMuted}>{candidate.smoke_status}</text>
                         <text fg={active() ? theme.selectedListItemText : theme.textMuted}>{candidate.context_hint ?? "context?"}</text>
+                        <Show when={draftDecision() === candidate.model_ref}>
+                          <text fg={active() ? theme.selectedListItemText : theme.accent}>主决策</text>
+                        </Show>
+                        <Show when={draftBackupDecision() === candidate.model_ref}>
+                          <text fg={active() ? theme.selectedListItemText : theme.secondary}>备用</text>
+                        </Show>
                       </box>
                     )
                   }}
                 </For>
                 <Show when={visibleCandidates().length === 0}>
                   <text fg={theme.warning}>
-                    {currentSection() === "decision" || editingRole()
-                      ? "还没有可用模型。先在“可用模型”中勾选模型并保存。"
-                      : "没有候选模型。先注册 provider 并刷新模型列表。"}
+                    {editingRole()
+                      ? "还没有可用模型。先在“所有模型”中勾选候选模型并保存。"
+                      : "没有模型。先在“已注册”中添加 provider 并刷新模型列表。"}
                   </text>
                 </Show>
               </Match>
@@ -691,20 +705,6 @@ export function PaperModelWorkbenchPage() {
                 </For>
                 <text fg={theme.textMuted}>Enter 在自动/动态之间切换；F 从可用模型池强制指定。</text>
               </Match>
-
-              <Match when={currentSection() === "diagnostics"}>
-                <box flexDirection="column" gap={1}>
-                  <text fg={theme.text}>库存路径：~/.paper_fucker/model-inventory.json</text>
-                  <text fg={theme.text}>候选模型只来自已注册 provider；可用模型只来自 allowlist。</text>
-                  <For each={activeRouting()}>
-                    {(item) => (
-                      <text fg={item.source === "blocked" ? theme.warning : theme.textMuted}>
-                        {ROLE_LABELS[item.role]}：{truncateDisplayMiddle(item.selected_model ?? item.reason, Math.max(42, dimensions().width - 22))}
-                      </text>
-                    )}
-                  </For>
-                </box>
-              </Match>
             </Switch>
           </box>
 
@@ -720,8 +720,9 @@ export function PaperModelWorkbenchPage() {
             <text fg={theme.text}>Enter/Space 选择</text>
             <text fg={theme.text}>A 全选</text>
             <text fg={theme.text}>N 清空</text>
+            <text fg={theme.text}>M 主模型</text>
             <text fg={theme.text}>B 设备用</text>
-            <text fg={theme.text}>D 禁用 provider</text>
+            <text fg={theme.text}>D 删除 provider</text>
             <text fg={theme.text}>Ctrl+S 保存</text>
           </box>
         </box>
@@ -729,10 +730,10 @@ export function PaperModelWorkbenchPage() {
         <Show when={!compact()}>
           <box width={detailWidth()} flexShrink={0} flexDirection="column" gap={1} paddingLeft={1} border={["left"]} borderColor={theme.borderSubtle}>
             <text fg={theme.accent} attributes={TextAttributes.BOLD}>说明</text>
-            <text fg={theme.textMuted}>Provider 注册后才会缓存模型。</text>
-            <text fg={theme.textMuted}>候选模型表示发现结果，不等于可用。</text>
-            <text fg={theme.textMuted}>可用模型是 PaperRun 与 Agent Team 的唯一模型池。</text>
-            <text fg={theme.textMuted}>动态阶段模型允许运行中按任务重新选择，但不能越过 allowlist。</text>
+            <text fg={theme.textMuted}>已注册只显示用户配置过的 provider。</text>
+            <text fg={theme.textMuted}>所有模型只来自已注册 provider；勾选后才进入候选池。</text>
+            <text fg={theme.textMuted}>主/备用决策模型必须来自候选池。</text>
+            <text fg={theme.textMuted}>动态阶段模型允许运行中按质量和成本切换候选模型。</text>
           </box>
         </Show>
       </box>
