@@ -10,9 +10,11 @@ import {
   getResearchRunStatus,
   loadResearchRun,
   readJsonlFacts,
+  resumeResearchRun,
   updateResearchRunStatus,
   type ResearchFinalGateState,
   type ResearchRuntimeOptions,
+  type ResearchStorageScope,
 } from "./research/runtime"
 import type {
   ResearchArtifact,
@@ -30,7 +32,7 @@ import { normalizeResearchIntake, type ResearchBrief, type ResearchIntakeRequest
 import {
   createModelRoleRouter,
   PAPER_MODEL_ROLES,
-  type OpenCodeModelRef,
+  type PaperModelRef,
   type PaperModelRole,
 } from "./model-router"
 import {
@@ -70,7 +72,12 @@ import {
 } from "./code-understanding"
 import { crawlerDiagnostics, type CrawlerDiagnosticsSummary } from "./crawler"
 import { hfLoopDiagnostics, type HFLoopDiagnostics } from "./huggingface-loop"
-import { inspectNatureSkill } from "./skill-install"
+import { inspectPaperManagedCapabilities, type PaperManagedCapability } from "./skill-install"
+import {
+  inspectPaperMachineProfile,
+  type PaperExperimentEnvironmentStatus,
+  type PaperMachineProfile,
+} from "./machine"
 
 import {
   applyPaperRunControl,
@@ -96,7 +103,34 @@ export interface DataEgressPolicy {
 export interface PaperRunCreateRequest extends ResearchIntakeRequest {
   budget_tier?: BudgetTier
   quality_mode?: QualityMode
+  storage_scope?: ResearchStorageScope
   data_egress_policy?: Partial<DataEgressPolicy>
+}
+
+export interface PaperRunHistoryEntry {
+  schema_version: "PaperRunHistoryEntry.v1"
+  run_id: string
+  topic: string
+  workspace: string
+  status: PaperRunSnapshot["status"]
+  storage_scope: ResearchStorageScope
+  run_dir: string
+  runtime_root: string
+  created_at: string
+  updated_at: string
+}
+
+export interface PaperRunResumeRequest {
+  run_id: string
+}
+
+export interface PaperDoctorReport {
+  schema_version: "PaperDoctorReport.v1"
+  configured: string[]
+  missing: string[]
+  optional_missing: string[]
+  blocked: string[]
+  next_steps: string[]
 }
 
 export interface PaperRunStageSnapshot {
@@ -244,10 +278,19 @@ export interface PaperRunSnapshot {
       exports: number
       checkpoints: number
     }
-    model_roles: Partial<Record<PaperModelRole, OpenCodeModelRef>>
+    model_roles: Partial<Record<PaperModelRole, PaperModelRef>>
     model_inventory?: PaperModelInventory
     model_routing?: ModelRoutingDecision[]
     cost: unknown
+    runtime_root: string
+    machine_profile: PaperMachineProfile
+    experiment_environment: PaperExperimentEnvironmentStatus
+    token_usage: {
+      input_tokens: number
+      output_tokens: number
+      total_tokens: number
+      estimated: boolean
+    }
     final_gate: unknown
     tool_traces: ResearchToolTrace[]
     audit: PaperObservabilityAuditSummary
@@ -438,6 +481,23 @@ function metadataQualityMode(value: unknown): QualityMode | undefined {
   return value === "reviewable_bundle" || value === "submission_candidate" ? value : undefined
 }
 
+function metadataStorageScope(value: unknown): ResearchStorageScope | undefined {
+  return value === "home" || value === "workspace" ? value : undefined
+}
+
+function tokenUsageFromCost(value: unknown) {
+  const record = jsonRecord(value)
+  const inputTokens = numberValue(record.input_tokens ?? record.prompt_tokens)
+  const outputTokens = numberValue(record.output_tokens ?? record.completion_tokens)
+  const totalTokens = numberValue(record.total_tokens) || inputTokens + outputTokens
+  return {
+    input_tokens: inputTokens,
+    output_tokens: outputTokens,
+    total_tokens: totalTokens,
+    estimated: !record.total_tokens,
+  }
+}
+
 function runOptions(input?: PaperRunRuntimeOptions): PaperRunRuntimeOptions {
   return {
     ...input,
@@ -535,7 +595,7 @@ function defaultAgentTree(input: {
   runID: string
   tier: BudgetTier
   capabilities: ResearchCapability[]
-  writer?: OpenCodeModelRef
+    writer?: PaperModelRef
 }): AgentTree {
   const policy = budgetTierPolicy(input.tier)
   const permissionDefaults: AgentPermissionEnvelope = {
@@ -580,7 +640,7 @@ function modelRoleMap(config: ResearchIntakeRequest["model_roles"]) {
     default_model: firstConfigured,
     roles: config,
   })
-  const roles: Partial<Record<PaperModelRole, OpenCodeModelRef>> = {}
+  const roles: Partial<Record<PaperModelRole, PaperModelRef>> = {}
   for (const role of PAPER_MODEL_ROLES) {
     if (!config[role]) continue
     const resolved = router.resolve(role)
@@ -592,9 +652,9 @@ function modelRoleMap(config: ResearchIntakeRequest["model_roles"]) {
   return roles
 }
 
-function metadataModelRoles(value: unknown): Partial<Record<PaperModelRole, OpenCodeModelRef>> | undefined {
+function metadataModelRoles(value: unknown): Partial<Record<PaperModelRole, PaperModelRef>> | undefined {
   const record = jsonRecord(value)
-  const roles: Partial<Record<PaperModelRole, OpenCodeModelRef>> = {}
+  const roles: Partial<Record<PaperModelRole, PaperModelRef>> = {}
   for (const role of PAPER_MODEL_ROLES) {
     const raw = jsonRecord(record[role])
     const provider = metadataString(raw.provider_id)
@@ -932,6 +992,66 @@ export async function getPaperRunSnapshot(runID: string, options?: PaperRunRunti
   return getPaperRunSnapshotFromDir(runDir)
 }
 
+export interface PaperRunHistoryListOptions extends PaperRunRuntimeOptions {
+  query?: string
+  status?: PaperRunSnapshot["status"]
+  workspace_filter?: string
+  limit?: number
+}
+
+export async function listPaperRuns(options?: PaperRunHistoryListOptions): Promise<PaperRunHistoryEntry[]> {
+  const normalized = runOptions(options)
+  const dirs = await discoverRunDirs(normalized)
+  const query = options?.query?.trim().toLowerCase()
+  const workspaceFilter = options?.workspace_filter ? path.resolve(options.workspace_filter).toLowerCase() : undefined
+  const entries = await Promise.all(
+    dirs.map(async (runDir) => {
+      const snapshot = await getPaperRunSnapshotFromDir(runDir).catch(() => undefined)
+      if (!snapshot) return undefined
+      const run = await loadResearchRun(runDir).catch(() => undefined)
+      const runtime = jsonRecord(run?.metadata?.runtime)
+      const storageScope = metadataStorageScope(runtime.storage_scope) ?? "home"
+      return {
+        schema_version: "PaperRunHistoryEntry.v1" as const,
+        run_id: snapshot.run_id,
+        topic: snapshot.topic,
+        workspace: snapshot.workspace,
+        status: snapshot.status,
+        storage_scope: storageScope,
+        run_dir: runDir,
+        runtime_root: path.dirname(runDir),
+        created_at: snapshot.created_at,
+        updated_at: snapshot.updated_at,
+      }
+    }),
+  )
+  return entries
+    .filter((entry): entry is PaperRunHistoryEntry => {
+      if (!entry) return false
+      if (options?.status && entry.status !== options.status) return false
+      if (workspaceFilter && path.resolve(entry.workspace).toLowerCase() !== workspaceFilter) return false
+      if (!query) return true
+      return (
+        entry.run_id.toLowerCase().includes(query) ||
+        entry.topic.toLowerCase().includes(query) ||
+        entry.workspace.toLowerCase().includes(query) ||
+        entry.status.toLowerCase().includes(query)
+      )
+    })
+    .sort((left, right) => right.updated_at.localeCompare(left.updated_at))
+    .slice(0, options?.limit ?? 100)
+}
+
+export async function resumePaperRun(
+  request: PaperRunResumeRequest | string,
+  options?: PaperRunRuntimeOptions,
+): Promise<PaperRunSnapshot> {
+  const runID = typeof request === "string" ? request : request.run_id
+  const runDir = await findPaperRunDir(runID, options)
+  await resumeResearchRun(runDir, options)
+  return getPaperRunSnapshotFromDir(runDir)
+}
+
 export async function getPaperRunSnapshotFromDir(runDir: string): Promise<PaperRunSnapshot> {
   const [status, events, artifacts, sources, toolTraces, claims, drafts, reviews, exports] = await Promise.all([
     getResearchRunStatus(runDir),
@@ -945,6 +1065,11 @@ export async function getPaperRunSnapshotFromDir(runDir: string): Promise<PaperR
     readJsonlFacts(runDir, "export"),
   ])
   const metadata = jsonRecord(status.run.metadata)
+  const runtimeMetadata = jsonRecord(metadata.runtime)
+  const runtimeRoot = path.dirname(metadataString(runtimeMetadata.run_dir) ?? runDir)
+  const inferredHome = runtimeRoot.endsWith(path.join(".paper_fucker", "runs"))
+    ? path.dirname(path.dirname(runtimeRoot))
+    : undefined
   const budgetTier = normalizeBudgetTier(metadataBudgetTier(metadata.paper_budget_tier))
   const qualityMode = normalizeQualityMode(metadataQualityMode(metadata.paper_quality_mode), budgetTier)
   const dataEgressPolicy = defaultDataEgressPolicy(
@@ -991,6 +1116,7 @@ export async function getPaperRunSnapshotFromDir(runDir: string): Promise<PaperR
   for (const path of metadataStringArray(intakeMetadata.code_paths)) {
     addCodeFile(codeGraph, { path })
   }
+  const machine = await inspectPaperMachineProfile({ workspace: status.run.workspace, home: inferredHome })
   const snapshot = {
     schema_version: "PaperRun.v1",
     run_id: status.run.run_id,
@@ -1055,6 +1181,10 @@ export async function getPaperRunSnapshotFromDir(runDir: string): Promise<PaperR
           : undefined,
       model_routing: modelRouting,
       cost: status.state.cost,
+      runtime_root: runtimeRoot,
+      machine_profile: machine.profile,
+      experiment_environment: machine.environment,
+      token_usage: tokenUsageFromCost(status.state.cost),
       final_gate: status.state.final_gate,
       tool_traces: toolTraces,
       audit: paperObservabilityAuditFromEvents(events),
@@ -1091,6 +1221,7 @@ export async function createPaperRun(
   const brief = normalizeResearchIntake(request)
   const budgetTier = normalizeBudgetTier(request.budget_tier)
   const qualityMode = normalizeQualityMode(request.quality_mode, budgetTier)
+  const storageScope = request.storage_scope ?? "home"
   const dataEgressPolicy = defaultDataEgressPolicy(request.data_egress_policy)
   const workspace = request.workspace_path ?? normalized.workspace
   const executionRequest: ResearchIntakeRequest = {
@@ -1121,6 +1252,7 @@ export async function createPaperRun(
     {
       topic: brief.topic,
       workspace,
+      storage_scope: storageScope,
       metadata: {
         paper_run: true,
         paper_intake: {
@@ -1144,6 +1276,7 @@ export async function createPaperRun(
         paper_model_routing: modelRouting,
         paper_budget_tier: budgetTier,
         paper_quality_mode: qualityMode,
+        paper_storage_scope: storageScope,
         paper_data_egress_policy: dataEgressPolicy,
         internal_sessions: [],
       },
@@ -1158,6 +1291,7 @@ export async function createPaperRun(
       payload: {
         budget_tier: budgetTier,
         quality_mode: qualityMode,
+        storage_scope: storageScope,
         data_egress_policy: dataEgressPolicy,
       },
     },
@@ -1356,33 +1490,65 @@ export function paperCapabilities() {
 export async function paperDoctor(options?: PaperRunRuntimeOptions) {
   const capabilities = defaultResearchCapabilities()
   const inventory = await loadPaperModelInventory({ home: options?.home })
-  const natureSkill = await inspectNatureSkill({ home: options?.home, workspace: options?.workspace })
+  const managedCapabilities = await inspectPaperManagedCapabilities({ home: options?.home, workspace: options?.workspace })
+  const machine = await inspectPaperMachineProfile({ home: options?.home, workspace: options?.workspace })
+  const managedSkillChecks = managedCapabilities.map((skill) => ({
+    name: skill.capability_name,
+    status: skill.status === "available" ? "ok" : skill.status,
+    impact: skill.impact,
+    install_hint: skill.install_hint,
+  }))
+  const checks = [
+    { name: "paper_core", status: "ok" },
+    { name: "research_runtime", status: "ok" },
+    { name: "private_first_data_egress", status: "ok" },
+    { name: "model_workbench", status: inventory.allowlist.length > 0 ? "ok" : "missing" },
+    { name: "machine_profile", status: machine.environment.status === "blocked" ? "blocked" : "ok" },
+    ...managedSkillChecks,
+  ]
+  const report: PaperDoctorReport = {
+    schema_version: "PaperDoctorReport.v1",
+    configured: checks.filter((check) => check.status === "ok").map((check) => check.name),
+    missing: checks.filter((check) => check.status === "missing").map((check) => check.name),
+    optional_missing: checks.filter((check) => check.status === "optional_missing").map((check) => check.name),
+    blocked: [
+      ...checks.filter((check) => check.status === "blocked").map((check) => check.name),
+      ...(inventory.allowlist.length > 0 ? [] : ["model_workbench"]),
+    ],
+    next_steps: [
+      ...(inventory.allowlist.length > 0
+        ? []
+        : ["进入 /models 添加 provider、勾选允许模型并选择主决策模型。"]),
+      ...managedCapabilities
+        .filter((skill) => skill.status !== "available")
+        .map((skill) => skill.install_hint),
+      "需要机器可读结果时使用 --json；默认 doctor 输出中文摘要。",
+    ],
+  }
   return {
     status: "ok",
     default_language: "zh-CN",
-    storage: "workspace-first",
+    storage: "home-first",
+    report,
+    machine_profile: machine.profile,
+    experiment_environment: machine.environment,
     model_workbench: {
       decision_model: inventory.decision_model,
       allowed_models: inventory.allowlist.length,
       candidates: inventory.candidates.length,
       endpoint: "/paper/model-inventory",
     },
-    skills: {
-      nature_paper: natureSkill,
-    },
+    skills: Object.fromEntries(managedCapabilities.map((skill) => [skill.id.replaceAll("-", "_"), skill])) as Record<
+      string,
+      PaperManagedCapability
+    >,
     capabilities: {
       total: capabilities.length,
       mcp: capabilities.filter((capability) => capability.type === "mcp").map((capability) => capability.name),
       skills: capabilities.filter((capability) => capability.type === "skill").map((capability) => capability.name),
       packs: builtinPaperCapabilityPacks().map((pack) => pack.id),
     },
-    checks: [
-      { name: "paper_core", status: "ok" },
-      { name: "research_runtime", status: "ok" },
-      { name: "private_first_data_egress", status: "ok" },
-      { name: "model_workbench", status: inventory.allowlist.length > 0 ? "ok" : "missing" },
-      { name: "skill.nature-paper", status: natureSkill.source_valid && natureSkill.targets.some((target) => target.name === "codex" && target.exists) ? "ok" : "missing" },
-    ],
+    checks,
   }
 }
 
@@ -1412,7 +1578,7 @@ export function discoverPaperProviders(
 export function paperModelRoles(config: ResearchIntakeRequest["model_roles"] = {}) {
   const roles = modelRoleMap(config)
   return {
-    strategy: "opencode_provider_agnostic",
+    strategy: "paper_provider_agnostic",
     default_model: undefined,
     roles,
   }

@@ -10,6 +10,10 @@ function envValue(key: string) {
   return process.env[currentKey(key)] ?? process.env[key]
 }
 
+function paperOnlyEnvValue(key: string) {
+  return process.env[currentKey(key)]
+}
+
 for (const key of ["OPENCODE_EXPERIMENTAL_FILEWATCHER", "OPENCODE_EXPERIMENTAL_DISABLE_FILEWATCHER"]) {
   const preferred = currentKey(key)
   if (process.env[key] === undefined && process.env[preferred] !== undefined) process.env[key] = process.env[preferred]
@@ -49,7 +53,7 @@ export const Flag = {
   OPENCODE_AUTO_SHARE: truthy("OPENCODE_AUTO_SHARE"),
   OPENCODE_AUTO_HEAP_SNAPSHOT: truthy("OPENCODE_AUTO_HEAP_SNAPSHOT"),
   OPENCODE_GIT_BASH_PATH: envValue("OPENCODE_GIT_BASH_PATH"),
-  OPENCODE_CONFIG: envValue("OPENCODE_CONFIG"),
+  OPENCODE_CONFIG: paperOnlyEnvValue("OPENCODE_CONFIG"),
   OPENCODE_DISABLE_AUTOUPDATE: truthy("OPENCODE_DISABLE_AUTOUPDATE"),
   OPENCODE_ALWAYS_NOTIFY_UPDATE: truthy("OPENCODE_ALWAYS_NOTIFY_UPDATE"),
   OPENCODE_DISABLE_PRUNE: truthy("OPENCODE_DISABLE_PRUNE"),
@@ -90,10 +94,10 @@ export const Flag = {
   OPENCODE_EXPERIMENTAL_LSP_TOOL: OPENCODE_EXPERIMENTAL || truthy("OPENCODE_EXPERIMENTAL_LSP_TOOL"),
   OPENCODE_EXPERIMENTAL_PLAN_MODE: OPENCODE_EXPERIMENTAL || truthy("OPENCODE_EXPERIMENTAL_PLAN_MODE"),
   OPENCODE_EXPERIMENTAL_MARKDOWN: !falsy("OPENCODE_EXPERIMENTAL_MARKDOWN"),
-  OPENCODE_MODELS_URL: envValue("OPENCODE_MODELS_URL"),
-  OPENCODE_MODELS_PATH: envValue("OPENCODE_MODELS_PATH"),
+  OPENCODE_MODELS_URL: paperOnlyEnvValue("OPENCODE_MODELS_URL"),
+  OPENCODE_MODELS_PATH: paperOnlyEnvValue("OPENCODE_MODELS_PATH"),
   OPENCODE_DISABLE_EMBEDDED_WEB_UI: truthy("OPENCODE_DISABLE_EMBEDDED_WEB_UI"),
-  OPENCODE_DB: envValue("OPENCODE_DB"),
+  OPENCODE_DB: paperOnlyEnvValue("OPENCODE_DB"),
   OPENCODE_DISABLE_CHANNEL_DB: truthy("OPENCODE_DISABLE_CHANNEL_DB"),
   OPENCODE_SKIP_MIGRATIONS: truthy("OPENCODE_SKIP_MIGRATIONS"),
   OPENCODE_STRICT_CONFIG_DEPS: truthy("OPENCODE_STRICT_CONFIG_DEPS"),
@@ -116,13 +120,13 @@ export const Flag = {
     return truthy("OPENCODE_DISABLE_PROJECT_CONFIG")
   },
   get OPENCODE_TUI_CONFIG() {
-    return envValue("OPENCODE_TUI_CONFIG")
+    return paperOnlyEnvValue("OPENCODE_TUI_CONFIG")
   },
   get OPENCODE_CONFIG_CONTENT() {
-    return envValue("OPENCODE_CONFIG_CONTENT")
+    return paperOnlyEnvValue("OPENCODE_CONFIG_CONTENT")
   },
   get OPENCODE_CONFIG_DIR() {
-    return envValue("OPENCODE_CONFIG_DIR")
+    return paperOnlyEnvValue("OPENCODE_CONFIG_DIR")
   },
   get OPENCODE_PURE() {
     return truthy("OPENCODE_PURE")

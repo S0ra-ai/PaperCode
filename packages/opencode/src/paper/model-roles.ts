@@ -1,4 +1,4 @@
-import { PAPER_MODEL_ROLES, parseOpenCodeModelId, type OpenCodeModelRef, type PaperModelRole } from "./model-router"
+import { PAPER_MODEL_ROLES, parsePaperModelId, type PaperModelRef, type PaperModelRole } from "./model-router"
 
 export interface ModelRoleAssignment {
   default_model: string
@@ -8,7 +8,7 @@ export interface ModelRoleAssignment {
 
 export type ModelRoleAssignmentSource = "default" | "role_override" | "subagent_override"
 
-export type ResolvedModelRoleAssignment = OpenCodeModelRef & {
+export type ResolvedModelRoleAssignment = PaperModelRef & {
   role: PaperModelRole
   subagent_role?: string
   source: ModelRoleAssignmentSource
@@ -25,7 +25,7 @@ export function resolveModelRoleAssignment(
   const subagent = subagentRole ? assignment.subagents?.[subagentRole] : undefined
   const override = assignment.roles?.[role]
   const source: ModelRoleAssignmentSource = subagent ? "subagent_override" : override ? "role_override" : "default"
-  const parsed = parseOpenCodeModelId(subagent ?? override ?? assignment.default_model, role)
+  const parsed = parsePaperModelId(subagent ?? override ?? assignment.default_model, role)
   return {
     role,
     subagent_role: subagentRole,

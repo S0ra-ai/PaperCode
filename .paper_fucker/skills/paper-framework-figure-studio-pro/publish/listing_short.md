@@ -1,0 +1,1 @@
+Publication-ready research-paper framework figure studio with saved subtype/style atlases, required concept references, required visual-structure image embeds, target-paper image isolation, and mandatory two-round multi-image selection.

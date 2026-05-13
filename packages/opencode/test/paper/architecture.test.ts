@@ -6,10 +6,10 @@ import {
 } from "@/paper"
 
 describe("paper_fucker paper system architecture", () => {
-  test("frames OpenCode as the substrate and paper_fucker as the paper domain system", () => {
+  test("frames the model/agent substrate and paper_fucker as the paper domain system", () => {
     expect(PAPER_FUCKER_ARCHITECTURE.layers).toEqual([
       {
-        id: "opencode_substrate",
+        id: "model_agent_substrate",
         owns: ["providers", "models", "agents", "sessions", "tools", "mcp", "skills", "tui", "permissions"],
       },
       {
@@ -40,8 +40,13 @@ describe("paper_fucker paper system architecture", () => {
       provider_id: "deepseek",
       model_id: "deepseek-v4-pro",
     })
-    expect(system.model_strategy).toBe("opencode_provider_agnostic")
-    expect(system.supports_all_opencode_models).toBe(true)
-    expect(system.core_capability_sources).toEqual(["opencode_tools", "opencode_mcp", "opencode_skills", "paper_fucker_tools"])
+    expect(system.model_strategy).toBe("paper_provider_agnostic")
+    expect(system.supports_all_configured_models).toBe(true)
+    expect(system.core_capability_sources).toEqual([
+      "model_provider_runtime",
+      "agent_runtime",
+      "managed_skills",
+      "paper_fucker_tools",
+    ])
   })
 })

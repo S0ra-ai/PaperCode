@@ -2,6 +2,7 @@ import type { PaperCapabilityStage, ResearchCapability, ResearchCapabilityType }
 
 export type PaperCapabilityPackId =
   | "paper-profile-skills"
+  | "paper-figure-skills"
   | "literature-mcp"
   | "crawler-data"
   | "huggingface-research"
@@ -86,6 +87,38 @@ export function builtinPaperCapabilityPacks(): PaperCapabilityPack[] {
       ],
     }),
     pack({
+      id: "paper-figure-skills",
+      title: "Paper figure and diagram skills",
+      description: "Paper Fucker managed skills for publication-ready framework figures and inspectable system diagrams.",
+      default_enabled: true,
+      install_policy: "built_in",
+      capabilities: [
+        capability({
+          name: "skill.architecture-diagram",
+          type: "skill",
+          substrate: "codex_skill",
+          title: "Architecture diagram skill",
+          description: "Create self-contained HTML/SVG architecture and system diagrams for methods, platforms, and pipelines.",
+          trust: "local_generated",
+          cost: "free",
+          network: "optional",
+          allowed_stages: ["planning", "drafting", "revision", "export"],
+        }),
+        capability({
+          name: "skill.paper-framework-figure-studio-pro",
+          type: "skill",
+          substrate: "codex_skill",
+          title: "Paper framework figure studio",
+          description:
+            "Design, critique, generate, and integrate reviewer-facing research framework figures, method overviews, pipelines, and agent workflows.",
+          trust: "local_generated",
+          cost: "free",
+          network: "optional",
+          allowed_stages: ["planning", "drafting", "profile_formatting", "revision", "export"],
+        }),
+      ],
+    }),
+    pack({
       id: "literature-mcp",
       title: "Literature MCP bus",
       description: "Automatically linked literature and source-verification MCP surfaces.",
@@ -166,6 +199,18 @@ export function builtinPaperCapabilityPacks(): PaperCapabilityPack[] {
           cost: "variable",
           network: "required",
           allowed_stages: ["data", "verification"],
+        }),
+        capability({
+          name: "skill.bb-browser",
+          type: "skill",
+          substrate: "codex_skill",
+          title: "Managed browser acquisition",
+          description:
+            "Paper Fucker managed browser and web-data acquisition skill for authorized public or user-approved private research sources.",
+          trust: "external_verified",
+          cost: "free",
+          network: "required",
+          allowed_stages: ["literature", "data", "verification"],
         }),
       ],
     }),
@@ -258,7 +303,7 @@ export function builtinPaperCapabilityPacks(): PaperCapabilityPack[] {
     pack({
       id: "code-experiment-core",
       title: "Code and experiment core",
-      description: "OpenCode substrate and Python tools for code analysis, shell execution, notebooks, logs, and datasets.",
+      description: "Paper Fucker local tool substrate and Python tools for code analysis, shell execution, notebooks, logs, and datasets.",
       default_enabled: true,
       install_policy: "built_in",
       capabilities: [
@@ -266,8 +311,8 @@ export function builtinPaperCapabilityPacks(): PaperCapabilityPack[] {
           name: "opencode.read",
           type: "builtin_tool",
           substrate: "opencode",
-          title: "OpenCode read",
-          description: "Read source files and paper materials through the OpenCode tool substrate.",
+          title: "Paper Fucker read",
+          description: "Read source files and paper materials through the Paper Fucker local tool substrate.",
           trust: "first_party",
           cost: "free",
           network: "none",
@@ -277,8 +322,8 @@ export function builtinPaperCapabilityPacks(): PaperCapabilityPack[] {
           name: "opencode.grep",
           type: "builtin_tool",
           substrate: "opencode",
-          title: "OpenCode grep",
-          description: "Search source and document text through the OpenCode tool substrate.",
+          title: "Paper Fucker search",
+          description: "Search source and document text through the Paper Fucker local tool substrate.",
           trust: "first_party",
           cost: "free",
           network: "none",
@@ -288,7 +333,7 @@ export function builtinPaperCapabilityPacks(): PaperCapabilityPack[] {
           name: "opencode.glob",
           type: "builtin_tool",
           substrate: "opencode",
-          title: "OpenCode glob",
+          title: "Paper Fucker file discovery",
           description: "Discover workspace files for intake, code analysis, and export packaging.",
           trust: "first_party",
           cost: "free",
@@ -299,8 +344,8 @@ export function builtinPaperCapabilityPacks(): PaperCapabilityPack[] {
           name: "opencode.task",
           type: "builtin_tool",
           substrate: "opencode",
-          title: "OpenCode task",
-          description: "Delegate bounded code analysis or verification work through OpenCode agents.",
+          title: "Paper Fucker agent task",
+          description: "Delegate bounded code analysis or verification work through Paper Fucker agents.",
           trust: "first_party",
           cost: "variable",
           network: "optional",
@@ -310,7 +355,7 @@ export function builtinPaperCapabilityPacks(): PaperCapabilityPack[] {
           name: "opencode.shell",
           type: "builtin_tool",
           substrate: "opencode",
-          title: "OpenCode shell",
+          title: "Paper Fucker shell",
           description: "Run approved local commands for diagnostics, experiments, and export rendering.",
           trust: "first_party",
           cost: "free",

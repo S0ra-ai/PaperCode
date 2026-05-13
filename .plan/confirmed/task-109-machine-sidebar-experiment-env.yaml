@@ -1,0 +1,104 @@
+id: task-109-machine-sidebar-experiment-env
+title: Machine sidebar experiment environment for 0.10.6-dev
+status: done
+priority: high
+owner: codex-paper-fucker
+tags:
+- paper
+- machine
+- gpu
+- doctor
+- tui
+- 0.10.6-dev
+depends_on:
+- task-108-init-doctor-resume-workflow
+description: Add a machine/environment profile covering OS, CPU, memory, disk, GPU,
+  compilers, runtimes, virtualization, Docker, WSL, and cached refreshable status
+  in doctor and TUI sidebar.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: machine-profile-runtime
+  title: Implement machine profile runtime
+  status: done
+  owner: codex-paper-fucker
+  depends_on: []
+  description: Add PaperMachineProfile and PaperExperimentEnvironmentStatus detection
+    with non-blocking cached checks.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-13T02:04:56.254893'
+      level: info
+      message: Added PaperMachineProfile and PaperExperimentEnvironmentStatus runtime
+        inspection in packages/opencode/src/paper/machine.ts, with cached OS/CPU/memory/disk/workspace/default
+        run root/GPU/toolchain/runtime detection. Snapshot diagnostics now include
+        machine_profile and experiment_environment.
+      agent: codex-paper-fucker
+    last_run: '2026-05-13T02:04:56.254893'
+    attempt_count: 2
+  meta: {}
+- id: doctor-machine-integration
+  title: Integrate machine profile into doctor
+  status: done
+  owner: codex-paper-fucker
+  depends_on:
+  - machine-profile-runtime
+  description: Expose machine/runtime status in paperDoctor and init doctor grouped
+    reports.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-13T02:05:07.067232'
+      level: info
+      message: paperDoctor now includes machine_profile and experiment_environment,
+        and PaperDoctorReport.v1 includes machine_profile in configured/blocked checks.
+        init doctor tests still pass.
+      agent: codex-paper-fucker
+    last_run: '2026-05-13T02:05:07.067232'
+    attempt_count: 2
+  meta: {}
+- id: tui-machine-sidebar
+  title: Render machine page/sidebar
+  status: done
+  owner: codex-paper-fucker
+  depends_on:
+  - doctor-machine-integration
+  description: Add machine status view in the PaperRun sidebar with refresh semantics
+    and degradation messages.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-13T02:05:20.708717'
+      level: info
+      message: PaperRun TUI sidebar now renders a 机器 section with OS, CPU, memory,
+        disk, GPU/CPU-only mode, run root, and available/optional/blocked capability
+        counts. Focused PaperRun API + TUI workbench tests passed together (14 pass).
+      agent: codex-paper-fucker
+    last_run: '2026-05-13T02:05:20.708717'
+    attempt_count: 2
+  meta: {}
+outputs:
+- type: file
+  path: packages/opencode/src/paper/machine.ts
+  description: Machine profile detection
+- type: file
+  path: packages/opencode/src/paper/run.ts
+  description: Snapshot diagnostics machine profile fields
+- type: directory
+  path: packages/opencode/src/cli/cmd/tui/routes/paper
+  description: Machine sidebar view
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-13T01:37:21.156728'
+  updated_at: '2026-05-13T02:05:25.746837'
+  version: '1'

@@ -7,6 +7,7 @@ import {
   exportPaperRun,
   getPaperRunSnapshot,
   initialPaperRunLiveEvents,
+  listPaperRuns,
   paperCapabilities,
   paperDoctor,
   paperModelWorkbench,
@@ -15,6 +16,7 @@ import {
   PaperRunNotFoundError,
   previewPaperRun,
   recordPaperRunGuidance,
+  resumePaperRun,
   subscribeToPaperRunLiveEvents,
 } from "@/paper/run"
 import { discoverOpenAICompatibleModels, saveProviderEndpointConfig } from "@/paper/model-discovery"
@@ -120,6 +122,7 @@ function normalizeCreatePayload(payload: typeof PaperRunCreatePayload.Type): Pap
     model_roles: payload.model_roles as PaperRunCreateRequest["model_roles"],
     budget_tier: payload.budget_tier,
     quality_mode: payload.quality_mode,
+    storage_scope: payload.storage_scope,
     data_egress_policy: payload.data_egress_policy
       ? {
           mode: payload.data_egress_policy.mode,
@@ -154,10 +157,28 @@ export const paperHandlers = HttpApiBuilder.group(InstanceHttpApi, "paper", (han
       })
     })
 
+    const listRuns = Effect.fn("PaperHttpApi.listRuns")(function* () {
+      const instance = yield* InstanceState.context
+      const runs = yield* Effect.tryPromise({
+        try: () => listPaperRuns(paperOptions(instance.directory)),
+        catch: mapPaperBadRequest,
+      })
+      return { runs }
+    })
+
     const getRun = Effect.fn("PaperHttpApi.getRun")(function* (ctx: { params: { runID: string } }) {
       const instance = yield* InstanceState.context
       const run = yield* Effect.tryPromise({
         try: () => getPaperRunSnapshot(ctx.params.runID, paperOptions(instance.directory)),
+        catch: mapPaperError,
+      })
+      return { run }
+    })
+
+    const resumeRun = Effect.fn("PaperHttpApi.resumeRun")(function* (ctx: { params: { runID: string } }) {
+      const instance = yield* InstanceState.context
+      const run = yield* Effect.tryPromise({
+        try: () => resumePaperRun({ run_id: ctx.params.runID }, paperOptions(instance.directory)),
         catch: mapPaperError,
       })
       return { run }
@@ -394,7 +415,9 @@ export const paperHandlers = HttpApiBuilder.group(InstanceHttpApi, "paper", (han
 
     return handlers
       .handle("createRun", createRun)
+      .handle("listRuns", listRuns)
       .handle("getRun", getRun)
+      .handle("resumeRun", resumeRun)
       .handleRaw("events", events)
       .handle("guidance", guidance)
       .handle("controlRun", controlRun)

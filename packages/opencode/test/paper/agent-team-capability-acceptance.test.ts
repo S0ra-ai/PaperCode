@@ -56,6 +56,7 @@ describe("Agent Team capability acceptance", () => {
 
     expect(packs.map((pack) => pack.id)).toEqual([
       "paper-profile-skills",
+      "paper-figure-skills",
       "literature-mcp",
       "crawler-data",
       "huggingface-research",
@@ -63,7 +64,16 @@ describe("Agent Team capability acceptance", () => {
       "writing-verification-export",
     ])
     expect(capabilities.map((capability) => capability.name)).toEqual(
-      expect.arrayContaining(["skill.nature-paper", "exa", "python.web-crawler.scrapling", "hf.datasets", "hf.jobs", "hf.trackio"]),
+      expect.arrayContaining([
+        "skill.nature-paper",
+        "skill.architecture-diagram",
+        "skill.paper-framework-figure-studio-pro",
+        "exa",
+        "python.web-crawler.scrapling",
+        "hf.datasets",
+        "hf.jobs",
+        "hf.trackio",
+      ]),
     )
 
     const harness = createPaperHarness({ run_id: "run-acceptance", policy: { max_parallel: 2 } })
