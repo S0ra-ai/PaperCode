@@ -140,10 +140,7 @@ outputs:
 trace:
   logs: []
   attempt_count: 0
-lock:
-  by: paper-fucker-agent
-  at: '2026-05-13T09:58:27.366150'
 meta:
   created_at: '2026-05-13T09:58:17.264211'
-  updated_at: '2026-05-13T10:19:07.928141'
+  updated_at: '2026-05-13T10:23:11.409675'
   version: '1'
