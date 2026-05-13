@@ -1,6 +1,6 @@
 id: model-workbench-runid-display-hardening
 title: 模型工作台三页重构与 PaperRun 创建硬化
-status: in_progress
+status: done
 priority: high
 owner: paper-fucker-agent
 tags:
@@ -105,7 +105,7 @@ steps:
   meta: {}
 - id: step-5
   title: 测试与文档版本同步
-  status: in_progress
+  status: done
   owner: paper-fucker-agent
   depends_on: []
   description: 补充模型工作台、provider 删除、run_id 重试和 README/CHANGELOG 检查；更新 0.11.1-dev changelog。
@@ -118,8 +118,13 @@ steps:
       level: info
       message: 开始补充测试与版本同步。
       agent: paper-fucker-agent
-    last_run: '2026-05-13T10:17:08.129122'
-    attempt_count: 1
+    - timestamp: '2026-05-13T10:19:07.927141'
+      level: info
+      message: 补充 model-discovery/run-api 测试，更新 README 与 CHANGELOG 到 0.11.1-dev，并通过
+        README 版本、CHANGELOG 格式、git diff --check、opencode typecheck 和目标测试。
+      agent: paper-fucker-agent
+    last_run: '2026-05-13T10:19:07.927141'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -140,5 +145,5 @@ lock:
   at: '2026-05-13T09:58:27.366150'
 meta:
   created_at: '2026-05-13T09:58:17.264211'
-  updated_at: '2026-05-13T10:17:08.129122'
+  updated_at: '2026-05-13T10:19:07.928141'
   version: '1'
