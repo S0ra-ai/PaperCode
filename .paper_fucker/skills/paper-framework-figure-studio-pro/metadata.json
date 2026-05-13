@@ -101,7 +101,7 @@
     "markdown_image_embed_required_for_display": true,
     "plain_path_list_is_not_display": true,
     "codex_desktop_requires_absolute_markdown_image_paths": true,
-    "codex_installed_skill_root": "C:/Users/qu_yw/.codex/skills/paper-framework-figure-studio-pro",
+    "paper_fucker_skill_root": ".paper_fucker/skills/paper-framework-figure-studio-pro",
     "chatgpt_sources_uses_package_relative_embeds_or_source_asset_display": true,
     "reference_display_render_status_field": "reference_display_render_status"
   },

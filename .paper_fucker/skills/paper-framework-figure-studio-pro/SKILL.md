@@ -58,10 +58,10 @@ Saved boards:
 
 Display means an actual Markdown image tag, not a path list. In Codex desktop, resolve the package-local path to the active installed skill root and emit an absolute filesystem path with forward slashes. For this Codex installation, startup display should include these image tags outside code blocks:
 
-![Framework Figure Subtypes](C:/Users/qu_yw/.codex/skills/paper-framework-figure-studio-pro/assets/subtype-atlas/boards/subtype-overview.png)
-![Visual Grammar and Layout](C:/Users/qu_yw/.codex/skills/paper-framework-figure-studio-pro/assets/subtype-atlas/boards/visual-grammar-layout.png)
-![Reader Role and Detail](C:/Users/qu_yw/.codex/skills/paper-framework-figure-studio-pro/assets/subtype-atlas/boards/reader-role-detail.png)
-![Visual Communication Styles](C:/Users/qu_yw/.codex/skills/paper-framework-figure-studio-pro/assets/subtype-atlas/boards/visual-communication-styles.png)
+![Framework Figure Subtypes](assets/subtype-atlas/boards/subtype-overview.png)
+![Visual Grammar and Layout](assets/subtype-atlas/boards/visual-grammar-layout.png)
+![Reader Role and Detail](assets/subtype-atlas/boards/reader-role-detail.png)
+![Visual Communication Styles](assets/subtype-atlas/boards/visual-communication-styles.png)
 
 In ChatGPT web with the zip in Sources, use saved source assets or package-relative image embeds such as `![Framework Figure Subtypes](assets/subtype-atlas/boards/subtype-overview.png)` when the host can render them. If the host blocks rendering, record `reference_display_render_status: attempted_host_blocked` and list exact paths; do not silently omit the atlas.
 
