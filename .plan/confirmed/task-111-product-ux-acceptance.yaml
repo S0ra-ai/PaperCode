@@ -1,0 +1,120 @@
+id: task-111-product-ux-acceptance
+title: Product UX acceptance for 0.11.0-dev
+status: done
+priority: high
+owner: codex-paper-fucker
+tags:
+- paper
+- acceptance
+- verification
+- 0.11.0-dev
+depends_on:
+- task-110-readme-brand-repo-cleanup
+description: Run focused product acceptance across config isolation, home/workspace
+  PaperRun storage, /resume, init/doctor, machine diagnostics, built-in skill/MCP
+  registry, README/version, and regression suites for the 0.11.0-dev line.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: focused-product-tests
+  title: Add and run focused product tests
+  status: done
+  owner: codex-paper-fucker
+  depends_on: []
+  description: Cover storage isolation, run history/resume, doctor grouping, machine
+    profile, and built-in capability registry.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-13T02:18:08.164824'
+      level: info
+      message: Running focused acceptance coverage after completing feature and cleanup
+        tasks.
+      agent: codex-paper-fucker
+    - timestamp: '2026-05-13T02:19:51.017364'
+      level: info
+      message: 'Focused acceptance passed: opencode targeted suite across init/doctor,
+        PaperRun home/workspace storage and resume, model registry, machine/workbench
+        sidebar, visible commands, and public brand surface: 53 pass, 0 fail.'
+      agent: codex-paper-fucker
+    last_run: '2026-05-13T02:19:51.017364'
+    attempt_count: 2
+  meta: {}
+- id: version-changelog
+  title: Update version and CHANGELOG
+  status: done
+  owner: codex-paper-fucker
+  depends_on:
+  - focused-product-tests
+  description: Advance root README/CHANGELOG to 0.11.0-dev with colon DSL entries
+    reflecting the serial task chain.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-13T02:19:56.240107'
+      level: info
+      message: Preparing 0.11.0-dev README/CHANGELOG sync.
+      agent: codex-paper-fucker
+    - timestamp: '2026-05-13T02:21:56.624275'
+      level: info
+      message: Updated root README/CHANGELOG to 0.11.0-dev and added a colon-DSL entry
+        summarizing skills/MCP, config isolation, PaperRun history/resume, machine
+        sidebar, public brand cleanup, and tests. README version check and CHANGELOG
+        format/version validation pass. TaskFlow Git branch preparation was attempted
+        but refused the already-dirty worktree, so no branch operation was forced.
+      agent: codex-paper-fucker
+    last_run: '2026-05-13T02:21:56.624275'
+    attempt_count: 2
+  meta: {}
+- id: regression-suite
+  title: Run required regression suite
+  status: done
+  owner: codex-paper-fucker
+  depends_on:
+  - version-changelog
+  description: Run opencode tests/typecheck, preview tests, research-tools unittest,
+    README version check, and CHANGELOG format check as feasible.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-13T02:23:06.151509'
+      level: info
+      message: Running required final regression suite.
+      agent: codex-paper-fucker
+    - timestamp: '2026-05-13T03:48:14.027215'
+      level: info
+      message: 'Regression suite completed for 0.11.0-dev product UX acceptance. Passed:
+        npx --yes bun@1.3.13 --cwd packages/opencode test (2623 pass, 0 fail, 38 skip,
+        2 todo); npx --yes bun@1.3.13 run --cwd packages/opencode typecheck; npx --yes
+        bun@1.3.13 --cwd packages/preview test (3 pass); python -m unittest discover
+        -s research-tools/tests (18 pass); scripts/check-readme-version.ps1; scripts/check-changelog-format.ps1
+        -IncludeArchives; TaskFlow validate_changelog_format; TaskFlow validate_changelog_versions.
+        CHANGELOG 0.11.0-dev verification updated.'
+      agent: codex-paper-fucker
+    last_run: '2026-05-13T03:48:14.027215'
+    attempt_count: 2
+  meta: {}
+outputs:
+- type: directory
+  path: packages/opencode/test
+  description: Focused and regression tests
+- type: file
+  path: CHANGELOG
+  description: 0.11.0-dev entry
+- type: file
+  path: README.md
+  description: Version-aligned README
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-13T01:37:39.048779'
+  updated_at: '2026-05-13T03:48:26.928311'
+  version: '1'

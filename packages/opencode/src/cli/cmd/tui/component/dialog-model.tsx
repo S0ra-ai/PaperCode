@@ -5,6 +5,7 @@ import { map, pipe, flatMap, entries, filter, sortBy, take } from "remeda"
 import { DialogSelect } from "@tui/ui/dialog-select"
 import { useDialog } from "@tui/ui/dialog"
 import { createDialogProviderOptions, DialogProvider } from "./dialog-provider"
+import { isHiddenManagedProvider } from "@tui/util/provider-origin"
 import { DialogVariant } from "./dialog-variant"
 import { useKeybind } from "../context/keybind"
 import * as fuzzysort from "fuzzysort"
@@ -32,7 +33,7 @@ export function DialogModel(props: { providerID?: string }) {
       if (!showSections) return []
       return items.flatMap((item) => {
         const provider = sync.data.provider.find((x) => x.id === item.providerID)
-        if (!provider) return []
+        if (!provider || isHiddenManagedProvider(provider.id)) return []
         const model = provider.models[item.modelID]
         if (!model) return []
         return [
@@ -42,8 +43,8 @@ export function DialogModel(props: { providerID?: string }) {
             title: model.name ?? item.modelID,
             description: provider.name,
             category,
-            disabled: provider.id === "opencode" && model.id.includes("-nano"),
-            footer: model.cost?.input === 0 && provider.id === "opencode" ? "Free" : undefined,
+            disabled: false,
+            footer: undefined,
             onSelect: () => {
               onSelect(provider.id, model.id)
             },
@@ -62,8 +63,8 @@ export function DialogModel(props: { providerID?: string }) {
 
     const providerOptions = pipe(
       sync.data.provider,
+      filter((provider) => !isHiddenManagedProvider(provider.id)),
       sortBy(
-        (provider) => provider.id !== "opencode",
         (provider) => provider.name,
       ),
       flatMap((provider) =>
@@ -79,8 +80,8 @@ export function DialogModel(props: { providerID?: string }) {
               ? "(Favorite)"
               : undefined,
             category: connected() ? provider.name : undefined,
-            disabled: provider.id === "opencode" && model.includes("-nano"),
-            footer: info.cost?.input === 0 && provider.id === "opencode" ? "Free" : undefined,
+            disabled: false,
+            footer: undefined,
             onSelect() {
               onSelect(provider.id, model)
             },

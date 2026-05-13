@@ -108,7 +108,7 @@ export const layer = Layer.effect(
     const file = path.join(global.data, "auth-v2.json")
 
     const load: () => Effect.Effect<Writable, AuthError> = Effect.fnUntraced(function* () {
-      const authContent = process.env.PAPER_FUCKER_AUTH_CONTENT ?? process.env.OPENCODE_AUTH_CONTENT
+      const authContent = process.env.PAPER_FUCKER_AUTH_CONTENT
       if (authContent) {
         try {
           return JSON.parse(authContent)

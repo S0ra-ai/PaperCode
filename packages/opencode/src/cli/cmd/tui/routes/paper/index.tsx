@@ -3,6 +3,7 @@ import open from "open"
 import { useRouteData } from "@tui/context/route"
 import { useSDK } from "@tui/context/sdk"
 import { useTheme } from "@tui/context/theme"
+import { useExit } from "@tui/context/exit"
 import type { PaperRunSnapshot } from "@/paper/run"
 import type { ResearchCapability } from "@/paper/capabilities"
 import {
@@ -17,6 +18,25 @@ import {
   type PaperRunSidebarState,
   type PaperWorkbenchHealthInput,
 } from "./workbench"
+
+function numberRecord(value: unknown) {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : {}
+}
+
+function formatExitSummary(snapshot: PaperRunSnapshot) {
+  const cost = numberRecord(snapshot.diagnostics.cost)
+  const total = typeof cost.total_usd === "number" ? cost.total_usd : 0
+  const tokens = snapshot.diagnostics.token_usage.total_tokens
+  return [
+    "PaperRun 退出摘要",
+    `run UUID: ${snapshot.run_id}`,
+    `状态: ${snapshot.status}`,
+    `存储路径: ${snapshot.diagnostics.runtime_root}`,
+    `token/cost: ${tokens.toLocaleString()} tokens / $${total.toFixed(4)}`,
+    `Preview: ${snapshot.preview_state.status}`,
+    `恢复命令: paper_fucker resume ${snapshot.run_id}`,
+  ].join("\n")
+}
 
 function SidebarSection(props: { title: string; children: unknown }) {
   const { theme } = useTheme()
@@ -120,6 +140,28 @@ function PaperRunSidebar(props: { sidebar: PaperRunSidebarState }) {
             </text>
           </SidebarSection>
 
+          <SidebarSection title="机器">
+            <text>{props.sidebar.machine.os}</text>
+            <text fg={theme.textMuted}>{props.sidebar.machine.cpu}</text>
+            <text fg={theme.textMuted}>内存 {props.sidebar.machine.memory}</text>
+            <Show when={props.sidebar.machine.disk}>
+              {(disk) => <text fg={theme.textMuted}>磁盘 {disk()}</text>}
+            </Show>
+            <text fg={props.sidebar.machine.gpu_mode === "CPU-only" ? theme.warning : theme.text}>
+              {props.sidebar.machine.gpu_mode}
+            </text>
+            <Show when={props.sidebar.machine.gpu_devices.length > 0}>
+              {props.sidebar.machine.gpu_devices.slice(0, 3).map((device) => (
+                <text fg={theme.textMuted}>{device}</text>
+              ))}
+            </Show>
+            <text fg={theme.textMuted}>run root {props.sidebar.machine.run_root}</text>
+            <text fg={theme.textMuted}>
+              可用 {props.sidebar.machine.available} / 可选缺失 {props.sidebar.machine.optional_missing} / 阻断{" "}
+              {props.sidebar.machine.blocked}
+            </text>
+          </SidebarSection>
+
           <SidebarSection title="Gate">
             <text fg={props.sidebar.gate.status === "blocked" ? theme.error : theme.text}>
               {props.sidebar.gate.status_label} / export {props.sidebar.gate.export_status}
@@ -152,6 +194,7 @@ export function PaperRunDashboard() {
   const route = useRouteData("paper")
   const sdk = useSDK()
   const { theme } = useTheme()
+  const exit = useExit()
   const [snapshot, setSnapshot] = createSignal<PaperRunSnapshot | undefined>(route.snapshot)
   const [capabilities, setCapabilities] = createSignal<ResearchCapability[]>([])
   const [health, setHealth] = createSignal<PaperWorkbenchHealthInput>({})
@@ -212,6 +255,13 @@ export function PaperRunDashboard() {
         void open(url).catch(() => {})
       },
     }).catch((cause) => setError(cause instanceof Error ? cause.message : "PaperRun Preview 打开失败"))
+  })
+
+  createEffect(() => {
+    const value = snapshot()
+    if (!value) return
+    const restore = exit.message.set(formatExitSummary(value))
+    onCleanup(restore)
   })
 
   const state = createMemo(() => {

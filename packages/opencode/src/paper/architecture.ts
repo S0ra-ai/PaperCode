@@ -1,5 +1,5 @@
 export type PaperArchitectureLayer = {
-  id: "opencode_substrate" | "research_runtime" | "paper_domain"
+  id: "model_agent_substrate" | "research_runtime" | "paper_domain"
   owns: string[]
 }
 
@@ -13,13 +13,13 @@ export type PaperInputMode =
 export type PaperSystemDescription = {
   product: "paper_fucker"
   purpose: string
-  model_strategy: "opencode_provider_agnostic"
-  supports_all_opencode_models: boolean
+  model_strategy: "paper_provider_agnostic"
+  supports_all_configured_models: boolean
   default_model_sample: {
     provider_id: string
     model_id: string
   }
-  core_capability_sources: Array<"opencode_tools" | "opencode_mcp" | "opencode_skills" | "paper_fucker_tools">
+  core_capability_sources: Array<"model_provider_runtime" | "agent_runtime" | "managed_skills" | "paper_fucker_tools">
   input_modes: PaperInputMode[]
   architecture: typeof PAPER_FUCKER_ARCHITECTURE
 }
@@ -27,7 +27,7 @@ export type PaperSystemDescription = {
 export const PAPER_FUCKER_ARCHITECTURE = {
   layers: [
     {
-      id: "opencode_substrate",
+      id: "model_agent_substrate",
       owns: ["providers", "models", "agents", "sessions", "tools", "mcp", "skills", "tui", "permissions"],
     },
     {
@@ -53,14 +53,14 @@ export function describePaperSystem(): PaperSystemDescription {
   return {
     product: "paper_fucker",
     purpose:
-      "A closed-loop academic paper system that uses OpenCode providers, agents, tools, MCP servers, skills, and TUI as the substrate for verifiable topic/code/data/materials-to-paper workflows.",
-    model_strategy: "opencode_provider_agnostic",
-    supports_all_opencode_models: true,
+      "A closed-loop academic paper system with Paper Fucker managed providers, agents, tools, MCP servers, skills, and TUI for verifiable topic/code/data/materials-to-paper workflows.",
+    model_strategy: "paper_provider_agnostic",
+    supports_all_configured_models: true,
     default_model_sample: {
       provider_id: "deepseek",
       model_id: "deepseek-v4-pro",
     },
-    core_capability_sources: ["opencode_tools", "opencode_mcp", "opencode_skills", "paper_fucker_tools"],
+    core_capability_sources: ["model_provider_runtime", "agent_runtime", "managed_skills", "paper_fucker_tools"],
     input_modes: [...SUPPORTED_PAPER_INPUT_MODES],
     architecture: PAPER_FUCKER_ARCHITECTURE,
   }

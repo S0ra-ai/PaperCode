@@ -209,7 +209,7 @@ describe("paper provider model discovery", () => {
     expect(decision.reason).toContain("不在允许列表")
   })
 
-  test("persists built-in OpenCode provider models into the Paper allowlist", async () => {
+  test("persists built-in provider models into the Paper allowlist", async () => {
     const home = await tmpHome()
     const candidates = candidatesFromBuiltinProviders({
       "github-copilot": {
@@ -227,7 +227,7 @@ describe("paper provider model discovery", () => {
 
     expect(inventory.candidates.find((candidate) => candidate.model_ref === "github-copilot/claude-opus-4.7")).toMatchObject({
       provider_id: "github-copilot",
-      source: "opencode_builtin",
+      source: "paper_builtin",
       allowed: true,
     })
     expect(routePaperModel(inventory, { role: "planner" })).toMatchObject({

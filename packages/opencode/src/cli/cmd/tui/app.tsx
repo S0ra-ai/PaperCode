@@ -40,6 +40,7 @@ import { Home } from "@tui/routes/home"
 import { PaperRunDashboard } from "@tui/routes/paper"
 import { PaperModelWorkbenchPage } from "@tui/routes/paper-models"
 import { PaperFolderPickerPage } from "@tui/routes/paper-folder"
+import { PaperResumePage } from "@tui/routes/paper-resume"
 import { Session } from "@tui/routes/session"
 import { PromptHistoryProvider } from "./component/prompt/history"
 import { FrecencyProvider } from "./component/prompt/frecency"
@@ -358,6 +359,11 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
       return
     }
 
+    if (route.data.type === "paper-resume") {
+      renderer.setTerminalTitle("paper_fucker | resume")
+      return
+    }
+
     if (route.data.type === "plugin") {
       renderer.setTerminalTitle(`paper_fucker | ${route.data.id}`)
     }
@@ -496,6 +502,19 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
       },
       onSelect: () => {
         route.navigate({ type: "paper-folder" })
+        dialog.clear()
+      },
+    },
+    {
+      title: "恢复历史 PaperRun",
+      value: "paper.resume",
+      category: "Paper",
+      slash: {
+        name: "resume",
+        aliases: ["runs"],
+      },
+      onSelect: () => {
+        route.navigate({ type: "paper-resume" })
         dialog.clear()
       },
     },
@@ -988,6 +1007,9 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
             </Match>
             <Match when={route.data.type === "paper-folder"}>
               <PaperFolderPickerPage />
+            </Match>
+            <Match when={route.data.type === "paper-resume"}>
+              <PaperResumePage />
             </Match>
           </Switch>
         </Show>

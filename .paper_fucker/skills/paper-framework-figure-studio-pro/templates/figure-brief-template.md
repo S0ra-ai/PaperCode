@@ -1,0 +1,66 @@
+# Figure Brief Template
+
+- Figure thesis:
+- Paper slot:
+- Audience:
+- Diagram labels:
+- Primary production subtype:
+- Reader 10-second effect:
+- Reader 60-second understanding:
+- Layout skeleton:
+- Layout skeleton display: must be an embedded saved/reference or non-target visual-structure image when discussed; do not rely on prose/bullets only
+- Panel order:
+- Required modules/entities/evidence:
+- Exact labels:
+- Sample-image transfer rules:
+  - Image 1 preferred attributes:
+  - Image 2 preferred attributes:
+  - Image 3 preferred attributes:
+- Style family:
+- Color semantics:
+- Saved atlas/reference Markdown embeds rendered:
+  - `![Atlas label](C:/Users/qu_yw/.codex/skills/paper-framework-figure-studio-pro/assets/subtype-atlas/boards/<board>.png)` in Codex, or package-relative/source asset equivalent in ChatGPT
+- Inline non-target concept/example images displayed:
+- Concept/example requirement:
+  - concept_example_required: false / true
+  - concept_example_status: not_needed / displayed_saved_reference / generated_inline / generation_pending / missing_recorded
+  - concept_example_role: none / saved_atlas / non_target_reference / concept_example
+  - concept_example_trigger_reason: none / subtype / layout_grammar / visual_style / density / metaphor / modeling_pattern / candidate_scheme_differences / final_content_architecture
+- Visual-structure image requirement:
+  - visual_structure_image_required: false / true
+  - visual_structure_image_status: not_needed / displayed_saved_reference / generated_inline / generation_pending / missing_recorded
+  - visual_structure_image_role: none / saved_atlas / non_target_reference / concept_example
+  - visual_structure_image_trigger_reason: none / visual_structure / layout_skeleton / panel_choreography / module_topology / arrow_grammar / candidate_board_structure / second_round_optimization_geometry / final_content_architecture
+- Target-paper images embedded in this text brief: false
+- Missing atlas/reference/concept images:
+- Reference display render status: rendered / attempted_host_blocked / missing_recorded
+- User request interpreted action:
+- Workflow step before user request:
+- Workflow step after user request:
+- State transition reason:
+- Off-recommended prompt handling: not_needed / handled_and_mapped / blocked_missing_prerequisites / mapped_to_text_setup_before_image_only
+- Prerequisites inferred or missing:
+- Text candidate count: 6 by default, allowed 4-6
+- First-round candidate-board image count: 6 by default, allowed 4-6
+- First-round purpose: maximize direction-level diversity
+- First-round varied axes: subtype / layout grammar / metaphor / density / panel rhythm / style family
+- Candidate-board fixed elements:
+- Candidate comparison focus:
+- Mandatory next visual action: after text candidates, set up and generate 6 diverse first-round target-paper candidate images or schematic candidates unless the user explicitly skips image candidates
+- Selected first-round visual candidate:
+- Best-practice divergence:
+  - best_practice_divergence_status: not_started / required_after_first_selection / setup_ready / generated / reviewed / final_locked / overridden_by_user
+  - best_practice_divergence_axes: []
+  - fixed elements from first-round winner: []
+  - paper-local details to vary: module relationships / evidence or case anchor / label economy / panel transition / color semantics / callout placement / reviewer readability
+- Second-round image candidate count: 6 by default, allowed 4-6
+- second_round_candidate_batch_id:
+- selected_second_round_candidate:
+- Final direction source: P6c selected second-round candidate
+- Rendering route:
+  - ChatGPT web: Create image through ChatGPT Images 2.0
+  - Codex: `$imagegen` first
+  - Fallback: ChatGPT Images 2.0 API or another approved image-generation API
+- Response boundary: if this brief is shown in a text reply, stop before target-paper image generation; non-target concept/example references and visual-structure images must be embedded when required and do not satisfy P5/P6b-IMAGE/P8
+- Negative constraints:
+- What the user should compare:
