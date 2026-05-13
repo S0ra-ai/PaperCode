@@ -358,6 +358,52 @@ describe("paper provider model discovery", () => {
     })
   })
 
+  test("clearing registered providers resets the complete model inventory", async () => {
+    const home = await tmpHome()
+    const candidates = candidatesFromDiscovery({
+      provider_id: "lab",
+      provider_name: "Local Lab",
+      base_url: "https://lab.example/v1",
+      compatibility: "openai-compatible",
+      models: [{ id: "writer-pro" }, { id: "reviewer-pro" }],
+      diagnostics: [],
+    })
+
+    await updatePaperModelAllowlist(["lab/writer-pro", "lab/reviewer-pro"], {
+      home,
+      decision_model: "lab/writer-pro",
+      backup_decision_model: "lab/reviewer-pro",
+      candidates,
+      provider_registrations: {
+        lab: {
+          provider_id: "lab",
+          provider_name: "Local Lab",
+          kind: "openai_compatible",
+          status: "registered",
+          model_count: 2,
+          allowed_count: 2,
+        },
+      },
+      stage_model_policies: {
+        writer: { role: "writer", mode: "forced", model_ref: "lab/writer-pro" },
+      },
+    })
+
+    const cleared = await updatePaperModelAllowlist([], {
+      home,
+      provider_registrations: {},
+      stage_model_policies: {},
+    })
+
+    expect(cleared.provider_registrations).toEqual({})
+    expect(cleared.candidates).toEqual([])
+    expect(cleared.allowlist).toEqual([])
+    expect(cleared.decision_model).toBeUndefined()
+    expect(cleared.backup_decision_model).toBeUndefined()
+    expect(cleared.stage_model_policies).toEqual({})
+    expect(routePaperModel(cleared, { role: "writer" }).diagnostics).toContain("model_allowlist_empty")
+  })
+
   test("uses a backup decision model when the primary model is stale", async () => {
     const home = await tmpHome()
     const file = modelInventoryPath(home)

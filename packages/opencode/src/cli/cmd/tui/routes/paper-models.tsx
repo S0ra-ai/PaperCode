@@ -95,6 +95,12 @@ const POLICY_LABELS: Record<StagePolicy["mode"], string> = {
   forced: "强制指定",
 }
 
+const SECTION_DESCRIPTIONS: Record<Section, string> = {
+  registered: "只显示已经授权或已发现模型的 provider。",
+  models: "勾选模型进入候选池，并设置主/备用决策模型。",
+  stage: "为每个论文阶段选择自动、动态或强制模型策略。",
+}
+
 function nowIso() {
   return new Date().toISOString()
 }
@@ -138,6 +144,11 @@ function providerKindFor(providerID: string): ProviderRegistration["kind"] {
   return "builtin"
 }
 
+function connectionLabel(registration: ProviderRegistration, connected: boolean) {
+  if (registration.kind === "openai_compatible" || registration.kind === "manual") return "ready"
+  return connected ? "ready" : "auth"
+}
+
 export function PaperModelWorkbenchPage() {
   const sdk = useSDK()
   const sync = useSync()
@@ -178,11 +189,26 @@ export function PaperModelWorkbenchPage() {
   const inventory = createMemo(() => payload()?.inventory ?? { allowlist: [], candidates: [], provider_registrations: {}, stage_model_policies: {} })
   const builtinProviders = createMemo(() => payload()?.builtin_providers ?? [])
   const registrations = createMemo(() => draftRegistrations())
-  const activeProviderIDs = createMemo(() => new Set(registeredProviderIDs(registrations())))
-  const candidates = createMemo(() => sortCandidates((inventory().candidates ?? []).filter((candidate) => activeProviderIDs().has(candidate.provider_id))))
-  const allowedCandidates = createMemo(() => sortCandidates(candidates().filter((candidate) => draftAllowlist().has(candidate.model_ref))))
   const currentSection = createMemo(() => SECTIONS[sectionIndex()]!.id)
   const connectedProviders = createMemo(() => new Set(sync.data.provider_next.connected ?? []))
+  const rawCandidates = createMemo(() => sortCandidates(inventory().candidates ?? []))
+  const configuredRegistrations = createMemo(() => {
+    return Object.fromEntries(
+      Object.entries(registrations()).filter(([, registration]) => {
+        if (registration.status !== "registered") return false
+        if (registration.kind === "openai_compatible" || registration.kind === "manual") {
+          return registration.model_count > 0 || rawCandidates().some((candidate) => candidate.provider_id === registration.provider_id)
+        }
+        return connectedProviders().has(registration.provider_id)
+      }),
+    ) as Record<string, ProviderRegistration>
+  })
+  const activeProviderIDs = createMemo(() => new Set(registeredProviderIDs(configuredRegistrations())))
+  const candidates = createMemo(() => rawCandidates().filter((candidate) => activeProviderIDs().has(candidate.provider_id)))
+  const activeAllowlist = createMemo(
+    () => new Set([...draftAllowlist()].filter((ref) => activeProviderIDs().has(ref.split("/")[0] ?? ""))),
+  )
+  const allowedCandidates = createMemo(() => sortCandidates(candidates().filter((candidate) => activeAllowlist().has(candidate.model_ref))))
 
   createEffect(
     on(
@@ -213,7 +239,7 @@ export function PaperModelWorkbenchPage() {
   })
 
   const providerRows = createMemo<ProviderRow[]>(() =>
-    Object.values(registrations())
+    Object.values(configuredRegistrations())
       .filter((registration) => registration.status === "registered")
       .sort((left, right) => {
         const categoryCompare = providerCategory(left).localeCompare(providerCategory(right), "zh-CN")
@@ -233,7 +259,7 @@ export function PaperModelWorkbenchPage() {
     if (currentSection() === "stage" && !editingRole()) return PAPER_MODEL_ROLES.length
     return visibleCandidates().length
   })
-  const listHeight = createMemo(() => Math.max(8, dimensions().height - 15))
+  const listHeight = createMemo(() => Math.max(8, dimensions().height - 18))
   const visibleStart = createMemo(() => scrollOffset())
   const visibleEnd = createMemo(() => Math.min(scrollOffset() + listHeight(), rowCount()))
 
@@ -274,24 +300,18 @@ export function PaperModelWorkbenchPage() {
   }
 
   async function save() {
-    const allowlist = Array.from(draftAllowlist()).sort()
-    const decision = draftDecision()
-    const backupDecision = draftBackupDecision()
-    if (decision && !draftAllowlist().has(decision)) {
-      toast.show({ variant: "warning", message: "主决策模型必须先加入可用模型。" })
-      return
-    }
-    if (backupDecision && !draftAllowlist().has(backupDecision)) {
-      toast.show({ variant: "warning", message: "备用决策模型必须先加入可用模型。" })
-      return
-    }
+    const allowlist = Array.from(activeAllowlist()).sort()
+    const decision = draftDecision() && activeAllowlist().has(draftDecision()!) ? draftDecision() : undefined
+    const backupDecision =
+      draftBackupDecision() && activeAllowlist().has(draftBackupDecision()!) ? draftBackupDecision() : undefined
+    const activeRegistrations = configuredRegistrations()
     await postJson("paper/model-inventory", {
       allowlist,
       decision_model: decision,
       backup_decision_model: backupDecision,
       roles: {},
-      registered_provider_ids: registeredProviderIDs(draftRegistrations()),
-      provider_registrations: draftRegistrations(),
+      registered_provider_ids: registeredProviderIDs(activeRegistrations),
+      provider_registrations: activeRegistrations,
       stage_model_policies: draftStagePolicies(),
     })
     await refetch()
@@ -322,6 +342,16 @@ export function PaperModelWorkbenchPage() {
     setDraftAllowlist((current) => new Set([...current].filter((ref) => !refs.has(ref))))
     if (draftDecision() && refs.has(draftDecision()!)) setDraftDecision(undefined)
     if (draftBackupDecision() && refs.has(draftBackupDecision()!)) setDraftBackupDecision(undefined)
+  }
+
+  function clearAllDraftConfiguration() {
+    setDraftRegistrations({})
+    setDraftAllowlist(new Set<string>())
+    setDraftDecision(undefined)
+    setDraftBackupDecision(undefined)
+    setDraftStagePolicies({})
+    setFilter("")
+    toast.show({ variant: "warning", message: "已清空模型工作台草稿。按 Ctrl+S 保存到本机配置。" })
   }
 
   function registerBuiltin(provider: BuiltinProviderSummary) {
@@ -511,6 +541,11 @@ export function PaperModelWorkbenchPage() {
       evt.preventDefault()
       return
     }
+    if (!evt.ctrl && evt.name === "x") {
+      clearAllDraftConfiguration()
+      evt.preventDefault()
+      return
+    }
     if (!evt.ctrl && evt.name === "g" && currentSection() === "registered") {
       registerSubscriptionProvider("openai")
       evt.preventDefault()
@@ -541,25 +576,28 @@ export function PaperModelWorkbenchPage() {
   })
 
   const summary = createMemo(() => ({
-    decision: draftDecision(),
-    backup: draftBackupDecision(),
-    allowed: draftAllowlist().size,
+    decision: draftDecision() && activeAllowlist().has(draftDecision()!) ? draftDecision() : undefined,
+    backup: draftBackupDecision() && activeAllowlist().has(draftBackupDecision()!) ? draftBackupDecision() : undefined,
+    allowed: activeAllowlist().size,
     candidates: candidates().length,
-    providers: Object.values(registrations()).filter((registration) => registration.status === "registered").length,
+    providers: Object.values(configuredRegistrations()).filter((registration) => registration.status === "registered").length,
   }))
 
   const activeCandidateRows = createMemo(() => visibleCandidates().slice(visibleStart(), visibleEnd()))
   const activeProviderRows = createMemo(() => providerRows().slice(visibleStart(), visibleEnd()))
   const activeRoles = createMemo(() => PAPER_MODEL_ROLES.slice(visibleStart(), visibleEnd()))
-  const compact = createMemo(() => dimensions().width < 118)
-  const detailWidth = createMemo(() => (compact() ? 0 : 34))
+  const compact = createMemo(() => dimensions().width < 120)
+  const showDetail = createMemo(() => dimensions().width >= 140)
+  const navWidth = createMemo(() => (compact() ? 22 : 30))
+  const detailWidth = createMemo(() => (showDetail() ? 42 : 0))
+  const rowTextWidth = createMemo(() => Math.max(28, dimensions().width - navWidth() - detailWidth() - 64))
 
   return (
-    <box width="100%" height="100%" paddingLeft={2} paddingRight={2} paddingTop={1} paddingBottom={1} flexDirection="column" gap={1}>
+    <box width="100%" height="100%" paddingLeft={3} paddingRight={3} paddingTop={1} paddingBottom={1} flexDirection="column" gap={1}>
       <box flexDirection="row" justifyContent="space-between" alignItems="center">
         <box flexDirection="column">
           <text fg={theme.text} attributes={TextAttributes.BOLD}>Paper Fucker 模型工作台</text>
-          <text fg={theme.textMuted}>管理 provider、候选模型、决策模型和全流程路由。</text>
+          <text fg={theme.textMuted}>{SECTION_DESCRIPTIONS[currentSection()]}</text>
         </box>
         <text fg={dirty() ? theme.warning : theme.textMuted}>{dirty() ? "有未保存修改 Ctrl+S 保存" : "Esc 返回首页"}</text>
       </box>
@@ -574,18 +612,17 @@ export function PaperModelWorkbenchPage() {
         </For>
       </box>
 
-      <box flexDirection="row" gap={2}>
-        <text fg={summary().decision ? theme.text : theme.warning}>主模型：{summary().decision ? truncateDisplayMiddle(summary().decision!, 36) : "未选择"}</text>
-        <text fg={summary().backup ? theme.textMuted : theme.textMuted}>备用：{summary().backup ? truncateDisplayMiddle(summary().backup!, 30) : "未选择"}</text>
-        <text fg={theme.textMuted}>可用 {summary().allowed}</text>
-        <text fg={theme.textMuted}>候选 {summary().candidates}</text>
+      <box flexDirection="row" gap={3} paddingLeft={1} paddingRight={1} backgroundColor={theme.backgroundPanel}>
+        <text fg={summary().decision ? theme.text : theme.warning}>主决策 {summary().decision ? truncateDisplayMiddle(summary().decision!, 34) : "未配置"}</text>
+        <text fg={summary().backup ? theme.textMuted : theme.textMuted}>备用 {summary().backup ? truncateDisplayMiddle(summary().backup!, 28) : "未配置"}</text>
+        <text fg={theme.textMuted}>候选 {summary().allowed}/{summary().candidates}</text>
         <text fg={theme.textMuted}>Provider {summary().providers}</text>
       </box>
 
       <box border={["top"]} borderColor={theme.border} />
 
       <box flexDirection="row" gap={2} flexGrow={1} minHeight={0}>
-        <box width={24} flexShrink={0} flexDirection="column" gap={1}>
+        <box width={navWidth()} flexShrink={0} flexDirection="column" gap={1}>
           <For each={SECTIONS}>
             {(section, index) => (
               <box paddingLeft={1} paddingRight={1} backgroundColor={index() === sectionIndex() ? theme.backgroundPanel : undefined}>
@@ -598,6 +635,7 @@ export function PaperModelWorkbenchPage() {
             <text fg={theme.textMuted}>p Copilot CLI 订阅</text>
             <text fg={theme.textMuted}>c 其他 provider</text>
             <text fg={theme.textMuted}>d 删除已注册</text>
+            <text fg={theme.warning}>x 清空全部</text>
             <text fg={theme.textMuted}>Ctrl+S 保存</text>
           </box>
         </box>
@@ -616,6 +654,31 @@ export function PaperModelWorkbenchPage() {
             />
           </Show>
 
+          <Show when={currentSection() === "registered"}>
+            <box flexDirection="row" gap={2} paddingLeft={1} border={["bottom"]} borderColor={theme.borderSubtle}>
+              <text fg={theme.textMuted}>状态</text>
+              <text fg={theme.textMuted}>类型</text>
+              <text fg={theme.textMuted}>Provider</text>
+              <text fg={theme.textMuted}>模型</text>
+              <text fg={theme.textMuted}>连接</text>
+            </box>
+          </Show>
+          <Show when={currentSection() === "models" || editingRole()}>
+            <box flexDirection="row" gap={2} paddingLeft={1} border={["bottom"]} borderColor={theme.borderSubtle}>
+              <text fg={theme.textMuted}>选择</text>
+              <text fg={theme.textMuted}>模型</text>
+              <text fg={theme.textMuted}>状态</text>
+              <text fg={theme.textMuted}>上下文</text>
+            </box>
+          </Show>
+          <Show when={currentSection() === "stage" && !editingRole()}>
+            <box flexDirection="row" gap={2} paddingLeft={1} border={["bottom"]} borderColor={theme.borderSubtle}>
+              <text fg={theme.textMuted}>阶段</text>
+              <text fg={theme.textMuted}>策略</text>
+              <text fg={theme.textMuted}>模型</text>
+            </box>
+          </Show>
+
           <box flexDirection="column" height={listHeight()} minHeight={0} overflow="hidden">
             <Switch>
               <Match when={currentSection() === "registered"}>
@@ -626,17 +689,19 @@ export function PaperModelWorkbenchPage() {
                       row.kind === "registration" && (row.registration.kind === "openai_compatible" || row.registration.kind === "manual" || connectedProviders().has(row.registration.provider_id)),
                     )
                     return (
-                      <box backgroundColor={active() ? theme.primary : undefined} paddingLeft={1} gap={1}>
-                        <text fg={active() ? theme.selectedListItemText : theme.success}>●</text>
+                      <box backgroundColor={active() ? theme.primary : undefined} paddingLeft={1} gap={2}>
+                        <text fg={active() ? theme.selectedListItemText : theme.success}>[ok]</text>
+                        <text fg={active() ? theme.selectedListItemText : theme.textMuted}>
+                          {truncateDisplayMiddle(providerCategory(row.registration), 18)}
+                        </text>
                         <text fg={active() ? theme.selectedListItemText : theme.text}>
-                          {providerLabel(row.registration.provider_id, row.registration.provider_name)}
+                          {truncateDisplayMiddle(providerLabel(row.registration.provider_id, row.registration.provider_name), rowTextWidth())}
                         </text>
                         <text fg={active() ? theme.selectedListItemText : theme.textMuted}>
                           {row.registration.allowed_count}/{row.registration.model_count}
                         </text>
-                        <text fg={active() ? theme.selectedListItemText : theme.textMuted}>{providerCategory(row.registration)}</text>
                         <text fg={active() ? theme.selectedListItemText : connected() ? theme.success : theme.warning}>
-                          {connected() ? "可用" : "需授权"}
+                          {connectionLabel(row.registration, connected())}
                         </text>
                       </box>
                     )
@@ -659,12 +724,12 @@ export function PaperModelWorkbenchPage() {
                     const active = createMemo(() => index() + scrollOffset() === selected())
                     const allowed = createMemo(() => draftAllowlist().has(candidate.model_ref))
                     return (
-                      <box backgroundColor={active() ? theme.primary : undefined} paddingLeft={1} gap={1}>
+                      <box backgroundColor={active() ? theme.primary : undefined} paddingLeft={1} gap={2}>
                         <text fg={active() ? theme.selectedListItemText : allowed() ? theme.success : theme.textMuted}>
-                          {allowed() ? "✓" : "·"}
+                          {allowed() ? "[x]" : "[ ]"}
                         </text>
                         <text fg={active() ? theme.selectedListItemText : theme.text}>
-                          {truncateDisplayMiddle(candidate.model_ref, Math.max(34, dimensions().width - detailWidth() - 42))}
+                          {truncateDisplayMiddle(candidate.model_ref, rowTextWidth())}
                         </text>
                         <text fg={active() ? theme.selectedListItemText : theme.textMuted}>{candidate.smoke_status}</text>
                         <text fg={active() ? theme.selectedListItemText : theme.textMuted}>{candidate.context_hint ?? "context?"}</text>
@@ -693,11 +758,11 @@ export function PaperModelWorkbenchPage() {
                     const policy = createMemo(() => draftStagePolicies()[role] ?? defaultPolicy(role))
                     const active = createMemo(() => index() + scrollOffset() === selected())
                     return (
-                      <box backgroundColor={active() ? theme.primary : undefined} paddingLeft={1} gap={1}>
+                      <box backgroundColor={active() ? theme.primary : undefined} paddingLeft={1} gap={2}>
                         <text fg={active() ? theme.selectedListItemText : theme.text}>{ROLE_LABELS[role]}</text>
                         <text fg={active() ? theme.selectedListItemText : theme.accent}>{POLICY_LABELS[policy().mode]}</text>
                         <text fg={active() ? theme.selectedListItemText : theme.textMuted}>
-                          {policy().model_ref ? truncateDisplayMiddle(policy().model_ref!, Math.max(24, dimensions().width - detailWidth() - 48)) : "由决策模型按任务动态路由"}
+                          {policy().model_ref ? truncateDisplayMiddle(policy().model_ref!, rowTextWidth()) : "由决策模型按任务动态路由"}
                         </text>
                       </box>
                     )
@@ -723,17 +788,18 @@ export function PaperModelWorkbenchPage() {
             <text fg={theme.text}>M 主模型</text>
             <text fg={theme.text}>B 设备用</text>
             <text fg={theme.text}>D 删除 provider</text>
+            <text fg={theme.text}>X 清空全部</text>
             <text fg={theme.text}>Ctrl+S 保存</text>
           </box>
         </box>
 
-        <Show when={!compact()}>
+        <Show when={showDetail()}>
           <box width={detailWidth()} flexShrink={0} flexDirection="column" gap={1} paddingLeft={1} border={["left"]} borderColor={theme.borderSubtle}>
             <text fg={theme.accent} attributes={TextAttributes.BOLD}>说明</text>
-            <text fg={theme.textMuted}>已注册只显示用户配置过的 provider。</text>
-            <text fg={theme.textMuted}>所有模型只来自已注册 provider；勾选后才进入候选池。</text>
-            <text fg={theme.textMuted}>主/备用决策模型必须来自候选池。</text>
-            <text fg={theme.textMuted}>动态阶段模型允许运行中按质量和成本切换候选模型。</text>
+            <text fg={theme.textMuted}>{SECTION_DESCRIPTIONS[currentSection()]}</text>
+            <text fg={theme.textMuted}>x 清空全部只修改草稿；Ctrl+S 后写入 ~/.paper_fucker/model-inventory.json。</text>
+            <text fg={theme.textMuted}>候选池是 PaperRun 和 Agent Team 的唯一模型来源。</text>
+            <text fg={theme.textMuted}>动态阶段模型允许运行中按质量、成本和上下文重新选择。</text>
           </box>
         </Show>
       </box>
