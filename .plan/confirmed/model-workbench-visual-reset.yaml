@@ -1,6 +1,6 @@
 id: model-workbench-visual-reset
 title: 模型工作台视觉重排与库存清空入口
-status: todo
+status: done
 priority: high
 owner: paper-fucker-agent
 tags:
@@ -61,7 +61,7 @@ steps:
   meta: {}
 - id: step-3
   title: 补充测试与版本记录
-  status: in_progress
+  status: done
   owner: paper-fucker-agent
   depends_on: []
   description: 补充模型库存清空和 UI 文字/状态测试，更新 README 与 CHANGELOG 到 0.11.2-dev。
@@ -74,8 +74,13 @@ steps:
       level: info
       message: 开始补充测试与版本记录。
       agent: paper-fucker-agent
-    last_run: '2026-05-13T10:38:49.016983'
-    attempt_count: 1
+    - timestamp: '2026-05-13T10:39:58.679157'
+      level: info
+      message: 补充模型库存清空测试，更新 README 与 CHANGELOG 到 0.11.2-dev；通过 README 版本检查、CHANGELOG
+        格式/版本检查、git diff --check、opencode typecheck 和 model-discovery 测试。
+      agent: paper-fucker-agent
+    last_run: '2026-05-13T10:39:58.679157'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -96,5 +101,5 @@ lock:
   at: '2026-05-13T10:28:29.766457'
 meta:
   created_at: '2026-05-13T10:28:18.519397'
-  updated_at: '2026-05-13T10:38:49.016983'
+  updated_at: '2026-05-13T10:39:58.679157'
   version: '1'
