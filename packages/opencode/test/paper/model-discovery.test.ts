@@ -10,6 +10,7 @@ import {
   saveProviderEndpointConfig,
 } from "../../src/paper/model-discovery"
 import {
+  candidatesFromDiscovery,
   candidatesFromBuiltinProviders,
   loadPaperModelInventory,
   modelInventoryPath,
@@ -275,6 +276,86 @@ describe("paper provider model discovery", () => {
     expect(routePaperModel(inventory, { role: "reviewer" }).allowed_models).toEqual([
       "github-copilot/claude-opus-4.7",
     ])
+  })
+
+  test("removing a provider purges its candidates, allowlist, decisions, and forced stage policies", async () => {
+    const home = await tmpHome()
+    const builtinCandidates = candidatesFromBuiltinProviders({
+      "github-copilot": {
+        name: "GitHub Copilot",
+        models: {
+          "claude-opus-4.7": { name: "Claude Opus 4.7" },
+        },
+      },
+    })
+    const customCandidates = candidatesFromDiscovery({
+      provider_id: "lab",
+      provider_name: "Local Lab",
+      base_url: "https://lab.example/v1",
+      compatibility: "openai-compatible",
+      models: [{ id: "writer-pro" }],
+      diagnostics: [],
+    })
+
+    await updatePaperModelAllowlist(["github-copilot/claude-opus-4.7", "lab/writer-pro"], {
+      home,
+      decision_model: "github-copilot/claude-opus-4.7",
+      backup_decision_model: "lab/writer-pro",
+      candidates: [...builtinCandidates, ...customCandidates],
+      provider_registrations: {
+        "github-copilot": {
+          provider_id: "github-copilot",
+          provider_name: "GitHub Copilot",
+          kind: "copilot_subscription",
+          status: "registered",
+          model_count: 1,
+          allowed_count: 1,
+        },
+        lab: {
+          provider_id: "lab",
+          provider_name: "Local Lab",
+          kind: "openai_compatible",
+          status: "registered",
+          model_count: 1,
+          allowed_count: 1,
+        },
+      },
+      stage_model_policies: {
+        writer: { role: "writer", mode: "forced", model_ref: "github-copilot/claude-opus-4.7" },
+        reviewer: { role: "reviewer", mode: "forced", model_ref: "lab/writer-pro" },
+      },
+    })
+
+    const inventory = await updatePaperModelAllowlist(["lab/writer-pro"], {
+      home,
+      decision_model: "lab/writer-pro",
+      provider_registrations: {
+        lab: {
+          provider_id: "lab",
+          provider_name: "Local Lab",
+          kind: "openai_compatible",
+          status: "registered",
+          model_count: 1,
+          allowed_count: 1,
+        },
+      },
+      stage_model_policies: {
+        writer: { role: "writer", mode: "forced", model_ref: "github-copilot/claude-opus-4.7" },
+        reviewer: { role: "reviewer", mode: "forced", model_ref: "lab/writer-pro" },
+      },
+    })
+
+    expect(inventory.provider_registrations["github-copilot"]).toBeUndefined()
+    expect(inventory.candidates.map((candidate) => candidate.model_ref)).toEqual(["lab/writer-pro"])
+    expect(inventory.allowlist).toEqual(["lab/writer-pro"])
+    expect(inventory.decision_model).toBe("lab/writer-pro")
+    expect(inventory.backup_decision_model).toBeUndefined()
+    expect(inventory.stage_model_policies.writer).toEqual({ role: "writer", mode: "auto" })
+    expect(inventory.stage_model_policies.reviewer).toEqual({
+      role: "reviewer",
+      mode: "forced",
+      model_ref: "lab/writer-pro",
+    })
   })
 
   test("uses a backup decision model when the primary model is stale", async () => {
