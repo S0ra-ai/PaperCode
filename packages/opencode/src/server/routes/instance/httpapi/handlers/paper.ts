@@ -23,6 +23,8 @@ import {
   loadPaperModelInventory,
   mergeModelCandidates,
   modelRolesFromInventory,
+  type PaperProviderRegistration,
+  type PaperStageModelPolicy,
   routePaperModel,
   updatePaperModelAllowlist,
   upsertDiscoveredModels,
@@ -73,12 +75,16 @@ function paperLogDirectory(home = process.env.PAPER_FUCKER_TEST_HOME ?? process.
 
 function paperRunCreateError(error: unknown) {
   const message = errorText(error)
+  const schemaFailure = message.includes("schema") || message.includes("$defs") || message.includes("resolve reference")
+  const modelFailure = message.includes("model_allowlist_empty") || message.includes("decision_model")
   return {
     error: {
       schema_version: "PaperApiError.v1",
-      code: "paper_run_create_failed",
+      code: schemaFailure ? "paper_schema_runtime_failed" : modelFailure ? "paper_model_config_blocked" : "paper_run_create_failed",
       message: `PaperRun 创建失败：${message}`,
-      action: "请检查 /models 主决策模型、可用模型和 /folder 当前工作目录；详细堆栈见 Paper Fucker 日志。",
+      action: schemaFailure
+        ? "这是 Paper Fucker 运行时 schema 加载问题，请保留日志并重新构建；当前 PaperRun 未创建。"
+        : "请检查 /models 主决策模型、可用模型和 /folder 当前工作目录；详细堆栈见 Paper Fucker 日志。",
       log_path: paperLogDirectory(),
     },
   }
@@ -282,10 +288,27 @@ export const paperHandlers = HttpApiBuilder.group(InstanceHttpApi, "paper", (han
       )
       return yield* Effect.promise(async () => {
         const state = await paperModelWorkbench(paperGlobalOptions())
-        const inventory = mergeModelCandidates(state.inventory, candidatesFromBuiltinProviders(providers))
+        const registeredProviders = new Set(
+          Object.entries(state.inventory.provider_registrations ?? {})
+            .filter(([, registration]) => registration.status === "registered")
+            .map(([providerID]) => providerID),
+        )
+        const builtinCandidates = candidatesFromBuiltinProviders(providers)
+        const inventory = mergeModelCandidates(
+          state.inventory,
+          builtinCandidates.filter((candidate) => registeredProviders.has(candidate.provider_id)),
+        )
         return {
           ...state,
           inventory,
+          builtin_providers: Object.entries(providers)
+            .map(([provider_id, provider]) => ({
+              provider_id,
+              provider_name: provider.name ?? provider_id,
+              model_count: Object.keys(provider.models ?? {}).length,
+              registered: registeredProviders.has(provider_id),
+            }))
+            .sort((left, right) => left.provider_id.localeCompare(right.provider_id)),
           roles: modelRolesFromInventory(inventory),
           routing: PAPER_MODEL_ROLES.map((role) => routePaperModel(inventory, { role })),
         }
@@ -300,11 +323,35 @@ export const paperHandlers = HttpApiBuilder.group(InstanceHttpApi, "paper", (han
       )
       return yield* Effect.tryPromise({
         try: async () => {
+          const registeredProviderIDs = new Set(ctx.payload.registered_provider_ids ?? [])
+          const builtinCandidates = candidatesFromBuiltinProviders(providers).filter((candidate) =>
+            registeredProviderIDs.has(candidate.provider_id),
+          )
+          const providerRegistrations: Record<string, PaperProviderRegistration> = {}
+          const providerRecord = providers as Record<string, { name?: string; models?: Record<string, unknown> }>
+          for (const providerID of registeredProviderIDs) {
+            const provider = providerRecord[providerID]
+            providerRegistrations[providerID] = {
+              provider_id: providerID,
+              provider_name: provider?.name ?? providerID,
+              kind: "builtin",
+              status: "registered",
+              model_count: Object.keys(provider?.models ?? {}).length,
+              allowed_count: ctx.payload.allowlist.filter((ref) => ref.startsWith(`${providerID}/`)).length,
+              last_refreshed_at: new Date().toISOString(),
+            }
+          }
           const inventory = await updatePaperModelAllowlist([...ctx.payload.allowlist], {
             ...paperGlobalOptions(),
             decision_model: ctx.payload.decision_model,
+            backup_decision_model: ctx.payload.backup_decision_model,
             role_overrides: ctx.payload.roles as Partial<Record<PaperModelRole, string>> | undefined,
-            candidates: candidatesFromBuiltinProviders(providers),
+            provider_registrations: {
+              ...(ctx.payload.provider_registrations as Record<string, PaperProviderRegistration> | undefined),
+              ...providerRegistrations,
+            },
+            stage_model_policies: ctx.payload.stage_model_policies as Partial<Record<PaperModelRole, PaperStageModelPolicy>> | undefined,
+            candidates: builtinCandidates,
           })
           return { inventory, roles: modelRolesFromInventory(inventory) }
         },

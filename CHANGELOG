@@ -2,10 +2,33 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.10.1-dev
-:last_update   2026/05/12
+:version       0.10.2-dev
+:last_update   2026/05/13
 
 :history
+
+    0.10.2-dev - 2026/05/13 (2e3d297e) [feature/tui-terminal-model-brand-hardening]
+        :brief 硬化终端尺寸保护、模型工作台、目录选择、PaperRun schema 和品牌表面
+        :tui
+            - feat(tui): 启动前检测终端尺寸，低于 96x28 时显示中文最低/推荐尺寸提示并拒绝渲染复杂 TUI
+            - feat(tui): 运行中窗口缩小时切换到轻量阻断页，恢复尺寸后回到原页面
+            - style(tui): Paper Fucker 主题收敛为冷黑、纸白、研究蓝、琥珀风险、红色阻断和绿色可用
+            - fix(tui): 首页、模型工作台和目录选择器使用 CJK-aware 截断，避免中文路径和长模型名逐字换行
+            - fix(commands): 命令面中文化并保留 PaperRun 可见命令集，旧 provider/chat/session 入口继续隐藏
+        :models
+            - feat(models): /models 改为四段式工作台，覆盖 provider 注册、主/备用决策模型、可用模型多选和阶段模型策略
+            - feat(models): Provider 注册区区分已配置内置、已配置自定义和未注册 provider，支持禁用、添加自定义 endpoint 和内置登录
+            - fix(models): 候选模型只来自已注册 provider；可用模型只来自 allowlist，未注册 provider 不进入候选池
+            - feat(models): 模型列表按 provider_id/model_id 字典序排序，支持 PageUp/PageDown/Home/End 并保持光标可见
+            - feat(models): 阶段模型支持自动选择、动态选择和强制指定，强制模型仍必须来自 allowlist
+        :runtime
+            - feat(picker): /folder 优先打开系统目录选择器，失败后回退中文 TUI 选择器；Windows 回退支持驱动器列表
+            - feat(materials): /file、/data、/log 复用系统文件选择器，把材料路径加入当前 PaperRun 输入
+            - fix(schema): PaperRun schema 使用打包安全的内置 schema fallback，修复编译后 exe 无法解析 $defs/Run 的问题
+            - fix(errors): PaperRun 创建失败返回结构化中文诊断，保留 log_path 和可执行 action
+        :test
+            - test(tui): 覆盖终端尺寸 guard、CJK 路径截断、Paper 可见命令与公开品牌表面
+            - test(models): 覆盖 provider 注册边界、备用决策模型、阶段强制模型和 allowlist-only 路由
 
     0.10.1-dev - 2026/05/12 (51712c9f) [feature/tui-model-workspace-run-hardening]
         :brief 强化 TUI 模型工作台、工作目录选择和 PaperRun 创建诊断

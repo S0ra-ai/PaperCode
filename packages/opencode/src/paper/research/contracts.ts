@@ -2,6 +2,7 @@ import Ajv2020 from "ajv/dist/2020"
 import type { ErrorObject, ValidateFunction } from "ajv"
 import path from "path"
 import { readFileSync } from "fs"
+import researchSchema from "../../../../../schemas/research/v1.schema.json" with { type: "json" }
 import {
   RESEARCH_SCHEMA_VERSION,
   type ResearchContractByKind,
@@ -71,7 +72,13 @@ function migrationMessage(kind: ResearchContractKind, from: string | undefined, 
 }
 
 function loadSchema() {
-  if (!schemaCache) schemaCache = JSON.parse(readFileSync(SCHEMA_PATH, "utf8")) as SchemaDocument
+  if (!schemaCache) {
+    try {
+      schemaCache = JSON.parse(readFileSync(SCHEMA_PATH, "utf8")) as SchemaDocument
+    } catch {
+      schemaCache = researchSchema as SchemaDocument
+    }
+  }
   return schemaCache
 }
 
@@ -91,7 +98,7 @@ function validator(kind: ResearchContractKind) {
   if (cached) return cached
 
   const name = DEF_BY_KIND[kind]
-  const validate = ajv().compile({ $ref: `${SCHEMA_ID}#/$defs/${name}` })
+  const validate = ajv().getSchema(`${SCHEMA_ID}#/$defs/${name}`) ?? ajv().compile({ $ref: `${SCHEMA_ID}#/$defs/${name}` })
   validators.set(kind, validate)
   return validate
 }

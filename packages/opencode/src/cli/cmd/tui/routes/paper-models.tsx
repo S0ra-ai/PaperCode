@@ -10,30 +10,82 @@ import { DialogPrompt } from "@tui/ui/dialog-prompt"
 import { useToast } from "@tui/ui/toast"
 import { readTuiJsonResponse } from "@tui/util/http"
 import { notifyPaperModelInventoryChanged } from "@tui/util/paper-model-inventory-events"
+import { truncateDisplayMiddle } from "@tui/util/text-width"
 import { DialogProvider } from "../component/dialog-provider"
 
 type PaperCandidate = {
-  provider_id?: string
+  provider_id: string
+  provider_name?: string
+  model_id: string
   model_ref: string
   display_name: string
   allowed: boolean
   smoke_status: string
-  source?: string
+  source?: "opencode_builtin" | "openai_compatible" | "manual"
   cost_hint?: string
   context_hint?: string
   capabilities?: string[]
 }
 
+type ProviderRegistration = {
+  provider_id: string
+  provider_name?: string
+  kind: "builtin" | "openai_compatible" | "manual"
+  status: "registered" | "disabled" | "needs_auth"
+  model_count: number
+  allowed_count: number
+  last_refreshed_at?: string
+  diagnostics?: string[]
+}
+
+type StagePolicy = {
+  role: PaperModelRole
+  mode: "auto" | "dynamic" | "forced"
+  model_ref?: string
+}
+
+type BuiltinProviderSummary = {
+  provider_id: string
+  provider_name?: string
+  model_count: number
+  registered: boolean
+}
+
 type ModelInventoryPayload = {
   inventory?: {
     decision_model?: string
+    backup_decision_model?: string
     allowlist: string[]
     role_overrides?: Partial<Record<PaperModelRole, string>>
+    provider_registrations?: Record<string, ProviderRegistration>
+    stage_model_policies?: Partial<Record<PaperModelRole, StagePolicy>>
     candidates: PaperCandidate[]
   }
+  builtin_providers?: BuiltinProviderSummary[]
   routing?: Array<{ role: PaperModelRole; selected_model?: string; source: string; reason: string }>
   error?: string
 }
+
+type Section = "provider" | "decision" | "available" | "stage" | "diagnostics"
+type ProviderPage = "configured_builtin" | "configured_custom" | "unregistered"
+
+type ProviderRow =
+  | { kind: "registration"; registration: ProviderRegistration }
+  | { kind: "unregistered"; provider: BuiltinProviderSummary }
+
+const SECTIONS: Array<{ id: Section; label: string }> = [
+  { id: "provider", label: "Provider 注册" },
+  { id: "decision", label: "主模型" },
+  { id: "available", label: "可用模型" },
+  { id: "stage", label: "阶段模型" },
+  { id: "diagnostics", label: "诊断" },
+]
+
+const PROVIDER_PAGES: Array<{ id: ProviderPage; label: string }> = [
+  { id: "configured_builtin", label: "已配置内置" },
+  { id: "configured_custom", label: "已配置自定义" },
+  { id: "unregistered", label: "未注册" },
+]
 
 const ROLE_LABELS: Record<PaperModelRole, string> = {
   planner: "研究规划",
@@ -47,28 +99,41 @@ const ROLE_LABELS: Record<PaperModelRole, string> = {
   subagent: "子 Agent",
 }
 
-const TABS = ["Provider", "候选模型", "可用模型", "主决策模型", "阶段模型", "诊断"] as const
-type Tab = (typeof TABS)[number]
-
-function truncateMiddle(value: string, max = 72) {
-  if (value.length <= max) return value
-  const head = Math.max(16, Math.floor((max - 1) * 0.58))
-  const tail = Math.max(10, max - head - 1)
-  return `${value.slice(0, head)}…${value.slice(value.length - tail)}`
+const POLICY_LABELS: Record<StagePolicy["mode"], string> = {
+  auto: "自动选择",
+  dynamic: "动态选择",
+  forced: "强制指定",
 }
 
-function providerLabel(providerID: string | undefined) {
+function nowIso() {
+  return new Date().toISOString()
+}
+
+function providerLabel(providerID: string | undefined, name?: string) {
   if (!providerID) return "unknown"
-  if (providerID === "github-copilot") return "GitHub Copilot"
-  return providerID
+  return name ?? providerID
 }
 
 function includesQuery(candidate: PaperCandidate, query: string) {
   const normalized = query.trim().toLowerCase()
   if (!normalized) return true
-  return [candidate.model_ref, candidate.display_name, candidate.provider_id, candidate.source]
+  return [candidate.model_ref, candidate.display_name, candidate.provider_id, candidate.provider_name, candidate.source]
     .filter(Boolean)
     .some((value) => value!.toLowerCase().includes(normalized))
+}
+
+function sortCandidates(candidates: PaperCandidate[]) {
+  return [...candidates].sort((left, right) => left.model_ref.localeCompare(right.model_ref, "en", { numeric: true }))
+}
+
+function defaultPolicy(role: PaperModelRole): StagePolicy {
+  return { role, mode: "auto" }
+}
+
+function registeredProviderIDs(registrations: Record<string, ProviderRegistration>) {
+  return Object.values(registrations)
+    .filter((registration) => registration.status === "registered")
+    .map((registration) => registration.provider_id)
 }
 
 export function PaperModelWorkbenchPage() {
@@ -78,12 +143,16 @@ export function PaperModelWorkbenchPage() {
   const toast = useToast()
   const { theme } = useTheme()
   const dimensions = useTerminalDimensions()
-  const [tabIndex, setTabIndex] = createSignal(0)
+  const [sectionIndex, setSectionIndex] = createSignal(0)
+  const [providerPageIndex, setProviderPageIndex] = createSignal(0)
   const [selected, setSelected] = createSignal(0)
+  const [scrollOffset, setScrollOffset] = createSignal(0)
   const [filter, setFilter] = createSignal("")
   const [draftAllowlist, setDraftAllowlist] = createSignal<Set<string>>(new Set())
   const [draftDecision, setDraftDecision] = createSignal<string | undefined>()
-  const [draftRoles, setDraftRoles] = createSignal<Partial<Record<PaperModelRole, string>>>({})
+  const [draftBackupDecision, setDraftBackupDecision] = createSignal<string | undefined>()
+  const [draftRegistrations, setDraftRegistrations] = createSignal<Record<string, ProviderRegistration>>({})
+  const [draftStagePolicies, setDraftStagePolicies] = createSignal<Partial<Record<PaperModelRole, StagePolicy>>>({})
   const [editingRole, setEditingRole] = createSignal<PaperModelRole>()
 
   const [payload, { refetch }] = createResource(async (): Promise<ModelInventoryPayload> => {
@@ -96,26 +165,22 @@ export function PaperModelWorkbenchPage() {
       return await readTuiJsonResponse<ModelInventoryPayload>(response, "模型工作台读取失败")
     } catch (error) {
       return {
-        inventory: { allowlist: [], candidates: [] },
+        inventory: { allowlist: [], candidates: [], provider_registrations: {}, stage_model_policies: {} },
+        builtin_providers: [],
         routing: [],
         error: error instanceof Error ? error.message : String(error),
       }
     }
   })
 
-  const inventory = createMemo(() => payload()?.inventory ?? { allowlist: [], candidates: [] })
-  const candidates = createMemo(() => inventory().candidates ?? [])
-  const storedAllowlist = createMemo(() => inventory().allowlist ?? [])
-  const storedDecision = createMemo(() => {
-    const decision = inventory().decision_model
-    return decision && storedAllowlist().includes(decision) ? decision : undefined
-  })
-  const dirty = createMemo(() => {
-    const draft = Array.from(draftAllowlist()).sort().join("\n")
-    const stored = [...storedAllowlist()].sort().join("\n")
-    return draft !== stored || draftDecision() !== storedDecision() || JSON.stringify(draftRoles()) !== JSON.stringify(inventory().role_overrides ?? {})
-  })
-  const currentTab = createMemo<Tab>(() => TABS[tabIndex()]!)
+  const inventory = createMemo(() => payload()?.inventory ?? { allowlist: [], candidates: [], provider_registrations: {}, stage_model_policies: {} })
+  const builtinProviders = createMemo(() => payload()?.builtin_providers ?? [])
+  const registrations = createMemo(() => draftRegistrations())
+  const activeProviderIDs = createMemo(() => new Set(registeredProviderIDs(registrations())))
+  const candidates = createMemo(() => sortCandidates((inventory().candidates ?? []).filter((candidate) => activeProviderIDs().has(candidate.provider_id))))
+  const allowedCandidates = createMemo(() => sortCandidates(candidates().filter((candidate) => draftAllowlist().has(candidate.model_ref))))
+  const currentSection = createMemo(() => SECTIONS[sectionIndex()]!.id)
+  const currentProviderPage = createMemo(() => PROVIDER_PAGES[providerPageIndex()]!.id)
 
   createEffect(
     on(
@@ -123,52 +188,82 @@ export function PaperModelWorkbenchPage() {
       (value) => {
         const next = value?.inventory
         if (!next) return
-        setDraftAllowlist(new Set(next.allowlist ?? []))
-        setDraftDecision(next.decision_model && (next.allowlist ?? []).includes(next.decision_model) ? next.decision_model : undefined)
-        setDraftRoles(next.role_overrides ?? {})
+        const allowlist = new Set(next.allowlist ?? [])
+        setDraftAllowlist(allowlist)
+        setDraftDecision(next.decision_model && allowlist.has(next.decision_model) ? next.decision_model : undefined)
+        setDraftBackupDecision(next.backup_decision_model && allowlist.has(next.backup_decision_model) ? next.backup_decision_model : undefined)
+        setDraftRegistrations(next.provider_registrations ?? {})
+        setDraftStagePolicies(next.stage_model_policies ?? {})
       },
     ),
   )
 
-  const allowedCandidates = createMemo(() => candidates().filter((candidate) => draftAllowlist().has(candidate.model_ref)))
-  const providerSummaries = createMemo(() => {
-    const stats = new Map<string, { id: string; total: number; allowed: number; custom: boolean }>()
-    for (const candidate of candidates()) {
-      const id = candidate.provider_id ?? "unknown"
-      const current = stats.get(id) ?? { id, total: 0, allowed: 0, custom: candidate.source === "openai_compatible" }
-      current.total += 1
-      if (draftAllowlist().has(candidate.model_ref)) current.allowed += 1
-      if (candidate.source === "openai_compatible") current.custom = true
-      stats.set(id, current)
-    }
-    return Array.from(stats.values()).sort((left, right) => right.allowed - left.allowed || right.total - left.total)
+  const dirty = createMemo(() => {
+    const next = payload()?.inventory
+    if (!next) return false
+    return (
+      [...draftAllowlist()].sort().join("\n") !== [...(next.allowlist ?? [])].sort().join("\n") ||
+      draftDecision() !== next.decision_model ||
+      draftBackupDecision() !== next.backup_decision_model ||
+      JSON.stringify(draftRegistrations()) !== JSON.stringify(next.provider_registrations ?? {}) ||
+      JSON.stringify(draftStagePolicies()) !== JSON.stringify(next.stage_model_policies ?? {})
+    )
+  })
+
+  const providerRows = createMemo<ProviderRow[]>(() => {
+    const list = Object.values(registrations()).sort((left, right) => left.provider_id.localeCompare(right.provider_id, "en", { numeric: true }))
+    const page = currentProviderPage()
+    if (page === "configured_builtin") return list.filter((registration) => registration.kind === "builtin" && registration.status === "registered").map((registration) => ({ kind: "registration", registration }))
+    if (page === "configured_custom") return list.filter((registration) => registration.kind !== "builtin" && registration.status === "registered").map((registration) => ({ kind: "registration", registration }))
+    const registered = new Set(Object.keys(registrations()).filter((id) => registrations()[id]?.status === "registered"))
+    return builtinProviders()
+      .filter((provider) => !registered.has(provider.provider_id))
+      .sort((left, right) => left.provider_id.localeCompare(right.provider_id, "en", { numeric: true }))
+      .map((provider) => ({ kind: "unregistered", provider }))
   })
 
   const visibleCandidates = createMemo(() => {
-    const tab = currentTab()
-    const query = filter()
-    const base =
-      tab === "可用模型" || tab === "主决策模型"
-        ? allowedCandidates()
-        : tab === "候选模型"
-          ? candidates()
-          : []
-    return base.filter((candidate) => includesQuery(candidate, query))
-  })
-
-  const visibleRows = createMemo(() => {
     if (editingRole()) return allowedCandidates().filter((candidate) => includesQuery(candidate, filter()))
-    if (currentTab() === "阶段模型") return PAPER_MODEL_ROLES
-    if (currentTab() === "Provider") return providerSummaries()
-    if (currentTab() === "诊断") return []
-    return visibleCandidates()
+    if (currentSection() === "decision" || currentSection() === "available") {
+      const base = currentSection() === "available" ? candidates() : allowedCandidates()
+      return base.filter((candidate) => includesQuery(candidate, filter()))
+    }
+    return []
   })
 
-  createEffect(
-    on([currentTab, filter, editingRole], () => {
-      setSelected(0)
-    }),
-  )
+  const rowCount = createMemo(() => {
+    if (currentSection() === "provider") return providerRows().length
+    if (currentSection() === "stage" && !editingRole()) return PAPER_MODEL_ROLES.length
+    if (currentSection() === "diagnostics") return payload()?.routing?.length ?? 0
+    return visibleCandidates().length
+  })
+  const listHeight = createMemo(() => Math.max(8, dimensions().height - 15))
+  const visibleStart = createMemo(() => scrollOffset())
+  const visibleEnd = createMemo(() => Math.min(scrollOffset() + listHeight(), rowCount()))
+
+  function ensureVisible(index: number) {
+    const height = listHeight()
+    setScrollOffset((offset) => {
+      if (index < offset) return index
+      if (index >= offset + height) return Math.max(0, index - height + 1)
+      return offset
+    })
+  }
+
+  function resetList() {
+    setSelected(0)
+    setScrollOffset(0)
+  }
+
+  createEffect(on([currentSection, currentProviderPage, filter, editingRole], resetList))
+
+  function move(delta: number) {
+    const count = rowCount()
+    if (count <= 0) return
+    const next = (selected() + delta + count) % count
+    setSelected(next)
+    ensureVisible(next)
+  }
 
   async function postJson<T>(path: string, body: unknown): Promise<T> {
     const response = await sdk.fetch(new URL(path, sdk.url), {
@@ -183,46 +278,87 @@ export function PaperModelWorkbenchPage() {
   }
 
   async function save() {
-    const allowlist = Array.from(draftAllowlist())
+    const allowlist = Array.from(draftAllowlist()).sort()
     const decision = draftDecision()
+    const backupDecision = draftBackupDecision()
     if (decision && !draftAllowlist().has(decision)) {
       toast.show({ variant: "warning", message: "主决策模型必须先加入可用模型。" })
+      return
+    }
+    if (backupDecision && !draftAllowlist().has(backupDecision)) {
+      toast.show({ variant: "warning", message: "备用决策模型必须先加入可用模型。" })
       return
     }
     await postJson("paper/model-inventory", {
       allowlist,
       decision_model: decision,
-      roles: draftRoles(),
+      backup_decision_model: backupDecision,
+      roles: {},
+      registered_provider_ids: registeredProviderIDs(draftRegistrations()),
+      provider_registrations: draftRegistrations(),
+      stage_model_policies: draftStagePolicies(),
     })
     await refetch()
     notifyPaperModelInventoryChanged()
     toast.show({ variant: "success", message: "模型配置已保存。" })
   }
 
-  function toggle(ref: string) {
+  function toggleAllowed(ref: string) {
     setDraftAllowlist((current) => {
       const next = new Set(current)
       if (next.has(ref)) next.delete(ref)
       else next.add(ref)
       if (draftDecision() === ref && !next.has(ref)) setDraftDecision(undefined)
-      setDraftRoles((roles) => Object.fromEntries(Object.entries(roles).filter(([, value]) => value !== ref)))
+      if (draftBackupDecision() === ref && !next.has(ref)) setDraftBackupDecision(undefined)
+      setDraftStagePolicies((policies) =>
+        Object.fromEntries(Object.entries(policies).map(([role, policy]) => [role, policy?.model_ref === ref ? { role: role as PaperModelRole, mode: "auto" } : policy])),
+      )
       return next
     })
   }
 
   function selectAllVisible() {
-    const refs = visibleCandidates().map((candidate) => candidate.model_ref)
-    setDraftAllowlist((current) => new Set([...current, ...refs]))
+    setDraftAllowlist((current) => new Set([...current, ...visibleCandidates().map((candidate) => candidate.model_ref)]))
   }
 
   function clearVisible() {
     const refs = new Set(visibleCandidates().map((candidate) => candidate.model_ref))
-    setDraftAllowlist((current) => {
-      const next = new Set([...current].filter((ref) => !refs.has(ref)))
-      if (draftDecision() && !next.has(draftDecision()!)) setDraftDecision(undefined)
-      setDraftRoles((roles) => Object.fromEntries(Object.entries(roles).filter(([, value]) => !refs.has(value))))
-      return next
-    })
+    setDraftAllowlist((current) => new Set([...current].filter((ref) => !refs.has(ref))))
+    if (draftDecision() && refs.has(draftDecision()!)) setDraftDecision(undefined)
+    if (draftBackupDecision() && refs.has(draftBackupDecision()!)) setDraftBackupDecision(undefined)
+  }
+
+  function registerBuiltin(provider: BuiltinProviderSummary) {
+    setDraftRegistrations((current) => ({
+      ...current,
+      [provider.provider_id]: {
+        provider_id: provider.provider_id,
+        provider_name: provider.provider_name,
+        kind: "builtin",
+        status: "registered",
+        model_count: provider.model_count,
+        allowed_count: 0,
+        last_refreshed_at: nowIso(),
+      },
+    }))
+    toast.show({ variant: "info", message: `已加入 ${provider.provider_name ?? provider.provider_id}，保存后会缓存模型。` })
+  }
+
+  function disableSelectedProvider() {
+    const row = providerRows()[selected()]
+    if (row?.kind !== "registration") return
+    const providerID = row.registration.provider_id
+    setDraftRegistrations((current) => ({
+      ...current,
+      [providerID]: {
+        ...row.registration,
+        status: "disabled",
+      },
+    }))
+    setDraftAllowlist((current) => new Set([...current].filter((ref) => !ref.startsWith(`${providerID}/`))))
+    if (draftDecision()?.startsWith(`${providerID}/`)) setDraftDecision(undefined)
+    if (draftBackupDecision()?.startsWith(`${providerID}/`)) setDraftBackupDecision(undefined)
+    toast.show({ variant: "warning", message: `已禁用 ${providerID}，保存后生效。` })
   }
 
   async function addOpenAICompatibleProvider() {
@@ -249,47 +385,45 @@ export function PaperModelWorkbenchPage() {
     })
     await refetch()
     notifyPaperModelInventoryChanged()
-    setTabIndex(1)
+    setSectionIndex(2)
     toast.show({ variant: "success", message: `已发现 ${result.models?.length ?? 0} 个模型。` })
   }
 
-  function move(delta: number) {
-    const count = visibleRows().length
-    if (count <= 0) return
-    const next = (selected() + delta + count) % count
-    setSelected(next)
-  }
-
-  function selectedCandidate() {
-    return visibleCandidates()[selected()]
+  function cycleStagePolicy(role: PaperModelRole) {
+    const current = draftStagePolicies()[role]?.mode ?? "auto"
+    const next = current === "auto" ? "dynamic" : current === "dynamic" ? "auto" : "auto"
+    setDraftStagePolicies((policies) => ({ ...policies, [role]: { role, mode: next } }))
   }
 
   function activate() {
-    const tab = currentTab()
     if (editingRole()) {
-      const candidate = selectedCandidate()
+      const candidate = visibleCandidates()[selected()]
       if (!candidate) return
-      setDraftRoles((roles) => ({ ...roles, [editingRole()!]: candidate.model_ref }))
+      const role = editingRole()!
+      setDraftStagePolicies((policies) => ({ ...policies, [role]: { role, mode: "forced", model_ref: candidate.model_ref } }))
       setEditingRole(undefined)
       setFilter("")
       return
     }
-    if (tab === "候选模型" || tab === "可用模型") {
-      const candidate = selectedCandidate()
-      if (candidate) toggle(candidate.model_ref)
+    const section = currentSection()
+    if (section === "provider") {
+      const row = providerRows()[selected()]
+      if (row?.kind === "unregistered") registerBuiltin(row.provider)
       return
     }
-    if (tab === "主决策模型") {
-      const candidate = selectedCandidate()
+    if (section === "available") {
+      const candidate = visibleCandidates()[selected()]
+      if (candidate) toggleAllowed(candidate.model_ref)
+      return
+    }
+    if (section === "decision") {
+      const candidate = visibleCandidates()[selected()]
       if (candidate) setDraftDecision(candidate.model_ref)
       return
     }
-    if (tab === "阶段模型") {
+    if (section === "stage") {
       const role = PAPER_MODEL_ROLES[selected()]
-      if (role) {
-        setEditingRole(role)
-        setFilter("")
-      }
+      if (role) cycleStagePolicy(role)
     }
   }
 
@@ -305,40 +439,59 @@ export function PaperModelWorkbenchPage() {
       evt.preventDefault()
       return
     }
-    if (evt.name === "tab" && !evt.shift) {
-      setTabIndex((index) => (index + 1) % TABS.length)
-      evt.preventDefault()
-      return
-    }
-    if (evt.name === "tab" && evt.shift) {
-      setTabIndex((index) => (index - 1 + TABS.length) % TABS.length)
+    if (evt.name === "tab") {
+      if (currentSection() === "provider" && !evt.shift) setProviderPageIndex((index) => (index + 1) % PROVIDER_PAGES.length)
+      else setSectionIndex((index) => (index + (evt.shift ? -1 : 1) + SECTIONS.length) % SECTIONS.length)
       evt.preventDefault()
       return
     }
     if (evt.name === "up" || (evt.ctrl && evt.name === "p")) move(-1)
     if (evt.name === "down" || (evt.ctrl && evt.name === "n")) move(1)
-    if (evt.name === "return") {
-      activate()
-      evt.preventDefault()
-      return
+    if (evt.name === "pageup") move(-listHeight())
+    if (evt.name === "pagedown") move(listHeight())
+    if (evt.name === "home") {
+      setSelected(0)
+      setScrollOffset(0)
     }
-    if ((evt.name === "space" || evt.name === " ") && (currentTab() === "候选模型" || currentTab() === "可用模型")) {
+    if (evt.name === "end") {
+      const last = Math.max(0, rowCount() - 1)
+      setSelected(last)
+      ensureVisible(last)
+    }
+    if (evt.name === "return" || evt.name === "space" || evt.name === " ") {
       activate()
       evt.preventDefault()
       return
     }
     if (evt.ctrl && evt.name === "s") {
-      void save()
+      void save().catch((error) => toast.show({ variant: "error", message: error instanceof Error ? error.message : "保存模型配置失败" }))
       evt.preventDefault()
       return
     }
-    if (!evt.ctrl && evt.name === "a" && (currentTab() === "候选模型" || currentTab() === "可用模型")) {
+    if (!evt.ctrl && evt.name === "a" && currentSection() === "available") {
       selectAllVisible()
       evt.preventDefault()
       return
     }
-    if (!evt.ctrl && evt.name === "n" && (currentTab() === "候选模型" || currentTab() === "可用模型")) {
+    if (!evt.ctrl && evt.name === "n" && currentSection() === "available") {
       clearVisible()
+      evt.preventDefault()
+      return
+    }
+    if (!evt.ctrl && evt.name === "b" && currentSection() === "decision") {
+      const candidate = visibleCandidates()[selected()]
+      if (candidate) setDraftBackupDecision(candidate.model_ref)
+      evt.preventDefault()
+      return
+    }
+    if (!evt.ctrl && evt.name === "f" && currentSection() === "stage") {
+      const role = PAPER_MODEL_ROLES[selected()]
+      if (role) setEditingRole(role)
+      evt.preventDefault()
+      return
+    }
+    if (!evt.ctrl && evt.name === "d" && currentSection() === "provider") {
+      disableSelectedProvider()
       evt.preventDefault()
       return
     }
@@ -349,48 +502,56 @@ export function PaperModelWorkbenchPage() {
       evt.preventDefault()
       return
     }
-    if (!evt.ctrl && evt.name === "b") {
+    if (!evt.ctrl && evt.name === "l") {
       dialog.replace(() => <DialogProvider />)
       evt.preventDefault()
       return
     }
     const number = Number(evt.name)
-    if (Number.isInteger(number) && number >= 1 && number <= TABS.length) {
-      setTabIndex(number - 1)
+    if (Number.isInteger(number) && number >= 1 && number <= SECTIONS.length) {
+      setSectionIndex(number - 1)
       evt.preventDefault()
     }
   })
 
-  const bodyHeight = createMemo(() => Math.max(8, dimensions().height - 11))
   const summary = createMemo(() => ({
     decision: draftDecision(),
+    backup: draftBackupDecision(),
     allowed: draftAllowlist().size,
     candidates: candidates().length,
-    providers: providerSummaries().length,
+    providers: Object.values(registrations()).filter((registration) => registration.status === "registered").length,
   }))
 
+  const activeCandidateRows = createMemo(() => visibleCandidates().slice(visibleStart(), visibleEnd()))
+  const activeProviderRows = createMemo(() => providerRows().slice(visibleStart(), visibleEnd()))
+  const activeRoles = createMemo(() => PAPER_MODEL_ROLES.slice(visibleStart(), visibleEnd()))
+  const activeRouting = createMemo(() => (payload()?.routing ?? []).slice(visibleStart(), visibleEnd()))
+  const compact = createMemo(() => dimensions().width < 118)
+  const detailWidth = createMemo(() => (compact() ? 0 : 34))
+
   return (
-    <box width="100%" height="100%" paddingLeft={3} paddingRight={3} paddingTop={2} paddingBottom={1} flexDirection="column" gap={1}>
-      <box flexDirection="row" justifyContent="space-between">
+    <box width="100%" height="100%" paddingLeft={2} paddingRight={2} paddingTop={1} paddingBottom={1} flexDirection="column" gap={1}>
+      <box flexDirection="row" justifyContent="space-between" alignItems="center">
         <box flexDirection="column">
-          <text fg={theme.text} attributes={TextAttributes.BOLD}>模型工作台</text>
-          <text fg={theme.textMuted}>配置 provider、候选模型、可用模型、主决策模型与阶段模型。</text>
+          <text fg={theme.text} attributes={TextAttributes.BOLD}>Paper Fucker 模型工作台</text>
+          <text fg={theme.textMuted}>注册 provider、选择可用模型、设置决策模型和阶段策略。</text>
         </box>
         <text fg={dirty() ? theme.warning : theme.textMuted}>{dirty() ? "有未保存修改 Ctrl+S 保存" : "Esc 返回首页"}</text>
       </box>
 
       <box flexDirection="row" gap={2}>
-        <For each={TABS}>
-          {(tab, index) => (
-            <text fg={index() === tabIndex() ? theme.accent : theme.textMuted} attributes={index() === tabIndex() ? TextAttributes.BOLD : undefined}>
-              {index() + 1} {tab}
+        <For each={SECTIONS}>
+          {(section, index) => (
+            <text fg={index() === sectionIndex() ? theme.accent : theme.textMuted} attributes={index() === sectionIndex() ? TextAttributes.BOLD : undefined}>
+              {index() + 1} {section.label}
             </text>
           )}
         </For>
       </box>
 
       <box flexDirection="row" gap={2}>
-        <text fg={summary().decision ? theme.text : theme.warning}>主决策模型：{summary().decision ?? "未选择"}</text>
+        <text fg={summary().decision ? theme.text : theme.warning}>主模型：{summary().decision ? truncateDisplayMiddle(summary().decision!, 36) : "未选择"}</text>
+        <text fg={summary().backup ? theme.textMuted : theme.textMuted}>备用：{summary().backup ? truncateDisplayMiddle(summary().backup!, 30) : "未选择"}</text>
         <text fg={theme.textMuted}>可用 {summary().allowed}</text>
         <text fg={theme.textMuted}>候选 {summary().candidates}</text>
         <text fg={theme.textMuted}>Provider {summary().providers}</text>
@@ -400,16 +561,27 @@ export function PaperModelWorkbenchPage() {
 
       <box flexDirection="row" gap={2} flexGrow={1} minHeight={0}>
         <box width={24} flexShrink={0} flexDirection="column" gap={1}>
-          <For each={TABS}>
-            {(tab, index) => (
-              <box paddingLeft={1} paddingRight={1} backgroundColor={index() === tabIndex() ? theme.backgroundPanel : undefined}>
-                <text fg={index() === tabIndex() ? theme.accent : theme.textMuted}>{index() + 1}. {tab}</text>
+          <For each={SECTIONS}>
+            {(section, index) => (
+              <box paddingLeft={1} paddingRight={1} backgroundColor={index() === sectionIndex() ? theme.backgroundPanel : undefined}>
+                <text fg={index() === sectionIndex() ? theme.accent : theme.textMuted}>{index() + 1}. {section.label}</text>
               </box>
             )}
           </For>
+          <Show when={currentSection() === "provider"}>
+            <box paddingTop={1} flexDirection="column">
+              <For each={PROVIDER_PAGES}>
+                {(page, index) => (
+                  <text fg={index() === providerPageIndex() ? theme.secondary : theme.textMuted}>
+                    Tab {index() + 1}. {page.label}
+                  </text>
+                )}
+              </For>
+            </box>
+          </Show>
           <box paddingTop={1} flexDirection="column">
             <text fg={theme.textMuted}>c 自定义 provider</text>
-            <text fg={theme.textMuted}>b 内置 provider 授权</text>
+            <text fg={theme.textMuted}>l 内置 provider 登录</text>
             <text fg={theme.textMuted}>Ctrl+S 保存</text>
           </box>
         </box>
@@ -418,89 +590,116 @@ export function PaperModelWorkbenchPage() {
           <Show when={payload()?.error}>
             {(error) => <text fg={theme.warning}>{error()}</text>}
           </Show>
-          <Show when={["候选模型", "可用模型", "主决策模型"].includes(currentTab()) || editingRole()}>
+          <Show when={currentSection() === "available" || currentSection() === "decision" || editingRole()}>
             <input
               placeholder="搜索 provider、模型名或来源"
               cursorColor={theme.primary}
-              focusedBackgroundColor={theme.backgroundPanel}
+              focusedBackgroundColor={theme.backgroundElement}
               focusedTextColor={theme.text}
               onInput={(value) => setFilter(value)}
             />
           </Show>
 
-          <box flexDirection="column" maxHeight={bodyHeight()} minHeight={0}>
+          <box flexDirection="column" height={listHeight()} minHeight={0} overflow="hidden">
             <Switch>
-              <Match when={currentTab() === "Provider"}>
-                <For each={providerSummaries().slice(0, bodyHeight())}>
-                  {(provider, index) => (
-                    <box backgroundColor={index() === selected() ? theme.primary : undefined} paddingLeft={1} gap={1}>
-                      <text fg={index() === selected() ? theme.selectedListItemText : theme.text}>{providerLabel(provider.id)}</text>
-                      <text fg={index() === selected() ? theme.selectedListItemText : theme.textMuted}>{provider.allowed}/{provider.total}</text>
-                      <text fg={index() === selected() ? theme.selectedListItemText : theme.textMuted}>{provider.custom ? "custom" : "built-in"}</text>
-                    </box>
-                  )}
+              <Match when={currentSection() === "provider"}>
+                <For each={activeProviderRows()}>
+                  {(row, index) => {
+                    const active = createMemo(() => index() + scrollOffset() === selected())
+                    return (
+                      <box backgroundColor={active() ? theme.primary : undefined} paddingLeft={1} gap={1}>
+                        <Show
+                          when={row.kind === "registration"}
+                          fallback={
+                            <>
+                              <text fg={active() ? theme.selectedListItemText : theme.textMuted}>＋</text>
+                              <text fg={active() ? theme.selectedListItemText : theme.text}>
+                                {providerLabel(row.kind === "unregistered" ? row.provider.provider_id : undefined, row.kind === "unregistered" ? row.provider.provider_name : undefined)}
+                              </text>
+                              <text fg={active() ? theme.selectedListItemText : theme.textMuted}>{row.kind === "unregistered" ? row.provider.model_count : 0} models</text>
+                            </>
+                          }
+                        >
+                          <>
+                            <text fg={active() ? theme.selectedListItemText : theme.success}>●</text>
+                            <text fg={active() ? theme.selectedListItemText : theme.text}>
+                              {providerLabel(row.kind === "registration" ? row.registration.provider_id : undefined, row.kind === "registration" ? row.registration.provider_name : undefined)}
+                            </text>
+                            <text fg={active() ? theme.selectedListItemText : theme.textMuted}>
+                              {row.kind === "registration" ? `${row.registration.allowed_count}/${row.registration.model_count}` : ""}
+                            </text>
+                            <text fg={active() ? theme.selectedListItemText : theme.textMuted}>{row.kind === "registration" ? row.registration.kind : ""}</text>
+                          </>
+                        </Show>
+                      </box>
+                    )
+                  }}
                 </For>
-                <Show when={providerSummaries().length === 0}>
-                  <text fg={theme.warning}>尚未发现 provider。按 c 添加自定义 endpoint，或按 b 使用内置 provider 授权。</text>
+                <Show when={providerRows().length === 0}>
+                  <text fg={theme.warning}>
+                    {currentProviderPage() === "unregistered" ? "没有未注册内置 provider。" : "还没有配置这一类 provider。按 c 添加自定义 endpoint，或切到未注册页选择内置 provider。"}
+                  </text>
                 </Show>
               </Match>
 
-              <Match when={currentTab() === "候选模型" || currentTab() === "可用模型" || currentTab() === "主决策模型" || editingRole()}>
+              <Match when={currentSection() === "available" || currentSection() === "decision" || editingRole()}>
                 <Show when={editingRole()}>
-                  {(role) => (
-                    <box flexDirection="row" gap={2}>
-                      <text fg={theme.accent}>{ROLE_LABELS[role()]}</text>
-                      <text fg={theme.textMuted}>Enter 指定模型，Esc 返回阶段列表。</text>
-                    </box>
-                  )}
+                  {(role) => <text fg={theme.accent}>为 {ROLE_LABELS[role()]} 选择强制模型；Esc 返回阶段列表。</text>}
                 </Show>
-                <For each={visibleCandidates().slice(0, bodyHeight() - 1)}>
+                <For each={activeCandidateRows()}>
                   {(candidate, index) => {
-                    const active = createMemo(() => index() === selected())
+                    const active = createMemo(() => index() + scrollOffset() === selected())
                     const allowed = createMemo(() => draftAllowlist().has(candidate.model_ref))
                     return (
                       <box backgroundColor={active() ? theme.primary : undefined} paddingLeft={1} gap={1}>
-                        <text fg={active() ? theme.selectedListItemText : allowed() ? theme.accent : theme.textMuted}>
+                        <text fg={active() ? theme.selectedListItemText : allowed() ? theme.success : theme.textMuted}>
                           {allowed() ? "✓" : "·"}
                         </text>
-                        <text fg={active() ? theme.selectedListItemText : theme.text}>{truncateMiddle(candidate.model_ref, 78)}</text>
+                        <text fg={active() ? theme.selectedListItemText : theme.text}>
+                          {truncateDisplayMiddle(candidate.model_ref, Math.max(34, dimensions().width - detailWidth() - 42))}
+                        </text>
                         <text fg={active() ? theme.selectedListItemText : theme.textMuted}>{candidate.smoke_status}</text>
+                        <text fg={active() ? theme.selectedListItemText : theme.textMuted}>{candidate.context_hint ?? "context?"}</text>
                       </box>
                     )
                   }}
                 </For>
                 <Show when={visibleCandidates().length === 0}>
                   <text fg={theme.warning}>
-                    {currentTab() === "可用模型" || currentTab() === "主决策模型" || editingRole()
-                      ? "还没有可用模型。先到“候选模型”勾选后保存。"
-                      : "没有匹配的候选模型。"}
+                    {currentSection() === "decision" || editingRole()
+                      ? "还没有可用模型。先在“可用模型”中勾选模型并保存。"
+                      : "没有候选模型。先注册 provider 并刷新模型列表。"}
                   </text>
                 </Show>
               </Match>
 
-              <Match when={currentTab() === "阶段模型"}>
-                <For each={PAPER_MODEL_ROLES}>
-                  {(role, index) => (
-                    <box backgroundColor={index() === selected() ? theme.primary : undefined} paddingLeft={1} gap={1}>
-                      <text fg={index() === selected() ? theme.selectedListItemText : theme.text}>{ROLE_LABELS[role]}</text>
-                      <text fg={index() === selected() ? theme.selectedListItemText : theme.textMuted}>
-                        {draftRoles()[role] ?? "自动选择"}
-                      </text>
-                    </box>
-                  )}
+              <Match when={currentSection() === "stage" && !editingRole()}>
+                <For each={activeRoles()}>
+                  {(role, index) => {
+                    const policy = createMemo(() => draftStagePolicies()[role] ?? defaultPolicy(role))
+                    const active = createMemo(() => index() + scrollOffset() === selected())
+                    return (
+                      <box backgroundColor={active() ? theme.primary : undefined} paddingLeft={1} gap={1}>
+                        <text fg={active() ? theme.selectedListItemText : theme.text}>{ROLE_LABELS[role]}</text>
+                        <text fg={active() ? theme.selectedListItemText : theme.accent}>{POLICY_LABELS[policy().mode]}</text>
+                        <text fg={active() ? theme.selectedListItemText : theme.textMuted}>
+                          {policy().model_ref ? truncateDisplayMiddle(policy().model_ref!, Math.max(24, dimensions().width - detailWidth() - 48)) : "由决策模型按任务动态路由"}
+                        </text>
+                      </box>
+                    )
+                  }}
                 </For>
-                <text fg={theme.textMuted}>Enter 为当前阶段指定模型；指定后仍只能从可用模型池选择。</text>
+                <text fg={theme.textMuted}>Enter 在自动/动态之间切换；F 从可用模型池强制指定。</text>
               </Match>
 
-              <Match when={currentTab() === "诊断"}>
+              <Match when={currentSection() === "diagnostics"}>
                 <box flexDirection="column" gap={1}>
                   <text fg={theme.text}>库存路径：~/.paper_fucker/model-inventory.json</text>
-                  <text fg={theme.text}>候选模型是发现结果；可用模型只来自 allowlist。</text>
-                  <text fg={theme.text}>未配置主决策模型或可用模型时，PaperRun 会阻断并提示进入 /models。</text>
-                  <For each={payload()?.routing ?? []}>
+                  <text fg={theme.text}>候选模型只来自已注册 provider；可用模型只来自 allowlist。</text>
+                  <For each={activeRouting()}>
                     {(item) => (
                       <text fg={item.source === "blocked" ? theme.warning : theme.textMuted}>
-                        {ROLE_LABELS[item.role]}：{item.selected_model ?? item.reason}
+                        {ROLE_LABELS[item.role]}：{truncateDisplayMiddle(item.selected_model ?? item.reason, Math.max(42, dimensions().width - 22))}
                       </text>
                     )}
                   </For>
@@ -509,15 +708,33 @@ export function PaperModelWorkbenchPage() {
             </Switch>
           </box>
 
+          <Show when={rowCount() > listHeight()}>
+            <text fg={theme.textMuted}>
+              {visibleStart() + 1}-{visibleEnd()}/{rowCount()}  PageUp/PageDown 滚动  Home/End 到首尾
+            </text>
+          </Show>
+
           <box border={["top"]} borderColor={theme.border} />
           <box flexDirection="row" gap={2}>
             <text fg={theme.text}>Tab 切换</text>
             <text fg={theme.text}>Enter/Space 选择</text>
-            <text fg={theme.text}>A 全选筛选</text>
-            <text fg={theme.text}>N 清空筛选</text>
+            <text fg={theme.text}>A 全选</text>
+            <text fg={theme.text}>N 清空</text>
+            <text fg={theme.text}>B 设备用</text>
+            <text fg={theme.text}>D 禁用 provider</text>
             <text fg={theme.text}>Ctrl+S 保存</text>
           </box>
         </box>
+
+        <Show when={!compact()}>
+          <box width={detailWidth()} flexShrink={0} flexDirection="column" gap={1} paddingLeft={1} border={["left"]} borderColor={theme.borderSubtle}>
+            <text fg={theme.accent} attributes={TextAttributes.BOLD}>说明</text>
+            <text fg={theme.textMuted}>Provider 注册后才会缓存模型。</text>
+            <text fg={theme.textMuted}>候选模型表示发现结果，不等于可用。</text>
+            <text fg={theme.textMuted}>可用模型是 PaperRun 与 Agent Team 的唯一模型池。</text>
+            <text fg={theme.textMuted}>动态阶段模型允许运行中按任务重新选择，但不能越过 allowlist。</text>
+          </box>
+        </Show>
       </box>
     </box>
   )
