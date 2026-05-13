@@ -26,6 +26,7 @@
         :docs
             - docs(readme): 重写中文 GitHub 首页，覆盖能力图、TUI-first 快速开始、隐私、系统要求和 FAQ
             - docs(notice): 记录 architecture-diagram、paper-framework-figure-studio-pro 与 bb-browser 的第三方来源和能力边界
+            - fix(skills): 将内置 paper-framework-figure-studio-pro 的 atlas 引用改为包内相对路径，避免泄露本地 Codex 安装路径
             - chore(repo): 删除 tracked legacy/ 与上游 glossary/tool/command 残留，保留内部底座包名作为实现细节
         :test
             - test(product): 覆盖 init/doctor、配置隔离、home/workspace run 存储、resume、机器侧栏、模型注册和公开品牌表面
