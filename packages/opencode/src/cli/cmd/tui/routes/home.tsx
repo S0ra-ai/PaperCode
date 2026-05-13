@@ -1,5 +1,6 @@
 import { Prompt, type PromptRef } from "@tui/component/prompt"
-import { createEffect, createSignal, onMount } from "solid-js"
+import { createEffect, createMemo, createSignal, onMount } from "solid-js"
+import { useTerminalDimensions } from "@opentui/solid"
 import { Logo } from "../component/logo"
 import { useProject } from "../context/project"
 import { useSync } from "../context/sync"
@@ -38,7 +39,9 @@ export function Home() {
   const editor = useEditorContext()
   const sdk = useSDK()
   const toast = useToast()
+  const dimensions = useTerminalDimensions()
   let sent = false
+  const panelWidth = createMemo(() => Math.min(Math.max(78, dimensions().width - 36), 96))
 
   onMount(() => {
     editor.clearSelection()
@@ -80,13 +83,13 @@ export function Home() {
             <Logo />
           </TuiPluginRuntime.Slot>
         </box>
-        <box flexDirection="column" alignItems="center" maxWidth={75} paddingTop={1} paddingBottom={1} flexShrink={0}>
+        <box flexDirection="column" alignItems="center" maxWidth={panelWidth()} paddingTop={1} paddingBottom={1} flexShrink={0}>
           <text>paper_fucker 论文工作台</text>
           <text>主题 / 代码 / 论文材料 / 数据 / 实验日志 → PaperRun</text>
           <text>自动编排 Agent · MCP · Skills，仅在授权、成本、真实性或复现风险时暂停</text>
         </box>
         <box height={1} minHeight={0} flexShrink={1} />
-        <box width="100%" maxWidth={75} zIndex={1000} paddingTop={1} flexShrink={0}>
+        <box width="100%" maxWidth={panelWidth()} zIndex={1000} paddingTop={1} flexShrink={0}>
           <TuiPluginRuntime.Slot
             name="home_prompt"
             mode="replace"

@@ -36,10 +36,10 @@ export function ErrorComponent(props: {
   // Choose safe fallback colors per mode since theme context may not be available
   const isLight = props.mode === "light"
   const colors = {
-    bg: isLight ? "#ffffff" : "#0a0a0a",
-    text: isLight ? "#1a1a1a" : "#eeeeee",
-    muted: isLight ? "#8a8a8a" : "#808080",
-    primary: isLight ? "#3b7dd8" : "#fab283",
+    bg: isLight ? "#ffffff" : "#05070a",
+    text: isLight ? "#1a1a1a" : "#f5f1e8",
+    muted: isLight ? "#8a8a8a" : "#91a1ad",
+    primary: isLight ? "#3b7dd8" : "#e7a33f",
   }
 
   if (props.error.message) {

@@ -236,6 +236,96 @@ describe("paper provider model discovery", () => {
     })
   })
 
+  test("tracks registered providers without enabling unallowed models", async () => {
+    const home = await tmpHome()
+    const candidates = candidatesFromBuiltinProviders({
+      "github-copilot": {
+        name: "GitHub Copilot",
+        models: {
+          "claude-opus-4.7": { name: "Claude Opus 4.7" },
+          "gpt-5.1": { name: "GPT 5.1" },
+        },
+      },
+    })
+    const inventory = await updatePaperModelAllowlist(["github-copilot/claude-opus-4.7"], {
+      home,
+      decision_model: "github-copilot/claude-opus-4.7",
+      candidates,
+      provider_registrations: {
+        "github-copilot": {
+          provider_id: "github-copilot",
+          provider_name: "GitHub Copilot",
+          kind: "builtin",
+          status: "registered",
+          model_count: 2,
+          allowed_count: 1,
+        },
+      },
+    })
+
+    expect(inventory.provider_registrations["github-copilot"]).toMatchObject({
+      status: "registered",
+      model_count: 2,
+      allowed_count: 1,
+    })
+    expect(inventory.candidates.map((candidate) => [candidate.model_ref, candidate.allowed])).toEqual([
+      ["github-copilot/claude-opus-4.7", true],
+      ["github-copilot/gpt-5.1", false],
+    ])
+    expect(routePaperModel(inventory, { role: "reviewer" }).allowed_models).toEqual([
+      "github-copilot/claude-opus-4.7",
+    ])
+  })
+
+  test("uses a backup decision model when the primary model is stale", async () => {
+    const home = await tmpHome()
+    const file = modelInventoryPath(home)
+    await mkdir(path.dirname(file), { recursive: true })
+    await writeFile(
+      file,
+      JSON.stringify({
+        schema_version: "PaperModelInventory.v1",
+        updated_at: "2026-05-13T00:00:00Z",
+        decision_model: "lab/removed",
+        backup_decision_model: "lab/backup",
+        allowlist: ["lab/backup"],
+        role_overrides: {},
+        candidates: [],
+      }),
+      "utf8",
+    )
+
+    const inventory = await loadPaperModelInventory({ home })
+    expect(inventory.decision_model).toBeUndefined()
+    expect(inventory.backup_decision_model).toBe("lab/backup")
+    expect(routePaperModel(inventory, { role: "planner" })).toMatchObject({
+      source: "decision_model",
+      decision_model: "lab/backup",
+      selected_model: "lab/backup",
+    })
+  })
+
+  test("routes forced stage policies only through the allowlist", async () => {
+    const home = await tmpHome()
+    const inventory = await updatePaperModelAllowlist(["lab/planner", "lab/writer"], {
+      home,
+      decision_model: "lab/planner",
+      stage_model_policies: {
+        writer: { role: "writer", mode: "forced", model_ref: "lab/writer" },
+        reviewer: { role: "reviewer", mode: "dynamic" },
+      },
+    })
+
+    expect(routePaperModel(inventory, { role: "writer" })).toMatchObject({
+      source: "user_override",
+      selected_model: "lab/writer",
+    })
+    expect(routePaperModel(inventory, { role: "reviewer" })).toMatchObject({
+      source: "decision_model",
+      selected_model: "lab/planner",
+    })
+  })
+
   test("ships a provider matrix smoke script that reads local secrets without echoing keys", async () => {
     const scriptPath = path.join(repoRoot, "scripts", "provider-matrix-smoke.ps1")
     expect(existsSync(scriptPath)).toBe(true)
