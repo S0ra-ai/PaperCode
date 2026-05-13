@@ -1,0 +1,112 @@
+id: task-107-config-storage-isolation
+title: Config and storage isolation for 0.10.4-dev
+status: done
+priority: high
+owner: codex-paper-fucker
+tags:
+- paper
+- config
+- storage
+- 0.10.4-dev
+depends_on:
+- task-106-skill-mcp-bundle-intake
+description: Stop Paper Fucker from using OpenCode user config/storage paths, default
+  PaperRun output to ~/.paper_fucker/runs, and add explicit workspace storage scope
+  plus global run history.
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: isolate-config-env
+  title: Isolate config and env surfaces
+  status: done
+  owner: codex-paper-fucker
+  depends_on: []
+  description: Ensure user-visible Paper Fucker config reads PAPER_FUCKER_* and .paper_fucker
+    paths, not OpenCode config/auth/session/cache paths.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-13T01:49:58.837152'
+      level: info
+      message: 'Core config/auth/cache env isolation implemented: config, TUI config,
+        config content, DB, models path/url, and auth content now read PAPER_FUCKER_*
+        only; Global home no longer falls back to OPENCODE_TEST_HOME; child workspace
+        env no longer propagates OPENCODE_AUTH_CONTENT. Test preload and relevant
+        tests were mechanically moved to PAPER_FUCKER_* env names. Focused PaperRun
+        API test added coverage that fake OPENCODE_TEST_HOME is ignored.'
+      agent: codex-paper-fucker
+    last_run: '2026-05-13T01:49:58.837152'
+    attempt_count: 2
+  meta: {}
+- id: home-first-run-root
+  title: Make run storage home-first
+  status: done
+  owner: codex-paper-fucker
+  depends_on:
+  - isolate-config-env
+  description: Change PaperRun creation to write to ~/.paper_fucker/runs unless storage_scope=workspace
+    is explicitly selected.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-13T01:50:12.419171'
+      level: info
+      message: 'Earlier edits to packages/opencode/src/paper/research/runtime/paths.ts
+        and run-store.ts are accounted here: chooseRunRoot now defaults to ~/.paper_fucker/runs
+        and only uses workspace runs when storage_scope === "workspace".'
+      agent: codex-paper-fucker
+    - timestamp: '2026-05-13T01:50:17.575823'
+      level: info
+      message: PaperRunCreateRequest now accepts storage_scope with default home,
+        createPaperRun passes storage_scope into createResearchRun, and runtime paths
+        default to ~/.paper_fucker/runs. Focused API test verifies default home storage
+        and explicit workspace storage.
+      agent: codex-paper-fucker
+    last_run: '2026-05-13T01:50:17.575823'
+    attempt_count: 2
+  meta: {}
+- id: run-history-index
+  title: Add global PaperRun history index APIs
+  status: done
+  owner: codex-paper-fucker
+  depends_on:
+  - home-first-run-root
+  description: Expose list/search/resume-ready history across home and explicit workspace
+    run roots.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-13T01:50:28.187479'
+      level: info
+      message: Added PaperRunHistoryEntry/PaperRunResumeRequest public interfaces,
+        listPaperRuns and resumePaperRun wrappers, GET /paper/runs and POST /paper/runs/:runID/resume
+        HTTP API endpoints. Snapshot diagnostics now include runtime_root and token_usage.
+        Focused API test verifies list/resume across home and workspace run roots.
+      agent: codex-paper-fucker
+    last_run: '2026-05-13T01:50:28.187479'
+    attempt_count: 2
+  meta: {}
+outputs:
+- type: directory
+  path: packages/opencode/src/paper/research/runtime
+  description: Run path and run-store behavior
+- type: file
+  path: packages/opencode/src/paper/run.ts
+  description: PaperRun storage_scope/history/resume public interfaces
+- type: directory
+  path: packages/opencode/test/paper
+  description: Storage isolation and history tests
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-13T01:36:58.194822'
+  updated_at: '2026-05-13T01:50:32.571804'
+  version: '1'

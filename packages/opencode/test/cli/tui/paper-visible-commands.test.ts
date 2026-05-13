@@ -35,7 +35,7 @@ describe("Paper Fucker visible command surface", () => {
     ).toBe(false)
     expect(
       isPaperVisibleCommandOption({
-        title: "OpenCode provider switch",
+        title: "Managed provider switch",
         value: "provider.switch",
         category: "Provider",
       }),

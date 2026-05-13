@@ -1,0 +1,34 @@
+name: paper-framework-figure-studio-pro
+version: "2.5.0"
+summary: >-
+  Production-grade research-paper framework figure studio with saved subtype/style
+  atlases, required abstract-decision concept/reference display, required
+  image-embedded visual-structure explanations, target-paper image isolation,
+  diverse first-round candidate boards, and mandatory P6b/P6b-IMAGE/P6c
+  paper-local best-practice second-round selection.
+important_rules:
+  - First trigger must be STARTUP_PLAN_ONLY and show S0/P1-P6/P6b/P6b-IMAGE/P6c/P7-P9 before analysis.
+  - The first reply displays all available saved subtype/style atlas boards with Markdown image embeds; it does not analyze the target paper or generate target-paper images.
+  - Showing saved atlas boards means emitting actual Markdown image embeds, not only listing paths.
+  - In Codex desktop, resolve package-local atlas paths to absolute filesystem paths before embedding local images.
+  - Target-paper candidate images, second-round variants, draft figures, final figures, and revisions must never be embedded inside a prose reply; they must use dedicated IMAGE_ONLY turns.
+  - Text replies that explain or compare subtype, layout grammar, visual style, density, metaphor, modeling pattern, candidate scheme differences, or final content architecture must embed a relevant saved reference image or non-target concept/modeling example image, or record concept_example_required/status/role/trigger_reason and a repair action.
+  - Text replies that explain or define visual structure, layout skeleton, panel choreography, module topology, arrow grammar, candidate-board structure, second-round optimization geometry, or final content architecture must embed a saved reference image or non-target visual-structure concept/modeling example image when technically possible.
+  - Do not describe visual structure with prose, bullets, ASCII, Mermaid, SVG, or code-rendered sketches only; if the preview would be paper-specific, defer it to P5/P6b-IMAGE/P8 IMAGE_ONLY and embed only a generic structure/reference image in text.
+  - Pure state synchronization, caption/body text, simple confirmation, and ordinary restatement of an already registered image batch do not require a new concept/example image.
+  - Inline non-target concept/example images must be recorded as non_target_reference or concept_example and must not count as candidate boards, second-round variants, or set candidate_image_batch_id / second_round_candidate_batch_id.
+  - After any multi-option text reply, the first recommended next prompt must ask the user to generate/display multiple diverse first-round candidate images or schematic boards, normally 6.
+  - The first round should maximize high-level diversity to establish direction across subtype, layout grammar, metaphor, density, panel rhythm, or style family.
+  - P6 records the first-round image batch and selects only the current best direction; it cannot move directly to P7/P8.
+  - After P6, P6b must set up 4-6 paper-local best-practice optimization axes, normally 6.
+  - P6b-IMAGE must generate 4-6 second-round target-paper variants, normally 6, with a new second_round_candidate_batch_id.
+  - P6c must record the second-round batch and lock selected_second_round_candidate before P7 final prompt construction.
+  - The second round should optimize module relationships, evidence/case anchors, label economy, panel transitions, color semantics, callout placement, and reviewer readability.
+  - Default to 6 text candidates, 6 first-round image candidates, and 6 second-round variants unless the user explicitly requests another allowed count.
+  - ChatGPT web must use Create image through ChatGPT Images 2.0 for target-paper image generation.
+  - Codex must use $imagegen first; if unavailable, use ChatGPT Images 2.0 API or another approved image-generation API.
+  - Never use SVG, Mermaid, TikZ, Graphviz, HTML/CSS, canvas, matplotlib, or code-rendered files as target-paper visual outputs or fallbacks.
+  - IMAGE_ONLY responses contain no prose, no state footer, and no captions.
+  - Every TEXT_ONLY reply must include the current plan, default recommendation, current state and products, all steps plus current position, current-turn outputs, cumulative outputs, and next-question help.
+  - Every text reply must record user_request_interpreted_action, workflow_step_before_user_request, workflow_step_after_user_request, state_transition_reason, off_recommended_prompt_handling, concept_example_required/status/role/trigger_reason, visual_structure_image_required/status/role/trigger_reason, and best_practice_divergence_status/axes/second_round_candidate_batch_id/selected_second_round_candidate when applicable.
+  - If a user asks for target-paper image generation in a text turn, map the request to the closest setup step and make the next action the required IMAGE_ONLY step; do not generate or embed target-paper images in the text reply.

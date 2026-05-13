@@ -15,6 +15,7 @@ import { DebugCommand } from "./cli/cmd/debug"
 import { McpCommand } from "./cli/cmd/mcp"
 import { ExportCommand } from "./cli/cmd/export"
 import { InitCommand } from "./cli/cmd/init"
+import { ResumeCommand, RunsCommand } from "./cli/cmd/runs"
 import { AttachCommand } from "./cli/cmd/tui/attach"
 import { TuiThreadCommand } from "./cli/cmd/tui/thread"
 import { EOL } from "os"
@@ -108,7 +109,7 @@ const cli = yargs(args)
 
     const positionals = Array.isArray(opts._) ? opts._ : []
     const command = String(positionals[0] ?? "")
-    const skipDatabaseMigration = command === "init" || command === "completion"
+    const skipDatabaseMigration = command === "init" || command === "runs" || command === "resume" || command === "completion"
     const marker = Database.Path
     if (!skipDatabaseMigration && marker !== ":memory:" && !(await Filesystem.exists(marker))) {
       const tty = process.stderr.isTTY
@@ -153,6 +154,8 @@ const cli = yargs(args)
   .command(AttachCommand)
   .command(RunCommand)
   .command(InitCommand)
+  .command(RunsCommand)
+  .command(ResumeCommand)
   .command(DebugCommand)
   .command(ProvidersCommand)
   .command(ServeCommand)

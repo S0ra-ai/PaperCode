@@ -958,7 +958,7 @@ test("gets config directories", async () => {
   })
 })
 
-test("does not try to install dependencies in read-only OPENCODE_CONFIG_DIR", async () => {
+test("does not try to install dependencies in read-only PAPER_FUCKER_CONFIG_DIR", async () => {
   if (process.platform === "win32") return
 
   await using tmp = await tmpdir<string>({
@@ -975,8 +975,8 @@ test("does not try to install dependencies in read-only OPENCODE_CONFIG_DIR", as
     },
   })
 
-  const prev = process.env.OPENCODE_CONFIG_DIR
-  process.env.OPENCODE_CONFIG_DIR = tmp.extra
+  const prev = process.env.PAPER_FUCKER_CONFIG_DIR
+  process.env.PAPER_FUCKER_CONFIG_DIR = tmp.extra
 
   try {
     await WithInstance.provide({
@@ -986,12 +986,12 @@ test("does not try to install dependencies in read-only OPENCODE_CONFIG_DIR", as
       },
     })
   } finally {
-    if (prev === undefined) delete process.env.OPENCODE_CONFIG_DIR
-    else process.env.OPENCODE_CONFIG_DIR = prev
+    if (prev === undefined) delete process.env.PAPER_FUCKER_CONFIG_DIR
+    else process.env.PAPER_FUCKER_CONFIG_DIR = prev
   }
 })
 
-test("installs dependencies in writable OPENCODE_CONFIG_DIR", async () => {
+test("installs dependencies in writable PAPER_FUCKER_CONFIG_DIR", async () => {
   await using tmp = await tmpdir<string>({
     init: async (dir) => {
       const cfg = path.join(dir, "configdir")
@@ -1000,8 +1000,8 @@ test("installs dependencies in writable OPENCODE_CONFIG_DIR", async () => {
     },
   })
 
-  const prev = process.env.OPENCODE_CONFIG_DIR
-  process.env.OPENCODE_CONFIG_DIR = tmp.extra
+  const prev = process.env.PAPER_FUCKER_CONFIG_DIR
+  process.env.PAPER_FUCKER_CONFIG_DIR = tmp.extra
 
   const testLayer = Config.layer.pipe(
     Layer.provide(testFlock),
@@ -1030,8 +1030,8 @@ test("installs dependencies in writable OPENCODE_CONFIG_DIR", async () => {
     expect(await Filesystem.exists(path.join(tmp.extra, ".gitignore"))).toBe(true)
     expect(await Filesystem.readText(path.join(tmp.extra, ".gitignore"))).toContain("package-lock.json")
   } finally {
-    if (prev === undefined) delete process.env.OPENCODE_CONFIG_DIR
-    else process.env.OPENCODE_CONFIG_DIR = prev
+    if (prev === undefined) delete process.env.PAPER_FUCKER_CONFIG_DIR
+    else process.env.PAPER_FUCKER_CONFIG_DIR = prev
   }
 })
 
@@ -2292,11 +2292,11 @@ describe("OPENCODE_DISABLE_PROJECT_CONFIG", () => {
 
   test("skips relative instructions with warning when flag is set but no config dir", async () => {
     const originalDisable = process.env["OPENCODE_DISABLE_PROJECT_CONFIG"]
-    const originalConfigDir = process.env["OPENCODE_CONFIG_DIR"]
+    const originalConfigDir = process.env["PAPER_FUCKER_CONFIG_DIR"]
 
     try {
       // Ensure no config dir is set
-      delete process.env["OPENCODE_CONFIG_DIR"]
+      delete process.env["PAPER_FUCKER_CONFIG_DIR"]
       process.env["OPENCODE_DISABLE_PROJECT_CONFIG"] = "true"
 
       await using tmp = await tmpdir({
@@ -2333,16 +2333,16 @@ describe("OPENCODE_DISABLE_PROJECT_CONFIG", () => {
         process.env["OPENCODE_DISABLE_PROJECT_CONFIG"] = originalDisable
       }
       if (originalConfigDir === undefined) {
-        delete process.env["OPENCODE_CONFIG_DIR"]
+        delete process.env["PAPER_FUCKER_CONFIG_DIR"]
       } else {
-        process.env["OPENCODE_CONFIG_DIR"] = originalConfigDir
+        process.env["PAPER_FUCKER_CONFIG_DIR"] = originalConfigDir
       }
     }
   })
 
-  test("OPENCODE_CONFIG_DIR still works when flag is set", async () => {
+  test("PAPER_FUCKER_CONFIG_DIR still works when flag is set", async () => {
     const originalDisable = process.env["OPENCODE_DISABLE_PROJECT_CONFIG"]
-    const originalConfigDir = process.env["OPENCODE_CONFIG_DIR"]
+    const originalConfigDir = process.env["PAPER_FUCKER_CONFIG_DIR"]
 
     try {
       await using configDirTmp = await tmpdir({
@@ -2372,13 +2372,13 @@ describe("OPENCODE_DISABLE_PROJECT_CONFIG", () => {
       })
 
       process.env["OPENCODE_DISABLE_PROJECT_CONFIG"] = "true"
-      process.env["OPENCODE_CONFIG_DIR"] = configDirTmp.path
+      process.env["PAPER_FUCKER_CONFIG_DIR"] = configDirTmp.path
 
       await WithInstance.provide({
         directory: projectTmp.path,
         fn: async () => {
           const config = await load()
-          // Should load from OPENCODE_CONFIG_DIR, not project
+          // Should load from PAPER_FUCKER_CONFIG_DIR, not project
           expect(config.model).toBe("configdir/model")
         },
       })
@@ -2389,20 +2389,20 @@ describe("OPENCODE_DISABLE_PROJECT_CONFIG", () => {
         process.env["OPENCODE_DISABLE_PROJECT_CONFIG"] = originalDisable
       }
       if (originalConfigDir === undefined) {
-        delete process.env["OPENCODE_CONFIG_DIR"]
+        delete process.env["PAPER_FUCKER_CONFIG_DIR"]
       } else {
-        process.env["OPENCODE_CONFIG_DIR"] = originalConfigDir
+        process.env["PAPER_FUCKER_CONFIG_DIR"] = originalConfigDir
       }
     }
   })
 })
 
-describe("OPENCODE_CONFIG_CONTENT token substitution", () => {
-  test("substitutes {env:} tokens in OPENCODE_CONFIG_CONTENT", async () => {
-    const originalEnv = process.env["OPENCODE_CONFIG_CONTENT"]
+describe("PAPER_FUCKER_CONFIG_CONTENT token substitution", () => {
+  test("substitutes {env:} tokens in PAPER_FUCKER_CONFIG_CONTENT", async () => {
+    const originalEnv = process.env["PAPER_FUCKER_CONFIG_CONTENT"]
     const originalTestVar = process.env["TEST_CONFIG_VAR"]
     process.env["TEST_CONFIG_VAR"] = "test_api_key_12345"
-    process.env["OPENCODE_CONFIG_CONTENT"] = JSON.stringify({
+    process.env["PAPER_FUCKER_CONFIG_CONTENT"] = JSON.stringify({
       $schema: "https://opencode.ai/config.json",
       username: "{env:TEST_CONFIG_VAR}",
     })
@@ -2418,9 +2418,9 @@ describe("OPENCODE_CONFIG_CONTENT token substitution", () => {
       })
     } finally {
       if (originalEnv !== undefined) {
-        process.env["OPENCODE_CONFIG_CONTENT"] = originalEnv
+        process.env["PAPER_FUCKER_CONFIG_CONTENT"] = originalEnv
       } else {
-        delete process.env["OPENCODE_CONFIG_CONTENT"]
+        delete process.env["PAPER_FUCKER_CONFIG_CONTENT"]
       }
       if (originalTestVar !== undefined) {
         process.env["TEST_CONFIG_VAR"] = originalTestVar
@@ -2430,14 +2430,14 @@ describe("OPENCODE_CONFIG_CONTENT token substitution", () => {
     }
   })
 
-  test("substitutes {file:} tokens in OPENCODE_CONFIG_CONTENT", async () => {
-    const originalEnv = process.env["OPENCODE_CONFIG_CONTENT"]
+  test("substitutes {file:} tokens in PAPER_FUCKER_CONFIG_CONTENT", async () => {
+    const originalEnv = process.env["PAPER_FUCKER_CONFIG_CONTENT"]
 
     try {
       await using tmp = await tmpdir({
         init: async (dir) => {
           await Filesystem.write(path.join(dir, "api_key.txt"), "secret_key_from_file")
-          process.env["OPENCODE_CONFIG_CONTENT"] = JSON.stringify({
+          process.env["PAPER_FUCKER_CONFIG_CONTENT"] = JSON.stringify({
             $schema: "https://opencode.ai/config.json",
             username: "{file:./api_key.txt}",
           })
@@ -2452,9 +2452,9 @@ describe("OPENCODE_CONFIG_CONTENT token substitution", () => {
       })
     } finally {
       if (originalEnv !== undefined) {
-        process.env["OPENCODE_CONFIG_CONTENT"] = originalEnv
+        process.env["PAPER_FUCKER_CONFIG_CONTENT"] = originalEnv
       } else {
-        delete process.env["OPENCODE_CONFIG_CONTENT"]
+        delete process.env["PAPER_FUCKER_CONFIG_CONTENT"]
       }
     }
   })

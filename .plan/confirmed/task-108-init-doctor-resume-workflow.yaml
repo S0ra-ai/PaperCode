@@ -1,0 +1,105 @@
+id: task-108-init-doctor-resume-workflow
+title: Init doctor resume workflow for 0.10.5-dev
+status: done
+priority: high
+owner: codex-paper-fucker
+tags:
+- paper
+- cli
+- tui
+- resume
+- 0.10.5-dev
+depends_on:
+- task-107-config-storage-isolation
+description: 'Harden the initialization and diagnostics workflow: interactive init
+  TUI semantics, Chinese doctor grouping, /resume selector, CLI resume and runs list
+  commands, and exit summary.'
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: doctor-report-shape
+  title: Add grouped PaperDoctorReport
+  status: done
+  owner: codex-paper-fucker
+  depends_on: []
+  description: Return and format configured, missing, optional_missing, blocked, and
+    next step groups in Chinese by default; keep --json machine-readable.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-13T01:53:12.036566'
+      level: info
+      message: init doctor now formats grouped Chinese diagnostics with 已配置/未配置/可选缺失/阻断缺失/下一步建议,
+        keeps --json machine-readable data, and diagnoseInit includes managed Paper
+        capabilities. API doctor now exposes PaperDoctorReport.v1. Focused init tests
+        passed.
+      agent: codex-paper-fucker
+    last_run: '2026-05-13T01:53:12.036566'
+    attempt_count: 2
+  meta: {}
+- id: resume-api-cli
+  title: Add resume API and CLI commands
+  status: done
+  owner: codex-paper-fucker
+  depends_on:
+  - doctor-report-shape
+  description: Implement paper_fucker resume [run-id] and paper_fucker runs list [--json]
+    using PaperRun history.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-13T01:58:31.636830'
+      level: info
+      message: Added list/resume PaperRun APIs, CLI commands paper_fucker runs list
+        and paper_fucker resume [run-id], and TUI /resume command route. Focused PaperRun
+        API and TUI workbench tests cover list/resume API and storage_scope request
+        generation.
+      agent: codex-paper-fucker
+    last_run: '2026-05-13T01:58:31.636830'
+    attempt_count: 2
+  meta: {}
+- id: resume-tui-exit-summary
+  title: Add /resume TUI and exit summary
+  status: done
+  owner: codex-paper-fucker
+  depends_on:
+  - resume-api-cli
+  description: Add a PaperRun history selector route and print run UUID/status/path/token/cost/Preview/resume
+    command when exiting a run.
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-13T01:58:51.795414'
+      level: info
+      message: Home TUI copy is reduced to “你的私人专属研究助手” with the new prompt placeholder,
+        /resume opens a PaperRun history selector with keyboard filtering, and PaperRunDashboard
+        writes an exit summary containing run UUID, status, runtime root, token/cost,
+        preview status, and resume command. Focused TUI workbench tests passed.
+      agent: codex-paper-fucker
+    last_run: '2026-05-13T01:58:51.795414'
+    attempt_count: 2
+  meta: {}
+outputs:
+- type: directory
+  path: packages/opencode/src/paper/init
+  description: Init and doctor flow
+- type: directory
+  path: packages/opencode/src/cli/cmd
+  description: CLI init/resume/runs commands
+- type: directory
+  path: packages/opencode/src/cli/cmd/tui
+  description: TUI /resume and exit summary
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-13T01:37:11.618548'
+  updated_at: '2026-05-13T01:58:57.526024'
+  version: '1'

@@ -21,7 +21,7 @@ type PaperCandidate = {
   display_name: string
   allowed: boolean
   smoke_status: string
-  source?: "opencode_builtin" | "openai_compatible" | "manual"
+  source?: "paper_builtin" | "openai_compatible" | "manual"
   cost_hint?: string
   context_hint?: string
   capabilities?: string[]
@@ -159,7 +159,7 @@ export function PaperModelWorkbenchPage() {
     try {
       const response = await sdk.fetch(new URL("paper/model-inventory", sdk.url), {
         headers: {
-          ...(sdk.directory ? { "x-opencode-directory": sdk.directory } : {}),
+          ...(sdk.directory ? { "x-paper-fucker-directory": sdk.directory } : {}),
         },
       })
       return await readTuiJsonResponse<ModelInventoryPayload>(response, "模型工作台读取失败")
@@ -270,7 +270,7 @@ export function PaperModelWorkbenchPage() {
       method: "POST",
       headers: {
         "content-type": "application/json",
-        ...(sdk.directory ? { "x-opencode-directory": sdk.directory } : {}),
+        ...(sdk.directory ? { "x-paper-fucker-directory": sdk.directory } : {}),
       },
       body: JSON.stringify(body),
     })

@@ -1,4 +1,7 @@
 import { afterEach, describe, expect, test } from "bun:test"
+import { existsSync } from "fs"
+import { mkdir } from "fs/promises"
+import path from "path"
 import { ConfigProvider, Layer } from "effect"
 import { HttpRouter } from "effect/unstable/http"
 import { Flag } from "@opencode-ai/core/flag/flag"
@@ -71,7 +74,7 @@ describe("PaperRun HttpApi", () => {
     Flag.OPENCODE_EXPERIMENTAL_HTTPAPI = false
 
     const response = await Server.Legacy().app.request(PaperPaths.modelInventory, {
-      headers: { "x-opencode-directory": tmp.path },
+      headers: { "x-paper-fucker-directory": tmp.path },
     })
 
     expect(response.status).toBe(200)
@@ -87,7 +90,7 @@ describe("PaperRun HttpApi", () => {
     await using tmp = await tmpdir({ git: true, config: { formatter: false, lsp: false } })
     previousPaperHome = process.env.PAPER_FUCKER_TEST_HOME
     process.env.PAPER_FUCKER_TEST_HOME = tmp.path
-    const headers = { "x-opencode-directory": tmp.path }
+    const headers = { "x-paper-fucker-directory": tmp.path }
 
     const create = await app().request(PaperPaths.runs, {
       ...json({
@@ -193,5 +196,65 @@ describe("PaperRun HttpApi", () => {
     const routingBody = await routing.json()
     expect(routingBody.source).toBe("blocked")
     expect(routingBody.diagnostics).toContain("model_allowlist_empty")
+  })
+
+  test("stores PaperRuns in Paper Fucker home by default and resumes home/workspace history", async () => {
+    await using tmp = await tmpdir({
+      git: true,
+      config: { formatter: false, lsp: false },
+      init: async (dir) => {
+        const home = path.join(dir, "paper-home")
+        const workspace = path.join(dir, "workspace")
+        const legacyHome = path.join(dir, "legacy-opencode-home")
+        await mkdir(home, { recursive: true })
+        await mkdir(workspace, { recursive: true })
+        await mkdir(legacyHome, { recursive: true })
+        return { home, workspace, legacyHome }
+      },
+    })
+    previousPaperHome = process.env.PAPER_FUCKER_TEST_HOME
+    process.env.PAPER_FUCKER_TEST_HOME = tmp.extra.home
+    const previousLegacyHome = process.env.OPENCODE_TEST_HOME
+    process.env.OPENCODE_TEST_HOME = tmp.extra.legacyHome
+    const headers = { "x-paper-fucker-directory": tmp.extra.workspace }
+
+    try {
+      const homeCreate = await app().request(PaperPaths.runs, {
+        ...json({ topic: "默认 home run", language: "zh-CN" }),
+        headers: { ...headers, "content-type": "application/json" },
+      })
+      expect(homeCreate.status).toBe(200)
+      const homeBody = await homeCreate.json()
+      expect(path.resolve(homeBody.run_dir).startsWith(path.join(tmp.extra.home, ".paper_fucker", "runs"))).toBe(true)
+      expect(path.resolve(homeBody.run_dir).startsWith(path.join(tmp.extra.workspace, ".paper_fucker", "runs"))).toBe(false)
+      expect(existsSync(path.join(tmp.extra.legacyHome, ".paper_fucker", "runs"))).toBe(false)
+      expect(homeBody.run.diagnostics.runtime_root).toBe(path.dirname(homeBody.run_dir))
+
+      const workspaceCreate = await app().request(PaperPaths.runs, {
+        ...json({ topic: "显式 workspace run", language: "zh-CN", storage_scope: "workspace" }),
+        headers: { ...headers, "content-type": "application/json" },
+      })
+      expect(workspaceCreate.status).toBe(200)
+      const workspaceBody = await workspaceCreate.json()
+      expect(path.resolve(workspaceBody.run_dir).startsWith(path.join(tmp.extra.workspace, ".paper_fucker", "runs"))).toBe(true)
+
+      const list = await app().request(PaperPaths.runs, { headers })
+      expect(list.status).toBe(200)
+      const runs = (await list.json()).runs as Array<{ run_id: string; storage_scope: string }>
+      expect(runs.map((run) => run.run_id)).toContain(homeBody.run.run_id)
+      expect(runs.map((run) => run.run_id)).toContain(workspaceBody.run.run_id)
+      expect(runs.find((run) => run.run_id === homeBody.run.run_id)?.storage_scope).toBe("home")
+      expect(runs.find((run) => run.run_id === workspaceBody.run.run_id)?.storage_scope).toBe("workspace")
+
+      const resumed = await app().request(runPath(PaperPaths.resume, homeBody.run.run_id), {
+        method: "POST",
+        headers,
+      })
+      expect(resumed.status).toBe(200)
+      expect((await resumed.json()).run.run_id).toBe(homeBody.run.run_id)
+    } finally {
+      if (previousLegacyHome === undefined) delete process.env.OPENCODE_TEST_HOME
+      else process.env.OPENCODE_TEST_HOME = previousLegacyHome
+    }
   })
 })

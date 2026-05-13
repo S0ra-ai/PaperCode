@@ -42,7 +42,7 @@ function runtimeOptions(workspace: string, home: string): ResearchRuntimeOptions
 }
 
 describe("research runtime", () => {
-  test("creates a workspace-first run and rebuilds local and global indexes", async () => {
+  test("creates a home-first run and rebuilds local and global indexes", async () => {
     const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-runtime-test-"))
     try {
       const workspace = path.join(dir, "workspace")
@@ -58,9 +58,10 @@ describe("research runtime", () => {
         runtimeOptions(workspace, home),
       )
 
-      expect(handle.storage_scope).toBe("workspace")
+      expect(handle.storage_scope).toBe("home")
       expect(handle.run.workspace).toBe(workspace)
-      expect(handle.run_dir.startsWith(path.join(workspace, ".paper_fucker", "runs"))).toBe(true)
+      expect(handle.run_dir.startsWith(path.join(home, ".paper_fucker", "runs"))).toBe(true)
+      expect(handle.run_dir.startsWith(path.join(workspace, ".paper_fucker", "runs"))).toBe(false)
       expect(existsSync(path.join(handle.run_dir, "run.json"))).toBe(true)
       expect(existsSync(path.join(handle.run_dir, "runtime-state.json"))).toBe(true)
       expect(existsSync(path.join(handle.run_dir, "events.jsonl"))).toBe(true)

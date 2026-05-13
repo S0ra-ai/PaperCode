@@ -485,7 +485,7 @@ export const layer = Layer.effect(
 
         const pluginScopeForSource = Effect.fnUntraced(function* (source: string) {
           if (source.startsWith("http://") || source.startsWith("https://")) return "global"
-          if (source === "PAPER_FUCKER_CONFIG_CONTENT" || source === "OPENCODE_CONFIG_CONTENT") return "local"
+          if (source === "PAPER_FUCKER_CONFIG_CONTENT") return "local"
           if (containsPath(source, ctx)) return "local"
           return "global"
         })
