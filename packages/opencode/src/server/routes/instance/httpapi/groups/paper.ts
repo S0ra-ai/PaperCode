@@ -10,6 +10,7 @@ const root = "/paper"
 const StringArray = Schema.Array(Schema.String)
 const BudgetTier = Schema.Literals(["quick", "standard", "deep", "submission", "custom"])
 const QualityMode = Schema.Literals(["reviewable_bundle", "submission_candidate"])
+const StorageScope = Schema.Literals(["home", "workspace"])
 
 const DataEgressPolicyPayload = Schema.Struct({
   mode: Schema.optional(Schema.Literals(["private_first", "allow_summaries", "allow_authorized_paths"])),
@@ -30,6 +31,7 @@ export const PaperRunCreatePayload = Schema.Struct({
   model_roles: Schema.optional(Schema.Record(Schema.String, Schema.String)),
   budget_tier: Schema.optional(BudgetTier),
   quality_mode: Schema.optional(QualityMode),
+  storage_scope: Schema.optional(StorageScope),
   data_egress_policy: Schema.optional(DataEgressPolicyPayload),
 })
 
@@ -87,6 +89,7 @@ export const ModelRoutingDecisionPayload = Schema.Struct({
 export const PaperPaths = {
   runs: `${root}/runs`,
   run: `${root}/runs/:runID`,
+  resume: `${root}/runs/:runID/resume`,
   events: `${root}/runs/:runID/events`,
   guidance: `${root}/runs/:runID/guidance`,
   control: `${root}/runs/:runID/control`,
@@ -117,6 +120,16 @@ export const PaperApi = HttpApi.make("paper")
             description: "Create a first-class Paper Fucker PaperRun from topic, code, data, logs, or paper materials.",
           }),
         ),
+        HttpApiEndpoint.get("listRuns", PaperPaths.runs, {
+          success: described(AnyJson, "PaperRun history entries"),
+          error: HttpApiError.BadRequest,
+        }).annotateMerge(
+          OpenApi.annotations({
+            identifier: "paper.runs.list",
+            summary: "List PaperRuns",
+            description: "List home and workspace PaperRun history entries for resume and audit workflows.",
+          }),
+        ),
         HttpApiEndpoint.get("getRun", PaperPaths.run, {
           params: { runID: Schema.String },
           success: described(AnyJson, "PaperRun snapshot"),
@@ -126,6 +139,17 @@ export const PaperApi = HttpApi.make("paper")
             identifier: "paper.runs.get",
             summary: "Get PaperRun",
             description: "Get PaperRun state, ledgers, agent tree, diagnostics, preview state, and export state.",
+          }),
+        ),
+        HttpApiEndpoint.post("resumeRun", PaperPaths.resume, {
+          params: { runID: Schema.String },
+          success: described(AnyJson, "Resumed PaperRun snapshot"),
+          error: [HttpApiError.BadRequest, HttpApiError.NotFound],
+        }).annotateMerge(
+          OpenApi.annotations({
+            identifier: "paper.runs.resume",
+            summary: "Resume PaperRun",
+            description: "Resume a previous PaperRun from the Paper Fucker home/workspace run index.",
           }),
         ),
         HttpApiEndpoint.get("events", PaperPaths.events, {

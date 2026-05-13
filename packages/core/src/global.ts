@@ -10,7 +10,7 @@ const homeDirName = ".paper_fucker"
 const overrides: Partial<Record<keyof Interface, string>> = {}
 
 function home() {
-  return overrides.home ?? process.env.PAPER_FUCKER_TEST_HOME ?? process.env.OPENCODE_TEST_HOME ?? os.homedir()
+  return overrides.home ?? process.env.PAPER_FUCKER_TEST_HOME ?? os.homedir()
 }
 
 function root() {

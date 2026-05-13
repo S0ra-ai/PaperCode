@@ -1,0 +1,38 @@
+# Release Checklist - v2.5.0
+
+- [ ] `SKILL.md` exists with name, description, MIT-0 license, version 2.5.0, and OpenClaw key in metadata.
+- [ ] `VERSION` is 2.5.0.
+- [ ] `metadata.json` exists, is valid JSON, and says 2.5.0.
+- [ ] `metadata.json` records `generated_from.guide_version` as 2.0.5.
+- [ ] `agents/openai.yaml` exists and says 2.5.0.
+- [ ] `assets/subtype-atlas/manifest.json` exists and is valid JSON.
+- [ ] `assets/subtype-atlas/manifest.json` says atlas/generated skill version 2.5.0 and factory version 2.0.5.
+- [ ] First-trigger startup-plan-only rule included.
+- [ ] First-trigger startup displays all available saved atlas boards with Markdown image embeds without target-paper image generation.
+- [ ] Text replies that explain subtype, layout grammar, visual style, density, metaphor, modeling pattern, candidate scheme differences, or final content architecture embed a saved reference or non-target concept/modeling image, or record missing state and repair action.
+- [ ] Text replies that explain visual structure, layout skeleton, panel choreography, module topology, arrow grammar, candidate-board structure, second-round optimization geometry, or content architecture embed a saved reference or non-target visual-structure concept/modeling image.
+- [ ] Tests fail if a visual-structure text reply uses only prose, bullets, ASCII, Mermaid, SVG, or a code-rendered sketch.
+- [ ] State footer records `concept_example_required`, `concept_example_status`, `concept_example_role`, and `concept_example_trigger_reason`.
+- [ ] State footer records `visual_structure_image_required`, `visual_structure_image_status`, `visual_structure_image_role`, and `visual_structure_image_trigger_reason`.
+- [ ] Text replies never embed target-paper candidate images, second-round variants, draft figures, final figures, or revisions.
+- [ ] Inline non-target concept/example/structure images do not count as candidate-board batches and do not set `candidate_image_batch_id` or `second_round_candidate_batch_id`.
+- [ ] Workflow lists S0, P1-P6, P6b, P6b-IMAGE, P6c, and P7-P9 with response modes.
+- [ ] P3 text candidates default to 6 within a 4-6 range.
+- [ ] P4 TEXT_ONLY diverse first-round candidate-board setup includes required reference/concept and visual-structure display state.
+- [ ] P5 IMAGE_ONLY diverse first-round target-paper candidate-board generation included.
+- [ ] P6 TEXT_ONLY first-round review/current-best selection included and cannot move directly to P7/P8.
+- [ ] P6b TEXT_ONLY paper-local divergence setup includes required reference/concept and optimization-structure display state.
+- [ ] P6b-IMAGE IMAGE_ONLY second-round target-paper variant generation included.
+- [ ] P6c TEXT_ONLY second-round review/final direction lock included.
+- [ ] Release tests fail if P6 first-round selection moves directly to P7/P8 without P6b/P6b-IMAGE/P6c.
+- [ ] Every text reply lists all workflow steps and current position.
+- [ ] Next-question prompt prefix and fallback prompt included exactly.
+- [ ] ChatGPT web Create image / ChatGPT Images 2.0 rendering route included.
+- [ ] Codex `$imagegen` first rendering route included, with ChatGPT Images 2.0 API or approved API fallback.
+- [ ] SVG/Mermaid/TikZ/Graphviz/HTML-CSS/canvas/matplotlib/code-rendered outputs forbidden as target-paper image outputs or fallbacks.
+- [ ] Sample/reference image multi-image attribute protocol included.
+- [ ] Full local corpus manifest and evidence map references included.
+- [ ] Builder-time acquisition report included.
+- [ ] Representative rendered pages are labeled as audit aids only.
+- [ ] Multi-label diagram routing included.
+- [ ] MIT-0 license included.

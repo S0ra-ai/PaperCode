@@ -50,8 +50,10 @@ describe("init wizard", () => {
       expect(initText).toContain("Nature Skill:")
       expect(initText.trimStart().startsWith("{")).toBe(false)
       expect(doctorText).toContain("Paper Fucker Doctor")
-      expect(doctorText).toContain("配置文件: 已存在")
-      expect(doctorText).toContain("Nature Skill: 已安装")
+      expect(doctorText).toContain("已配置:")
+      expect(doctorText).toContain("配置文件已存在")
+      expect(doctorText).toContain("可选缺失:")
+      expect(doctorText).toContain("阻断缺失:")
       expect(doctorText).toContain("需要完整机器可读诊断时，加 --json")
       expect(doctorText.trimStart().startsWith("{")).toBe(false)
     } finally {
@@ -94,7 +96,7 @@ describe("init wizard", () => {
       expect(result.config.access.full_access_acknowledged).toBe(true)
       expect(result.config.workspace.default_root).toBe(workspace)
       expect(result.config.model_roles.default_model).toBeUndefined()
-      expect(result.config.model_roles.strategy).toBe("opencode_provider_agnostic")
+      expect(result.config.model_roles.strategy).toBe("paper_provider_agnostic")
       expect(result.tools.tools.pandoc.status).toBe("available")
       expect(result.tools.tools.pandoc.source).toBe("config")
 

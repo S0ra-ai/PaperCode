@@ -12,7 +12,7 @@ export const PAPER_MODEL_ROLES = [
 
 export type PaperModelRole = (typeof PAPER_MODEL_ROLES)[number]
 
-export type OpenCodeModelRef = {
+export type PaperModelRef = {
   provider_id: string
   model_id: string
 }
@@ -22,19 +22,19 @@ export type ModelRoleConfig = {
   roles?: Partial<Record<PaperModelRole, string>>
 }
 
-export type ResolvedModelRole = OpenCodeModelRef & {
+export type ResolvedModelRole = PaperModelRef & {
   role: PaperModelRole
   source: "default" | "role_override"
 }
 
 export type ModelRoleRouter = {
-  strategy: "opencode_provider_agnostic"
+  strategy: "paper_provider_agnostic"
   config: ModelRoleConfig
   resolve(role: PaperModelRole): ResolvedModelRole
   diagnostics(): {
-    strategy: "opencode_provider_agnostic"
-    default_model: OpenCodeModelRef
-    role_overrides: Partial<Record<PaperModelRole, OpenCodeModelRef>>
+    strategy: "paper_provider_agnostic"
+    default_model: PaperModelRef
+    role_overrides: Partial<Record<PaperModelRole, PaperModelRef>>
   }
 }
 
@@ -43,20 +43,20 @@ export const DEFAULT_MODEL_ROLE_CONFIG = {
   roles: {},
 } as const satisfies ModelRoleConfig
 
-export class InvalidOpenCodeModelIdError extends Error {
+export class InvalidPaperModelIdError extends Error {
   constructor(
     readonly value: string,
     readonly role?: PaperModelRole,
   ) {
-    super(role ? `Invalid OpenCode model id for role "${role}": ${value}` : `Invalid OpenCode model id: ${value}`)
-    this.name = "InvalidOpenCodeModelIdError"
+    super(role ? `Invalid Paper Fucker model id for role "${role}": ${value}` : `Invalid Paper Fucker model id: ${value}`)
+    this.name = "InvalidPaperModelIdError"
   }
 }
 
-export function parseOpenCodeModelId(value: string, role?: PaperModelRole): OpenCodeModelRef {
+export function parsePaperModelId(value: string, role?: PaperModelRole): PaperModelRef {
   const [provider, ...modelParts] = value.split("/")
   const model = modelParts.join("/")
-  if (!provider?.trim() || !model.trim()) throw new InvalidOpenCodeModelIdError(value, role)
+  if (!provider?.trim() || !model.trim()) throw new InvalidPaperModelIdError(value, role)
   return {
     provider_id: provider.trim(),
     model_id: model.trim(),
@@ -70,12 +70,12 @@ export function createModelRoleRouter(config: Partial<ModelRoleConfig> = {}): Mo
   }
 
   return {
-    strategy: "opencode_provider_agnostic",
+    strategy: "paper_provider_agnostic",
     config: resolvedConfig,
     resolve(role) {
       const override = resolvedConfig.roles?.[role]
       const source = override ? "role_override" : "default"
-      const ref = parseOpenCodeModelId(override ?? resolvedConfig.default_model, role)
+      const ref = parsePaperModelId(override ?? resolvedConfig.default_model, role)
       return {
         role,
         ...ref,
@@ -83,14 +83,14 @@ export function createModelRoleRouter(config: Partial<ModelRoleConfig> = {}): Mo
       }
     },
     diagnostics() {
-      const role_overrides: Partial<Record<PaperModelRole, OpenCodeModelRef>> = {}
+      const role_overrides: Partial<Record<PaperModelRole, PaperModelRef>> = {}
       for (const role of PAPER_MODEL_ROLES) {
         const value = resolvedConfig.roles?.[role]
-        if (value) role_overrides[role] = parseOpenCodeModelId(value, role)
+        if (value) role_overrides[role] = parsePaperModelId(value, role)
       }
       return {
-        strategy: "opencode_provider_agnostic",
-        default_model: parseOpenCodeModelId(resolvedConfig.default_model),
+        strategy: "paper_provider_agnostic",
+        default_model: parsePaperModelId(resolvedConfig.default_model),
         role_overrides,
       }
     },

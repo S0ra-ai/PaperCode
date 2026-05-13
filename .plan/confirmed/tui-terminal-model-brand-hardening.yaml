@@ -207,10 +207,7 @@ outputs:
 trace:
   logs: []
   attempt_count: 0
-lock:
-  by: paper-fucker-agent
-  at: '2026-05-12T23:43:39.029671'
 meta:
   created_at: '2026-05-12T23:43:32.365683'
-  updated_at: '2026-05-13T00:37:04.913017'
+  updated_at: '2026-05-13T00:43:53.962805'
   version: '1'
