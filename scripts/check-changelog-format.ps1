@@ -101,6 +101,17 @@ foreach ($resolvedPath in $paths) {
       continue
     }
 
+    if ($trim -match '^:(brief|changes)(?:\s+.*)?$') {
+      if ($line -ne "        $trim") {
+        $problems.Add("${displayPath}:${lineNumber}: section headers must use 8-space indentation")
+      }
+      $currentSection = "changes"
+      if ($isRootChangelog -and $matches[1] -eq "brief" -and $trim.Length -gt 160) {
+        $problems.Add("${displayPath}:${lineNumber}: :brief is too long; summarize and move details into grouped sections")
+      }
+      continue
+    }
+
     if ($trim -match '^:([A-Za-z_]+)(?:\s+.*)?$') {
       if ($line -ne "        $trim") {
         $problems.Add("${displayPath}:${lineNumber}: section headers must use 8-space indentation")
@@ -109,22 +120,19 @@ foreach ($resolvedPath in $paths) {
       if ($isRootChangelog -and $currentSection -eq "commits") {
         $problems.Add("${displayPath}:${lineNumber}: root CHANGELOG entries must not use :commits aggregation blocks")
       }
-      if ($isRootChangelog -and $currentSection -eq "brief" -and $trim.Length -gt 160) {
-        $problems.Add("${displayPath}:${lineNumber}: :brief is too long; summarize and move details into grouped sections")
-      }
       continue
     }
 
     if ($trim -match '^- ') {
       $currentVersionItems += 1
-      $expected = if ($currentSection -and $currentSection -ne "brief") { "            $trim" } else { "        $trim" }
+      $expected = if ($currentSection -and $currentSection -ne "changes") { "            $trim" } else { "        $trim" }
       if ($line -ne $expected) {
         $problems.Add("${displayPath}:${lineNumber}: list items have invalid indentation for section '$currentSection'")
       }
       continue
     }
 
-    $expectedContinuation = if ($currentSection -and $currentSection -ne "brief") { "            $trim" } else { "        $trim" }
+    $expectedContinuation = if ($currentSection -and $currentSection -ne "changes") { "            $trim" } else { "        $trim" }
     if ($line -ne $expectedContinuation) {
       $problems.Add("${displayPath}:${lineNumber}: continuation has invalid indentation for section '$currentSection'")
     }

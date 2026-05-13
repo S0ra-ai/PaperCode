@@ -2,10 +2,21 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.11.0-dev
+:version       0.11.0.1-dev
 :last_update   2026/05/13
 
 :history
+
+    0.11.0.1-dev - 2026/05/13 (f901e6a8) [develop]
+        :brief 统一 TaskFlow CHANGELOG 风格和缩进
+        - docs(changelog): 统一根 CHANGELOG 与 v0 归档的 TaskFlow colon-DSL 风格
+        - fix(changelog): 收紧本地 changelog 格式脚本以匹配 TaskFlow :changes 缩进语义
+        :verification
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-changelog-format.ps1 -IncludeArchives
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1
+            - TaskFlow validate_changelog_format
+            - TaskFlow validate_changelog_versions
+            - git diff --check
 
     0.11.0-dev - 2026/05/13 (b0db5090) [develop]
         :brief 将 Paper Fucker 推进为更独立的论文研究工作台，补齐配置隔离、历史恢复、机器环境、内置论文 skills 和公开文档

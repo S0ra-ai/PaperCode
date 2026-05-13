@@ -9,6 +9,7 @@
 
     0.4.4-dev - 2026/05/10 (713835c) [develop]
         :brief 默认 PaperRun 引擎自动记录完整 observability audit 覆盖
+        :changes
         - fix(observability): 新增 recordDefaultPaperRunObservability, 自动记录 model_role/capability/subagent/tool/data_egress/cost
         - fix(run): createPaperRun 在默认 stage graph 之后写入 observability baseline, 不再依赖测试或调用方手动补 audit
         - fix(strict): strict acceptance 的 Git Flow 检查允许 `fix/*` 活动分支, 与当前分支策略一致
@@ -33,6 +34,7 @@
 
     0.4.3-dev - 2026/05/10 (7d5df2a) [develop]
         :brief PDF 导出支持多 LaTeX 引擎 fallback 并修复 Windows TeX 路径/standalone LaTeX
+        :changes
         - fix(export): PDF renderer 按 latexmk -> xelatex -> pdflatex -> lualatex -> tectonic 顺序尝试
         - fix(export): 任一引擎失败后继续尝试下一引擎, 并把失败原因保留到 PDF diagnostics
         - fix(export): 传给 LaTeX 引擎的 Windows 路径统一转为 `/`, 避免反斜杠被 TeX 解析为控制序列
@@ -54,6 +56,7 @@
 
     0.4.2-dev - 2026/05/10 (18562fb) [develop]
         :brief 对齐 PaperRun 完成态、真实性 gate 与 reproduction_failure 阶段展示
+        :changes
         - fix(paperrun): PaperRun snapshot status 新增 blocked, 完整执行但 final gate 阻断时不再显示 running
         - fix(controller): durable controller 新增 review_required, 用于已跑完但需要证据/复现/审查的 run
         - fix(stage): final gate 的 reproduction_failure 反投影到 reproduction stage, 避免复现阶段成功但最终 gate 因复现失败阻断的矛盾
@@ -75,6 +78,7 @@
 
     0.4.1-dev - 2026/05/10 (fad39b1) [develop]
         :brief 严格验收脚本增加逐项超时、进度报告与 focused 默认测试集
+        :changes
         - fix(strict): scripts/strict-acceptance.ps1 新增 CheckTimeoutSeconds、FullWorkspaceSuite 与 FullWorkspaceTimeoutSeconds 参数
         - fix(strict): 每个检查通过 Start-Job/Wait-Job 独立执行, 超时后清理子任务并报告 timed out after
         - fix(strict): Invoke-Check 在 finally 中写入报告, 长流程失败或超时时保留已完成检查证据
@@ -94,6 +98,7 @@
 
     0.4.0-dev - 2026/05/10 (b0452c8) [develop]
         :brief 运行真实 topic+code PaperRun 质量基准并生成后续硬化任务
+        :changes
         - feat(benchmark): 新增 scripts/live-paper-quality-benchmark.ts, 可复现创建真实 PaperRun、forced export 与 summary JSON
         - feat(gitignore): 忽略 .paper_fucker/runs/, 防止 live PaperRun 产物进入 Git
         - docs(benchmark): 新增 reports/live-paper-quality-benchmark.md, 记录 DeepSeek/Exa/Nature/toolchain/PaperRun 结果与质量缺口
