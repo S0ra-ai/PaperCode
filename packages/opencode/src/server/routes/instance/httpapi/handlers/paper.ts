@@ -352,10 +352,16 @@ export const paperHandlers = HttpApiBuilder.group(InstanceHttpApi, "paper", (han
           const providerRecord = providers as Record<string, { name?: string; models?: Record<string, unknown> }>
           for (const providerID of registeredProviderIDs) {
             const provider = providerRecord[providerID]
+            if (!provider) continue
             providerRegistrations[providerID] = {
               provider_id: providerID,
               provider_name: provider?.name ?? providerID,
-              kind: "builtin",
+              kind:
+                providerID === "openai"
+                  ? "chatgpt_subscription"
+                  : providerID === "github-copilot"
+                    ? "copilot_subscription"
+                    : "builtin",
               status: "registered",
               model_count: Object.keys(provider?.models ?? {}).length,
               allowed_count: ctx.payload.allowlist.filter((ref) => ref.startsWith(`${providerID}/`)).length,

@@ -2,10 +2,27 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.11.0.1-dev
+:version       0.11.1-dev
 :last_update   2026/05/13
 
 :history
+
+    0.11.1-dev - 2026/05/13 (ed57d7dc) [feature/model-workbench-runid-display-hardening]
+        :brief 重构模型工作台三页体验并修复 PaperRun run_id 冲突
+        :tui
+            - feat(models): /models 收敛为已注册、所有模型、全流程模型三页
+            - feat(models): 已注册页只显示用户配置过的 provider，并区分 ChatGPT 订阅、Copilot CLI 订阅和其他 provider
+            - feat(models): 所有模型页支持多选候选池，M 设置主决策模型，B 设置备用决策模型
+            - feat(models): 全流程模型继续支持自动选择、动态选择和强制指定
+            - fix(models): 删除 provider 会同步清理候选模型、allowlist、主/备用决策模型和强制阶段策略
+        :runtime
+            - fix(runs): PaperRun 创建时检测已有 run_id，冲突时自动生成新的 run id，避免 runs.run_id UNIQUE constraint 失败
+        :test
+            - test(models): 覆盖删除 provider 后候选池、allowlist、决策模型和阶段策略清理
+            - test(runs): 覆盖重复生成 run id 时自动创建新 PaperRun
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/model-discovery.test.ts test/paper/run-api.test.ts
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
 
     0.11.0.1-dev - 2026/05/13 (f901e6a8) [develop]
         :brief 统一 TaskFlow CHANGELOG 风格和缩进
