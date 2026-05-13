@@ -1,3 +1,4 @@
+import { existsSync } from "fs"
 import { appendFile, mkdir, readFile } from "fs/promises"
 import path from "path"
 import { randomUUID } from "crypto"
@@ -117,6 +118,20 @@ function nowIso(options?: ResearchRuntimeOptions) {
 
 export function nextResearchId(kind: "run" | "event" | "artifact", options?: ResearchRuntimeOptions) {
   return options?.idFactory?.(kind) ?? `${kind}-${randomUUID()}`
+}
+
+async function nextUniqueResearchRunId(root: string, input: CreateResearchRunInput, options?: ResearchRuntimeOptions) {
+  const existing = new Set((await discoverRunDirs({ workspace: options?.workspace, home: options?.home })).map((runDir) => path.basename(runDir)))
+  const available = (runId: string) => {
+    const runDir = runDirectoryPath(root, runId)
+    return !existsSync(runDir) && !existing.has(path.basename(runDir))
+  }
+  if (input.run_id && available(input.run_id)) return input.run_id
+  for (let attempt = 0; attempt < 10; attempt++) {
+    const candidate = input.run_id ? `${input.run_id}-${attempt + 1}` : nextResearchId("run", options)
+    if (available(candidate)) return candidate
+  }
+  return `run-${randomUUID()}`
 }
 
 async function nextUniqueResearchEventId(runDir: string, options?: ResearchRuntimeOptions) {
@@ -243,8 +258,8 @@ export async function createResearchRun(
     async (span) => {
       const createdAt = nowIso(options)
       const workspace = path.resolve(input.workspace ?? options?.workspace ?? process.cwd())
-      const runId = input.run_id ?? nextResearchId("run", options)
       const runRoot = await chooseRunRoot({ workspace, home: options?.home, storage_scope: input.storage_scope })
+      const runId = await nextUniqueResearchRunId(runRoot.root, input, { ...options, workspace })
       const runDir = runDirectoryPath(runRoot.root, runId)
       await initializeFactFiles(runDir)
 
