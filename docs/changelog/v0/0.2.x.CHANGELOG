@@ -9,6 +9,7 @@
 
     0.2.6-dev - 2026/05/09 (66db257) [develop]
         :brief 清理 OpenCode 用户可见表面为 Paper Fucker 论文工作台
+        :changes
         - feat(cli): 启动 ASCII logo 与默认 help/banner 改为 Paper Fucker wordmark
         - feat(cli): 默认命令注册移除 acp/agent/console/db/generate/github/import/pr/session/stats/upgrade/uninstall 等旧产品入口
         - feat(cli): run/tui/attach 的旧 resume/session/agent 参数改为隐藏内部兼容参数, 避免普通用户入口暴露 chat session 语义
@@ -55,6 +56,7 @@
 
     0.2.5-dev - 2026/05/09 (5786258) [develop]
         :brief 新增多层多模型 Agent 编排与私有优先数据外传策略
+        :changes
         - feat(agents): 新增 AgentRoleRouter 与 PaperAgentTree, 支持 root/stage/worker/specialist/reviewer/verifier/citation 多层子 agent
         - feat(models): 父 agent、子 agent、specialist subagent 可解析不同 OpenCode provider/model, 并记录 model source 与 artifact provenance
         - feat(budget): 新增 quick/standard/deep/submission/custom 预算档, 约束最大深度、并发、live search、container reproduction 与成本上限
@@ -101,6 +103,7 @@
 
     0.2.4-dev - 2026/05/09 (dd2fd98) [develop]
         :brief 新增 OpenAI-compatible Provider/Model 角色向导基础
+        :changes
         - feat(models): 新增 ProviderEndpointConfig 与 OpenAI-compatible /models discovery, 支持 base_url、api_key、compatibility、timeout diagnostics
         - feat(secrets): provider public config 写入 ~/.paper_fucker/providers, API key 仅写入 ~/.paper_fucker/local/provider-secrets.json
         - feat(roles): 新增 ModelRoleAssignment, 支持 default、per-role、subagent override 解析
@@ -126,6 +129,7 @@
 
     0.2.3-dev - 2026/05/09 (476b978) [develop]
         :brief 将 TUI 默认入口改为中文 PaperRun 论文工作台
+        :changes
         - feat(tui): 首页 prompt 解析主题、代码路径、论文材料、数据集、实验日志、profile、language、budget 为 PaperRunCreateRequest
         - feat(tui): Prompt 支持 onSubmitPrompt 拦截, 首页默认提交 /paper/runs 而不是创建普通 chat session
         - feat(tui): 新增 paper route 与 PaperRun dashboard, 展示 Stage Graph、Agent Tree、Source Ledger、Claim Ledger、实验复现、diagnostics、pause questions、Preview、Export
@@ -150,6 +154,7 @@
 
     0.2.2-dev - 2026/05/09 (8442f6a) [develop]
         :brief 新增一等 PaperRun HTTP/SSE API
+        :changes
         - feat(paper): 新增 PaperRun.v1 状态投影, 汇总 intake、stage graph、Source Ledger、Claim Ledger、实验状态、Agent Tree、diagnostics、pause questions、preview/export state
         - feat(api): 新增 /paper/runs create/get、/paper/runs/:id/events SSE、guidance、preview、export、capabilities、doctor、providers/discover、model-roles
         - feat(provider): provider discovery 通过 OpenCode ModelsDev substrate 读取模型目录, 失败时保留 DeepSeek 默认样例
@@ -172,6 +177,7 @@
 
     0.2.1-dev - 2026/05/09 (3debb73) [develop]
         :brief 将 paper_fucker 论文运行时迁入 OpenCode hard fork
+        :changes
         - refactor(opencode): 将 paper/research/init runtime 从 packages/server 迁入 packages/opencode/src/paper
         - refactor(workspace): 移除独立 @paper-fucker/server workspace, opencode 成为论文领域权威运行时
         - test(opencode): 迁移 paper/research/init 测试到 packages/opencode/test 并新增 core migration smoke
@@ -192,6 +198,7 @@
 
     0.2.0-dev - 2026/05/09 (d57a117) [develop]
         :brief 完整闭环论文系统 strict live acceptance
+        :changes
         - feat(acceptance): 新增 scripts/strict-acceptance.ps1, 覆盖 18 个严格验收检查
         - feat(live): DeepSeek live provider smoke 校验 /models 与 chat completion, 默认模型 deepseek-v4-pro
         - feat(mcp): Exa remote MCP initialize live smoke 校验 https://mcp.exa.ai/mcp 可达

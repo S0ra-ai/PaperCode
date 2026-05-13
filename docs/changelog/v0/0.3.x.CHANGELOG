@@ -9,6 +9,7 @@
 
     0.3.7-dev - 2026/05/10 (55167c9) [develop]
         :brief 报告路径卫生清理, 标记迁移前 server 路径为历史证据
+        :changes
         - docs(reports): 为 25 个 task-032 前报告添加 historical path note, 避免将 packages/server 误读为当前架构
         - docs(readme): 说明历史报告可保留 packages/server/@paper-fucker/server 作为 provenance, 当前权威路径为 packages/opencode/src/paper
         - docs(report): 新增 report-path-hygiene 审计报告, 区分当前文档、历史证据、迁移/缺失断言
@@ -25,6 +26,7 @@
 
     0.3.6-dev - 2026/05/10 (7d335eb) [develop]
         :brief PaperRun 新增 observability audit、cost、tool trace 与 data-egress 诊断
+        :changes
         - feat(observability): 新增 PaperObservabilityAudit.v1 与 summary coverage, 覆盖 stage、capability、model_role、subagent、tool、data_egress、export_renderer、cost
         - feat(runtime): 新增 recordPaperToolTrace、recordPaperCostUsage、recordPaperDataEgressAudit 与 recordPaperObservabilityAudit
         - feat(snapshot): PaperRun diagnostics 新增 audit summary, 从 durable run events 聚合审计覆盖与缺口
@@ -50,6 +52,7 @@
 
     0.3.5-dev - 2026/05/10 (855a944) [develop]
         :brief PaperRun export pipeline 写出真实文件与 manifest
+        :changes
         - feat(export): 新增 run-bound export pipeline, 写出 Markdown、LaTeX、PDF、DOCX 与 manifest.json
         - feat(export): 默认发现 pandoc、latexmk、xelatex、pdflatex、lualatex、tectonic, 并支持测试/调用方注入 renderer 或 command runner
         - feat(api): /paper/runs/:runID/export 现在返回 concrete files、manifest_path、tool_diagnostics 与 failed_checks
@@ -75,6 +78,7 @@
 
     0.3.4-dev - 2026/05/10 (30479e1) [develop]
         :brief TUI 论文工作台新增 PaperRun live controls 与能力健康显示
+        :changes
         - feat(tui): PaperRun dashboard 新增发送指导、继续运行、重试阶段、取消运行、打开预览、导出终稿、导出 forced draft、能力健康、模型角色 controls
         - feat(tui): 新增 renderer-independent API helpers, 自动调用 /paper/runs/:runID/guidance、/control、/preview、/export、/paper/capabilities、/paper/model-roles、/paper/doctor
         - feat(tui): 显示 durable controller status、queued guidance 数、模型角色 provider/model、MCP/Skill/toolchain 健康状态
@@ -95,6 +99,7 @@
 
     0.3.3-dev - 2026/05/10 (11d1042) [develop]
         :brief Intake 新增真实材料索引与 Source Ledger 记录
+        :changes
         - feat(intake): 新增 MaterialIndex.v1, 支持 code_paths、paper_files、dataset_paths、experiment_logs 的 workspace-safe 索引
         - feat(materials): 记录 mime、bytes、sha256、source_range、text_preview 与 material source_id
         - feat(source-ledger): PaperRun intake 写入 MaterialIndex artifact, 并为 indexed materials 创建 Source Ledger entries
@@ -115,6 +120,7 @@
 
     0.3.2-dev - 2026/05/10 (644922b) [develop]
         :brief 新增持久化 PaperRun controller、guidance queue 与控制 API
+        :changes
         - feat(controller): 新增 PaperRunController.v1, 持久化 checkpoints、guidance_queue、controls、internal_sessions 与 controller status
         - feat(paperrun): PaperRun snapshot 新增 controller_state, 创建 run 后同步 controller 状态
         - feat(guidance): recordPaperRunGuidance 同步写入 durable guidance queue, resume/retry 后标记 queued guidance 为 applied
@@ -140,6 +146,7 @@
 
     0.3.1-dev - 2026/05/10 (e78a169) [develop]
         :brief PaperRun 创建默认驱动论文 stage engine
+        :changes
         - feat(paperrun): createPaperRun 默认调用 startPaperResearchRun, 创建 run 后直接推进 14-stage paper graph
         - feat(orchestrator): 新增默认具体 stage handlers, 记录 planning、source/data discovery、code-to-paper、experiment diagnostics、ClaimLedger、draft、profile check、verification 与 forced export bundle
         - feat(runtime): PaperRun stage snapshot 识别 paperorchestrator.stage.completed, API/TUI 创建路径能返回已推进的 stage 状态
@@ -162,6 +169,7 @@
 
     0.3.0-dev - 2026/05/10 (9fdb7dc) [develop]
         :brief OpenCode hard fork 最终验收为 Paper Fucker 论文工作台
+        :changes
         - test(acceptance): 新增 hard-fork acceptance 覆盖 paper core 迁移、PaperRun API/TUI、submission 预算档、多层多模型 Agent Tree、private-first data egress、forced draft 阻断原因
         - test(strict): strict acceptance 新增 hard-fork-paper-core、hard-fork-paperrun-api-tui、hard-fork-agent-tree、hard-fork-quality-egress、hard-fork-public-branding 检查
         - fix(strict): TUI smoke 改用仓库内 Paper Fucker CLI help, 不依赖全局 opencode 命令
