@@ -40,12 +40,37 @@ export interface PaperModelCandidate {
   last_smoke_at?: string
 }
 
+export type PaperProviderRegistrationKind = "builtin" | "openai_compatible" | "manual"
+export type PaperProviderRegistrationStatus = "registered" | "disabled" | "needs_auth"
+
+export interface PaperProviderRegistration {
+  provider_id: string
+  provider_name?: string
+  kind: PaperProviderRegistrationKind
+  status: PaperProviderRegistrationStatus
+  model_count: number
+  allowed_count: number
+  last_refreshed_at?: string
+  diagnostics?: string[]
+}
+
+export type PaperStageModelPolicyMode = "auto" | "dynamic" | "forced"
+
+export interface PaperStageModelPolicy {
+  role: PaperModelRole
+  mode: PaperStageModelPolicyMode
+  model_ref?: string
+}
+
 export interface PaperModelInventory {
   schema_version: "PaperModelInventory.v1"
   updated_at: string
   decision_model?: string
+  backup_decision_model?: string
   allowlist: string[]
   role_overrides: Partial<Record<PaperModelRole, string>>
+  provider_registrations: Record<string, PaperProviderRegistration>
+  stage_model_policies: Partial<Record<PaperModelRole, PaperStageModelPolicy>>
   candidates: PaperModelCandidate[]
 }
 
@@ -113,7 +138,35 @@ function emptyInventory(): PaperModelInventory {
     updated_at: now(),
     allowlist: [],
     role_overrides: {},
+    provider_registrations: {},
+    stage_model_policies: {},
     candidates: [],
+  }
+}
+
+function providerKindFromSource(source: PaperModelCandidate["source"]): PaperProviderRegistrationKind {
+  if (source === "opencode_builtin") return "builtin"
+  if (source === "openai_compatible") return "openai_compatible"
+  return "manual"
+}
+
+function summarizeProviderRegistration(
+  providerID: string,
+  candidates: PaperModelCandidate[],
+  allowlist: Set<string>,
+  previous?: PaperProviderRegistration,
+): PaperProviderRegistration {
+  const providerCandidates = candidates.filter((candidate) => candidate.provider_id === providerID)
+  const first = providerCandidates[0]
+  return {
+    provider_id: providerID,
+    provider_name: previous?.provider_name ?? first?.provider_name ?? providerID,
+    kind: previous?.kind ?? (first ? providerKindFromSource(first.source) : "manual"),
+    status: previous?.status ?? "registered",
+    model_count: providerCandidates.length,
+    allowed_count: providerCandidates.filter((candidate) => allowlist.has(candidate.model_ref)).length,
+    last_refreshed_at: previous?.last_refreshed_at ?? first?.discovered_at,
+    diagnostics: previous?.diagnostics,
   }
 }
 
@@ -132,6 +185,17 @@ function normalizeInventory(input: unknown): PaperModelInventory {
           }),
         )
       : {}
+  const stage_model_policies =
+    record.stage_model_policies && typeof record.stage_model_policies === "object"
+      ? Object.fromEntries(
+          Object.entries(record.stage_model_policies).filter(([role, value]) => {
+            if (!PAPER_MODEL_ROLES.includes(role as PaperModelRole)) return false
+            if (!value || typeof value !== "object") return false
+            const mode = (value as Partial<PaperStageModelPolicy>).mode
+            return mode === "auto" || mode === "dynamic" || mode === "forced"
+          }),
+        )
+      : {}
   const mergedCandidates = candidates
   const mergedAllowlist = new Set(allowlist)
   const decisionModel =
@@ -139,12 +203,38 @@ function normalizeInventory(input: unknown): PaperModelInventory {
       ? record.decision_model
       : undefined
   const validDecisionModel = decisionModel && mergedAllowlist.has(decisionModel) ? decisionModel : undefined
+  const backupDecisionModel =
+    typeof record.backup_decision_model === "string" && mergedAllowlist.has(record.backup_decision_model)
+      ? record.backup_decision_model
+      : undefined
+  const rawRegistrations =
+    record.provider_registrations && typeof record.provider_registrations === "object"
+      ? (record.provider_registrations as Record<string, PaperProviderRegistration>)
+      : {}
+  const providerIDs = new Set([
+    ...Object.keys(rawRegistrations),
+    ...mergedCandidates.map((candidate) => candidate.provider_id),
+    ...Array.from(mergedAllowlist)
+      .map((ref) => ref.split("/")[0])
+      .filter((id): id is string => Boolean(id)),
+  ])
+  const providerRegistrations = Object.fromEntries(
+    Array.from(providerIDs)
+      .sort()
+      .map((providerID) => [
+        providerID,
+        summarizeProviderRegistration(providerID, mergedCandidates, mergedAllowlist, rawRegistrations[providerID]),
+      ]),
+  )
   return {
     schema_version: "PaperModelInventory.v1",
     updated_at: typeof record.updated_at === "string" ? record.updated_at : now(),
     decision_model: validDecisionModel,
+    backup_decision_model: backupDecisionModel,
     allowlist: Array.from(mergedAllowlist),
     role_overrides,
+    provider_registrations: providerRegistrations,
+    stage_model_policies: stage_model_policies as Partial<Record<PaperModelRole, PaperStageModelPolicy>>,
     candidates: mergedCandidates.map((candidate) => ({
       ...candidate,
       allowed: mergedAllowlist.has(candidate.model_ref),
@@ -286,6 +376,14 @@ export function mergeModelCandidates(
       ...candidate,
       allowed: allowlist.has(candidate.model_ref),
     })),
+    provider_registrations: Object.fromEntries(
+      Array.from(new Set([...Object.keys(inventory.provider_registrations), ...Array.from(next.values()).map((candidate) => candidate.provider_id)]))
+        .sort()
+        .map((providerID) => [
+          providerID,
+          summarizeProviderRegistration(providerID, Array.from(next.values()), allowlist, inventory.provider_registrations[providerID]),
+        ]),
+    ),
   }
 }
 
@@ -313,6 +411,19 @@ export async function upsertDiscoveredModels(
       ...inventory,
       decision_model: decisionModel,
       allowlist: Array.from(allowlist),
+      provider_registrations: {
+        ...inventory.provider_registrations,
+        [discovery.provider_id]: {
+          provider_id: discovery.provider_id,
+          provider_name: discovery.provider_name,
+          kind: "openai_compatible",
+          status: "registered",
+          model_count: discovery.models.length,
+          allowed_count: Array.from(allowlist).filter((ref) => ref.startsWith(`${discovery.provider_id}/`)).length,
+          last_refreshed_at: now(),
+          diagnostics: discovery.diagnostics.map((item) => `${item.level}: ${item.message}`),
+        },
+      },
       candidates: Array.from(nextCandidates.values()).map((candidate) => ({
         ...candidate,
         allowed: allowlist.has(candidate.model_ref),
@@ -326,7 +437,10 @@ export async function updatePaperModelAllowlist(
   modelRefs: string[],
   options: PaperModelInventoryStorageOptions & {
     decision_model?: string
+    backup_decision_model?: string
     role_overrides?: Partial<Record<PaperModelRole, string>>
+    provider_registrations?: Record<string, PaperProviderRegistration>
+    stage_model_policies?: Partial<Record<PaperModelRole, PaperStageModelPolicy>>
     candidates?: PaperModelCandidate[]
   } = {},
 ) {
@@ -337,16 +451,33 @@ export async function updatePaperModelAllowlist(
     options.decision_model ??
     (inventory.decision_model && modelRefs.includes(inventory.decision_model) ? inventory.decision_model : undefined)
   if (decisionModel) allowlist.add(decisionModel)
+  const backupDecisionModel =
+    options.backup_decision_model ??
+    (inventory.backup_decision_model && modelRefs.includes(inventory.backup_decision_model)
+      ? inventory.backup_decision_model
+      : undefined)
+  if (backupDecisionModel) allowlist.add(backupDecisionModel)
   const roleOverrides = options.role_overrides ?? inventory.role_overrides
   for (const value of Object.values(roleOverrides)) {
     if (value) allowlist.add(value)
+  }
+  const stageModelPolicies = options.stage_model_policies ?? inventory.stage_model_policies
+  for (const policy of Object.values(stageModelPolicies)) {
+    if (policy?.mode === "forced" && policy.model_ref) allowlist.add(policy.model_ref)
+  }
+  const providerRegistrations = {
+    ...inventory.provider_registrations,
+    ...(options.provider_registrations ?? {}),
   }
   return savePaperModelInventory(
     {
       ...inventory,
       decision_model: decisionModel,
+      backup_decision_model: backupDecisionModel,
       allowlist: Array.from(allowlist),
       role_overrides: roleOverrides,
+      provider_registrations: providerRegistrations,
+      stage_model_policies: stageModelPolicies,
       candidates: inventory.candidates.map((candidate) => ({
         ...candidate,
         allowed: allowlist.has(candidate.model_ref),
@@ -389,8 +520,17 @@ export function routePaperModel(inventory: PaperModelInventory, input: ModelRout
   const createdAt = now()
   const allowedModels = inventory.allowlist.filter((ref) => ref.includes("/"))
   const allowedCandidates = inventory.candidates.filter((candidate) => allowedModels.includes(candidate.model_ref))
-  const forced = input.forced_model ?? inventory.role_overrides[input.role]
-  const decisionModel = inventory.decision_model
+  const policy = inventory.stage_model_policies[input.role]
+  const forced =
+    input.forced_model ??
+    (policy?.mode === "forced" ? policy.model_ref : undefined) ??
+    inventory.role_overrides[input.role]
+  const decisionModel =
+    inventory.decision_model && allowedModels.includes(inventory.decision_model)
+      ? inventory.decision_model
+      : inventory.backup_decision_model && allowedModels.includes(inventory.backup_decision_model)
+        ? inventory.backup_decision_model
+        : inventory.decision_model
 
   const block = (reason: string, diagnostics: string[]): ModelRoutingDecision => ({
     schema_version: "ModelRoutingDecision.v1",
