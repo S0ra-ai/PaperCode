@@ -9,6 +9,7 @@
 
     0.6.6-dev - 2026/05/11 (1c1c2a5) [develop]
         :brief Hugging Face / ML-Intern research loop
+        :changes
         - feat(hf): 新增 ML-Intern-inspired HF research loop contracts, 覆盖 docs/papers/datasets/models/spaces/jobs/trackio
         - feat(hf): HF records 可转换为 Source Ledger, HF jobs 可转换为 ExperimentRun 并记录 tool trace
         - feat(capability): Hugging Face capability pack 增加 hf.models、hf.spaces、hf.trackio
@@ -38,6 +39,7 @@
 
     0.6.5-dev - 2026/05/11 (b188ae0) [develop]
         :brief Crawler 数据采集与 Source Ledger gate
+        :changes
         - feat(crawler): 新增 WebCrawlPlan、CrawlSourceRecord、CrawledDataset、CrawlComplianceReport 和 gate summary
         - feat(crawler): 爬虫结果可转换为 ResearchSource web ledger、source_snapshot artifact 和 tool trace
         - feat(python): 新增 Scrapling-first crawler bridge、fixture HTML extraction 和 web_crawl_probe 工具
@@ -62,6 +64,7 @@
 
     0.6.4-dev - 2026/05/11 (86b5b08) [develop]
         :brief MemoryBank 与代码理解层
+        :changes
         - feat(memory): 新增 MemoryBank.v1, 支持 scope、share policy、provenance、retention、secret/path redaction 与查询摘要
         - feat(code): 新增 CodeUnderstandingGraph.v1, 记录 package/file/symbol/source range/test/benchmark surface 与 coverage
         - feat(agent-team): Agent Team member 可绑定 memory_entry_ids, 让队友学习与 artifact provenance 可追踪
@@ -84,6 +87,7 @@
 
     0.6.3-dev - 2026/05/11 (590d9f9) [develop]
         :brief 内置 capability pack 与 harness 调度层
+        :changes
         - feat(capability): 新增内置 PaperCapabilityPack, 覆盖 paper profiles、literature MCP、crawler、Hugging Face、code/experiment、writing/verification/export
         - feat(registry): 新增 PaperCapabilityRegistry snapshot 与按 stage 查询, skills/MCP/Python/first-party tools 自动融合
         - feat(harness): 新增 PaperHarness 队列、approval gate、并发上限、retry、doom-loop 检测和 capability trace 绑定
@@ -105,6 +109,7 @@
 
     0.6.2-dev - 2026/05/11 (408a187) [develop]
         :brief PaperRun Agent Team 协作层
+        :changes
         - feat(agent-team): 新增 PaperAgentTeam、成员、任务板、mailbox、harness decision 与 source-bound evidence merge
         - feat(paperrun): PaperRun snapshot 增加 agent_team, 将 Agent Tree 升级为 team-aware 运行状态
         - feat(tui): 右侧栏和 dashboard 增加 Agent Team 成员、队列、活跃任务、未读 mailbox 与 team depth 摘要
@@ -127,6 +132,7 @@
 
     0.6.1-dev - 2026/05/11 (affb5f1) [develop]
         :brief strict live-run 证据升级
+        :changes
         - test(acceptance): topic-to-paper-live-run 与 code-to-paper-live-run 改为执行真实 PaperRun benchmark, 不再用 fixture e2e 测试冒充 live-run 证据
         - feat(script): live-paper-quality-benchmark 支持 topic/code 场景, 输出场景化 summary 并断言 stage/artifact/source/claim/draft/review/preview/export/audit 证据
         - test(script): strict-acceptance 测试覆盖 live PaperRun benchmark 调用路径
@@ -147,6 +153,7 @@
 
     0.6.0-dev - 2026/05/11 (0e792d7) [develop]
         :brief 递归 Agent 与论文工作台综合验收
+        :changes
         - test(acceptance): 综合验收递归 Agent Fabric、PaperRun 右侧栏、中文工作台流程、品牌表面与 strict live acceptance
         - fix(acceptance): strict-acceptance.ps1 保持 ASCII-safe, 避免 Windows PowerShell 非 UTF-8 解析失败
         - fix(acceptance): strict branding 检查避开 PowerShell 只读 $HOME 变量, 并匹配真实 PaperRunSidebar/home 入口

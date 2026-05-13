@@ -9,6 +9,7 @@
 
     0.7.0-dev - 2026/05/11 (1db0157) [develop]
         :brief Agent Team capability acceptance and no-mock boundary
+        :changes
         - test(acceptance): 新增 Agent Team capability acceptance 场景, 覆盖内置 skills/MCP/Python capability fusion、harness approval、递归 team 和 source-bound evidence merge
         - test(strict): strict acceptance 增加 agent-team-capability-fusion、paper-workbench-ux-sidebar、hf-no-mock-boundary、changelog-split-archives 检查
         - test(hf): 最终验收锁定产品默认 no-mock 边界, 未授权 HF 网络不会生成伪数据

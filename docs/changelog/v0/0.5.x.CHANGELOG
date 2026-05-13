@@ -9,6 +9,7 @@
 
     0.5.7-dev - 2026/05/11 (1c09b71) [develop]
         :brief Paper Fucker 品牌表面审计
+        :changes
         - fix(tui): 旧 session/sidebar footer 与 plugin sidebar footer 改为 Paper Fucker 品牌
         - fix(api): paper provider discovery OpenAPI 描述改为 provider-agnostic, 不再暴露旧 OpenCode 产品措辞
         - test(brand): public-surface 测试覆盖 sidebar footer 与 paper API 品牌残留
@@ -29,6 +30,7 @@
 
     0.5.6-dev - 2026/05/11 (002f011) [develop]
         :brief 明确 PaperRun 工作台用户流程
+        :changes
         - feat(tui): 首页 placeholder 和标题改为主题/代码/材料/数据/日志输入后自动创建 PaperRun 的流程表达
         - feat(tui): tips 明确 reviewable_bundle、submission_candidate、右侧栏诊断与运行态递归 agent 停止语义
         - feat(tui): PaperRun 侧栏标题改为中文, 下一步动作改为中文暂停问题表达
@@ -49,6 +51,7 @@
 
     0.5.5-dev - 2026/05/11 (399aeb2) [develop]
         :brief PaperRun 右侧诊断栏
+        :changes
         - feat(tui): PaperRun dashboard 新增固定右侧栏, 保留 OpenCode 原 cost/token/context 价值并改为 PaperRun 语义
         - feat(tui): sidebar 展示运行概览、下一步动作、阻塞项、成本/上下文、论文大纲、Agent Tree、Gate 与最近调用诊断
         - feat(tui): 新增 PaperRunCostDiagnostics、PaperRunOutlineState、PaperRunGateSummary 与 PaperRunSidebarState 派生状态
@@ -64,6 +67,7 @@
 
     0.5.4-dev - 2026/05/11 (9fa7acd) [develop]
         :brief 统一 CHANGELOG colon-history 缩进
+        :changes
         - docs(changelog): 将历史版本行统一为 4 空格缩进, 修复 0.1.9-dev 等早期条目掉到 0 缩进的问题
         - docs(changelog): 将版本字段统一为 8 空格缩进, :src/:doc/:verification 等字段内容统一为 12 空格缩进
         - chore(script): 新增 scripts/check-changelog-format.ps1, 防止后续 CHANGELOG 缩进回退
@@ -78,6 +82,7 @@
 
     0.5.4-dev - 2026/05/11 (f514f02) [develop]
         :brief 递归 PaperRun Agent Fabric
+        :changes
         - feat(agent): 新增 RecursiveAgentPolicy.v1 与 AgentExpansionDecision, 子 agent 不再受预算档固定深度限制
         - feat(agent): 子 agent 可继续派生子 agent, 由 cost/time/concurrency/context/permission/data-egress/license/authenticity/coverage 条件停止
         - feat(agent): AgentTree 记录 children、permissions、recursive_policy 与 agent.spawned/completed/blocked/expansion_skipped 事件
@@ -100,6 +105,7 @@
 
     0.5.3-dev - 2026/05/10 (ab28a53) [develop]
         :brief 移除 tracked 文档中的 secret-like 示例 token
+        :changes
         - fix(security): github/README.md 中的 ANTHROPIC_API_KEY 示例从 sk-ant 形态改为 <provider-api-key>
         - fix(security): github/README.md 中的 MOCK_TOKEN 示例从 github_pat 形态改为 <github-token>
         - docs(report): 新增 reports/tracked-secret-example-cleanup.md 记录扫描证据
@@ -116,6 +122,7 @@
 
     0.5.2-dev - 2026/05/10 (d266530) [develop]
         :brief 清理 TUI 首页模型 provider 与代码示例文案
+        :changes
         - fix(tui): 首页 code-to-paper placeholder 从 `--code packages/opencode` 改为 `--code .`, 避免把用户引向上游目录名
         - fix(tui): provider 提示从 OpenCode provider 改为通用模型 provider, 保留 OpenAI-compatible 与 DeepSeek 示例
         - fix(i18n): 首页 tips 标签从 Tip 改为 提示
@@ -134,6 +141,7 @@
 
     0.5.1-dev - 2026/05/10 (878cdfb) [develop]
         :brief 清理当前运行时残留的 Phase 1 stub 命名
+        :changes
         - fix(runtime): ResearchStageStub/createNotImplementedStageStub/phaseOneStageStubs 改为 ResearchStageBlockingDiagnostic/createStageBlockingDiagnostic
         - fix(runtime): stage blocking diagnostic 使用 blocked 语义, 不再把当前论文阶段描述为 not_implemented
         - fix(authenticity): provenance guard 改为阻断 placeholder/synthetic/fake, 保留真实性 gate 约束但移除当前 stub 来源类型
@@ -161,6 +169,7 @@
 
     0.5.0-dev - 2026/05/10 (cf7aad5) [develop]
         :brief Live PaperRun 基准回归通过并收口 0.4.x 质量缺口
+        :changes
         - test(benchmark): 重新执行真实 topic+code PaperRun, 记录 run-ee44237e-e1cc-40d5-abee-611dbc9a8222
         - test(strict): focused strict acceptance 通过, 覆盖 TaskFlow、版本同步、secret scan、server/preview/Python/typecheck、CLI/TUI、DeepSeek、Exa、Nature、pandoc、LaTeX、DOCX、topic/code run 与 hard-fork checks
         - test(paperrun): 确认完整执行后 PaperRun snapshot 正确显示 blocked, 不再卡在 running
