@@ -33,6 +33,32 @@ export type PreviewDiagnostics = {
   agents: Array<{ name: string; status: string; detail?: string }>
 }
 
+export type PreviewMonitorSummary = {
+  stage_graph: Array<{ id: string; label: string; status: string; summary?: string }>
+  novelty: {
+    status: string
+    checkpoints: Array<{ id: string; stage: string; status: string; conflicts: number; summary: string }>
+    experiment_gate?: { status: string; reason: string; allowed: boolean }
+  }
+  paper_spine?: {
+    readiness: string
+    central_claim: string
+    motivation_chain: string[]
+    contribution_chain: string[]
+  }
+  global_figure?: {
+    status: string
+    title: string
+    panels: Array<{ id: string; title: string; purpose: string; evidence_refs: number }>
+    checks: Array<{ id: string; status: string; message: string }>
+  }
+  gate: {
+    status: string
+    failed_checks: string[]
+  }
+  timeline: Array<{ type: string; label: string; at: string; detail?: string }>
+}
+
 export type PreviewRenderStatus = {
   state: "idle" | "queued" | "rendering" | "ready" | "failed" | "cancelled"
   job_id?: string
@@ -55,6 +81,7 @@ export type PreviewSnapshot = {
   }
   annotations: PreviewAnnotation[]
   diagnostics: PreviewDiagnostics
+  monitor?: PreviewMonitorSummary
   render: PreviewRenderStatus
 }
 

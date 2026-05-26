@@ -19,6 +19,10 @@ import { composeClaimLedger, composeDraftPaper } from "./research/writing"
 import type { DataPlan, SourceCandidate, SourceRecord } from "./research/sources"
 import type { ExperimentMetricDirection, ResultReport, ExperimentPlan, ExperimentRunner } from "./research/experiments"
 import type { ClaimLedger } from "./research/writing"
+import { createExperimentNoveltyGate, createNoveltyCheckpoint, type NoveltyCheckpoint } from "./novelty"
+import { createResearchWikiDigest } from "./research-wiki"
+import { createPaperSpine, type PaperSpineClaim } from "./paper-spine"
+import { createGlobalFigureSpec } from "./global-figure"
 
 export const PAPER_RESEARCH_STAGE_IDS = [
   "intake",
@@ -394,6 +398,207 @@ async function defaultSourceDiscovery(runDir: string, request: ResearchIntakeReq
     options,
   )
   return cache.source
+}
+
+async function recordNoveltyCheckpoint(
+  runDir: string,
+  input: {
+    run_id: string
+    request: ResearchIntakeRequest
+    stage: Parameters<typeof createNoveltyCheckpoint>[0]["stage"]
+    sources?: SourceRecord[]
+  },
+  options?: ResearchRuntimeOptions,
+) {
+  const checkpoint = createNoveltyCheckpoint({
+    request: input.request,
+    stage: input.stage,
+    sources: input.sources ?? [],
+    now: nowIso(options),
+  })
+  const artifact = await writeStageLog(
+    runDir,
+    {
+      logical_path: `novelty/${input.stage}-checkpoint.json`,
+      schema: "NoveltyCheckpoint.v1",
+      data: checkpoint,
+    },
+    options,
+  )
+  await appendResearchEvent(
+    runDir,
+    {
+      type: "novelty.checkpoint.completed",
+      actor: "agent",
+      payload: {
+        stage: input.stage,
+        checkpoint_id: checkpoint.checkpoint_id,
+        status: checkpoint.status,
+        conflicts: checkpoint.conflicts.length,
+        artifact_id: artifact.artifact_id,
+      },
+    },
+    options,
+  )
+  return { checkpoint, artifact }
+}
+
+async function recordExperimentNoveltyGate(
+  runDir: string,
+  checkpoint: NoveltyCheckpoint,
+  options?: ResearchRuntimeOptions,
+) {
+  const gate = createExperimentNoveltyGate({ checkpoint, now: nowIso(options) })
+  const artifact = await writeStageLog(
+    runDir,
+    {
+      logical_path: "novelty/experiment-gate.json",
+      schema: "ExperimentNoveltyGate.v1",
+      data: gate,
+    },
+    options,
+  )
+  await appendResearchEvent(
+    runDir,
+    {
+      type: "novelty.experimentgate.updated",
+      actor: "agent",
+      payload: {
+        gate_id: gate.gate_id,
+        status: gate.status,
+        allowed_to_run_expensive_experiments: gate.allowed_to_run_expensive_experiments,
+        artifact_id: artifact.artifact_id,
+      },
+    },
+    options,
+  )
+  return { gate, artifact }
+}
+
+async function recordResearchWiki(
+  runDir: string,
+  input: {
+    run_id: string
+    request: ResearchIntakeRequest
+    novelty: NoveltyCheckpoint
+    artifact_ids?: string[]
+  },
+  options?: ResearchRuntimeOptions,
+) {
+  const wiki = createResearchWikiDigest({
+    run_id: input.run_id,
+    request: input.request,
+    novelty: input.novelty,
+    artifact_ids: input.artifact_ids,
+    now: nowIso(options),
+  })
+  const artifact = await writeStageLog(
+    runDir,
+    {
+      logical_path: "memory/research-wiki-digest.json",
+      schema: "ResearchWikiDigest.v1",
+      data: wiki,
+    },
+    options,
+  )
+  await appendResearchEvent(
+    runDir,
+    {
+      type: "researchwiki.digest.updated",
+      actor: "agent",
+      payload: {
+        idea_id: wiki.archive.idea_id,
+        novelty_status: wiki.archive.novelty_status,
+        artifact_id: artifact.artifact_id,
+      },
+    },
+    options,
+  )
+  return { wiki, artifact }
+}
+
+function paperSpineClaims(ledger: ClaimLedger): PaperSpineClaim[] {
+  return ledger.entries.map((entry) => ({
+    claim_id: entry.claim_id,
+    text: entry.text,
+    status: entry.status === "supported" ? "supported" : "needs_review",
+    source_ids: entry.source_ids,
+    artifact_ids: entry.artifact_ids,
+  }))
+}
+
+async function recordPaperSpineAndFigure(
+  runDir: string,
+  input: {
+    run_id: string
+    request: ResearchIntakeRequest
+    novelty: NoveltyCheckpoint
+    claims: ClaimLedger
+    sources: SourceRecord[]
+  },
+  options?: ResearchRuntimeOptions,
+) {
+  const spine = createPaperSpine({
+    run_id: input.run_id,
+    title: normalizeResearchIntake(input.request).topic,
+    novelty: input.novelty,
+    claims: paperSpineClaims(input.claims),
+    sources: input.sources,
+    now: nowIso(options),
+  })
+  const spineArtifact = await writeStageLog(
+    runDir,
+    {
+      logical_path: "writing/paper-spine.json",
+      schema: "PaperSpine.v1",
+      data: spine,
+    },
+    options,
+  )
+  const figure = createGlobalFigureSpec({
+    run_id: input.run_id,
+    title: normalizeResearchIntake(input.request).topic,
+    target_profile: targetProfile(input.request),
+    spine,
+    now: nowIso(options),
+  })
+  const figureArtifact = await writeStageLog(
+    runDir,
+    {
+      logical_path: "figures/global-figure-spec.json",
+      schema: "GlobalFigureSpec.v1",
+      data: figure,
+    },
+    options,
+  )
+  await appendResearchEvent(
+    runDir,
+    {
+      type: "paperspine.updated",
+      actor: "agent",
+      payload: {
+        spine_id: spine.spine_id,
+        readiness: spine.readiness,
+        artifact_id: spineArtifact.artifact_id,
+      },
+    },
+    options,
+  )
+  await appendResearchEvent(
+    runDir,
+    {
+      type: "figure.globalspec.updated",
+      actor: "agent",
+      payload: {
+        figure_id: figure.figure_id,
+        status: figure.status,
+        panels: figure.panels.length,
+        artifact_id: figureArtifact.artifact_id,
+      },
+    },
+    options,
+  )
+  return { spine, figure, artifacts: { spine: spineArtifact, figure: figureArtifact } }
 }
 
 async function defaultCodeAnalysis(
@@ -776,11 +981,31 @@ const DEFAULT_STAGE_HANDLERS: Partial<Record<PaperResearchStageId, PaperStageHan
       },
     }
   },
-  literature: async ({ run_dir, request, options }) => {
+  literature: async ({ run_dir, run_id, request, options }) => {
     const discovered = await defaultSourceDiscovery(run_dir, request, options)
+    const novelty = await recordNoveltyCheckpoint(
+      run_dir,
+      {
+        run_id,
+        request,
+        stage: "literature",
+        sources: discovered.literature.sources,
+      },
+      options,
+    )
+    await recordResearchWiki(
+      run_dir,
+      {
+        run_id,
+        request,
+        novelty: novelty.checkpoint,
+        artifact_ids: [novelty.artifact.artifact_id, discovered.artifacts.literature.artifact_id],
+      },
+      options,
+    )
     return {
       status: "succeeded",
-      summary: `Recorded ${discovered.literature.sources.length} literature seed(s); verification gaps remain explicit.`,
+      summary: `Recorded ${discovered.literature.sources.length} literature seed(s); novelty status is ${novelty.checkpoint.status}.`,
     }
   },
   code_analysis: async ({ run_dir, request, options }) => {
@@ -807,8 +1032,27 @@ const DEFAULT_STAGE_HANDLERS: Partial<Record<PaperResearchStageId, PaperStageHan
       summary: `Recorded ${discovered.data_plan.datasets.length} dataset candidate(s); recommendation is ${discovered.data_plan.recommendation}.`,
     }
   },
-  experiment_design: async ({ run_dir, request, options }) => {
+  experiment_design: async ({ run_dir, run_id, request, options }) => {
     const sources = await defaultSourceDiscovery(run_dir, request, options)
+    const novelty = await recordNoveltyCheckpoint(
+      run_dir,
+      {
+        run_id,
+        request,
+        stage: "experiment_design",
+        sources: sources.literature.sources,
+      },
+      options,
+    )
+    const noveltyGate = await recordExperimentNoveltyGate(run_dir, novelty.checkpoint, options)
+    if (noveltyGate.gate.status === "redirect_required" || noveltyGate.gate.status === "blocked") {
+      return {
+        block: {
+          reason: "license_or_source_conflict",
+          message: `查新 gate 阻断实验设计：${noveltyGate.gate.reason}`,
+        },
+      }
+    }
     const plan = planExperiments({
       topic: normalizeResearchIntake(request).topic,
       method_name: methodName(request),
@@ -827,7 +1071,7 @@ const DEFAULT_STAGE_HANDLERS: Partial<Record<PaperResearchStageId, PaperStageHan
     )
     return {
       status: "succeeded",
-      summary: `Planned ${1 + plan.baselines.length + plan.ablations.length} experiment spec(s).`,
+      summary: `Planned ${1 + plan.baselines.length + plan.ablations.length} experiment spec(s); novelty gate is ${noveltyGate.gate.status}.`,
     }
   },
   experiment_execution: async ({ run_dir, request, options }) => {
@@ -853,8 +1097,30 @@ const DEFAULT_STAGE_HANDLERS: Partial<Record<PaperResearchStageId, PaperStageHan
       summary: `Reproduction gate is ${experiment.loop.report.reproduction.status}; final claims allowed: ${experiment.loop.report.final_claims_allowed}.`,
     }
   },
-  claim_ledger: async ({ run_dir, request, options }) => {
+  claim_ledger: async ({ run_dir, run_id, request, options }) => {
     const claims = await defaultClaimLedger(run_dir, request, options)
+    const sources = await defaultSourceDiscovery(run_dir, request, options)
+    const novelty = await recordNoveltyCheckpoint(
+      run_dir,
+      {
+        run_id,
+        request,
+        stage: "claim_ledger",
+        sources: sources.literature.sources,
+      },
+      options,
+    )
+    const spine = await recordPaperSpineAndFigure(
+      run_dir,
+      {
+        run_id,
+        request,
+        novelty: novelty.checkpoint,
+        claims: claims.ledger,
+        sources: sources.literature.sources,
+      },
+      options,
+    )
     await writeStageLog(
       run_dir,
       {
@@ -866,7 +1132,7 @@ const DEFAULT_STAGE_HANDLERS: Partial<Record<PaperResearchStageId, PaperStageHan
     )
     return {
       status: "succeeded",
-      summary: `Prepared ${claims.ledger.entries.length} claim ledger entr${claims.ledger.entries.length === 1 ? "y" : "ies"}.`,
+      summary: `Prepared ${claims.ledger.entries.length} claim ledger entr${claims.ledger.entries.length === 1 ? "y" : "ies"}; PaperSpine is ${spine.spine.readiness}.`,
     }
   },
   drafting: async ({ run_dir, request, options }) => {
