@@ -325,7 +325,25 @@ export function PaperRunDashboard() {
               </box>
 
               <box flexDirection="column" gap={0}>
-                <text fg={theme.textMuted}>Stage Graph</text>
+                <text fg={theme.textMuted}>研究闭环</text>
+                <box flexDirection="row" gap={2} flexWrap="wrap">
+                  <text>查新</text>
+                  <text fg={view().research_closure.novelty_conflicts > 0 ? theme.warning : theme.textMuted}>
+                    {view().research_closure.novelty_status} / conflicts {view().research_closure.novelty_conflicts}
+                  </text>
+                  <text>论文脊梁</text>
+                  <text fg={view().research_closure.spine_readiness === "ready" ? theme.accent : theme.textMuted}>
+                    {view().research_closure.spine_readiness}
+                  </text>
+                  <text>全局图</text>
+                  <text fg={view().research_closure.global_figure_status === "ready" ? theme.accent : theme.textMuted}>
+                    {view().research_closure.global_figure_status} / panels {view().research_closure.global_figure_panels}
+                  </text>
+                </box>
+              </box>
+
+              <box flexDirection="column" gap={0}>
+                <text fg={theme.textMuted}>阶段图</text>
                 {view().stage_graph.map((stage) => (
                   <box flexDirection="row" gap={2}>
                     <text fg={stage.status === "blocked" ? theme.error : theme.text}>{stage.status_label}</text>

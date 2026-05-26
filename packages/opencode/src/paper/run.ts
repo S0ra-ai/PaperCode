@@ -2,7 +2,7 @@ import path from "path"
 import { EventEmitter } from "events"
 import { readFile } from "fs/promises"
 import { startPreviewServer, type PreviewServerHandle } from "../../../preview/src/server"
-import type { PreviewAnnotation, PreviewArtifactRef, PreviewSnapshot } from "../../../preview/src/protocol"
+import type { PreviewAnnotation, PreviewArtifactRef, PreviewMonitorSummary, PreviewSnapshot } from "../../../preview/src/protocol"
 import {
   appendResearchEvent,
   createResearchRun,
@@ -78,6 +78,10 @@ import {
   type PaperExperimentEnvironmentStatus,
   type PaperMachineProfile,
 } from "./machine"
+import type { NoveltyCheckpoint, ExperimentNoveltyGate } from "./novelty"
+import type { ResearchWikiDigest } from "./research-wiki"
+import type { PaperSpine } from "./paper-spine"
+import type { GlobalFigureSpec } from "./global-figure"
 
 import {
   applyPaperRunControl,
@@ -212,6 +216,9 @@ export interface PaperRunLiveEvent {
     | "model.routing_decision"
     | "diagnostics.cost_updated"
     | "gate.summary_updated"
+    | "novelty.updated"
+    | "paperspine.updated"
+    | "figure.updated"
     | "preview.updated"
     | "export.updated"
   run_id: string
@@ -262,6 +269,13 @@ export interface PaperRunSnapshot {
     exploratory_runs: number
     reproduction_gate: "not_started" | "passed" | "blocked"
   }
+  novelty: {
+    checkpoints: NoveltyCheckpoint[]
+    experiment_gate?: ExperimentNoveltyGate
+  }
+  research_wiki?: ResearchWikiDigest
+  paper_spine?: PaperSpine
+  global_figure?: GlobalFigureSpec
   agent_tree: AgentTree
   agent_team: PaperAgentTeamState
   memory_bank: PaperMemoryBank
@@ -380,6 +394,32 @@ function paperRunLiveEventsFromSnapshot(snapshot: PaperRunSnapshot): PaperRunLiv
       created_at: now,
       data: { draft },
     })),
+    {
+      event: "novelty.updated",
+      run_id: snapshot.run_id,
+      created_at: now,
+      data: { novelty: snapshot.novelty },
+    },
+    ...(snapshot.paper_spine
+      ? [
+          {
+            event: "paperspine.updated" as const,
+            run_id: snapshot.run_id,
+            created_at: now,
+            data: { paper_spine: snapshot.paper_spine },
+          },
+        ]
+      : []),
+    ...(snapshot.global_figure
+      ? [
+          {
+            event: "figure.updated" as const,
+            run_id: snapshot.run_id,
+            created_at: now,
+            data: { global_figure: snapshot.global_figure },
+          },
+        ]
+      : []),
     ...snapshot.agent_tree.nodes.slice(-8).map((agent) => ({
       event: "agent.updated" as const,
       run_id: snapshot.run_id,
@@ -847,6 +887,43 @@ function resolveRunFile(runDir: string, filePath: string) {
   return path.isAbsolute(filePath) ? filePath : path.join(runDir, filePath)
 }
 
+async function readArtifactJson<T>(
+  runDir: string,
+  artifact: ResearchArtifact | undefined,
+): Promise<T | undefined> {
+  if (!artifact) return undefined
+  try {
+    return JSON.parse(await readFile(resolveRunFile(runDir, artifact.path), "utf8")) as T
+  } catch {
+    return undefined
+  }
+}
+
+async function readArtifactsBySchema<T>(
+  runDir: string,
+  artifacts: ResearchArtifact[],
+  schema: string,
+): Promise<T[]> {
+  const matches = artifacts.filter((artifact) => artifact.metadata?.artifact_schema === schema)
+  const values = await Promise.all(matches.map((artifact) => readArtifactJson<T>(runDir, artifact)))
+  const defined: T[] = []
+  for (const value of values) {
+    if (value !== undefined) defined.push(value as T)
+  }
+  return defined
+}
+
+async function readLatestArtifactBySchema<T>(
+  runDir: string,
+  artifacts: ResearchArtifact[],
+  schema: string,
+): Promise<T | undefined> {
+  return readArtifactJson<T>(
+    runDir,
+    artifacts.filter((artifact) => artifact.metadata?.artifact_schema === schema).at(-1),
+  )
+}
+
 async function markdownArtifactForPreview(
   runDir: string,
   snapshot: PaperRunSnapshot,
@@ -884,6 +961,74 @@ function previewAnnotations(snapshot: PaperRunSnapshot): PreviewAnnotation[] {
     tui_ref: `gate:${check}`,
   }))
   return [...claimAnnotations, ...failedChecks]
+}
+
+function createPreviewMonitor(snapshot: PaperRunSnapshot): PreviewMonitorSummary {
+  const noveltyStatus =
+    snapshot.novelty.experiment_gate?.status ??
+    snapshot.novelty.checkpoints.at(-1)?.status ??
+    "not_started"
+  const gateRecord = jsonRecord(snapshot.diagnostics.final_gate)
+  return {
+    stage_graph: snapshot.stage_graph.stages.map((stage) => ({
+      id: stage.id,
+      label: stage.title,
+      status: stage.status,
+      summary: stage.summary,
+    })),
+    novelty: {
+      status: noveltyStatus,
+      checkpoints: snapshot.novelty.checkpoints.map((checkpoint) => ({
+        id: checkpoint.checkpoint_id,
+        stage: checkpoint.stage,
+        status: checkpoint.status,
+        conflicts: checkpoint.conflicts.length,
+        summary: checkpoint.decision.summary,
+      })),
+      experiment_gate: snapshot.novelty.experiment_gate
+        ? {
+            status: snapshot.novelty.experiment_gate.status,
+            reason: snapshot.novelty.experiment_gate.reason,
+            allowed: snapshot.novelty.experiment_gate.allowed_to_run_expensive_experiments,
+          }
+        : undefined,
+    },
+    paper_spine: snapshot.paper_spine
+      ? {
+          readiness: snapshot.paper_spine.readiness,
+          central_claim: snapshot.paper_spine.central_claim,
+          motivation_chain: snapshot.paper_spine.motivation_chain,
+          contribution_chain: snapshot.paper_spine.contribution_chain,
+        }
+      : undefined,
+    global_figure: snapshot.global_figure
+      ? {
+          status: snapshot.global_figure.status,
+          title: snapshot.global_figure.title,
+          panels: snapshot.global_figure.panels.map((panel) => ({
+            id: panel.panel_id,
+            title: panel.title,
+            purpose: panel.purpose,
+            evidence_refs: panel.evidence_refs.length,
+          })),
+          checks: snapshot.global_figure.checks.map((check) => ({
+            id: check.check_id,
+            status: check.status,
+            message: check.message,
+          })),
+        }
+      : undefined,
+    gate: {
+      status: typeof gateRecord.status === "string" ? gateRecord.status : "not_started",
+      failed_checks: snapshot.export_state.failed_checks,
+    },
+    timeline: snapshot.events.slice(-24).map((event) => ({
+      type: event.type,
+      label: event.type.replace(/^paperorchestrator\./, ""),
+      at: event.created_at,
+      detail: typeof event.payload.stage === "string" ? event.payload.stage : undefined,
+    })),
+  }
 }
 
 async function createPaperRunLivePreviewSnapshot(
@@ -932,6 +1077,7 @@ async function createPaperRunLivePreviewSnapshot(
         detail: `${agent.role} ${agent.provider_id}/${agent.model_id}`,
       })),
     },
+    monitor: createPreviewMonitor(snapshot),
     render: {
       state: "ready",
       stage: "paperrun",
@@ -1117,6 +1263,13 @@ export async function getPaperRunSnapshotFromDir(runDir: string): Promise<PaperR
     addCodeFile(codeGraph, { path })
   }
   const machine = await inspectPaperMachineProfile({ workspace: status.run.workspace, home: inferredHome })
+  const [noveltyCheckpoints, experimentNoveltyGate, researchWiki, paperSpine, globalFigure] = await Promise.all([
+    readArtifactsBySchema<NoveltyCheckpoint>(runDir, artifacts, "NoveltyCheckpoint.v1"),
+    readLatestArtifactBySchema<ExperimentNoveltyGate>(runDir, artifacts, "ExperimentNoveltyGate.v1"),
+    readLatestArtifactBySchema<ResearchWikiDigest>(runDir, artifacts, "ResearchWikiDigest.v1"),
+    readLatestArtifactBySchema<PaperSpine>(runDir, artifacts, "PaperSpine.v1"),
+    readLatestArtifactBySchema<GlobalFigureSpec>(runDir, artifacts, "GlobalFigureSpec.v1"),
+  ])
   const snapshot = {
     schema_version: "PaperRun.v1",
     run_id: status.run.run_id,
@@ -1148,6 +1301,13 @@ export async function getPaperRunSnapshotFromDir(runDir: string): Promise<PaperR
       exploratory_runs: toolTraces.filter((trace) => trace.tool_name.includes("experiment")).length,
       reproduction_gate: gate === "passed" ? "passed" : gate === "blocked" ? "blocked" : "not_started",
     },
+    novelty: {
+      checkpoints: noveltyCheckpoints,
+      experiment_gate: experimentNoveltyGate,
+    },
+    research_wiki: researchWiki,
+    paper_spine: paperSpine,
+    global_figure: globalFigure,
     agent_tree: agentTree,
     agent_team: createPaperAgentTeam({
       run_id: status.run.run_id,

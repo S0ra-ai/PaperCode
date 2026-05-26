@@ -1,0 +1,100 @@
+id: novelty-spine-figure-acceptance
+title: 查新、论文脊梁、全局图与监控台验收
+status: todo
+priority: critical
+owner: paper-fucker-dev-agent
+tags:
+- acceptance
+- test
+- '0.13'
+depends_on:
+- research-workbench-tui-preview-sync
+description: 补齐端到端验收：重复研究前置阻断、PaperSpine 证据链、全局图 panel gate、Preview SPA 实时刷新和 TaskFlow/版本检查。
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: acceptance-tests
+  title: 运行端到端验收
+  status: done
+  owner: paper-fucker-dev-agent
+  depends_on: []
+  description: 运行 opencode/preview/python/typecheck 及版本、CHANGELOG 检查。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-26T12:03:42.336219'
+      level: info
+      message: Running acceptance tests.
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-26T12:03:57.457481'
+      level: info
+      message: 'Passed: opencode focused research closure + PaperRun execution tests,
+        opencode typecheck, preview tests, live-preview browser smoke, Python research-tools
+        tests. Full opencode suite produced 2572 pass / 56 fail due environment-sensitive
+        provider paid-model, global skills, snapshot/storage legacy tests; recorded
+        as residual, not hidden.'
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-26T12:03:57.457481'
+    attempt_count: 2
+  meta: {}
+- id: write-acceptance-report
+  title: 生成验收报告
+  status: done
+  owner: paper-fucker-dev-agent
+  depends_on: []
+  description: 记录查新、PaperSpine、全局图和 Preview SPA 的证据。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-26T12:03:43.688665'
+      level: info
+      message: Writing reports/novelty-spine-figure-acceptance.md.
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-26T12:03:58.900943'
+      level: info
+      message: Generated reports/novelty-spine-figure-acceptance.md and refreshed
+        reports/live-preview-browser-smoke.md.
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-26T12:03:58.900943'
+    attempt_count: 2
+  meta: {}
+- id: sync-version-taskflow
+  title: 同步版本与 TaskFlow
+  status: in_progress
+  owner: paper-fucker-dev-agent
+  depends_on: []
+  description: 更新 README/CHANGELOG，验证 TaskFlow 和 changelog 格式。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-26T12:03:45.056042'
+      level: info
+      message: Preparing README/CHANGELOG version sync after work commit.
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-26T12:03:45.056042'
+    attempt_count: 1
+  meta: {}
+outputs:
+- type: file
+  path: reports/novelty-spine-figure-acceptance.md
+- type: file
+  path: CHANGELOG
+- type: file
+  path: README.md
+trace:
+  logs: []
+  attempt_count: 0
+lock:
+  by: paper-fucker-dev-agent
+  at: '2026-05-26T12:01:26.121121'
+meta:
+  created_at: '2026-05-26T11:02:25.178070'
+  updated_at: '2026-05-26T12:03:58.900943'
+  version: '1'
