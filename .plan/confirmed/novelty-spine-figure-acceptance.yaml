@@ -1,6 +1,6 @@
 id: novelty-spine-figure-acceptance
 title: 查新、论文脊梁、全局图与监控台验收
-status: todo
+status: done
 priority: critical
 owner: paper-fucker-dev-agent
 tags:
@@ -65,7 +65,7 @@ steps:
   meta: {}
 - id: sync-version-taskflow
   title: 同步版本与 TaskFlow
-  status: in_progress
+  status: done
   owner: paper-fucker-dev-agent
   depends_on: []
   description: 更新 README/CHANGELOG，验证 TaskFlow 和 changelog 格式。
@@ -78,8 +78,14 @@ steps:
       level: info
       message: Preparing README/CHANGELOG version sync after work commit.
       agent: paper-fucker-dev-agent
-    last_run: '2026-05-26T12:03:45.056042'
-    attempt_count: 1
+    - timestamp: '2026-05-26T12:11:54.463317'
+      level: info
+      message: 同步完成：work commit 71d0c81a，CHANGELOG/README 当前版本 0.13.0-dev；check-readme-version
+        passed；check-changelog-format -IncludeArchives passed；TaskFlow validate_changelog_format/validate_changelog_versions
+        passed；7 个新增/更新任务 validate_task 全部通过。
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-26T12:11:54.463317'
+    attempt_count: 2
   meta: {}
 outputs:
 - type: file
@@ -91,10 +97,7 @@ outputs:
 trace:
   logs: []
   attempt_count: 0
-lock:
-  by: paper-fucker-dev-agent
-  at: '2026-05-26T12:01:26.121121'
 meta:
   created_at: '2026-05-26T11:02:25.178070'
-  updated_at: '2026-05-26T12:03:58.900943'
+  updated_at: '2026-05-26T12:12:01.751050'
   version: '1'

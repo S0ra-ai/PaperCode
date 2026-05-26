@@ -2,10 +2,38 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.11.2-dev
-:last_update   2026/05/13
+:version       0.13.0-dev
+:last_update   2026/05/26
 
 :history
+
+    0.13.0-dev - 2026/05/26 (71d0c81a) [develop]
+        :brief 研究闭环监控：查新、PaperSpine、全局图与实时 Preview
+        - feat(paper): 新增 NoveltyCheckpoint/PriorWorkMap/ExperimentNoveltyGate，按 literature、experiment_design、claim_ledger 阶段记录查新证据
+        - feat(paper): 新增 ResearchWikiDigest、PaperSpine 和 GlobalFigureSpec artifact，补齐 idea archive、论文脊梁和期刊图示闭环
+        - feat(orchestrator): 将查新 gate、实验转向 gate、PaperSpine 与 GlobalFigure 写入 PaperRun 事件与 artifact
+        - feat(preview): 实时 Monitor 增加总览、查新、论文脊梁、全局图、草稿、账本和诊断页面
+        - feat(tui): Paper 工作台右侧同步展示查新状态、spine readiness 和全局图 panel 数
+        - docs(readme): 更新当前能力图、GitHub 仓库地址和实时监控说明
+        - test(paper): 增加 research closure 单测、PaperRun 集成断言和 live preview browser smoke 报告
+        :src
+            - packages/opencode/src/paper/novelty.ts - 查新策略、prior work map、冲突分级与实验新颖性 gate
+            - packages/opencode/src/paper/research-wiki.ts - idea archive/research wiki digest
+            - packages/opencode/src/paper/paper-spine.ts - question、motivation、contribution、section intent、revision matrix
+            - packages/opencode/src/paper/global-figure.ts - Nature/IEEE/ACM/generic figure profile 与 evidence-linked panel plan
+            - packages/opencode/src/paper/orchestrator.ts - 阶段写入 closure artifacts 与事件
+            - packages/opencode/src/paper/run.ts - PaperRun snapshot 与 preview monitor summary
+        :preview
+            - packages/preview/src/client.js - 只读实时 Monitor 渲染 stage、novelty、spine、figure、ledger、diagnostics
+            - packages/preview/src/style.css - Paper Fucker Monitor 视觉与响应式布局
+        :tui
+            - packages/opencode/src/cli/cmd/tui/routes/paper/index.tsx - 研究闭环侧栏展示
+            - packages/opencode/src/cli/cmd/tui/routes/paper/workbench.ts - dashboard state 增加 research_closure
+        :test
+            - packages/opencode/test/paper/research-closure.test.ts - 查新、PaperSpine、GlobalFigure 单测
+            - packages/opencode/test/paper/paperrun-execution.test.ts - PaperRun artifact 集成断言
+            - scripts/live-preview-browser-smoke.ps1 - preview snapshot 增加 monitor 验收
+            - reports/novelty-spine-figure-acceptance.md - 验收报告
 
     0.11.2-dev - 2026/05/13 (ba0cc982) [feature/model-workbench-visual-reset]
         :brief 清空本机模型库存并重排模型工作台界面
