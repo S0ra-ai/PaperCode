@@ -1,6 +1,6 @@
 # Paper Fucker
 
-当前版本：<!-- version:start -->0.11.2-dev<!-- version:end --> ｜ 作者：k1d ([ZhuchenZhong](https://github.com/ZhuchenZhong)) ｜ 状态：开发态 ｜ 许可证：private-first / UNLICENSED
+当前版本：<!-- version:start -->0.13.0-dev<!-- version:end --> ｜ 作者：k1d ([ZhuchenZhong](https://github.com/ZhuchenZhong)) ｜ 状态：开发态 ｜ 许可证：private-first / UNLICENSED
 
 Paper Fucker 是一个中文优先、私有优先的论文研究工作台。你输入主题，或拖入论文、代码、数据和实验日志，它会把任务组织成可恢复、可审查的 `PaperRun`：研究规划、资料检索、代码理解、实验设计、复现记录、证据账本、真实性审查、实时预览和导出。
 
@@ -15,9 +15,11 @@ Paper Fucker 是一个中文优先、私有优先的论文研究工作台。你�
         +-- 模型工作台：provider、allowlist、主决策模型、阶段模型
         +-- 资料与网页：文献 MCP、托管浏览器采集、source ledger
         +-- 代码与实验：代码图谱、机器/GPU/工具链诊断、复现 gate
+        +-- 查新与转向：NoveltyCheckpoint、PriorWorkMap、ExperimentNoveltyGate
+        +-- 论文脊梁：PaperSpine、动机链、贡献链、章节意图、revision matrix
         +-- 论文图示：architecture-diagram、framework figure studio
         +-- 写作与审查：ClaimLedger、引用检查、真实性 gate、forced draft 标记
-        +-- 预览与恢复：只读 Preview、全局 run index、/resume
+        +-- 监控与恢复：实时只读 Monitor、全局 run index、/resume
 ```
 
 ## 快速开始
@@ -27,7 +29,7 @@ Windows PowerShell：
 ```powershell
 winget install --id Git.Git -e
 powershell -c "irm bun.sh/install.ps1 | iex"
-git clone https://github.com/S0ra-ai/paper_fucker.git
+git clone https://github.com/ZhuchenZhong/paper_fucker.git
 cd paper_fucker
 bun install
 bun run build
@@ -37,7 +39,7 @@ bun run build
 macOS / Linux：
 
 ```bash
-git clone https://github.com/S0ra-ai/paper_fucker.git
+git clone https://github.com/ZhuchenZhong/paper_fucker.git
 cd paper_fucker
 bun install
 bun run build
@@ -69,9 +71,14 @@ paper_fucker resume <run-id>
 
 默认情况下，`PaperRun` 写入 `~/.paper_fucker/runs/<run-id>`。选择工作区或显式传入 `storage_scope: "workspace"` 后，才写入 `<workspace>/.paper_fucker/runs/<run-id>`。
 
+运行中会自动打开本地只读 Monitor。它通过 SSE 持续显示阶段图、查新结果、论文脊梁、全局图、草稿、证据账本、agent、成本和 gate 状态；没有 token 的请求会被拒绝，写请求会被阻断。
+
 ## 论文能力
 
 - 论文 profile：Nature、IEEE、ACM、Springer 等结构与材料检查。
+- 查新流程：从资料检索、实验设计到 ClaimLedger 前持续生成 `NoveltyCheckpoint`，发现重复研究时先改道或收窄贡献。
+- 论文脊梁：`PaperSpine` 在正文前检查中心论点、动机链、贡献链和证据链，避免无证据草稿伪装成终稿。
+- 全局图：`GlobalFigureSpec` 生成期刊适配 overview figure，panel 必须绑定 claim、source 或 artifact。
 - 图示能力：内置 `architecture-diagram` 和 `paper-framework-figure-studio-pro`，用于系统架构图、方法流程图和 framework figure。
 - 网页采集：`bb-browser` 作为 Paper Fucker 托管能力诊断和安装，不要求用户手工准备浏览器采集栈。
 - 机器环境：侧边栏显示 OS、CPU、内存、磁盘、GPU/CUDA/ROCm、编译器、Python/uv/pip/conda、Node/Bun、Docker、WSL 和虚拟化工具状态。

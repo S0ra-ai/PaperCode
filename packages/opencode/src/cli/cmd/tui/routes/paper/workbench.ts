@@ -245,6 +245,13 @@ export interface PaperDashboardState {
     id: string
     message: string
   }>
+  research_closure: {
+    novelty_status: string
+    novelty_conflicts: number
+    spine_readiness: string
+    global_figure_status: string
+    global_figure_panels: number
+  }
   sidebar: PaperRunSidebarState
 }
 
@@ -1171,6 +1178,9 @@ export function createPaperRunDashboardState(
     })),
     panels: [
       { id: "stage_graph", label: "阶段图", count: snapshot.stage_graph.stages.length },
+      { id: "novelty", label: "查新", count: snapshot.novelty?.checkpoints.length ?? 0 },
+      { id: "paper_spine", label: "论文脊梁", count: snapshot.paper_spine ? 1 : 0 },
+      { id: "global_figure", label: "全局图", count: snapshot.global_figure?.panels.length ?? 0 },
       { id: "agent_tree", label: "Agent Tree", count: snapshot.agent_tree.nodes.length },
       { id: "agent_team", label: "Agent Team", count: snapshot.agent_team?.members.length ?? 0 },
       { id: "sources", label: "Source Ledger", count: snapshot.source_ledger.length },
@@ -1189,6 +1199,14 @@ export function createPaperRunDashboardState(
       id: question.question_id,
       message: question.message,
     })),
+    research_closure: {
+      novelty_status:
+        snapshot.novelty?.experiment_gate?.status ?? snapshot.novelty?.checkpoints.at(-1)?.status ?? "not_started",
+      novelty_conflicts: snapshot.novelty?.checkpoints.reduce((count, item) => count + item.conflicts.length, 0) ?? 0,
+      spine_readiness: snapshot.paper_spine?.readiness ?? "not_started",
+      global_figure_status: snapshot.global_figure?.status ?? "not_started",
+      global_figure_panels: snapshot.global_figure?.panels.length ?? 0,
+    },
     sidebar: createPaperRunSidebarState(snapshot),
   }
 }

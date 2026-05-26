@@ -1,16 +1,16 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Paper Fucker Preview</title>
+    <title>Paper Fucker Monitor</title>
     <link rel="stylesheet" href="/assets/style.css" />
   </head>
   <body>
     <main class="shell">
       <header class="topbar">
         <section>
-          <p class="eyebrow">Paper Fucker localhost read-only preview</p>
+          <p class="eyebrow">Paper Fucker localhost read-only monitor</p>
           <h1 id="run-title">Paper Fucker run</h1>
         </section>
         <section class="status-strip" aria-label="Render status">
@@ -21,28 +21,78 @@
       </header>
 
       <nav class="tabs" aria-label="Preview sections">
-        <button data-tab="markdown" class="active">Markdown</button>
-        <button data-tab="latex">LaTeX</button>
-        <button data-tab="pdf">PDF</button>
-        <button data-tab="docx">DOCX</button>
-        <button data-tab="annotations">Annotations</button>
-        <button data-tab="diagnostics">Diagnostics</button>
+        <button data-tab="overview" class="active">总览</button>
+        <button data-tab="novelty">查新</button>
+        <button data-tab="spine">论文脊梁</button>
+        <button data-tab="figure">全局图</button>
+        <button data-tab="draft">草稿</button>
+        <button data-tab="ledger">账本</button>
+        <button data-tab="diagnostics">诊断</button>
       </nav>
 
       <section class="workspace">
-        <article class="pane active" id="tab-markdown">
+        <article class="pane active" id="tab-overview">
+          <section class="monitor-grid">
+            <div class="panel span-2">
+              <h2>Stage Graph</h2>
+              <div id="stage-graph" class="stage-grid"></div>
+            </div>
+            <div class="panel">
+              <h2>Gate</h2>
+              <div id="gate-summary"></div>
+            </div>
+            <div class="panel">
+              <h2>Cost / Agent</h2>
+              <div id="cost-agent-summary"></div>
+            </div>
+            <div class="panel span-3">
+              <h2>Timeline</h2>
+              <div id="timeline-list" class="timeline"></div>
+            </div>
+          </section>
+        </article>
+        <article class="pane" id="tab-novelty">
+          <section class="monitor-grid">
+            <div class="panel span-2">
+              <h2>Novelty Checkpoints</h2>
+              <div id="novelty-list"></div>
+            </div>
+            <div class="panel">
+              <h2>Experiment Novelty Gate</h2>
+              <div id="novelty-gate"></div>
+            </div>
+          </section>
+        </article>
+        <article class="pane" id="tab-spine">
+          <section class="monitor-grid">
+            <div class="panel span-3">
+              <h2>PaperSpine</h2>
+              <div id="paper-spine"></div>
+            </div>
+          </section>
+        </article>
+        <article class="pane" id="tab-figure">
+          <section class="monitor-grid">
+            <div class="panel span-2">
+              <h2>Global Figure</h2>
+              <div id="global-figure"></div>
+            </div>
+            <div class="panel">
+              <h2>Figure Checks</h2>
+              <div id="figure-checks"></div>
+            </div>
+          </section>
+        </article>
+        <article class="pane" id="tab-draft">
           <pre id="markdown-content"></pre>
+          <details>
+            <summary>LaTeX / PDF / DOCX artifacts</summary>
+            <div class="artifact-view" id="latex-content"></div>
+            <div class="artifact-view" id="pdf-content"></div>
+            <div class="artifact-view" id="docx-content"></div>
+          </details>
         </article>
-        <article class="pane" id="tab-latex">
-          <pre id="latex-content"></pre>
-        </article>
-        <article class="pane" id="tab-pdf">
-          <div class="artifact-view" id="pdf-content"></div>
-        </article>
-        <article class="pane" id="tab-docx">
-          <div class="artifact-view" id="docx-content"></div>
-        </article>
-        <article class="pane" id="tab-annotations">
+        <article class="pane" id="tab-ledger">
           <div id="annotation-list" class="annotation-list"></div>
         </article>
         <article class="pane" id="tab-diagnostics">
