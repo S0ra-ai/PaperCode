@@ -1,0 +1,100 @@
+id: idea-archive-research-wiki
+title: Idea Archive 与 Research Wiki
+status: done
+priority: high
+owner: paper-fucker-dev-agent
+tags:
+- paper
+- memory
+- archive
+- '0.12'
+depends_on:
+- novelty-checkpoint-workflow
+description: 新增持久化研究档案，记录主题、假设、查新结论、相关论文、失败路径和可复用证据，供后续 PaperRun 避免重复工作。
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: define-archive-contracts
+  title: 定义 archive/wiki 契约
+  status: done
+  owner: paper-fucker-dev-agent
+  depends_on: []
+  description: 新增 IdeaArchiveEntry、ResearchWikiPage、ResearchWikiDigest 类型。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-26T11:57:19.531869'
+      level: info
+      message: Defining Research Wiki contracts.
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-26T11:57:39.880877'
+      level: info
+      message: Added packages/opencode/src/paper/research-wiki.ts with IdeaArchiveEntry,
+        ResearchWikiPage, and ResearchWikiDigest contracts.
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-26T11:57:39.880877'
+    attempt_count: 2
+  meta: {}
+- id: persist-archive-summary
+  title: 持久化并汇总到 PaperRun
+  status: done
+  owner: paper-fucker-dev-agent
+  depends_on: []
+  description: 在 run 根目录写入 archive/wiki digest，并在 snapshot diagnostics 暴露摘要。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-26T11:57:20.836526'
+      level: info
+      message: Persisting ResearchWikiDigest artifacts into PaperRun.
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-26T11:57:41.198811'
+      level: info
+      message: Orchestrator records ResearchWikiDigest.v1 during literature stage,
+        and PaperRun snapshot exposes research_wiki from artifact storage.
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-26T11:57:41.198811'
+    attempt_count: 2
+  meta: {}
+- id: verify-archive
+  title: 验证 archive 可复用
+  status: done
+  owner: paper-fucker-dev-agent
+  depends_on: []
+  description: 测试 PaperRun 能读取已有 archive 并生成避免重复检索的摘要。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-26T11:57:22.145035'
+      level: info
+      message: Verifying ResearchWikiDigest through PaperRun artifact loading.
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-26T11:57:42.524678'
+      level: info
+      message: Verified through PaperRun execution path and full artifact snapshot
+        loading; focused PaperRun execution test passed.
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-26T11:57:42.524678'
+    attempt_count: 2
+  meta: {}
+outputs:
+- type: file
+  path: packages/opencode/src/paper/research-wiki.ts
+- type: file
+  path: packages/opencode/src/paper/run.ts
+- type: file
+  path: packages/opencode/test/paper/research-wiki.test.ts
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-26T11:01:24.935037'
+  updated_at: '2026-05-26T11:57:52.519631'
+  version: '1'

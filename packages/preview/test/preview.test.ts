@@ -36,6 +36,36 @@ function snapshot(): PreviewSnapshot {
       costs: { llm_usd: 0, api_usd: 0, total_usd: 0 },
       agents: [{ name: "writer", status: "idle" }],
     },
+    monitor: {
+      stage_graph: [{ id: "drafting", label: "Drafting", status: "running", summary: "Writing draft." }],
+      novelty: {
+        status: "clear",
+        checkpoints: [
+          {
+            id: "literature:smoke",
+            stage: "literature",
+            status: "clear",
+            conflicts: 0,
+            summary: "No blocking overlap.",
+          },
+        ],
+        experiment_gate: { status: "passed", reason: "No blocking overlap.", allowed: true },
+      },
+      paper_spine: {
+        readiness: "ready",
+        central_claim: "Smoke claim.",
+        motivation_chain: ["Problem", "Gap"],
+        contribution_chain: ["Contribution"],
+      },
+      global_figure: {
+        status: "ready",
+        title: "Overview",
+        panels: [{ id: "A", title: "Problem", purpose: "Show context.", evidence_refs: 1 }],
+        checks: [{ id: "panel-evidence", status: "passed", message: "Evidence linked." }],
+      },
+      gate: { status: "passed", failed_checks: [] },
+      timeline: [{ type: "stage", label: "drafting", at: now, detail: "Writing draft." }],
+    },
     render: {
       state: "idle",
       updated_at: now,
@@ -63,7 +93,7 @@ describe("preview server", () => {
 
       const html = await fetch(preview.url)
       expect(html.status).toBe(200)
-      expect(await html.text()).toContain("Paper Fucker Preview")
+      expect(await html.text()).toContain("Paper Fucker Monitor")
     } finally {
       preview.stop()
     }

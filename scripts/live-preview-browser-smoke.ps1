@@ -40,6 +40,40 @@ function snapshot(input: { markdown: string; stage: string; agent: string; cost:
       costs: { llm_usd: input.cost, api_usd: 0, total_usd: input.cost },
       agents: [{ name: input.agent, status: "running", detail: input.stage }],
     },
+    monitor: {
+      stage_graph: [{ id: input.stage, label: input.stage, status: "running", summary: input.markdown }],
+      novelty: {
+        status: input.gate === "passed" ? "clear" : "needs_review",
+        checkpoints: [
+          {
+            id: `novelty:${input.stage}`,
+            stage: input.stage,
+            status: input.gate === "passed" ? "clear" : "needs_review",
+            conflicts: input.gate === "passed" ? 0 : 1,
+            summary: `gate=${input.gate}`,
+          },
+        ],
+        experiment_gate: {
+          status: input.gate,
+          reason: `gate=${input.gate}`,
+          allowed: input.gate === "passed",
+        },
+      },
+      paper_spine: {
+        readiness: input.gate === "passed" ? "ready" : "needs_evidence",
+        central_claim: input.markdown,
+        motivation_chain: ["problem", "gap"],
+        contribution_chain: ["contribution"],
+      },
+      global_figure: {
+        status: input.gate === "passed" ? "ready" : "needs_evidence",
+        title: "Overview",
+        panels: [{ id: "A", title: "Problem", purpose: "Show evidence flow.", evidence_refs: 1 }],
+        checks: [{ id: "panel-evidence", status: input.gate === "passed" ? "passed" : "warning", message: input.gate }],
+      },
+      gate: { status: input.gate, failed_checks: input.gate === "passed" ? [] : ["smoke_gate"] },
+      timeline: [{ type: "stage", label: input.stage, at: updated, detail: input.agent }],
+    },
     render: {
       state: "ready",
       stage: input.stage,
