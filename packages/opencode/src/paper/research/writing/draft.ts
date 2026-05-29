@@ -1102,8 +1102,8 @@ function abstractSummary(input: ComposeDraftPaperInput) {
   const methodClaim = firstClaimText(input, "method")
   const resultClaim = firstClaimText(input, "results")
   return [
-    `本文研究“${input.title}”的代码证据与实验复现问题，目标是在写作前先建立材料、实验和结果断言之间的追踪关系。`,
-    `研究流程将材料索引、代码理解、实验计划、复现检查和同行审阅线索串联为同一条可复核链路。`,
+    "计算机类论文若缺少可追踪代码证据、显式对照和隔离复现，容易把流程产物误写成研究结论。",
+    `本文以“${input.title}”为对象，检验材料、实验协议和结果断言能否形成同一条可复核证据链。`,
     methodClaim ? `方法证据显示：${methodClaim}` : undefined,
     resultClaim ? `结果证据显示：${resultClaim}` : undefined,
     metric,
@@ -1120,7 +1120,7 @@ function introductionSummary(input: ComposeDraftPaperInput) {
   const methodClaim = firstClaimText(input, "method")
   const resultEvidence = resultEvidenceText(input)
   return [
-    `面向计算机类论文的自动写作不能只生成流畅文本，还必须说明代码依据、实验协议、运行结果和复现边界。${sourceSummary(input)}`,
+    `面向计算机类论文的自动写作不能只追求正文完整，还必须说明代码依据、实验协议、运行结果和复现边界。${sourceSummary(input)}`,
     methodClaim
       ? `本研究的直接动机来自方法证据：${methodClaim}这意味着正文必须围绕代码接口、源码范围、实验入口和结论边界展开，而不能只给出泛化的写作流程描述。`
       : "本文采用证据优先的组织方式：材料进入后先整理来源和可验证断言，再根据实验计划执行或校验结果，最后由证据充分性检查决定结论能否成立。",
@@ -1128,8 +1128,8 @@ function introductionSummary(input: ComposeDraftPaperInput) {
       ? `结果侧的核心问题是：${resultEvidence}因此，本文需要同时呈现基线、消融、主指标和复现一致性，避免把缺少对照的观察写成贡献。`
       : undefined,
     finalReady(input)
-      ? "本文报告的是一组已满足当前证据充分性要求的研究结果，正文只讨论已绑定证据的结论。"
-      : "本文报告的是一组待修复的研究结果，正文会明确标出哪些结论仍不能作为正式结论。",
+      ? "因此，本文只讨论已绑定证据的结论，并把未被来源、实验或复现记录支撑的表述排除在正式结论之外。"
+      : "因此，本文把未被来源、实验或复现记录支撑的表述标为待修复结论，而不是写成正式结论。",
   ]
     .filter(Boolean)
     .join("\n\n")
