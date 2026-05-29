@@ -457,6 +457,43 @@ function literatureSynthesisSummary(map: LiteratureMap, sources: LiteratureMap["
   return `综合来看，相关工作可分为 ${taxonomy.length} 类：${taxonomyText}。${clusterText}本文不把这些工作简单当作背景罗列，而是用它们界定本研究的比较边界：已有研究说明自动化研究、工具调用或复现评测为何重要，本文进一步要求代码证据、实验协议和容器复现同时支撑正文结论。`
 }
 
+function literatureContrastSummary(sources: LiteratureMap["sources"]) {
+  const sourceRoles = sources.map((source) => ({
+    source,
+    roles: literatureRoleTags(source),
+    title: literatureDisplayTitle(source),
+  }))
+  const roles = [...new Set(sourceRoles.flatMap((item) => (item.roles.length > 0 ? item.roles : ["未归类背景"])))]
+  const usedTitles = new Set<string>()
+  const roleGroups = new Map<string, string[]>()
+  for (const role of roles) {
+    const titles: string[] = []
+    for (const item of sourceRoles) {
+      const itemRoles = item.roles.length > 0 ? item.roles : ["未归类背景"]
+      if (!itemRoles.includes(role) || usedTitles.has(item.title)) continue
+      titles.push(item.title)
+      usedTitles.add(item.title)
+      if (titles.length >= 2) break
+    }
+    if (titles.length > 0) roleGroups.set(role, titles)
+  }
+  for (const source of sources) {
+    if (usedTitles.has(literatureDisplayTitle(source))) continue
+    const roles = literatureRoleTags(source)
+    const role = roles[0] ?? "未归类背景"
+    const titles = roleGroups.get(role) ?? []
+    if (titles.length < 2) {
+      titles.push(literatureDisplayTitle(source))
+      usedTitles.add(literatureDisplayTitle(source))
+      roleGroups.set(role, titles)
+    }
+  }
+  const grouped = [...roleGroups.entries()].slice(0, 3)
+  if (grouped.length === 0) return undefined
+  const fragments = grouped.map(([role, titles]) => `${role}方向以 ${titles.join("、")} 为代表`).join("；")
+  return `对比这些方向，${fragments}。而本文的差异在于：相关工作只提供外部参照，正文结论必须同时经过代码证据、显式基线、消融和容器复现约束，不能把自动化流程本身写成未经验证的性能贡献。`
+}
+
 function literatureEvidenceSummary(input: ComposeDraftPaperInput) {
   const map = input.literature_map
   if (!map || map.sources.length === 0) return undefined
@@ -486,10 +523,7 @@ function literatureEvidenceSummary(input: ComposeDraftPaperInput) {
     verified.length > 0 ? literatureSynthesisSummary(map, selected) : undefined,
     markdownTable([verifiedHeading, "验证状态", "定位信息", "相关性"], rows),
     verified.length > 0
-      ? `核心参考包括 ${rows
-          .slice(0, 2)
-          .map((row) => row[0])
-          .join("；")}；这些工作提供了问题背景，但本文只把可复现协议中的结果写成实验结论。`
+      ? literatureContrastSummary(selected)
       : "由于当前文献记录未验证，正文不能把这些条目写成领域共识或新颖性证明；需要后续用授权检索、DOI/arXiv 元数据或人工审查补齐相关工作。",
   ])
 }

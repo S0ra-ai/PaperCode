@@ -418,6 +418,11 @@ describe("paper authoring loop", () => {
     expect(relatedWork).toContain("相关工作可分为")
     expect(relatedWork).toContain("工具使用或智能体自动化")
     expect(relatedWork).toContain("实验复现与验证风险")
+    expect(relatedWork).toContain("对比这些方向")
+    expect(relatedWork).toContain("而本文的差异在于")
+    expect(relatedWork).toContain("工具使用或智能体自动化方向以 Toolformer")
+    expect(relatedWork).toContain("实验复现与验证风险方向以 Reproducibility in Machine Learning")
+    expect(relatedWork).not.toContain("核心参考包括")
     expect(relatedWork).not.toContain("文献图中的 ")
     expect(relatedWork).not.toContain("| 已验证 | 2302.04761 |")
     expect(relatedWork).not.toContain("| 已验证 | 10.1145/1234567 |")
@@ -546,6 +551,83 @@ describe("paper authoring loop", () => {
     expect(relatedWork).toContain("以 accuracy 作为主指标")
     expect(relatedWork).toContain("最佳基线")
     expect(relatedWork).not.toContain("如果没有基线、消融和复现记录")
+  })
+
+  test("chooses distinct representatives for related work contrast groups", () => {
+    const ledger = composeClaimLedger({
+      topic: "Agent workflow validation",
+      claims: [
+        {
+          text: "The code analysis found source ranges for agent workflow validation.",
+          section_id: "method",
+          confidence: 0.9,
+          source_ids: ["material:code:agent-workflow"],
+          artifact_ids: ["artifact-codebase-map"],
+        },
+      ],
+      now,
+    })
+    const draft = composeDraftPaper({
+      title: "Agent Workflow Validation",
+      ledger,
+      literature_map: {
+        schema_version: "LiteratureMap.v1",
+        topic: "Agent workflow validation",
+        created_at: now,
+        sources: [
+          {
+            schema_version: "SourceRecord.v1",
+            source_id: "paper:agent-a",
+            kind: "paper",
+            title: "Agent Workflow A",
+            url: "https://example.org/agent-a",
+            retrieved_at: now,
+            provider: "arxiv",
+            license: { status: "clear", expression: "CC BY 4.0" },
+            version: { value: "v1", retrieved_at: now },
+            verification: { status: "verified", method: "live", checked_at: now },
+            topics: ["agent", "workflow", "validation"],
+            abstract: "Studies autonomous agent workflow validation benchmarks.",
+          },
+          {
+            schema_version: "SourceRecord.v1",
+            source_id: "paper:agent-b",
+            kind: "paper",
+            title: "Agent Workflow B",
+            url: "https://example.org/agent-b",
+            retrieved_at: now,
+            provider: "arxiv",
+            license: { status: "clear", expression: "CC BY 4.0" },
+            version: { value: "v1", retrieved_at: now },
+            verification: { status: "verified", method: "live", checked_at: now },
+            topics: ["agent", "workflow", "validation"],
+            abstract: "Reports autonomous agent workflow evaluation.",
+          },
+          {
+            schema_version: "SourceRecord.v1",
+            source_id: "paper:paper-code",
+            kind: "paper",
+            title: "Paper-to-Code Execution",
+            url: "https://example.org/paper-code",
+            retrieved_at: now,
+            provider: "arxiv",
+            license: { status: "clear", expression: "CC BY 4.0" },
+            version: { value: "v1", retrieved_at: now },
+            verification: { status: "verified", method: "live", checked_at: now },
+            topics: ["benchmark", "execution", "paper to code"],
+            abstract: "Evaluates benchmark execution and paper-to-code validation.",
+          },
+        ],
+        clusters: [],
+        summary: { total_sources: 3, verified_sources: 3, open_license_sources: 3 },
+        diagnostics: { verification_failures: [], gaps: [] },
+      },
+      now,
+    })
+    const relatedWork = markdownSection(draft.markdown, "相关工作")
+
+    expect(relatedWork).toContain("工具使用或智能体自动化方向以 Agent Workflow A、Agent Workflow B 为代表")
+    expect(relatedWork).toContain("实验复现与验证风险方向以 Paper-to-Code Execution 为代表")
   })
 
   test("renders ranking benchmark experiment names as paper-readable labels", () => {
