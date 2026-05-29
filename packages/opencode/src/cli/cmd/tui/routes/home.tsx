@@ -15,6 +15,7 @@ import { useSDK } from "@tui/context/sdk"
 import { useToast } from "@tui/ui/toast"
 import { submitPaperWorkbenchPrompt } from "./paper/workbench"
 import { getPaperConversationWorkspace } from "@tui/util/paper-conversation-workspace"
+import { getPaperConversationJournal } from "@tui/util/paper-conversation-journal"
 
 let once = false
 const placeholder = {
@@ -108,8 +109,13 @@ export function Home() {
                   router.navigate({ type: "paper-resume" })
                   return true
                 }
+                if (command === "/journal" || command === "/journals" || command === "/venue") {
+                  router.navigate({ type: "paper-journal" })
+                  return true
+                }
                 try {
                   const conversationWorkspace = getPaperConversationWorkspace()
+                  const conversationJournal = getPaperConversationJournal()
                   const result = await submitPaperWorkbenchPrompt({
                     baseUrl: sdk.url,
                     directory: sdk.directory,
@@ -118,6 +124,10 @@ export function Home() {
                       ...prompt,
                       workspace_path: conversationWorkspace ?? prompt.workspace_path ?? sdk.directory,
                       storage_scope: conversationWorkspace ? "workspace" : "home",
+                      target_profile: conversationJournal.profile_id,
+                      target_journal:
+                        conversationJournal.profile_id === "generic-preprint" ? undefined : conversationJournal.journal_name,
+                      target_journal_url: conversationJournal.official_url,
                     },
                   })
                   router.navigate({

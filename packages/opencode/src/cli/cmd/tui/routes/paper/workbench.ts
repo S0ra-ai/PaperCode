@@ -1,6 +1,11 @@
 import type { PromptInfo } from "@tui/component/prompt/history"
-import type { PaperRunCreateRequest, PaperRunSnapshot } from "@/paper/run"
-import type { PaperProfileId } from "@/paper/profiles"
+import type {
+  PaperExperimentProtocolRunResult,
+  PaperExperimentStarterApplyResult,
+  PaperRunCreateRequest,
+  PaperRunSnapshot,
+} from "@/paper/run"
+import { resolvePaperProfileSelection, type PaperProfileId } from "@/paper/profiles"
 import type { ResearchCapability, ResearchCapabilityType } from "@/paper/capabilities"
 import type { ModelRoutingDecision, PaperModelRef, PaperModelInventory, PaperModelRole } from "@/paper"
 import type { PaperRunControlAction, PaperRunControllerState } from "@/paper/run-controller"
@@ -10,7 +15,9 @@ import { readTuiJsonResponse } from "@tui/util/http"
 export interface PaperWorkbenchSubmitInput {
   baseUrl: string
   directory?: string
-  prompt: PromptInfo & Pick<PaperRunCreateRequest, "storage_scope">
+  prompt: PromptInfo &
+    Pick<PaperRunCreateRequest, "storage_scope"> &
+    Pick<PaperRunCreateRequest, "target_profile" | "target_journal" | "target_journal_url">
   fetch: (input: string | URL | Request, init?: RequestInit) => Promise<Response>
 }
 
@@ -49,6 +56,20 @@ export interface PaperWorkbenchPreviewResponse {
   snapshot?: unknown
 }
 
+export interface PaperWorkbenchExperimentStarterApplyInput extends PaperWorkbenchApiInput {
+  dryRun?: boolean
+  overwrite?: boolean
+  updatePackageJson?: boolean
+  filePaths?: readonly string[]
+  workspacePath?: string
+}
+
+export interface PaperWorkbenchExperimentProtocolRunInput extends PaperWorkbenchApiInput {
+  dryRun?: boolean
+  timeoutSeconds?: number
+  workspacePath?: string
+}
+
 export interface PaperRunLiveMonitor {
   close: () => void
 }
@@ -85,7 +106,16 @@ export interface PaperWorkbenchControl {
   enabled: boolean
   method: "GET" | "POST"
   endpoint: string
-  kind: "guidance" | "control" | "preview" | "export" | "capability" | "model_roles" | "model_inventory"
+  kind:
+    | "guidance"
+    | "control"
+    | "preview"
+    | "export"
+    | "experiment_starter"
+    | "experiment_run"
+    | "capability"
+    | "model_roles"
+    | "model_inventory"
   danger?: boolean
   payload?: Record<string, unknown>
 }
@@ -144,6 +174,24 @@ export interface PaperRunGateSummary {
   reproduction_gate: string
   export_status: string
   final_export_enabled: boolean
+  experiment_guidance?: {
+    status: string
+    summary: string
+    gaps: string[]
+    suggestions: Array<{
+      gap: string
+      severity: string
+      recommended_script: string
+      next_action: string
+    }>
+  }
+  experiment_starter_pack?: {
+    status: string
+    summary: string
+    scripts: string[]
+    files: string[]
+    next_steps: string[]
+  }
 }
 
 export interface PaperRunSidebarState {
@@ -209,6 +257,7 @@ export interface PaperRunSidebarState {
     run_root: string
     gpu_mode: string
     gpu_devices: string[]
+    tool_versions: string[]
     available: number
     optional_missing: number
     blocked: number
@@ -385,18 +434,27 @@ function readFlagValue(token: string, tokens: string[], index: number) {
 }
 
 export function parsePaperWorkbenchPrompt(
-  prompt: string | (PromptInfo & Pick<PaperRunCreateRequest, "storage_scope">),
+  prompt:
+    | string
+    | (PromptInfo &
+        Pick<PaperRunCreateRequest, "storage_scope"> &
+        Pick<PaperRunCreateRequest, "target_profile" | "target_journal" | "target_journal_url">),
 ): PaperRunCreateRequest {
   const input = typeof prompt === "string" ? prompt : prompt.input
   const parts = typeof prompt === "string" ? [] : prompt.parts
   const promptBudget = typeof prompt === "string" ? undefined : prompt.budget_tier
+  const promptProfile = typeof prompt === "string" ? undefined : prompt.target_profile
+  const promptJournal = typeof prompt === "string" ? undefined : prompt.target_journal
+  const promptJournalUrl = typeof prompt === "string" ? undefined : prompt.target_journal_url
   const tokens = tokenize(input.trim())
   const topic: string[] = []
   const codePaths: string[] = []
   const paperFiles: string[] = []
   const datasetPaths: string[] = []
   const experimentLogs: string[] = []
-  let profile: PaperProfileId | undefined
+  let profile: PaperProfileId | string | undefined = promptProfile
+  let targetJournal = promptJournal
+  let targetJournalUrl = promptJournalUrl
   let language: string | undefined
   let budget: PaperRunCreateRequest["budget_tier"]
   let quality: PaperRunCreateRequest["quality_mode"] = "reviewable_bundle"
@@ -439,7 +497,19 @@ export function parsePaperWorkbenchPrompt(
     }
     if (token === "--profile" || token.startsWith("--profile=")) {
       const result = readFlagValue(token, tokens, index)
-      profile = result.value as PaperProfileId
+      profile = result.value
+      index = result.next
+      continue
+    }
+    if (token === "--journal" || token.startsWith("--journal=")) {
+      const result = readFlagValue(token, tokens, index)
+      targetJournal = result.value
+      index = result.next
+      continue
+    }
+    if (token === "--journal-url" || token.startsWith("--journal-url=")) {
+      const result = readFlagValue(token, tokens, index)
+      targetJournalUrl = result.value
       index = result.next
       continue
     }
@@ -487,6 +557,11 @@ export function parsePaperWorkbenchPrompt(
 
   const normalizedTopic = topic.join(" ").trim()
   if (!normalizedTopic) throw new Error("请输入论文主题，或在路径参数后补充研究目标。")
+  const profileSelection = resolvePaperProfileSelection({
+    target_profile: profile,
+    target_journal: targetJournal,
+    target_journal_url: targetJournalUrl,
+  })
 
   return {
     topic: normalizedTopic,
@@ -496,7 +571,9 @@ export function parsePaperWorkbenchPrompt(
     paper_files: paperFiles,
     dataset_paths: datasetPaths,
     experiment_logs: experimentLogs,
-    target_profile: profile,
+    target_profile: profileSelection.profile_id,
+    target_journal: profileSelection.journal_name,
+    target_journal_url: targetJournalUrl,
     language: language ?? "zh-CN",
     budget_tier: budget ?? promptBudget ?? "standard",
     quality_mode: quality === "submission_candidate" || budget === "submission" || promptBudget === "submission" ? "submission_candidate" : quality,
@@ -679,6 +756,9 @@ function createLiveControls(snapshot: PaperRunSnapshot, controller: PaperRunCont
   const blocked = blockedStage(snapshot)
   const canResume = controller.status === "paused"
   const canCancel = controller.status !== "cancelled" && controller.status !== "completed"
+  const starterPack = objectValue(snapshot.diagnostics.experiment_starter_pack)
+  const hasStarterPack = starterPack.status === "ready"
+  const hasExperimentPlan = snapshot.artifacts.some((artifact) => artifact.metadata?.artifact_schema === "ExperimentPlan.v1")
   return [
     {
       id: "guidance",
@@ -749,6 +829,26 @@ function createLiveControls(snapshot: PaperRunSnapshot, controller: PaperRunCont
       endpoint: controlEndpoint(snapshot, "/export"),
       kind: "export",
       payload: { forced: true },
+    },
+    {
+      id: "experiment_starter_apply",
+      label: "写入实验模板",
+      description: "把实验 starter pack 写入当前工作区，并合并 package.json scripts。",
+      enabled: hasStarterPack,
+      method: "POST",
+      endpoint: controlEndpoint(snapshot, "/experiment-starter/apply"),
+      kind: "experiment_starter",
+      payload: { dry_run: false, overwrite: false, update_package_json: true },
+    },
+    {
+      id: "experiment_protocol_run",
+      label: "运行实验协议",
+      description: "在当前工作区受控执行 proposed、baseline、ablation 与容器复现命令。",
+      enabled: hasExperimentPlan,
+      method: "POST",
+      endpoint: controlEndpoint(snapshot, "/experiments/run"),
+      kind: "experiment_run",
+      payload: { dry_run: false, timeout_seconds: 120 },
     },
     {
       id: "capabilities",
@@ -1034,6 +1134,16 @@ function outlineState(snapshot: PaperRunSnapshot): PaperRunOutlineState {
 
 function gateSummary(snapshot: PaperRunSnapshot): PaperRunGateSummary {
   const gate = objectValue(snapshot.diagnostics.final_gate)
+  const guidance = objectValue(snapshot.diagnostics.experiment_guidance)
+  const starterPack = objectValue(snapshot.diagnostics.experiment_starter_pack)
+  const guidanceSuggestions = arrayValue(guidance.suggestions)
+    .map((value) => objectValue(value))
+    .map((item) => ({
+      gap: typeof item.gap === "string" ? item.gap : "unknown_gap",
+      severity: typeof item.severity === "string" ? item.severity : "warning",
+      recommended_script: typeof item.recommended_script === "string" ? item.recommended_script : "",
+      next_action: typeof item.next_action === "string" ? item.next_action : "",
+    }))
   const status = gate.status === "passed" || gate.status === "blocked" || gate.status === "open" ? gate.status : "not_started"
   const exportFailedChecks = snapshot.export_state.failed_checks ?? []
   const failedChecks = exportFailedChecks.length
@@ -1052,6 +1162,27 @@ function gateSummary(snapshot: PaperRunSnapshot): PaperRunGateSummary {
     reproduction_gate: snapshot.experiment_status?.reproduction_gate ?? "not_started",
     export_status: snapshot.export_state.status,
     final_export_enabled: snapshot.export_state.status === "final",
+    experiment_guidance:
+      guidance.status === "needs_protocol"
+        ? {
+            status: "needs_protocol",
+            summary: typeof guidance.summary === "string" ? guidance.summary : "实验协议缺失，需要补齐后再生成 final export。",
+            gaps: arrayValue(guidance.gaps).filter((item): item is string => typeof item === "string"),
+            suggestions: guidanceSuggestions,
+          }
+        : undefined,
+    experiment_starter_pack:
+      starterPack.status === "ready"
+        ? {
+            status: "ready",
+            summary: typeof starterPack.summary === "string" ? starterPack.summary : "实验协议 starter pack 已生成。",
+            scripts: Object.keys(objectValue(starterPack.package_json_scripts)),
+            files: arrayValue(starterPack.files)
+              .map((value) => objectValue(value).path)
+              .filter((item): item is string => typeof item === "string"),
+            next_steps: arrayValue(starterPack.next_steps).filter((item): item is string => typeof item === "string"),
+          }
+        : undefined,
   }
 }
 
@@ -1065,6 +1196,7 @@ function activeStage(snapshot: PaperRunSnapshot) {
 }
 
 function nextAction(snapshot: PaperRunSnapshot, gate: PaperRunGateSummary) {
+  if (gate.experiment_guidance?.status === "needs_protocol") return "补齐 baseline / ablation / container 实验协议"
   if (snapshot.pause_questions.length > 0) return "回答暂停问题"
   if (gate.failed_checks.length > 0) return "补证据或导出 forced draft"
   if (snapshot.export_state.status === "final") return "导出终稿"
@@ -1081,6 +1213,7 @@ export function createPaperRunSidebarState(snapshot: PaperRunSnapshot): PaperRun
   const code = objectValue(snapshot.diagnostics.code_understanding)
   const machine = snapshot.diagnostics.machine_profile
   const environment = snapshot.diagnostics.experiment_environment
+  const toolPriority = ["python", "bun", "node", "docker", "nvcc", "cuda", "cmake", "gcc", "clang"]
   const recentAgents = nodes.slice(-4).map((agent) => ({
     id: agent.agent_id,
     role: agent.role,
@@ -1098,7 +1231,11 @@ export function createPaperRunSidebarState(snapshot: PaperRunSnapshot): PaperRun
       current_stage: current ? (STAGE_LABELS[current.id] ?? current.title) : "未开始",
       current_stage_status: current ? (STATUS_LABELS[current.status] ?? current.status) : "未知",
       next_action: nextAction(snapshot, gate),
-      blockers: [...gate.failed_checks, ...snapshot.pause_questions.map((question) => question.reason)].filter(Boolean),
+      blockers: [
+        ...gate.failed_checks,
+        ...(gate.experiment_guidance?.gaps ?? []),
+        ...snapshot.pause_questions.map((question) => question.reason),
+      ].filter(Boolean),
     },
     cost: costDiagnostics(snapshot),
     outline: outlineState(snapshot),
@@ -1135,6 +1272,20 @@ export function createPaperRunSidebarState(snapshot: PaperRunSnapshot): PaperRun
             run_root: machine.default_run_root,
             gpu_mode: machine.gpu.mode === "gpu" ? "GPU" : "CPU-only",
             gpu_devices: machine.gpu.devices.map((device) => `${device.vendor} ${device.name}`),
+            tool_versions: [
+              ...(machine.runtimes ?? []),
+              ...(machine.compilers ?? []),
+              machine.gpu.cuda,
+              machine.gpu.rocm,
+            ]
+              .filter((tool) => tool.status === "available" && tool.version)
+              .sort((left, right) => {
+                const leftIndex = toolPriority.indexOf(left.id)
+                const rightIndex = toolPriority.indexOf(right.id)
+                return (leftIndex === -1 ? 999 : leftIndex) - (rightIndex === -1 ? 999 : rightIndex)
+              })
+              .slice(0, 6)
+              .map((tool) => `${tool.label}: ${tool.version}`),
             available: environment.available.length,
             optional_missing: environment.optional_missing.length,
             blocked: environment.blocked.length,
@@ -1147,6 +1298,7 @@ export function createPaperRunSidebarState(snapshot: PaperRunSnapshot): PaperRun
             run_root: String(snapshot.diagnostics.runtime_root ?? ""),
             gpu_mode: "未检测",
             gpu_devices: [],
+            tool_versions: [],
             available: 0,
             optional_missing: 0,
             blocked: 0,
@@ -1248,6 +1400,41 @@ export async function requestPaperWorkbenchExport(input: PaperWorkbenchApiInput 
     body: JSON.stringify({ forced: Boolean(input.forced) }),
   })
   return readJsonResponse(response, "PaperRun 导出失败")
+}
+
+export async function requestPaperWorkbenchExperimentStarterApply(
+  input: PaperWorkbenchExperimentStarterApplyInput,
+): Promise<PaperExperimentStarterApplyResult> {
+  const response = await input.fetch(
+    apiUrl(input.baseUrl, `paper/runs/${encodeURIComponent(input.runID)}/experiment-starter/apply`),
+    {
+      method: "POST",
+      headers: apiHeaders(input.directory, true),
+      body: JSON.stringify({
+        dry_run: input.dryRun ?? false,
+        overwrite: input.overwrite ?? false,
+        update_package_json: input.updatePackageJson ?? true,
+        ...(input.filePaths ? { file_paths: input.filePaths } : {}),
+        ...(input.workspacePath ? { workspace_path: input.workspacePath } : {}),
+      }),
+    },
+  )
+  return readJsonResponse<PaperExperimentStarterApplyResult>(response, "实验模板写入失败")
+}
+
+export async function requestPaperWorkbenchExperimentProtocolRun(
+  input: PaperWorkbenchExperimentProtocolRunInput,
+): Promise<PaperExperimentProtocolRunResult> {
+  const response = await input.fetch(apiUrl(input.baseUrl, `paper/runs/${encodeURIComponent(input.runID)}/experiments/run`), {
+    method: "POST",
+    headers: apiHeaders(input.directory, true),
+    body: JSON.stringify({
+      dry_run: input.dryRun ?? false,
+      timeout_seconds: input.timeoutSeconds ?? 120,
+      ...(input.workspacePath ? { workspace_path: input.workspacePath } : {}),
+    }),
+  })
+  return readJsonResponse<PaperExperimentProtocolRunResult>(response, "实验协议运行失败")
 }
 
 export async function fetchPaperWorkbenchCapabilities(input: Omit<PaperWorkbenchApiInput, "runID">) {

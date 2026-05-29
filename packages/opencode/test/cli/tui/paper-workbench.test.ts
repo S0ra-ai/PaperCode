@@ -2,6 +2,8 @@ import { describe, expect, test } from "bun:test"
 import {
   createPaperRunDashboardState,
   parsePaperWorkbenchPrompt,
+  requestPaperWorkbenchExperimentProtocolRun,
+  requestPaperWorkbenchExperimentStarterApply,
   subscribePaperRunLiveMonitor,
   submitPaperWorkbenchPrompt,
 } from "../../../src/cli/cmd/tui/routes/paper/workbench"
@@ -79,6 +81,33 @@ describe("TUI PaperRun workbench", () => {
     expect(request.quality_mode).toBe("submission_candidate")
   })
 
+  test("uses the TUI-selected journal context for PaperRun profile selection", () => {
+    const request = parsePaperWorkbenchPrompt({
+      input: "生成面向计算机学报的论文",
+      parts: [],
+      target_profile: "cjc-paper",
+      target_journal: "中国计算机学报",
+      target_journal_url: "https://cjc.ict.ac.cn/",
+    })
+
+    expect(request.topic).toBe("生成面向计算机学报的论文")
+    expect(request.target_profile).toBe("cjc-paper")
+    expect(request.target_journal).toBe("中国计算机学报")
+    expect(request.target_journal_url).toBe("https://cjc.ict.ac.cn/")
+  })
+
+  test("keeps unknown journal selection as custom-journal for runtime profile generation", () => {
+    const request = parsePaperWorkbenchPrompt({
+      input: "为新期刊准备投稿草稿",
+      parts: [],
+      target_journal: "Journal of Unknown Systems",
+      target_journal_url: "https://example.org/authors",
+    })
+
+    expect(request.target_profile).toBe("custom-journal")
+    expect(request.target_journal).toBe("Journal of Unknown Systems")
+  })
+
   test("classifies attached files into PaperRun material inputs", () => {
     const request = parsePaperWorkbenchPrompt({
       input: "基于这些材料生成论文",
@@ -146,6 +175,90 @@ describe("TUI PaperRun workbench", () => {
     ).rejects.toThrow("请先用 /folder 选择当前工作目录。")
   })
 
+  test("applies experiment starter pack from PaperRun workbench", async () => {
+    const calls: Array<{ url: string; init: RequestInit }> = []
+    const result = await requestPaperWorkbenchExperimentStarterApply({
+      baseUrl: "http://localhost:4096",
+      directory: "E:/Project/paper_fucker",
+      runID: "run-paper",
+      fetch: async (input, init) => {
+        calls.push({ url: String(input), init: init ?? {} })
+        return Response.json({
+          schema_version: "PaperExperimentStarterApplyResult.v1",
+          run_id: "run-paper",
+          status: "ready",
+          dry_run: false,
+          overwrite: false,
+          workspace_path: "E:/Project/paper_fucker",
+          files: [
+            {
+              path: "experiments/starter/Dockerfile.repro",
+              target_path: "E:/Project/paper_fucker/experiments/starter/Dockerfile.repro",
+              status: "written",
+              message: "已写入",
+            },
+            {
+              path: "package.json",
+              target_path: "E:/Project/paper_fucker/package.json",
+              status: "written",
+              message: "已写入",
+            },
+          ],
+          written_count: 2,
+          conflict_count: 0,
+          skipped_count: 0,
+          message: "已写入 2 个实验 starter 项。",
+        })
+      },
+    })
+
+    expect(result.files.map((file) => file.path)).toEqual(["experiments/starter/Dockerfile.repro", "package.json"])
+    expect(result.written_count).toBe(2)
+    expect(calls).toHaveLength(1)
+    expect(calls[0]!.url).toBe("http://localhost:4096/paper/runs/run-paper/experiment-starter/apply")
+    expect(calls[0]!.init.method).toBe("POST")
+    expect((calls[0]!.init.headers as Record<string, string>)["x-paper-fucker-directory"]).toBe("E:/Project/paper_fucker")
+    expect(JSON.parse(String(calls[0]!.init.body))).toEqual({
+      dry_run: false,
+      overwrite: false,
+      update_package_json: true,
+    })
+  })
+
+  test("runs experiment protocol from PaperRun workbench", async () => {
+    const calls: Array<{ url: string; init: RequestInit }> = []
+    const result = await requestPaperWorkbenchExperimentProtocolRun({
+      baseUrl: "http://localhost:4096",
+      directory: "E:/Project/paper_fucker",
+      runID: "run-paper",
+      fetch: async (input, init) => {
+        calls.push({ url: String(input), init: init ?? {} })
+        return Response.json({
+          schema_version: "PaperExperimentProtocolRunResult.v1",
+          run_id: "run-paper",
+          status: "succeeded",
+          dry_run: false,
+          workspace_path: "E:/Project/paper_fucker",
+          planned_commands: [],
+          host_runs: [{ experiment_id: "proposed", role: "proposed", environment: "host", status: "succeeded", command: "bun run typecheck", exit_code: 0, wall_time_seconds: 0.1, metrics: [] }],
+          container_runs: [{ experiment_id: "proposed", role: "proposed", environment: "container", status: "succeeded", command: "bun run repro:container", exit_code: 0, wall_time_seconds: 0.1, metrics: [] }],
+          artifact_ids: ["artifact-host", "artifact-container", "artifact-report"],
+          message: "实验协议已执行，host/container 结果允许 final claim。",
+        })
+      },
+    })
+
+    expect(result.status).toBe("succeeded")
+    expect(result.container_runs[0]!.command).toBe("bun run repro:container")
+    expect(calls).toHaveLength(1)
+    expect(calls[0]!.url).toBe("http://localhost:4096/paper/runs/run-paper/experiments/run")
+    expect(calls[0]!.init.method).toBe("POST")
+    expect(JSON.parse(String(calls[0]!.init.body))).toEqual({
+      dry_run: false,
+      timeout_seconds: 120,
+    })
+  })
+
   test("maps PaperRun snapshot to Chinese dashboard panels", () => {
     const snapshot = {
       run_id: "run-paper",
@@ -200,6 +313,11 @@ describe("TUI PaperRun workbench", () => {
           workspace: "E:/Project/paper_fucker",
           default_run_root: "C:/Users/test/.paper_fucker/runs",
           gpu: { mode: "cpu-only", devices: [], cuda: { status: "optional_missing" }, rocm: { status: "optional_missing" } },
+          compilers: [{ id: "gcc", label: "gcc", status: "available", version: "gcc 13.2.0" }],
+          runtimes: [
+            { id: "python", label: "Python", status: "available", version: "Python 3.12.0" },
+            { id: "bun", label: "Bun", status: "available", version: "1.3.13" },
+          ],
         },
         experiment_environment: {
           available: [{ id: "python" }],
@@ -207,6 +325,40 @@ describe("TUI PaperRun workbench", () => {
           blocked: [],
         },
         final_gate: { status: "blocked", blockers: ["unsupported_claim"] },
+        experiment_guidance: {
+          schema_version: "ExperimentProtocolGuidance.v1",
+          created_at: "2026-05-11T00:00:00Z",
+          status: "needs_protocol",
+          summary: "缺少 baseline 和 container reproduction 协议。",
+          final_export_blocked: true,
+          gaps: ["missing_baseline_runner", "missing_container_reproduction_runner"],
+          suggestions: [
+            {
+              gap: "missing_container_reproduction_runner",
+              severity: "blocking",
+              recommended_script: "repro:container",
+              next_action: "在 package.json scripts 中添加容器复现入口。",
+            },
+          ],
+        },
+        experiment_starter_pack: {
+          schema_version: "ExperimentProtocolStarterPack.v1",
+          created_at: "2026-05-11T00:00:00Z",
+          status: "ready",
+          summary: "已生成实验协议 starter pack。",
+          package_json_scripts: {
+            "baseline:starter": "bun run experiments/starter/baseline-starter.ts",
+            "repro:container:starter": "docker build -f experiments/starter/Dockerfile.repro -t paper-fucker-repro . && docker run --rm paper-fucker-repro",
+          },
+          files: [
+            {
+              path: "experiments/starter/Dockerfile.repro",
+              purpose: "Container reproduction skeleton.",
+              content: "FROM oven/bun:1",
+            },
+          ],
+          next_steps: ["复制 starter pack 并替换为真实实验。"],
+        },
         tool_traces: [
           {
             tool_name: "model.writer",
@@ -252,8 +404,18 @@ describe("TUI PaperRun workbench", () => {
       failed_checks: ["unsupported_claim"],
       reproduction_gate: "blocked",
     })
+    expect(state.sidebar.gate.experiment_guidance).toMatchObject({
+      status: "needs_protocol",
+      gaps: ["missing_baseline_runner", "missing_container_reproduction_runner"],
+    })
+    expect(state.sidebar.gate.experiment_starter_pack).toMatchObject({
+      status: "ready",
+      files: ["experiments/starter/Dockerfile.repro"],
+    })
+    expect(state.sidebar.overview.next_action).toBe("补齐 baseline / ablation / container 实验协议")
     expect(state.sidebar.diagnostics.recent_calls[0]!.name).toBe("model.writer")
     expect(state.sidebar.machine.gpu_mode).toBe("CPU-only")
+    expect(state.sidebar.machine.tool_versions).toContain("Python: Python 3.12.0")
     expect(state.sidebar.machine.optional_missing).toBe(1)
     expect(state.controls.map((control) => control.label)).toEqual([
       "发送指导",
@@ -263,6 +425,8 @@ describe("TUI PaperRun workbench", () => {
       "打开预览",
       "导出终稿",
       "导出 forced draft",
+      "写入实验模板",
+      "运行实验协议",
       "能力健康",
       "模型工作台",
       "模型角色",

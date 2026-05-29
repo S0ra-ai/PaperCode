@@ -3,6 +3,7 @@ import {
   BUILTIN_PAPER_PROFILE_IDS,
   createPaperProfileRegistry,
   defaultPaperProfiles,
+  resolvePaperProfileSelection,
   type PaperProfileCheck,
 } from "@/paper"
 
@@ -10,10 +11,12 @@ describe("paper profile registry", () => {
   test("registers the built-in paper profile ids", () => {
     expect(BUILTIN_PAPER_PROFILE_IDS).toEqual([
       "nature-paper",
+      "cjc-paper",
       "ieee-paper",
       "acm-paper",
       "springer-paper",
       "generic-preprint",
+      "custom-journal",
     ])
 
     const registry = createPaperProfileRegistry(defaultPaperProfiles())
@@ -68,6 +71,47 @@ describe("paper profile registry", () => {
       expect.arrayContaining(["methods", "code-availability", "ethics", "competing-interests"]),
     )
     expect(check.warnings.map((warning) => warning.check_id)).toContain("supplementary-material")
+  })
+
+  test("models Chinese Journal of Computers as a runtime-refreshed official-template profile", () => {
+    const cjcProfile = createPaperProfileRegistry(defaultPaperProfiles()).get("cjc-paper")
+
+    expect(cjcProfile).toMatchObject({
+      id: "cjc-paper",
+      title: "计算机学报（Chinese Journal of Computers）",
+      guidance_refresh_policy: "fetch_current_official_guidance",
+      template_strategy: "official_template_first",
+    })
+    expect(cjcProfile.official_guidance_sources).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: "计算机学报官网",
+          url: "https://cjc.ict.ac.cn/",
+          trust: "official",
+          refresh: "runtime",
+        }),
+      ]),
+    )
+    expect(cjcProfile.required_checks.map((check) => check.id)).toEqual(
+      expect.arrayContaining(["chinese-title-abstract-keywords", "english-title-abstract-keywords", "official-cjc-template"]),
+    )
+  })
+
+  test("generates a blocked draft profile for unknown journals without guessed format rules", () => {
+    const selection = resolvePaperProfileSelection({
+      target_journal: "Journal of Unknown Systems",
+      target_journal_url: "https://example.org/authors",
+    })
+
+    expect(selection.profile_id).toBe("custom-journal")
+    expect(selection.journal_name).toBe("Journal of Unknown Systems")
+    expect(selection.generated_profile).toMatchObject({
+      schema_version: "PaperGeneratedJournalProfile.v1",
+      profile_id: "custom-journal",
+      status: "needs_official_guidance",
+      official_url: "https://example.org/authors",
+    })
+    expect(selection.generated_profile?.notes.join("\n")).toContain("不会使用猜测规则")
   })
 
   test("installs a first-party nature-paper skill with runtime official-source refresh instructions", async () => {
