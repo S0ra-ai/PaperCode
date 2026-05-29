@@ -62,6 +62,14 @@
 - 主文扫描未发现 `目标是在写作前`、`研究流程将材料索引`、`本文报告的是一组`、`本次运行`、工程审计词、mock/fixture 词或内部证据 ID 残留。
 - 质量判断：摘要和引言更接近问题驱动论文；下一轮应继续处理相关工作段里的“本次相关工作”和方法段里的流程口吻，让正文更像真实研究叙述。
 
+## 2026-05-30 相关工作论文式表达复审
+
+- 协议场景复跑 `run-a2d9e7b4-7670-4cc1-a2d5-1fc4d0e1fd00`：status=`succeeded`，final export=`final`，Preview=`ready`，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-a2d9e7b4-7670-4cc1-a2d5-1fc4d0e1fd00\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 相关工作开头改为 `本文纳入 ... 条相关文献记录`，聚类说明改为 `主题线索`，不再把内部文献图结构暴露到主文。
+- 主文扫描未发现 `本次相关工作`、`文献图`、`目标是在写作前`、`本文报告的是一组`、`本次运行`、工程审计词、mock/fixture 词或内部证据 ID 残留。
+- 质量判断：相关工作段更像论文背景综述；下一轮可继续改“本节比较”“本文采用证据优先流程”等方法/可复现性模板句。
+
 ## 本轮实跑
 
 | 场景 | Run ID | 结果 | 判断 |
