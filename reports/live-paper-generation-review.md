@@ -215,6 +215,14 @@ Paper Fucker 当前已经具备“诚实闭环”的关键能力：没有复现�
 - 产品源码审计：`research-tools/src`、`packages/opencode/src/paper` 和 live benchmark 中未发现 `manual_fixture`、`local_fixture`、伪 HF job digest、伪容器镜像、固定 arXiv seed 或 benchmark 伪 locator。
 - 验证：`python -m unittest research-tools.tests.test_huggingface_loop research-tools.tests.test_crawler` 13 pass；`test/paper/huggingface-loop.test.ts` + `test/paper/agent-team-capability-acceptance.test.ts` + `test/paper/strict-acceptance.test.ts` 17 pass / 118 assertions；`packages/opencode` typecheck passed。
 
+## 2026-05-30 终稿导出 fallback 诊断复审
+
+- Protocol benchmark 重新生成完整论文：`run-d8c6442c-7540-4f7b-93b7-9f5e393ee8d0`，14 个阶段全部成功，final export=`final`，failed checks 为空，Preview ready。
+- 人工抽查最新 Markdown：包含摘要、引言、研究问题、贡献、相关工作、研究设计、方法、证据、数据与代码、实验设置、结果、可复现性、讨论、效度威胁、限制、结论、参考文献与附录；未发现 `mock/fake/fixture/placeholder`、机器 artifact/source id、`generic-preprint`、`typecheck_pass`、`PaperRun`、`ClaimLedger` 等正文残留。
+- 修复导出语义：当 `latexmk` 失败但后续 LaTeX engine 成功生成有效 PDF 时，最终 PDF 和 manifest 不再把失败尝试写进 `tool_diagnostics`。最终失败的格式仍会返回结构化诊断。
+- 最新 manifest 验证：`tool_diagnostics_count=0`，Markdown/LaTeX/PDF/DOCX 四种格式均为 `written`。
+- 验证：`test/paper/export-pipeline.test.ts` 5 pass / 31 assertions；`packages/opencode` typecheck passed；`scripts/live-paper-quality-benchmark.ts --scenario protocol` passed。
+
 ## 2026-05-30 期刊工作台与中国计算机学报 profile
 
 - 新增 `/journal` TUI 期刊工作台：内置期刊列表、当前期刊状态和未知期刊抓取草案分开显示。
