@@ -58,8 +58,9 @@ function paperProseText(value: string) {
     .replace(/declared baseline/g, "已声明基线")
     .replace(/primary reproducibility metric/g, "主复现指标")
     .replace(/experiment runs/g, "实验运行记录")
-    .replace(/export gates/g, "导出检查")
-    .replace(/final paper generation/g, "终稿生成")
+    .replace(/export gates/g, "证据充分性检查")
+    .replace(/before final paper generation/g, "并在成稿前完成")
+    .replace(/final paper generation/g, "正式成稿")
     .replace(/, and /g, "和")
     .replace(/, /g, "、")
     .replace(/source-range-grounded/g, "基于源码范围的")
@@ -72,10 +73,10 @@ function paperProseText(value: string) {
     .replace(/系统抽取到/g, "分析阶段抽取到")
     .replace(/导出方法\/类表面/g, "导出方法或类接口")
     .replace(/package script/g, "package.json 脚本")
-    .replace(/final gate/g, "终稿检查")
-    .replace(/final claim/g, "终稿结论")
-    .replace(/最终 claim/g, "终稿结论")
-    .replace(/final export/g, "终稿导出")
+    .replace(/final gate/g, "证据充分性检查")
+    .replace(/final claim/g, "正式结论")
+    .replace(/最终 claim/g, "正式结论")
+    .replace(/final export/g, "最终成稿")
     .replace(/(?<![A-Za-z0-9_])ClaimLedger(?![A-Za-z0-9_])/g, "证据台账")
     .replace(/(?<!:)\bbaseline\b(?!:)/g, "基线")
     .replace(/(?<!:)\bablation\b(?!:)/g, "消融")
@@ -83,6 +84,9 @@ function paperProseText(value: string) {
     .replace(/(?<!:)\bcontainer\b/g, "容器")
     .replace(/进行\s+基于源码范围的\s+分析/g, "进行基于源码范围的分析")
     .replace(/和\s+源码范围/g, "和源码范围")
+    .replace(/和证据充分性检查\s+并在成稿前完成/g, "，并在成稿前完成证据充分性检查")
+    .replace(/完成\./g, "完成。")
+    .replace(/检查\./g, "检查。")
 }
 
 function claimMarkdown(entry: ClaimLedgerEntry) {
@@ -133,8 +137,8 @@ function buildPlainSection(sectionId: string, title: string, markdown: string): 
 function claimStatusSummary(ledger: ClaimLedger) {
   const unsupported = ledger.unsupported_claim_ids.length
   const supported = ledger.entries.filter((entry) => entry.status === "supported").length
-  if (ledger.entries.length === 0) return "当前还没有证据台账条目，不能生成终稿结论。"
-  if (unsupported > 0) return `当前 ${unsupported}/${ledger.entries.length} 条断言尚缺证据，终稿导出必须保持阻断。`
+  if (ledger.entries.length === 0) return "当前还没有证据台账条目，不能生成正式结论。"
+  if (unsupported > 0) return `当前 ${unsupported}/${ledger.entries.length} 条断言尚缺证据，正式结论必须保持阻断。`
   return `当前 ${supported}/${ledger.entries.length} 条断言已绑定证据，可进入更严格的审稿与导出检查。`
 }
 
@@ -329,7 +333,7 @@ function sourceSummary(input: ComposeDraftPaperInput) {
 function artifactSummary(input: ComposeDraftPaperInput) {
   const artifactIds = [...new Set(input.ledger.entries.flatMap((entry) => entry.artifact_ids))]
   if (artifactIds.length === 0) return "当前还没有可审查证据记录。"
-  return `正文结论绑定 ${artifactIds.length} 个证据记录；完整机器索引保留在运行清单与导出清单，正文只保留必要说明。`
+  return `正文结论绑定 ${artifactIds.length} 个证据记录；完整证据索引保留在附录和本地审查材料中，正文只保留必要说明。`
 }
 
 function countedSummary(values: string[], label: (value: string) => string, unit: string) {
@@ -562,7 +566,7 @@ function referencesSummary(input: ComposeDraftPaperInput) {
 
 function humanizeExperimentText(value: string) {
   return value
-    .replace(/^Create a reproducible evaluation plan before allowing final paper claims\.$/, "在允许终稿结论前建立可复现评价方案。")
+    .replace(/^Create a reproducible evaluation plan before allowing final paper claims\.$/, "在允许正式结论前建立可复现评价方案。")
     .replace(/^Strong sparse retrieval baseline for retrieval-style CS\/AI papers\.$/, "作为检索类任务的稀疏检索对照。")
     .replace(/^Common neural retrieval baseline for embedding-based methods\.$/, "作为嵌入式方法的神经检索对照。")
     .replace(/^End-to-end retrieval augmented generation baseline\.$/, "作为端到端 RAG 流水线对照。")
@@ -571,7 +575,7 @@ function humanizeExperimentText(value: string) {
     .replace(/^Ablation runner declared by package script\.$/, "仓库 package.json 显式声明的消融运行入口。")
     .replace(/^If fewer than two baselines can run, downgrade to an engineering report\.$/, "少于两个基线可运行时降级为工程报告。")
     .replace(/^If datasets are unavailable, turn to the nearest open verified benchmark\.$/, "数据集不可用时转向最近的开放可验证 benchmark。")
-    .replace(/^If container reproduction fails, block final paper claims\.$/, "容器复现失败时阻断终稿结论。")
+    .replace(/^If container reproduction fails, block final paper claims\.$/, "容器复现失败时阻断正式结论。")
 }
 
 function humanizeLabel(value: string) {
@@ -607,7 +611,7 @@ function dataAvailabilitySummary(input: ComposeDraftPaperInput) {
         .filter(Boolean)
         .join("")
     }
-    return `本次运行未登记可用数据集。${gaps} 因此实验结果只能依赖用户提供的显式实验记录；若缺少实验记录，终稿导出必须保持阻断。`
+    return `本次运行未登记可用数据集。${gaps} 因此实验结果只能依赖用户提供的显式实验记录；若缺少实验记录，正式结论必须保持阻断。`
   }
   const datasetLines = data.datasets.slice(0, 5).map((dataset) => {
     const license = displayDatasetLicense(dataset.license.expression ?? dataset.license.status)
@@ -679,7 +683,7 @@ function experimentProtocolSummary(input: ComposeDraftPaperInput) {
     `被评估方法为“${humanizeLabel(plan.proposed.label)}”，主观测指标为“${displayMetricName(plan.proposed.expected_metric)}”。`,
     "",
     "### 基线",
-    baselineTable || "当前没有基线运行入口；该缺口会阻断终稿结论。",
+    baselineTable || "当前没有基线运行入口；该缺口会阻断正式结论。",
     "",
     "### 消融",
     ablationTable || "当前没有消融运行入口；贡献强度需要保持保守。",
@@ -701,7 +705,7 @@ function experimentGuidanceSummary(input: ComposeDraftPaperInput) {
   })
   return [
     guidance.summary,
-    guidance.final_export_blocked ? "在这些协议缺口补齐前，终稿导出必须保持阻断；待修复草稿只能作为待补实验清单。" : "",
+    guidance.final_export_blocked ? "在这些协议缺口补齐前，正式结论必须保持阻断；待修复草稿只能作为待补实验清单。" : "",
     ...lines,
   ]
     .filter(Boolean)
@@ -802,13 +806,13 @@ function researchQuestionsSummary(input: ComposeDraftPaperInput) {
   const metric = displayMetricName(input.result_report?.primary_metric ?? input.experiment_plan?.proposed.expected_metric ?? "primary_metric")
   const design = experimentDesignCountsText(input)
   return joinBlocks([
-    `本文把研究目标拆成三项：证据是否足以支撑方法，${design} 的对照是否能形成可比较结果，以及复现状态是否允许终稿结论。`,
+    `本文把研究目标拆成三项：证据是否足以支撑方法，${design} 的对照是否能形成可比较结果，以及复现状态是否允许正式结论。`,
     "RQ1 证据边界：提交的代码、方法描述和源码范围是否足以支撑正文中的方法断言？",
     `RQ2 对照有效性：本文方法、基线和消融是否围绕“${metric}”这一主指标形成可比较记录？`,
-    "RQ3 复现一致性：本机与隔离环境中的状态和主指标是否一致，从而允许结果进入终稿结论？",
+    "RQ3 复现一致性：本机与隔离环境中的状态和主指标是否一致，从而允许结果进入正式结论？",
     ready
-      ? "由于当前终稿检查已通过，正文只保留已绑定来源和实验结果的结论；完整证据索引放在附录。"
-      : "由于当前终稿检查尚未通过，正文会把结论限定为待验证状态，并把缺口写成修复清单。",
+      ? "由于当前证据充分性检查已通过，正文只保留已绑定来源和实验结果的结论；完整证据索引放在附录。"
+      : "由于当前证据充分性检查尚未通过，正文会把结论限定为待验证状态，并把缺口写成修复清单。",
   ])
 }
 
@@ -826,7 +830,7 @@ function contributionsSummary(input: ComposeDraftPaperInput) {
     [
       `1. 第一项贡献是把源码范围、来源和实验记录统一为可审查证据${methodClaim ? `；核心方法断言为：${trimTerminalPunctuation(methodClaim)}` : ""}。`,
       `2. 第二项贡献是将本文方法与 ${counts.baseline} 个基线、${counts.ablation} 个消融放入同一评价协议，并${primaryMetricPhrase(metric).replace("主指标", "主比较指标")}${resultClaim ? `；核心结果断言为：${trimTerminalPunctuation(resultClaim)}` : ""}。`,
-      `3. 第三项贡献是用本机/容器一致性检查约束结果表述${runEvidence}，避免把未复现或只在单一环境中成立的观察写成终稿结论。`,
+      `3. 第三项贡献是用本机/容器一致性检查约束结果表述${runEvidence}，避免把未复现或只在单一环境中成立的观察写成正式结论。`,
     ].join("\n"),
     "这些贡献共同保证方法比较、复现检查和正文表述共享同一套证据边界。",
   ])
@@ -864,13 +868,13 @@ function studyDesignSummary(input: ComposeDraftPaperInput) {
     ["代码证据", `${evidenceCount} 个绑定方法或结果的证据记录`, "把方法表述绑定到文件、源码范围和生成证据。"],
     ["实验协议", `指标=${metric}；基线=${input.experiment_plan?.baselines.length ?? 0}；消融=${input.experiment_plan?.ablations.length ?? 0}`, "形成可比较的本文方法、基线和消融运行。"],
     ["复现执行", `本机=${hostCount}；容器=${containerCount}`, "检查同一观察能否在受控环境中重复出现。"],
-    ["终稿检查", finalReady(input) ? "通过" : "阻断", "决定结果是否可以作为终稿结论呈现。"],
+    ["证据充分性", finalReady(input) ? "通过" : "阻断", "决定结果是否可以作为正式结论呈现。"],
   ]
   return joinBlocks([
-    "下表展示研究设计与证据流。论文从材料边界、代码证据、显式实验协议、本机/容器执行和终稿检查生成；每个阶段都会收窄正文可以声称的内容。",
+    "下表展示研究设计与证据流。论文从材料边界、代码证据、显式实验协议、本机/容器执行和证据充分性检查生成；每个阶段都会收窄正文可以声称的内容。",
     markdownTable(["阶段", "观测状态", "在论文中的作用"], rows),
     "这个设计把两个经常被混在一起的任务分开：一是生成流畅正文，二是判断正文是否被可运行证据支撑。前者由写作阶段完成，后者由来源记录、实验结果和复现检查约束。",
-    "因此，研究设计不是简单的流水线说明，而是正文可信度的约束机制。材料边界决定可以讨论哪些对象，代码证据决定方法描述是否有源码范围支撑，实验协议决定结果是否有对照，复现执行决定结果是否可以重复，终稿检查则决定这些结果能否进入结论。任一环节缺失时，系统应把结论降级为待验证观察，而不是用完整段落掩盖证据缺口。",
+    "因此，研究设计不是简单的流水线说明，而是正文可信度的约束机制。材料边界决定可以讨论哪些对象，代码证据决定方法描述是否有源码范围支撑，实验协议决定结果是否有对照，复现执行决定结果是否可以重复，证据充分性检查则决定这些结果能否进入结论。任一环节缺失时，相关结论应降级为待验证观察，而不是用完整段落掩盖证据缺口。",
     "这种分层也让后续人工审查更直接：审稿人可以先查看主文中的研究问题和结果表，再沿着附录中的来源、断言和实验记录回到具体文件、命令和输出摘要。对计算机类论文而言，这比单纯给出一段生成式解释更重要，因为代码路径、运行脚本、数据版本和环境差异都会影响结果能否成立。",
     "在实际使用中，这一设计还能区分两类常见失败：一类是写作材料不足，例如缺少论文来源或数据许可；另一类是实验链路不足，例如没有基线、消融或隔离环境复现。前者会影响背景与引用可信度，后者会影响结果与贡献可信度。把两类问题分开呈现，可以让用户优先修复真正阻断投稿的缺口，也能避免把格式完整误判为研究完成。",
     "因此，主文中的每个强结论都应能在附录中找到对应证据，而附录中的每条证据也应能解释它为何足以支撑或限制该结论完整成立。",
@@ -889,12 +893,12 @@ function implementationTraceSummary(input: ComposeDraftPaperInput) {
     evidenceCountSummary(entry.artifact_ids),
   ])
   return joinBlocks([
-    "实现层面，写作器不会直接把系统内部日志拼进论文；它先读取断言台账、数据计划、实验计划、实验运行和结果报告，再把这些结构化产物转换为论文段落、表格和附录索引。",
-    `本次运行共有 ${input.ledger.entries.length} 条断言、${evidenceSources.length} 个可追踪来源（其中 ${sourceIds.length} 个直接绑定断言）和 ${artifactIds.length} 个证据记录。断言状态会影响终稿检查：待补证据的断言只能出现在待修复草稿中，已支持断言才允许进入终稿导出。`,
+    "实现层面，写作阶段不会直接把内部运行日志拼进论文；它先读取断言台账、数据计划、实验计划、实验运行和结果报告，再把这些结构化产物转换为论文段落、表格和附录索引。",
+    `本次运行共有 ${input.ledger.entries.length} 条断言、${evidenceSources.length} 个可追踪来源（其中 ${sourceIds.length} 个直接绑定断言）和 ${artifactIds.length} 个证据记录。断言状态会影响证据充分性判断：待补证据的断言只能出现在待修复草稿中，已支持断言才允许进入正式结论。`,
     claimRows.length > 0
       ? markdownTable(["断言", "章节", "状态", "来源类型", "证据概况"], claimRows)
       : "当前没有断言行。",
-    "这种实现方式让论文正文保持可读，同时保留审查入口。读者如果需要复核某个结果，可以从正文断言跳到运行证据清单，再根据导出清单定位到代码分析、实验运行、审稿或导出记录。",
+    "这种实现方式让论文正文保持可读，同时保留审查入口。读者如果需要复核某个结果，可以从正文断言跳到附录证据清单，再定位到代码分析、实验运行和审稿记录。",
   ])
 }
 
@@ -961,10 +965,10 @@ function hostContainerConsistencySummary(input: ComposeDraftPaperInput) {
   const rows = comparisons.map((item) => item.row)
   const mismatches = comparisons.filter((item) => item.mismatch)
   return joinBlocks([
-    `本节比较本机与容器结果，${primaryMetricPhrase(metricLabel)}。只有当本文方法、基线和消融在可复现环境中有一致记录时，终稿结论才有资格进入导出包。`,
+    `本节比较本机与容器结果，${primaryMetricPhrase(metricLabel)}。只有当本文方法、基线和消融在可复现环境中有一致记录时，相关结果才有资格进入正式结论。`,
     markdownTable(["实验", "本机状态", `本机 ${metricLabel}`, "容器状态", `容器 ${metricLabel}`, "差值", "容器命令"], rows),
     mismatches.length === 0
-      ? "本次运行没有发现本机/容器状态或主指标差异，复现检查可以把这些实验作为终稿结论的支撑证据。"
+      ? "本次运行没有发现本机/容器状态或主指标差异，复现检查可以把这些实验作为正式结论的支撑证据。"
       : `本次运行发现 ${mismatches.length} 个本机/容器差异，相关断言应降级为探索性观察，直到复现脚本或环境被修复。`,
     "该检查不等价于证明方法泛化有效；它只证明当前工作区、当前协议和当前环境声明可以复现同一组观测结果。泛化结论仍需要更多数据集、更多随机种子和领域基线。",
   ])
@@ -985,7 +989,7 @@ function reproducibilityChecklistSummary(input: ComposeDraftPaperInput) {
     ["本机执行", displayReady(hasHostRuns), hasHostRuns ? "已记录本机输出、退出码、耗时和指标。" : "需要真实执行本机实验。"],
     ["容器复现", displayReady(hasContainerRuns), hasContainerRuns ? "已记录容器复现结果。" : "需要容器或等价隔离环境复现。"],
     ["结果报告", displayReady(hasResultReport), hasResultReport ? "已生成主指标比较、阻断项和建议。" : "需要生成结果报告。"],
-    ["终稿检查", displayReady(finalReady(input)), finalReady(input) ? "允许终稿导出。" : "保持阻断或待修复草稿。"],
+    ["证据充分性", displayReady(finalReady(input)), finalReady(input) ? "允许正式结论。" : "保持阻断或待修复草稿。"],
   ]
   return joinBlocks([
     "本清单用于回答用户最关心的问题：当前产物是不是一篇可交付论文，还是一个待补实验的草稿。每一项都来自结构化证据记录，而不是人工勾选。",
@@ -1005,8 +1009,8 @@ function threatsToValiditySummary(input: ComposeDraftPaperInput) {
       ? `内部效度：本文方法与最佳基线${primaryMetricLocus(metric)}的差异为 ${formatMetricValue(report.proposed.value - report.best_baseline.value)}。如果差异很小，正文不能把流程完整性写成性能优势；如果差异很大，也需要检查随机种子、数据划分和脚本等价性。`
       : "内部效度：当前缺少本文方法与基线的可比较结果，因此不能声称方法优于对照。",
     "外部效度：当前结论只覆盖用户提交的工作区、登记的数据/代码材料和本次运行环境。要扩展到更一般的计算机类论文场景，还需要更多任务、更多仓库、更多基线和更严格的人工审稿。",
-    "复现效度：容器复现能降低环境差异，但不能自动证明依赖来源永久可用。导出包应保存命令、镜像、摘要、输出摘要和证据清单，必要时还需要锁定数据版本。",
-    "自动化效度：自动写作链路不能替代研究者对问题价值、实验设计合理性和投稿伦理的最终判断。流程应继续把可疑结论标为阻断或需要人工审查。",
+    "复现效度：容器复现能降低环境差异，但不能自动证明依赖来源永久可用。审查材料应保存命令、镜像、摘要、输出摘要和证据清单，必要时还需要锁定数据版本。",
+    "自动化效度：自动写作链路不能替代研究者对问题价值、实验设计合理性和投稿伦理的最终判断。可疑结论仍应标为阻断或需要人工审查。",
   ])
 }
 
@@ -1059,10 +1063,10 @@ function experimentSummary(input: ComposeDraftPaperInput) {
     metrics = `${primaryMetricLocus(displayMetricName(report.primary_metric))}，本文方法为 ${displayMetricValue(report.primary_metric, report.proposed.value)}；由于缺少基线，对比性结论仍需保守。`
   }
   if (report.reproduction.status === "passed" && report.final_claims_allowed) {
-    return `${metrics}\n\n容器复现已通过，本机与容器结果可以支撑当前终稿结论。`
+    return `${metrics}\n\n容器复现已通过，本机与容器结果可以支撑当前正式结论。`
   }
   const blockers = report.blockers.length > 0 ? report.blockers.map(paperProseText).join("、") : "复现检查"
-  return `${metrics}\n\n复现检查未通过，阻断项：${blockers}。相关结果只能标为探索性证据，不能进入终稿结论。`
+  return `${metrics}\n\n复现检查未通过，阻断项：${blockers}。相关结果只能标为探索性证据，不能进入正式结论。`
 }
 
 function discussionSummary(input: ComposeDraftPaperInput) {
@@ -1093,13 +1097,13 @@ function discussionSummary(input: ComposeDraftPaperInput) {
 
 function abstractSummary(input: ComposeDraftPaperInput) {
   const ready = finalReady(input)
-  const status = ready ? "在当前证据边界内，终稿检查已通过。" : "在当前证据边界内，终稿检查尚未通过。"
+  const status = ready ? "在当前证据边界内，证据充分性检查已通过。" : "在当前证据边界内，证据充分性检查尚未通过。"
   const metric = resultMetricSummary(input)
   const methodClaim = firstClaimText(input, "method")
   const resultClaim = firstClaimText(input, "results")
   return [
     `本文研究“${input.title}”的代码证据与实验复现问题，目标是在写作前先建立材料、实验和结果断言之间的追踪关系。`,
-    `研究流程将材料索引、代码理解、实验计划、复现检查、审稿和导出串联为同一条可复核链路。`,
+    `研究流程将材料索引、代码理解、实验计划、复现检查和同行审阅线索串联为同一条可复核链路。`,
     methodClaim ? `方法证据显示：${methodClaim}` : undefined,
     resultClaim ? `结果证据显示：${resultClaim}` : undefined,
     metric,
@@ -1119,13 +1123,13 @@ function introductionSummary(input: ComposeDraftPaperInput) {
     `面向计算机类论文的自动写作不能只生成流畅文本，还必须说明代码依据、实验协议、运行结果和复现边界。${sourceSummary(input)}`,
     methodClaim
       ? `本研究的直接动机来自方法证据：${methodClaim}这意味着正文必须围绕代码接口、源码范围、实验入口和结论边界展开，而不能只给出泛化的写作流程描述。`
-      : "本文采用证据优先的组织方式：材料进入后先整理来源和可验证断言，再根据实验计划执行或校验结果，最后由终稿检查决定是否允许导出。",
+      : "本文采用证据优先的组织方式：材料进入后先整理来源和可验证断言，再根据实验计划执行或校验结果，最后由证据充分性检查决定结论能否成立。",
     resultEvidence
       ? `结果侧的核心问题是：${resultEvidence}因此，本文需要同时呈现基线、消融、主指标和复现一致性，避免把缺少对照的观察写成贡献。`
       : undefined,
     finalReady(input)
-      ? "本文报告的是一个满足当前终稿检查的论文包，正文只讨论已绑定证据的结论。"
-      : "本文报告的是一个待修复的研究包，正文会明确标出哪些结论仍不能作为终稿结论。",
+      ? "本文报告的是一组已满足当前证据充分性要求的研究结果，正文只讨论已绑定证据的结论。"
+      : "本文报告的是一组待修复的研究结果，正文会明确标出哪些结论仍不能作为正式结论。",
   ]
     .filter(Boolean)
     .join("\n\n")
@@ -1142,7 +1146,7 @@ function relatedWorkSummary(input: ComposeDraftPaperInput) {
     resultEvidence
       ? `与只报告单次运行结果的流程相比，本文把结果断言限定在显式对照内：${resultEvidence}`
       : "如果没有基线、消融和复现记录，相关结论只能保留为探索性观察。",
-    "本文采用的约束是：写作结果必须限制在已登记来源、断言和证据记录范围内；没有通过复现检查时，流程应阻断终稿输出，而不是把草稿包装成终稿。",
+    "本文采用的约束是：写作结果必须限制在已登记来源、断言和证据记录范围内；没有通过复现检查时，相关结论应保持待验证状态，而不是把草稿包装成正式结论。",
     sourceSummary(input),
   ])
 }
@@ -1150,7 +1154,7 @@ function relatedWorkSummary(input: ComposeDraftPaperInput) {
 function methodSummary(input: ComposeDraftPaperInput, claimSections: DraftSection[]) {
   const methodClaims = claimSections.find((section) => section.section_id === "method")?.markdown
   return [
-    "本文采用证据优先流程。每个运行先记录输入材料、工作区、模型路由和数据外传策略，再由阶段图驱动文献、代码分析、实验设计、复现、写作、审稿和导出。",
+    "本文采用证据优先流程。每个运行先记录输入材料、工作区、模型路由和数据外传策略，再由阶段图驱动文献、代码分析、实验设计、复现、写作和审稿。",
     methodClaims
       ? `代码理解阶段抽取的方法接口、源码范围和可运行入口如下：\n\n${methodClaims}`
       : "当前运行没有生成可展开的方法断言；这通常意味着输入材料不足或证据台账仍需补充。",
@@ -1167,13 +1171,13 @@ function evidenceModelSummary(input: ComposeDraftPaperInput) {
   return joinBlocks([
     "本文把证据组织成来源、断言和结构化记录三层。来源表示论文材料、代码文件、数据集或实验日志；断言表示正文可以被审查的具体陈述；结构化记录表示由分析、实验、审稿或导出阶段产生的证据。",
     `本次运行登记 ${evidenceSources.length} 个可追踪来源、${input.ledger.entries.length} 条断言和 ${artifactIds.length} 个结构化记录；其中 ${sourceIds.length} 个来源直接绑定断言，${supported} 条断言已标记为有证据支持，${unsupported} 条断言仍缺证据。`,
-    "写作器只把有证据支持的断言作为终稿正文的候选内容；缺少源码范围、实验结果或复现记录的断言会被保留为待修复项，不能伪装成已验证贡献。",
-    "这种证据模型的作用是让读者能够从正文中的方法或结果句子追溯到材料、实验命令、指标和导出记录，从而形成可追踪性。它也为后续人工审稿提供定位入口：审稿人可以先读主文，再进入附录检查完整证据索引。",
+    "写作阶段只把有证据支持的断言作为正式正文的候选内容；缺少源码范围、实验结果或复现记录的断言会被保留为待修复项，不能伪装成已验证贡献。",
+    "这种证据模型的作用是让读者能够从正文中的方法或结果句子追溯到材料、实验命令、指标和审稿记录，从而形成可追踪性。它也为后续人工审稿提供定位入口：审稿人可以先读主文，再进入附录检查完整证据索引。",
     "因此，正文中的每个实验结论都应回答两个问题：它来自哪里，以及是否在受控环境中重复出现。",
     "当这两个问题没有答案时，结论必须降级为探索性观察。",
     "这也是后续扩展真实数据集、领域基线、随机种子和更复杂实验资源时不可省略的基本约束之一，也是审稿可追踪性的基础。",
     "在计算机类论文场景中，这种约束尤其重要，因为代码实现、运行脚本、依赖版本和执行环境的细小差异都可能改变实验结论。",
-    "因此，本文把“能写出段落”和“能支撑结论”视为两个不同检查点。前者只要求写作器可以组织结构，后者要求来源、实验命令、运行结果和复现状态同时可追踪。只有后一个检查点通过时，系统才允许把结果写成终稿结论；否则正文必须保留限制说明，并把缺口转化为后续实验任务。",
+    "因此，本文把“能写出段落”和“能支撑结论”视为两个不同检查点。前者只要求写作阶段可以组织结构，后者要求来源、实验命令、运行结果和复现状态同时可追踪。只有后一个检查点通过时，结果才可以写成正式结论；否则正文必须保留限制说明，并把缺口转化为后续实验任务。",
   ])
 }
 
@@ -1238,14 +1242,14 @@ function scaffoldSections(input: ComposeDraftPaperInput, claimSections: DraftSec
             ...unsupported.map((claimId) => `- ${claimId}: 补充证据、降低表述强度，或从终稿断言中移除。`),
           ].join("\n")
         : ready
-          ? "当前没有未支持断言，引用、许可、代码证据和复现检查已满足终稿条件。"
+          ? "当前没有未支持断言，引用、许可、代码证据和复现检查已满足正式结论条件。"
           : "当前没有未支持断言；仍需通过引用、许可、代码证据和复现检查。",
     ),
     buildPlainSection(
       "conclusion",
       "结论",
       ready
-        ? "本文产物已绑定来源、断言、引用与复现证据，可作为终稿审查对象。后续若要进入真实投稿，还需要替换示例协议、扩大评测数据并补充领域相关基线。"
+        ? "本文结果已绑定来源、断言、引用与复现证据，可作为正式审查对象。后续若要进入真实投稿，还需要替换示例协议、扩大评测数据并补充领域相关基线。"
         : "本草稿是可审查工作包的中间产物。只有当来源、断言、引用、license 与 reproduction gate 全部通过后，才能升级为终稿。",
     ),
     buildPlainSection("references", "参考文献", referencesSummary(input)),
