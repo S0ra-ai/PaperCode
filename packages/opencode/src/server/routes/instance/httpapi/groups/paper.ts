@@ -27,6 +27,8 @@ export const PaperRunCreatePayload = Schema.Struct({
   dataset_paths: Schema.optional(StringArray),
   experiment_logs: Schema.optional(StringArray),
   target_profile: Schema.optional(Schema.String),
+  target_journal: Schema.optional(Schema.String),
+  target_journal_url: Schema.optional(Schema.String),
   language: Schema.optional(Schema.String),
   model_roles: Schema.optional(Schema.Record(Schema.String, Schema.String)),
   budget_tier: Schema.optional(BudgetTier),
@@ -46,6 +48,20 @@ export const PaperControlPayload = Schema.Struct({
 
 export const PaperExportPayload = Schema.Struct({
   forced: Schema.optional(Schema.Boolean),
+})
+
+export const PaperExperimentStarterApplyPayload = Schema.Struct({
+  workspace_path: Schema.optional(Schema.String),
+  dry_run: Schema.optional(Schema.Boolean),
+  overwrite: Schema.optional(Schema.Boolean),
+  file_paths: Schema.optional(StringArray),
+  update_package_json: Schema.optional(Schema.Boolean),
+})
+
+export const PaperExperimentProtocolRunPayload = Schema.Struct({
+  workspace_path: Schema.optional(Schema.String),
+  dry_run: Schema.optional(Schema.Boolean),
+  timeout_seconds: Schema.optional(Schema.Number),
 })
 
 export const ProviderDiscoverPayload = Schema.Struct({
@@ -95,6 +111,8 @@ export const PaperPaths = {
   control: `${root}/runs/:runID/control`,
   preview: `${root}/runs/:runID/preview`,
   export: `${root}/runs/:runID/export`,
+  experimentStarterApply: `${root}/runs/:runID/experiment-starter/apply`,
+  experimentProtocolRun: `${root}/runs/:runID/experiments/run`,
   capabilities: `${root}/capabilities`,
   doctor: `${root}/doctor`,
   providersDiscover: `${root}/providers/discover`,
@@ -208,6 +226,32 @@ export const PaperApi = HttpApi.make("paper")
             identifier: "paper.runs.export",
             summary: "Export PaperRun bundle",
             description: "Create final or forced-draft export status. Final exports remain blocked until gates pass.",
+          }),
+        ),
+        HttpApiEndpoint.post("experimentStarterApply", PaperPaths.experimentStarterApply, {
+          params: { runID: Schema.String },
+          payload: PaperExperimentStarterApplyPayload,
+          success: described(AnyJson, "Experiment starter workspace apply result"),
+          error: [HttpApiError.BadRequest, HttpApiError.NotFound],
+        }).annotateMerge(
+          OpenApi.annotations({
+            identifier: "paper.runs.experiment_starter.apply",
+            summary: "Apply experiment starter files",
+            description:
+              "Dry-run or write ExperimentProtocolStarterPack files into the selected workspace without overwriting by default.",
+          }),
+        ),
+        HttpApiEndpoint.post("experimentProtocolRun", PaperPaths.experimentProtocolRun, {
+          params: { runID: Schema.String },
+          payload: PaperExperimentProtocolRunPayload,
+          success: described(AnyJson, "Experiment protocol run result"),
+          error: [HttpApiError.BadRequest, HttpApiError.NotFound],
+        }).annotateMerge(
+          OpenApi.annotations({
+            identifier: "paper.runs.experiments.run",
+            summary: "Run experiment protocol",
+            description:
+              "Dry-run or execute the current PaperRun ExperimentPlan/ExperimentProtocol in the selected workspace.",
           }),
         ),
         HttpApiEndpoint.get("capabilities", PaperPaths.capabilities, {

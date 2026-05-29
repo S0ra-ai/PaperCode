@@ -55,14 +55,17 @@ function nowIso(now?: string) {
 
 export function journalFigureProfile(profile_id: PaperProfileId): JournalFigureProfile {
   const nature = profile_id === "nature-paper"
+  const chinese = profile_id === "generic-preprint" || profile_id === "cjc-paper" || profile_id === "custom-journal"
   return {
     schema_version: "JournalFigureProfile.v1",
     profile_id,
     overview_required: nature,
-    preferred_language: profile_id === "generic-preprint" ? "zh" : "en",
+    preferred_language: chinese ? "zh" : "en",
     layout_guidance: nature
       ? ["采用多 panel overview，先机制后实验再结果。", "每个 panel 只承载一个论证功能。"]
-      : ["保持方法流程、实验设置和结果摘要分区清晰。"],
+      : profile_id === "cjc-paper"
+        ? ["按中文计算机论文阅读习惯组织方法流程、实验设置和结果摘要。", "图中术语需要与正文、公式、表格保持一致。"]
+        : ["保持方法流程、实验设置和结果摘要分区清晰。"],
     caption_requirements: ["caption 必须说明 panel 目的、输入、输出和证据来源。"],
     evidence_requirements: ["每个 panel 必须绑定 claim、source 或 artifact。"],
   }

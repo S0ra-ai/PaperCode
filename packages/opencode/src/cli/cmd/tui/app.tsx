@@ -41,6 +41,7 @@ import { PaperRunDashboard } from "@tui/routes/paper"
 import { PaperModelWorkbenchPage } from "@tui/routes/paper-models"
 import { PaperFolderPickerPage } from "@tui/routes/paper-folder"
 import { PaperResumePage } from "@tui/routes/paper-resume"
+import { PaperJournalWorkbenchPage } from "@tui/routes/paper-journal"
 import { Session } from "@tui/routes/session"
 import { PromptHistoryProvider } from "./component/prompt/history"
 import { FrecencyProvider } from "./component/prompt/frecency"
@@ -364,6 +365,11 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
       return
     }
 
+    if (route.data.type === "paper-journal") {
+      renderer.setTerminalTitle("paper_fucker | journal")
+      return
+    }
+
     if (route.data.type === "plugin") {
       renderer.setTerminalTitle(`paper_fucker | ${route.data.id}`)
     }
@@ -515,6 +521,19 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
       },
       onSelect: () => {
         route.navigate({ type: "paper-resume" })
+        dialog.clear()
+      },
+    },
+    {
+      title: "Paper Fucker 期刊工作台",
+      value: "paper.journal_workbench",
+      category: "Paper",
+      slash: {
+        name: "journal",
+        aliases: ["journals", "venue"],
+      },
+      onSelect: () => {
+        route.navigate({ type: "paper-journal" })
         dialog.clear()
       },
     },
@@ -741,7 +760,7 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
       title: "Open docs",
       value: "docs.open",
       onSelect: () => {
-        open("https://github.com/S0ra-ai/paper_fucker").catch(() => {})
+        open("https://github.com/ZhuchenZhong/paper_fucker").catch(() => {})
         dialog.clear()
       },
       category: "System",
@@ -1010,6 +1029,9 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
             </Match>
             <Match when={route.data.type === "paper-resume"}>
               <PaperResumePage />
+            </Match>
+            <Match when={route.data.type === "paper-journal"}>
+              <PaperJournalWorkbenchPage />
             </Match>
           </Switch>
         </Show>

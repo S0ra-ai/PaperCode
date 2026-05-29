@@ -1,30 +1,36 @@
 import path from "path"
 import { EventEmitter } from "events"
-import { readFile } from "fs/promises"
+import { randomUUID } from "node:crypto"
+import { spawn } from "node:child_process"
+import { access, mkdir, readFile, writeFile } from "fs/promises"
 import { startPreviewServer, type PreviewServerHandle } from "../../../preview/src/server"
 import type { PreviewAnnotation, PreviewArtifactRef, PreviewMonitorSummary, PreviewSnapshot } from "../../../preview/src/protocol"
 import {
   appendResearchEvent,
+  appendResearchFact,
   createResearchRun,
   discoverRunDirs,
   getResearchRunStatus,
   loadResearchRun,
   readJsonlFacts,
   resumeResearchRun,
+  setResearchFinalGate,
   updateResearchRunStatus,
+  writeResearchArtifact,
   type ResearchFinalGateState,
   type ResearchRuntimeOptions,
   type ResearchStorageScope,
 } from "./research/runtime"
-import type {
-  ResearchArtifact,
-  ResearchClaim,
-  ResearchDraft,
-  ResearchEvent,
-  ResearchExport,
-  ResearchReview,
-  ResearchSource,
-  ResearchToolTrace,
+import {
+  RESEARCH_SCHEMA_VERSION,
+  type ResearchArtifact,
+  type ResearchClaim,
+  type ResearchDraft,
+  type ResearchEvent,
+  type ResearchExport,
+  type ResearchReview,
+  type ResearchSource,
+  type ResearchToolTrace,
 } from "./research/contracts"
 import { defaultResearchCapabilities, type ResearchCapability } from "./capabilities"
 import { builtinPaperCapabilityPacks } from "./capability-pack"
@@ -51,7 +57,8 @@ import {
 } from "./orchestrator"
 import { budgetTierPolicy } from "./budget"
 import { recordExportBundle, type ExportBundle } from "./research/export"
-import type { DraftPaper } from "./research/writing"
+import { composeDraftPaper, streamMarkdownDraft, type ClaimLedger, type DraftPaper } from "./research/writing"
+import type { DataPlan, LiteratureMap } from "./research/sources"
 import {
   paperObservabilityAuditFromEvents,
   recordDefaultPaperRunObservability,
@@ -78,6 +85,21 @@ import {
   type PaperExperimentEnvironmentStatus,
   type PaperMachineProfile,
 } from "./machine"
+import {
+  planExperiments,
+  plannedExperimentSpecs,
+  recordExperimentLoop,
+  type ExperimentCommand,
+  type ExperimentEnvironment,
+  type ExperimentPlan,
+  type ExperimentProtocol,
+  type ExperimentProtocolGuidance,
+  type ExperimentProtocolStarterPack,
+  type ExperimentRun,
+  type ExperimentRunner,
+  type ExperimentSpec,
+  type ResultReport,
+} from "./research/experiments"
 import type { NoveltyCheckpoint, ExperimentNoveltyGate } from "./novelty"
 import type { ResearchWikiDigest } from "./research-wiki"
 import type { PaperSpine } from "./paper-spine"
@@ -312,6 +334,13 @@ export interface PaperRunSnapshot {
     code_understanding?: ReturnType<typeof codeUnderstandingSummary>
     crawler?: CrawlerDiagnosticsSummary
     huggingface?: HFLoopDiagnostics
+    experiment_guidance?: ExperimentProtocolGuidance
+    experiment_starter_pack?: ExperimentProtocolStarterPack
+    experiment_runs?: {
+      host_runs: ExperimentRun[]
+      container_runs: ExperimentRun[]
+    }
+    experiment_terminal_traces?: PaperExperimentTerminalTraceArtifact[]
   }
   artifacts: ResearchArtifact[]
   drafts: ResearchDraft[]
@@ -350,6 +379,105 @@ export interface PaperRunPreviewResponse {
     artifact_ids: string[]
   }>
   diagnostics: PaperRunSnapshot["diagnostics"]
+}
+
+export interface PaperExperimentStarterApplyRequest {
+  workspace_path?: string
+  dry_run?: boolean
+  overwrite?: boolean
+  file_paths?: readonly string[]
+  update_package_json?: boolean
+}
+
+export interface PaperExperimentStarterApplyFileResult {
+  path: string
+  target_path: string
+  artifact_id?: string
+  artifact_path?: string
+  status: "would_write" | "would_overwrite" | "written" | "overwritten" | "conflict" | "skipped"
+  message: string
+}
+
+export interface PaperExperimentStarterApplyResult {
+  schema_version: "PaperExperimentStarterApplyResult.v1"
+  run_id: string
+  status: "ready" | "blocked"
+  dry_run: boolean
+  overwrite: boolean
+  workspace_path: string
+  files: PaperExperimentStarterApplyFileResult[]
+  written_count: number
+  conflict_count: number
+  skipped_count: number
+  audit_artifact_id?: string
+  message: string
+  action?: string
+}
+
+export interface PaperExperimentProtocolRunRequest {
+  workspace_path?: string
+  dry_run?: boolean
+  timeout_seconds?: number
+}
+
+export interface PaperExperimentProtocolRunSummary {
+  experiment_id: string
+  role: "proposed" | "baseline" | "ablation"
+  environment: "host" | "container"
+  status: string
+  command: string
+  exit_code: number
+  wall_time_seconds: number
+  metrics: Array<{ name: string; value: number; unit?: string }>
+}
+
+export interface PaperExperimentTerminalTraceSummary {
+  trace_id: string
+  artifact_id?: string
+  experiment_id: string
+  role: "proposed" | "baseline" | "ablation"
+  environment: "host" | "container"
+  command: string
+  cwd: string
+  status: string
+  exit_code: number
+  wall_time_seconds: number
+  timed_out: boolean
+  stdout_bytes: number
+  stderr_bytes: number
+  output_truncated: boolean
+}
+
+export interface PaperExperimentTerminalTraceArtifact extends PaperExperimentTerminalTraceSummary {
+  schema_version: "ExperimentTerminalTrace.v1"
+  run_id: string
+  platform: NodeJS.Platform | "container"
+  timeout_seconds: number
+  stdout_excerpt: string
+  stderr_excerpt: string
+  started_at: string
+  finished_at: string
+}
+
+export interface PaperExperimentProtocolRunResult {
+  schema_version: "PaperExperimentProtocolRunResult.v1"
+  run_id: string
+  status: "ready" | "succeeded" | "blocked"
+  dry_run: boolean
+  workspace_path: string
+  planned_commands: Array<{
+    experiment_id: string
+    role: "proposed" | "baseline" | "ablation" | "container_reproduction"
+    environment: "host" | "container"
+    command: string
+  }>
+  host_runs: PaperExperimentProtocolRunSummary[]
+  container_runs: PaperExperimentProtocolRunSummary[]
+  terminal_traces: PaperExperimentTerminalTraceSummary[]
+  report?: ResultReport
+  artifact_ids: string[]
+  message: string
+  action?: string
 }
 
 export interface PaperRunRuntimeOptions extends ResearchRuntimeOptions {
@@ -545,6 +673,113 @@ function runOptions(input?: PaperRunRuntimeOptions): PaperRunRuntimeOptions {
   }
 }
 
+function isPathInside(parent: string, child: string) {
+  const relative = path.relative(parent, child)
+  return relative === "" || (!relative.startsWith("..") && !path.isAbsolute(relative))
+}
+
+function resolveWorkspaceStarterTarget(workspace: string, filePath: string) {
+  if (path.isAbsolute(filePath)) throw new Error(`starter file path must be relative: ${filePath}`)
+  const normalized = filePath.replace(/\\/g, "/")
+  const target = path.resolve(workspace, normalized)
+  const root = path.resolve(workspace)
+  if (!isPathInside(root, target)) throw new Error(`starter file path escapes workspace: ${filePath}`)
+  return target
+}
+
+async function pathExists(target: string) {
+  return access(target).then(
+    () => true,
+    () => false,
+  )
+}
+
+function objectRecord(value: unknown): Record<string, unknown> | undefined {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : undefined
+}
+
+async function applyStarterPackageJsonScripts(input: {
+  workspace: string
+  scripts: Record<string, string>
+  dryRun: boolean
+  overwrite: boolean
+}): Promise<PaperExperimentStarterApplyFileResult> {
+  const target = path.resolve(input.workspace, "package.json")
+  const exists = await pathExists(target)
+  const scriptEntries = Object.entries(input.scripts)
+  if (scriptEntries.length === 0) {
+    return {
+      path: "package.json",
+      target_path: target,
+      status: "skipped",
+      message: "starter pack 没有建议写入的 package.json scripts。",
+    }
+  }
+
+  let packageJson: Record<string, unknown> = {}
+  if (exists) {
+    try {
+      packageJson = objectRecord(JSON.parse(await readFile(target, "utf8"))) ?? {}
+    } catch (error) {
+      return {
+        path: "package.json",
+        target_path: target,
+        status: "conflict",
+        message: `package.json 不是合法 JSON，已跳过 scripts 写入：${error instanceof Error ? error.message : String(error)}`,
+      }
+    }
+  }
+
+  const scripts = objectRecord(packageJson.scripts) ?? {}
+  const conflicts = scriptEntries.filter(([name, command]) => typeof scripts[name] === "string" && scripts[name] !== command)
+  const missing = scriptEntries.filter(([name]) => scripts[name] === undefined)
+  const same = scriptEntries.filter(([name, command]) => scripts[name] === command)
+
+  if (conflicts.length > 0 && !input.overwrite) {
+    return {
+      path: "package.json",
+      target_path: target,
+      status: "conflict",
+      message: `package.json 已有不同命令：${conflicts.map(([name]) => name).join(", ")}；默认不会覆盖。`,
+    }
+  }
+  if (missing.length === 0 && conflicts.length === 0 && same.length === scriptEntries.length) {
+    return {
+      path: "package.json",
+      target_path: target,
+      status: "skipped",
+      message: "package.json scripts 已包含 starter pack 建议命令。",
+    }
+  }
+
+  if (input.dryRun) {
+    return {
+      path: "package.json",
+      target_path: target,
+      status: exists ? "would_overwrite" : "would_write",
+      message:
+        conflicts.length > 0
+          ? `预检通过；启用 overwrite 后会更新 scripts：${conflicts.map(([name]) => name).join(", ")}。`
+          : `预检通过；会新增 scripts：${missing.map(([name]) => name).join(", ")}。`,
+    }
+  }
+
+  packageJson.scripts = {
+    ...scripts,
+    ...Object.fromEntries(scriptEntries),
+  }
+  await writeFile(target, `${JSON.stringify(packageJson, null, 2)}\n`, "utf8")
+  return {
+    path: "package.json",
+    target_path: target,
+    status: exists ? "overwritten" : "written",
+    message:
+      conflicts.length > 0
+        ? `已更新 package.json scripts：${scriptEntries.map(([name]) => name).join(", ")}。`
+        : `已写入 package.json scripts：${missing.map(([name]) => name).join(", ")}。`,
+  }
+}
+
 function finalGateBlockers(value: unknown) {
   return metadataStringArray(jsonRecord(value).blockers)
 }
@@ -731,10 +966,15 @@ function finalGateStatus(value: unknown) {
   return status === "passed" || status === "blocked" ? status : "not_started"
 }
 
+function isFinalResearchExport(item: ResearchExport) {
+  return item.export_id.startsWith("export:bundle-final-")
+}
+
 function exportState(input: {
   runID: string
   state: Awaited<ReturnType<typeof getResearchRunStatus>>["state"]
   exports: ResearchExport[]
+  finalBundle?: ExportBundle
 }): PaperExportBundle {
   const blockers = metadataStringArray(jsonRecord(input.state.final_gate).blockers)
   const gate = finalGateStatus(input.state.final_gate)
@@ -748,16 +988,38 @@ function exportState(input: {
       message: "Final export is blocked until authenticity, source, claim, and reproduction gates pass.",
     }
   }
+  if (input.finalBundle) return paperExportBundleFromResearch(input.runID, input.finalBundle)
+  const finalExports = input.exports.filter(isFinalResearchExport)
+  if (finalExports.length === 0) {
+    return {
+      run_id: input.runID,
+      status: "blocked",
+      formats: [],
+      artifact_ids: [],
+      failed_checks: ["final_export_missing"],
+      message: "Final gate passed, but no final export has been generated yet.",
+    }
+  }
+  const formats = [...new Set(finalExports.map((item) => item.format))]
+  const artifactIds = [...new Set(finalExports.flatMap((item) => item.artifact_ids))]
+  const files = Array.from(
+    new Map(
+      finalExports.map((item) => [
+        `${item.format}:${item.path}`,
+        {
+          format: item.format,
+          path: item.path,
+          status: "written" as const,
+        },
+      ]),
+    ).values(),
+  )
   return {
     run_id: input.runID,
     status: "final",
-    formats: input.exports.map((item) => item.format),
-    artifact_ids: input.exports.flatMap((item) => item.artifact_ids),
-    files: input.exports.map((item) => ({
-      format: item.format,
-      path: item.path,
-      status: "written" as const,
-    })),
+    formats,
+    artifact_ids: artifactIds,
+    files,
     failed_checks: [],
     message: "Final export is available.",
   }
@@ -836,8 +1098,138 @@ async function loadLatestDraftPaper(input: {
   }
 }
 
+async function refreshDraftPaperForFinalExport(input: {
+  runDir: string
+  run: Awaited<ReturnType<typeof loadResearchRun>>
+  artifacts: ResearchArtifact[]
+  existingSourceArtifactIDs: string[]
+  options?: PaperRunRuntimeOptions
+}) {
+  const ledger = await readLatestArtifactBySchema<ClaimLedger>(input.runDir, input.artifacts, "ClaimLedger.v1")
+  const resultReport = await readLatestArtifactBySchema<ResultReport>(input.runDir, input.artifacts, "ResultReport.v1")
+  if (!ledger || !resultReport) return undefined
+  const [
+    dataPlan,
+    literatureMap,
+    experimentPlan,
+    experimentProtocol,
+    experimentGuidance,
+    experimentStarterPack,
+    experimentRunGroups,
+  ] = await Promise.all([
+    readLatestArtifactBySchema<DataPlan>(input.runDir, input.artifacts, "DataPlan.v1"),
+    readLatestArtifactBySchema<LiteratureMap>(input.runDir, input.artifacts, "LiteratureMap.v1"),
+    readLatestArtifactBySchema<ExperimentPlan>(input.runDir, input.artifacts, "ExperimentPlan.v1"),
+    readLatestArtifactBySchema<ExperimentProtocol>(input.runDir, input.artifacts, "ExperimentProtocol.v1"),
+    readLatestArtifactBySchema<ExperimentProtocolGuidance>(input.runDir, input.artifacts, "ExperimentProtocolGuidance.v1"),
+    readLatestArtifactBySchema<ExperimentProtocolStarterPack>(input.runDir, input.artifacts, "ExperimentProtocolStarterPack.v1"),
+    readArtifactsBySchema<ExperimentRun[]>(input.runDir, input.artifacts, "ExperimentRun.v1[]"),
+  ])
+  const finalClaimsAllowed = resultReport.final_claims_allowed === true
+  const experimentRuns = latestExperimentRuns(experimentRunGroups.flat())
+  const draft = composeDraftPaper({
+    title: input.run.topic,
+    ledger,
+    data_plan: dataPlan,
+    literature_map: literatureMap,
+    experiment_plan: experimentPlan,
+    experiment_protocol: experimentProtocol,
+    experiment_guidance: finalClaimsAllowed ? undefined : experimentGuidance,
+    experiment_starter_pack: finalClaimsAllowed ? undefined : experimentStarterPack,
+    experiment_runs: {
+      host_runs: experimentRuns.filter((run) => run.environment.mode === "host"),
+      container_runs: experimentRuns.filter((run) => run.environment.mode === "container"),
+    },
+    result_report: resultReport,
+    now: input.options?.clock?.().toISOString(),
+  })
+  const refreshedDraft: DraftPaper = {
+    ...draft,
+    draft_id: `${draft.draft_id}:final-export-${randomUUID()}`,
+    version: draft.version + 1,
+  }
+  const draftArtifact = await writeResearchArtifact(
+    input.runDir,
+    {
+      artifact_id: `artifact-final-draft-${randomUUID()}`,
+      kind: "draft",
+      logical_path: "writing/draft.md",
+      data: refreshedDraft.markdown,
+      mime_type: "text/markdown",
+      source_ids: Array.from(new Set(ledger.entries.flatMap((entry) => entry.source_ids))),
+      metadata: { artifact_schema: "DraftPaper.v1", draft_id: refreshedDraft.draft_id, refreshed_for: "final_export" },
+    },
+    input.options,
+  )
+  const chunksArtifact = await writeResearchArtifact(
+    input.runDir,
+    {
+      artifact_id: `artifact-final-draft-chunks-${randomUUID()}`,
+      kind: "log",
+      logical_path: "writing/stream-chunks.json",
+      data: [...streamMarkdownDraft(refreshedDraft)],
+      metadata: { artifact_schema: "MarkdownStreamChunks.v1", draft_id: refreshedDraft.draft_id, refreshed_for: "final_export" },
+    },
+    input.options,
+  )
+  await appendResearchFact(input.runDir, "draft", {
+    schema_version: RESEARCH_SCHEMA_VERSION,
+    draft_id: refreshedDraft.draft_id,
+    run_id: input.run.run_id,
+    title: refreshedDraft.title,
+    format: "markdown",
+    path: draftArtifact.path,
+    claim_ids: refreshedDraft.claim_ids,
+    artifact_ids: [draftArtifact.artifact_id, chunksArtifact.artifact_id],
+    created_at: refreshedDraft.created_at,
+  })
+  await appendResearchEvent(
+    input.runDir,
+    {
+      type: "writing.draft.refreshed.finalexport",
+      actor: "system",
+      payload: {
+        draft_id: refreshedDraft.draft_id,
+        draft_artifact_id: draftArtifact.artifact_id,
+        result_report_status: resultReport.reproduction.status,
+        final_claims_allowed: resultReport.final_claims_allowed,
+      },
+    },
+    input.options,
+  )
+  const evidenceArtifactIDs = input.artifacts
+    .filter((artifact) =>
+      [
+        "ClaimLedger.v1",
+        "DataPlan.v1",
+        "ExperimentPlan.v1",
+        "ExperimentProtocol.v1",
+        "ExperimentRun.v1[]",
+        "ResultReport.v1",
+        "ExperimentTerminalTrace.v1",
+      ].includes(String(artifact.metadata?.artifact_schema ?? "")),
+    )
+    .map((artifact) => artifact.artifact_id)
+  return {
+    draft: refreshedDraft,
+    sourceArtifactIDs: Array.from(
+      new Set([
+        ...input.existingSourceArtifactIDs,
+        ...evidenceArtifactIDs,
+        draftArtifact.artifact_id,
+        chunksArtifact.artifact_id,
+      ]),
+    ),
+  }
+}
+
 function paperExportBundleFromResearch(runID: string, bundle: ExportBundle): PaperExportBundle {
   const writtenFiles = bundle.files.filter((file) => file.status === "written")
+  const failedFiles = bundle.files.filter((file) => file.status === "failed")
+  const finalMessage =
+    failedFiles.length === 0
+      ? "Final export rendered with validated files."
+      : `Final content gates passed, but ${failedFiles.map((file) => file.format).join(", ")} export failed. Check tool_diagnostics.`
   return {
     run_id: runID,
     status: bundle.status,
@@ -854,10 +1246,7 @@ function paperExportBundleFromResearch(runID: string, bundle: ExportBundle): Pap
     })),
     manifest_path: bundle.manifest.path,
     tool_diagnostics: bundle.manifest.tool_diagnostics,
-    message:
-      bundle.status === "final"
-        ? "Final export rendered with concrete files."
-        : "Forced draft exported with failed checks explicitly marked.",
+    message: bundle.status === "final" ? finalMessage : "Forced draft exported with failed checks explicitly marked.",
   }
 }
 
@@ -924,6 +1313,347 @@ async function readLatestArtifactBySchema<T>(
   )
 }
 
+async function readLatestFinalExportBundle(runDir: string, artifacts: ResearchArtifact[]) {
+  const bundles = await readArtifactsBySchema<ExportBundle>(runDir, artifacts, "ExportBundle.v1")
+  return bundles.filter((bundle) => bundle.schema_version === "ExportBundle.v1" && bundle.status === "final").at(-1)
+}
+
+function latestExperimentRuns(runs: ExperimentRun[]) {
+  const byRunKey = new Map<string, ExperimentRun>()
+  for (const run of runs) {
+    const key = `${run.environment.mode}:${run.role}:${run.experiment_id}`
+    const existing = byRunKey.get(key)
+    if (!existing || Date.parse(run.finished_at) >= Date.parse(existing.finished_at)) {
+      byRunKey.set(key, run)
+    }
+  }
+  return [...byRunKey.values()].sort((left, right) => {
+    if (left.environment.mode !== right.environment.mode) return left.environment.mode === "host" ? -1 : 1
+    const roleCompare = left.role.localeCompare(right.role)
+    if (roleCompare !== 0) return roleCompare
+    return left.experiment_id.localeCompare(right.experiment_id)
+  })
+}
+
+function experimentCommandText(command: ExperimentCommand) {
+  return command.argv.length === 1 ? command.argv[0]! : command.argv.join(" ")
+}
+
+function commandMatchesSpec(entry: ExperimentProtocol["entries"][number], spec: ExperimentSpec) {
+  return (
+    entry.role === spec.role &&
+    (entry.label === spec.label ||
+      entry.protocol_id === spec.experiment_id ||
+      entry.protocol_id.endsWith(spec.experiment_id) ||
+      entry.protocol_id.includes(spec.experiment_id.replace(/:/g, "-")))
+  )
+}
+
+function commandForProtocolRun(
+  spec: ExperimentSpec,
+  environment: ExperimentEnvironment,
+  protocol: ExperimentProtocol | undefined,
+) {
+  if (environment.mode === "container") {
+    return protocol?.entries.find((entry) => entry.role === "container_reproduction")?.command ?? spec.command
+  }
+  return protocol?.entries.find((entry) => commandMatchesSpec(entry, spec))?.command ?? spec.command
+}
+
+function protocolScriptSlug(value: string) {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "script"
+}
+
+function experimentCommandFromPackageScript(scriptName: string, timeoutSeconds = 120): ExperimentCommand {
+  return {
+    argv: ["bun", "run", scriptName],
+    timeout_seconds: timeoutSeconds,
+  }
+}
+
+function packageScriptSourceRange(packageJson: string, scriptName: string) {
+  const lines = packageJson.split(/\r?\n/)
+  const index = lines.findIndex((line) => line.includes(`"${scriptName}"`) || line.includes(`'${scriptName}'`))
+  if (index < 0) return undefined
+  return {
+    path: "package.json",
+    start_line: index + 1,
+    end_line: index + 1,
+  }
+}
+
+function packageScriptProtocolEntry(
+  scriptName: string,
+  packageJson: string,
+): ExperimentProtocol["entries"][number] | undefined {
+  const normalized = scriptName.toLowerCase()
+  const source_range = packageScriptSourceRange(packageJson, scriptName)
+  if (/^(baseline|bench:baseline|benchmark:baseline)(:|$)/.test(normalized)) {
+    return {
+      protocol_id: `baseline:${protocolScriptSlug(scriptName)}`,
+      role: "baseline",
+      label: scriptName,
+      command: experimentCommandFromPackageScript(scriptName),
+      expected_metric: "test_pass_rate",
+      rationale: "Baseline runner declared by package script.",
+      source_range,
+    }
+  }
+  if (/^(ablation|bench:ablation|benchmark:ablation)(:|$)/.test(normalized)) {
+    return {
+      protocol_id: `ablation:${protocolScriptSlug(scriptName)}`,
+      role: "ablation",
+      label: scriptName,
+      command: experimentCommandFromPackageScript(scriptName),
+      expected_metric: "test_pass_rate",
+      rationale: "Ablation runner declared by package script.",
+      source_range,
+    }
+  }
+  if (/^(container|repro|reproduce)(:|$)/.test(normalized)) {
+    return {
+      protocol_id: `container:${protocolScriptSlug(scriptName)}`,
+      role: "container_reproduction",
+      label: scriptName,
+      command: experimentCommandFromPackageScript(scriptName, 600),
+      expected_metric: "test_pass_rate",
+      rationale: "Container reproduction runner declared by package script.",
+      source_range,
+    }
+  }
+  if (/^(typecheck|test|check|lint|bench)(:|$)/.test(normalized)) {
+    return {
+      protocol_id: `proposed:${protocolScriptSlug(scriptName)}`,
+      role: "proposed",
+      label: scriptName,
+      command: experimentCommandFromPackageScript(scriptName),
+      expected_metric: normalized === "typecheck" ? "typecheck_pass" : "test_pass_rate",
+      rationale: "Primary host exploration command selected from package scripts.",
+      source_range,
+    }
+  }
+  return undefined
+}
+
+function packageScriptSortKey(scriptName: string) {
+  const normalized = scriptName.toLowerCase()
+  if (normalized === "typecheck") return `0:${normalized}`
+  if (normalized === "test") return `1:${normalized}`
+  if (normalized === "check") return `2:${normalized}`
+  if (normalized === "lint") return `3:${normalized}`
+  if (normalized.startsWith("bench")) return `4:${normalized}`
+  if (normalized.includes(":starter")) return `5:${normalized}`
+  return `6:${normalized}`
+}
+
+async function experimentProtocolFromWorkspacePackageJson(workspace: string): Promise<ExperimentProtocol | undefined> {
+  const packagePath = path.join(workspace, "package.json")
+  let source: string
+  try {
+    source = await readFile(packagePath, "utf8")
+  } catch {
+    return undefined
+  }
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(source)
+  } catch {
+    return undefined
+  }
+  if (!parsed || typeof parsed !== "object") return undefined
+  const scripts = (parsed as { scripts?: unknown }).scripts
+  if (!scripts || typeof scripts !== "object") return undefined
+  const entries = Object.keys(scripts as Record<string, unknown>)
+    .sort((left, right) => packageScriptSortKey(left).localeCompare(packageScriptSortKey(right)))
+    .map((scriptName) => packageScriptProtocolEntry(scriptName, source))
+    .filter((entry): entry is ExperimentProtocol["entries"][number] => Boolean(entry))
+  const selectedProposed = entries.find((entry) => entry.role === "proposed")
+  const filtered = [
+    ...(selectedProposed ? [selectedProposed] : []),
+    ...entries.filter((entry) => entry.role !== "proposed"),
+  ]
+  if (filtered.length === 0) return undefined
+  const roles = new Set(filtered.map((entry) => entry.role))
+  return {
+    schema_version: "ExperimentProtocol.v1",
+    discovered_from: "package_scripts",
+    entries: filtered,
+    gaps: [
+      !roles.has("proposed") ? "missing_proposed_runner" : undefined,
+      !roles.has("baseline") ? "missing_baseline_runner" : undefined,
+      !roles.has("ablation") ? "missing_ablation_runner" : undefined,
+      !roles.has("container_reproduction") ? "missing_container_reproduction_runner" : undefined,
+    ].filter((item): item is string => Boolean(item)),
+  }
+}
+
+function shouldUseWorkspaceProtocol(current: ExperimentProtocol | undefined, refreshed: ExperimentProtocol | undefined) {
+  if (!refreshed) return false
+  if (!current) return true
+  const currentRoles = new Set(current.entries.map((entry) => entry.role))
+  const refreshedRoles = new Set(refreshed.entries.map((entry) => entry.role))
+  const gainedRole = [...refreshedRoles].some((role) => !currentRoles.has(role))
+  return gainedRole || refreshed.gaps.length < current.gaps.length || refreshed.entries.length > current.entries.length
+}
+
+function planForProtocolRerun(input: {
+  plan: ExperimentPlan
+  protocol: ExperimentProtocol | undefined
+  now?: string
+}) {
+  const protocol = input.protocol
+  if (!protocol) return input.plan
+  const proposed = protocol.entries.find((entry) => entry.role === "proposed")
+  const baselines = protocol.entries.filter((entry) => entry.role === "baseline")
+  const ablations = protocol.entries.filter((entry) => entry.role === "ablation")
+  if (!proposed && baselines.length === 0 && ablations.length === 0) return input.plan
+  const primaryMetric = input.plan.metrics.find((metric) => metric.primary)?.name ?? proposed?.expected_metric ?? input.plan.proposed.expected_metric
+  return planExperiments({
+    topic: input.plan.topic,
+    method_name: input.plan.method_name,
+    dataset_ids: input.plan.proposed.dataset_ids,
+    objective: input.plan.objective,
+    primary_metric: primaryMetric,
+    proposed_command: proposed?.command ?? input.plan.proposed.command,
+    baseline_specs: baselines.map((entry) => ({
+      experiment_id: entry.protocol_id,
+      label: entry.label,
+      command: entry.command,
+      rationale: entry.rationale,
+    })),
+    ablation_specs: ablations.map((entry) => ({
+      experiment_id: entry.protocol_id,
+      label: entry.label,
+      command: entry.command,
+      rationale: entry.rationale,
+    })),
+    include_default_baselines: false,
+    now: input.now,
+  })
+}
+
+function summarizeExperimentRun(run: ExperimentRun): PaperExperimentProtocolRunSummary {
+  return {
+    experiment_id: run.experiment_id,
+    role: run.role,
+    environment: run.environment.mode,
+    status: run.status,
+    command: experimentCommandText(run.command),
+    exit_code: run.exit_code,
+    wall_time_seconds: run.resource_usage.wall_time_seconds,
+    metrics: run.metrics.map((metric) => ({ name: metric.name, value: metric.value, unit: metric.unit })),
+  }
+}
+
+function timeoutForProtocolRun(input?: PaperExperimentProtocolRunRequest) {
+  const requested = input?.timeout_seconds
+  if (typeof requested !== "number" || !Number.isFinite(requested) || requested <= 0) return 120
+  return Math.min(Math.max(Math.floor(requested), 1), 900)
+}
+
+const EXPERIMENT_TERMINAL_TRACE_EXCERPT_LIMIT = 64 * 1024
+
+function safeExperimentTraceSegment(value: string) {
+  return value.replace(/[^A-Za-z0-9._-]+/g, "-").replace(/^-+|-+$/g, "") || "trace"
+}
+
+async function runExperimentShellCommand(command: string, cwd: string, timeoutMs: number) {
+  return new Promise<{
+    stdout: string
+    stderr: string
+    stdoutBytes: number
+    stderrBytes: number
+    outputTruncated: boolean
+    exitCode: number
+    timedOut: boolean
+    wallTimeSeconds: number
+    startedAt: string
+    finishedAt: string
+  }>((resolve) => {
+    const started = Date.now()
+    const startedAt = new Date(started).toISOString()
+    const child = spawn(command, {
+      cwd,
+      shell: true,
+      windowsHide: true,
+      env: process.env,
+      stdio: ["ignore", "pipe", "pipe"],
+    })
+    let stdout = ""
+    let stderr = ""
+    let stdoutBytes = 0
+    let stderrBytes = 0
+    let stdoutTruncated = false
+    let stderrTruncated = false
+    let settled = false
+    let killedForTimeout = false
+    const append = (current: string, chunk: Buffer | string) => {
+      const text = Buffer.isBuffer(chunk) ? chunk.toString("utf8") : String(chunk)
+      const next = `${current}${text}`
+      if (next.length <= EXPERIMENT_TERMINAL_TRACE_EXCERPT_LIMIT) return { value: next, truncated: false }
+      return { value: next.slice(-EXPERIMENT_TERMINAL_TRACE_EXCERPT_LIMIT), truncated: true }
+    }
+    const timer = setTimeout(() => {
+      if (settled) return
+      killedForTimeout = true
+      child.kill()
+    }, timeoutMs)
+    child.stdout?.on("data", (chunk) => {
+      stdoutBytes += Buffer.isBuffer(chunk) ? chunk.length : Buffer.byteLength(String(chunk), "utf8")
+      const next = append(stdout, chunk)
+      stdout = next.value
+      stdoutTruncated = stdoutTruncated || next.truncated
+    })
+    child.stderr?.on("data", (chunk) => {
+      stderrBytes += Buffer.isBuffer(chunk) ? chunk.length : Buffer.byteLength(String(chunk), "utf8")
+      const next = append(stderr, chunk)
+      stderr = next.value
+      stderrTruncated = stderrTruncated || next.truncated
+    })
+    child.on("close", (code) => {
+      if (settled) return
+      settled = true
+      clearTimeout(timer)
+      const wallTimeSeconds = Math.max(0, (Date.now() - started) / 1000)
+      const timedOut = killedForTimeout
+      resolve({
+        stdout,
+        stderr,
+        stdoutBytes,
+        stderrBytes,
+        outputTruncated: stdoutTruncated || stderrTruncated,
+        exitCode: timedOut ? 124 : code ?? 1,
+        timedOut,
+        wallTimeSeconds,
+        startedAt,
+        finishedAt: new Date().toISOString(),
+      })
+    })
+    child.on("error", (error) => {
+      if (settled) return
+      settled = true
+      clearTimeout(timer)
+      const errorText = error instanceof Error ? error.message : String(error)
+      const next = append(stderr, `\n${errorText}`)
+      stderr = next.value.trim()
+      stderrBytes += Buffer.byteLength(errorText, "utf8")
+      stderrTruncated = stderrTruncated || next.truncated
+      resolve({
+        stdout,
+        stderr,
+        stdoutBytes,
+        stderrBytes,
+        outputTruncated: stdoutTruncated || stderrTruncated,
+        exitCode: 127,
+        timedOut: false,
+        wallTimeSeconds: Math.max(0, (Date.now() - started) / 1000),
+        startedAt,
+        finishedAt: new Date().toISOString(),
+      })
+    })
+  })
+}
+
 async function markdownArtifactForPreview(
   runDir: string,
   snapshot: PaperRunSnapshot,
@@ -960,7 +1690,35 @@ function previewAnnotations(snapshot: PaperRunSnapshot): PreviewAnnotation[] {
     source: { label: "final_gate" },
     tui_ref: `gate:${check}`,
   }))
-  return [...claimAnnotations, ...failedChecks]
+  const guidance = snapshot.diagnostics.experiment_guidance
+  const starterPack = snapshot.diagnostics.experiment_starter_pack
+  const guidanceAnnotations =
+    guidance?.status === "needs_protocol"
+      ? guidance.suggestions.map(
+          (item): PreviewAnnotation => ({
+            id: `experiment-guidance:${item.gap}`,
+            kind: "experiment",
+            severity: item.severity === "blocking" ? "blocker" : "warning",
+            message: `${item.gap}: ${item.next_action}`,
+            source: { label: item.recommended_script },
+            tui_ref: `experiment-guidance:${item.gap}`,
+          }),
+        )
+      : []
+  const starterPackAnnotations =
+    starterPack?.status === "ready"
+      ? [
+          {
+            id: "experiment-starter-pack",
+            kind: "experiment" as const,
+            severity: "warning" as const,
+            message: starterPack.summary,
+            source: { label: "experiments/experiment-protocol-starter-pack.json" },
+            tui_ref: "experiment-starter-pack",
+          },
+        ]
+      : []
+  return [...claimAnnotations, ...failedChecks, ...guidanceAnnotations, ...starterPackAnnotations]
 }
 
 function createPreviewMonitor(snapshot: PaperRunSnapshot): PreviewMonitorSummary {
@@ -969,6 +1727,23 @@ function createPreviewMonitor(snapshot: PaperRunSnapshot): PreviewMonitorSummary
     snapshot.novelty.checkpoints.at(-1)?.status ??
     "not_started"
   const gateRecord = jsonRecord(snapshot.diagnostics.final_gate)
+  const guidance = snapshot.diagnostics.experiment_guidance
+  const starterPack = snapshot.diagnostics.experiment_starter_pack
+  const experimentRuns = [
+    ...(snapshot.diagnostics.experiment_runs?.host_runs ?? []),
+    ...(snapshot.diagnostics.experiment_runs?.container_runs ?? []),
+  ]
+  const experimentTerminalTraces = snapshot.diagnostics.experiment_terminal_traces ?? []
+  const machine = snapshot.diagnostics.machine_profile
+  const experimentEnvironment = snapshot.diagnostics.experiment_environment
+  const toolPreview = (items: Array<{ id: string; label: string; status: string; version?: string; path?: string }>) =>
+    items.map((item) => ({
+      id: item.id,
+      label: item.label,
+      status: item.status,
+      version: item.version,
+      path: item.path,
+    }))
   return {
     stage_graph: snapshot.stage_graph.stages.map((stage) => ({
       id: stage.id,
@@ -1018,6 +1793,113 @@ function createPreviewMonitor(snapshot: PaperRunSnapshot): PreviewMonitorSummary
           })),
         }
       : undefined,
+    experiment_guidance:
+      guidance?.status === "needs_protocol"
+        ? {
+            status: guidance.status,
+            summary: guidance.summary,
+            final_export_blocked: guidance.final_export_blocked,
+            gaps: guidance.gaps,
+            suggestions: guidance.suggestions.map((item) => ({
+              gap: item.gap,
+              severity: item.severity,
+              recommended_script: item.recommended_script,
+              next_action: item.next_action,
+            })),
+          }
+        : undefined,
+    experiment_starter_pack:
+      starterPack?.status === "ready"
+        ? {
+            status: starterPack.status,
+            summary: starterPack.summary,
+            package_json_scripts: starterPack.package_json_scripts,
+            files: starterPack.files.map((file) => ({
+              path: file.path,
+              purpose: file.purpose,
+              artifact_id: file.artifact_id,
+              artifact_path: file.artifact_path,
+              mime_type: file.mime_type,
+            })),
+            next_steps: starterPack.next_steps,
+            apply_endpoint: `/paper/runs/${encodeURIComponent(snapshot.run_id)}/experiment-starter/apply`,
+            recommended_payload: {
+              dry_run: false,
+              overwrite: false,
+              update_package_json: true,
+            },
+          }
+        : undefined,
+    experiment_runs: experimentRuns.map((run) => ({
+      run_id: run.experiment_run_id,
+      experiment_id: run.experiment_id,
+      role: run.role,
+      environment: run.environment.mode,
+      status: run.status,
+      command: run.command.argv.length === 1 ? run.command.argv[0] : run.command.argv.join(" "),
+      exit_code: run.exit_code,
+      wall_time_seconds: run.resource_usage.wall_time_seconds,
+      metrics: run.metrics.map((metric) => ({
+        name: metric.name,
+        value: metric.value,
+        unit: metric.unit,
+      })),
+      stdout_excerpt: run.stdout ? run.stdout.slice(0, 400) : undefined,
+      stderr_excerpt: run.stderr ? run.stderr.slice(0, 400) : undefined,
+    })),
+    experiment_terminal_traces: experimentTerminalTraces.map((trace) => ({
+      trace_id: trace.trace_id,
+      artifact_id: trace.artifact_id,
+      experiment_id: trace.experiment_id,
+      role: trace.role,
+      environment: trace.environment,
+      command: trace.command,
+      cwd: trace.cwd,
+      status: trace.status,
+      exit_code: trace.exit_code,
+      wall_time_seconds: trace.wall_time_seconds,
+      timed_out: trace.timed_out,
+      stdout_bytes: trace.stdout_bytes,
+      stderr_bytes: trace.stderr_bytes,
+      output_truncated: trace.output_truncated,
+      stdout_excerpt: trace.stdout_excerpt ? trace.stdout_excerpt.slice(0, 400) : undefined,
+      stderr_excerpt: trace.stderr_excerpt ? trace.stderr_excerpt.slice(0, 400) : undefined,
+    })),
+    machine_environment: {
+      status: experimentEnvironment.status,
+      workspace: machine.workspace,
+      default_run_root: machine.default_run_root,
+      os: `${machine.os.platform} ${machine.os.release} ${machine.os.arch}`,
+      cpu: `${machine.cpu.model} / ${machine.cpu.cores} cores`,
+      memory: {
+        total_bytes: machine.memory.total_bytes,
+        free_bytes: machine.memory.free_bytes,
+      },
+      disk: machine.disk
+        ? {
+            path: machine.disk.path,
+            total_bytes: machine.disk.total_bytes,
+            free_bytes: machine.disk.free_bytes,
+          }
+        : undefined,
+      gpu: {
+        mode: machine.gpu.mode,
+        devices: machine.gpu.devices.map((device) => ({
+          vendor: device.vendor,
+          name: device.name,
+          memory_mb: device.memory_mb,
+          driver: device.driver,
+          status: device.status,
+        })),
+        cuda_status: machine.gpu.cuda.status,
+        rocm_status: machine.gpu.rocm.status,
+      },
+      runtimes: toolPreview(machine.runtimes),
+      compilers: toolPreview(machine.compilers),
+      optional_missing: experimentEnvironment.optional_missing.length,
+      blocked: experimentEnvironment.blocked.length,
+      notes: experimentEnvironment.notes,
+    },
     gate: {
       status: typeof gateRecord.status === "string" ? gateRecord.status : "not_started",
       failed_checks: snapshot.export_state.failed_checks,
@@ -1118,6 +2000,8 @@ function intakeFromRun(run: Awaited<ReturnType<typeof loadResearchRun>>): Resear
     dataset_paths: metadataStringArray(intake.dataset_paths),
     experiment_logs: metadataStringArray(intake.experiment_logs),
     target_profile: metadataString(intake.target_profile) as ResearchIntakeRequest["target_profile"],
+    target_journal: metadataString(intake.target_journal),
+    target_journal_url: metadataString(intake.target_journal_url),
     language: metadataString(intake.language),
     model_roles: jsonRecord(intake.model_roles) as ResearchIntakeRequest["model_roles"],
   })
@@ -1263,13 +2147,30 @@ export async function getPaperRunSnapshotFromDir(runDir: string): Promise<PaperR
     addCodeFile(codeGraph, { path })
   }
   const machine = await inspectPaperMachineProfile({ workspace: status.run.workspace, home: inferredHome })
-  const [noveltyCheckpoints, experimentNoveltyGate, researchWiki, paperSpine, globalFigure] = await Promise.all([
+  const [
+    noveltyCheckpoints,
+    experimentNoveltyGate,
+    researchWiki,
+    paperSpine,
+    globalFigure,
+    experimentGuidance,
+    experimentStarterPack,
+    experimentRunGroups,
+    experimentTerminalTraces,
+    latestFinalExportBundle,
+  ] = await Promise.all([
     readArtifactsBySchema<NoveltyCheckpoint>(runDir, artifacts, "NoveltyCheckpoint.v1"),
     readLatestArtifactBySchema<ExperimentNoveltyGate>(runDir, artifacts, "ExperimentNoveltyGate.v1"),
     readLatestArtifactBySchema<ResearchWikiDigest>(runDir, artifacts, "ResearchWikiDigest.v1"),
     readLatestArtifactBySchema<PaperSpine>(runDir, artifacts, "PaperSpine.v1"),
     readLatestArtifactBySchema<GlobalFigureSpec>(runDir, artifacts, "GlobalFigureSpec.v1"),
+    readLatestArtifactBySchema<ExperimentProtocolGuidance>(runDir, artifacts, "ExperimentProtocolGuidance.v1"),
+    readLatestArtifactBySchema<ExperimentProtocolStarterPack>(runDir, artifacts, "ExperimentProtocolStarterPack.v1"),
+    readArtifactsBySchema<ExperimentRun[]>(runDir, artifacts, "ExperimentRun.v1[]"),
+    readArtifactsBySchema<PaperExperimentTerminalTraceArtifact>(runDir, artifacts, "ExperimentTerminalTrace.v1"),
+    readLatestFinalExportBundle(runDir, artifacts),
   ])
+  const experimentRuns = experimentRunGroups.flat()
   const snapshot = {
     schema_version: "PaperRun.v1",
     run_id: status.run.run_id,
@@ -1352,6 +2253,16 @@ export async function getPaperRunSnapshotFromDir(runDir: string): Promise<PaperR
       code_understanding: codeUnderstandingSummary(codeGraph),
       crawler: crawlerDiagnostics({ sources }),
       huggingface: hfLoopDiagnostics({ sources }),
+      experiment_guidance: experimentGuidance,
+      experiment_starter_pack: experimentStarterPack,
+      experiment_runs:
+        experimentRuns.length > 0
+          ? {
+              host_runs: experimentRuns.filter((run) => run.environment.mode === "host"),
+              container_runs: experimentRuns.filter((run) => run.environment.mode === "container"),
+            }
+          : undefined,
+      experiment_terminal_traces: experimentTerminalTraces.length > 0 ? experimentTerminalTraces : undefined,
     },
     artifacts,
     drafts,
@@ -1363,7 +2274,7 @@ export async function getPaperRunSnapshotFromDir(runDir: string): Promise<PaperR
       status: "ready",
       run_id: status.run.run_id,
     },
-    export_state: exportState({ runID: status.run.run_id, state: status.state, exports }),
+    export_state: exportState({ runID: status.run.run_id, state: status.state, exports, finalBundle: latestFinalExportBundle }),
     internal_sessions: metadataStringArray(metadata.internal_sessions),
   } satisfies Omit<PaperRunSnapshot, "controller_state">
 
@@ -1421,6 +2332,8 @@ export async function createPaperRun(
           dataset_paths: request.dataset_paths ?? [],
           experiment_logs: request.experiment_logs ?? [],
           target_profile: request.target_profile,
+          target_journal: request.target_journal,
+          target_journal_url: request.target_journal_url,
           language: request.language,
           model_roles: request.model_roles ?? {},
         },
@@ -1597,6 +2510,453 @@ export async function previewPaperRun(runID: string, options?: PaperRunRuntimeOp
   }
 }
 
+export async function applyPaperRunExperimentStarterPack(
+  runID: string,
+  input: PaperExperimentStarterApplyRequest = {},
+  options?: PaperRunRuntimeOptions,
+): Promise<PaperExperimentStarterApplyResult> {
+  const normalized = runOptions(options)
+  const runDir = await findPaperRunDir(runID, normalized)
+  const snapshot = await getPaperRunSnapshotFromDir(runDir)
+  const starterPack = snapshot.diagnostics.experiment_starter_pack
+  const workspace = path.resolve(input.workspace_path ?? snapshot.workspace ?? normalized.workspace ?? process.cwd())
+  const dryRun = input.dry_run !== false
+  const overwrite = input.overwrite === true
+  const updatePackageJson = input.update_package_json === true
+
+  if (!starterPack || starterPack.status !== "ready") {
+    return {
+      schema_version: "PaperExperimentStarterApplyResult.v1",
+      run_id: runID,
+      status: "blocked",
+      dry_run: dryRun,
+      overwrite,
+      workspace_path: workspace,
+      files: [],
+      written_count: 0,
+      conflict_count: 0,
+      skipped_count: 0,
+      message: "当前 PaperRun 没有可写入的实验 starter pack。",
+      action: "先运行代码类 PaperRun，并根据实验协议诊断生成 starter pack。",
+    }
+  }
+
+  const selected = new Set((input.file_paths ?? []).filter(Boolean))
+  const selectedFiles = selected.size > 0 ? starterPack.files.filter((file) => selected.has(file.path)) : starterPack.files
+  const files: PaperExperimentStarterApplyFileResult[] = []
+  for (const file of selectedFiles) {
+    const target = resolveWorkspaceStarterTarget(workspace, file.path)
+    const exists = await pathExists(target)
+    if (exists && !overwrite) {
+      files.push({
+        path: file.path,
+        target_path: target,
+        artifact_id: file.artifact_id,
+        artifact_path: file.artifact_path,
+        status: "conflict",
+        message: "目标文件已存在；默认不会覆盖。",
+      })
+      continue
+    }
+    if (dryRun) {
+      files.push({
+        path: file.path,
+        target_path: target,
+        artifact_id: file.artifact_id,
+        artifact_path: file.artifact_path,
+        status: exists ? "would_overwrite" : "would_write",
+        message: exists ? "预检通过；启用 overwrite 后会覆盖该文件。" : "预检通过；执行时会写入该文件。",
+      })
+      continue
+    }
+    await mkdir(path.dirname(target), { recursive: true })
+    await writeFile(target, file.content, { encoding: "utf8", flag: overwrite ? "w" : "wx" })
+    files.push({
+      path: file.path,
+      target_path: target,
+      artifact_id: file.artifact_id,
+      artifact_path: file.artifact_path,
+      status: exists ? "overwritten" : "written",
+      message: exists ? "已按 overwrite=true 覆盖写入。" : "已写入工作区。",
+    })
+  }
+  for (const requested of selected) {
+    if (starterPack.files.some((file) => file.path === requested)) continue
+    files.push({
+      path: requested,
+      target_path: path.resolve(workspace, requested.replace(/\\/g, "/")),
+      status: "skipped",
+      message: "该路径不属于当前 starter pack，已跳过。",
+    })
+  }
+  if (updatePackageJson) {
+    files.push(
+      await applyStarterPackageJsonScripts({
+        workspace,
+        scripts: starterPack.package_json_scripts,
+        dryRun,
+        overwrite,
+      }),
+    )
+  }
+
+  const writtenCount = files.filter((file) => file.status === "written" || file.status === "overwritten").length
+  const conflictCount = files.filter((file) => file.status === "conflict").length
+  const skippedCount = files.filter((file) => file.status === "skipped").length
+  const result: PaperExperimentStarterApplyResult = {
+    schema_version: "PaperExperimentStarterApplyResult.v1",
+    run_id: runID,
+    status: conflictCount > 0 ? "blocked" : "ready",
+    dry_run: dryRun,
+    overwrite,
+    workspace_path: workspace,
+    files,
+    written_count: writtenCount,
+    conflict_count: conflictCount,
+    skipped_count: skippedCount,
+    message: dryRun
+      ? "这是 dry-run 预检，没有写入工作区。"
+      : writtenCount > 0
+        ? `已写入 ${writtenCount} 个实验 starter 项。`
+        : "没有文件被写入。",
+    action:
+      conflictCount > 0
+        ? "检查冲突文件，或在确认后使用 overwrite=true。"
+        : dryRun
+          ? "确认目标路径后，用 dry_run=false 执行写入。"
+          : "补全真实 baseline、ablation 和容器复现实验后重新运行 PaperRun。",
+  }
+
+  if (!dryRun && writtenCount > 0) {
+    const audit = await writeResearchArtifact(
+      runDir,
+      {
+        kind: "log",
+        logical_path: "experiments/starter/apply-audit.json",
+        data: result,
+        metadata: {
+          artifact_schema: "ExperimentProtocolStarterApplyResult.v1",
+          workspace_path: workspace,
+          written_count: writtenCount,
+          conflict_count: conflictCount,
+        },
+      },
+      normalized,
+    )
+    await appendResearchEvent(
+      runDir,
+      {
+        type: "experiment.starterpack.applied",
+        actor: "system",
+        payload: {
+          audit_artifact_id: audit.artifact_id,
+          workspace_path: workspace,
+          written_count: writtenCount,
+          conflict_count: conflictCount,
+        },
+      },
+      normalized,
+    )
+    result.audit_artifact_id = audit.artifact_id
+    await publishPaperRunSnapshot(await getPaperRunSnapshotFromDir(runDir), runDir)
+  }
+  return result
+}
+
+export async function runPaperRunExperimentProtocol(
+  runID: string,
+  input: PaperExperimentProtocolRunRequest = {},
+  options?: PaperRunRuntimeOptions,
+): Promise<PaperExperimentProtocolRunResult> {
+  const normalized = runOptions(options)
+  const runDir = await findPaperRunDir(runID, normalized)
+  const snapshot = await getPaperRunSnapshotFromDir(runDir)
+  const plan = await readLatestArtifactBySchema<ExperimentPlan>(runDir, snapshot.artifacts, "ExperimentPlan.v1")
+  const protocol = await readLatestArtifactBySchema<ExperimentProtocol>(runDir, snapshot.artifacts, "ExperimentProtocol.v1")
+  const workspace = path.resolve(input.workspace_path ?? snapshot.workspace ?? normalized.workspace ?? process.cwd())
+  const dryRun = input.dry_run !== false
+  const timeoutSeconds = timeoutForProtocolRun(input)
+
+  if (!plan) {
+    return {
+      schema_version: "PaperExperimentProtocolRunResult.v1",
+      run_id: runID,
+      status: "blocked",
+      dry_run: dryRun,
+      workspace_path: workspace,
+      planned_commands: [],
+      host_runs: [],
+      container_runs: [],
+      terminal_traces: [],
+      artifact_ids: [],
+      message: "当前 PaperRun 没有 ExperimentPlan，无法执行实验协议。",
+      action: "先创建包含代码路径的 PaperRun，或补充实验协议后重新运行。",
+    }
+  }
+
+  const workspaceProtocol = await experimentProtocolFromWorkspacePackageJson(workspace)
+  const effectiveProtocol = shouldUseWorkspaceProtocol(protocol, workspaceProtocol) ? workspaceProtocol : protocol
+  const effectivePlan = planForProtocolRerun({
+    plan,
+    protocol: effectiveProtocol,
+    now: normalized.clock?.().toISOString(),
+  })
+  if (effectiveProtocol && effectiveProtocol === workspaceProtocol) {
+    await writeResearchArtifact(
+      runDir,
+      {
+        kind: "log",
+        logical_path: "experiments/experiment-protocol-refreshed.json",
+        data: effectiveProtocol,
+        metadata: {
+          artifact_schema: "ExperimentProtocol.v1",
+          refreshed_from_workspace: true,
+          workspace_path: workspace,
+        },
+      },
+      normalized,
+    )
+    await appendResearchEvent(
+      runDir,
+      {
+        type: "experiment.protocol.refreshed",
+        actor: "system",
+        payload: {
+          workspace_path: workspace,
+          entries: effectiveProtocol.entries.length,
+          gaps: effectiveProtocol.gaps,
+        },
+      },
+      normalized,
+    )
+  }
+
+  const plannedCommands = plannedExperimentSpecs(effectivePlan).flatMap((spec) => {
+    const hostCommand = commandForProtocolRun(spec, { mode: "host", platform: process.platform }, effectiveProtocol)
+    const containerCommand = commandForProtocolRun(spec, { mode: "container", platform: "container" }, effectiveProtocol)
+    return [
+      {
+        experiment_id: spec.experiment_id,
+        role: spec.role,
+        environment: "host" as const,
+        command: experimentCommandText(hostCommand),
+      },
+      {
+        experiment_id: spec.experiment_id,
+        role: "container_reproduction" as const,
+        environment: "container" as const,
+        command: experimentCommandText(containerCommand),
+      },
+    ]
+  })
+
+  if (dryRun) {
+    return {
+      schema_version: "PaperExperimentProtocolRunResult.v1",
+      run_id: runID,
+      status: "ready",
+      dry_run: true,
+      workspace_path: workspace,
+      planned_commands: plannedCommands,
+      host_runs: [],
+      container_runs: [],
+      terminal_traces: [],
+      artifact_ids: [],
+      message: "这是实验协议 dry-run，没有执行命令。",
+      action: "确认命令和工作目录后，用 dry_run=false 执行。",
+    }
+  }
+
+  const terminalTraces: PaperExperimentTerminalTraceSummary[] = []
+  let terminalTraceIndex = 0
+  const runner: ExperimentRunner = async (spec, environment) => {
+    const command = commandForProtocolRun(spec, environment, effectiveProtocol)
+    const shellCommand = experimentCommandText(command)
+    const traceID = `terminal-trace-${++terminalTraceIndex}`
+    const timeoutMs = (command.timeout_seconds ?? timeoutSeconds) * 1000
+    await appendResearchEvent(
+      runDir,
+      {
+        type: "experiment.command.started",
+        actor: "system",
+        payload: {
+          trace_id: traceID,
+          experiment_id: spec.experiment_id,
+          role: spec.role,
+          environment: environment.mode,
+          command: shellCommand,
+          cwd: workspace,
+          timeout_seconds: Math.round(timeoutMs / 1000),
+        },
+      },
+      normalized,
+    )
+    const result = await runExperimentShellCommand(shellCommand, workspace, timeoutMs)
+    const status = result.exitCode === 0 ? "succeeded" : result.timedOut ? "resource_exceeded" : "failed"
+    const traceData = {
+      schema_version: "ExperimentTerminalTrace.v1",
+      trace_id: traceID,
+      run_id: runID,
+      experiment_id: spec.experiment_id,
+      role: spec.role,
+      environment: environment.mode,
+      platform: environment.platform,
+      command: shellCommand,
+      cwd: workspace,
+      timeout_seconds: Math.round(timeoutMs / 1000),
+      status,
+      exit_code: result.exitCode,
+      timed_out: result.timedOut,
+      wall_time_seconds: result.wallTimeSeconds,
+      stdout_bytes: result.stdoutBytes,
+      stderr_bytes: result.stderrBytes,
+      stdout_excerpt: result.stdout,
+      stderr_excerpt: result.stderr,
+      output_truncated: result.outputTruncated,
+      started_at: result.startedAt,
+      finished_at: result.finishedAt,
+    }
+    const traceArtifact = await writeResearchArtifact(
+      runDir,
+      {
+        kind: "log",
+        logical_path: `experiments/terminal/${safeExperimentTraceSegment(environment.mode)}-${safeExperimentTraceSegment(
+          spec.experiment_id,
+        )}-${safeExperimentTraceSegment(traceID)}.json`,
+        data: traceData,
+        metadata: {
+          artifact_schema: "ExperimentTerminalTrace.v1",
+          experiment_id: spec.experiment_id,
+          environment: environment.mode,
+          command: shellCommand,
+        },
+      },
+      normalized,
+    )
+    terminalTraces.push({
+      trace_id: traceID,
+      artifact_id: traceArtifact.artifact_id,
+      experiment_id: spec.experiment_id,
+      role: spec.role,
+      environment: environment.mode,
+      command: shellCommand,
+      cwd: workspace,
+      status,
+      exit_code: result.exitCode,
+      wall_time_seconds: result.wallTimeSeconds,
+      timed_out: result.timedOut,
+      stdout_bytes: result.stdoutBytes,
+      stderr_bytes: result.stderrBytes,
+      output_truncated: result.outputTruncated,
+    })
+    await appendResearchEvent(
+      runDir,
+      {
+        type: "experiment.command.completed",
+        actor: "system",
+        payload: {
+          trace_id: traceID,
+          trace_artifact_id: traceArtifact.artifact_id,
+          experiment_id: spec.experiment_id,
+          role: spec.role,
+          environment: environment.mode,
+          command: shellCommand,
+          status,
+          exit_code: result.exitCode,
+          timed_out: result.timedOut,
+          wall_time_seconds: result.wallTimeSeconds,
+          stdout_bytes: result.stdoutBytes,
+          stderr_bytes: result.stderrBytes,
+          output_truncated: result.outputTruncated,
+        },
+      },
+      normalized,
+    )
+    return {
+      status,
+      command,
+      metrics: [
+        {
+          name: spec.expected_metric,
+          value: result.exitCode === 0 ? 1 : 0,
+          direction: "higher_better",
+          unit: "ratio",
+        },
+      ],
+      stdout: result.stdout,
+      stderr: result.timedOut ? `Command timed out after ${result.wallTimeSeconds.toFixed(1)}s.\n${result.stderr}`.trim() : result.stderr,
+      exit_code: result.exitCode,
+      resource_usage: { wall_time_seconds: result.wallTimeSeconds },
+    }
+  }
+  const loop = await recordExperimentLoop(
+    runDir,
+    {
+      plan: effectivePlan,
+      host_runner: runner,
+      container_runner: runner,
+      run_options: { now: normalized.clock?.().toISOString() },
+    },
+    normalized,
+  )
+  const latestStatus = await getResearchRunStatus(runDir)
+  const previousBlockers = metadataStringArray(jsonRecord(latestStatus.state.final_gate).blockers)
+  const nextBlockers = loop.report.final_claims_allowed
+    ? previousBlockers.filter((blocker) => blocker !== "reproduction_failure")
+    : [...new Set([...previousBlockers, "reproduction_failure"])]
+  const updatedGate = await setResearchFinalGate(
+    runDir,
+    {
+      status: nextBlockers.length === 0 ? "passed" : "blocked",
+      blockers: nextBlockers,
+    },
+    normalized,
+  )
+  if (updatedGate.status === "passed") await updateResearchRunStatus(runDir, "succeeded", normalized)
+  await appendResearchEvent(
+    runDir,
+    {
+      type: "experiment.protocol.rerun.completed",
+      actor: "system",
+      payload: {
+        workspace_path: workspace,
+        host_runs: loop.host_runs.length,
+        container_runs: loop.container_runs.length,
+        recommendation: loop.report.recommendation,
+        final_claims_allowed: loop.report.final_claims_allowed,
+        final_gate_status: updatedGate.status,
+        final_gate_blockers: updatedGate.blockers,
+      },
+    },
+    normalized,
+  )
+  const updated = await getPaperRunSnapshotFromDir(runDir)
+  await publishPaperRunSnapshot(updated, runDir)
+  return {
+    schema_version: "PaperExperimentProtocolRunResult.v1",
+    run_id: runID,
+    status: loop.report.final_claims_allowed ? "succeeded" : "blocked",
+    dry_run: false,
+    workspace_path: workspace,
+    planned_commands: plannedCommands,
+    host_runs: loop.host_runs.map(summarizeExperimentRun),
+    container_runs: loop.container_runs.map(summarizeExperimentRun),
+    terminal_traces: terminalTraces,
+    report: loop.report,
+    artifact_ids: [
+      loop.artifacts.plan.artifact_id,
+      loop.artifacts.host_runs.artifact_id,
+      loop.artifacts.container_runs.artifact_id,
+      loop.artifacts.result_report.artifact_id,
+      ...terminalTraces.flatMap((trace) => (trace.artifact_id ? [trace.artifact_id] : [])),
+    ],
+    message: loop.report.final_claims_allowed
+      ? "实验协议已执行，host/container 结果允许 final claim。"
+      : "实验协议已执行，但仍有阻断项，final claim 不能放行。",
+    action: loop.report.final_claims_allowed ? "可以刷新 Preview 或重新导出 PaperRun。" : "查看 ResultReport blocker 并修复失败命令。",
+  }
+}
+
 export async function exportPaperRun(
   runID: string,
   input: { forced?: boolean },
@@ -1612,7 +2972,18 @@ export async function exportPaperRun(
   }
 
   const drafts = await readJsonlFacts(runDir, "draft")
-  const latest = await loadLatestDraftPaper({ runDir, run: status.run, drafts })
+  let latest = await loadLatestDraftPaper({ runDir, run: status.run, drafts })
+  if (finalGate.status === "passed" && !input.forced) {
+    const artifacts = await readJsonlFacts(runDir, "artifact")
+    latest =
+      (await refreshDraftPaperForFinalExport({
+        runDir,
+        run: status.run,
+        artifacts,
+        existingSourceArtifactIDs: latest.sourceArtifactIDs,
+        options,
+      })) ?? latest
+  }
   if (!latest.draft) {
     const snapshot = await getPaperRunSnapshotFromDir(runDir)
     await publishPaperRunSnapshot(snapshot, runDir)

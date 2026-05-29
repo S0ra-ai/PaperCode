@@ -1,10 +1,13 @@
 import { InstanceState } from "@/effect/instance-state"
 import { ModelsDev } from "@/provider/models"
+import { Provider } from "@/provider/provider"
 import {
   createPaperRun,
   controlPaperRun,
   discoverPaperProviders,
   exportPaperRun,
+  applyPaperRunExperimentStarterPack,
+  runPaperRunExperimentProtocol,
   getPaperRunSnapshot,
   initialPaperRunLiveEvents,
   listPaperRuns,
@@ -47,6 +50,8 @@ import {
   ModelRoutingDecisionPayload,
   PaperControlPayload,
   PaperExportPayload,
+  PaperExperimentStarterApplyPayload,
+  PaperExperimentProtocolRunPayload,
   PaperGuidancePayload,
   PaperRunCreatePayload,
   ProviderDiscoverPayload,
@@ -71,7 +76,18 @@ function errorText(error: unknown) {
   }
 }
 
-function paperLogDirectory(home = process.env.PAPER_FUCKER_TEST_HOME ?? process.env.PAPER_FUCKER_HOME ?? os.homedir()) {
+function envHome(value: string | undefined) {
+  if (!value) return undefined
+  const trimmed = value.trim()
+  if (!trimmed || trimmed === "undefined" || trimmed === "null") return undefined
+  return trimmed
+}
+
+function paperRuntimeHome() {
+  return envHome(process.env.PAPER_FUCKER_TEST_HOME) ?? envHome(process.env.PAPER_FUCKER_HOME)
+}
+
+function paperLogDirectory(home = paperRuntimeHome() ?? os.homedir()) {
   return path.join(home, ".paper_fucker", "data", "log")
 }
 
@@ -97,7 +113,7 @@ function paperOptions(directory: string) {
 }
 
 function paperGlobalOptions() {
-  return { home: process.env.PAPER_FUCKER_TEST_HOME ?? process.env.PAPER_FUCKER_HOME }
+  return { home: paperRuntimeHome() }
 }
 
 function paperSseEvent(event: string, data: unknown): Sse.Event {
@@ -118,6 +134,8 @@ function normalizeCreatePayload(payload: typeof PaperRunCreatePayload.Type): Pap
     dataset_paths: payload.dataset_paths ? [...payload.dataset_paths] : undefined,
     experiment_logs: payload.experiment_logs ? [...payload.experiment_logs] : undefined,
     target_profile: payload.target_profile as PaperRunCreateRequest["target_profile"],
+    target_journal: payload.target_journal,
+    target_journal_url: payload.target_journal_url,
     language: payload.language,
     model_roles: payload.model_roles as PaperRunCreateRequest["model_roles"],
     budget_tier: payload.budget_tier,
@@ -262,6 +280,28 @@ export const paperHandlers = HttpApiBuilder.group(InstanceHttpApi, "paper", (han
       })
     })
 
+    const experimentStarterApply = Effect.fn("PaperHttpApi.experimentStarterApply")(function* (ctx: {
+      params: { runID: string }
+      payload: typeof PaperExperimentStarterApplyPayload.Type
+    }) {
+      const instance = yield* InstanceState.context
+      return yield* Effect.tryPromise({
+        try: () => applyPaperRunExperimentStarterPack(ctx.params.runID, ctx.payload, paperOptions(instance.directory)),
+        catch: mapPaperError,
+      })
+    })
+
+    const experimentProtocolRun = Effect.fn("PaperHttpApi.experimentProtocolRun")(function* (ctx: {
+      params: { runID: string }
+      payload: typeof PaperExperimentProtocolRunPayload.Type
+    }) {
+      const instance = yield* InstanceState.context
+      return yield* Effect.tryPromise({
+        try: () => runPaperRunExperimentProtocol(ctx.params.runID, ctx.payload, paperOptions(instance.directory)),
+        catch: mapPaperError,
+      })
+    })
+
     const capabilities = Effect.fn("PaperHttpApi.capabilities")(function* () {
       return paperCapabilities()
     })
@@ -288,10 +328,11 @@ export const paperHandlers = HttpApiBuilder.group(InstanceHttpApi, "paper", (han
           if (!ctx.payload.persist) return discovered
           const options = paperGlobalOptions()
           const saved = await saveProviderEndpointConfig(ctx.payload, options)
+          const discoveredRefs = discovered.models.map((model) => `${discovered.provider_id}/${model.id}`)
           const inventory = await upsertDiscoveredModels(discovered, {
             ...options,
-            allow: ctx.payload.allow_models ? [...ctx.payload.allow_models] : undefined,
-            decision_model: ctx.payload.decision_model,
+            allow: ctx.payload.allow_models ? [...ctx.payload.allow_models] : discoveredRefs,
+            decision_model: ctx.payload.decision_model ?? discoveredRefs[0],
           })
           return { ...discovered, saved, inventory }
         },
@@ -307,11 +348,19 @@ export const paperHandlers = HttpApiBuilder.group(InstanceHttpApi, "paper", (han
       const providers = yield* ModelsDev.Service.use((service) => service.get()).pipe(
         Effect.catch(() => Effect.succeed({})),
       )
+      const connected = yield* Provider.Service.use((service) => service.list()).pipe(
+        Effect.catch(() => Effect.succeed({})),
+      )
       return yield* Effect.promise(async () => {
         const state = await paperModelWorkbench(paperGlobalOptions())
+        const connectedProviderIDs = new Set(Object.keys(connected))
         const registeredProviders = new Set(
           Object.entries(state.inventory.provider_registrations ?? {})
-            .filter(([, registration]) => registration.status === "registered")
+            .filter(([providerID, registration]) => {
+              if (registration.status !== "registered") return false
+              if (registration.kind === "openai_compatible" || registration.kind === "manual") return true
+              return (providerID === "openai" || providerID === "github-copilot") && connectedProviderIDs.has(providerID)
+            })
             .map(([providerID]) => providerID),
         )
         const builtinCandidates = candidatesFromBuiltinProviders(providers)
@@ -323,6 +372,7 @@ export const paperHandlers = HttpApiBuilder.group(InstanceHttpApi, "paper", (han
           ...state,
           inventory,
           builtin_providers: Object.entries(providers)
+            .filter(([provider_id]) => provider_id === "openai" || provider_id === "github-copilot")
             .map(([provider_id, provider]) => ({
               provider_id,
               provider_name: provider.name ?? provider_id,
@@ -342,15 +392,24 @@ export const paperHandlers = HttpApiBuilder.group(InstanceHttpApi, "paper", (han
       const providers = yield* ModelsDev.Service.use((service) => service.get()).pipe(
         Effect.catch(() => Effect.succeed({})),
       )
+      const connected = yield* Provider.Service.use((service) => service.list()).pipe(
+        Effect.catch(() => Effect.succeed({})),
+      )
       return yield* Effect.tryPromise({
         try: async () => {
-          const registeredProviderIDs = new Set(ctx.payload.registered_provider_ids ?? [])
+          const connectedProviderIDs = new Set(Object.keys(connected))
+          const subscriptionProviderIDs = new Set(
+            (ctx.payload.registered_provider_ids ?? []).filter(
+              (providerID) =>
+                (providerID === "openai" || providerID === "github-copilot") && connectedProviderIDs.has(providerID),
+            ),
+          )
           const builtinCandidates = candidatesFromBuiltinProviders(providers).filter((candidate) =>
-            registeredProviderIDs.has(candidate.provider_id),
+            subscriptionProviderIDs.has(candidate.provider_id),
           )
           const providerRegistrations: Record<string, PaperProviderRegistration> = {}
           const providerRecord = providers as Record<string, { name?: string; models?: Record<string, unknown> }>
-          for (const providerID of registeredProviderIDs) {
+          for (const providerID of subscriptionProviderIDs) {
             const provider = providerRecord[providerID]
             if (!provider) continue
             providerRegistrations[providerID] = {
@@ -361,20 +420,32 @@ export const paperHandlers = HttpApiBuilder.group(InstanceHttpApi, "paper", (han
                   ? "chatgpt_subscription"
                   : providerID === "github-copilot"
                     ? "copilot_subscription"
-                    : "builtin",
+                    : "manual",
               status: "registered",
               model_count: Object.keys(provider?.models ?? {}).length,
               allowed_count: ctx.payload.allowlist.filter((ref) => ref.startsWith(`${providerID}/`)).length,
               last_refreshed_at: new Date().toISOString(),
             }
           }
+          const payloadRegistrations = Object.fromEntries(
+            Object.entries((ctx.payload.provider_registrations as Record<string, PaperProviderRegistration> | undefined) ?? {}).filter(
+              ([providerID, registration]) => {
+                if (registration.status !== "registered") return false
+                if (registration.kind === "openai_compatible" || registration.kind === "manual") return true
+                return (
+                  (providerID === "openai" || providerID === "github-copilot") &&
+                  subscriptionProviderIDs.has(providerID)
+                )
+              },
+            ),
+          ) as Record<string, PaperProviderRegistration>
           const inventory = await updatePaperModelAllowlist([...ctx.payload.allowlist], {
             ...paperGlobalOptions(),
             decision_model: ctx.payload.decision_model,
             backup_decision_model: ctx.payload.backup_decision_model,
             role_overrides: ctx.payload.roles as Partial<Record<PaperModelRole, string>> | undefined,
             provider_registrations: {
-              ...(ctx.payload.provider_registrations as Record<string, PaperProviderRegistration> | undefined),
+              ...payloadRegistrations,
               ...providerRegistrations,
             },
             stage_model_policies: ctx.payload.stage_model_policies as Partial<Record<PaperModelRole, PaperStageModelPolicy>> | undefined,
@@ -429,6 +500,8 @@ export const paperHandlers = HttpApiBuilder.group(InstanceHttpApi, "paper", (han
       .handle("controlRun", controlRun)
       .handle("preview", preview)
       .handle("export", exportBundle)
+      .handle("experimentStarterApply", experimentStarterApply)
+      .handle("experimentProtocolRun", experimentProtocolRun)
       .handle("capabilities", capabilities)
       .handle("doctor", doctor)
       .handle("providersDiscover", providersDiscover)

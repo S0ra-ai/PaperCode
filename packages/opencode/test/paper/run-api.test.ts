@@ -1,11 +1,16 @@
 import { afterEach, describe, expect, test } from "bun:test"
 import { existsSync } from "fs"
-import { mkdir } from "fs/promises"
+import { mkdir, readFile, writeFile } from "fs/promises"
 import path from "path"
 import { ConfigProvider, Layer } from "effect"
 import { HttpRouter } from "effect/unstable/http"
 import { Flag } from "@opencode-ai/core/flag/flag"
-import { stopAllPaperRunLivePreviews } from "../../src/paper/run"
+import {
+  createPaperRun,
+  PAPER_MODEL_ROLES,
+  stopAllPaperRunLivePreviews,
+  type PaperModelRole,
+} from "../../src/paper"
 import { createResearchRun } from "../../src/paper/research/runtime"
 import { Server } from "../../src/server/server"
 import { PaperPaths } from "../../src/server/routes/instance/httpapi/groups/paper"
@@ -18,6 +23,11 @@ void Log.init({ print: false })
 
 const originalHttpApi = Flag.OPENCODE_EXPERIMENTAL_HTTPAPI
 let previousPaperHome: string | undefined
+const TEST_MODEL = "test-provider/test-model"
+
+function testModelRoles(): Record<PaperModelRole, string> {
+  return Object.fromEntries(PAPER_MODEL_ROLES.map((role) => [role, TEST_MODEL])) as Record<PaperModelRole, string>
+}
 
 function app() {
   Flag.OPENCODE_EXPERIMENTAL_HTTPAPI = true
@@ -106,6 +116,49 @@ describe("PaperRun HttpApi", () => {
     expect(body.routing.every((decision: { source: string }) => decision.source === "blocked")).toBe(true)
   })
 
+  test("registers OpenAI-compatible providers with all discovered models enabled by default", async () => {
+    await using tmp = await tmpdir({ git: true, config: { formatter: false, lsp: false } })
+    previousPaperHome = process.env.PAPER_FUCKER_TEST_HOME
+    process.env.PAPER_FUCKER_TEST_HOME = tmp.path
+    const headers = { "x-paper-fucker-directory": tmp.path }
+    const previousFetch = globalThis.fetch
+    globalThis.fetch = (async () =>
+      Response.json({
+        data: [{ id: "paper-fast" }, { id: "paper-pro" }],
+      })) as unknown as typeof fetch
+
+    try {
+      const response = await app().request(PaperPaths.providersDiscover, {
+        ...json({
+          provider_id: "lab",
+          provider_name: "Lab Models",
+          base_url: "https://lab.example/v1",
+          api_key: "sk-test",
+          compatibility: "openai-compatible",
+          persist: true,
+        }),
+        headers: { ...headers, "content-type": "application/json" },
+      })
+
+      expect(response.status).toBe(200)
+      const body = await response.json()
+      expect(body.inventory.decision_model).toBe("lab/paper-fast")
+      expect(body.inventory.allowlist.sort()).toEqual(["lab/paper-fast", "lab/paper-pro"])
+      expect(body.inventory.candidates.map((candidate: { model_ref: string; allowed: boolean }) => [candidate.model_ref, candidate.allowed])).toEqual([
+        ["lab/paper-fast", true],
+        ["lab/paper-pro", true],
+      ])
+      expect(body.inventory.provider_registrations.lab).toMatchObject({
+        provider_name: "Lab Models",
+        kind: "openai_compatible",
+        model_count: 2,
+        allowed_count: 2,
+      })
+    } finally {
+      globalThis.fetch = previousFetch
+    }
+  })
+
   test("serves PaperRun lifecycle, diagnostics, capability, provider, and role endpoints", async () => {
     await using tmp = await tmpdir({ git: true, config: { formatter: false, lsp: false } })
     previousPaperHome = process.env.PAPER_FUCKER_TEST_HOME
@@ -116,7 +169,8 @@ describe("PaperRun HttpApi", () => {
       ...json({
         topic: "代码仓库生成可验证论文",
         code_paths: ["packages/opencode"],
-        target_profile: "generic-preprint",
+        target_journal: "中国计算机学报",
+        target_journal_url: "https://cjc.ict.ac.cn/",
         language: "zh-CN",
       }),
       headers: { ...headers, "content-type": "application/json" },
@@ -124,6 +178,8 @@ describe("PaperRun HttpApi", () => {
     expect(create.status).toBe(200)
     const created = await create.json()
     expect(created.run.intake.topic).toBe("代码仓库生成可验证论文")
+    expect(created.run.intake.target_profile).toBe("cjc-paper")
+    expect(created.run.intake.target_journal).toBe("中国计算机学报")
     expect(created.run.status).toBe("blocked")
     expect(created.run.stage_graph.stages.map((stage: { id: string }) => stage.id)).toContain("intake")
     expect(
@@ -216,6 +272,96 @@ describe("PaperRun HttpApi", () => {
     const routingBody = await routing.json()
     expect(routingBody.source).toBe("blocked")
     expect(routingBody.diagnostics).toContain("model_allowlist_empty")
+  })
+
+  test("dry-runs and applies experiment starter files to the workspace without overwriting by default", async () => {
+    await using tmp = await tmpdir({
+      git: true,
+      config: { formatter: false, lsp: false },
+      init: async (dir) => {
+        const home = path.join(dir, "paper-home")
+        const workspace = path.join(dir, "workspace")
+        await mkdir(path.join(workspace, "src"), { recursive: true })
+        await mkdir(home, { recursive: true })
+        await writeFile(
+          path.join(workspace, "package.json"),
+          JSON.stringify({ scripts: { test: "node -e \"console.log('ok')\"" } }, null, 2),
+        )
+        await writeFile(
+          path.join(workspace, "src", "method.ts"),
+          ["export function normalizeClaim(value: string) {", "  return value.trim().toLowerCase()", "}"].join("\n"),
+        )
+        return { home, workspace }
+      },
+    })
+    previousPaperHome = process.env.PAPER_FUCKER_TEST_HOME
+    process.env.PAPER_FUCKER_TEST_HOME = tmp.extra.home
+    const headers = { "x-paper-fucker-directory": tmp.extra.workspace }
+    const run = await createPaperRun(
+      {
+        topic: "代码实验 starter 写入验证",
+        workspace_path: tmp.extra.workspace,
+        code_paths: ["src"],
+        language: "zh-CN",
+        model_roles: testModelRoles(),
+      },
+      { workspace: tmp.extra.workspace, home: tmp.extra.home },
+    )
+    expect(run.snapshot.diagnostics.experiment_starter_pack?.status).toBe("ready")
+
+    const dryRun = await app().request(runPath(PaperPaths.experimentStarterApply, run.run_id), {
+      ...json({ dry_run: true }),
+      headers: { ...headers, "content-type": "application/json" },
+    })
+    expect(dryRun.status).toBe(200)
+    const dryRunBody = await dryRun.json()
+    expect(dryRunBody.dry_run).toBe(true)
+    expect(dryRunBody.files.every((file: { status: string }) => file.status === "would_write")).toBe(true)
+    expect(existsSync(path.join(tmp.extra.workspace, "experiments", "starter", "baseline-starter.ts"))).toBe(false)
+
+    const apply = await app().request(runPath(PaperPaths.experimentStarterApply, run.run_id), {
+      ...json({ dry_run: false }),
+      headers: { ...headers, "content-type": "application/json" },
+    })
+    expect(apply.status).toBe(200)
+    const applyBody = await apply.json()
+    expect(applyBody.status).toBe("ready")
+    expect(applyBody.written_count).toBe(4)
+    expect(applyBody.audit_artifact_id).toMatch(/^artifact-/)
+    expect(await readFile(path.join(tmp.extra.workspace, "experiments", "starter", "README.md"), "utf8")).toContain(
+      "Experiment Protocol Starter",
+    )
+
+    const conflict = await app().request(runPath(PaperPaths.experimentStarterApply, run.run_id), {
+      ...json({ dry_run: false }),
+      headers: { ...headers, "content-type": "application/json" },
+    })
+    expect(conflict.status).toBe(200)
+    const conflictBody = await conflict.json()
+    expect(conflictBody.status).toBe("blocked")
+    expect(conflictBody.conflict_count).toBe(4)
+
+    const overwrite = await app().request(runPath(PaperPaths.experimentStarterApply, run.run_id), {
+      ...json({ dry_run: false, overwrite: true, update_package_json: true, file_paths: ["experiments/starter/README.md"] }),
+      headers: { ...headers, "content-type": "application/json" },
+    })
+    expect(overwrite.status).toBe(200)
+    const overwriteBody = await overwrite.json()
+    expect(overwriteBody.files).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ path: "experiments/starter/README.md", status: "overwritten" }),
+        expect.objectContaining({ path: "package.json", status: "overwritten" }),
+      ]),
+    )
+    const packageJson = JSON.parse(await readFile(path.join(tmp.extra.workspace, "package.json"), "utf8"))
+    expect(packageJson.scripts.test).toBe("node -e \"console.log('ok')\"")
+    expect(packageJson.scripts["repro:container:starter"]).toContain("Dockerfile.repro")
+
+    const get = await app().request(runPath(PaperPaths.run, run.run_id), { headers })
+    expect(get.status).toBe(200)
+    const snapshot = (await get.json()).run
+    expect(snapshot.artifacts.some((artifact: { metadata?: { artifact_schema?: string } }) => artifact.metadata?.artifact_schema === "ExperimentProtocolStarterApplyResult.v1")).toBe(true)
+    expect(snapshot.events.some((event: { type: string }) => event.type === "experiment.starterpack.applied")).toBe(true)
   })
 
   test("stores PaperRuns in Paper Fucker home by default and resumes home/workspace history", async () => {

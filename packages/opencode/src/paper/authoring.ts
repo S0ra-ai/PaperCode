@@ -1,7 +1,7 @@
 import type { PreviewDiagnostics, PreviewSnapshot } from "../../../preview/src/protocol"
 import { recordExportBundle, type ExportBundle, type ExportRenderer } from "./research/export"
 import type { ResearchArtifact } from "./research/contracts"
-import type { ResultReport } from "./research/experiments"
+import type { ExperimentPlan, ResultReport } from "./research/experiments"
 import {
   appendResearchEvent,
   loadResearchRun,
@@ -9,7 +9,7 @@ import {
   type ResearchRuntimeOptions,
   writeResearchArtifact,
 } from "./research/runtime"
-import type { DataPlan } from "./research/sources"
+import type { DataPlan, LiteratureMap } from "./research/sources"
 import type { SourceRecord } from "./research/sources/schemas"
 import { withSpan } from "./research/telemetry"
 import {
@@ -59,6 +59,12 @@ export type RunPaperAuthoringLoopInput = {
   title: string
   ledger: ClaimLedger
   data_plan: DataPlan
+  literature_map?: LiteratureMap
+  experiment_plan?: ExperimentPlan
+  experiment_protocol?: Parameters<typeof composeDraftPaper>[0]["experiment_protocol"]
+  experiment_guidance?: Parameters<typeof composeDraftPaper>[0]["experiment_guidance"]
+  experiment_starter_pack?: Parameters<typeof composeDraftPaper>[0]["experiment_starter_pack"]
+  experiment_runs?: Parameters<typeof composeDraftPaper>[0]["experiment_runs"]
   result_report: ResultReport
   available_source_ids: string[]
   source_records?: SourceRecord[]
@@ -103,9 +109,25 @@ function nowIso(override?: string) {
   return override ?? new Date().toISOString()
 }
 
+function finalGateIssueText(value: string) {
+  if (value.startsWith("unsupported claim ")) return `断言缺少证据 ${value.slice("unsupported claim ".length)}`
+  if (value.startsWith("dataset license ")) return `数据集许可待处理 ${value.slice("dataset license ".length)}`
+  if (value === "experiment reproduction gate") return "实验复现检查未通过"
+  return value
+}
+
+function displaySubmissionProfile(value: string) {
+  if (value === "generic-preprint") return "通用预印本"
+  if (value === "nature-paper") return "Nature 投稿配置"
+  if (value === "cjc-paper") return "计算机学报投稿配置"
+  if (value === "acm-paper" || value === "acm") return "ACM 论文配置"
+  if (value === "custom-journal") return "自定义期刊投稿配置"
+  return value.replace(/[-_]+/g, " ")
+}
+
 function appendProfileAppendix(markdown: string, input: RunPaperAuthoringLoopInput) {
   const profile = input.target_profile ?? "generic-preprint"
-  const datasetIds = input.data_plan.datasets.map((dataset) => dataset.dataset_id)
+  const datasetCount = input.data_plan.datasets.length
   const failedChecks = [
     ...input.ledger.unsupported_claim_ids.map((claimId) => `unsupported claim ${claimId}`),
     ...input.data_plan.license_conflicts.map((conflict) => `dataset license ${conflict.dataset_id}`),
@@ -114,12 +136,18 @@ function appendProfileAppendix(markdown: string, input: RunPaperAuthoringLoopInp
   return [
     markdown,
     "",
-    "## Submission Checklist",
+    "## 附录 G：投稿准备度",
     "",
-    `Submission profile: ${profile}`,
-    `Data availability: ${datasetIds.length > 0 ? datasetIds.join(", ") : "no dataset recorded"}`,
-    `Code availability: ${(input.code_artifact_ids ?? []).length > 0 ? input.code_artifact_ids!.join(", ") : "no code artifact recorded"}`,
-    `Final gate precheck: ${failedChecks.length === 0 ? "ready" : failedChecks.join("; ")}`,
+    `目标稿件配置：${displaySubmissionProfile(profile)}。`,
+    datasetCount > 0
+      ? `数据可用性：本次运行登记 ${datasetCount} 个数据集，详细清单见数据与代码可用性章节和运行证据清单。`
+      : "数据可用性：本次运行未登记数据集。",
+    (input.code_artifact_ids ?? []).length > 0
+      ? `代码可用性：本次运行登记 ${input.code_artifact_ids!.length} 个代码证据记录，详细清单见运行证据清单。`
+      : "代码可用性：本次运行未登记代码证据记录。",
+    failedChecks.length === 0
+      ? "终稿检查：已满足当前导出条件。"
+      : `终稿检查：仍需处理 ${failedChecks.map(finalGateIssueText).join("；")}。`,
   ].join("\n")
 }
 
@@ -274,7 +302,19 @@ export async function runPaperAuthoringLoop(
     },
     async (span) => {
       const run = await loadResearchRun(runDir)
-      const baseDraft = composeDraftPaper({ title: input.title, ledger: input.ledger, now: input.now })
+      const baseDraft = composeDraftPaper({
+        title: input.title,
+        ledger: input.ledger,
+        data_plan: input.data_plan,
+        literature_map: input.literature_map,
+        experiment_plan: input.experiment_plan,
+        experiment_protocol: input.experiment_protocol,
+        experiment_guidance: input.experiment_guidance,
+        experiment_starter_pack: input.experiment_starter_pack,
+        experiment_runs: input.experiment_runs,
+        result_report: input.result_report,
+        now: input.now,
+      })
       const revision = createProfileAwareDraftRevision({ draft: baseDraft, authoring: input, now: input.now })
       const draft = applyRevision(baseDraft, revision)
       const writing = await recordDraftWriting(

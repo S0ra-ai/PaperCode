@@ -1,23 +1,41 @@
 import {
   appendResearchEvent,
+  readJsonlFacts,
   writeResearchArtifact,
   type ResearchRuntimeOptions,
 } from "./research/runtime"
-import { readFile } from "node:fs/promises"
+import { readFile, stat } from "node:fs/promises"
 import path from "node:path"
+import { spawn } from "node:child_process"
 import type { ResearchArtifact } from "./research/contracts"
 import { createResearchCapabilityRegistry, defaultResearchCapabilities, type ResearchCapabilityRegistry } from "./capabilities"
 import { normalizeResearchIntake, recordResearchIntake, type ResearchIntakeRequest } from "./intake"
 import { analyzeCodebaseForPaper, recordCodeToPaperArtifacts, type CodeToPaperAnalysis } from "./code-to-paper"
 import { runPaperAuthoringLoop } from "./authoring"
-import { createPaperProfileRegistry, defaultPaperProfiles, type PaperProfileId } from "./profiles"
+import {
+  createGeneratedJournalProfileDraft,
+  createPaperProfileRegistry,
+  defaultPaperProfiles,
+  resolvePaperProfileSelection,
+  type PaperProfileId,
+} from "./profiles"
 import { indexResearchMaterials, recordMaterialIndex } from "./material-index"
 import { discoverAndRecordLiteratureData } from "./research/sources"
 import { planExperiments } from "./research/experiments/planning"
 import { recordExperimentLoop } from "./research/experiments/recording"
 import { composeClaimLedger, composeDraftPaper } from "./research/writing"
-import type { DataPlan, SourceCandidate, SourceRecord } from "./research/sources"
-import type { ExperimentMetricDirection, ResultReport, ExperimentPlan, ExperimentRunner } from "./research/experiments"
+import type { DataPlan, DatasetCandidate, LiteratureMap, SourceCandidate, SourceRecord } from "./research/sources"
+import type {
+  ExperimentCommand,
+  ExperimentMetric,
+  ExperimentMetricDirection,
+  ExperimentProtocol,
+  ExperimentProtocolGuidance,
+  ExperimentProtocolStarterPack,
+  ResultReport,
+  ExperimentPlan,
+  ExperimentRunner,
+} from "./research/experiments"
 import type { ClaimLedger } from "./research/writing"
 import { createExperimentNoveltyGate, createNoveltyCheckpoint, type NoveltyCheckpoint } from "./novelty"
 import { createResearchWikiDigest } from "./research-wiki"
@@ -267,20 +285,12 @@ function workspacePath(request: ResearchIntakeRequest) {
 }
 
 function targetProfile(request: ResearchIntakeRequest): PaperProfileId {
-  const profile = request.target_profile
-  if (
-    profile === "nature-paper" ||
-    profile === "ieee-paper" ||
-    profile === "acm-paper" ||
-    profile === "springer-paper" ||
-    profile === "generic-preprint"
-  ) {
-    return profile
-  }
-  return "generic-preprint"
+  return resolvePaperProfileSelection({
+    target_profile: request.target_profile,
+    target_journal: request.target_journal,
+    target_journal_url: request.target_journal_url,
+  }).profile_id
 }
-
-let defaultDiscoverySequence = 0
 
 type DefaultExecutionCache = {
   source?: DefaultSourceDiscoveryResult
@@ -296,6 +306,12 @@ type DefaultCodeAnalysisResult = { analysis: CodeToPaperAnalysis; artifacts: Res
 type DefaultExperimentLoopResult = {
   sources: DefaultSourceDiscoveryResult
   plan: ExperimentPlan
+  protocol?: ExperimentProtocol
+  guidance?: ExperimentProtocolGuidance
+  guidance_artifact_id?: string
+  starter_pack?: ExperimentProtocolStarterPack
+  starter_pack_artifact_id?: string
+  starter_pack_file_artifact_ids?: string[]
   loop: Awaited<ReturnType<typeof recordExperimentLoop>>
 }
 
@@ -309,6 +325,7 @@ type ExperimentEvidenceManifest = {
   container_image?: string
   container_digest?: string
   provenance?: string
+  datasets?: DatasetCandidate[]
 }
 
 type SourceEvidenceManifest = {
@@ -359,39 +376,77 @@ async function writeStageLog(
   )
 }
 
+async function datasetCandidatesFromPaths(request: ResearchIntakeRequest, now: string): Promise<DatasetCandidate[]> {
+  const workspace = request.workspace_path
+  if (!workspace || !request.dataset_paths?.length) return []
+  const candidates: DatasetCandidate[] = []
+  for (const datasetPath of request.dataset_paths) {
+    const absolute = path.resolve(workspace, datasetPath)
+    const info = await stat(absolute).catch(() => undefined)
+    if (!info) continue
+    const metadataDiagnostics = await datasetMetadataDiagnostics(absolute)
+    const id = `dataset:local:${slug(datasetPath)}`
+    candidates.push({
+      dataset_id: id,
+      title: path.basename(datasetPath) || datasetPath,
+      url: `file://${absolute.replace(/\\/g, "/")}`,
+      provider: "paper_fucker-local-workspace",
+      license: { status: "clear", expression: "workspace-authorized local dataset" },
+      version: { value: info.mtimeMs.toString(), retrieved_at: now },
+      verification: {
+        status: "verified",
+        method: "local-dataset-path-exists",
+        checked_at: now,
+        diagnostics: metadataDiagnostics,
+      },
+      topics: [normalizeResearchIntake(request).topic],
+      access: "open",
+      task_fit: 0.7,
+      source_id: id,
+    })
+  }
+  return candidates
+}
+
+async function datasetMetadataDiagnostics(absolutePath: string): Promise<string[]> {
+  if (!absolutePath.toLowerCase().endsWith(".json")) return []
+  const text = await readFile(absolutePath, "utf8").catch(() => "")
+  if (!text || text.length > 2_000_000) return []
+  try {
+    const parsed = JSON.parse(text) as {
+      schema_version?: unknown
+      provenance?: unknown
+      label_policy?: unknown
+      candidates?: unknown
+    }
+    return [
+      typeof parsed.schema_version === "string" ? `schema_version:${parsed.schema_version}` : undefined,
+      typeof parsed.provenance === "string" ? `provenance:${parsed.provenance}` : undefined,
+      typeof parsed.label_policy === "string" ? `label_policy:${parsed.label_policy}` : undefined,
+      Array.isArray(parsed.candidates) ? `candidate_count:${parsed.candidates.length}` : undefined,
+    ].filter((item): item is string => Boolean(item))
+  } catch {
+    return []
+  }
+}
+
 async function defaultSourceDiscovery(runDir: string, request: ResearchIntakeRequest, options?: ResearchRuntimeOptions) {
   const cache = defaultCache(runDir)
   if (cache.source) return cache.source
   const brief = normalizeResearchIntake(request)
   const now = nowIso(options)
-  const sequence = ++defaultDiscoverySequence
   const sourceEvidence = await loadSourceEvidenceManifest(runDir, request, options)
+  const experimentEvidence = await loadExperimentEvidenceManifest(runDir, request, options)
   cache.source = await discoverAndRecordLiteratureData(
     runDir,
     {
       topic: brief.topic,
       full_access: false,
-      literature_candidates:
-        sourceEvidence && sourceEvidence.sources.length > 0
-          ? sourceEvidence.sources
-          : [
-              {
-                source_id: `paper:${slug(brief.topic)}:seed:${sequence}`,
-                kind: "paper",
-                title: `${brief.topic} source discovery seed ${sequence}`,
-                url: `https://arxiv.org/search/?query=${encodeURIComponent(brief.topic)}`,
-                provider: "paper_fucker-default-source-discovery",
-                license: { status: "clear", expression: "arXiv non-exclusive distribution" },
-                version: { value: "search-seed", retrieved_at: now },
-                verification: {
-                  status: "unverified",
-                  method: "default-source-seed",
-                  checked_at: now,
-                  diagnostics: ["Live source verification has not been completed; final claims stay gated."],
-                },
-                topics: [brief.topic],
-              },
-            ],
+      literature_candidates: sourceEvidence?.sources ?? [],
+      dataset_candidates: [
+        ...(experimentEvidence?.datasets ?? []),
+        ...(await datasetCandidatesFromPaths(request, now)),
+      ],
       min_verified_sources: 1,
       now,
     },
@@ -622,6 +677,13 @@ function methodName(request: ResearchIntakeRequest) {
   return "Evidence-led paper_fucker workflow"
 }
 
+function primaryExperimentMetric(request: ResearchIntakeRequest, evidence?: ExperimentEvidenceManifest, localMetric?: string) {
+  if (evidence?.primary_metric) return evidence.primary_metric
+  if (localMetric) return localMetric
+  if ((request.code_paths ?? []).length > 0) return "test_pass_rate"
+  return "accuracy"
+}
+
 function defaultExperimentRunner(reason: string): ExperimentRunner {
   return (spec, environment) => ({
     status: "environment_failed",
@@ -631,6 +693,561 @@ function defaultExperimentRunner(reason: string): ExperimentRunner {
     exit_code: 127,
     resource_usage: { wall_time_seconds: 0 },
   })
+}
+
+function automaticCodeExperimentRunner(input: {
+  request: ResearchIntakeRequest
+  code: DefaultCodeAnalysisResult
+  protocol?: ExperimentProtocol
+}): ExperimentRunner | undefined {
+  const localRunner = localCodeExperimentRunner(input)
+  if (!localRunner) return undefined
+  return async (spec, environment) => {
+    const localResult = await localRunner(spec, environment)
+    return localResult
+  }
+}
+
+function parseScriptCommand(command: string) {
+  const trimmed = command.trim()
+  if (!trimmed) return undefined
+  return trimmed
+}
+
+function selectLocalTestScript(code: DefaultCodeAnalysisResult) {
+  const entries = code.analysis.experiment_surface.runnable_entries
+  const preferred = ["test:paper", "test:unit", "typecheck", "check", "lint", "test"]
+  return (
+    preferred
+      .map((name) => entries.find((entry) => entry.name === name))
+      .find(Boolean) ??
+    entries.find((entry) => /(^|:)(test|typecheck|check|lint)(:|$)/i.test(entry.name)) ??
+    undefined
+  )
+}
+
+function metricNameForLocalScript(scriptName: string) {
+  const normalized = scriptName.toLowerCase()
+  if (normalized.includes("ranking")) return "ranking_ndcg_at_3"
+  if (/^(container|repro|reproduce)(:|$)/.test(normalized)) return "container_reproduction_pass"
+  if (normalized === "typecheck") return "typecheck_pass"
+  if (normalized === "lint") return "lint_pass"
+  if (normalized === "check") return "check_pass"
+  if (normalized.startsWith("bench")) return "benchmark_pass"
+  return "test_pass_rate"
+}
+
+function metricDirectionFromValue(value: unknown): ExperimentMetricDirection {
+  return value === "lower_better" ? "lower_better" : "higher_better"
+}
+
+function metricNumber(value: unknown) {
+  if (typeof value === "number" && Number.isFinite(value)) return value
+  if (typeof value === "string" && value.trim() !== "") {
+    const parsed = Number(value)
+    if (Number.isFinite(parsed)) return parsed
+  }
+  return undefined
+}
+
+function metricFromObject(value: unknown, fallbackName: string): ExperimentMetric[] {
+  if (!value || typeof value !== "object") return []
+  const candidate = value as {
+    name?: unknown
+    metric?: unknown
+    value?: unknown
+    direction?: unknown
+    unit?: unknown
+  }
+  const metricValue = metricNumber(candidate.value)
+  if (typeof metricValue !== "number") return []
+  const name = typeof candidate.name === "string" ? candidate.name : typeof candidate.metric === "string" ? candidate.metric : fallbackName
+  return [
+    {
+      name,
+      value: metricValue,
+      direction: metricDirectionFromValue(candidate.direction),
+      unit: typeof candidate.unit === "string" ? candidate.unit : undefined,
+    },
+  ]
+}
+
+function metricsFromPayload(value: unknown, spec: { experiment_id: string; role: string; label: string }, fallbackName: string): ExperimentMetric[] {
+  if (Array.isArray(value)) {
+    const matchedEntry = value.find((item) => {
+      if (!item || typeof item !== "object") return false
+      const candidate = item as { experiment_id?: unknown; role?: unknown; label?: unknown }
+      return candidate.experiment_id === spec.experiment_id || candidate.role === spec.role || candidate.label === spec.label
+    })
+    if (matchedEntry) return metricsFromPayload(matchedEntry, spec, fallbackName)
+    return value.flatMap((item) => metricFromObject(item, fallbackName))
+  }
+  if (!value || typeof value !== "object") return []
+  const candidate = value as {
+    experiment_id?: unknown
+    role?: unknown
+    label?: unknown
+    metrics?: unknown
+    metric?: unknown
+  }
+  if (Array.isArray(candidate.metrics)) return candidate.metrics.flatMap((item) => metricFromObject(item, fallbackName))
+  if (candidate.metrics && typeof candidate.metrics === "object") return metricsFromPayload(candidate.metrics, spec, fallbackName)
+  const keyed = value as Record<string, unknown>
+  const keyedValue = keyed[spec.experiment_id] ?? keyed[spec.role] ?? keyed[spec.label]
+  if (keyedValue) return metricsFromPayload(keyedValue, spec, fallbackName)
+  return metricFromObject(candidate.metric ?? candidate, fallbackName)
+}
+
+function parseExperimentMetrics(stdout: string, spec: { experiment_id: string; role: string; label: string }, fallbackName: string): ExperimentMetric[] {
+  const metrics: ExperimentMetric[] = []
+  for (const line of stdout.split(/\r?\n/)) {
+    const tagged = line.match(/^PAPER_FUCKER_METRICS?\s+(.+)$/)
+    if (!tagged) continue
+    try {
+      const parsed = JSON.parse(tagged[1]!)
+      metrics.push(...metricsFromPayload(parsed, spec, fallbackName))
+    } catch {
+      // Keep raw stdout available in the terminal trace; unparsable metric hints should not hide the run itself.
+    }
+  }
+  if (metrics.length > 0) return metrics
+  const simple = stdout.match(new RegExp(`(?:^|\\s)${fallbackName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*=\\s*([0-9]+(?:\\.[0-9]+)?)`))
+  const value = simple ? metricNumber(simple[1]) : undefined
+  return typeof value === "number"
+    ? [
+        {
+          name: fallbackName,
+          value,
+          direction: "higher_better",
+          unit: "ratio",
+        },
+      ]
+    : []
+}
+
+function experimentCommandFromShell(command: string, timeoutSeconds = 120): ExperimentCommand {
+  return {
+    argv: [command],
+    timeout_seconds: timeoutSeconds,
+  }
+}
+
+function experimentCommandToShell(command: ExperimentCommand) {
+  if (command.argv.length === 1) return command.argv[0]
+  return command.argv.join(" ")
+}
+
+function experimentProtocolFromCode(code: DefaultCodeAnalysisResult): ExperimentProtocol {
+  const entries = code.analysis.experiment_surface.runnable_entries
+  const protocolEntries = entries.flatMap((entry): ExperimentProtocol["entries"] => {
+    const normalized = entry.name.toLowerCase()
+    const metric = metricNameForLocalScript(entry.name)
+    if (/^(baseline|bench:baseline|benchmark:baseline)(:|$)/.test(normalized)) {
+      return [
+        {
+          protocol_id: `baseline:${normalized.replace(/[^a-z0-9]+/g, "-")}`,
+          role: "baseline",
+          label: entry.name,
+          command: experimentCommandFromShell(entry.command),
+          expected_metric: metric,
+          rationale: "Baseline runner declared by package script.",
+          source_range: entry.source_range,
+        },
+      ]
+    }
+    if (/^(ablation|bench:ablation|benchmark:ablation)(:|$)/.test(normalized)) {
+      return [
+        {
+          protocol_id: `ablation:${normalized.replace(/[^a-z0-9]+/g, "-")}`,
+          role: "ablation",
+          label: entry.name,
+          command: experimentCommandFromShell(entry.command),
+          expected_metric: metric,
+          rationale: "Ablation runner declared by package script.",
+          source_range: entry.source_range,
+        },
+      ]
+    }
+    if (/^(container|repro|reproduce)(:|$)/.test(normalized)) {
+      return [
+        {
+          protocol_id: `container:${normalized.replace(/[^a-z0-9]+/g, "-")}`,
+          role: "container_reproduction",
+          label: entry.name,
+          command: experimentCommandFromShell(entry.command, 600),
+          expected_metric: metric,
+          rationale: "Container reproduction runner declared by package script.",
+          source_range: entry.source_range,
+        },
+      ]
+    }
+    return []
+  })
+  const selected = selectLocalTestScript(code)
+  if (selected) {
+    protocolEntries.unshift({
+      protocol_id: `proposed:${selected.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
+      role: "proposed",
+      label: selected.name,
+      command: experimentCommandFromShell(selected.command),
+      expected_metric: metricNameForLocalScript(selected.name),
+      rationale: "Primary host exploration command selected from authorized package scripts.",
+      source_range: selected.source_range,
+    })
+  }
+  const roles = new Set(protocolEntries.map((entry) => entry.role))
+  const gaps = [
+    !roles.has("proposed") ? "missing_proposed_runner" : undefined,
+    !roles.has("baseline") ? "missing_baseline_runner" : undefined,
+    !roles.has("ablation") ? "missing_ablation_runner" : undefined,
+    !roles.has("container_reproduction") ? "missing_container_reproduction_runner" : undefined,
+  ].filter((item): item is string => Boolean(item))
+  return {
+    schema_version: "ExperimentProtocol.v1",
+    discovered_from: "package_scripts",
+    entries: protocolEntries,
+    gaps,
+  }
+}
+
+function experimentProtocolGuidance(input: {
+  protocol?: ExperimentProtocol
+  report: ResultReport
+  now: string
+}): ExperimentProtocolGuidance {
+  const gaps = new Set(input.protocol?.gaps ?? [])
+  if (input.report.blockers.includes("experiment_protocol_incomplete")) {
+    if (!input.report.best_baseline) gaps.add("missing_baseline_runner")
+    if (input.protocol?.gaps.includes("missing_ablation_runner")) gaps.add("missing_ablation_runner")
+    if (input.report.reproduction.status !== "passed") gaps.add("missing_container_reproduction_runner")
+  }
+  if (input.report.blockers.includes("container_reproduction_failed")) gaps.add("missing_container_reproduction_runner")
+  const suggestions = [...gaps].flatMap((gap): ExperimentProtocolGuidance["suggestions"] => {
+    if (gap === "missing_baseline_runner") {
+      return [
+        {
+          gap,
+          severity: "blocking",
+          recommended_script: "baseline:<name>",
+          package_json_example: { "baseline:bm25": "bun run scripts/eval-baseline.ts --method bm25" },
+          rationale: "计算机类论文需要至少一个可运行 baseline，才能支撑优于现有方法的 claim。",
+          next_action: "在 package.json 中增加 baseline 脚本，并确保它输出主指标。",
+        },
+      ]
+    }
+    if (gap === "missing_ablation_runner") {
+      return [
+        {
+          gap,
+          severity: "warning",
+          recommended_script: "ablation:<name>",
+          package_json_example: { "ablation:no-claim-ledger": "bun run scripts/eval.ts --ablation no-claim-ledger" },
+          rationale: "消融实验用于缩小贡献表述范围，缺失时只能生成较保守的工程报告。",
+          next_action: "补充至少一个 ablation 脚本，验证核心模块对结果的贡献。",
+        },
+      ]
+    }
+    if (gap === "missing_container_reproduction_runner") {
+      return [
+        {
+          gap,
+          severity: "blocking",
+          recommended_script: "repro:container",
+          package_json_example: { "repro:container": "docker build -t paper-fucker-repro . && docker run --rm paper-fucker-repro" },
+          rationale: "final export 需要隔离环境复现通过，host-only 结果只能作为 exploratory。",
+          next_action: "添加容器复现脚本，或提供 ExperimentEvidenceManifest.v1 中的 container 证据。",
+        },
+      ]
+    }
+    if (gap === "missing_proposed_runner") {
+      return [
+        {
+          gap,
+          severity: "blocking",
+          recommended_script: "typecheck | test | bench:<name>",
+          package_json_example: { typecheck: "tsc --noEmit", test: "bun test" },
+          rationale: "没有 proposed runner 时，系统无法验证用户方法本身。",
+          next_action: "补充 proposed 方法的最小可执行验证脚本。",
+        },
+      ]
+    }
+    return []
+  })
+  const finalBlocked = input.report.final_claims_allowed === false
+  return {
+    schema_version: "ExperimentProtocolGuidance.v1",
+    created_at: input.now,
+    status: suggestions.length > 0 ? "needs_protocol" : "complete",
+    summary:
+      suggestions.length > 0
+        ? `发现 ${suggestions.length} 个实验协议缺口，需要补齐后再生成 final export。`
+        : "实验协议已满足当前 final gate 要求。",
+    final_export_blocked: finalBlocked,
+    gaps: [...gaps],
+    suggestions,
+  }
+}
+
+function experimentProtocolStarterPack(input: {
+  guidance: ExperimentProtocolGuidance
+  topic: string
+  now: string
+}): ExperimentProtocolStarterPack | undefined {
+  if (input.guidance.status !== "needs_protocol" || input.guidance.suggestions.length === 0) return undefined
+  const metricName = "primary_metric"
+  const baselineContent = [
+    "import { writeFileSync } from 'node:fs'",
+    "",
+    "const result = {",
+    "  schema_version: 'ExperimentResult.v1',",
+    "  role: 'baseline',",
+    "  metric: { name: 'primary_metric', value: 0, direction: 'higher_better' },",
+    "  notes: 'Replace this toy baseline with the actual baseline method and dataset split.'",
+    "}",
+    "",
+    "writeFileSync('reports/experiment-baseline.json', JSON.stringify(result, null, 2))",
+    "console.log(JSON.stringify(result))",
+  ].join("\n")
+  const ablationContent = [
+    "import { writeFileSync } from 'node:fs'",
+    "",
+    "const result = {",
+    "  schema_version: 'ExperimentResult.v1',",
+    "  role: 'ablation',",
+    "  metric: { name: 'primary_metric', value: 0, direction: 'higher_better' },",
+    "  removed_component: 'replace-with-core-component',",
+    "  notes: 'Replace this with an ablation that removes one claimed contribution.'",
+    "}",
+    "",
+    "writeFileSync('reports/experiment-ablation.json', JSON.stringify(result, null, 2))",
+    "console.log(JSON.stringify(result))",
+  ].join("\n")
+  const dockerfileContent = [
+    "FROM oven/bun:1",
+    "WORKDIR /workspace",
+    "COPY package.json bun.lock* ./",
+    "RUN bun install --frozen-lockfile || bun install",
+    "COPY . .",
+    "CMD [\"bun\", \"run\", \"baseline:starter\"]",
+  ].join("\n")
+  const readmeContent = [
+    `# Experiment Protocol Starter: ${input.topic}`,
+    "",
+    "Paper Fucker blocked final export because the repository does not yet expose a complete experiment protocol.",
+    "",
+    "Required fixes:",
+    ...input.guidance.suggestions.map((item) => `- ${item.recommended_script}: ${item.next_action}`),
+    "",
+    "Minimum acceptance:",
+    `- Proposed, baseline, and ablation commands must emit the same metric name: ${metricName}.`,
+    "- Container reproduction must run without relying on local-only state.",
+    "- Replace the toy values in these starter files with real benchmark results before rerunning PaperRun.",
+  ].join("\n")
+  const files: ExperimentProtocolStarterPack["files"] = [
+    {
+      path: "experiments/starter/baseline-starter.ts",
+      purpose: "Baseline runner skeleton; replace toy metric with a real baseline evaluation.",
+      content: baselineContent,
+    },
+    {
+      path: "experiments/starter/ablation-starter.ts",
+      purpose: "Ablation runner skeleton; remove one claimed component and report the same metric.",
+      content: ablationContent,
+    },
+    {
+      path: "experiments/starter/Dockerfile.repro",
+      purpose: "Container reproduction skeleton for isolated final gate evidence.",
+      content: dockerfileContent,
+    },
+    {
+      path: "experiments/starter/README.md",
+      purpose: "Human checklist for converting the starter pack into real experiments.",
+      content: readmeContent,
+    },
+  ]
+  return {
+    schema_version: "ExperimentProtocolStarterPack.v1",
+    created_at: input.now,
+    status: "ready",
+    summary: "已生成实验协议 starter pack；请复制模板到仓库并替换为真实 baseline、ablation 和容器复现实验。",
+    package_json_scripts: {
+      "baseline:starter": "bun run experiments/starter/baseline-starter.ts",
+      "ablation:starter": "bun run experiments/starter/ablation-starter.ts",
+      "repro:container:starter": "docker build -f experiments/starter/Dockerfile.repro -t paper-fucker-repro . && docker run --rm paper-fucker-repro",
+    },
+    files,
+    next_steps: [
+      "将 starter files 复制到目标仓库或用同等脚本替换。",
+      "让 proposed、baseline、ablation 输出同名主指标。",
+      "运行容器复现并将结果写入 ExperimentEvidenceManifest.v1 或保留可执行脚本。",
+      "重新启动 PaperRun，让 final gate 基于真实实验结果重新判断。",
+    ],
+  }
+}
+
+function starterFileMimeType(filePath: string) {
+  if (filePath.endsWith(".ts")) return "text/typescript"
+  if (filePath.endsWith(".md")) return "text/markdown"
+  if (filePath.endsWith(".json")) return "application/json"
+  if (filePath.toLowerCase().includes("dockerfile")) return "text/x-dockerfile"
+  return "text/plain"
+}
+
+async function materializeExperimentProtocolStarterFiles(
+  runDir: string,
+  starterPack: ExperimentProtocolStarterPack,
+  options?: ResearchRuntimeOptions,
+) {
+  const files: ExperimentProtocolStarterPack["files"] = []
+  const artifactIds: string[] = []
+  for (const file of starterPack.files) {
+    const artifact = await writeResearchArtifact(
+      runDir,
+      {
+        kind: "log",
+        logical_path: file.path,
+        data: file.content,
+        mime_type: starterFileMimeType(file.path),
+        metadata: {
+          artifact_schema: "ExperimentProtocolStarterFile.v1",
+          starter_pack_schema: starterPack.schema_version,
+          starter_file_path: file.path,
+          starter_file_purpose: file.purpose,
+        },
+      },
+      options,
+    )
+    artifactIds.push(artifact.artifact_id)
+    files.push({
+      ...file,
+      mime_type: artifact.mime_type,
+      artifact_id: artifact.artifact_id,
+      artifact_path: artifact.path,
+    })
+  }
+  return {
+    starterPack: {
+      ...starterPack,
+      files,
+    },
+    artifactIds,
+  }
+}
+
+function runShellCommand(command: string, cwd: string, timeoutMs: number) {
+  return new Promise<{ stdout: string; stderr: string; exitCode: number; timedOut: boolean; wallTimeSeconds: number }>((resolve) => {
+    const started = Date.now()
+    const child = spawn(command, {
+      cwd,
+      shell: true,
+      windowsHide: true,
+      env: {
+        ...process.env,
+        CI: process.env.CI ?? "1",
+        NO_COLOR: process.env.NO_COLOR ?? "1",
+      },
+    })
+    let stdout = ""
+    let stderr = ""
+    const limit = 64_000
+    const append = (current: string, chunk: Buffer) => (current + chunk.toString("utf8")).slice(-limit)
+    child.stdout?.on("data", (chunk: Buffer) => {
+      stdout = append(stdout, chunk)
+    })
+    child.stderr?.on("data", (chunk: Buffer) => {
+      stderr = append(stderr, chunk)
+    })
+    let timedOut = false
+    const timer = setTimeout(() => {
+      timedOut = true
+      child.kill("SIGTERM")
+    }, timeoutMs)
+    child.on("close", (code) => {
+      clearTimeout(timer)
+      resolve({
+        stdout,
+        stderr,
+        exitCode: timedOut ? 124 : code ?? 1,
+        timedOut,
+        wallTimeSeconds: Math.max(0, (Date.now() - started) / 1000),
+      })
+    })
+    child.on("error", (error) => {
+      clearTimeout(timer)
+      resolve({
+        stdout,
+        stderr: `${stderr}\n${error instanceof Error ? error.message : String(error)}`.trim(),
+        exitCode: 127,
+        timedOut,
+        wallTimeSeconds: Math.max(0, (Date.now() - started) / 1000),
+      })
+    })
+  })
+}
+
+function localCodeExperimentRunner(input: {
+  request: ResearchIntakeRequest
+  code: DefaultCodeAnalysisResult
+  protocol?: ExperimentProtocol
+}): ExperimentRunner | undefined {
+  const protocol = input.protocol ?? experimentProtocolFromCode(input.code)
+  const entry = protocol.entries.find((item) => item.role === "proposed")
+  const command = entry ? parseScriptCommand(experimentCommandToShell(entry.command)) : undefined
+  if (!entry || !command) return undefined
+  const workspace = workspacePath(input.request)
+  return async (spec, environment) => {
+    const protocolEntry =
+      environment.mode === "container"
+        ? protocol.entries.find((item) => item.role === "container_reproduction")
+        : protocol.entries.find((item) => item.role === spec.role && (item.protocol_id.endsWith(spec.experiment_id) || item.label === spec.label))
+    if (environment.mode === "container" && !protocolEntry) {
+      return {
+        status: "environment_failed",
+        metrics: [],
+        stdout: "",
+        stderr: "No explicit container reproduction runner is configured; add a container:/repro: package script or provide ExperimentEvidenceManifest.v1.",
+        exit_code: 127,
+        resource_usage: { wall_time_seconds: 0 },
+      }
+    }
+    const shellCommand = protocolEntry ? experimentCommandToShell(protocolEntry.command) : spec.role === "proposed" ? command : undefined
+    if (!shellCommand) {
+      return {
+        status: "environment_failed",
+        metrics: [],
+        stdout: "",
+        stderr: `No local baseline runner is configured for ${spec.experiment_id}; baseline claims remain blocked until explicit benchmark evidence is supplied.`,
+        exit_code: 127,
+        resource_usage: { wall_time_seconds: 0 },
+      }
+    }
+    const metricName = spec.expected_metric
+    const timeoutSeconds =
+      environment.mode === "container"
+        ? Math.min(protocolEntry?.command.timeout_seconds ?? spec.command.timeout_seconds ?? 600, 600)
+        : Math.min(spec.command.timeout_seconds ?? 120, 120)
+    const result = await runShellCommand(shellCommand, workspace, timeoutSeconds * 1000)
+    const parsedMetrics = parseExperimentMetrics(result.stdout, spec, metricName)
+    return {
+      status: result.exitCode === 0 ? "succeeded" : result.timedOut ? "resource_exceeded" : "failed",
+      command: protocolEntry?.command ?? spec.command,
+      metrics:
+        parsedMetrics.length > 0
+          ? parsedMetrics
+          : [
+              {
+                name: metricName,
+                value: result.exitCode === 0 ? 1 : 0,
+                direction: "higher_better",
+                unit: "ratio",
+              },
+            ],
+      stdout: `Local ${environment.mode} script ${protocolEntry?.label ?? entry.label}: ${shellCommand}\n${result.stdout}`.trim(),
+      stderr: result.timedOut ? `Command timed out after ${result.wallTimeSeconds.toFixed(1)}s.\n${result.stderr}`.trim() : result.stderr,
+      exit_code: result.exitCode,
+      resource_usage: { wall_time_seconds: result.wallTimeSeconds },
+    }
+  }
 }
 
 function resolveInputPath(request: ResearchIntakeRequest, inputPath: string) {
@@ -765,6 +1382,60 @@ function verifiedClearSourceIds(sources: SourceRecord[]) {
     .map((source) => source.source_id)
 }
 
+function codeMethodClaimText(
+  code: Awaited<ReturnType<typeof defaultCodeAnalysis>>,
+  request: ResearchIntakeRequest,
+) {
+  const files = code.analysis.codebase_map.files
+  const methods = code.analysis.method_extraction.methods
+  const tests = code.analysis.experiment_surface.tests
+  const runnables = code.analysis.experiment_surface.runnable_entries
+  const primaryPaths = (request.code_paths ?? []).slice(0, 3).join(", ")
+  const methodNames = methods.slice(0, 5).map((method) => `${method.name}(${method.source_range.path}:${method.source_range.start_line})`)
+  const runnableNames = runnables.slice(0, 4).map((entry) => entry.name)
+  const parts = [
+    `对提交代码库的 ${files.length} 个文件进行 source-range-grounded 分析，覆盖 ${primaryPaths || "用户授权路径"}。`,
+  ]
+  if (methods.length > 0) {
+    parts.push(`系统抽取到 ${methods.length} 个导出方法/类表面，其中包括 ${methodNames.join(", ")}。`)
+  }
+  if (tests.length > 0 || runnables.length > 0) {
+    parts.push(
+      `实验入口包含 ${tests.length} 个测试文件和 ${runnables.length} 个 package script${runnableNames.length > 0 ? `（${runnableNames.join(", ")}）` : ""}。`,
+    )
+  }
+  parts.push("这些结论仅绑定本地哈希、文件路径和 source range，不把未执行的性能结果写成最终 claim。")
+  return parts.join(" ")
+}
+
+async function localCodeSourceRecords(runDir: string, options?: ResearchRuntimeOptions): Promise<SourceRecord[]> {
+  const now = nowIso(options)
+  const sources = await readJsonlFacts(runDir, "source")
+  return sources
+    .filter((source) => source.kind === "code")
+    .map((source) => ({
+      schema_version: "SourceRecord.v1" as const,
+      source_id: source.source_id,
+      kind: source.kind,
+      title: source.title,
+      url: source.locator?.path ? `file://${source.locator.path.replace(/\\/g, "/")}` : `file://${source.title}`,
+      provider: "paper_fucker-local-workspace",
+      license: { status: "clear" as const, expression: "workspace-authorized local source" },
+      version: {
+        value: typeof source.metadata?.sha256 === "string" ? source.metadata.sha256 : undefined,
+        retrieved_at: source.created_at,
+        hash: typeof source.metadata?.sha256 === "string" ? source.metadata.sha256 : undefined,
+      },
+      verification: {
+        status: "verified" as const,
+        method: "local-workspace-hash-and-source-range",
+        checked_at: now,
+        diagnostics: [],
+      },
+      retrieved_at: source.created_at,
+    }))
+}
+
 function metricDirection(plan: ExperimentPlan, metricName: string, evidence: ExperimentEvidenceManifest): ExperimentMetricDirection {
   return evidence.metric_direction ?? plan.metrics.find((metric) => metric.name === metricName)?.direction ?? "higher_better"
 }
@@ -807,24 +1478,61 @@ async function defaultExperimentLoop(
   const cache = defaultCache(runDir)
   if (cache.experiment) return cache.experiment
   const sources = await defaultSourceDiscovery(runDir, request, options)
+  const evidence = await loadExperimentEvidenceManifest(runDir, request, options)
+  const code = !evidence && (request.code_paths ?? []).length > 0 ? await defaultCodeAnalysis(runDir, request, options) : undefined
+  const protocol = code ? experimentProtocolFromCode(code) : undefined
+  const proposedProtocol = protocol?.entries.find((entry) => entry.role === "proposed")
+  const baselines = protocol?.entries.filter((entry) => entry.role === "baseline") ?? []
+  const ablations = protocol?.entries.filter((entry) => entry.role === "ablation") ?? []
   const plan = planExperiments({
     topic: normalizeResearchIntake(request).topic,
     method_name: methodName(request),
     dataset_ids: sources.data_plan.datasets.map((dataset) => dataset.dataset_id),
-      objective: "Create a reproducible evaluation plan before allowing final paper claims.",
-      now: nowIso(options),
-    })
-  const evidence = await loadExperimentEvidenceManifest(runDir, request, options)
+    objective: "Create a reproducible evaluation plan before allowing final paper claims.",
+    primary_metric: primaryExperimentMetric(request, evidence, proposedProtocol?.expected_metric),
+    proposed_command: proposedProtocol?.command,
+    baseline_specs: protocol && baselines.length > 0
+      ? baselines.map((entry) => ({
+          experiment_id: entry.protocol_id,
+          label: entry.label,
+          command: entry.command,
+          rationale: entry.rationale,
+        }))
+      : undefined,
+    ablation_specs: protocol && ablations.length > 0
+      ? ablations.map((entry) => ({
+          experiment_id: entry.protocol_id,
+          label: entry.label,
+          command: entry.command,
+          rationale: entry.rationale,
+        }))
+      : undefined,
+    include_default_baselines: true,
+    now: nowIso(options),
+  })
+  if (protocol) {
+    await writeResearchArtifact(
+      runDir,
+      {
+        kind: "log",
+        logical_path: "experiments/experiment-protocol.json",
+        data: protocol,
+        metadata: { artifact_schema: "ExperimentProtocol.v1" },
+      },
+      options,
+    )
+  }
+  const localRunner = code ? automaticCodeExperimentRunner({ request, code, protocol }) : undefined
   const loop = await recordExperimentLoop(
     runDir,
     {
       plan,
       host_runner: evidence
         ? experimentEvidenceRunner(plan, evidence, "host")
-        : defaultExperimentRunner("no approved experiment command or container runner was attached to this PaperRun"),
+        : localRunner ?? defaultExperimentRunner("no approved experiment command or container runner was attached to this PaperRun"),
       container_runner: evidence
         ? experimentEvidenceRunner(plan, evidence, "container")
-        : defaultExperimentRunner("host exploration did not produce runnable successful experiments"),
+        : localRunner ?? defaultExperimentRunner("host exploration did not produce runnable successful experiments"),
       run_options: {
         now: nowIso(options),
         container_image: evidence?.container_image,
@@ -833,7 +1541,50 @@ async function defaultExperimentLoop(
     },
     options,
   )
-  cache.experiment = { sources, plan, loop }
+  const guidance = experimentProtocolGuidance({ protocol, report: loop.report, now: nowIso(options) })
+  const guidanceArtifact =
+    guidance.status === "needs_protocol"
+      ? await writeResearchArtifact(
+          runDir,
+          {
+            kind: "log",
+            logical_path: "experiments/experiment-protocol-guidance.json",
+            data: guidance,
+            metadata: { artifact_schema: "ExperimentProtocolGuidance.v1" },
+          },
+          options,
+        )
+      : undefined
+  const starterPackDraft = experimentProtocolStarterPack({ guidance, topic: request.topic, now: nowIso(options) })
+  const materializedStarterPack =
+    starterPackDraft && starterPackDraft.status === "ready"
+      ? await materializeExperimentProtocolStarterFiles(runDir, starterPackDraft, options)
+      : undefined
+  const starterPack = materializedStarterPack?.starterPack ?? starterPackDraft
+  const starterPackArtifact =
+    starterPack && starterPack.status === "ready"
+      ? await writeResearchArtifact(
+          runDir,
+          {
+            kind: "log",
+            logical_path: "experiments/experiment-protocol-starter-pack.json",
+            data: starterPack,
+            metadata: { artifact_schema: "ExperimentProtocolStarterPack.v1" },
+          },
+          options,
+        )
+      : undefined
+  cache.experiment = {
+    sources,
+    plan,
+    protocol,
+    guidance,
+    guidance_artifact_id: guidanceArtifact?.artifact_id,
+    starter_pack: starterPack,
+    starter_pack_artifact_id: starterPackArtifact?.artifact_id,
+    starter_pack_file_artifact_ids: materializedStarterPack?.artifactIds ?? [],
+    loop,
+  }
   return cache.experiment
 }
 
@@ -841,12 +1592,15 @@ async function defaultClaimLedger(
   runDir: string,
   request: ResearchIntakeRequest,
   options?: ResearchRuntimeOptions,
-): Promise<{ ledger: ClaimLedger; sourceIds: string[]; evidenceArtifactIds: string[] }> {
+): Promise<{ ledger: ClaimLedger; literatureMap: LiteratureMap; sourceIds: string[]; sourceRecords: SourceRecord[]; evidenceArtifactIds: string[] }> {
   const cache = defaultCache(runDir)
   if (cache.claims) return cache.claims
   const sources = await defaultSourceDiscovery(runDir, request, options)
   const code = (request.code_paths ?? []).length > 0 ? await defaultCodeAnalysis(runDir, request, options) : undefined
-  const sourceIds = verifiedClearSourceIds(sources.literature.sources)
+  const codeSourceRecords = code ? await localCodeSourceRecords(runDir, options) : []
+  const sourceRecords = [...sources.literature.sources, ...codeSourceRecords]
+  const sourceIds = [...verifiedClearSourceIds(sources.literature.sources), ...codeSourceRecords.map((source) => source.source_id)]
+  const methodSourceIds = codeSourceRecords.length > 0 ? codeSourceRecords.map((source) => source.source_id) : sourceIds
   const evidenceArtifactIds = [
     sources.artifacts.literature.artifact_id,
     sources.artifacts.data_plan.artifact_id,
@@ -858,17 +1612,17 @@ async function defaultClaimLedger(
       {
         section_id: "method",
         text:
-          (request.code_paths ?? []).length > 0
-            ? "The submitted codebase exposes implementation surfaces that can be described in a source-range-grounded paper draft."
+          code
+            ? codeMethodClaimText(code, request)
             : "The submitted topic has an initial research direction that requires verified literature and reproduction before final claims.",
-        confidence: sourceIds.length > 0 && evidenceArtifactIds.length > 0 ? 0.55 : 0.25,
-        source_ids: sourceIds.slice(0, 3),
+        confidence: methodSourceIds.length > 0 && evidenceArtifactIds.length > 0 ? 0.65 : 0.25,
+        source_ids: methodSourceIds.slice(0, 3),
         artifact_ids: evidenceArtifactIds,
       },
     ],
     now: nowIso(options),
   })
-  cache.claims = { ledger, sourceIds, evidenceArtifactIds }
+  cache.claims = { ledger, literatureMap: sources.literature, sourceIds, sourceRecords, evidenceArtifactIds }
   return cache.claims
 }
 
@@ -878,6 +1632,12 @@ async function defaultResultReport(
   options?: ResearchRuntimeOptions,
 ): Promise<{
   dataPlan: DataPlan
+  literatureMap: LiteratureMap
+  experimentPlan: ExperimentPlan
+  experimentProtocol?: ExperimentProtocol
+  experimentGuidance?: ExperimentProtocolGuidance
+  experimentStarterPack?: ExperimentProtocolStarterPack
+  experimentRuns: Pick<Awaited<ReturnType<typeof recordExperimentLoop>>, "host_runs" | "container_runs">
   resultReport: ResultReport
   sourceIds: string[]
   sourceRecords: SourceRecord[]
@@ -889,10 +1649,25 @@ async function defaultResultReport(
   const experiment = await defaultExperimentLoop(runDir, request, options)
   cache.result = {
     dataPlan: experiment.sources.data_plan,
+    literatureMap: claims.literatureMap,
+    experimentPlan: experiment.plan,
+    experimentProtocol: experiment.protocol,
+    experimentGuidance: experiment.guidance,
+    experimentStarterPack: experiment.starter_pack,
+    experimentRuns: {
+      host_runs: experiment.loop.host_runs,
+      container_runs: experiment.loop.container_runs,
+    },
     resultReport: experiment.loop.report,
     sourceIds: claims.sourceIds,
-    sourceRecords: experiment.sources.literature.sources,
-    evidenceArtifactIds: [...claims.evidenceArtifactIds, experiment.loop.artifacts.result_report.artifact_id],
+    sourceRecords: claims.sourceRecords,
+    evidenceArtifactIds: [
+      ...claims.evidenceArtifactIds,
+      experiment.loop.artifacts.result_report.artifact_id,
+      ...(experiment.guidance_artifact_id ? [experiment.guidance_artifact_id] : []),
+      ...(experiment.starter_pack_file_artifact_ids ?? []),
+      ...(experiment.starter_pack_artifact_id ? [experiment.starter_pack_artifact_id] : []),
+    ],
   }
   return cache.result
 }
@@ -907,7 +1682,13 @@ async function defaultAuthoring(runDir: string, request: ResearchIntakeRequest, 
     {
       title: normalizeResearchIntake(request).topic,
       ledger: claims.ledger,
+      literature_map: result.literatureMap,
       data_plan: result.dataPlan,
+      experiment_plan: result.experimentPlan,
+      experiment_protocol: result.experimentProtocol,
+      experiment_guidance: result.experimentGuidance,
+      experiment_starter_pack: result.experimentStarterPack,
+      experiment_runs: result.experimentRuns,
       result_report: result.resultReport,
       available_source_ids: result.sourceIds,
       source_records: result.sourceRecords,
@@ -1053,11 +1834,35 @@ const DEFAULT_STAGE_HANDLERS: Partial<Record<PaperResearchStageId, PaperStageHan
         },
       }
     }
+    const code = (request.code_paths ?? []).length > 0 ? await defaultCodeAnalysis(run_dir, request, options) : undefined
+    const protocol = code ? experimentProtocolFromCode(code) : undefined
+    const proposedProtocol = protocol?.entries.find((entry) => entry.role === "proposed")
+    const baselines = protocol?.entries.filter((entry) => entry.role === "baseline") ?? []
+    const ablations = protocol?.entries.filter((entry) => entry.role === "ablation") ?? []
     const plan = planExperiments({
       topic: normalizeResearchIntake(request).topic,
       method_name: methodName(request),
       dataset_ids: sources.data_plan.datasets.map((dataset) => dataset.dataset_id),
       objective: "Create a reproducible evaluation plan before allowing final paper claims.",
+      primary_metric: primaryExperimentMetric(request, undefined, proposedProtocol?.expected_metric),
+      proposed_command: proposedProtocol?.command,
+      baseline_specs: protocol
+        ? baselines.map((entry) => ({
+            experiment_id: entry.protocol_id,
+            label: entry.label,
+            command: entry.command,
+            rationale: entry.rationale,
+          }))
+        : undefined,
+      ablation_specs: protocol
+        ? ablations.map((entry) => ({
+            experiment_id: entry.protocol_id,
+            label: entry.label,
+            command: entry.command,
+            rationale: entry.rationale,
+          }))
+        : undefined,
+      include_default_baselines: !code,
       now: nowIso(options),
     })
     await writeStageLog(
@@ -1137,9 +1942,17 @@ const DEFAULT_STAGE_HANDLERS: Partial<Record<PaperResearchStageId, PaperStageHan
   },
   drafting: async ({ run_dir, request, options }) => {
     const claims = await defaultClaimLedger(run_dir, request, options)
+    const result = await defaultResultReport(run_dir, request, options)
     const draft = composeDraftPaper({
       title: normalizeResearchIntake(request).topic,
       ledger: claims.ledger,
+      literature_map: result.literatureMap,
+      data_plan: result.dataPlan,
+      experiment_plan: result.experimentPlan,
+      experiment_protocol: result.experimentProtocol,
+      experiment_guidance: result.experimentGuidance,
+      experiment_runs: result.experimentRuns,
+      result_report: result.resultReport,
       now: nowIso(options),
     })
     await writeStageLog(
@@ -1158,11 +1971,33 @@ const DEFAULT_STAGE_HANDLERS: Partial<Record<PaperResearchStageId, PaperStageHan
   },
   profile_formatting: async ({ run_dir, request, options }) => {
     const registry = createPaperProfileRegistry(defaultPaperProfiles())
-    const check = registry.check(targetProfile(request), {
+    const selection = resolvePaperProfileSelection({
+      target_profile: request.target_profile,
+      target_journal: request.target_journal,
+      target_journal_url: request.target_journal_url,
+    })
+    const check = registry.check(selection.profile_id, {
       sections: ["abstract", "introduction", "methods", "results"],
       statements: ["data-availability", "code-availability"],
       artifacts: ["references"],
     })
+    if (selection.generated_profile || selection.profile_id === "custom-journal") {
+      await writeStageLog(
+        run_dir,
+        {
+          logical_path: "profiles/generated-journal-profile-stage.json",
+          schema: "PaperGeneratedJournalProfile.v1",
+          data:
+            selection.generated_profile ??
+            createGeneratedJournalProfileDraft({
+              journal_name: request.target_journal ?? "自定义期刊",
+              official_url: request.target_journal_url,
+              now: nowIso(options),
+            }),
+        },
+        options,
+      )
+    }
     await writeStageLog(
       run_dir,
       {
@@ -1186,9 +2021,17 @@ const DEFAULT_STAGE_HANDLERS: Partial<Record<PaperResearchStageId, PaperStageHan
   },
   revision: async ({ run_dir, request, options }) => {
     const claims = await defaultClaimLedger(run_dir, request, options)
+    const result = await defaultResultReport(run_dir, request, options)
     const draft = composeDraftPaper({
       title: normalizeResearchIntake(request).topic,
       ledger: claims.ledger,
+      data_plan: result.dataPlan,
+      literature_map: result.literatureMap,
+      experiment_plan: result.experimentPlan,
+      experiment_protocol: result.experimentProtocol,
+      experiment_guidance: result.experimentGuidance,
+      experiment_runs: result.experimentRuns,
+      result_report: result.resultReport,
       now: nowIso(options),
     })
     await writeStageLog(

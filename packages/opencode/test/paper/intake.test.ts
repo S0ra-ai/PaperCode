@@ -95,6 +95,33 @@ describe("research intake", () => {
     )
   })
 
+  test("resolves journal workbench selection into CJC profile metadata", () => {
+    const brief = normalizeResearchIntake({
+      topic: "面向中国计算机学报的多智能体论文生成评测",
+      target_journal: "中国计算机学报",
+      target_journal_url: "https://cjc.ict.ac.cn/",
+    })
+
+    expect(brief.target_profile).toBe("cjc-paper")
+    expect(brief.target_journal).toBe("中国计算机学报")
+    expect(brief.generated_journal_profile).toBeUndefined()
+  })
+
+  test("keeps unknown journal profile as a generated draft that still needs official guidance", () => {
+    const brief = normalizeResearchIntake({
+      topic: "未知期刊格式生成",
+      target_journal: "Journal of Unknown Systems",
+      target_journal_url: "https://example.org/for-authors",
+    })
+
+    expect(brief.target_profile).toBe("custom-journal")
+    expect(brief.target_journal).toBe("Journal of Unknown Systems")
+    expect(brief.generated_journal_profile).toMatchObject({
+      schema_version: "PaperGeneratedJournalProfile.v1",
+      status: "needs_official_guidance",
+    })
+  })
+
   test("records ResearchBrief.v1 as a run artifact and intake event", async () => {
     const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-intake-test-"))
     try {

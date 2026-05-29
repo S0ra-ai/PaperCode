@@ -5,7 +5,7 @@ import {
 } from "./research/runtime"
 import type { ResearchArtifact, ResearchEvent } from "./research/contracts"
 import type { ModelRoleConfig } from "./model-router"
-import type { PaperProfileId } from "./profiles"
+import { resolvePaperProfileSelection, type PaperGeneratedJournalProfile, type PaperProfileId } from "./profiles"
 
 export type ResearchWorkflow = "topic_to_paper" | "code_to_paper" | "data_to_paper" | "materials_to_paper"
 
@@ -16,7 +16,9 @@ export interface ResearchIntakeRequest {
   paper_files?: string[]
   dataset_paths?: string[]
   experiment_logs?: string[]
-  target_profile?: PaperProfileId
+  target_profile?: PaperProfileId | string
+  target_journal?: string
+  target_journal_url?: string
   language?: string
   model_roles?: Partial<ModelRoleConfig["roles"]>
 }
@@ -33,6 +35,8 @@ export interface ResearchBrief {
   topic: string
   language: string
   target_profile: PaperProfileId
+  target_journal?: string
+  generated_journal_profile?: PaperGeneratedJournalProfile
   inputs: {
     workspace_path?: string
     code_paths: string[]
@@ -145,7 +149,12 @@ export function normalizeResearchIntake(request: ResearchIntakeRequest): Researc
     experiment_logs: normalizePaths(request.experiment_logs),
   }
   const workflow = inferWorkflow(inputs)
-  const targetProfile = request.target_profile ?? "generic-preprint"
+  const profileSelection = resolvePaperProfileSelection({
+    target_profile: request.target_profile,
+    target_journal: request.target_journal,
+    target_journal_url: request.target_journal_url,
+  })
+  const targetProfile = profileSelection.profile_id
 
   return {
     schema_version: "ResearchBrief.v1",
@@ -153,6 +162,8 @@ export function normalizeResearchIntake(request: ResearchIntakeRequest): Researc
     topic,
     language: request.language ?? "zh-CN",
     target_profile: targetProfile,
+    target_journal: profileSelection.journal_name,
+    generated_journal_profile: profileSelection.generated_profile,
     inputs,
     model_roles: request.model_roles,
     research_questions: [
@@ -206,6 +217,7 @@ export async function recordResearchIntake(
         artifact_id: artifact.artifact_id,
         workflow: brief.workflow,
         target_profile: brief.target_profile,
+        target_journal: brief.target_journal,
         language: brief.language,
       },
     },
