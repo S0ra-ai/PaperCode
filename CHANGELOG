@@ -2,10 +2,21 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.3-dev
+:version       0.13.0.4-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.4-dev - 2026/05/30 (6f3fc8b8) [fix/mcp-tool-binding-test-isolation]
+        :brief 增强代码论文相关工作综合与文献作用标注
+        :authoring
+            - fix(related-work): 已验证文献不再只按表格罗列，新增“综合来看”谱系段，按工具/智能体、复现验证、任务数据和论文到代码链路归类
+            - fix(related-work): 每条英文摘要文献输出“作用”标签，减少重复主题词堆砌
+            - fix(prose): 收紧文献图主题簇中文排版，避免“文献图中的 ... 主题簇”空格残留
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
     0.13.0.3-dev - 2026/05/30 (68ebc64a) [fix/mcp-tool-binding-test-isolation]
         :brief 提升代码论文终稿的指标措辞、效度威胁和实时来源稳定性

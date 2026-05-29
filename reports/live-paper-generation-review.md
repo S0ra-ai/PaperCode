@@ -13,6 +13,13 @@
 - `live-paper-quality-benchmark` 的 arXiv 检索保持真实网络来源：HTML 搜索超时后重试，并回退到官方 Atom API；未引入 mock、fixture 或伪来源。
 - 结论：本轮提升了代码论文终稿的专业可读性和真实来源链路稳定性，但仍需继续提升研究问题表达、相关工作综合和面向真实用户仓库的实验协议生成质量。
 
+## 2026-05-30 相关工作综合复审
+
+- 协议场景复跑 `run-e9022fae-7544-4fca-a751-a83127557fba`：status=`succeeded`，final export=`final`，Preview=`ready`，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-e9022fae-7544-4fca-a751-a83127557fba\exports\bundle-final-draft-paper-final-export-26faafd9-3283-4102-8c26-9e0b5617cde0\bundle-final-draft-paper-final-export-26faafd9-3283-4102-8c26-9e0b5617cde0.md`。
+- 相关工作新增“综合来看”谱系段，把已验证文献归入工具使用或智能体自动化、实验复现与验证风险、任务数据与领域评测、论文到代码执行链路等类别。
+- 每条英文摘要文献的相关性改为“作用”标签，降低重复主题词堆砌；坏词扫描未发现 `主指标 排序`、`在 排序`、`主要包括 `、`并用 `、`mock/fake/fixture/placeholder` 或内部证据 ID 残留。
+
 ## 本轮实跑
 
 | 场景 | Run ID | 结果 | 判断 |
