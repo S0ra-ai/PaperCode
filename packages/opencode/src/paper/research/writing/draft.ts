@@ -423,13 +423,38 @@ function literatureDisplayTitle(source: LiteratureMap["sources"][number]) {
   return source.title.trim() || source.title
 }
 
+function literatureRoleTags(source: LiteratureMap["sources"][number]) {
+  const text = `${source.title} ${source.abstract ?? ""} ${(source.topics ?? []).join(" ")}`.toLowerCase()
+  const tags: string[] = []
+  if (/tool|agent|multi-agent|workflow|autonomous|harness/.test(text)) tags.push("工具使用或智能体自动化")
+  if (/reproduc|validat|baseline|ablation|benchmark|experiment|evaluation/.test(text)) tags.push("实验复现与验证风险")
+  if (/paper[-\s]?to[-\s]?code|code generation|execution|program|software|source/.test(text)) tags.push("论文到代码执行链路")
+  if (/data|dataset|spatial|multimodal|modeling|neuroimaging/.test(text)) tags.push("任务数据与领域评测")
+  if (/language model|llm|large language/.test(text)) tags.push("大模型方法基础")
+  return [...new Set(tags)].slice(0, 3)
+}
+
 function literatureRelevanceSummary(source: LiteratureMap["sources"][number]) {
   const topics = (source.topics ?? []).map(paperProseText).filter(Boolean)
   const abstract = source.abstract?.trim()
+  const roles = literatureRoleTags(source)
   if (abstract && /[\u3400-\u9fff]/.test(abstract)) return compactClaimText(paperProseText(abstract), 130)
+  if (abstract && roles.length > 0) return `已核验英文摘要；作用：${roles.join("、")}。`
   if (abstract && topics.length > 0) return `已核验英文摘要；主题：${topics.join("、")}。`
   if (abstract) return "已核验英文摘要；详细内容保留在来源清单。"
+  if (roles.length > 0) return roles.join("、")
   return topics.join("、") || "无摘要"
+}
+
+function literatureSynthesisSummary(map: LiteratureMap, sources: LiteratureMap["sources"]) {
+  if (sources.length === 0) return undefined
+  const roleTags = [...new Set(sources.flatMap(literatureRoleTags))]
+  const clusterLabels = map.clusters.map((cluster) => paperProseText(cluster.label)).filter(Boolean)
+  const taxonomy = roleTags.length > 0 ? roleTags : clusterLabels
+  if (taxonomy.length === 0) return undefined
+  const taxonomyText = taxonomy.slice(0, 4).join("、")
+  const clusterText = clusterLabels.length > 0 ? `文献图的${clusterLabels.slice(0, 3).join("、")}主题簇说明这些方向已经形成可追踪背景；` : ""
+  return `综合来看，相关工作可分为 ${taxonomy.length} 类：${taxonomyText}。${clusterText}本文不把这些工作简单当作背景罗列，而是用它们界定本研究的比较边界：已有研究说明自动化研究、工具调用或复现评测为何重要，本文进一步要求代码证据、实验协议和容器复现同时支撑正文结论。`
 }
 
 function literatureEvidenceSummary(input: ComposeDraftPaperInput) {
@@ -458,6 +483,7 @@ function literatureEvidenceSummary(input: ComposeDraftPaperInput) {
       : `本次相关工作只有 ${map.summary.total_sources} 条候选文献，尚未完成来源验证；这些条目只能提示检索方向，不能作为已验证相关工作。`
   return joinBlocks([
     `${verifiedClaim}${clusterText}${gapText}`,
+    verified.length > 0 ? literatureSynthesisSummary(map, selected) : undefined,
     markdownTable([verifiedHeading, "验证状态", "定位信息", "相关性"], rows),
     verified.length > 0
       ? `核心参考包括 ${rows
