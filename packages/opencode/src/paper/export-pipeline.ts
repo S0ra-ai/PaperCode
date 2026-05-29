@@ -69,6 +69,18 @@ function encode(text: string) {
   return new TextEncoder().encode(text)
 }
 
+function formatValidationDiagnostic(format: ExportFormat, bytes: Uint8Array) {
+  if (bytes.byteLength === 0) return `${format.toUpperCase()} renderer output is empty.`
+  if (format === "pdf") {
+    const header = new TextDecoder().decode(bytes.slice(0, 5))
+    if (header !== "%PDF-") return "PDF renderer output is not a valid PDF file header."
+  }
+  if (format === "docx") {
+    if (bytes[0] !== 0x50 || bytes[1] !== 0x4b) return "DOCX renderer output is not a valid ZIP/DOCX file header."
+  }
+  return undefined
+}
+
 function nowIso(options?: ResearchRuntimeOptions, override?: string) {
   return override ?? (options?.clock?.() ?? new Date()).toISOString()
 }
@@ -139,6 +151,8 @@ async function writtenFile(input: {
   bytes: Uint8Array
   diagnostics?: string[]
 }): Promise<ExportFile> {
+  const validationDiagnostic = formatValidationDiagnostic(input.format, input.bytes)
+  if (validationDiagnostic) return failedFile(input.bundleID, input.format, [...(input.diagnostics ?? []), validationDiagnostic])
   const absolute = outputFile(input.runDir, input.bundleID, input.format)
   await mkdir(path.dirname(absolute), { recursive: true })
   await writeFile(absolute, Buffer.from(input.bytes))
@@ -315,7 +329,7 @@ async function renderPdf(input: {
       bundleID: input.bundleID,
       format: "pdf",
       bytes: new Uint8Array(await readFile(pdfPath)),
-      diagnostics,
+      diagnostics: [],
     })
   }
   return failedFile(input.bundleID, "pdf", diagnostics.length > 0 ? diagnostics : ["No LaTeX engine produced PDF output."])
