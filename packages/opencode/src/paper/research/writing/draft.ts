@@ -1,9 +1,32 @@
 import { withSpan } from "../telemetry"
+import type {
+  ExperimentPlan,
+  ExperimentProtocol,
+  ExperimentProtocolGuidance,
+  ExperimentProtocolStarterPack,
+  ExperimentRun,
+  ResultReport,
+} from "../experiments"
+import type { DataPlan, LiteratureMap } from "../sources"
 import type { CheckpointGuidance, ClaimLedger, ClaimLedgerEntry, DraftPaper, DraftSection } from "./schemas"
 
 export type ComposeDraftPaperInput = {
   title: string
   ledger: ClaimLedger
+  data_plan?: Pick<DataPlan, "datasets" | "license_conflicts" | "access_constraints" | "diagnostics" | "recommendation">
+  literature_map?: LiteratureMap
+  experiment_plan?: Pick<ExperimentPlan, "objective" | "metrics" | "proposed" | "baselines" | "ablations" | "resource_budget" | "downgrade_policy">
+  experiment_protocol?: Pick<ExperimentProtocol, "entries" | "gaps" | "discovered_from">
+  experiment_guidance?: Pick<ExperimentProtocolGuidance, "status" | "summary" | "suggestions" | "final_export_blocked">
+  experiment_starter_pack?: Pick<
+    ExperimentProtocolStarterPack,
+    "status" | "summary" | "package_json_scripts" | "files" | "next_steps"
+  >
+  experiment_runs?: {
+    host_runs: Pick<ExperimentRun, "experiment_id" | "role" | "status" | "command" | "environment" | "metrics" | "stdout" | "stderr" | "exit_code" | "resource_usage">[]
+    container_runs: Pick<ExperimentRun, "experiment_id" | "role" | "status" | "command" | "environment" | "metrics" | "stdout" | "stderr" | "exit_code" | "resource_usage">[]
+  }
+  result_report?: Pick<ResultReport, "best_baseline" | "blockers" | "final_claims_allowed" | "primary_metric" | "proposed" | "recommendation" | "reproduction">
   now?: string
 }
 
@@ -21,7 +44,45 @@ function titleCase(value: string) {
 
 function citationText(entry: ClaimLedgerEntry) {
   if (entry.citations.length === 0) return ""
-  return ` ${entry.citations.map((citation) => `[${citation.citation_id}]`).join(" ")}`
+  return ` ${entry.citations.map((_, index) => `[来源 ${index + 1}]`).join(" ")}`
+}
+
+function normalizeCjkSpacing(value: string) {
+  return value.replace(/([。！？])\s+([\u3400-\u9fff])/g, "$1$2")
+}
+
+function paperProseText(value: string) {
+  return normalizeCjkSpacing(value)
+    .replace(/The workflow links /g, "该流程串联")
+    .replace(/The proposed workflow matches the declared baseline on the primary reproducibility metric\./g, "本文方法在主复现指标上与已声明基线保持一致。")
+    .replace(/declared baseline/g, "已声明基线")
+    .replace(/primary reproducibility metric/g, "主复现指标")
+    .replace(/experiment runs/g, "实验运行记录")
+    .replace(/export gates/g, "导出检查")
+    .replace(/final paper generation/g, "终稿生成")
+    .replace(/, and /g, "和")
+    .replace(/, /g, "、")
+    .replace(/source-range-grounded/g, "基于源码范围的")
+    .replace(/baseline:ranking-lexical/g, "词项匹配基线")
+    .replace(/ablation:ranking-no-coverage/g, "无证据覆盖消融")
+    .replace(/repro:container/g, "容器复现")
+    .replace(/test:ranking/g, "排名测试")
+    .replace(/source ranges/g, "源码范围")
+    .replace(/source range/g, "源码范围")
+    .replace(/系统抽取到/g, "分析阶段抽取到")
+    .replace(/导出方法\/类表面/g, "导出方法或类接口")
+    .replace(/package script/g, "package.json 脚本")
+    .replace(/final gate/g, "终稿检查")
+    .replace(/final claim/g, "终稿结论")
+    .replace(/最终 claim/g, "终稿结论")
+    .replace(/final export/g, "终稿导出")
+    .replace(/(?<![A-Za-z0-9_])ClaimLedger(?![A-Za-z0-9_])/g, "证据台账")
+    .replace(/(?<!:)\bbaseline\b(?!:)/g, "基线")
+    .replace(/(?<!:)\bablation\b(?!:)/g, "消融")
+    .replace(/(?<!:)\bhost\b/g, "本机")
+    .replace(/(?<!:)\bcontainer\b/g, "容器")
+    .replace(/进行\s+基于源码范围的\s+分析/g, "进行基于源码范围的分析")
+    .replace(/和\s+源码范围/g, "和源码范围")
 }
 
 function claimMarkdown(entry: ClaimLedgerEntry) {
@@ -29,7 +90,7 @@ function claimMarkdown(entry: ClaimLedgerEntry) {
     entry.status === "supported"
       ? ""
       : `\n<!-- unsupported-claim: ${entry.claim_id} needs evidence before final export -->`
-  return `${entry.text}${citationText(entry)}${annotation}`
+  return `${paperProseText(entry.text)}${citationText(entry)}${annotation}`
 }
 
 function buildSection(sectionId: string, entries: ClaimLedgerEntry[]): DraftSection {
@@ -58,6 +119,1085 @@ function buildSection(sectionId: string, entries: ClaimLedgerEntry[]): DraftSect
   }
 }
 
+function buildPlainSection(sectionId: string, title: string, markdown: string): DraftSection {
+  return {
+    section_id: sectionId,
+    title,
+    level: 2,
+    markdown,
+    claim_ids: [],
+    source_ranges: [],
+  }
+}
+
+function claimStatusSummary(ledger: ClaimLedger) {
+  const unsupported = ledger.unsupported_claim_ids.length
+  const supported = ledger.entries.filter((entry) => entry.status === "supported").length
+  if (ledger.entries.length === 0) return "当前还没有证据台账条目，不能生成终稿结论。"
+  if (unsupported > 0) return `当前 ${unsupported}/${ledger.entries.length} 条断言尚缺证据，终稿导出必须保持阻断。`
+  return `当前 ${supported}/${ledger.entries.length} 条断言已绑定证据，可进入更严格的审稿与导出检查。`
+}
+
+function finalReady(input: ComposeDraftPaperInput) {
+  return input.ledger.unsupported_claim_ids.length === 0 && input.result_report?.final_claims_allowed === true
+}
+
+function formatMetricValue(value: number) {
+  const normalized = Object.is(value, -0) ? 0 : value
+  return normalized.toFixed(4)
+}
+
+function displayMetricName(value: string) {
+  if (value === "typecheck_pass") return "类型检查通过状态"
+  if (value === "test_pass_rate") return "测试通过率"
+  if (value === "ranking_ndcg_at_3") return "排序 nDCG@3"
+  if (value === "container_reproduction_pass") return "容器复现通过状态"
+  return value.replace(/_/g, " ")
+}
+
+function primaryMetricPhrase(metric: string) {
+  if (/^[A-Za-z0-9]/.test(metric)) return `以 ${metric} 作为主指标`
+  const suffixSpace = /[A-Za-z0-9]$/.test(metric) ? " " : ""
+  return `以${metric}${suffixSpace}作为主指标`
+}
+
+function primaryMetricLocus(metric: string) {
+  return `在“${metric}”这一主指标上`
+}
+
+function constructValidityExample(metricId: string, metricLabel: string) {
+  if (metricId === "typecheck_pass") return "例如类型检查通过状态可以证明代码可运行，却不能证明算法效果更好。"
+  if (metricId === "ranking_ndcg_at_3") {
+    return "例如排序 nDCG@3 可以评价当前候选排序协议，却不能单独证明系统在其他数据集、人工相关性标注或真实投稿任务中同样有效。"
+  }
+  if (metricId === "container_reproduction_pass") return "例如容器复现通过状态可以证明当前环境声明可重放，却不能单独证明算法在更多任务上泛化有效。"
+  const subject = /^[A-Za-z0-9]/.test(metricLabel) ? `${metricLabel} ` : metricLabel
+  return `例如${subject}可以验证当前协议中的观测结果，却不能单独证明更广泛的学术贡献。`
+}
+
+function displayMetricDirection(value: string) {
+  if (value === "higher_better") return "越高越好"
+  if (value === "lower_better") return "越低越好"
+  return value.replace(/_/g, " ")
+}
+
+function displayMetricValue(metric: string, value: number) {
+  if (metric === "typecheck_pass") return value >= 1 ? "通过" : "未通过"
+  return formatMetricValue(value)
+}
+
+function displayMetricUnit(metric: string, unit?: string) {
+  if (!unit || metric === "typecheck_pass" || unit === "ratio") return ""
+  return ` ${unit}`
+}
+
+function displayExperimentLabel(value: string) {
+  const normalized = value.trim().replace(/[_\s]+/g, "-").toLowerCase()
+  if (normalized === "proposed") return "证据驱动工作流"
+  if (value.startsWith("container:") || normalized.startsWith("container-")) return "容器复现"
+  const baseline = normalized.match(/^baseline[:-](.+)$/)
+  if (baseline) return displayExperimentLabel(baseline[1])
+  const ablation = normalized.match(/^ablation[:-](.+)$/)
+  if (ablation) return displayExperimentLabel(ablation[1])
+  if (normalized.match(/^proposed[:-]/)) return "证据驱动工作流"
+  if (normalized === "ranking-lexical") return "词项匹配基线"
+  if (normalized === "ranking-no-coverage") return "无证据覆盖消融"
+  return value.replace(/[-_]+/g, " ")
+}
+
+function displayExperimentRole(value: string) {
+  if (value === "proposed") return "本文方法"
+  if (value === "baseline") return "基线"
+  if (value === "ablation") return "消融"
+  if (value === "container_reproduction") return "容器复现"
+  return value.replace(/_/g, " ")
+}
+
+function displayRunStatus(value: string) {
+  if (value === "succeeded") return "通过"
+  if (value === "failed") return "失败"
+  if (value === "environment_failed") return "环境失败"
+  if (value === "resource_exceeded") return "超出资源"
+  if (value === "missing") return "缺失"
+  return value
+}
+
+function displayVerificationStatus(value: string) {
+  if (value === "verified") return "已验证"
+  if (value === "unverified") return "未验证"
+  if (value === "failed") return "验证失败"
+  return value
+}
+
+function displayLicenseStatus(value: string) {
+  if (value === "clear") return "许可清晰"
+  if (value === "unclear") return "许可待核验"
+  if (value === "restricted") return "许可受限"
+  if (value === "conflict") return "许可冲突"
+  return value
+}
+
+function displayReady(value: boolean) {
+  return value ? "是" : "否"
+}
+
+function displayProtocolSource(value: string) {
+  if (value === "package_scripts") return "package.json 脚本"
+  if (value === "manifest") return "实验清单"
+  if (value === "manual") return "手工协议"
+  return value
+}
+
+function displayEnvironment(value: string) {
+  if (value === "container:repro-env") return "容器复现环境"
+  if (value.startsWith("host:")) {
+    const platform = value.slice("host:".length)
+    if (platform === "win32") return "本机 Windows"
+    if (platform === "darwin") return "本机 macOS"
+    if (platform === "linux") return "本机 Linux"
+    return `本机 ${platform}`
+  }
+  return value
+}
+
+function resultMetricSummary(input: ComposeDraftPaperInput) {
+  const report = input.result_report
+  if (!report?.proposed) return "尚未形成可比较的主指标结果。"
+  const metric = displayMetricName(report.primary_metric)
+  const metricPhrase = primaryMetricPhrase(metric)
+  const proposed = displayMetricValue(report.primary_metric, report.proposed.value)
+  if (!report.best_baseline) return `${metricPhrase}：本文方法为 ${proposed}，仍缺少基线对照。`
+  const baseline = report.best_baseline.value
+  const delta = report.proposed.value - baseline
+  if (Math.abs(delta) < 1e-9) {
+    return `${metricPhrase}：本文方法与最佳基线（${displayExperimentLabel(report.best_baseline.experiment_id)}）均为 ${proposed}。`
+  }
+  const formattedDelta = `${delta >= 0 ? "+" : ""}${formatMetricValue(delta)}`
+  return `${metricPhrase}：本文方法为 ${proposed}，最佳基线（${displayExperimentLabel(report.best_baseline.experiment_id)}）为 ${displayMetricValue(report.primary_metric, baseline)}，差值 ${formattedDelta}。`
+}
+
+function markdownTable(headers: string[], rows: string[][]) {
+  if (rows.length === 0) return ""
+  const escape = (value: string) => value.replace(/\|/g, "\\|").replace(/\r?\n/g, " ")
+  return [
+    `| ${headers.map(escape).join(" | ")} |`,
+    `| ${headers.map(() => "---").join(" | ")} |`,
+    ...rows.map((row) => `| ${row.map(escape).join(" | ")} |`),
+  ].join("\n")
+}
+
+function joinBlocks(blocks: Array<string | undefined>) {
+  return blocks.filter((block): block is string => Boolean(block?.trim())).join("\n\n")
+}
+
+function compactId(value: string) {
+  if (value.length <= 36) return value
+  return `${value.slice(0, 18)}...${value.slice(-8)}`
+}
+
+function sourceKindLabel(sourceId: string) {
+  if (sourceId.startsWith("material:code:")) return "代码材料"
+  if (sourceId.startsWith("material:data:")) return "数据材料"
+  if (sourceId.startsWith("material:paper:")) return "论文材料"
+  if (sourceId.startsWith("material:log:")) return "实验日志"
+  if (sourceId.startsWith("paper:")) return "已验证论文来源"
+  if (sourceId.startsWith("dataset:") || sourceId.startsWith("source-dataset")) return "数据集来源"
+  return compactId(sourceId)
+}
+
+function claimSourceIds(input: ComposeDraftPaperInput) {
+  return [...new Set(input.ledger.entries.flatMap((entry) => entry.source_ids))]
+}
+
+function evidenceSourceIds(input: ComposeDraftPaperInput) {
+  const sourceIds = new Set(claimSourceIds(input))
+  for (const source of input.literature_map?.sources ?? []) {
+    if (source.verification.status === "verified") sourceIds.add(source.source_id)
+  }
+  for (const dataset of input.data_plan?.datasets ?? []) {
+    sourceIds.add(dataset.source_id || dataset.dataset_id)
+  }
+  return [...sourceIds]
+}
+
+function sourceSummary(input: ComposeDraftPaperInput) {
+  const sourceIds = evidenceSourceIds(input)
+  if (sourceIds.length === 0) return "本次运行尚未登记可引用来源，因此正文只能作为研究骨架。"
+  const shown = [...new Set(sourceIds.map(sourceKindLabel))].slice(0, 4).join("、")
+  return `本次运行使用 ${sourceIds.length} 个可追踪来源，主要包括${shown}${sourceIds.length > 4 ? "等" : ""}。`
+}
+
+function artifactSummary(input: ComposeDraftPaperInput) {
+  const artifactIds = [...new Set(input.ledger.entries.flatMap((entry) => entry.artifact_ids))]
+  if (artifactIds.length === 0) return "当前还没有可审查证据记录。"
+  return `正文结论绑定 ${artifactIds.length} 个证据记录；完整机器索引保留在运行清单与导出清单，正文只保留必要说明。`
+}
+
+function countedSummary(values: string[], label: (value: string) => string, unit: string) {
+  if (values.length === 0) return "无"
+  const counts = new Map<string, number>()
+  for (const value of values) {
+    const key = label(value)
+    counts.set(key, (counts.get(key) ?? 0) + 1)
+  }
+  return [...counts.entries()].map(([key, count]) => `${key} ${count} ${unit}`).join("、")
+}
+
+function evidenceCountSummary(artifactIds: string[]) {
+  return artifactIds.length > 0 ? `结构化证据 ${artifactIds.length} 条` : "无"
+}
+
+function displayClaimAction(value: string) {
+  if (!value || value === "none") return "无需处理"
+  if (value === "add_evidence") return "补充证据"
+  if (value === "downgrade_claim") return "降低表述强度"
+  if (value === "remove_claim") return "移出终稿断言"
+  return paperProseText(value)
+}
+
+function displaySectionID(value: string) {
+  if (value === "method") return "方法"
+  if (value === "results") return "结果"
+  if (value === "discussion") return "讨论"
+  if (value === "introduction") return "引言"
+  if (value === "related_work") return "相关工作"
+  return titleCase(value)
+}
+
+function displayDatasetAccess(value: string) {
+  if (value === "open") return "开放"
+  if (value === "registration_required") return "需注册"
+  if (value === "restricted") return "受限"
+  if (value === "unavailable") return "不可用"
+  return value
+}
+
+function displayDatasetLicense(value: string) {
+  if (value === "workspace-authorized local dataset") return "工作区授权本地数据集"
+  return paperProseText(value)
+}
+
+function displaySubmissionProfile(value: string) {
+  if (value === "generic-preprint") return "通用预印本"
+  if (value === "nature-paper") return "Nature 投稿配置"
+  if (value === "acm") return "ACM 论文配置"
+  return value.replace(/[-_]+/g, " ")
+}
+
+function compactClaimText(value: string, maxLength = 180) {
+  const compacted = paperProseText(value.replace(/<!--[\s\S]*?-->/g, "").replace(/\s+/g, " ")).trim()
+  if (compacted.length <= maxLength) return compacted
+  const chineseSentences = compacted.match(/[^。！？]+[。！？]/g)?.map((sentence) => sentence.trim()).filter(Boolean) ?? []
+  const englishSentences =
+    chineseSentences.length === 0
+      ? compacted.match(/[^.!?]+[.!?](?=\s|$)/g)?.map((sentence) => sentence.trim()).filter(Boolean) ?? []
+      : []
+  const sentences = chineseSentences.length > 0 ? chineseSentences : englishSentences
+  const kept: string[] = []
+  for (const sentence of sentences) {
+    const candidate = [...kept, sentence].join(" ")
+    if (candidate.length > maxLength) break
+    kept.push(sentence)
+  }
+  if (kept.length > 0) return kept.join(chineseSentences.length > 0 ? "" : " ")
+  const boundary = compacted.lastIndexOf(" ", maxLength - 1)
+  const cut = boundary > Math.floor(maxLength * 0.5) ? boundary : maxLength - 1
+  return `${compacted.slice(0, cut).trim()}…`
+}
+
+function trimTerminalPunctuation(value: string) {
+  return value.replace(/[。！？.!?]+$/g, "")
+}
+
+function firstClaimText(input: ComposeDraftPaperInput, sectionID: string) {
+  const preferred = input.ledger.entries.find((entry) => entry.section_id === sectionID && entry.status === "supported")
+  const fallback = input.ledger.entries.find((entry) => entry.section_id === sectionID)
+  return preferred || fallback ? compactClaimText((preferred ?? fallback)!.text) : undefined
+}
+
+function resultEvidenceText(input: ComposeDraftPaperInput) {
+  return firstClaimText(input, "results") ?? (input.result_report?.proposed ? resultMetricSummary(input) : undefined)
+}
+
+function literatureDisplayTitle(source: LiteratureMap["sources"][number]) {
+  return source.title.trim() || source.title
+}
+
+function literatureRelevanceSummary(source: LiteratureMap["sources"][number]) {
+  const topics = (source.topics ?? []).map(paperProseText).filter(Boolean)
+  const abstract = source.abstract?.trim()
+  if (abstract && /[\u3400-\u9fff]/.test(abstract)) return compactClaimText(paperProseText(abstract), 130)
+  if (abstract && topics.length > 0) return `已核验英文摘要；主题：${topics.join("、")}。`
+  if (abstract) return "已核验英文摘要；详细内容保留在来源清单。"
+  return topics.join("、") || "无摘要"
+}
+
+function literatureEvidenceSummary(input: ComposeDraftPaperInput) {
+  const map = input.literature_map
+  if (!map || map.sources.length === 0) return undefined
+  const verified = map.sources.filter((source) => source.verification.status === "verified")
+  const selected = verified.length > 0 ? verified : map.sources
+  const rows = selected.slice(0, 5).map((source) => [
+    literatureDisplayTitle(source),
+    displayVerificationStatus(source.verification.status),
+    referenceLocator(source),
+    literatureRelevanceSummary(source),
+  ])
+  const clusterText =
+    map.clusters.length > 0
+      ? `文献图还形成 ${map.clusters.length} 个主题簇：${map.clusters
+          .slice(0, 3)
+          .map((cluster) => `${cluster.label}（${cluster.keywords.map(paperProseText).join("、")}）`)
+          .join("；")}。`
+      : "文献图尚未形成稳定主题簇。"
+  const gapText = map.diagnostics.gaps.length > 0 ? `剩余缺口：${map.diagnostics.gaps.map(paperProseText).join("、")}。` : "当前文献图没有登记阻断性缺口。"
+  const verifiedHeading = verified.length > 0 ? "相关工作" : "候选文献"
+  const verifiedClaim =
+    verified.length > 0
+      ? `本次相关工作使用 ${map.summary.total_sources} 条文献记录，其中 ${map.summary.verified_sources} 条已验证，${map.summary.open_license_sources} 条${displayLicenseStatus("clear")}。`
+      : `本次相关工作只有 ${map.summary.total_sources} 条候选文献，尚未完成来源验证；这些条目只能提示检索方向，不能作为已验证相关工作。`
+  return joinBlocks([
+    `${verifiedClaim}${clusterText}${gapText}`,
+    markdownTable([verifiedHeading, "验证状态", "定位信息", "相关性"], rows),
+    verified.length > 0
+      ? `核心参考包括 ${rows
+          .slice(0, 2)
+          .map((row) => row[0])
+          .join("；")}；这些工作提供了问题背景，但本文只把可复现协议中的结果写成实验结论。`
+      : "由于当前文献记录未验证，正文不能把这些条目写成领域共识或新颖性证明；需要后续用授权检索、DOI/arXiv 元数据或人工审查补齐相关工作。",
+  ])
+}
+
+function referenceLocator(source: LiteratureMap["sources"][number]) {
+  const url = source.url?.trim()
+  if (source.doi) return url ? `doi:${source.doi} (${url})` : `doi:${source.doi}`
+  if (source.arxiv_id) {
+    const arxivUrl = url || `https://arxiv.org/abs/${source.arxiv_id}`
+    return `arXiv:${source.arxiv_id} (${arxivUrl})`
+  }
+  return url || "缺少可核验定位信息"
+}
+
+function referenceEntry(source: LiteratureMap["sources"][number], index: number) {
+  const published = source.version.published_at ? ` 发表时间：${source.version.published_at}。` : ""
+  const retrieved = source.version.retrieved_at ? ` 检索时间：${source.version.retrieved_at}。` : ""
+  return `${index + 1}. ${literatureDisplayTitle(source)}. ${referenceLocator(source)}.${published}${retrieved}`
+}
+
+function referencesSummary(input: ComposeDraftPaperInput) {
+  const map = input.literature_map
+  if (!map || map.sources.length === 0) {
+    return "当前运行没有登记可验证参考文献。进入投稿前必须补充 DOI、arXiv、出版社页面或其他可复核来源。"
+  }
+  const verified = map.sources.filter((source) => source.verification.status === "verified")
+  if (verified.length === 0) {
+    return "当前只有未验证候选文献；这些条目不能进入正式参考文献。进入投稿前必须完成 DOI、arXiv 元数据或人工审查验证。"
+  }
+  return joinBlocks([
+    verified.slice(0, 20).map(referenceEntry).join("\n"),
+    verified.length < map.sources.length
+      ? `另有 ${map.sources.length - verified.length} 条候选文献尚未验证，未列入正式参考文献。`
+      : undefined,
+  ])
+}
+
+function humanizeExperimentText(value: string) {
+  return value
+    .replace(/^Create a reproducible evaluation plan before allowing final paper claims\.$/, "在允许终稿结论前建立可复现评价方案。")
+    .replace(/^Strong sparse retrieval baseline for retrieval-style CS\/AI papers\.$/, "作为检索类任务的稀疏检索对照。")
+    .replace(/^Common neural retrieval baseline for embedding-based methods\.$/, "作为嵌入式方法的神经检索对照。")
+    .replace(/^End-to-end retrieval augmented generation baseline\.$/, "作为端到端 RAG 流水线对照。")
+    .replace(/^Tests whether claim-ledger evidence tracking contributes to the result\.$/, "检验移除证据追踪后结果是否下降。")
+    .replace(/^Baseline runner declared by package script\.$/, "仓库 package.json 显式声明的基线运行入口。")
+    .replace(/^Ablation runner declared by package script\.$/, "仓库 package.json 显式声明的消融运行入口。")
+    .replace(/^If fewer than two baselines can run, downgrade to an engineering report\.$/, "少于两个基线可运行时降级为工程报告。")
+    .replace(/^If datasets are unavailable, turn to the nearest open verified benchmark\.$/, "数据集不可用时转向最近的开放可验证 benchmark。")
+    .replace(/^If container reproduction fails, block final paper claims\.$/, "容器复现失败时阻断终稿结论。")
+}
+
+function humanizeLabel(value: string) {
+  const normalizedLabel = displayExperimentLabel(value)
+  if (normalizedLabel !== value.replace(/[-_]+/g, " ")) return normalizedLabel
+  return value
+    .replace(/^Code-grounded paper_fucker workflow$/, "代码证据驱动工作流")
+    .replace(/^baseline:ranking-lexical$/, "词项匹配基线")
+    .replace(/^ablation:ranking-no-coverage$/, "无证据覆盖消融")
+    .replace(/^BM25 lexical retrieval$/, "BM25 稀疏检索")
+    .replace(/^Dense bi-encoder retrieval$/, "Dense bi-encoder 检索")
+    .replace(/^Standard RAG pipeline$/, "标准 RAG 流水线")
+    .replace(/^Ablation without claim ledger$/, "移除证据台账的消融设置")
+    .replace(/^baseline:(.+)$/, (_, name) => `基线：${displayExperimentLabel(String(name))}`)
+    .replace(/^ablation:(.+)$/, (_, name) => `消融：${displayExperimentLabel(String(name))}`)
+}
+
+function dataAvailabilitySummary(input: ComposeDraftPaperInput) {
+  const data = input.data_plan
+  if (!data) return "尚未生成数据计划；数据来源、许可和访问约束需要补充。"
+  if (data.datasets.length === 0) {
+    const codeSources = input.ledger.entries.some((entry) => entry.source_ids.some((source) => source.startsWith("material:code:")))
+    const visibleGaps = codeSources
+      ? data.diagnostics.gaps.filter((gap) => gap !== "missing_dataset_candidates")
+      : data.diagnostics.gaps
+    const gaps = visibleGaps.length > 0 ? `缺口：${visibleGaps.join("; ")}。` : ""
+    if (codeSources) {
+      return [
+        "本次研究使用代码仓库和实验脚本作为主要证据，未登记外部数据集。",
+        gaps,
+        "因此结果解释限定在当前代码工作区、显式实验协议和复现记录内。",
+      ]
+        .filter(Boolean)
+        .join("")
+    }
+    return `本次运行未登记可用数据集。${gaps} 因此实验结果只能依赖用户提供的显式实验记录；若缺少实验记录，终稿导出必须保持阻断。`
+  }
+  const datasetLines = data.datasets.slice(0, 5).map((dataset) => {
+    const license = displayDatasetLicense(dataset.license.expression ?? dataset.license.status)
+    const metadata = dataset.verification.diagnostics
+      ?.map(displayDatasetDiagnostic)
+      .filter(Boolean)
+      .join("；")
+    return `- ${dataset.title}；访问=${displayDatasetAccess(dataset.access)}；许可=${license}；验证=${displayVerificationStatus(dataset.verification.status)}${metadata ? `；${metadata}` : ""}`
+  })
+  const conflicts =
+    data.license_conflicts.length > 0
+      ? `\n\n许可冲突：${data.license_conflicts.length} 个数据集仍需处理。`
+      : ""
+  const constraints =
+    data.access_constraints.length > 0
+      ? `\n\n访问约束：${data.access_constraints.map((constraint) => displayDatasetAccess(constraint.access)).join("、")}。`
+      : ""
+  return [`已登记 ${data.datasets.length} 个候选数据集：`, ...datasetLines, conflicts, constraints].join("\n")
+}
+
+function displayDatasetDiagnostic(value: string) {
+  if (value.startsWith("schema_version:")) {
+    const schema = value.slice("schema_version:".length)
+    if (schema === "LiveArxivRankingDataset.v1") return "数据格式=实时 arXiv 排名评测集"
+    return `数据格式=${schema.replace(/\.v\d+$/i, "").replace(/[-_]+/g, " ")}`
+  }
+  if (value.startsWith("provenance:")) {
+    const provenance = value.slice("provenance:".length)
+    if (provenance === "live-arxiv-search+abs-page") return "来源=实时 arXiv 检索和摘要页核验"
+    return `来源=${provenance.replace(/[-_+]+/g, " ")}`
+  }
+  if (value.startsWith("candidate_count:")) return `候选数=${value.slice("candidate_count:".length)}`
+  if (value.startsWith("label_policy:")) {
+    const policy = value.slice("label_policy:".length)
+    if (/Deterministic validation labels derived from query-term overlap/i.test(policy)) {
+      return "标签策略=确定性验证标签，由检索词重合、来源元数据完整度和发表时间生成；不是人工相关性标注"
+    }
+    return `标签策略=${paperProseText(policy)}`
+  }
+  return ""
+}
+
+function experimentProtocolSummary(input: ComposeDraftPaperInput) {
+  const plan = input.experiment_plan
+  if (!plan) return "尚未生成实验计划；需要补充评估目标、指标、基线、消融、资源预算和降级策略。"
+  const protocol = input.experiment_protocol
+  const downgradePolicy = plan.downgrade_policy
+    .map(humanizeExperimentText)
+    .map((item) => item.replace(/[。.]$/, ""))
+    .join("；")
+  const metricTable = markdownTable(
+    ["指标", "方向", "角色"],
+    plan.metrics.map((metric) => [displayMetricName(metric.name), displayMetricDirection(metric.direction), metric.primary ? "主指标" : "辅助指标"]),
+  )
+  const baselineTable = markdownTable(
+    ["编号", "设置", "理由"],
+    plan.baselines.slice(0, 8).map((baseline) => [displayExperimentLabel(baseline.experiment_id), humanizeLabel(baseline.label), humanizeExperimentText(baseline.rationale)]),
+  )
+  const ablationTable = markdownTable(
+    ["编号", "设置", "理由"],
+    plan.ablations.slice(0, 8).map((ablation) => [displayExperimentLabel(ablation.experiment_id), humanizeLabel(ablation.label), humanizeExperimentText(ablation.rationale)]),
+  )
+  return [
+    `本节定义评价问题、主指标、对照组和消融项。目标是：${humanizeExperimentText(plan.objective)}`,
+    "",
+    "### 指标",
+    metricTable,
+    "",
+    `被评估方法为“${humanizeLabel(plan.proposed.label)}”，主观测指标为“${displayMetricName(plan.proposed.expected_metric)}”。`,
+    "",
+    "### 基线",
+    baselineTable || "当前没有基线运行入口；该缺口会阻断终稿结论。",
+    "",
+    "### 消融",
+    ablationTable || "当前没有消融运行入口；贡献强度需要保持保守。",
+    "",
+    protocol
+      ? `实验协议来自 ${displayProtocolSource(protocol.discovered_from)}，记录 ${protocol.entries.length} 个入口；缺口：${protocol.gaps.length > 0 ? protocol.gaps.map(paperProseText).join("、") : "无"}。`
+      : "当前没有显式仓库实验协议；流程只能根据已登记证据和受控执行结果组织评价。",
+    "",
+    `资源预算为运行时间<=${plan.resource_budget.max_wall_time_seconds}s、内存<=${plan.resource_budget.max_memory_mb}MB、GPU<=${plan.resource_budget.max_gpu_hours ?? 0} 小时。降级策略：${downgradePolicy}。`,
+  ].join("\n")
+}
+
+function experimentGuidanceSummary(input: ComposeDraftPaperInput) {
+  const guidance = input.experiment_guidance
+  if (!guidance || guidance.status === "complete" || guidance.suggestions.length === 0) return undefined
+  const lines = guidance.suggestions.slice(0, 8).map((item) => {
+    const example = item.package_json_example ? `; package.json scripts ${JSON.stringify(item.package_json_example)}` : ""
+    return `- ${item.gap}: ${item.next_action}; recommended=${item.recommended_script}${example}`
+  })
+  return [
+    guidance.summary,
+    guidance.final_export_blocked ? "在这些协议缺口补齐前，终稿导出必须保持阻断；待修复草稿只能作为待补实验清单。" : "",
+    ...lines,
+  ]
+    .filter(Boolean)
+    .join("\n")
+}
+
+function experimentStarterPackSummary(input: ComposeDraftPaperInput) {
+  const starter = input.experiment_starter_pack
+  if (!starter || starter.status !== "ready") return undefined
+  const scripts = Object.entries(starter.package_json_scripts)
+    .slice(0, 8)
+    .map(([name, command]) => `- ${name}: ${command}`)
+  const files = starter.files.slice(0, 8).map((file) => {
+    const artifact = file.artifact_path ? `; artifact=${file.artifact_path}` : ""
+    return `- ${file.path}: ${file.purpose}${artifact}`
+  })
+  return [
+    starter.summary,
+    "",
+    "Suggested package.json scripts:",
+    ...scripts,
+    "",
+    "Starter files:",
+    ...files,
+    "",
+    "Next steps:",
+    ...starter.next_steps.map((step) => `- ${step}`),
+  ].join("\n")
+}
+
+function compactOutput(value: string) {
+  const lines = value
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+  return lines.slice(0, 4).join(" | ") || "none"
+}
+
+function experimentRunSummary(input: ComposeDraftPaperInput) {
+  const runs = input.experiment_runs
+  if (!runs) return "尚未登记具体 ExperimentRun 命令输出。"
+  const rows = [...runs.host_runs, ...runs.container_runs].slice(0, 12).map((run) => {
+    const metrics = run.metrics.length > 0 ? run.metrics.map((metric) => `${displayMetricName(metric.name)}=${displayMetricValue(metric.name, metric.value)}${displayMetricUnit(metric.name, metric.unit)}`).join(", ") : "无指标"
+    const command = run.command.argv.join(" ")
+    const mode = run.environment.mode
+    const environment = mode === "container" ? "container:repro-env" : `${mode}:${run.environment.platform}`
+    const output = [compactOutput(run.stdout), compactOutput(run.stderr)].filter((item) => item && item !== "none").join(" / ")
+    return [
+      displayEnvironment(environment),
+      displayExperimentLabel(run.experiment_id),
+      displayExperimentRole(run.role),
+      displayRunStatus(run.status),
+      metrics,
+      `${run.resource_usage.wall_time_seconds}s`,
+      command,
+      output ? "见运行日志" : "none",
+    ]
+  })
+  return rows.length > 0
+    ? [
+        "表 1 汇总了本次运行登记的本机与容器实验。正文只展示关键指标，完整输出保留在运行证据日志中。",
+        "",
+        markdownTable(["环境", "实验", "角色", "状态", "指标", "耗时", "命令", "输出"], rows),
+      ].join("\n")
+    : "没有可展示的实验运行记录。"
+}
+
+function commandText(command: { argv: string[] }) {
+  return command.argv.join(" ")
+}
+
+function metricLookup(run: Pick<ExperimentRun, "metrics">, metric: string) {
+  return run.metrics.find((item) => item.name === metric)?.value
+}
+
+function researchQuestionsSummary(input: ComposeDraftPaperInput) {
+  const ready = finalReady(input)
+  const metric = displayMetricName(input.result_report?.primary_metric ?? input.experiment_plan?.proposed.expected_metric ?? "primary_metric")
+  return joinBlocks([
+    `本文围绕“${input.title}”提出三个可检验问题，重点放在方法本身、实验协议和可复现证据，而不是只评价生成文本是否完整。`,
+    "RQ1 方法证据：提交的代码、方法描述和源码范围是否足以支撑正文中的方法断言？",
+    `RQ2 实验有效性：本文方法、基线和消融是否围绕“${metric}”这一主指标形成可比较记录？`,
+    "RQ3 复现一致性：本机与隔离环境中的状态和主指标是否一致，从而允许结果进入终稿结论？",
+    ready
+      ? "由于当前终稿检查已通过，正文只保留已绑定来源和实验结果的结论；完整证据索引放在附录。"
+      : "由于当前终稿检查尚未通过，正文会把结论限定为待验证状态，并把缺口写成修复清单。",
+  ])
+}
+
+function contributionsSummary(input: ComposeDraftPaperInput) {
+  const metric = displayMetricName(input.result_report?.primary_metric ?? input.experiment_plan?.proposed.expected_metric ?? "primary_metric")
+  const methodClaim = firstClaimText(input, "method")
+  const resultClaim = firstClaimText(input, "results")
+  return joinBlocks([
+    "本文贡献集中在研究对象和实验结论本身：",
+    [
+      `1. 给出一个围绕“${input.title}”的证据约束写作框架，使方法断言必须绑定代码、来源或实验记录${methodClaim ? `；核心方法断言为：${trimTerminalPunctuation(methodClaim)}` : ""}。`,
+      `2. 将本文方法、基线与消融放入同一评价协议，并${primaryMetricPhrase(metric).replace("主指标", "主比较指标")}${resultClaim ? `；核心结果断言为：${trimTerminalPunctuation(resultClaim)}` : ""}。`,
+      "3. 用本机/容器一致性检查约束结果表述，避免把未复现或只在单一环境中成立的观察写成终稿结论。",
+    ].join("\n"),
+    "这些贡献共同保证方法比较、复现检查和正文表述共享同一套证据边界。",
+  ])
+}
+
+function systemArchitectureSummary(input: ComposeDraftPaperInput) {
+  const stageRows = [
+    ["Intake", "登记主题、工作区、代码/论文/数据材料和数据外传策略。", "MaterialIndex, ResearchBrief"],
+    ["Planning", "生成研究图、阶段目标、模型角色和预算边界。", "ResearchRunGraph, ResearchRunController"],
+    ["Code analysis", "解析代码表面、入口脚本、source range 和方法 claim。", "CodebaseMap, MethodExtraction"],
+    ["Experiment design", "选择指标、本文方法、基线、消融、资源预算和降级策略。", "ExperimentPlan, ExperimentProtocol"],
+    ["Execution", "在 host 和可复现环境中运行实验命令，并记录 stdout/stderr、exit code、耗时和指标。", "ExperimentRun.v1[]"],
+    ["Reproduction", "比较 host/container 结果，决定 final claim 是否允许。", "ResultReport, ReproductionPlan"],
+    ["Authoring", "根据 claim ledger、实验结果和审稿意见生成论文正文。", "DraftPaper, ReviewReport"],
+    ["Export", "执行 final gate，写出 Markdown、LaTeX、PDF、DOCX 和 manifest。", "ExportBundle"],
+  ]
+  return joinBlocks([
+    "PaperRun 的架构目标是让每个阶段都可重放、可诊断、可被 Preview 展示。实现上，运行目录位于用户本机 `.paper_fucker/runs/<run_id>`，阶段产物通过 artifact store 统一登记；TUI、Preview、导出器和后续 `/resume` 都读取同一份 run 状态。",
+    markdownTable(["Stage", "Responsibility", "Primary Artifacts"], stageRows),
+    "这条链路刻意把内部执行状态和用户可见论文分开：artifact 记录原始证据，draft 只引用已经绑定的 claim，export manifest 则说明哪些文件被写出、哪些 gate 检查已经通过。这样做的直接收益是：当模型、脚本、容器或引用检查失败时，失败会停在具体阶段，而不是把错误扩散成一篇看似完整但不可审查的论文。",
+    input.experiment_runs
+      ? `本次运行登记了 ${input.experiment_runs.host_runs.length} 个 host run 和 ${input.experiment_runs.container_runs.length} 个 container run，因此 Preview 可以把实验执行状态直接展示给用户。`
+      : "本次运行尚未登记 ExperimentRun，因此 Preview 只能展示协议缺口和 starter pack。",
+  ])
+}
+
+function studyDesignSummary(input: ComposeDraftPaperInput) {
+  const metric = displayMetricName(input.result_report?.primary_metric ?? input.experiment_plan?.proposed.expected_metric ?? "primary_metric")
+  const sourceCount = evidenceSourceIds(input).length
+  const evidenceCount = [...new Set(input.ledger.entries.flatMap((entry) => entry.artifact_ids))].length
+  const hostCount = input.experiment_runs?.host_runs.length ?? 0
+  const containerCount = input.experiment_runs?.container_runs.length ?? 0
+  const rows = [
+    ["材料边界", `${sourceCount} 个代码、数据、论文或日志来源`, "限定正文可以讨论的范围。"],
+    ["代码证据", `${evidenceCount} 个绑定方法或结果的证据记录`, "把方法表述绑定到文件、源码范围和生成证据。"],
+    ["实验协议", `指标=${metric}；基线=${input.experiment_plan?.baselines.length ?? 0}；消融=${input.experiment_plan?.ablations.length ?? 0}`, "形成可比较的本文方法、基线和消融运行。"],
+    ["复现执行", `本机=${hostCount}；容器=${containerCount}`, "检查同一观察能否在受控环境中重复出现。"],
+    ["终稿检查", finalReady(input) ? "通过" : "阻断", "决定结果是否可以作为终稿结论呈现。"],
+  ]
+  return joinBlocks([
+    "下表展示研究设计与证据流。论文从材料边界、代码证据、显式实验协议、本机/容器执行和终稿检查生成；每个阶段都会收窄正文可以声称的内容。",
+    markdownTable(["阶段", "观测状态", "在论文中的作用"], rows),
+    "这个设计把两个经常被混在一起的任务分开：一是生成流畅正文，二是判断正文是否被可运行证据支撑。前者由写作阶段完成，后者由来源记录、实验结果和复现检查约束。",
+    "因此，研究设计不是简单的流水线说明，而是正文可信度的约束机制。材料边界决定可以讨论哪些对象，代码证据决定方法描述是否有源码范围支撑，实验协议决定结果是否有对照，复现执行决定结果是否可以重复，终稿检查则决定这些结果能否进入结论。任一环节缺失时，系统应把结论降级为待验证观察，而不是用完整段落掩盖证据缺口。",
+    "这种分层也让后续人工审查更直接：审稿人可以先查看主文中的研究问题和结果表，再沿着附录中的来源、断言和实验记录回到具体文件、命令和输出摘要。对计算机类论文而言，这比单纯给出一段生成式解释更重要，因为代码路径、运行脚本、数据版本和环境差异都会影响结果能否成立。",
+    "在实际使用中，这一设计还能区分两类常见失败：一类是写作材料不足，例如缺少论文来源或数据许可；另一类是实验链路不足，例如没有基线、消融或隔离环境复现。前者会影响背景与引用可信度，后者会影响结果与贡献可信度。把两类问题分开呈现，可以让用户优先修复真正阻断投稿的缺口，也能避免把格式完整误判为研究完成。",
+    "因此，主文中的每个强结论都应能在附录中找到对应证据，而附录中的每条证据也应能解释它为何足以支撑或限制该结论完整成立。",
+  ])
+}
+
+function implementationTraceSummary(input: ComposeDraftPaperInput) {
+  const artifactIds = [...new Set(input.ledger.entries.flatMap((entry) => entry.artifact_ids))]
+  const sourceIds = claimSourceIds(input)
+  const evidenceSources = evidenceSourceIds(input)
+  const claimRows = input.ledger.entries.slice(0, 10).map((entry, index) => [
+    `断言 ${index + 1}`,
+    displaySectionID(entry.section_id),
+    entry.status === "supported" ? "已支持" : "待补证据",
+    countedSummary(entry.source_ids, sourceKindLabel, "个"),
+    evidenceCountSummary(entry.artifact_ids),
+  ])
+  return joinBlocks([
+    "实现层面，写作器不会直接把系统内部日志拼进论文；它先读取断言台账、数据计划、实验计划、实验运行和结果报告，再把这些结构化产物转换为论文段落、表格和附录索引。",
+    `本次运行共有 ${input.ledger.entries.length} 条断言、${evidenceSources.length} 个可追踪来源（其中 ${sourceIds.length} 个直接绑定断言）和 ${artifactIds.length} 个证据记录。断言状态会影响终稿检查：待补证据的断言只能出现在待修复草稿中，已支持断言才允许进入终稿导出。`,
+    claimRows.length > 0
+      ? markdownTable(["断言", "章节", "状态", "来源类型", "证据概况"], claimRows)
+      : "当前没有断言行。",
+    "这种实现方式让论文正文保持可读，同时保留审查入口。读者如果需要复核某个结果，可以从正文断言跳到运行证据清单，再根据导出清单定位到代码分析、实验运行、审稿或导出记录。",
+  ])
+}
+
+function registeredCommandsSummary(input: ComposeDraftPaperInput) {
+  const protocolRows =
+    input.experiment_protocol?.entries.map((entry) => [
+      displayExperimentRole(entry.role),
+      displayExperimentLabel(entry.protocol_id),
+      commandText(entry.command),
+      displayMetricName(entry.expected_metric),
+      displayProtocolSource(input.experiment_protocol?.discovered_from ?? "unknown"),
+    ]) ?? []
+  const planRows = input.experiment_plan
+    ? [input.experiment_plan.proposed, ...input.experiment_plan.baselines, ...input.experiment_plan.ablations].map((spec) => [
+        displayExperimentRole(spec.role),
+        displayExperimentLabel(spec.experiment_id),
+        commandText(spec.command),
+        displayMetricName(spec.expected_metric),
+        "实验计划",
+      ])
+    : []
+  const rows = protocolRows.length > 0 ? protocolRows : planRows
+  return joinBlocks([
+    "### 登记命令",
+    rows.length > 0
+      ? markdownTable(["角色", "编号", "命令", "指标", "来源"], rows.slice(0, 12))
+      : "当前没有登记命令；需要先在 package.json、manifest 或手工协议中声明本文方法、基线、消融与复现入口。",
+    "命令登记的作用不是代替实验，而是为后续执行提供可审查的入口。系统只把实际运行过的实验记录写入结果章节；仅登记但未执行的命令会保留在协议章节或修复清单中。",
+  ])
+}
+
+function hostContainerConsistencySummary(input: ComposeDraftPaperInput) {
+  const runs = input.experiment_runs
+  const metric = input.result_report?.primary_metric ?? input.experiment_plan?.proposed.expected_metric ?? "primary_metric"
+  const metricLabel = displayMetricName(metric)
+  if (!runs) {
+    return "尚未登记本机/容器实验运行，因此无法比较复现一致性。当前论文只能说明协议设计，不能说明执行结果。"
+  }
+  const ids = [...new Set([...runs.host_runs.map((run) => run.experiment_id), ...runs.container_runs.map((run) => run.experiment_id)])]
+  const comparisons = ids.map((id) => {
+    const host = runs.host_runs.find((run) => run.experiment_id === id)
+    const container = runs.container_runs.find((run) => run.experiment_id === id)
+    const hostValue = host ? metricLookup(host, metric) : undefined
+    const containerValue = container ? metricLookup(container, metric) : undefined
+    const delta = typeof hostValue === "number" && typeof containerValue === "number" ? containerValue - hostValue : undefined
+    const mismatch =
+      host?.status !== container?.status ||
+      typeof hostValue !== "number" ||
+      typeof containerValue !== "number" ||
+      Math.abs(delta ?? Number.POSITIVE_INFINITY) > 1e-9
+    return {
+      mismatch,
+      row: [
+        displayExperimentLabel(id),
+        displayRunStatus(host?.status ?? "missing"),
+        typeof hostValue === "number" ? displayMetricValue(metric, hostValue) : "无",
+        displayRunStatus(container?.status ?? "missing"),
+        typeof containerValue === "number" ? displayMetricValue(metric, containerValue) : "无",
+        typeof delta === "number" ? formatMetricValue(delta) : "无",
+        container ? commandText(container.command) : "无",
+      ],
+    }
+  })
+  const rows = comparisons.map((item) => item.row)
+  const mismatches = comparisons.filter((item) => item.mismatch)
+  return joinBlocks([
+    `本节比较本机与容器结果，${primaryMetricPhrase(metricLabel)}。只有当本文方法、基线和消融在可复现环境中有一致记录时，终稿结论才有资格进入导出包。`,
+    markdownTable(["实验", "本机状态", `本机 ${metricLabel}`, "容器状态", `容器 ${metricLabel}`, "差值", "容器命令"], rows),
+    mismatches.length === 0
+      ? "本次运行没有发现本机/容器状态或主指标差异，复现检查可以把这些实验作为终稿结论的支撑证据。"
+      : `本次运行发现 ${mismatches.length} 个本机/容器差异，相关断言应降级为探索性观察，直到复现脚本或环境被修复。`,
+    "该检查不等价于证明方法泛化有效；它只证明当前工作区、当前协议和当前环境声明可以复现同一组观测结果。泛化结论仍需要更多数据集、更多随机种子和领域基线。",
+  ])
+}
+
+function reproducibilityChecklistSummary(input: ComposeDraftPaperInput) {
+  const hasPlan = Boolean(input.experiment_plan)
+  const hasProtocol = Boolean(input.experiment_protocol && input.experiment_protocol.entries.length > 0)
+  const hasHostRuns = Boolean(input.experiment_runs?.host_runs.length)
+  const hasContainerRuns = Boolean(input.experiment_runs?.container_runs.length)
+  const hasResultReport = Boolean(input.result_report)
+  const hasDataBoundary = Boolean(input.data_plan)
+  const rows = [
+    ["研究简报", displayReady(true), "主题、语言、目标模板和预算已进入运行记录。"],
+    ["数据/代码边界", displayReady(hasDataBoundary), hasDataBoundary ? "已生成数据计划或代码材料边界。" : "需要补充数据许可、访问和代码材料范围。"],
+    ["实验计划", displayReady(hasPlan), hasPlan ? "指标、基线、消融和资源预算已登记。" : "缺少评价目标和对照设计。"],
+    ["协议命令", displayReady(hasProtocol), hasProtocol ? "已登记可执行命令。" : "缺少本文方法、基线、消融和复现命令。"],
+    ["本机执行", displayReady(hasHostRuns), hasHostRuns ? "已记录本机输出、退出码、耗时和指标。" : "需要真实执行本机实验。"],
+    ["容器复现", displayReady(hasContainerRuns), hasContainerRuns ? "已记录容器复现结果。" : "需要容器或等价隔离环境复现。"],
+    ["结果报告", displayReady(hasResultReport), hasResultReport ? "已生成主指标比较、阻断项和建议。" : "需要生成结果报告。"],
+    ["终稿检查", displayReady(finalReady(input)), finalReady(input) ? "允许终稿导出。" : "保持阻断或待修复草稿。"],
+  ]
+  return joinBlocks([
+    "本清单用于回答用户最关心的问题：当前产物是不是一篇可交付论文，还是一个待补实验的草稿。每一项都来自结构化证据记录，而不是人工勾选。",
+    markdownTable(["项目", "就绪", "证据"], rows),
+    registeredCommandsSummary(input),
+    "当清单中任一关键项为“否”时，界面应该把问题暴露给 TUI 和实时预览：用户需要看到缺什么、是否还能继续写作、哪些结论必须降级。这样比直接生成一篇完整但不可验证的论文更符合计算机类论文的实际写作流程。",
+  ])
+}
+
+function threatsToValiditySummary(input: ComposeDraftPaperInput) {
+  const report = input.result_report
+  const metricId = report?.primary_metric ?? "primary_metric"
+  const metric = displayMetricName(metricId)
+  return joinBlocks([
+    `构念效度：本文当前使用的主指标是从协议或运行结果中登记的指标，能够验证执行链路，但不一定覆盖真实学术贡献。${constructValidityExample(metricId, metric)}`,
+    report?.best_baseline && report.proposed
+      ? `内部效度：本文方法与最佳基线${primaryMetricLocus(metric)}的差异为 ${formatMetricValue(report.proposed.value - report.best_baseline.value)}。如果差异很小，正文不能把流程完整性写成性能优势；如果差异很大，也需要检查随机种子、数据划分和脚本等价性。`
+      : "内部效度：当前缺少本文方法与基线的可比较结果，因此不能声称方法优于对照。",
+    "外部效度：当前结论只覆盖用户提交的工作区、登记的数据/代码材料和本次运行环境。要扩展到更一般的计算机类论文场景，还需要更多任务、更多仓库、更多基线和更严格的人工审稿。",
+    "复现效度：容器复现能降低环境差异，但不能自动证明依赖来源永久可用。导出包应保存命令、镜像、摘要、输出摘要和证据清单，必要时还需要锁定数据版本。",
+    "自动化效度：自动写作链路不能替代研究者对问题价值、实验设计合理性和投稿伦理的最终判断。流程应继续把可疑结论标为阻断或需要人工审查。",
+  ])
+}
+
+function experimentResultTable(input: ComposeDraftPaperInput) {
+  const runs = input.experiment_runs
+  const report = input.result_report
+  if (!runs || !report) return undefined
+  const metric = report.primary_metric
+  const rows = runs.host_runs
+    .filter((run) => run.metrics.some((item) => item.name === metric))
+    .map((run) => {
+      const value = run.metrics.find((item) => item.name === metric)?.value
+      const reproduced = runs.container_runs.some((item) => item.experiment_id === run.experiment_id && item.status === "succeeded")
+      return [
+        displayExperimentLabel(run.experiment_id),
+        displayExperimentRole(run.role),
+        typeof value === "number" ? displayMetricValue(metric, value) : "无",
+        displayRunStatus(run.status),
+        reproduced ? "是" : "否",
+      ]
+    })
+  if (rows.length === 0) return undefined
+  return markdownTable(["实验", "角色", displayMetricName(metric), "本机状态", "容器复现"], rows)
+}
+
+function recommendationLabel(value: ResultReport["recommendation"]) {
+  if (value === "accept") return "接受"
+  if (value === "revise") return "需要修订"
+  return "阻断"
+}
+
+function experimentSummary(input: ComposeDraftPaperInput) {
+  const report = input.result_report
+  if (!report) {
+    return "实验章节必须包含基线、消融、主指标、运行环境和复现结果。若复现检查未通过，相关结果只能标为探索性观察。"
+  }
+  let metrics = "实验尚未记录可比较主指标。"
+  if (report.proposed && report.best_baseline) {
+    const metric = displayMetricName(report.primary_metric)
+    const proposed = displayMetricValue(report.primary_metric, report.proposed.value)
+    const baseline = displayMetricValue(report.primary_metric, report.best_baseline.value)
+    const delta = report.proposed.value - report.best_baseline.value
+    if (Math.abs(delta) < 1e-9) {
+      metrics = `${primaryMetricLocus(metric)}，本文方法与最佳基线（${displayExperimentLabel(report.best_baseline.experiment_id)}）均为 ${proposed}，说明当前协议下没有观察到性能差异。`
+    } else {
+      const direction = delta > 0 ? "高于" : "低于"
+      metrics = `${primaryMetricLocus(metric)}，本文方法为 ${proposed}，最佳基线（${displayExperimentLabel(report.best_baseline.experiment_id)}）为 ${baseline}，本文方法${direction}基线 ${formatMetricValue(Math.abs(delta))}。`
+    }
+  } else if (report.proposed) {
+    metrics = `${primaryMetricLocus(displayMetricName(report.primary_metric))}，本文方法为 ${displayMetricValue(report.primary_metric, report.proposed.value)}；由于缺少基线，对比性结论仍需保守。`
+  }
+  if (report.reproduction.status === "passed" && report.final_claims_allowed) {
+    return `${metrics}\n\n容器复现已通过，本机与容器结果可以支撑当前终稿结论。`
+  }
+  const blockers = report.blockers.length > 0 ? report.blockers.map(paperProseText).join("、") : "复现检查"
+  return `${metrics}\n\n复现检查未通过，阻断项：${blockers}。相关结果只能标为探索性证据，不能进入终稿结论。`
+}
+
+function discussionSummary(input: ComposeDraftPaperInput) {
+  const report = input.result_report
+  if (!report) {
+    return "当前还没有足够实验结果支撑讨论。下一步应先补齐主指标、基线、消融和复现环境，再扩大结论范围。"
+  }
+  const rows: string[] = []
+  if (report.proposed && report.best_baseline) {
+    const delta = report.proposed.value - report.best_baseline.value
+    if (Math.abs(delta) < 1e-9) {
+      rows.push("主指标与最佳基线持平，因此本文不能声称本文方法在性能上优于基线；可成立的结论是当前方法与对照在该复现指标上表现一致，并且实验链路保留了可复核证据。")
+    } else if (delta > 0) {
+      rows.push("主指标高于最佳基线，但该结论仍需要结合任务规模、数据代表性和容器复现稳定性解释，避免把单次运行写成泛化结论。")
+    } else {
+      rows.push("主指标低于最佳基线，正文应把贡献限定为流程、可观测性或工程可靠性，而不是性能提升。")
+    }
+  }
+  if (report.reproduction.status === "passed") {
+    rows.push("容器复现通过说明当前证据链可以被重新执行；这降低了复核成本，也让失败原因能定位到具体脚本、输出摘要或环境差异。")
+  } else {
+    rows.push("复现检查尚未通过，所有实验结果只能作为探索性证据。流程应继续保留待修复草稿，并把缺口转化为可执行修复清单。")
+  }
+  rows.push("本节的重点不是夸大自动化能力，而是说明结果解释必须受证据、实验协议和复现状态约束。")
+  rows.push("对于需要写代码跑实验的论文，这个边界尤其重要：自动化系统可以帮助发现入口脚本、组织对照组、记录容器复现结果，但不能替研究者决定任务是否有学术价值，也不能把类型检查通过、单一数据集通过或单次脚本通过解释成普遍性能优势。后续投稿前仍需要人工审查研究问题、实验充分性和引用支撑。")
+  return rows.join("\n\n")
+}
+
+function abstractSummary(input: ComposeDraftPaperInput) {
+  const ready = finalReady(input)
+  const status = ready ? "在当前证据边界内，终稿检查已通过。" : "在当前证据边界内，终稿检查尚未通过。"
+  const metric = resultMetricSummary(input)
+  const methodClaim = firstClaimText(input, "method")
+  const resultClaim = firstClaimText(input, "results")
+  return [
+    `本文研究“${input.title}”的代码证据与实验复现问题，目标是在写作前先建立材料、实验和结果断言之间的追踪关系。`,
+    `研究流程将材料索引、代码理解、实验计划、复现检查、审稿和导出串联为同一条可复核链路。`,
+    methodClaim ? `方法证据显示：${methodClaim}` : undefined,
+    resultClaim ? `结果证据显示：${resultClaim}` : undefined,
+    metric,
+    status,
+    ready
+      ? "结果表明，当来源、实验协议和复现记录均具备时，正文可以只保留被证据支持的结果和限制。"
+      : "当基线、消融或容器复现缺失时，流程必须保留草稿状态，并把缺口转化为可执行修复步骤。",
+  ]
+    .filter(Boolean)
+    .join("")
+}
+
+function introductionSummary(input: ComposeDraftPaperInput) {
+  const methodClaim = firstClaimText(input, "method")
+  const resultEvidence = resultEvidenceText(input)
+  return [
+    `面向计算机类论文的自动写作不能只生成流畅文本，还必须说明代码依据、实验协议、运行结果和复现边界。${sourceSummary(input)}`,
+    methodClaim
+      ? `本研究的直接动机来自方法证据：${methodClaim}这意味着正文必须围绕代码接口、源码范围、实验入口和结论边界展开，而不能只给出泛化的写作流程描述。`
+      : "本文采用证据优先的组织方式：材料进入后先整理来源和可验证断言，再根据实验计划执行或校验结果，最后由终稿检查决定是否允许导出。",
+    resultEvidence
+      ? `结果侧的核心问题是：${resultEvidence}因此，本文需要同时呈现基线、消融、主指标和复现一致性，避免把缺少对照的观察写成贡献。`
+      : undefined,
+    finalReady(input)
+      ? "本文报告的是一个满足当前终稿检查的论文包，正文只讨论已绑定证据的结论。"
+      : "本文报告的是一个待修复的研究包，正文会明确标出哪些结论仍不能作为终稿结论。",
+  ]
+    .filter(Boolean)
+    .join("\n\n")
+}
+
+function relatedWorkSummary(input: ComposeDraftPaperInput) {
+  const methodClaim = firstClaimText(input, "method")
+  const resultEvidence = resultEvidenceText(input)
+  return joinBlocks([
+    literatureEvidenceSummary(input),
+    methodClaim
+      ? `与既有工具使用、自动写作或实验复现研究相比，本研究把相关工作边界放在代码证据上：${methodClaim}`
+      : "相关工作通常强调检索、规划或长文生成；本文关注的是代码证据、实验日志和复现环境如何共同约束论文正文。",
+    resultEvidence
+      ? `与只报告单次运行结果的流程相比，本文把结果断言限定在显式对照内：${resultEvidence}`
+      : "如果没有基线、消融和复现记录，相关结论只能保留为探索性观察。",
+    "本文采用的约束是：写作结果必须限制在已登记来源、断言和证据记录范围内；没有通过复现检查时，流程应阻断终稿输出，而不是把草稿包装成终稿。",
+    sourceSummary(input),
+  ])
+}
+
+function methodSummary(input: ComposeDraftPaperInput, claimSections: DraftSection[]) {
+  const methodClaims = claimSections.find((section) => section.section_id === "method")?.markdown
+  return [
+    "本文采用证据优先流程。每个运行先记录输入材料、工作区、模型路由和数据外传策略，再由阶段图驱动文献、代码分析、实验设计、复现、写作、审稿和导出。",
+    methodClaims
+      ? `代码理解阶段抽取的方法接口、源码范围和可运行入口如下：\n\n${methodClaims}`
+      : "当前运行没有生成可展开的方法断言；这通常意味着输入材料不足或证据台账仍需补充。",
+    artifactSummary(input),
+  ].join("\n\n")
+}
+
+function evidenceModelSummary(input: ComposeDraftPaperInput) {
+  const sourceIds = claimSourceIds(input)
+  const evidenceSources = evidenceSourceIds(input)
+  const artifactIds = [...new Set(input.ledger.entries.flatMap((entry) => entry.artifact_ids))]
+  const supported = input.ledger.entries.filter((entry) => entry.status === "supported").length
+  const unsupported = input.ledger.unsupported_claim_ids.length
+  return joinBlocks([
+    "本文把证据组织成来源、断言和结构化记录三层。来源表示论文材料、代码文件、数据集或实验日志；断言表示正文可以被审查的具体陈述；结构化记录表示由分析、实验、审稿或导出阶段产生的证据。",
+    `本次运行登记 ${evidenceSources.length} 个可追踪来源、${input.ledger.entries.length} 条断言和 ${artifactIds.length} 个结构化记录；其中 ${sourceIds.length} 个来源直接绑定断言，${supported} 条断言已标记为有证据支持，${unsupported} 条断言仍缺证据。`,
+    "写作器只把有证据支持的断言作为终稿正文的候选内容；缺少源码范围、实验结果或复现记录的断言会被保留为待修复项，不能伪装成已验证贡献。",
+    "这种证据模型的作用是让读者能够从正文中的方法或结果句子追溯到材料、实验命令、指标和导出记录，从而形成可追踪性。它也为后续人工审稿提供定位入口：审稿人可以先读主文，再进入附录检查完整证据索引。",
+    "因此，正文中的每个实验结论都应回答两个问题：它来自哪里，以及是否在受控环境中重复出现。",
+    "当这两个问题没有答案时，结论必须降级为探索性观察。",
+    "这也是后续扩展真实数据集、领域基线、随机种子和更复杂实验资源时不可省略的基本约束之一，也是审稿可追踪性的基础。",
+    "在计算机类论文场景中，这种约束尤其重要，因为代码实现、运行脚本、依赖版本和执行环境的细小差异都可能改变实验结论。",
+    "因此，本文把“能写出段落”和“能支撑结论”视为两个不同检查点。前者只要求写作器可以组织结构，后者要求来源、实验命令、运行结果和复现状态同时可追踪。只有后一个检查点通过时，系统才允许把结果写成终稿结论；否则正文必须保留限制说明，并把缺口转化为后续实验任务。",
+  ])
+}
+
+function reproducibilitySummary(input: ComposeDraftPaperInput) {
+  return joinBlocks([
+    hostContainerConsistencySummary(input),
+    "### 实验运行记录",
+    experimentRunSummary(input),
+  ])
+}
+
+function resultSummary(input: ComposeDraftPaperInput, claimSections: DraftSection[]) {
+  const table = experimentResultTable(input)
+  const resultClaim = claimSections.find((section) => section.section_id === "results")?.markdown
+  return [
+    resultClaim ? `${resultClaim}\n\n` : "",
+    experimentSummary(input),
+    table ? `\n\n${table}` : "",
+  ]
+    .filter(Boolean)
+    .join("")
+}
+
+function evidenceSummary(entry: ClaimLedgerEntry) {
+  const status = entry.status === "supported" ? "已支持" : "待补证据"
+  return [
+    compactClaimText(entry.text, 120),
+    status,
+    displayClaimAction(entry.required_action),
+    countedSummary(entry.source_ids, sourceKindLabel, "个"),
+    evidenceCountSummary(entry.artifact_ids),
+  ]
+}
+
+function scaffoldSections(input: ComposeDraftPaperInput, claimSections: DraftSection[]): DraftSection[] {
+  const artifactIds = [...new Set(input.ledger.entries.flatMap((entry) => entry.artifact_ids))]
+  const unsupported = input.ledger.unsupported_claim_ids
+  const ready = finalReady(input)
+  return [
+    buildPlainSection("abstract", "摘要", abstractSummary(input)),
+    buildPlainSection("introduction", "引言", introductionSummary(input)),
+    buildPlainSection("research_questions", "研究问题", researchQuestionsSummary(input)),
+    buildPlainSection("contributions", "主要贡献", contributionsSummary(input)),
+    buildPlainSection("related_work", "相关工作", relatedWorkSummary(input)),
+    buildPlainSection("study_design", "研究设计与证据流", studyDesignSummary(input)),
+    buildPlainSection("method", "方法", methodSummary(input, claimSections)),
+    buildPlainSection("evidence_traceability", "证据与可追踪性", evidenceModelSummary(input)),
+    ...claimSections.filter((section) => section.section_id !== "method" && section.section_id !== "results"),
+    buildPlainSection("data_availability", "数据与代码可用性", dataAvailabilitySummary(input)),
+    buildPlainSection("experimental_setup", "实验设置", experimentProtocolSummary(input)),
+    buildPlainSection("results", "结果", resultSummary(input, claimSections)),
+    buildPlainSection("reproducibility", "可复现性", reproducibilitySummary(input)),
+    buildPlainSection("discussion", "讨论", discussionSummary(input)),
+    buildPlainSection("threats_to_validity", "效度威胁", threatsToValiditySummary(input)),
+    buildPlainSection(
+      "limitations",
+      "限制与待修复项",
+      unsupported.length > 0
+        ? [
+            "当前必须修复以下阻断项后才能生成终稿；在修复前终稿输出必须保持阻断：",
+            "",
+            ...unsupported.map((claimId) => `- ${claimId}: 补充证据、降低表述强度，或从终稿断言中移除。`),
+          ].join("\n")
+        : ready
+          ? "当前没有未支持断言，引用、许可、代码证据和复现检查已满足终稿条件。"
+          : "当前没有未支持断言；仍需通过引用、许可、代码证据和复现检查。",
+    ),
+    buildPlainSection(
+      "conclusion",
+      "结论",
+      ready
+        ? "本文产物已绑定来源、断言、引用与复现证据，可作为终稿审查对象。后续若要进入真实投稿，还需要替换示例协议、扩大评测数据并补充领域相关基线。"
+        : "本草稿是可审查工作包的中间产物。只有当来源、断言、引用、license 与 reproduction gate 全部通过后，才能升级为终稿。",
+    ),
+    buildPlainSection("references", "参考文献", referencesSummary(input)),
+    buildPlainSection("appendix_evidence_trace", "附录 A：证据追踪", implementationTraceSummary(input)),
+    buildPlainSection(
+      "appendix_operational_reproducibility_checklist",
+      "附录 B：复现清单",
+      reproducibilityChecklistSummary(input),
+    ),
+    ...(experimentGuidanceSummary(input)
+      ? [buildPlainSection("appendix_experiment_protocol_guidance", "附录 C：实验协议修复清单", experimentGuidanceSummary(input)!)]
+      : []),
+    ...(experimentStarterPackSummary(input)
+      ? [buildPlainSection("appendix_experiment_protocol_starter_pack", "附录 D：实验启动包", experimentStarterPackSummary(input)!)]
+      : []),
+    buildPlainSection(
+      "appendix_claim_ledger",
+      "附录 E：断言证据表",
+      input.ledger.entries.length > 0
+        ? markdownTable(["断言摘要", "状态", "处理", "来源类型", "证据概况"], input.ledger.entries.map(evidenceSummary))
+        : "无 claim ledger 条目。请先补充可验证 claim。",
+    ),
+    buildPlainSection(
+      "appendix_artifacts",
+      "附录 F：证据记录索引",
+      artifactIds.length > 0
+        ? [
+            `本次运行共有 ${artifactIds.length} 条结构化证据记录。为保持论文正文可读，完整机器标识、路径、哈希和渲染状态不在正文展开；请在运行目录的证据清单、导出清单和实时监控台中复核。`,
+            "审稿时建议先核对三类记录：代码分析是否覆盖论文声称的方法入口，实验运行是否包含本文方法、基线、消融和复现记录，导出记录是否说明 Markdown、LaTeX、PDF 与 DOCX 的生成状态。若这些记录缺失，正文中的相应结论应降级为待验证观察。",
+            "这份摘要只用于人工阅读；机器可追踪性仍由运行目录中的结构化记录与导出清单承担。",
+            "若人工复核发现证据数量与主文结论不一致，应优先修正实验协议或降低结论强度，而不是补写没有来源支撑的段落、表格、图片或图表内容。",
+          ].join("\n\n")
+        : "当前没有结构化证据记录。",
+    ),
+  ]
+}
+
 function render(title: string, sections: DraftSection[]) {
   return [`# ${title}`, ...sections.map((section) => `## ${section.title}\n\n${section.markdown}`)].join("\n\n")
 }
@@ -74,7 +1214,8 @@ export function composeDraftPaper(input: ComposeDraftPaperInput): DraftPaper {
       for (const entry of input.ledger.entries) {
         bySection.set(entry.section_id, [...(bySection.get(entry.section_id) ?? []), entry])
       }
-      const sections = Array.from(bySection.entries()).map(([sectionId, entries]) => buildSection(sectionId, entries))
+      const claimSections = Array.from(bySection.entries()).map(([sectionId, entries]) => buildSection(sectionId, entries))
+      const sections = scaffoldSections(input, claimSections)
       const markdown = render(input.title, sections)
       return {
         schema_version: "DraftPaper.v1",
