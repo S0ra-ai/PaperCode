@@ -2,10 +2,21 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.10-dev
+:version       0.13.0.11-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.11-dev - 2026/05/30 (4ba6313e) [fix/mcp-tool-binding-test-isolation]
+        :brief 方法与可复现性段落去流程化
+        :authoring
+            - fix(method): 方法段改为材料边界、代码证据抽取和可复现实验约束三部分，不再输出运行流程说明
+            - fix(reproducibility): 可复现性段落改为分析表述，并把实验运行记录标题收敛为实验执行摘要
+            - test(authoring): 断言主文禁止“每个运行”“本节比较”和旧实验运行记录标题
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
     0.13.0.10-dev - 2026/05/30 (d28d03ec) [fix/mcp-tool-binding-test-isolation]
         :brief 相关工作段移除系统化“文献图”口吻
