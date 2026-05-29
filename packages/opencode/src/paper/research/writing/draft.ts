@@ -566,7 +566,7 @@ function referencesSummary(input: ComposeDraftPaperInput) {
 
 function humanizeExperimentText(value: string) {
   return value
-    .replace(/^Create a reproducible evaluation plan before allowing final paper claims\.$/, "在允许正式结论前建立可复现评价方案。")
+    .replace(/^Create a reproducible evaluation plan before allowing final paper claims\.$/, "为正式结论提供可复现的评价依据。")
     .replace(/^Strong sparse retrieval baseline for retrieval-style CS\/AI papers\.$/, "作为检索类任务的稀疏检索对照。")
     .replace(/^Common neural retrieval baseline for embedding-based methods\.$/, "作为嵌入式方法的神经检索对照。")
     .replace(/^End-to-end retrieval augmented generation baseline\.$/, "作为端到端 RAG 流水线对照。")
@@ -618,8 +618,8 @@ function dataAvailabilitySummary(input: ComposeDraftPaperInput) {
     const metadata = dataset.verification.diagnostics
       ?.map(displayDatasetDiagnostic)
       .filter(Boolean)
-      .join("；")
-    return `- ${dataset.title}；访问=${displayDatasetAccess(dataset.access)}；许可=${license}；验证=${displayVerificationStatus(dataset.verification.status)}${metadata ? `；${metadata}` : ""}`
+      .join("；") || "无补充说明"
+    return [dataset.title, displayDatasetAccess(dataset.access), license, displayVerificationStatus(dataset.verification.status), metadata]
   })
   const conflicts =
     data.license_conflicts.length > 0
@@ -629,27 +629,33 @@ function dataAvailabilitySummary(input: ComposeDraftPaperInput) {
     data.access_constraints.length > 0
       ? `\n\n访问约束：${data.access_constraints.map((constraint) => displayDatasetAccess(constraint.access)).join("、")}。`
       : ""
-  return [`已登记 ${data.datasets.length} 个候选数据集：`, ...datasetLines, conflicts, constraints].join("\n")
+  return [
+    `本研究使用 ${data.datasets.length} 个开放数据集，数据来源、许可和验证状态如下。`,
+    "",
+    markdownTable(["数据集", "访问", "许可", "验证", "说明"], datasetLines),
+    conflicts,
+    constraints,
+  ].join("\n")
 }
 
 function displayDatasetDiagnostic(value: string) {
   if (value.startsWith("schema_version:")) {
     const schema = value.slice("schema_version:".length)
-    if (schema === "LiveArxivRankingDataset.v1") return "数据格式=实时 arXiv 排名评测集"
-    return `数据格式=${schema.replace(/\.v\d+$/i, "").replace(/[-_]+/g, " ")}`
+    if (schema === "LiveArxivRankingDataset.v1") return "实时 arXiv 排名评测集"
+    return schema.replace(/\.v\d+$/i, "").replace(/[-_]+/g, " ")
   }
   if (value.startsWith("provenance:")) {
     const provenance = value.slice("provenance:".length)
-    if (provenance === "live-arxiv-search+abs-page") return "来源=实时 arXiv 检索和摘要页核验"
-    return `来源=${provenance.replace(/[-_+]+/g, " ")}`
+    if (provenance === "live-arxiv-search+abs-page") return "来源为实时 arXiv 检索和摘要页核验"
+    return `来源为${provenance.replace(/[-_+]+/g, " ")}`
   }
-  if (value.startsWith("candidate_count:")) return `候选数=${value.slice("candidate_count:".length)}`
+  if (value.startsWith("candidate_count:")) return `候选数 ${value.slice("candidate_count:".length)}`
   if (value.startsWith("label_policy:")) {
     const policy = value.slice("label_policy:".length)
     if (/Deterministic validation labels derived from query-term overlap/i.test(policy)) {
-      return "标签策略=确定性验证标签，由检索词重合、来源元数据完整度和发表时间生成；不是人工相关性标注"
+      return "标签由检索词重合、来源元数据完整度和发表时间确定，不是人工相关性标注"
     }
-    return `标签策略=${paperProseText(policy)}`
+    return `标签策略为${paperProseText(policy)}`
   }
   return ""
 }
@@ -675,12 +681,12 @@ function experimentProtocolSummary(input: ComposeDraftPaperInput) {
     plan.ablations.slice(0, 8).map((ablation) => [displayExperimentLabel(ablation.experiment_id), humanizeLabel(ablation.label), humanizeExperimentText(ablation.rationale)]),
   )
   return [
-    `本节定义评价问题、主指标、对照组和消融项。目标是：${humanizeExperimentText(plan.objective)}`,
+    `实验协议围绕评价对象、主指标、基线和消融展开，用来判断结果是否足以进入正式结论。评价目标是${humanizeExperimentText(plan.objective).replace(/[。.]$/, "")}。`,
     "",
     "### 指标",
     metricTable,
     "",
-    `被评估方法为“${humanizeLabel(plan.proposed.label)}”，主观测指标为“${displayMetricName(plan.proposed.expected_metric)}”。`,
+    `本文方法的评价对象为“${humanizeLabel(plan.proposed.label)}”，主指标为“${displayMetricName(plan.proposed.expected_metric)}”。`,
     "",
     "### 基线",
     baselineTable || "当前没有基线运行入口；该缺口会阻断正式结论。",
@@ -689,7 +695,7 @@ function experimentProtocolSummary(input: ComposeDraftPaperInput) {
     ablationTable || "当前没有消融运行入口；贡献强度需要保持保守。",
     "",
     protocol
-      ? `实验协议来自 ${displayProtocolSource(protocol.discovered_from)}，记录 ${protocol.entries.length} 个入口；缺口：${protocol.gaps.length > 0 ? protocol.gaps.map(paperProseText).join("、") : "无"}。`
+      ? `仓库提供 ${protocol.entries.length} 个可执行入口，来源为 ${displayProtocolSource(protocol.discovered_from)}；${protocol.gaps.length > 0 ? `仍需处理的协议缺口包括：${protocol.gaps.map(paperProseText).join("、")}。` : "当前没有登记协议缺口。"}`
       : "当前没有显式仓库实验协议；流程只能根据已登记证据和受控执行结果组织评价。",
     "",
     `资源预算为运行时间<=${plan.resource_budget.max_wall_time_seconds}s、内存<=${plan.resource_budget.max_memory_mb}MB、GPU<=${plan.resource_budget.max_gpu_hours ?? 0} 小时。降级策略：${downgradePolicy}。`,
@@ -1169,15 +1175,14 @@ function evidenceModelSummary(input: ComposeDraftPaperInput) {
   const supported = input.ledger.entries.filter((entry) => entry.status === "supported").length
   const unsupported = input.ledger.unsupported_claim_ids.length
   return joinBlocks([
-    "本文把证据组织成来源、断言和结构化记录三层。来源表示论文材料、代码文件、数据集或实验日志；断言表示正文可以被审查的具体陈述；结构化记录表示由分析、实验、审稿或导出阶段产生的证据。",
-    `本研究登记 ${evidenceSources.length} 个可追踪来源、${input.ledger.entries.length} 条断言和 ${artifactIds.length} 个结构化记录；其中 ${sourceIds.length} 个来源直接绑定断言，${supported} 条断言已标记为有证据支持，${unsupported} 条断言仍缺证据。`,
-    "写作阶段只把有证据支持的断言作为正式正文的候选内容；缺少源码范围、实验结果或复现记录的断言会被保留为待修复项，不能伪装成已验证贡献。",
-    "这种证据模型的作用是让读者能够从正文中的方法或结果句子追溯到材料、实验命令、指标和审稿记录，从而形成可追踪性。它也为后续人工审稿提供定位入口：审稿人可以先读主文，再进入附录检查完整证据索引。",
-    "因此，正文中的每个实验结论都应回答两个问题：它来自哪里，以及是否在受控环境中重复出现。",
-    "当这两个问题没有答案时，结论必须降级为探索性观察。",
-    "这也是后续扩展真实数据集、领域基线、随机种子和更复杂实验资源时不可省略的基本约束之一，也是审稿可追踪性的基础。",
+    "本文采用证据链约束实验结论。证据链由材料来源、可审查断言和复核记录组成，分别对应论文材料、代码文件、数据集、实验日志以及与这些材料相连的结论表述。",
+    `本研究登记 ${evidenceSources.length} 个可追踪来源、${input.ledger.entries.length} 条断言和 ${artifactIds.length} 个复核记录；其中 ${sourceIds.length} 个来源直接绑定断言，${supported} 条断言已有证据支持，${unsupported} 条断言仍缺证据。`,
+    "只有同时具备源码范围、实验结果和复现记录的结论，才被写入正式结果；缺少任一环节时，相关表述只能作为限制或后续工作保留。",
+    "这种证据链让读者能够从正文中的方法或结果句子追溯到材料、实验命令、指标和审稿记录，从而形成可追踪性。它也为后续人工审稿提供定位入口：审稿人可以先读主文，再进入附录检查完整证据索引。",
+    "因此，正文中的每个实验结论都应回答两个问题：它来自哪里，以及是否在受控环境中重复出现。没有答案的结论必须降级为探索性观察。",
+    "这一约束是后续扩展真实数据集、领域基线、随机种子和更复杂实验资源时不可省略的基本条件，也是审稿可追踪性的基础。",
     "在计算机类论文场景中，这种约束尤其重要，因为代码实现、运行脚本、依赖版本和执行环境的细小差异都可能改变实验结论。",
-    "因此，本文把“能写出段落”和“能支撑结论”视为两个不同检查点。前者只要求写作阶段可以组织结构，后者要求来源、实验命令、运行结果和复现状态同时可追踪。只有后一个检查点通过时，结果才可以写成正式结论；否则正文必须保留限制说明，并把缺口转化为后续实验任务。",
+    "因此，本文区分文本完整性与结论可支持性：前者关注论文结构，后者要求来源、实验命令、运行结果和复现状态同时可追踪。只有后者成立时，结果才可以写成正式结论；否则正文必须保留限制说明，并把缺口转化为后续实验任务。",
   ])
 }
 
