@@ -766,11 +766,11 @@ function experimentRunSummary(input: ComposeDraftPaperInput) {
   })
   return rows.length > 0
     ? [
-        "表 1 汇总了本研究登记的本机与容器实验。正文只展示关键指标，完整输出保留在审查材料中。",
+        "表 1 列出本研究登记的本机与容器实验；主文只保留关键指标，完整输出保留在审查材料中。",
         "",
         markdownTable(["环境", "实验", "角色", "状态", "指标", "耗时", "命令", "输出"], rows),
       ].join("\n")
-    : "没有可展示的实验运行记录。"
+    : "没有可展示的实验执行摘要。"
 }
 
 function commandText(command: { argv: string[] }) {
@@ -965,7 +965,7 @@ function hostContainerConsistencySummary(input: ComposeDraftPaperInput) {
   const rows = comparisons.map((item) => item.row)
   const mismatches = comparisons.filter((item) => item.mismatch)
   return joinBlocks([
-    `本节比较本机与容器结果，${primaryMetricPhrase(metricLabel)}。只有当本文方法、基线和消融在可复现环境中有一致记录时，相关结果才有资格进入正式结论。`,
+    `可复现性分析比较本机与容器结果，${primaryMetricPhrase(metricLabel)}。只有当本文方法、基线和消融在可复现环境中有一致记录时，相关结果才有资格进入正式结论。`,
     markdownTable(["实验", "本机状态", `本机 ${metricLabel}`, "容器状态", `容器 ${metricLabel}`, "差值", "容器命令"], rows),
     mismatches.length === 0
       ? "本机与容器比较没有发现状态或主指标差异，复现检查可以把这些实验作为正式结论的支撑证据。"
@@ -1154,7 +1154,7 @@ function relatedWorkSummary(input: ComposeDraftPaperInput) {
 function methodSummary(input: ComposeDraftPaperInput, claimSections: DraftSection[]) {
   const methodClaims = claimSections.find((section) => section.section_id === "method")?.markdown
   return [
-    "本文采用证据优先流程。每个运行先记录输入材料、工作区、模型路由和数据外传策略，再由阶段图驱动文献、代码分析、实验设计、复现、写作和审稿。",
+    "本文的方法由三部分组成：材料边界定义、代码证据抽取和可复现实验约束。材料边界先限定可讨论对象，代码分析再绑定接口、源码范围和实验入口，最后用基线、消融和容器复现约束结果表述。",
     methodClaims
       ? `代码理解阶段抽取的方法接口、源码范围和可运行入口如下：\n\n${methodClaims}`
       : "当前运行没有生成可展开的方法断言；这通常意味着输入材料不足或证据台账仍需补充。",
@@ -1184,7 +1184,7 @@ function evidenceModelSummary(input: ComposeDraftPaperInput) {
 function reproducibilitySummary(input: ComposeDraftPaperInput) {
   return joinBlocks([
     hostContainerConsistencySummary(input),
-    "### 实验运行记录",
+    "### 实验执行摘要",
     experimentRunSummary(input),
   ])
 }
