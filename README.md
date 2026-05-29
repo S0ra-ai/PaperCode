@@ -1,6 +1,6 @@
 # Paper Fucker
 
-当前版本：<!-- version:start -->0.13.0-dev<!-- version:end --> ｜ 作者：k1d ([ZhuchenZhong](https://github.com/ZhuchenZhong)) ｜ 状态：开发态 ｜ 许可证：private-first / UNLICENSED
+当前版本：<!-- version:start -->0.13.0.1-dev<!-- version:end --> ｜ 作者：k1d ([ZhuchenZhong](https://github.com/ZhuchenZhong)) ｜ 状态：开发态 ｜ 许可证：MPL-2.0
 
 Paper Fucker 是一个中文优先、私有优先的论文研究工作台。你输入主题，或拖入论文、代码、数据和实验日志，它会把任务组织成可恢复、可审查的 `PaperRun`：研究规划、资料检索、代码理解、实验设计、复现记录、证据账本、真实性审查、实时预览和导出。
 
@@ -73,6 +73,15 @@ paper_fucker resume <run-id>
 
 运行中会自动打开本地只读 Monitor。它通过 SSE 持续显示阶段图、查新结果、论文脊梁、全局图、草稿、证据账本、agent、成本和 gate 状态；没有 token 的请求会被拒绝，写请求会被阻断。
 
+## 模型与订阅
+
+`/models` 是唯一的模型配置入口。Paper Fucker 中的 provider 指已经完成授权、实际可调用的模型入口。注册方式有两类：
+
+- 订阅登录：ChatGPT Plus/Pro、GitHub Copilot。
+- 自定义 endpoint：填写 provider id、base URL 和 API key，自动拉取 `/models`。
+
+所有模型都会先进入“所有模型”列表；只有你勾选的模型才会进入候选池。主决策模型、备用决策模型和阶段模型都只能从候选池中选择。运行时的 Agent Team 和递归子 agent 也只能通过这个候选池路由模型，不会回退到未授权模型。
+
 ## 论文能力
 
 - 论文 profile：Nature、IEEE、ACM、Springer 等结构与材料检查。
@@ -88,7 +97,7 @@ paper_fucker resume <run-id>
 
 Paper Fucker 默认 private-first：
 
-- 不读取 `.opencode/`、`~/.config/opencode/` 或旧 auth/config/session/cache。
+- 配置、密钥和运行记录保存在 Paper Fucker 本机状态目录。
 - 只使用 `~/.paper_fucker/`、项目 `.paper_fucker/` 和 `PAPER_FUCKER_*` 环境变量。
 - 本地代码、数据和论文材料不会默认全文发给外部模型或 MCP。
 - secrets、ignored files、大二进制和敏感配置会被排除。
@@ -119,4 +128,4 @@ Paper Fucker 默认 private-first：
 
 ## License
 
-本项目当前是 private-first，除非后续书面修改许可证，否则保留所有权利。
+Paper Fucker 原创项目代码使用 Mozilla Public License 2.0（MPL-2.0）。第三方快照、skills 和工具链组件保留其各自许可证，详见 `NOTICE.md`。

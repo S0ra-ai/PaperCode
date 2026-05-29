@@ -2,10 +2,27 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0-dev
-:last_update   2026/05/26
+:version       0.13.0.1-dev
+:last_update   2026/05/30
 
 :history
+
+    0.13.0.1-dev - 2026/05/30 (7ced85ef) [fix/mcp-tool-binding-test-isolation]
+        :brief TUI 期刊工作台与期刊 profile 路由
+        :tui
+            - feat(journal): 新增 /journal 期刊工作台，支持内置期刊选择、当前期刊查看和未知期刊抓取草案
+            - feat(journal): 首页创建 PaperRun 时读取当前 TUI 期刊上下文，不要求用户在 prompt 中手写期刊参数
+        :profiles
+            - feat(profile): 内置 cjc-paper，对应《计算机学报》官方入口和官方模板优先策略
+            - feat(profile): 未知期刊生成 PaperGeneratedJournalProfile.v1 草案，保持 blocked 状态直到官方指南和模板被确认
+            - fix(profile): PaperRun intake、API 和 profile_formatting 阶段统一使用期刊解析结果
+        :test
+            - test(profile): 覆盖中国计算机学报 profile、未知期刊草案和 TUI 期刊上下文解析
+            - test(api): 覆盖 HTTP 创建 PaperRun 时 target_journal 落到 cjc-paper intake
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/profiles.test.ts test/paper/intake.test.ts test/cli/tui/paper-workbench.test.ts
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/run-api.test.ts
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
 
     0.13.0-dev - 2026/05/26 (71d0c81a) [develop]
         :brief 研究闭环监控：查新、PaperSpine、全局图与实时 Preview
@@ -400,7 +417,7 @@
         :build
             - 根目录新增 build/link 脚本，源码编译后在仓库根目录生成 paper_fucker.exe 或 paper_fucker
             - packages/opencode build 的 optional dependency 安装改为 --no-save，避免污染 package.json 或 bun.lock
-            - root package.json、packages/opencode/package.json 增加 author 元数据，仓库 URL 仍指向当前 S0ra-ai/paper_fucker 远端
+            - root package.json、packages/opencode/package.json 增加 author 元数据，仓库 URL 后续统一为 ZhuchenZhong/paper_fucker 远端
         :release
             - .gitattributes 增加 export-ignore，GitHub source archive 排除 TaskFlow、reports、legacy、upstream、本地 runtime、测试树和上游营销素材
             - packages/opencode 与 packages/preview 增加 npm files 白名单，避免 test/spec/fixture/历史证据进入 pack
