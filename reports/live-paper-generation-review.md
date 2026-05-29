@@ -377,3 +377,12 @@ Paper Fucker 当前已经具备“诚实闭环”的关键能力：没有复现�
 - 最新 protocol benchmark：`run-8ce6e48b-e95f-4812-98e2-0ab527119750`，status=`succeeded`，final export=`final`，failed checks 为空，Preview ready。
 - 抽查：`tmp/live-paper-quality-benchmark/protocol` 根目录仅保留最新 `paperrun-summary.json`；workspace 的 `source-evidence.json` 含 5 条 live arXiv abs page verified source；终稿 Related Work 显示真实 arXiv URL，未发现固定 arXiv seed、旧本地来源、伪容器镜像或测试来源残留。
 - 验证：`test/paper/authoring.test.ts` 11 pass / 218 assertions；`test/paper/strict-acceptance.test.ts -t "fake locator"` 1 pass / 16 assertions；`packages/opencode` typecheck passed；`scripts/live-paper-quality-benchmark.ts --scenario protocol` passed。
+
+## 2026-05-30 方法与可复现性论文式表达复审
+
+- 写作器的方法段不再输出“证据优先流程”“每个运行”“阶段图驱动”等运行说明，改为材料边界定义、代码证据抽取和可复现实验约束三部分。
+- 可复现性段落不再以“本节比较”开场，改为“可复现性分析比较本机与容器结果”；实验运行记录标题收敛为“实验执行摘要”。
+- 最新 protocol benchmark：`run-77d3b102-38d0-4dc4-92af-651cc46d6126`，status=`succeeded`，14 个 stage 全通过，final export=`final`，failed checks 为空，Preview ready。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-77d3b102-38d0-4dc4-92af-651cc46d6126\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 抽查：主文未发现“本文采用证据优先流程”“每个运行”“本节比较”“实验运行记录”、旧摘要/引言模板句、工程审计词、完整机器 id、`mock/fake/fixture/placeholder`、伪来源或伪容器残留。
+- 验证：`test/paper/authoring.test.ts` 12 pass / 282 assertions；`packages/opencode` typecheck passed；`scripts/live-paper-quality-benchmark.ts --scenario protocol` passed。
