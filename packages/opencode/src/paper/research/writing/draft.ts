@@ -323,8 +323,7 @@ function evidenceSourceIds(input: ComposeDraftPaperInput) {
 function sourceSummary(input: ComposeDraftPaperInput) {
   const sourceIds = evidenceSourceIds(input)
   if (sourceIds.length === 0) return "本次运行尚未登记可引用来源，因此正文只能作为研究骨架。"
-  const shown = [...new Set(sourceIds.map(sourceKindLabel))].slice(0, 4).join("、")
-  return `本次运行使用 ${sourceIds.length} 个可追踪来源，主要包括${shown}${sourceIds.length > 4 ? "等" : ""}。`
+  return `本次运行使用 ${sourceIds.length} 个可追踪来源，其中${countedSummary(sourceIds, sourceKindLabel, "个")}。`
 }
 
 function artifactSummary(input: ComposeDraftPaperInput) {
@@ -778,13 +777,34 @@ function metricLookup(run: Pick<ExperimentRun, "metrics">, metric: string) {
   return run.metrics.find((item) => item.name === metric)?.value
 }
 
+function experimentDesignCounts(input: ComposeDraftPaperInput) {
+  const baseline = input.experiment_plan?.baselines.length ?? 0
+  const ablation = input.experiment_plan?.ablations.length ?? 0
+  const protocolContainer = input.experiment_protocol?.entries.filter((entry) => entry.role === "container_reproduction").length ?? 0
+  const containerRuns = input.experiment_runs?.container_runs.length ?? 0
+  const hostRuns = input.experiment_runs?.host_runs.length ?? 0
+  return {
+    baseline,
+    ablation,
+    container: protocolContainer > 0 ? protocolContainer : containerRuns,
+    hostRuns,
+    containerRuns,
+  }
+}
+
+function experimentDesignCountsText(input: ComposeDraftPaperInput) {
+  const counts = experimentDesignCounts(input)
+  return `基线=${counts.baseline}、消融=${counts.ablation}、容器复现=${counts.container}`
+}
+
 function researchQuestionsSummary(input: ComposeDraftPaperInput) {
   const ready = finalReady(input)
   const metric = displayMetricName(input.result_report?.primary_metric ?? input.experiment_plan?.proposed.expected_metric ?? "primary_metric")
+  const design = experimentDesignCountsText(input)
   return joinBlocks([
-    `本文围绕“${input.title}”提出三个可检验问题，重点放在方法本身、实验协议和可复现证据，而不是只评价生成文本是否完整。`,
-    "RQ1 方法证据：提交的代码、方法描述和源码范围是否足以支撑正文中的方法断言？",
-    `RQ2 实验有效性：本文方法、基线和消融是否围绕“${metric}”这一主指标形成可比较记录？`,
+    `本文把研究目标拆成三项：证据是否足以支撑方法，${design} 的对照是否能形成可比较结果，以及复现状态是否允许终稿结论。`,
+    "RQ1 证据边界：提交的代码、方法描述和源码范围是否足以支撑正文中的方法断言？",
+    `RQ2 对照有效性：本文方法、基线和消融是否围绕“${metric}”这一主指标形成可比较记录？`,
     "RQ3 复现一致性：本机与隔离环境中的状态和主指标是否一致，从而允许结果进入终稿结论？",
     ready
       ? "由于当前终稿检查已通过，正文只保留已绑定来源和实验结果的结论；完整证据索引放在附录。"
@@ -796,12 +816,17 @@ function contributionsSummary(input: ComposeDraftPaperInput) {
   const metric = displayMetricName(input.result_report?.primary_metric ?? input.experiment_plan?.proposed.expected_metric ?? "primary_metric")
   const methodClaim = firstClaimText(input, "method")
   const resultClaim = firstClaimText(input, "results")
+  const counts = experimentDesignCounts(input)
+  const runEvidence =
+    counts.hostRuns > 0 || counts.containerRuns > 0
+      ? `，并记录 ${counts.hostRuns} 个本机运行和 ${counts.containerRuns} 个容器运行`
+      : ""
   return joinBlocks([
-    "本文贡献集中在研究对象和实验结论本身：",
+    "本文贡献集中在三条可审查链路：",
     [
-      `1. 给出一个围绕“${input.title}”的证据约束写作框架，使方法断言必须绑定代码、来源或实验记录${methodClaim ? `；核心方法断言为：${trimTerminalPunctuation(methodClaim)}` : ""}。`,
-      `2. 将本文方法、基线与消融放入同一评价协议，并${primaryMetricPhrase(metric).replace("主指标", "主比较指标")}${resultClaim ? `；核心结果断言为：${trimTerminalPunctuation(resultClaim)}` : ""}。`,
-      "3. 用本机/容器一致性检查约束结果表述，避免把未复现或只在单一环境中成立的观察写成终稿结论。",
+      `1. 第一项贡献是把源码范围、来源和实验记录统一为可审查证据${methodClaim ? `；核心方法断言为：${trimTerminalPunctuation(methodClaim)}` : ""}。`,
+      `2. 第二项贡献是将本文方法与 ${counts.baseline} 个基线、${counts.ablation} 个消融放入同一评价协议，并${primaryMetricPhrase(metric).replace("主指标", "主比较指标")}${resultClaim ? `；核心结果断言为：${trimTerminalPunctuation(resultClaim)}` : ""}。`,
+      `3. 第三项贡献是用本机/容器一致性检查约束结果表述${runEvidence}，避免把未复现或只在单一环境中成立的观察写成终稿结论。`,
     ].join("\n"),
     "这些贡献共同保证方法比较、复现检查和正文表述共享同一套证据边界。",
   ])
