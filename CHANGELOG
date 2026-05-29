@@ -2,10 +2,20 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.1-dev
+:version       0.13.0.2-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.2-dev - 2026/05/30 (a95e91b1) [fix/mcp-tool-binding-test-isolation]
+        :brief 清理终稿导出 fallback 诊断语义
+        :export
+            - fix(pdf): LaTeX engine fallback 成功后不再把失败尝试写入最终 PDF diagnostics
+            - test(export): 导出测试使用真实 PDF/DOCX 文件头，并覆盖无效二进制输出阻断
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/export-pipeline.test.ts
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
     0.13.0.1-dev - 2026/05/30 (7ced85ef) [fix/mcp-tool-binding-test-isolation]
         :brief TUI 期刊工作台与期刊 profile 路由
