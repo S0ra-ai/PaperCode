@@ -20,6 +20,13 @@
 - 相关工作新增“综合来看”谱系段，把已验证文献归入工具使用或智能体自动化、实验复现与验证风险、任务数据与领域评测、论文到代码执行链路等类别。
 - 每条英文摘要文献的相关性改为“作用”标签，降低重复主题词堆砌；坏词扫描未发现 `主指标 排序`、`在 排序`、`主要包括 `、`并用 `、`mock/fake/fixture/placeholder` 或内部证据 ID 残留。
 
+## 2026-05-30 相关工作对比段复审
+
+- 协议场景复跑 `run-e10a7c20-16ea-48dd-9179-718ef929c779`：status=`succeeded`，final export=`final`，Preview=`ready`，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-e10a7c20-16ea-48dd-9179-718ef929c779\exports\bundle-final-draft-paper-final-export-bf8afc2d-1fa3-42be-9a2b-66e6281acef6\bundle-final-draft-paper-final-export-bf8afc2d-1fa3-42be-9a2b-66e6281acef6.md`。
+- “对比这些方向”段现在会尽量为不同作用组选择不同代表文献；协议场景中工具/智能体、复现验证、论文到代码执行链路分别选出不同代表，避免机械重复。
+- 坏词扫描未发现 `核心参考包括`、`文献图中的 `、`主指标 排序`、`在 排序`、`mock/fake/fixture/placeholder` 或内部证据 ID 残留。
+
 ## 本轮实跑
 
 | 场景 | Run ID | 结果 | 判断 |

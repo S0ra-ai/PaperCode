@@ -2,10 +2,20 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.4-dev
+:version       0.13.0.5-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.5-dev - 2026/05/30 (11678f63) [fix/mcp-tool-binding-test-isolation]
+        :brief 相关工作对比段按作用去重选择代表文献
+        :authoring
+            - fix(related-work): “对比这些方向”段按作用组选择不同代表，避免同一篇文献重复代表多个方向
+            - test(related-work): 增加重叠作用标签场景，确保复现验证组能选择不同文献代表
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
     0.13.0.4-dev - 2026/05/30 (6f3fc8b8) [fix/mcp-tool-binding-test-isolation]
         :brief 增强代码论文相关工作综合与文献作用标注
