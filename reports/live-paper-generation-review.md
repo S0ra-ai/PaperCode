@@ -5,6 +5,14 @@
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
 
+## 2026-05-30 指标文案与实时来源复审
+
+- 协议场景复跑 `run-8664dcbc-5828-4c2f-9fc2-1ef582c814da`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-8664dcbc-5828-4c2f-9fc2-1ef582c814da\exports\bundle-final-draft-paper-final-export-bbb9f81b-7c97-4288-8f80-7f87fa41f858\bundle-final-draft-paper-final-export-bbb9f81b-7c97-4288-8f80-7f87fa41f858.md`。
+- 终稿已消除“主指标 排序”“在 排序”“主要包括 ... 等”“并用 ...”等模板痕迹；ranking 场景的构念效度示例改为围绕 `排序 nDCG@3`，不再错误套用类型检查说明。
+- `live-paper-quality-benchmark` 的 arXiv 检索保持真实网络来源：HTML 搜索超时后重试，并回退到官方 Atom API；未引入 mock、fixture 或伪来源。
+- 结论：本轮提升了代码论文终稿的专业可读性和真实来源链路稳定性，但仍需继续提升研究问题表达、相关工作综合和面向真实用户仓库的实验协议生成质量。
+
 ## 本轮实跑
 
 | 场景 | Run ID | 结果 | 判断 |
