@@ -2,10 +2,21 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.6-dev
+:version       0.13.0.7-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.7-dev - 2026/05/30 (58cd886c) [fix/mcp-tool-binding-test-isolation]
+        :brief 终稿主文移除工程审计词，转为论文式证据充分性表述
+        :authoring
+            - fix(draft): 摘要、引言、研究设计和可复现性主文使用“证据充分性”“正式结论”等论文式表达，减少终稿检查、导出包等运行审计词
+            - fix(draft): 贡献、结果和结论统一把复现约束写成正式结论边界，不再把主文表述为产品产物或导出流程
+            - test(authoring): 主文禁止出现终稿检查、终稿导出、导出包、导出清单、写作器、系统应和本文产物等工程化表达
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
     0.13.0.6-dev - 2026/05/30 (62819ced) [fix/mcp-tool-binding-test-isolation]
         :brief 研究问题、贡献与来源概述转向证据化论文表达
