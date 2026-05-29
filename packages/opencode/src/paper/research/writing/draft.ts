@@ -326,8 +326,8 @@ function evidenceSourceIds(input: ComposeDraftPaperInput) {
 
 function sourceSummary(input: ComposeDraftPaperInput) {
   const sourceIds = evidenceSourceIds(input)
-  if (sourceIds.length === 0) return "本次运行尚未登记可引用来源，因此正文只能作为研究骨架。"
-  return `本次运行使用 ${sourceIds.length} 个可追踪来源，其中${countedSummary(sourceIds, sourceKindLabel, "个")}。`
+  if (sourceIds.length === 0) return "本研究尚未登记可引用来源，因此正文只能作为研究骨架。"
+  return `本研究使用 ${sourceIds.length} 个可追踪来源，其中${countedSummary(sourceIds, sourceKindLabel, "个")}。`
 }
 
 function artifactSummary(input: ComposeDraftPaperInput) {
@@ -611,7 +611,7 @@ function dataAvailabilitySummary(input: ComposeDraftPaperInput) {
         .filter(Boolean)
         .join("")
     }
-    return `本次运行未登记可用数据集。${gaps} 因此实验结果只能依赖用户提供的显式实验记录；若缺少实验记录，正式结论必须保持阻断。`
+    return `本研究尚未登记可用数据集。${gaps} 因此实验结果只能依赖用户提供的显式实验记录；若缺少实验记录，正式结论必须保持阻断。`
   }
   const datasetLines = data.datasets.slice(0, 5).map((dataset) => {
     const license = displayDatasetLicense(dataset.license.expression ?? dataset.license.status)
@@ -766,7 +766,7 @@ function experimentRunSummary(input: ComposeDraftPaperInput) {
   })
   return rows.length > 0
     ? [
-        "表 1 汇总了本次运行登记的本机与容器实验。正文只展示关键指标，完整输出保留在运行证据日志中。",
+        "表 1 汇总了本研究登记的本机与容器实验。正文只展示关键指标，完整输出保留在审查材料中。",
         "",
         markdownTable(["环境", "实验", "角色", "状态", "指标", "耗时", "命令", "输出"], rows),
       ].join("\n")
@@ -894,7 +894,7 @@ function implementationTraceSummary(input: ComposeDraftPaperInput) {
   ])
   return joinBlocks([
     "实现层面，写作阶段不会直接把内部运行日志拼进论文；它先读取断言台账、数据计划、实验计划、实验运行和结果报告，再把这些结构化产物转换为论文段落、表格和附录索引。",
-    `本次运行共有 ${input.ledger.entries.length} 条断言、${evidenceSources.length} 个可追踪来源（其中 ${sourceIds.length} 个直接绑定断言）和 ${artifactIds.length} 个证据记录。断言状态会影响证据充分性判断：待补证据的断言只能出现在待修复草稿中，已支持断言才允许进入正式结论。`,
+    `本研究共有 ${input.ledger.entries.length} 条断言、${evidenceSources.length} 个可追踪来源（其中 ${sourceIds.length} 个直接绑定断言）和 ${artifactIds.length} 个证据记录。断言状态会影响证据充分性判断：待补证据的断言只能出现在待修复草稿中，已支持断言才允许进入正式结论。`,
     claimRows.length > 0
       ? markdownTable(["断言", "章节", "状态", "来源类型", "证据概况"], claimRows)
       : "当前没有断言行。",
@@ -968,8 +968,8 @@ function hostContainerConsistencySummary(input: ComposeDraftPaperInput) {
     `本节比较本机与容器结果，${primaryMetricPhrase(metricLabel)}。只有当本文方法、基线和消融在可复现环境中有一致记录时，相关结果才有资格进入正式结论。`,
     markdownTable(["实验", "本机状态", `本机 ${metricLabel}`, "容器状态", `容器 ${metricLabel}`, "差值", "容器命令"], rows),
     mismatches.length === 0
-      ? "本次运行没有发现本机/容器状态或主指标差异，复现检查可以把这些实验作为正式结论的支撑证据。"
-      : `本次运行发现 ${mismatches.length} 个本机/容器差异，相关断言应降级为探索性观察，直到复现脚本或环境被修复。`,
+      ? "本机与容器比较没有发现状态或主指标差异，复现检查可以把这些实验作为正式结论的支撑证据。"
+      : `本机与容器比较发现 ${mismatches.length} 个状态或主指标差异，相关断言应降级为探索性观察，直到复现脚本或环境被修复。`,
     "该检查不等价于证明方法泛化有效；它只证明当前工作区、当前协议和当前环境声明可以复现同一组观测结果。泛化结论仍需要更多数据集、更多随机种子和领域基线。",
   ])
 }
@@ -1008,7 +1008,7 @@ function threatsToValiditySummary(input: ComposeDraftPaperInput) {
     report?.best_baseline && report.proposed
       ? `内部效度：本文方法与最佳基线${primaryMetricLocus(metric)}的差异为 ${formatMetricValue(report.proposed.value - report.best_baseline.value)}。如果差异很小，正文不能把流程完整性写成性能优势；如果差异很大，也需要检查随机种子、数据划分和脚本等价性。`
       : "内部效度：当前缺少本文方法与基线的可比较结果，因此不能声称方法优于对照。",
-    "外部效度：当前结论只覆盖用户提交的工作区、登记的数据/代码材料和本次运行环境。要扩展到更一般的计算机类论文场景，还需要更多任务、更多仓库、更多基线和更严格的人工审稿。",
+    "外部效度：当前结论只覆盖用户提交的工作区、登记的数据/代码材料和当前实验环境。要扩展到更一般的计算机类论文场景，还需要更多任务、更多仓库、更多基线和更严格的人工审稿。",
     "复现效度：容器复现能降低环境差异，但不能自动证明依赖来源永久可用。审查材料应保存命令、镜像、摘要、输出摘要和证据清单，必要时还需要锁定数据版本。",
     "自动化效度：自动写作链路不能替代研究者对问题价值、实验设计合理性和投稿伦理的最终判断。可疑结论仍应标为阻断或需要人工审查。",
   ])
@@ -1170,7 +1170,7 @@ function evidenceModelSummary(input: ComposeDraftPaperInput) {
   const unsupported = input.ledger.unsupported_claim_ids.length
   return joinBlocks([
     "本文把证据组织成来源、断言和结构化记录三层。来源表示论文材料、代码文件、数据集或实验日志；断言表示正文可以被审查的具体陈述；结构化记录表示由分析、实验、审稿或导出阶段产生的证据。",
-    `本次运行登记 ${evidenceSources.length} 个可追踪来源、${input.ledger.entries.length} 条断言和 ${artifactIds.length} 个结构化记录；其中 ${sourceIds.length} 个来源直接绑定断言，${supported} 条断言已标记为有证据支持，${unsupported} 条断言仍缺证据。`,
+    `本研究登记 ${evidenceSources.length} 个可追踪来源、${input.ledger.entries.length} 条断言和 ${artifactIds.length} 个结构化记录；其中 ${sourceIds.length} 个来源直接绑定断言，${supported} 条断言已标记为有证据支持，${unsupported} 条断言仍缺证据。`,
     "写作阶段只把有证据支持的断言作为正式正文的候选内容；缺少源码范围、实验结果或复现记录的断言会被保留为待修复项，不能伪装成已验证贡献。",
     "这种证据模型的作用是让读者能够从正文中的方法或结果句子追溯到材料、实验命令、指标和审稿记录，从而形成可追踪性。它也为后续人工审稿提供定位入口：审稿人可以先读主文，再进入附录检查完整证据索引。",
     "因此，正文中的每个实验结论都应回答两个问题：它来自哪里，以及是否在受控环境中重复出现。",
