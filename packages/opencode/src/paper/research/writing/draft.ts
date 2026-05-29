@@ -456,7 +456,7 @@ function literatureSynthesisSummary(map: LiteratureMap, sources: LiteratureMap["
   const taxonomy = roleTags.length > 0 ? roleTags : clusterLabels
   if (taxonomy.length === 0) return undefined
   const taxonomyText = taxonomy.slice(0, 4).join("、")
-  const clusterText = clusterLabels.length > 0 ? `文献图的${clusterLabels.slice(0, 3).join("、")}主题簇说明这些方向已经形成可追踪背景；` : ""
+  const clusterText = clusterLabels.length > 0 ? `${clusterLabels.slice(0, 3).join("、")}等主题线索说明这些方向已经形成可追踪背景；` : ""
   return `综合来看，相关工作可分为 ${taxonomy.length} 类：${taxonomyText}。${clusterText}本文不把这些工作简单当作背景罗列，而是用它们界定本研究的比较边界：已有研究说明自动化研究、工具调用或复现评测为何重要，本文进一步要求代码证据、实验协议和容器复现同时支撑正文结论。`
 }
 
@@ -510,17 +510,17 @@ function literatureEvidenceSummary(input: ComposeDraftPaperInput) {
   ])
   const clusterText =
     map.clusters.length > 0
-      ? `文献图还形成 ${map.clusters.length} 个主题簇：${map.clusters
+      ? `这些文献形成 ${map.clusters.length} 条主题线索：${map.clusters
           .slice(0, 3)
           .map((cluster) => `${cluster.label}（${cluster.keywords.map(paperProseText).join("、")}）`)
           .join("；")}。`
-      : "文献图尚未形成稳定主题簇。"
-  const gapText = map.diagnostics.gaps.length > 0 ? `剩余缺口：${map.diagnostics.gaps.map(paperProseText).join("、")}。` : "当前文献图没有登记阻断性缺口。"
+      : "这些文献尚未形成稳定主题线索。"
+  const gapText = map.diagnostics.gaps.length > 0 ? `剩余缺口：${map.diagnostics.gaps.map(paperProseText).join("、")}。` : "当前相关工作没有登记阻断性缺口。"
   const verifiedHeading = verified.length > 0 ? "相关工作" : "候选文献"
   const verifiedClaim =
     verified.length > 0
-      ? `本次相关工作使用 ${map.summary.total_sources} 条文献记录，其中 ${map.summary.verified_sources} 条已验证，${map.summary.open_license_sources} 条${displayLicenseStatus("clear")}。`
-      : `本次相关工作只有 ${map.summary.total_sources} 条候选文献，尚未完成来源验证；这些条目只能提示检索方向，不能作为已验证相关工作。`
+      ? `本文纳入 ${map.summary.total_sources} 条相关文献记录，其中 ${map.summary.verified_sources} 条已验证，${map.summary.open_license_sources} 条${displayLicenseStatus("clear")}。`
+      : `本文仅纳入 ${map.summary.total_sources} 条候选文献，尚未完成来源验证；这些条目只能提示检索方向，不能作为已验证相关工作。`
   return joinBlocks([
     `${verifiedClaim}${clusterText}${gapText}`,
     verified.length > 0 ? literatureSynthesisSummary(map, selected) : undefined,
