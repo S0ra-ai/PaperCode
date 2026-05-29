@@ -37,6 +37,14 @@
 - 坏词扫描未发现 `本文围绕`、`证据约束写作框架`、`主要包括`、`主指标 排序`、`在 排序`、`并用 `、`mock/fake/fixture/placeholder` 或内部证据 ID 残留。
 - 质量判断：当前协议样本已经更接近正常论文的研究问题、贡献与材料说明；下一轮应继续减少主文中的“终稿检查/导出”等工程审计词，转为期刊论文常用的证据充分性、复现条件和材料可得性表述。
 
+## 2026-05-30 主文工程审计词收敛复审
+
+- 协议场景复跑 `run-b41719dd-749d-4c89-ab8d-ea794ede17ac`：status=`succeeded`，final export=`final`，Preview=`ready`，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-b41719dd-749d-4c89-ab8d-ea794ede17ac\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 摘要、引言、研究问题、研究设计、结果、可复现性和结论改用“证据充分性检查”“正式结论”“本地审查材料”等表达，不再把主文写成导出或运行审计报告。
+- 主文扫描未发现 `终稿检查`、`终稿导出`、`导出包`、`导出清单`、`写作器`、`系统应`、`本文产物`、`主要包括`、`mock/fake/fixture/placeholder` 或内部证据 ID 残留；附录仍保留必要审计字段。
+- 质量判断：主文现在更接近期刊论文的证据边界叙述；下一轮应继续减少“本次运行”频率，并把实验设置、效度威胁和结论改得更像面向真实研究对象的论文。
+
 ## 本轮实跑
 
 | 场景 | Run ID | 结果 | 判断 |
