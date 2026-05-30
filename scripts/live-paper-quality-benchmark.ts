@@ -282,6 +282,13 @@ async function protocolBenchmarkWorkspace(dataset: ReturnType<typeof liveArxivRa
     path.join(workspace, "package.json"),
     `${JSON.stringify(
       {
+        name: "paper-fucker-live-ranking-protocol",
+        version: "0.1.0",
+        license: "MPL-2.0",
+        repository: {
+          type: "git",
+          url: "https://github.com/ZhuchenZhong/paper_fucker",
+        },
         scripts: {
           "test:ranking": "bun run experiments/evaluate-agent-ranking.ts --variant=proposed",
           "baseline:ranking-lexical": "bun run experiments/evaluate-agent-ranking.ts --variant=baseline",

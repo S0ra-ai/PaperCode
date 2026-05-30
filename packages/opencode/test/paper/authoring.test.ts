@@ -923,6 +923,11 @@ describe("paper authoring loop", () => {
           run("ablation ranking no coverage", "ablation", "container"),
         ],
       },
+      code_metadata: {
+        repository_url: "https://github.com/ZhuchenZhong/paper_fucker",
+        version: "0.13.0-test",
+        license: "MPL-2.0",
+      },
       data_plan: {
         datasets: [
           {
@@ -1114,9 +1119,9 @@ describe("paper authoring loop", () => {
     expect(dataAvailability).toContain("代码可用性")
     expect(dataAvailability).toContain("方法实现包括 rankAgentTeamPapers(src/agent-team-paper.ts:3)、scorePaper(src/agent-team-paper.ts:7)、claimLedgerCoverage(src/agent-team-paper.ts:11)")
     expect(dataAvailability).toContain("复现实验入口包括排名测试、词项匹配基线、无证据覆盖消融和容器复现")
-    expect(dataAvailability).toContain("代码仓库地址：未登记")
-    expect(dataAvailability).toContain("代码版本：未登记")
-    expect(dataAvailability).toContain("代码许可证：未登记")
+    expect(dataAvailability).toContain("代码仓库地址：https://github.com/ZhuchenZhong/paper_fucker")
+    expect(dataAvailability).toContain("代码版本：0.13.0-test")
+    expect(dataAvailability).toContain("代码许可证：MPL-2.0")
     expect(dataAvailability).not.toContain("Deterministic validation labels")
     expect(dataAvailability).not.toContain("not human relevance ground truth")
     expect(dataAvailability).not.toContain("当前代码工作区")

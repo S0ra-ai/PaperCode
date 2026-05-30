@@ -10,6 +10,12 @@ import type {
 import type { DataPlan, LiteratureMap } from "../sources"
 import type { CheckpointGuidance, ClaimLedger, ClaimLedgerEntry, DraftPaper, DraftSection } from "./schemas"
 
+export type CodeAvailabilityMetadata = {
+  repository_url?: string
+  version?: string
+  license?: string
+}
+
 export type ComposeDraftPaperInput = {
   title: string
   ledger: ClaimLedger
@@ -27,6 +33,7 @@ export type ComposeDraftPaperInput = {
     container_runs: Pick<ExperimentRun, "experiment_id" | "role" | "status" | "command" | "environment" | "metrics" | "stdout" | "stderr" | "exit_code" | "resource_usage">[]
   }
   result_report?: Pick<ResultReport, "best_baseline" | "blockers" | "final_claims_allowed" | "primary_metric" | "proposed" | "recommendation" | "reproduction">
+  code_metadata?: CodeAvailabilityMetadata
   now?: string
 }
 
@@ -823,11 +830,14 @@ function codeAvailabilitySummary(input: ComposeDraftPaperInput) {
   if (ranges.length === 0 && entrypoints.length === 0) return undefined
   const implementation = ranges.length > 0 ? `方法实现包括 ${ranges.join("、")}。` : "方法实现入口尚未登记。"
   const reproduction = entrypoints.length > 0 ? `复现实验入口包括${chineseList(entrypoints)}。` : "复现实验入口尚未登记。"
+  const repository = input.code_metadata?.repository_url ?? "未登记"
+  const version = input.code_metadata?.version ?? "未登记"
+  const license = input.code_metadata?.license ?? "未登记"
   return [
     "代码可用性：",
     implementation,
     reproduction,
-    "代码仓库地址：未登记；代码版本：未登记；代码许可证：未登记。",
+    `代码仓库地址：${repository}；代码版本：${version}；代码许可证：${license}。`,
   ].join("\n")
 }
 
