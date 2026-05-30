@@ -2,10 +2,22 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.101-dev
+:version       0.13.0.102-dev
 :last_update   2026/05/31
 
 :history
+
+    0.13.0.102-dev - 2026/05/31 (16e11251) [fix/mcp-tool-binding-test-isolation]
+        :brief 通用相关工作占位来源过滤
+        :authoring
+            - fix(related-work): 通用相关工作与材料来源统计只使用已验证且非占位 URL 的正式文献来源
+            - fix(related-work): 占位来源改为待补检索边界，不再输出为相关工作表格、代表文献或已验证论文来源
+            - test(authoring): 新增通用相关工作占位来源用例，并将代表分组测试改用正式 arXiv 定位
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "placeholder literature|distinct representatives"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|renders ranking related work|placeholder literature|distinct representatives"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|renders ranking related work|placeholder literature|distinct representatives|live paper quality|prefers product README version|retries retryable temporary directory cleanup"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
 
     0.13.0.101-dev - 2026/05/31 (29d68727) [fix/mcp-tool-binding-test-isolation]
         :brief 占位相关工作过滤
