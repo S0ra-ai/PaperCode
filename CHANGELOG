@@ -2,10 +2,22 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.63-dev
+:version       0.13.0.64-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.64-dev - 2026/05/30 (8d9d13bd) [fix/mcp-tool-binding-test-isolation]
+        :brief 实验协议入口说明改为覆盖口径
+        :authoring
+            - fix(protocol): ranking 实验设置说明 4 个入口覆盖本文方法、词项匹配基线、无证据覆盖消融和容器复现
+            - fix(protocol): 移除来源为复现实验入口的生硬表述
+            - test(authoring): ranking 成稿断言实验设置不再出现来源为复现实验入口
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
     0.13.0.63-dev - 2026/05/30 (6d5bb56f) [fix/mcp-tool-binding-test-isolation]
         :brief 复现实验数量口径改为实验记录

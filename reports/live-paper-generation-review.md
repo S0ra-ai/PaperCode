@@ -1,9 +1,17 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.63-dev
+- project_version: 0.13.0.64-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 实验协议覆盖说明复审
+
+- 协议场景复跑 `run-addf162a-4359-4933-90ce-929570c89ad3`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-addf162a-4359-4933-90ce-929570c89ad3\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 实验设置现在写为 `实验协议包含 4 个可执行入口，覆盖本文方法、词项匹配基线、无证据覆盖消融和容器复现`。
+- 最终稿不再出现 `来源为复现实验入口`。
+- 质量判断：实验协议句从内部来源说明改成论文读者可直接理解的覆盖范围说明。
 
 ## 2026-05-30 复现实验记录口径复审
 
