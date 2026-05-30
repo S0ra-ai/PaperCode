@@ -2,10 +2,22 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.103-dev
+:version       0.13.0.104-dev
 :last_update   2026/05/31
 
 :history
+
+    0.13.0.104-dev - 2026/05/31 (6d70b8e1) [fix/mcp-tool-binding-test-isolation]
+        :brief dataset discovery 占位来源过滤
+        :sources
+            - fix(dataset): discoverDatasets/openVerifiedDatasets 不再把 example、localhost、缺失 URL 等占位定位计入 open verified 数据集
+            - fix(dataset): 占位数据集写入 verification diagnostic，并在无正式开放数据集时保留 no_open_verified_dataset 缺口
+            - test(dataset): 覆盖 verified/open 占位数据集被排除，防止伪数据进入可行性和成稿链路
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/datasets.test.ts
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "complete code-paper|placeholder datasets|renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/datasets.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|placeholder datasets|dataset discovery|renders ranking benchmark|renders ranking related work|placeholder literature|distinct representatives|live paper quality|prefers product README version|retries retryable temporary directory cleanup"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
 
     0.13.0.103-dev - 2026/05/31 (79951912) [fix/mcp-tool-binding-test-isolation]
         :brief 占位数据集过滤

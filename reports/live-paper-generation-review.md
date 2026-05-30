@@ -1,9 +1,18 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.103-dev
+- project_version: 0.13.0.104-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-31 dataset discovery 占位来源过滤复审
+
+- dataset discovery 测试已确认 `https://example.org/dataset` 即使标记为 verified/open，也不会进入 open verified 数据集集合。
+- `discoverDatasets` 和 `openVerifiedDatasets` 现在共享同一过滤规则，避免可行性判断、转向和成稿阶段使用不同真实性边界。
+- 占位数据集会写入 `placeholder_dataset_locator` verification diagnostic；如果没有正式开放数据集，仍保留 `no_open_verified_dataset` 缺口。
+- 相关回归已通过：datasets 定向测试、authoring 定向测试、authoring/datasets/live/metadata 组合测试和 `packages/opencode` typecheck。
+- 本报告和 CHANGELOG 记录为后续开发版本 `0.13.0.104-dev`。
+- 质量判断：伪数据被拦截得更早，Paper Fucker 在生成接近人工协作质量论文时不会把占位数据源用于方向可行性判断。
 
 ## 2026-05-31 占位数据集过滤复审
 
