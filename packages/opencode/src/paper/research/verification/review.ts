@@ -27,6 +27,19 @@ function failure(review: ModelReviewInput, index: number): VerificationFinding {
   }
 }
 
+function missingModelReview(): VerificationFinding {
+  return {
+    finding_id: "missing_model_review:models",
+    category: "missing_model_review",
+    severity: "blocker",
+    message: "No model review result is available for final export.",
+    claim_ids: [],
+    source_ids: [],
+    artifact_ids: [],
+    required_action: "Run at least one configured review model before final export.",
+  }
+}
+
 function conflict(reviewers: ModelReviewInput[]): VerificationFinding {
   return {
     finding_id: "review_conflict:models",
@@ -48,6 +61,7 @@ export function runMultiModelReview(reviews: ModelReviewInput[], now: string): R
     },
     (span) => {
       const findings: VerificationFinding[] = []
+      if (reviews.length === 0) findings.push(missingModelReview())
       reviews.forEach((review, index) => {
         if (review.verdict === "warn") findings.push(warning(review, index))
         if (review.verdict === "fail") findings.push(failure(review, index))

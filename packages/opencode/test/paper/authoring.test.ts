@@ -1847,6 +1847,55 @@ describe("paper authoring loop", () => {
     expect(findings.map((finding) => finding.category)).not.toContain("missing_verified_reference")
   })
 
+  test("blocks final export when no model review is available", () => {
+    const ledger = composeClaimLedger({
+      topic: "Model review readiness",
+      claims: [
+        {
+          text: "The paper reference is ready.",
+          section_id: "related-work",
+          confidence: 0.8,
+          source_ids: ["paper:arxiv:2305.12571"],
+          artifact_ids: ["artifact-literature"],
+        },
+      ],
+      now,
+    })
+    const draft = composeDraftPaper({ title: "Model Review Readiness", ledger, now })
+    const result = evaluateVerificationGate({
+      ledger,
+      draft,
+      data_plan: dataPlan(),
+      result_report: resultReport(),
+      available_source_ids: ["paper:arxiv:2305.12571"],
+      source_records: [
+        {
+          schema_version: "SourceRecord.v1",
+          source_id: "paper:arxiv:2305.12571",
+          kind: "paper",
+          title: "Reproducibility Requires Consolidated Artifacts",
+          url: "https://arxiv.org/abs/2305.12571",
+          provider: "arxiv",
+          license: { status: "clear", expression: "CC BY-NC-SA 4.0" },
+          version: { value: "live-arxiv-abs-page", retrieved_at: now, published_at: "2023-05-21" },
+          verification: { status: "verified", method: "unit-test-real-arxiv-record", checked_at: now },
+          retrieved_at: now,
+          arxiv_id: "2305.12571",
+        },
+      ],
+      model_reviews: [],
+      now,
+    })
+
+    expect(result.blocking_report.status).toBe("blocked")
+    expect(result.blocking_report.blockers).toContainEqual(
+      expect.objectContaining({
+        category: "missing_model_review",
+        severity: "blocker",
+      }),
+    )
+  })
+
   test("blocks claim sources that are missing source records", () => {
     const ledger = composeClaimLedger({
       topic: "Source record readiness",
