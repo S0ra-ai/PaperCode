@@ -1,9 +1,17 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.60-dev
+- project_version: 0.13.0.61-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 数据可用性开放性复审
+
+- 协议场景复跑 `run-4f035a3f-1c43-4dc1-be2d-34fc6c704039`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-4f035a3f-1c43-4dc1-be2d-34fc6c704039\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 数据与代码可用性章节现在写为 `本研究使用 1 个可核验数据集`。
+- 表格仍分别保留访问状态 `开放` 与许可 `工作区授权本地数据集`，不再把两者合并成开放数据集总称。
+- 质量判断：数据可用性声明从泛化的开放数据集表述，收紧到可核验数据集，避免访问状态和许可状态混淆。
 
 ## 2026-05-30 方法图导出兼容复审
 
