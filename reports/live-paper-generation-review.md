@@ -1,9 +1,19 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.70-dev
+- project_version: 0.13.0.71-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 研究问题相关性口径复审
+
+- 协议场景复跑 `run-732c11a6-2e4c-4bb3-bd79-0da7d6eeac9d`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-732c11a6-2e4c-4bb3-bd79-0da7d6eeac9d\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 引言现在写为 `为检查 claim_coverage 项是否与排序差异相关`。
+- 研究问题现在写为 `RQ2 特征关联：移除 claim_coverage 后，相比完整排序，在排序 nDCG@3 上是否出现前三位排序差异？`。
+- 方法和实验设置现在分别写为 `证据覆盖相关性` 与 `检验证据覆盖项是否与候选排序差异相关`。
+- 最终稿代码版本为 `0.13.0.70-dev`，代码修订为 `c7e9fe29`；本报告和 CHANGELOG 记录为后续开发版本 `0.13.0.71-dev`。
+- 质量判断：RQ、引言、方法和实验设置统一为相关性口径，避免把单一候选集消融写成因果贡献或性能改善结论。
 
 ## 2026-05-30 证据覆盖表述复审
 

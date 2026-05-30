@@ -2,10 +2,24 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.70-dev
+:version       0.13.0.71-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.71-dev - 2026/05/30 (c7e9fe29) [fix/mcp-tool-binding-test-isolation]
+        :brief 研究问题与引言统一为相关性口径
+        :authoring
+            - fix(introduction): ranking 引言改为检查 claim_coverage 项是否与排序差异相关
+            - fix(rq): RQ2 改为移除 claim_coverage 后是否出现前三位排序差异
+            - fix(method): 方法入口说明使用证据覆盖相关性，不再写成贡献口径
+            - fix(setup): 无证据覆盖消融理由改为检验证据覆盖项与候选排序差异相关
+            - test(authoring): ranking 成稿断言不再出现特征贡献、改善前三位排序、证据覆盖贡献或带来排序收益
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
     0.13.0.70-dev - 2026/05/30 (b48dedd9) [fix/mcp-tool-binding-test-isolation]
         :brief 证据覆盖表述改为相关性口径
