@@ -1,9 +1,17 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.62-dev
+- project_version: 0.13.0.63-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 复现实验记录口径复审
+
+- 协议场景复跑 `run-d284027e-74b4-4356-858c-0e075db642d0`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-d284027e-74b4-4356-858c-0e075db642d0\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 主要贡献现在写为 `3 条本机实验记录和 3 条容器实验记录`。
+- 结果章节仍明确 `本文方法、基线和消融各在本机与容器环境执行一次`。
+- 质量判断：复现数量口径从运行次数改为实验记录，避免把三类实验条件误读为重复随机试验。
 
 ## 2026-05-30 方法结构框编号复审
 

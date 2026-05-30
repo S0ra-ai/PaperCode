@@ -2,10 +2,22 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.62-dev
+:version       0.13.0.63-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.63-dev - 2026/05/30 (6d5bb56f) [fix/mcp-tool-binding-test-isolation]
+        :brief 复现实验数量口径改为实验记录
+        :authoring
+            - fix(contribution): ranking 主要贡献将本机/容器运行改为本机/容器实验记录
+            - fix(interpretation): 贡献句避免把三类实验条件误读为重复随机试验次数
+            - test(authoring): ranking 成稿断言贡献章节不再出现 3 个本机运行和 3 个容器运行
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
     0.13.0.62-dev - 2026/05/30 (f224b98e) [fix/mcp-tool-binding-test-isolation]
         :brief 方法结构表改为框编号
