@@ -861,6 +861,44 @@ describe("paper authoring loop", () => {
         resource_budget: { max_wall_time_seconds: 3600, max_memory_mb: 8192, max_gpu_hours: 0 },
         downgrade_policy: ["If container reproduction fails, block final paper claims."],
       },
+      experiment_protocol: {
+        discovered_from: "package_scripts",
+        gaps: [],
+        entries: [
+          {
+            protocol_id: "proposed",
+            role: "proposed",
+            label: "test:ranking",
+            command: { argv: ["bun", "run", "test:ranking"] },
+            expected_metric: "ranking_ndcg_at_3",
+            rationale: "Ranking evaluation.",
+          },
+          {
+            protocol_id: "baseline:ranking-lexical",
+            role: "baseline",
+            label: "baseline:ranking-lexical",
+            command: { argv: ["bun", "run", "baseline:ranking-lexical"] },
+            expected_metric: "ranking_ndcg_at_3",
+            rationale: "Lexical baseline.",
+          },
+          {
+            protocol_id: "ablation:ranking-no-coverage",
+            role: "ablation",
+            label: "ablation:ranking-no-coverage",
+            command: { argv: ["bun", "run", "ablation:ranking-no-coverage"] },
+            expected_metric: "ranking_ndcg_at_3",
+            rationale: "Coverage ablation.",
+          },
+          {
+            protocol_id: "container:repro",
+            role: "container_reproduction",
+            label: "repro:container",
+            command: { argv: ["bun", "run", "repro:container"] },
+            expected_metric: "container_reproduction_pass",
+            rationale: "Container reproduction.",
+          },
+        ],
+      },
       result_report: {
         ...resultReport(),
         primary_metric: "ranking_ndcg_at_3",
@@ -958,6 +996,8 @@ describe("paper authoring loop", () => {
     const threatsToValidity = markdownSection(draft.markdown, "效度威胁")
     const limitations = markdownSection(draft.markdown, "限制")
     const conclusion = markdownSection(draft.markdown, "结论")
+    const appendixMaterials = markdownSection(draft.markdown, "附录 A：材料与实现定位")
+    const appendixReproduction = markdownSection(draft.markdown, "附录 B：复现实验入口")
     const dataAvailability = markdownSection(draft.markdown, "数据与代码可用性")
 
     expect(draft.markdown.startsWith("# 证据约束的候选论文排序方法：显式基线、消融与容器复现")).toBe(true)
@@ -1069,6 +1109,7 @@ describe("paper authoring loop", () => {
     expect(draft.markdown).not.toContain("提交代码库")
     expect(draft.markdown).not.toContain("登记命令")
     expect(draft.markdown).not.toContain("仓库提供")
+    expect(draft.markdown).not.toContain("项目声明的实验入口")
     expect(draft.markdown).not.toContain("方法证据显示：对提交代码库")
     expect(draft.markdown).not.toContain("方法部分的证据边界为：对提交代码库")
     expect(draft.markdown).not.toContain("把相关工作边界放在代码证据上：对提交代码库")
@@ -1092,12 +1133,27 @@ describe("paper authoring loop", () => {
     expect(draft.markdown).not.toContain("| ranking no coverage |")
     expect(draft.markdown).not.toContain("## 附录 E：断言证据表")
     expect(draft.markdown).not.toContain("## 附录 F：证据记录索引")
+    expect(draft.markdown).not.toContain("## 附录 A：证据追踪")
+    expect(draft.markdown).not.toContain("## 附录 B：复现清单")
     expect(draft.markdown).not.toContain("断言证据表")
     expect(draft.markdown).not.toContain("证据记录索引")
     expect(draft.markdown).not.toContain("结构化证据")
     expect(draft.markdown).not.toContain("处理 | 来源类型")
     expect(draft.markdown).not.toContain("## 限制与待修复项")
     expect(draft.markdown).not.toContain("待修复")
+    expect(appendixMaterials).toContain("材料类型")
+    expect(appendixMaterials).toContain("排序方法实现")
+    expect(appendixMaterials).toContain("代码材料")
+    expect(appendixMaterials).not.toContain("断言 1")
+    expect(appendixMaterials).not.toContain("断言状态")
+    expect(appendixMaterials).not.toContain("证据追踪表")
+    expect(appendixReproduction).toContain("本文方法")
+    expect(appendixReproduction).toContain("词项匹配基线")
+    expect(appendixReproduction).toContain("无证据覆盖消融")
+    expect(appendixReproduction).not.toContain("研究简报")
+    expect(appendixReproduction).not.toContain("就绪")
+    expect(appendixReproduction).not.toContain("结论表述条件")
+    expect(appendixReproduction).not.toContain("项目声明的实验入口")
   })
 
   test("renders ranking related work with ranking and retrieval representatives", () => {

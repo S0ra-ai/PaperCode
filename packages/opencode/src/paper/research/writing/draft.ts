@@ -832,7 +832,7 @@ function experimentProtocolSummary(input: ComposeDraftPaperInput) {
     ablationTable || "当前没有消融运行入口；贡献强度需要保持保守。",
     "",
     protocol
-      ? `实验协议包含 ${protocol.entries.length} 个可执行入口，来源为${displayProtocolSource(protocol.discovered_from)}；${protocol.gaps.length > 0 ? `仍需处理的协议缺口包括：${protocol.gaps.map(paperProseText).join("、")}。` : "当前实验协议完整。"}`
+      ? `实验协议包含 ${protocol.entries.length} 个可执行入口，来源为${isRankingContext(input) && protocol.discovered_from === "package_scripts" ? "复现实验入口" : displayProtocolSource(protocol.discovered_from)}；${protocol.gaps.length > 0 ? `仍需处理的协议缺口包括：${protocol.gaps.map(paperProseText).join("、")}。` : "当前实验协议完整。"}`
       : "当前没有显式仓库实验协议；流程只能根据已登记证据和受控执行结果组织评价。",
     "",
     `资源预算为运行时间<=${plan.resource_budget.max_wall_time_seconds}s、内存<=${plan.resource_budget.max_memory_mb}MB、GPU<=${plan.resource_budget.max_gpu_hours ?? 0} 小时。降级策略：${downgradePolicy}。`,
@@ -1203,6 +1203,20 @@ function implementationTraceSummary(input: ComposeDraftPaperInput) {
   const sourceIds = claimSourceIds(input)
   const evidenceSources = evidenceSourceIds(input)
   const evidenceLabel = isRankingContext(input) ? "复核材料" : "结构化证据"
+  if (isRankingContext(input)) {
+    const rows = input.ledger.entries.slice(0, 10).map((entry) => [
+      entry.section_id === "method" ? "排序方法实现" : displaySectionID(entry.section_id),
+      displaySectionID(entry.section_id),
+      countedSummary(entry.source_ids, sourceKindLabel, "个"),
+      evidenceCountSummary(entry.artifact_ids, evidenceLabel),
+    ])
+    return joinBlocks([
+      "本附录汇总主文所依赖的材料类型、实现位置和复核材料，便于读者定位排序接口与实验入口。",
+      `本研究共有 ${evidenceSources.length} 个可核验材料来源，其中 ${sourceIds.length} 个来源直接支撑正文方法或结果表述。`,
+      rows.length > 0 ? markdownTable(["条目", "对应章节", "材料类型", "复核材料"], rows) : "当前没有可列出的材料定位条目。",
+      "这些材料用于定位方法实现、数据来源和实验复现路径；结果解释仍以主文结果与讨论为准。",
+    ])
+  }
   const claimStatusRule = isRankingContext(input)
     ? "断言状态会影响终稿表述条件：待补证据的断言不能进入终稿结论，已支持断言才允许进入结论性表述。"
     : "断言状态会影响证据链完整性判断：待补证据的断言只能出现在待修复草稿中，已支持断言才允许进入结论性表述。"
@@ -1295,6 +1309,7 @@ function hostContainerConsistencySummary(input: ComposeDraftPaperInput) {
 }
 
 function reproducibilityChecklistSummary(input: ComposeDraftPaperInput) {
+  if (isRankingContext(input)) return rankingReproducibilityAppendixSummary(input)
   const hasPlan = Boolean(input.experiment_plan)
   const hasProtocol = Boolean(input.experiment_protocol && input.experiment_protocol.entries.length > 0)
   const hasHostRuns = Boolean(input.experiment_runs?.host_runs.length)
@@ -1317,6 +1332,30 @@ function reproducibilityChecklistSummary(input: ComposeDraftPaperInput) {
     markdownTable(["项目", "就绪", "证据"], rows),
     registeredCommandsSummary(input),
     "当清单中任一关键项为“否”时，相关结论应降级为探索性观察，并在正文或附录中说明缺失的证据类型。这样可以避免把完整段落误读为完整研究。",
+  ])
+}
+
+function rankingReproducibilityAppendixSummary(input: ComposeDraftPaperInput) {
+  const planRows = input.experiment_plan
+    ? [input.experiment_plan.proposed, ...input.experiment_plan.baselines, ...input.experiment_plan.ablations].map((spec) => [
+        displayExperimentRole(spec.role),
+        contextualExperimentLabel(input, spec.experiment_id, spec.role),
+        commandText(spec.command),
+        displayMetricName(spec.expected_metric),
+      ])
+    : []
+  const protocolRows =
+    input.experiment_protocol?.entries.map((entry) => [
+      displayExperimentRole(entry.role),
+      contextualExperimentLabel(input, entry.protocol_id, entry.role === "container_reproduction" ? undefined : entry.role),
+      commandText(entry.command),
+      displayMetricName(entry.expected_metric),
+    ]) ?? []
+  const rows = protocolRows.length > 0 ? protocolRows : planRows
+  return joinBlocks([
+    "本附录列出复现实验入口，便于读者复核本文方法、词项匹配基线、无证据覆盖消融和容器复现。结果数值以结果章节和可复现性章节为准。",
+    rows.length > 0 ? markdownTable(["角色", "实验", "命令", "指标"], rows.slice(0, 12)) : "当前没有可列出的复现实验入口。",
+    "这些入口用于复现评价协议，不替代主文中的结果解释；若入口、环境或指标发生变化，应重新生成结果表和效度分析。",
   ])
 }
 
@@ -1693,6 +1732,14 @@ function limitationsSectionTitle(input: ComposeDraftPaperInput) {
   return isRankingContext(input) ? "限制" : "限制与待修复项"
 }
 
+function appendixEvidenceTraceTitle(input: ComposeDraftPaperInput) {
+  return isRankingContext(input) ? "附录 A：材料与实现定位" : "附录 A：证据追踪"
+}
+
+function appendixReproducibilityTitle(input: ComposeDraftPaperInput) {
+  return isRankingContext(input) ? "附录 B：复现实验入口" : "附录 B：复现清单"
+}
+
 function limitationsSummary(input: ComposeDraftPaperInput, unsupported: string[], ready: boolean) {
   if (isRankingContext(input)) {
     const candidateCount = rankingCandidateCount(input)
@@ -1754,10 +1801,10 @@ function scaffoldSections(input: ComposeDraftPaperInput, claimSections: DraftSec
       conclusionSummary(input, ready),
     ),
     buildPlainSection("references", "参考文献", referencesSummary(input)),
-    buildPlainSection("appendix_evidence_trace", "附录 A：证据追踪", implementationTraceSummary(input)),
+    buildPlainSection("appendix_evidence_trace", appendixEvidenceTraceTitle(input), implementationTraceSummary(input)),
     buildPlainSection(
       "appendix_operational_reproducibility_checklist",
-      "附录 B：复现清单",
+      appendixReproducibilityTitle(input),
       reproducibilityChecklistSummary(input),
     ),
     ...(experimentGuidanceSummary(input)
