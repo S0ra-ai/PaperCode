@@ -1,9 +1,19 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.93-dev
+- project_version: 0.13.0.94-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 ranking 主要贡献表格复审
+
+- ranking authoring 测试已确认主要贡献章节包含 `贡献 / 内容 / 证据位置` 表格。
+- 排序评分、对照协议和复现约束三项贡献分别绑定到方法、实验设置、结果、可复现性和附录位置。
+- 主要贡献不再使用 `1.`、`2.`、`3.` 编号段落堆叠。
+- 相关回归已通过：authoring/live/metadata 定向测试和 `packages/opencode` typecheck 均通过。
+- 本轮未重复触发 protocol live 复审，原因是上一轮完整 protocol 复跑已被 arXiv HTTP 429 rate limit 阻断；为避免扩大限流，只记录当前 authoring 证据。
+- 本报告和 CHANGELOG 记录为后续开发版本 `0.13.0.94-dev`。
+- 质量判断：贡献章节现在更像正式论文的贡献摘要，读者能直接看到每项贡献及其证据位置。
 
 ## 2026-05-30 ranking 研究问题表格复审
 
