@@ -5,6 +5,14 @@
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
 
+## 2026-05-30 研究问题领域化复审
+
+- 协议场景复跑 `run-f5092197-2707-482f-9770-da46235e0159`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-f5092197-2707-482f-9770-da46235e0159\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 研究问题改为候选论文排序任务三问：排序接口是否可追踪、特征贡献是否可比较、复现结果是否一致。
+- RQ1 聚焦 `rankAgentTeamPapers` 与 `scorePaper`；RQ2 聚焦相对词项匹配基线和无证据覆盖消融的 `排序 nDCG@3` 差异；RQ3 聚焦本机与容器复现一致性。
+- 质量判断：研究问题从通用证据边界收敛到具体任务和实验变量，更接近人工协作稿的论文问题设定。
+
 ## 2026-05-30 基线消融语义复审
 
 - 协议场景复跑 `run-97ef4162-3306-4e2c-b27f-56e6c622f1c8`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
