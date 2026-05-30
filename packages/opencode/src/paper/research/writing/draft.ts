@@ -1697,8 +1697,9 @@ function rankingAblationInterpretation(input: ComposeDraftPaperInput) {
   const ablationValue = noCoverage ? metricLookup(noCoverage, report.primary_metric) : undefined
   if (typeof ablationValue !== "number") return undefined
   const delta = report.proposed.value - ablationValue
-  if (delta <= 0) return "消融分析显示，无证据覆盖消融没有低于本文方法，claim_coverage 特征在当前候选集上的贡献仍需进一步验证。"
-  return `消融分析显示，无证据覆盖消融低于本文方法，绝对差值为 ${formatMetricValue(delta)}，claim_coverage 项与当前候选集上的排序差异相关。`
+  const metric = displayMetricName(report.primary_metric)
+  if (delta <= 0) return `消融分析显示，无证据覆盖消融的${metric} 数值没有低于本文方法，claim_coverage 项与当前候选集排序差异的关系仍需进一步验证。`
+  return `消融分析显示，无证据覆盖消融的${metric} 数值低于本文方法，绝对差值为 ${formatMetricValue(delta)}，claim_coverage 项与当前候选集上的排序差异相关。`
 }
 
 function resultStatisticalScopeSummary(input: ComposeDraftPaperInput) {
@@ -1808,7 +1809,7 @@ function rankingDiscussionSummary(input: ComposeDraftPaperInput, report: NonNull
     }
   }
   rows.push("词项匹配基线提供了一个低成本检索对照：当前结果显示，完整排序与词项匹配基线存在可观测差异；该差异提示 relevance、claim_coverage 和 recency 的组合需要在更强基线和更大候选集上继续验证。")
-  rows.push("无证据覆盖消融去掉 claim_coverage 后排名下降，说明 claim_coverage 项与当前前三位排序差异相关。这一结果与任务设定一致：候选论文不仅要与主题相关，还需要覆盖当前研究问题中的关键断言。")
+  rows.push(`无证据覆盖消融移除 claim_coverage 后，${metricLabel} 数值低于完整排序，说明 claim_coverage 项与当前前三位排序差异相关。这一结果与任务设定一致：候选论文不仅要与主题相关，还需要覆盖当前研究问题中的关键断言。`)
   rows.push(`结果仍需要保守解释。${candidateText}，且标签不是人工相关性标注，而是由实时 arXiv 检索排序、主题匹配、元数据完整度和发表时间派生；因此当前结论更适合作为自动筛选协议的证据，而不是人工文献综述质量的最终证明。`)
   if (report.reproduction.status === "passed") {
     rows.push("本机和容器结果一致，说明上述比较不是由当前宿主环境偶然触发；但复现一致性只验证同一协议可重复，不证明该评分函数已覆盖更多主题、更多候选规模或人工标注场景。")
