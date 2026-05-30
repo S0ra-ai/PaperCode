@@ -630,6 +630,22 @@ function humanizeProposedLabel(input: ComposeDraftPaperInput) {
   return humanizeLabel(label)
 }
 
+function isRankingContext(input: ComposeDraftPaperInput) {
+  return isRankingMetric(input.result_report?.primary_metric ?? input.experiment_plan?.proposed.expected_metric)
+}
+
+function semanticExperimentRationale(input: ComposeDraftPaperInput, role: "baseline" | "ablation", experimentId: string, label: string, fallback: string) {
+  if (!isRankingContext(input)) return humanizeExperimentText(fallback)
+  const text = `${experimentId} ${label} ${fallback}`.toLowerCase()
+  if (role === "baseline" && /lexical|词项/.test(text)) {
+    return "词项匹配基线用于只依赖查询词重合的排序对照，检验代码证据排序是否优于简单词项排序。"
+  }
+  if (role === "ablation" && /(no[-_\s]?coverage|coverage|证据覆盖)/.test(text)) {
+    return "无证据覆盖消融用于移除 claim_coverage 对排序得分的贡献，检验证据覆盖特征是否影响候选排序。"
+  }
+  return humanizeExperimentText(fallback)
+}
+
 function dataAvailabilitySummary(input: ComposeDraftPaperInput) {
   const data = input.data_plan
   if (!data) return "尚未生成数据计划；数据来源、许可和访问约束需要补充。"
@@ -711,11 +727,23 @@ function experimentProtocolSummary(input: ComposeDraftPaperInput) {
   )
   const baselineTable = markdownTable(
     ["编号", "设置", "理由"],
-    plan.baselines.slice(0, 8).map((baseline) => [displayExperimentLabel(baseline.experiment_id), humanizeLabel(baseline.label), humanizeExperimentText(baseline.rationale)]),
+    plan.baselines
+      .slice(0, 8)
+      .map((baseline) => [
+        displayExperimentLabel(baseline.experiment_id),
+        humanizeLabel(baseline.label),
+        semanticExperimentRationale(input, "baseline", baseline.experiment_id, baseline.label, baseline.rationale),
+      ]),
   )
   const ablationTable = markdownTable(
     ["编号", "设置", "理由"],
-    plan.ablations.slice(0, 8).map((ablation) => [displayExperimentLabel(ablation.experiment_id), humanizeLabel(ablation.label), humanizeExperimentText(ablation.rationale)]),
+    plan.ablations
+      .slice(0, 8)
+      .map((ablation) => [
+        displayExperimentLabel(ablation.experiment_id),
+        humanizeLabel(ablation.label),
+        semanticExperimentRationale(input, "ablation", ablation.experiment_id, ablation.label, ablation.rationale),
+      ]),
   )
   return [
     `实验协议围绕评价对象、主指标、基线和消融展开，用来判断结果是否足以支撑结论性表述。评价目标是${humanizeExperimentText(plan.objective).replace(/[。.]$/, "")}。`,
@@ -1227,6 +1255,21 @@ function experimentResultTable(input: ComposeDraftPaperInput) {
   return markdownTable(["实验", "角色", displayMetricName(metric), "本机状态", "容器复现"], rows)
 }
 
+function rankingAblationInterpretation(input: ComposeDraftPaperInput) {
+  const runs = input.experiment_runs
+  const report = input.result_report
+  if (!runs || !report?.proposed || !isRankingContext(input)) return undefined
+  const noCoverage = runs.host_runs.find((run) => {
+    const label = `${run.experiment_id} ${contextualExperimentLabel(input, run.experiment_id, run.role)}`.toLowerCase()
+    return run.role === "ablation" && /(no[-_\s]?coverage|coverage|无证据覆盖)/.test(label)
+  })
+  const ablationValue = noCoverage ? metricLookup(noCoverage, report.primary_metric) : undefined
+  if (typeof ablationValue !== "number") return undefined
+  const delta = report.proposed.value - ablationValue
+  if (delta <= 0) return "消融分析显示，无证据覆盖消融没有低于本文方法，claim_coverage 特征在当前候选集上的贡献仍需进一步验证。"
+  return `消融分析显示，无证据覆盖消融低于本文方法 ${formatMetricValue(delta)}，claim_coverage 特征在当前候选集上提供了可观测贡献。`
+}
+
 function recommendationLabel(value: ResultReport["recommendation"]) {
   if (value === "accept") return "接受"
   if (value === "revise") return "需要修订"
@@ -1279,6 +1322,9 @@ function discussionSummary(input: ComposeDraftPaperInput) {
     } else {
       rows.push("主指标低于最佳基线，正文应把贡献限定为流程、可观测性或工程可靠性，而不是性能提升。")
     }
+  }
+  if (isRankingContext(input)) {
+    rows.push("词项匹配基线和无证据覆盖消融分别约束词项匹配与证据覆盖特征，使结果解释能够区分简单词项排序、证据覆盖特征和完整排序接口的影响。")
   }
   if (report.reproduction.status === "passed") {
     rows.push("代码证据、显式对照和容器复现共同说明，当前结果不是孤立脚本输出，而是可以沿材料、命令和指标回溯的观察。")
@@ -1391,11 +1437,13 @@ function reproducibilitySummary(input: ComposeDraftPaperInput) {
 
 function resultSummary(input: ComposeDraftPaperInput, claimSections: DraftSection[]) {
   const table = experimentResultTable(input)
+  const ablation = rankingAblationInterpretation(input)
   const resultClaim = claimSections.find((section) => section.section_id === "results")?.markdown
   return [
     resultClaim ? `${resultClaim}\n\n` : "",
     experimentSummary(input),
     table ? `\n\n${table}` : "",
+    ablation ? `\n\n${ablation}` : "",
   ]
     .filter(Boolean)
     .join("")
