@@ -42,7 +42,7 @@ async function fixtureWorkspace() {
   await writeFile(path.join(root, "README.md"), "# Fixture Product Root\n\n当前版本：<!-- version:start -->9.8.7-dev<!-- version:end -->\n")
   await writeFile(
     path.join(workspace, "package.json"),
-    JSON.stringify({ version: "0.1.0", license: "MPL-2.0", scripts: { test: "bun test" } }, null, 2),
+    JSON.stringify({ name: "fixture-code-paper", version: "0.1.0", license: "MPL-2.0", scripts: { test: "bun test" } }, null, 2),
   )
   await writeFile(
     path.join(workspace, "src", "paper-method.ts"),
@@ -136,6 +136,7 @@ describe("PaperRun code availability metadata", () => {
     const markdownFile = run.snapshot.export_state.files?.find((file) => file.format === "markdown" && file.status === "written")
     expect(markdownFile).toBeDefined()
     const finalMarkdown = await readFile(path.join(run.run_dir, markdownFile!.path), "utf8")
+    expect(finalMarkdown).toContain("代码包：fixture-code-paper")
     expect(finalMarkdown).toContain("代码版本：9.8.7-dev")
     expect(finalMarkdown).not.toContain("代码版本：0.1.0")
   }, PAPER_RUN_INTEGRATION_TIMEOUT)
