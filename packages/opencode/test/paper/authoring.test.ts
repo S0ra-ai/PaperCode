@@ -1280,9 +1280,9 @@ describe("paper authoring loop", () => {
     })
     const relatedWork = markdownSection(draft.markdown, "相关工作")
 
-    expect(relatedWork).toContain("排序解释研究以 Explaining Rankings with Hidden Group Bonuses")
-    expect(relatedWork).toContain("检索与推荐评测研究以 Discrimination Is Generation")
-    expect(relatedWork).toContain("复现与验证研究以 Same Ranking, Different Winner")
+    expect(relatedWork).toContain("排序解释研究以 Explaining Rankings with Hidden Group Bonuses [1]")
+    expect(relatedWork).toContain("检索与推荐评测研究以 Discrimination Is Generation: Unifying Ranking and Retrieval from a Tokenizer Perspective [3]")
+    expect(relatedWork).toContain("复现与验证研究以 Same Ranking, Different Winner: How Scoring Targets Shape LLM Memory Benchmarks [2]")
     expect(relatedWork).not.toContain("多智能体和工具调用研究")
     expect(relatedWork).not.toContain("工具调用与智能体协作研究")
     expect(relatedWork).not.toContain("论文到代码执行研究")

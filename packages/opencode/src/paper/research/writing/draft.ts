@@ -496,6 +496,34 @@ function rankingRoleRepresentatives(
   return selected
 }
 
+function sourceReferenceNumber(map: LiteratureMap, source: LiteratureMap["sources"][number]) {
+  const verified = map.sources.filter((item) => item.verification.status === "verified")
+  const referenceSources = verified.length > 0 ? verified : map.sources
+  const index = referenceSources.findIndex((item) => item.source_id === source.source_id)
+  return index >= 0 ? index + 1 : undefined
+}
+
+function literatureDisplayTitleWithCitation(map: LiteratureMap, source: LiteratureMap["sources"][number]) {
+  const number = sourceReferenceNumber(map, source)
+  return `${literatureDisplayTitle(source)}${number ? ` [${number}]` : ""}`
+}
+
+function rankingRoleRepresentativesWithCitations(
+  map: LiteratureMap,
+  sources: LiteratureMap["sources"],
+  role: "explanation" | "retrieval" | "validation",
+  usedTitles: Set<string>,
+  limit = 2,
+) {
+  const ranked = sources
+    .map((source, index) => ({ source, index, title: literatureDisplayTitle(source), score: rankingLiteratureRoleScore(source, role) }))
+    .filter((item) => item.score > 0 && !usedTitles.has(item.title))
+    .sort((left, right) => right.score - left.score || left.index - right.index)
+  const selected = ranked.slice(0, limit)
+  for (const item of selected) usedTitles.add(item.title)
+  return selected.map((item) => literatureDisplayTitleWithCitation(map, item.source))
+}
+
 function literatureClusterSummary(cluster: LiteratureMap["clusters"][number]) {
   const label = literatureTopicText(cluster.label)
   const keywords = cluster.keywords
@@ -615,9 +643,9 @@ function rankingRelatedWorkSummary(input: ComposeDraftPaperInput) {
   const verified = map.sources.filter((source) => source.verification.status === "verified")
   const selected = (verified.length > 0 ? verified : map.sources).slice(0, 5)
   const usedTitles = new Set<string>()
-  const explanationWorks = rankingRoleRepresentatives(selected, "explanation", usedTitles, 1)
-  const retrievalWorks = rankingRoleRepresentatives(selected, "retrieval", usedTitles, 1)
-  const reproducibilityWorks = rankingRoleRepresentatives(selected, "validation", usedTitles)
+  const explanationWorks = rankingRoleRepresentativesWithCitations(map, selected, "explanation", usedTitles, 1)
+  const retrievalWorks = rankingRoleRepresentativesWithCitations(map, selected, "retrieval", usedTitles, 1)
+  const reproducibilityWorks = rankingRoleRepresentativesWithCitations(map, selected, "validation", usedTitles)
   const representativeLead = (label: string, values: string[]) =>
     values.length > 0 ? `${label}以 ${values.join("、")} 为代表，强调` : `${label}强调`
   return joinBlocks([
