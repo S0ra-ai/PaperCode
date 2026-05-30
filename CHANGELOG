@@ -2,10 +2,22 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.32-dev
+:version       0.13.0.33-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.33-dev - 2026/05/30 (4fc98a84) [fix/mcp-tool-binding-test-isolation]
+        :brief ranking 讨论与效度威胁改为具体实验分析
+        :authoring
+            - fix(discussion): ranking 讨论解释完整排序相对词项匹配基线和无证据覆盖消融的差值
+            - fix(validity): ranking 效度威胁改为标注、指标、基线、消融和外部效度五类具体限制
+            - fix(data): ranking 讨论和效度威胁引用候选数与非人工标注边界
+            - test(authoring): 增加 discussion/threats 禁用安全声明口吻和要求具体 ranking 分析的断言
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
     0.13.0.32-dev - 2026/05/30 (1035d3fa) [fix/mcp-tool-binding-test-isolation]
         :brief ranking 引言、贡献和方法改为论文式叙事
