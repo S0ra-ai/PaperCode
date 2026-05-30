@@ -2,10 +2,21 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.108-dev
+:version       0.13.0.109-dev
 :last_update   2026/05/31
 
 :history
+
+    0.13.0.109-dev - 2026/05/31 (def399cf) [fix/mcp-tool-binding-test-isolation]
+        :brief 缺少正式论文参考文献阻断 final export
+        :verification
+            - fix(reference): missing_verified_reference 从 warning 收紧为 blocker，缺少 verified clear paper source record 时不得通过 final export
+            - fix(reference): final gate 覆盖只有代码/材料证据但没有正式论文参考文献的阻断路径
+            - test(authoring): 新增 evaluateVerificationGate 用例，确认无正式论文来源时 blocking_report.status=blocked
+        :checks
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "verified paper reference|formal References"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/datasets.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "verified paper reference|formal References|source records|source record manifest|complete code-paper|placeholder datasets|blocks final data checks|dataset discovery|renders ranking benchmark|renders ranking related work|placeholder literature|distinct representatives|live paper quality|prefers product README version|retries retryable temporary directory cleanup"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
 
     0.13.0.108-dev - 2026/05/31 (7a9df2bb) [fix/mcp-tool-binding-test-isolation]
         :brief source record manifest 缺失阻断
