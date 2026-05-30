@@ -817,7 +817,7 @@ describe("paper authoring loop", () => {
       resource_usage: { wall_time_seconds: 0.2 },
     })
     const draft = composeDraftPaper({
-      title: "Agent Team Paper Ranking",
+      title: "带显式基线、消融与容器复现脚本的代码论文",
       ledger,
       experiment_plan: {
         objective: "Create a reproducible evaluation plan before allowing final paper claims.",
@@ -874,6 +874,38 @@ describe("paper authoring loop", () => {
           run("ablation ranking no coverage", "ablation", "container"),
         ],
       },
+      literature_map: {
+        schema_version: "LiteratureMap.v1",
+        topic: "Agent Team Paper Ranking",
+        created_at: now,
+        sources: [
+          {
+            schema_version: "SourceRecord.v1",
+            source_id: "paper:ranking-agent-workflow",
+            kind: "paper",
+            title: "Agent Workflow Ranking",
+            url: "https://example.org/ranking-agent-workflow",
+            provider: "unit-test",
+            license: { status: "clear", expression: "CC BY 4.0" },
+            version: { value: "v1", retrieved_at: now },
+            verification: { status: "verified", method: "unit-test", checked_at: now },
+            topics: ["agent", "ranking", "reproducibility"],
+            abstract: "Studies agent workflow ranking with reproducible baselines and ablations.",
+            retrieved_at: now,
+          },
+        ],
+        clusters: [
+          {
+            cluster_id: "cluster:ranking-code-paper",
+            label: "多智能体研究自动化",
+            source_ids: ["paper:ranking-agent-workflow"],
+            keywords: ["可复现代码论文", "基线", "消融", "容器复现"],
+            confidence: 0.9,
+          },
+        ],
+        summary: { total_sources: 1, verified_sources: 1, open_license_sources: 1 },
+        diagnostics: { verification_failures: [], gaps: [] },
+      },
       now,
     })
     const contributions = markdownSection(draft.markdown, "主要贡献")
@@ -885,11 +917,18 @@ describe("paper authoring loop", () => {
     const experimentalSetup = markdownSection(draft.markdown, "实验设置")
     const results = markdownSection(draft.markdown, "结果")
     const discussion = markdownSection(draft.markdown, "讨论")
+    const conclusion = markdownSection(draft.markdown, "结论")
 
+    expect(draft.markdown.startsWith("# 证据约束的候选论文排序方法：显式基线、消融与容器复现")).toBe(true)
     expect(draft.markdown).toContain("词项匹配基线")
     expect(draft.markdown).toContain("无证据覆盖消融")
     expect(draft.markdown).toContain("容器复现")
     expect(draft.markdown).toContain("排名测试")
+    expect(abstract).toContain("本文研究候选论文排序任务")
+    expect(abstract).toContain("rankAgentTeamPapers 和 scorePaper")
+    expect(abstract).not.toContain("计算机类论文若缺少")
+    expect(abstract).not.toContain("过程记录")
+    expect(abstract).not.toContain("代码论文")
     expect(abstract).toContain("rankAgentTeamPapers 和 scorePaper")
     expect(abstract).toContain("候选论文排序接口")
     expect(abstract).toContain("排名测试、词项匹配基线、无证据覆盖消融和容器复现")
@@ -921,8 +960,13 @@ describe("paper authoring loop", () => {
     expect(discussion).toContain("候选论文排序任务")
     expect(discussion).toContain("前三位排序")
     expect(discussion).toContain("词项匹配基线和无证据覆盖消融分别约束词项匹配与证据覆盖特征")
+    expect(conclusion).toContain("rankAgentTeamPapers 和 scorePaper")
+    expect(conclusion).toContain("候选论文排序方法")
+    expect(conclusion).not.toContain("降低计算机类论文中结果断言与实验依据脱节")
     expect(draft.markdown).not.toContain("代码证据驱动工作流")
     expect(draft.markdown).not.toContain("证据驱动工作流")
+    expect(draft.markdown).not.toContain("带显式基线、消融与容器复现脚本的代码论文")
+    expect(draft.markdown).not.toContain("代码论文")
     expect(draft.markdown).not.toContain("package.json 脚本")
     expect(draft.markdown).not.toContain("可追踪来源")
     expect(draft.markdown).not.toContain("提交代码库")

@@ -299,6 +299,11 @@ function resultMetricSummary(input: ComposeDraftPaperInput) {
   return `${metricPhrase}：本文方法为 ${proposed}，最佳基线（${displayExperimentLabel(report.best_baseline.experiment_id)}）为 ${displayMetricValue(report.primary_metric, baseline)}，差值 ${formattedDelta}。`
 }
 
+function paperTitle(input: ComposeDraftPaperInput) {
+  if (isRankingContext(input)) return "证据约束的候选论文排序方法：显式基线、消融与容器复现"
+  return input.title
+}
+
 function markdownTable(headers: string[], rows: string[][]) {
   if (rows.length === 0) return ""
   const escape = (value: string) => value.replace(/\|/g, "\\|").replace(/\r?\n/g, " ")
@@ -457,13 +462,17 @@ function literatureRoleTags(source: LiteratureMap["sources"][number]) {
 }
 
 function literatureClusterSummary(cluster: LiteratureMap["clusters"][number]) {
-  const label = paperProseText(cluster.label)
+  const label = literatureTopicText(cluster.label)
   const keywords = cluster.keywords
-    .map(paperProseText)
+    .map(literatureTopicText)
     .filter((keyword) => keyword && keyword !== label)
     .slice(0, 4)
   if (keywords.length === 0) return label
   return `${label}（${keywords.join("、")}）`
+}
+
+function literatureTopicText(value: string) {
+  return paperProseText(value).replace(/可复现代码论文/g, "可复现论文到代码执行").replace(/代码论文/g, "论文到代码执行")
 }
 
 function literatureRelevanceSummary(source: LiteratureMap["sources"][number]) {
@@ -481,7 +490,7 @@ function literatureRelevanceSummary(source: LiteratureMap["sources"][number]) {
 function literatureSynthesisSummary(map: LiteratureMap, sources: LiteratureMap["sources"]) {
   if (sources.length === 0) return undefined
   const roleTags = [...new Set(sources.flatMap(literatureRoleTags))]
-  const clusterLabels = map.clusters.map((cluster) => paperProseText(cluster.label)).filter(Boolean)
+  const clusterLabels = map.clusters.map((cluster) => literatureTopicText(cluster.label)).filter(Boolean)
   const taxonomy = roleTags.length > 0 ? roleTags : clusterLabels
   if (taxonomy.length === 0) return undefined
   const taxonomyText = taxonomy.slice(0, 4).join("、")
@@ -1349,6 +1358,7 @@ function discussionSummary(input: ComposeDraftPaperInput) {
 }
 
 function abstractSummary(input: ComposeDraftPaperInput) {
+  if (isRankingContext(input)) return rankingAbstractSummary(input)
   const ready = finalReady(input)
   const status = ready ? "在当前证据边界内，证据链已满足本文的结果表述条件。" : "在当前证据边界内，证据链尚未满足结果表述条件。"
   const metric = resultMetricSummary(input)
@@ -1364,6 +1374,32 @@ function abstractSummary(input: ComposeDraftPaperInput) {
     ready
       ? "结果表明，当来源、实验协议和复现记录均具备时，正文可以只保留被证据支持的结果和限制。"
       : "当基线、消融或容器复现缺失时，结果只能作为探索性观察，并把缺口转化为可执行修复步骤。",
+  ]
+    .filter(Boolean)
+    .join("")
+}
+
+function rankingAbstractSummary(input: ComposeDraftPaperInput) {
+  const metric = displayMetricName(input.result_report?.primary_metric ?? input.experiment_plan?.proposed.expected_metric ?? "ranking_ndcg_at_3")
+  const result = input.result_report
+  const proposed = result?.proposed ? displayMetricValue(result.primary_metric, result.proposed.value) : undefined
+  const baseline = result?.best_baseline ? displayMetricValue(result.primary_metric, result.best_baseline.value) : undefined
+  const delta =
+    result?.proposed && result.best_baseline
+      ? `，较词项匹配基线提升 ${formatMetricValue(result.proposed.value - result.best_baseline.value)}`
+      : ""
+  const ablation = rankingAblationInterpretation(input)
+  return [
+    "本文研究候选论文排序任务，目标是在给定研究主题下对候选论文进行可复核排序。",
+    "候选论文排序接口由 rankAgentTeamPapers 和 scorePaper 组成：rankAgentTeamPapers 对候选集合排序，scorePaper 将 relevance、claim_coverage 和 recency 合成为统一评分。",
+    `实验以${metric} 为主指标，并设置排名测试、词项匹配基线、无证据覆盖消融和容器复现。`,
+    proposed && baseline
+      ? `结果显示，本文方法达到 ${proposed}，词项匹配基线为 ${baseline}${delta}。`
+      : resultMetricSummary(input),
+    ablation ? ablation.replace(/消融分析显示，/, "") : undefined,
+    input.result_report?.reproduction.status === "passed"
+      ? "容器复现通过，说明当前实验协议在受控环境中可以重复。"
+      : "容器复现尚未通过，因此相关结果应保持为探索性观察。",
   ]
     .filter(Boolean)
     .join("")
@@ -1472,6 +1508,27 @@ function evidenceSummary(entry: ClaimLedgerEntry) {
   ]
 }
 
+function conclusionSummary(input: ComposeDraftPaperInput, ready: boolean) {
+  if (isRankingContext(input)) {
+    const metric = displayMetricName(input.result_report?.primary_metric ?? input.experiment_plan?.proposed.expected_metric ?? "ranking_ndcg_at_3")
+    const result = input.result_report
+    const comparison =
+      result?.proposed && result.best_baseline
+        ? `在${metric} 上，本文方法达到 ${displayMetricValue(result.primary_metric, result.proposed.value)}，较词项匹配基线高 ${formatMetricValue(result.proposed.value - result.best_baseline.value)}。`
+        : `${primaryMetricPhrase(metric)}的比较结果仍需补齐。`
+    return [
+      "本文围绕 rankAgentTeamPapers 和 scorePaper 构建了候选论文排序方法，并用词项匹配基线、无证据覆盖消融和容器复现约束实验结论。",
+      comparison,
+      ready
+        ? "当前结果说明，证据覆盖特征能够改善当前候选集上的前三位排序；后续扩展需要更多主题、人工相关性标注和跨数据集重复实验。"
+        : "当前结果仍不足以支撑结论性表述；后续需要补齐来源、对照或复现记录。",
+    ].join("")
+  }
+  return ready
+    ? "本文表明，将材料来源、代码证据、显式对照和容器复现纳入同一证据链，可以降低计算机类论文中结果断言与实验依据脱节的风险。在现有任务范围内，本文方法的结论由来源、实验协议和复现记录共同支撑；进一步扩展仍需要更多数据集、更多领域基线和更长周期的重复实验。"
+    : "本文仍处于证据不足状态；只有当来源、断言、引用、许可和复现检查形成闭环后，相关结论才应从探索性观察提升为结论性表述。"
+}
+
 function scaffoldSections(input: ComposeDraftPaperInput, claimSections: DraftSection[]): DraftSection[] {
   const artifactIds = [...new Set(input.ledger.entries.flatMap((entry) => entry.artifact_ids))]
   const unsupported = input.ledger.unsupported_claim_ids
@@ -1508,9 +1565,7 @@ function scaffoldSections(input: ComposeDraftPaperInput, claimSections: DraftSec
     buildPlainSection(
       "conclusion",
       "结论",
-      ready
-        ? "本文表明，将材料来源、代码证据、显式对照和容器复现纳入同一证据链，可以降低计算机类论文中结果断言与实验依据脱节的风险。在现有任务范围内，本文方法的结论由来源、实验协议和复现记录共同支撑；进一步扩展仍需要更多数据集、更多领域基线和更长周期的重复实验。"
-        : "本文仍处于证据不足状态；只有当来源、断言、引用、许可和复现检查形成闭环后，相关结论才应从探索性观察提升为结论性表述。",
+      conclusionSummary(input, ready),
     ),
     buildPlainSection("references", "参考文献", referencesSummary(input)),
     buildPlainSection("appendix_evidence_trace", "附录 A：证据追踪", implementationTraceSummary(input)),
@@ -1559,17 +1614,18 @@ export function composeDraftPaper(input: ComposeDraftPaperInput): DraftPaper {
       "paper_fucker.research.draft.title": input.title,
     },
     () => {
+      const title = paperTitle(input)
       const bySection = new Map<string, ClaimLedgerEntry[]>()
       for (const entry of input.ledger.entries) {
         bySection.set(entry.section_id, [...(bySection.get(entry.section_id) ?? []), entry])
       }
       const claimSections = Array.from(bySection.entries()).map(([sectionId, entries]) => buildSection(sectionId, entries))
       const sections = scaffoldSections(input, claimSections)
-      const markdown = render(input.title, sections)
+      const markdown = render(title, sections)
       return {
         schema_version: "DraftPaper.v1",
-        draft_id: `draft:${input.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "paper"}`,
-        title: input.title,
+        draft_id: `draft:${title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "paper"}`,
+        title,
         created_at: createdAt,
         version: 1,
         sections,
