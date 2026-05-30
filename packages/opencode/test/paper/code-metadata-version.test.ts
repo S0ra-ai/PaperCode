@@ -24,10 +24,13 @@ function runtimeOptions(workspace: string, home: string): PaperRunRuntimeOptions
   }
 }
 
-async function clean(dir: string, attempts = 30): Promise<void> {
+async function clean(dir: string, attempts = 60): Promise<void> {
   await sleep(100)
   return rm(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 }).catch((error) => {
-    if (attempts <= 1) throw error
+    if (attempts <= 1) {
+      console.warn(`Could not remove temporary code metadata test directory ${dir}: ${String(error)}`)
+      return
+    }
     return clean(dir, attempts - 1)
   })
 }
