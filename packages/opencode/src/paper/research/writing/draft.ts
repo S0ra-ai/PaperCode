@@ -377,7 +377,7 @@ function evidenceSourceIds(input: ComposeDraftPaperInput) {
       sourceIds.add(source.source_id)
     }
   }
-  for (const dataset of input.data_plan?.datasets ?? []) {
+  for (const dataset of verifiedFormalDatasets(input.data_plan)) {
     sourceIds.add(dataset.source_id || dataset.dataset_id)
   }
   return [...sourceIds]
@@ -454,6 +454,31 @@ function displayDatasetAccessForTable(dataset: {
 function displayDatasetLicense(value: string) {
   if (value === "workspace-authorized local dataset") return "工作区授权本地数据集"
   return paperProseText(value)
+}
+
+type DraftDataset = NonNullable<ComposeDraftPaperInput["data_plan"]>["datasets"][number]
+
+function isWorkspaceDataset(dataset: DraftDataset) {
+  return (
+    dataset.url?.startsWith("file://") ||
+    dataset.provider === "workspace" ||
+    dataset.license.expression === "workspace-authorized local dataset"
+  )
+}
+
+function isPlaceholderDatasetSource(dataset: DraftDataset) {
+  if (isWorkspaceDataset(dataset)) return false
+  const url = dataset.url?.trim()
+  if (!url) return true
+  return isPlaceholderReferenceUrl(url)
+}
+
+function verifiedFormalDatasets(data?: ComposeDraftPaperInput["data_plan"]) {
+  return (data?.datasets ?? []).filter((dataset) => dataset.verification.status === "verified" && !isPlaceholderDatasetSource(dataset))
+}
+
+function placeholderVerifiedDatasets(data?: ComposeDraftPaperInput["data_plan"]) {
+  return (data?.datasets ?? []).filter((dataset) => dataset.verification.status === "verified" && isPlaceholderDatasetSource(dataset))
 }
 
 function displaySubmissionProfile(value: string) {
@@ -884,16 +909,24 @@ function semanticExperimentRationale(input: ComposeDraftPaperInput, role: "basel
 function dataAvailabilitySummary(input: ComposeDraftPaperInput) {
   const data = input.data_plan
   if (!data) return "尚未生成数据计划；数据来源、许可和访问约束需要补充。"
-  if (data.datasets.length === 0) {
+  const formalDatasets = verifiedFormalDatasets(data)
+  const placeholderDatasets = placeholderVerifiedDatasets(data)
+  if (formalDatasets.length === 0) {
     const codeSources = input.ledger.entries.some((entry) => entry.source_ids.some((source) => source.startsWith("material:code:")))
     const visibleGaps = codeSources
       ? data.diagnostics.gaps.filter((gap) => gap !== "missing_dataset_candidates")
       : data.diagnostics.gaps
     const gaps = visibleGaps.length > 0 ? `缺口：${visibleGaps.join("; ")}。` : ""
+    const placeholderText =
+      placeholderDatasets.length > 0
+        ? `${placeholderDatasets.length} 个数据集使用测试或占位 URL，已从数据可用性表排除。`
+        : ""
     if (codeSources) {
       const codeAvailability = codeAvailabilitySummary(input)
       return [
-        "本次研究使用代码仓库和实验脚本作为主要证据，未登记外部数据集。",
+        placeholderDatasets.length > 0
+          ? `当前没有可进入数据可用性章节的已验证数据集；${placeholderText}`
+          : "本次研究使用代码仓库和实验脚本作为主要证据，未登记外部数据集。",
         gaps,
         codeAvailability,
         "因此结果解释限定在当前代码工作区、显式实验协议和复现记录内。",
@@ -901,9 +934,9 @@ function dataAvailabilitySummary(input: ComposeDraftPaperInput) {
         .filter(Boolean)
         .join("\n\n")
     }
-    return `本研究尚未登记可用数据集。${gaps} 因此实验结果只能依赖用户提供的显式实验记录；若缺少实验记录，结论性表述必须保持阻断。`
+    return `当前没有可进入数据可用性章节的已验证数据集；${placeholderText}${gaps}因此实验结果只能依赖用户提供的显式实验记录；若缺少实验记录，结论性表述必须保持阻断。`
   }
-  const datasetLines = data.datasets.slice(0, 5).map((dataset) => {
+  const datasetLines = formalDatasets.slice(0, 5).map((dataset) => {
     const license = displayDatasetLicense(dataset.license.expression ?? dataset.license.status)
     const metadata = dataset.verification.diagnostics
       ?.map(displayDatasetDiagnostic)
@@ -921,9 +954,10 @@ function dataAvailabilitySummary(input: ComposeDraftPaperInput) {
       : ""
   const codeAvailability = codeAvailabilitySummary(input)
   return [
-    `本研究使用 ${data.datasets.length} 个可核验数据集，数据来源、许可和核验结果如下。`,
+    `本研究使用 ${formalDatasets.length} 个可核验数据集，数据来源、许可和核验结果如下。`,
     "",
     markdownTable(["数据集", "访问", "许可", "验证", "说明"], datasetLines),
+    placeholderDatasets.length > 0 ? `\n\n${placeholderDatasets.length} 个数据集使用测试或占位 URL，已从数据可用性表排除。` : "",
     codeAvailability ? `\n\n${codeAvailability}` : "",
     conflicts,
     constraints,
