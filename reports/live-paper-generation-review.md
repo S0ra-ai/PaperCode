@@ -5,6 +5,16 @@
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
 
+## 2026-05-30 相关工作叙事化复审
+
+- 协议场景复跑 `run-4278e1cb-39db-43cb-a0a2-0381826e0d3b`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-4278e1cb-39db-43cb-a0a2-0381826e0d3b\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 相关工作改为三段综述：工具调用与智能体协作研究、复现与验证研究、论文到代码执行研究。
+- 相关工作不再输出文献验证表、定位信息、已核验英文摘要、阻断缺口清单或 `| 相关工作 |` 表格。
+- 数据可用性将“验证状态”改为“核验结果”，减少表格式审计字段口吻。
+- 坏词扫描未发现 `本文纳入`、`这些文献形成`、`验证状态`、`定位信息`、`已核验英文摘要；作用`、`代码论文`、`mock/fake/fixture/placeholder` 或旧工程审计词残留。
+- 质量判断：相关工作从来源清单转为围绕候选论文排序任务的论文式综述，主文更接近人工协作稿。
+
 ## 2026-05-30 题名摘要具体化复审
 
 - 协议场景复跑 `run-092c3e2e-b216-40ff-ab15-5b02346da40d`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
