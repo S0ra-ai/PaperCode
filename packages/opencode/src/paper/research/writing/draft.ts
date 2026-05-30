@@ -1122,6 +1122,26 @@ function parsedScoreFeatures(input: ComposeDraftPaperInput) {
   return [...scorePaperText.matchAll(/\bitem\.([A-Za-z0-9_]+)/g)].map((match) => match[1]).filter(Boolean).slice(0, 5)
 }
 
+function parsedScoreWeights(input: ComposeDraftPaperInput) {
+  const text = methodEvidenceText(input)
+  const scorePaperIndex = text.search(/scorePaper\b/i)
+  if (scorePaperIndex < 0) return []
+  const scorePaperText = text.slice(scorePaperIndex)
+  if (!/\breturns\b/i.test(scorePaperText)) return []
+  return [...scorePaperText.matchAll(/\bitem\.([A-Za-z0-9_]+)\s*\*\s*([0-9]+(?:\.[0-9]+)?)/g)]
+    .map((match) => ({ feature: match[1] ?? "", weight: match[2] ?? "" }))
+    .filter((item) => item.feature.length > 0 && item.weight.length > 0)
+    .slice(0, 5)
+}
+
+function rankingScoreFormulaSummary(input: ComposeDraftPaperInput) {
+  const weights = parsedScoreWeights(input)
+  const required = ["relevance", "claim_coverage", "recency"]
+  if (!required.every((feature) => weights.some((item) => item.feature === feature))) return undefined
+  const byFeature = new Map(weights.map((item) => [item.feature, item.weight]))
+  return `评分公式为：score(p) = ${byFeature.get("relevance")} * relevance(p) + ${byFeature.get("claim_coverage")} * claim_coverage(p) + ${byFeature.get("recency")} * recency(p)。三个权重来自 scorePaper 的当前实现。`
+}
+
 function readableAsciiList(values: string[]) {
   if (values.length <= 1) return values[0] ?? ""
   if (values.length === 2) return `${values[0]} 和 ${values[1]}`
@@ -1153,11 +1173,13 @@ function rankingMethodNarrative(input: ComposeDraftPaperInput) {
     features.includes("relevance") && features.includes("claim_coverage") && features.includes("recency")
       ? "其中，relevance 衡量候选论文与研究主题的匹配程度，claim_coverage 衡量候选论文对当前研究问题关键断言的覆盖，recency 作为发表时间相关的弱排序信号。"
       : undefined
+  const formula = rankingScoreFormulaSummary(input)
   const entrypointSentence = methodEntrypointRoles(input)
   return [
     "候选论文排序方法由 rankAgentTeamPapers 和 scorePaper 两个核心接口组成。",
     "rankAgentTeamPapers 接收候选论文集合，并按 scorePaper 输出的得分进行降序排列。",
     featureSentence,
+    formula,
     featureDetail,
     entrypointSentence ? `${entrypointSentence}。` : undefined,
   ]
