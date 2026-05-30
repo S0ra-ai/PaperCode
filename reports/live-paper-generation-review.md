@@ -5,6 +5,14 @@
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
 
+## 2026-05-30 相关工作编号引用复审
+
+- 协议场景复跑 `run-58eab6bf-39bc-4cc1-98a2-87890c66a79f`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-58eab6bf-39bc-4cc1-98a2-87890c66a79f\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 相关工作正文现在输出 `Explaining Rankings with Hidden Group Bonuses [1]`、`Discrimination Is Generation... [3]` 和 `Same Ranking, Different Winner... [2]`。
+- 参考文献编号与正文编号一致：`[1]` 为 Hidden Group Bonuses，`[2]` 为 Same Ranking，`[3]` 为 Discrimination Is Generation。
+- 质量判断：正文与参考文献之间建立了可追踪引用关系，更接近正式论文阅读体验。
+
 ## 2026-05-30 关键词章节复审
 
 - 协议场景复跑 `run-208d29b9-a590-4244-99fe-fb10dffd3500`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
