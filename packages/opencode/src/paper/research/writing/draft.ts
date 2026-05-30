@@ -1608,6 +1608,27 @@ function rankingAblationInterpretation(input: ComposeDraftPaperInput) {
   return `消融分析显示，无证据覆盖消融低于本文方法 ${formatMetricValue(delta)}，claim_coverage 特征在当前候选集上提供了可观测贡献。`
 }
 
+function resultStatisticalScopeSummary(input: ComposeDraftPaperInput) {
+  const runs = input.experiment_runs
+  if (!runs) return undefined
+  const orderedRoles: Array<ExperimentRun["role"]> = ["proposed", "baseline", "ablation"]
+  const roles = orderedRoles.filter((role) => runs.host_runs.some((run) => run.role === role) || runs.container_runs.some((run) => run.role === role))
+  if (roles.length === 0) return undefined
+  const roleText = chineseList(roles.map(displayExperimentRole))
+  const hasHost = runs.host_runs.length > 0
+  const hasContainer = runs.container_runs.length > 0
+  const environmentText =
+    hasHost && hasContainer
+      ? "本机与容器环境"
+      : hasHost
+      ? "本机环境"
+      : hasContainer
+      ? "容器环境"
+      : "当前环境"
+  const frequencyText = roles.length > 1 ? `${roleText}各在${environmentText}执行一次` : `${roleText}在${environmentText}执行一次`
+  return `统计解释：${frequencyText}；当前数值是确定性协议观测，不计算置信区间或显著性检验。若后续引入随机采样、模型生成或更大候选集，应报告重复次数、方差和置信区间。`
+}
+
 function recommendationLabel(value: ResultReport["recommendation"]) {
   if (value === "accept") return "接受"
   if (value === "revise") return "需要修订"
@@ -1871,12 +1892,14 @@ function reproducibilitySummary(input: ComposeDraftPaperInput) {
 function resultSummary(input: ComposeDraftPaperInput, claimSections: DraftSection[]) {
   const table = experimentResultTable(input)
   const ablation = rankingAblationInterpretation(input)
+  const statisticalScope = resultStatisticalScopeSummary(input)
   const resultClaim = claimSections.find((section) => section.section_id === "results")?.markdown
   return [
     resultClaim ? `${resultClaim}\n\n` : "",
     experimentSummary(input),
     table ? `\n\n表 1 汇总本文方法、基线和消融在主指标、运行状态和容器复现上的结果。\n\n${table}` : "",
     ablation ? `\n\n${ablation}` : "",
+    statisticalScope ? `\n\n${statisticalScope}` : "",
   ]
     .filter(Boolean)
     .join("")
