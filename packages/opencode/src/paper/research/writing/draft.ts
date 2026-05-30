@@ -990,6 +990,32 @@ function experimentRunSummary(input: ComposeDraftPaperInput) {
     : "没有可展示的实验执行摘要。"
 }
 
+function displayPlatformName(platform: NodeJS.Platform | "container") {
+  if (platform === "win32") return "Windows"
+  if (platform === "darwin") return "macOS"
+  if (platform === "linux") return "Linux"
+  if (platform === "container") return "容器"
+  return platform
+}
+
+function experimentEnvironmentDeclaration(input: ComposeDraftPaperInput) {
+  const runs = input.experiment_runs
+  if (!runs) return undefined
+  const host = runs.host_runs.find((run) => run.environment.mode === "host")?.environment
+  const container = runs.container_runs.find((run) => run.environment.mode === "container")?.environment
+  const rows: string[] = []
+  if (host) {
+    const node = host.node ? `，Node.js ${host.node}` : ""
+    rows.push(`本机平台：${displayPlatformName(host.platform)}${node}。`)
+  }
+  if (container) {
+    const digest = container.digest ? `，摘要 ${container.digest}` : ""
+    rows.push(container.image ? `容器镜像：${container.image}${digest}。` : "容器环境：已登记隔离复现环境。")
+  }
+  if (rows.length === 0) return undefined
+  return ["实验环境声明：", ...rows.map((row) => `- ${row}`)].join("\n")
+}
+
 function commandText(command: { argv: string[] }) {
   return command.argv.join(" ")
 }
@@ -1835,6 +1861,7 @@ function evidenceModelSummary(input: ComposeDraftPaperInput) {
 
 function reproducibilitySummary(input: ComposeDraftPaperInput) {
   return joinBlocks([
+    experimentEnvironmentDeclaration(input),
     hostContainerConsistencySummary(input),
     "### 实验执行摘要",
     experimentRunSummary(input),
