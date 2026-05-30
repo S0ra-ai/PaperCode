@@ -159,6 +159,10 @@ function displayMetricName(value: string) {
   return value.replace(/_/g, " ")
 }
 
+function isRankingMetric(value?: string) {
+  return Boolean(value && /ranking|ndcg|rank/i.test(value))
+}
+
 function primaryMetricPhrase(metric: string) {
   if (/^[A-Za-z0-9]/.test(metric)) return `以 ${metric} 作为主指标`
   const suffixSpace = /[A-Za-z0-9]$/.test(metric) ? " " : ""
@@ -207,6 +211,20 @@ function displayExperimentLabel(value: string) {
   if (normalized === "ranking-lexical") return "词项匹配基线"
   if (normalized === "ranking-no-coverage") return "无证据覆盖消融"
   return value.replace(/[-_]+/g, " ")
+}
+
+function contextualProposedLabel(input: ComposeDraftPaperInput) {
+  const metric = input.result_report?.primary_metric ?? input.experiment_plan?.proposed.expected_metric
+  if (isRankingMetric(metric)) return "证据约束的论文排序方法"
+  return "证据驱动工作流"
+}
+
+function contextualExperimentLabel(input: ComposeDraftPaperInput, experimentId: string, role?: string) {
+  const normalized = experimentId.trim().replace(/[_\s]+/g, "-").toLowerCase()
+  if (role === "proposed" || normalized === "proposed" || normalized.match(/^proposed[:-]/)) {
+    return contextualProposedLabel(input)
+  }
+  return displayExperimentLabel(experimentId)
 }
 
 function displayExperimentRole(value: string) {
@@ -603,6 +621,15 @@ function humanizeLabel(value: string) {
     .replace(/^ablation:(.+)$/, (_, name) => `消融：${displayExperimentLabel(String(name))}`)
 }
 
+function humanizeProposedLabel(input: ComposeDraftPaperInput) {
+  const label = input.experiment_plan?.proposed.label
+  if (!label) return contextualProposedLabel(input)
+  if (/paper_fucker workflow|code-grounded/i.test(label) && isRankingMetric(input.experiment_plan?.proposed.expected_metric ?? input.result_report?.primary_metric)) {
+    return contextualProposedLabel(input)
+  }
+  return humanizeLabel(label)
+}
+
 function dataAvailabilitySummary(input: ComposeDraftPaperInput) {
   const data = input.data_plan
   if (!data) return "尚未生成数据计划；数据来源、许可和访问约束需要补充。"
@@ -696,7 +723,7 @@ function experimentProtocolSummary(input: ComposeDraftPaperInput) {
     "### 指标",
     metricTable,
     "",
-    `本文方法的评价对象为“${humanizeLabel(plan.proposed.label)}”，主指标为“${displayMetricName(plan.proposed.expected_metric)}”。`,
+    `本文方法的评价对象为“${humanizeProposedLabel(input)}”，主指标为“${displayMetricName(plan.proposed.expected_metric)}”。`,
     "",
     "### 基线",
     baselineTable || "当前没有基线运行入口；该缺口会阻断结论性表述。",
@@ -771,7 +798,7 @@ function experimentRunSummary(input: ComposeDraftPaperInput) {
     const output = [compactOutput(run.stdout), compactOutput(run.stderr)].filter((item) => item && item !== "none").join(" / ")
     return [
       displayEnvironment(environment),
-      displayExperimentLabel(run.experiment_id),
+      contextualExperimentLabel(input, run.experiment_id, run.role),
       displayExperimentRole(run.role),
       displayRunStatus(run.status),
       metrics,
@@ -832,11 +859,33 @@ function researchQuestionsSummary(input: ComposeDraftPaperInput) {
   ])
 }
 
+function methodSymbolNames(value?: string) {
+  if (!value) return []
+  const matches = value.match(/\b[a-z][A-Za-z0-9]*[A-Z][A-Za-z0-9]*\b/g) ?? []
+  return [...new Set(matches)].slice(0, 3)
+}
+
+function contributionEvidenceSubject(input: ComposeDraftPaperInput, methodClaim?: string) {
+  const metric = input.result_report?.primary_metric ?? input.experiment_plan?.proposed.expected_metric
+  const methodText = [
+    methodClaim,
+    ...input.ledger.entries.filter((entry) => entry.section_id === "method").map((entry) => entry.text),
+  ]
+    .filter(Boolean)
+    .join(" ")
+  const symbols = methodSymbolNames(methodText)
+  if (isRankingMetric(metric)) {
+    return symbols.length > 0 ? `${symbols.slice(0, 2).join("、")} 等排序接口` : "论文排序接口"
+  }
+  return symbols.length > 0 ? `${symbols.slice(0, 2).join("、")} 等代码接口` : "源码范围"
+}
+
 function contributionsSummary(input: ComposeDraftPaperInput) {
   const metric = displayMetricName(input.result_report?.primary_metric ?? input.experiment_plan?.proposed.expected_metric ?? "primary_metric")
   const methodClaim = firstClaimText(input, "method")
   const resultClaim = firstClaimText(input, "results")
   const counts = experimentDesignCounts(input)
+  const evidenceSubject = contributionEvidenceSubject(input, methodClaim)
   const runEvidence =
     counts.hostRuns > 0 || counts.containerRuns > 0
       ? `，并记录 ${counts.hostRuns} 个本机运行和 ${counts.containerRuns} 个容器运行`
@@ -844,7 +893,7 @@ function contributionsSummary(input: ComposeDraftPaperInput) {
   return joinBlocks([
     "本文贡献集中在三条可审查链路：",
     [
-      `1. 第一项贡献是把源码范围、来源和实验记录统一为可审查证据${methodClaim ? `；核心方法断言为：${trimTerminalPunctuation(methodClaim)}` : ""}。`,
+      `1. 第一项贡献是把${evidenceSubject}、来源和实验记录统一为可审查证据${methodClaim ? `；核心方法断言为：${trimTerminalPunctuation(methodClaim)}` : ""}。`,
       `2. 第二项贡献是将本文方法与 ${counts.baseline} 个基线、${counts.ablation} 个消融放入同一评价协议，并${primaryMetricPhrase(metric).replace("主指标", "主比较指标")}${resultClaim ? `；核心结果断言为：${trimTerminalPunctuation(resultClaim)}` : ""}。`,
       `3. 第三项贡献是用本机/容器一致性检查约束结果表述${runEvidence}，避免把未复现或只在单一环境中成立的观察写成结论性表述。`,
     ].join("\n"),
@@ -922,7 +971,7 @@ function registeredCommandsSummary(input: ComposeDraftPaperInput) {
   const protocolRows =
     input.experiment_protocol?.entries.map((entry) => [
       displayExperimentRole(entry.role),
-      displayExperimentLabel(entry.protocol_id),
+      contextualExperimentLabel(input, entry.protocol_id, entry.role === "container_reproduction" ? undefined : entry.role),
       commandText(entry.command),
       displayMetricName(entry.expected_metric),
       displayProtocolSource(input.experiment_protocol?.discovered_from ?? "unknown"),
@@ -930,7 +979,7 @@ function registeredCommandsSummary(input: ComposeDraftPaperInput) {
   const planRows = input.experiment_plan
     ? [input.experiment_plan.proposed, ...input.experiment_plan.baselines, ...input.experiment_plan.ablations].map((spec) => [
         displayExperimentRole(spec.role),
-        displayExperimentLabel(spec.experiment_id),
+        contextualExperimentLabel(input, spec.experiment_id, spec.role),
         commandText(spec.command),
         displayMetricName(spec.expected_metric),
         "实验计划",
@@ -968,7 +1017,7 @@ function hostContainerConsistencySummary(input: ComposeDraftPaperInput) {
     return {
       mismatch,
       row: [
-        displayExperimentLabel(id),
+        contextualExperimentLabel(input, id, host?.role ?? container?.role),
         displayRunStatus(host?.status ?? "missing"),
         typeof hostValue === "number" ? displayMetricValue(metric, hostValue) : "无",
         displayRunStatus(container?.status ?? "missing"),
@@ -1041,7 +1090,7 @@ function experimentResultTable(input: ComposeDraftPaperInput) {
       const value = run.metrics.find((item) => item.name === metric)?.value
       const reproduced = runs.container_runs.some((item) => item.experiment_id === run.experiment_id && item.status === "succeeded")
       return [
-        displayExperimentLabel(run.experiment_id),
+        contextualExperimentLabel(input, run.experiment_id, run.role),
         displayExperimentRole(run.role),
         typeof value === "number" ? displayMetricValue(metric, value) : "无",
         displayRunStatus(run.status),
@@ -1096,7 +1145,11 @@ function discussionSummary(input: ComposeDraftPaperInput) {
     if (Math.abs(delta) < 1e-9) {
       rows.push("主指标与最佳基线持平，因此本文不能声称本文方法在性能上优于基线；较稳妥的解释是，当前方法与对照在该复现指标上表现一致，并且实验链路保留了可复核证据。")
     } else if (delta > 0) {
-      rows.push("主指标高于最佳基线，但该结论仍需要结合任务规模、数据代表性和容器复现稳定性解释，避免把单次运行写成泛化结论。")
+      if (isRankingMetric(report.primary_metric)) {
+        rows.push(`在候选论文排序任务中，${displayMetricName(report.primary_metric)} 高于最佳基线 ${formatMetricValue(Math.abs(delta))}，说明本文方法在前三位排序上更接近当前证据标注；但该结论仍需要结合候选集规模、标注策略和容器复现稳定性解释，避免把单次运行写成泛化结论。`)
+      } else {
+        rows.push("主指标高于最佳基线，但该结论仍需要结合任务规模、数据代表性和容器复现稳定性解释，避免把单次运行写成泛化结论。")
+      }
     } else {
       rows.push("主指标低于最佳基线，正文应把贡献限定为流程、可观测性或工程可靠性，而不是性能提升。")
     }
