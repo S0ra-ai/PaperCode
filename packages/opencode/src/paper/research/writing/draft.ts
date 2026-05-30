@@ -2173,6 +2173,15 @@ function resultSummary(input: ComposeDraftPaperInput, claimSections: DraftSectio
   const ablation = rankingAblationInterpretation(input)
   const statisticalScope = resultStatisticalScopeSummary(input)
   const resultClaim = claimSections.find((section) => section.section_id === "results")?.markdown
+  if (isRankingContext(input)) {
+    return joinBlocks([
+      resultClaim,
+      joinBlocks(["### 主结果", experimentSummary(input)]),
+      table ? joinBlocks(["### 结果表", `表 1 汇总本文方法、基线和消融在主指标、运行状态和容器复现上的结果。\n\n${table}`]) : undefined,
+      ablation ? joinBlocks(["### 消融分析", ablation.replace(/^消融分析显示，/, "")]) : undefined,
+      statisticalScope ? joinBlocks(["### 统计解释", statisticalScope.replace(/^统计解释：/, "")]) : undefined,
+    ])
+  }
   return [
     resultClaim ? `${resultClaim}\n\n` : "",
     experimentSummary(input),
