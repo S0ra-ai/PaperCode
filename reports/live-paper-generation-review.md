@@ -1,9 +1,18 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.71-dev
+- project_version: 0.13.0.72-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 GPU 预算口径复审
+
+- 协议场景复跑 `run-6738dca1-473f-4fec-9274-17f794f48ce4`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-6738dca1-473f-4fec-9274-17f794f48ce4\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 实验计划记录 `max_gpu_hours=0`，最终稿资源预算写为 `GPU 未纳入当前资源预算`。
+- 最终稿不再出现默认 `GPU<=4 小时` 或无意义的 `GPU<=0 小时`。
+- 最终稿代码版本为 `0.13.0.71-dev`，代码修订为 `ba8e87b1`；本报告和 CHANGELOG 记录为后续开发版本 `0.13.0.72-dev`。
+- 质量判断：资源预算从固定 GPU 假设改为显式启用，避免无 GPU 实验被写成 GPU 预算实验。
 
 ## 2026-05-30 研究问题相关性口径复审
 
