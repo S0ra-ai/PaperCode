@@ -5,6 +5,14 @@
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
 
+## 2026-05-30 实验证据措辞复审
+
+- 协议场景复跑 `run-b9ca2413-9b6b-47e6-9799-e294b845b986`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-b9ca2413-9b6b-47e6-9799-e294b845b986\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 坏词扫描未发现 `package.json 脚本`、`可追踪来源`、`提交代码库`、`登记命令`、`仓库提供`、`mock/fake/fixture/placeholder` 或内部运行路径残留。
+- 来源表述改为“可核验材料来源”，实验来源改为“项目声明的实验入口”，附录命令区改为“复现实验入口”。
+- 质量判断：终稿进一步脱离工程审计报告形态，实验协议和复现附录更接近论文中的可复核实验说明。
+
 ## 2026-05-30 研究问题领域化复审
 
 - 协议场景复跑 `run-f5092197-2707-482f-9770-da46235e0159`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
