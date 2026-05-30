@@ -5,6 +5,14 @@
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
 
+## 2026-05-30 ranking 评分公式复审
+
+- 协议场景复跑 `run-5a379d74-d0e0-42e3-b520-6efc60eda2ba`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-5a379d74-d0e0-42e3-b520-6efc60eda2ba\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 方法章节现在根据 `scorePaper` 代码证据输出 `score(p) = 0.62 * relevance(p) + 0.28 * claim_coverage(p) + 0.10 * recency(p)`。
+- 方法章节同时说明三个权重来自 `scorePaper` 的当前实现。
+- 质量判断：ranking 方法从 prose 描述推进到可复核公式表述，更接近算法论文方法章节。
+
 ## 2026-05-30 正式声明区块复审
 
 - 协议场景复跑 `run-6b7c1898-a944-4198-a517-bc9d4f71d4eb`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
