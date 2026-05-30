@@ -1304,10 +1304,6 @@ function rankingMethodFigureSummary(input: ComposeDraftPaperInput) {
       : "排序特征"
   const metric = displayMetricName(input.result_report?.primary_metric ?? input.experiment_plan?.proposed.expected_metric ?? "ranking_ndcg_at_3")
   const entrypoints = experimentEntrypointLabels(input).filter((entrypoint) => entrypoint !== "排名测试")
-  const branch =
-    entrypoints.length > 0
-      ? `对照分支包括${chineseList(entrypoints)}。`
-      : "对照分支包括基线、消融和复现检查。"
   const branchText = entrypoints.length > 0 ? chineseList(entrypoints) : "基线、消融和复现检查"
   return [
     "框 1 候选论文排序与复现实验流程。",
@@ -1320,8 +1316,7 @@ function rankingMethodFigureSummary(input: ComposeDraftPaperInput) {
     "| rankAgentTeamPapers 排序 | 排序接口 | 候选顺序 |",
     `| ${metric} 评测 | 主指标 | 排序质量 |`,
     "",
-    `分支检查：${branchText}。`,
-    branch,
+    `分支检查覆盖${branchText}。`,
   ].join("\n")
 }
 
