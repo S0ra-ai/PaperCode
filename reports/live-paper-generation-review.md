@@ -5,6 +5,14 @@
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
 
+## 2026-05-30 ranking 研究问题复审
+
+- 协议场景复跑 `run-de8331e2-fc53-4c31-b70c-cdf212b47ad4`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-de8331e2-fc53-4c31-b70c-cdf212b47ad4\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 研究问题改为排序机制、特征贡献和环境一致性三项问题，分别对应方法、结果和可复现性章节。
+- 坏词扫描未发现 `结论性表述`、`完整复核材料`、`足以支撑`、`证据充分性检查` 或 `待验证状态`。
+- 质量判断：研究问题章节从流程验收说明转为论文问题定义，读者能直接理解本文要回答什么。
+
 ## 2026-05-30 ranking 附录复审
 
 - 协议场景复跑 `run-20512e64-1a0d-4eca-82f7-efe68a55b787`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
