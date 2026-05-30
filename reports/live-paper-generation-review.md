@@ -5,6 +5,15 @@
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
 
+## 2026-05-30 证据与附录审计口吻复审
+
+- 协议场景复跑 `run-51193f4e-bd0a-4dd2-b76b-6b86608ddebf`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-51193f4e-bd0a-4dd2-b76b-6b86608ddebf\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 研究设计改为读者复核路径，不再输出“人工审查”“审稿人”等过程词。
+- 方法、证据链和附录改为“复核记录”“证据清单”“实验执行摘要”等论文式表述，不再暴露本地审查材料、系统动作、运行目录或导出格式细节。
+- 坏词扫描未发现 `人工审查`、`审稿人`、`本地审查材料`、`审稿记录`、`审稿可追踪性`、`进入运行记录`、`系统只把`、`导出记录`、`Markdown/LaTeX/PDF/DOCX`、`运行目录`、`完整复核材料`、`结构化证据记录`、`mock/fake/fixture/placeholder` 或内部证据 ID 残留。
+- 质量判断：终稿的主文和附录进一步脱离运行审计报告形态；下一轮重点应转向提高实验对象、贡献和讨论的领域特异性，而不是继续只做禁用词收敛。
+
 ## 2026-05-30 相关工作与附录机械措辞复审
 
 - 协议场景复跑 `run-02674a61-5645-415b-a414-f5b37e06e13b`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。

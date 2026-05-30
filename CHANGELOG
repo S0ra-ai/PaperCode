@@ -2,10 +2,22 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.16-dev
+:version       0.13.0.17-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.17-dev - 2026/05/30 (18a17a0b) [fix/mcp-tool-binding-test-isolation]
+        :brief 证据与附录残余审计口吻收敛
+        :authoring
+            - fix(study-design): 研究设计说明改为读者复核路径，不再输出人工审查、审稿人等过程词
+            - fix(evidence): 方法和证据链章节移除本地审查材料、审稿记录和审稿可追踪性等审计表达
+            - fix(appendix): 复现清单和证据记录索引移除系统只把、进入运行记录、导出记录、文件格式清单和运行目录等内部执行表述
+            - test(authoring): 增加研究设计、方法、证据链、复现清单和证据索引禁用词断言
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
     0.13.0.16-dev - 2026/05/30 (7f18f60e) [fix/mcp-tool-binding-test-isolation]
         :brief 相关工作与附录机械措辞继续收敛
