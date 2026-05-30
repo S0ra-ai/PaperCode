@@ -2,10 +2,21 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.41-dev
+:version       0.13.0.42-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.42-dev - 2026/05/30 (ac100419) [fix/mcp-tool-binding-test-isolation]
+        :brief 生成稿增加作者信息区块
+        :authoring
+            - fix(structure): scaffold 在题名后、摘要前增加作者信息区块
+            - fix(metadata): 未登记作者、机构和通信作者时显式输出未登记状态，不伪造作者
+            - test(authoring): 增加作者信息位置和品牌残留禁用断言
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
     0.13.0.41-dev - 2026/05/30 (f7b68589) [fix/mcp-tool-binding-test-isolation]
         :brief ranking 主文隐藏内部来源标记

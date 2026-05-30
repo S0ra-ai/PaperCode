@@ -5,6 +5,15 @@
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
 
+## 2026-05-30 作者信息区块复审
+
+- 协议场景复跑 `run-e0d800c5-cc7e-4bf4-a9d7-1cfadf23362a`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-e0d800c5-cc7e-4bf4-a9d7-1cfadf23362a\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 终稿现在在题名后、摘要前输出作者信息区块。
+- 未登记作者、机构和通信作者时输出未登记状态，不伪造作者或机构。
+- 扫描未发现 `Paper Fucker` 或 `OpenCode` 品牌进入作者信息。
+- 质量判断：题名页元数据缺口已显式化，后续可由 TUI 作者和期刊配置替换为真实信息。
+
 ## 2026-05-30 内部来源标记复审
 
 - 协议场景复跑 `run-5e567e47-2155-4625-be20-7f9de4404108`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
