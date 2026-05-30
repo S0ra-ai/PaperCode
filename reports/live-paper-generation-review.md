@@ -1,9 +1,17 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.58-dev
+- project_version: 0.13.0.59-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 方法流程图复审
+
+- 协议场景复跑 `run-ad13aef6-4ee0-4709-93fe-92792e561898`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-ad13aef6-4ee0-4709-93fe-92792e561898\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 方法章节的图 1 现在输出 Mermaid `flowchart LR`。
+- 图 1 同时展示候选集、特征计算、scorePaper、rankAgentTeamPapers、排序 nDCG@3，以及词项匹配基线、无证据覆盖消融和容器复现分支。
+- 质量判断：方法图从纯文本箭头推进到可渲染结构图，改善论文的图表呈现和读者扫描效率。
 
 ## 2026-05-30 作者与声明占位文案复审
 
