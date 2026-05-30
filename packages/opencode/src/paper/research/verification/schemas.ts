@@ -14,6 +14,7 @@ export type VerificationFindingCategory =
   | "missing_open_dataset"
   | "reproduction_failure"
   | "reviewer_warning"
+  | "missing_model_review"
   | "review_conflict"
   | "reviewer_authenticity_failure"
 
