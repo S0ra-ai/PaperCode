@@ -53,14 +53,14 @@ function normalizeCjkSpacing(value: string) {
 
 function paperProseText(value: string) {
   return normalizeCjkSpacing(value)
-    .replace(/The workflow links /g, "该流程串联")
+    .replace(/The workflow links /g, "该证据链连接")
     .replace(/The proposed workflow matches the declared baseline on the primary reproducibility metric\./g, "本文方法在主复现指标上与已声明基线保持一致。")
     .replace(/declared baseline/g, "已声明基线")
     .replace(/primary reproducibility metric/g, "主复现指标")
     .replace(/experiment runs/g, "实验运行记录")
-    .replace(/export gates/g, "证据充分性检查")
-    .replace(/before final paper generation/g, "并在成稿前完成")
-    .replace(/final paper generation/g, "正式成稿")
+    .replace(/export gates/g, "证据链完整性约束")
+    .replace(/before final paper generation/g, "并在形成结果表述前完成")
+    .replace(/final paper generation/g, "结果表述")
     .replace(/, and /g, "和")
     .replace(/, /g, "、")
     .replace(/source-range-grounded/g, "基于源码范围的")
@@ -73,10 +73,10 @@ function paperProseText(value: string) {
     .replace(/系统抽取到/g, "分析阶段抽取到")
     .replace(/导出方法\/类表面/g, "导出方法或类接口")
     .replace(/package script/g, "package.json 脚本")
-    .replace(/final gate/g, "证据充分性检查")
-    .replace(/final claim/g, "正式结论")
-    .replace(/最终 claim/g, "正式结论")
-    .replace(/final export/g, "最终成稿")
+    .replace(/final gate/g, "证据链完整性约束")
+    .replace(/final claim/g, "结论性表述")
+    .replace(/最终 claim/g, "结论性表述")
+    .replace(/final export/g, "最终结果表述")
     .replace(/(?<![A-Za-z0-9_])ClaimLedger(?![A-Za-z0-9_])/g, "证据台账")
     .replace(/(?<!:)\bbaseline\b(?!:)/g, "基线")
     .replace(/(?<!:)\bablation\b(?!:)/g, "消融")
@@ -84,7 +84,7 @@ function paperProseText(value: string) {
     .replace(/(?<!:)\bcontainer\b/g, "容器")
     .replace(/进行\s+基于源码范围的\s+分析/g, "进行基于源码范围的分析")
     .replace(/和\s+源码范围/g, "和源码范围")
-    .replace(/和证据充分性检查\s+并在成稿前完成/g, "，并在成稿前完成证据充分性检查")
+    .replace(/和证据链完整性约束\s+并在形成结果表述前完成/g, "，并在形成结果表述前完成证据链完整性约束")
     .replace(/完成\./g, "完成。")
     .replace(/检查\./g, "检查。")
 }
@@ -137,8 +137,8 @@ function buildPlainSection(sectionId: string, title: string, markdown: string): 
 function claimStatusSummary(ledger: ClaimLedger) {
   const unsupported = ledger.unsupported_claim_ids.length
   const supported = ledger.entries.filter((entry) => entry.status === "supported").length
-  if (ledger.entries.length === 0) return "当前还没有证据台账条目，不能生成正式结论。"
-  if (unsupported > 0) return `当前 ${unsupported}/${ledger.entries.length} 条断言尚缺证据，正式结论必须保持阻断。`
+  if (ledger.entries.length === 0) return "当前还没有证据台账条目，不能生成结论性表述。"
+  if (unsupported > 0) return `当前 ${unsupported}/${ledger.entries.length} 条断言尚缺证据，结论性表述必须保持阻断。`
   return `当前 ${supported}/${ledger.entries.length} 条断言已绑定证据，可进入更严格的审稿与导出检查。`
 }
 
@@ -457,7 +457,7 @@ function literatureSynthesisSummary(map: LiteratureMap, sources: LiteratureMap["
   if (taxonomy.length === 0) return undefined
   const taxonomyText = taxonomy.slice(0, 4).join("、")
   const clusterText = clusterLabels.length > 0 ? `${clusterLabels.slice(0, 3).join("、")}等主题线索说明这些方向已经形成可追踪背景；` : ""
-  return `综合来看，相关工作可分为 ${taxonomy.length} 类：${taxonomyText}。${clusterText}本文不把这些工作简单当作背景罗列，而是用它们界定本研究的比较边界：已有研究说明自动化研究、工具调用或复现评测为何重要，本文进一步要求代码证据、实验协议和容器复现同时支撑正文结论。`
+  return `综合来看，相关工作可分为 ${taxonomy.length} 类：${taxonomyText}。${clusterText}本文不把这些工作简单当作背景罗列，而是用它们界定本研究的比较边界：已有研究说明工具调用、智能体协作或复现评测为何重要，本文进一步要求代码证据、实验协议和容器复现同时支撑正文结论。`
 }
 
 function literatureContrastSummary(sources: LiteratureMap["sources"]) {
@@ -494,7 +494,7 @@ function literatureContrastSummary(sources: LiteratureMap["sources"]) {
   const grouped = [...roleGroups.entries()].slice(0, 3)
   if (grouped.length === 0) return undefined
   const fragments = grouped.map(([role, titles]) => `${role}方向以 ${titles.join("、")} 为代表`).join("；")
-  return `对比这些方向，${fragments}。而本文的差异在于：相关工作只提供外部参照，正文结论必须同时经过代码证据、显式基线、消融和容器复现约束，不能把自动化流程本身写成未经验证的性能贡献。`
+  return `对比这些方向，${fragments}。而本文的差异在于：相关工作只提供外部参照，正文结论必须同时经过代码证据、显式基线、消融和容器复现约束，不能把执行链路本身写成未经验证的性能贡献。`
 }
 
 function literatureEvidenceSummary(input: ComposeDraftPaperInput) {
@@ -566,7 +566,7 @@ function referencesSummary(input: ComposeDraftPaperInput) {
 
 function humanizeExperimentText(value: string) {
   return value
-    .replace(/^Create a reproducible evaluation plan before allowing final paper claims\.$/, "为正式结论提供可复现的评价依据。")
+    .replace(/^Create a reproducible evaluation plan before allowing final paper claims\.$/, "为结论性表述提供可复现的评价依据。")
     .replace(/^Strong sparse retrieval baseline for retrieval-style CS\/AI papers\.$/, "作为检索类任务的稀疏检索对照。")
     .replace(/^Common neural retrieval baseline for embedding-based methods\.$/, "作为嵌入式方法的神经检索对照。")
     .replace(/^End-to-end retrieval augmented generation baseline\.$/, "作为端到端 RAG 流水线对照。")
@@ -575,7 +575,7 @@ function humanizeExperimentText(value: string) {
     .replace(/^Ablation runner declared by package script\.$/, "仓库 package.json 显式声明的消融运行入口。")
     .replace(/^If fewer than two baselines can run, downgrade to an engineering report\.$/, "少于两个基线可运行时降级为工程报告。")
     .replace(/^If datasets are unavailable, turn to the nearest open verified benchmark\.$/, "数据集不可用时转向最近的开放可验证 benchmark。")
-    .replace(/^If container reproduction fails, block final paper claims\.$/, "容器复现失败时阻断正式结论。")
+    .replace(/^If container reproduction fails, block final paper claims\.$/, "容器复现失败时阻断结论性表述。")
 }
 
 function humanizeLabel(value: string) {
@@ -611,7 +611,7 @@ function dataAvailabilitySummary(input: ComposeDraftPaperInput) {
         .filter(Boolean)
         .join("")
     }
-    return `本研究尚未登记可用数据集。${gaps} 因此实验结果只能依赖用户提供的显式实验记录；若缺少实验记录，正式结论必须保持阻断。`
+    return `本研究尚未登记可用数据集。${gaps} 因此实验结果只能依赖用户提供的显式实验记录；若缺少实验记录，结论性表述必须保持阻断。`
   }
   const datasetLines = data.datasets.slice(0, 5).map((dataset) => {
     const license = displayDatasetLicense(dataset.license.expression ?? dataset.license.status)
@@ -681,7 +681,7 @@ function experimentProtocolSummary(input: ComposeDraftPaperInput) {
     plan.ablations.slice(0, 8).map((ablation) => [displayExperimentLabel(ablation.experiment_id), humanizeLabel(ablation.label), humanizeExperimentText(ablation.rationale)]),
   )
   return [
-    `实验协议围绕评价对象、主指标、基线和消融展开，用来判断结果是否足以进入正式结论。评价目标是${humanizeExperimentText(plan.objective).replace(/[。.]$/, "")}。`,
+    `实验协议围绕评价对象、主指标、基线和消融展开，用来判断结果是否足以支撑结论性表述。评价目标是${humanizeExperimentText(plan.objective).replace(/[。.]$/, "")}。`,
     "",
     "### 指标",
     metricTable,
@@ -689,7 +689,7 @@ function experimentProtocolSummary(input: ComposeDraftPaperInput) {
     `本文方法的评价对象为“${humanizeLabel(plan.proposed.label)}”，主指标为“${displayMetricName(plan.proposed.expected_metric)}”。`,
     "",
     "### 基线",
-    baselineTable || "当前没有基线运行入口；该缺口会阻断正式结论。",
+    baselineTable || "当前没有基线运行入口；该缺口会阻断结论性表述。",
     "",
     "### 消融",
     ablationTable || "当前没有消融运行入口；贡献强度需要保持保守。",
@@ -711,7 +711,7 @@ function experimentGuidanceSummary(input: ComposeDraftPaperInput) {
   })
   return [
     guidance.summary,
-    guidance.final_export_blocked ? "在这些协议缺口补齐前，正式结论必须保持阻断；待修复草稿只能作为待补实验清单。" : "",
+    guidance.final_export_blocked ? "在这些协议缺口补齐前，结论性表述必须保持阻断；待修复草稿只能作为待补实验清单。" : "",
     ...lines,
   ]
     .filter(Boolean)
@@ -812,13 +812,13 @@ function researchQuestionsSummary(input: ComposeDraftPaperInput) {
   const metric = displayMetricName(input.result_report?.primary_metric ?? input.experiment_plan?.proposed.expected_metric ?? "primary_metric")
   const design = experimentDesignCountsText(input)
   return joinBlocks([
-    `本文把研究目标拆成三项：证据是否足以支撑方法，${design} 的对照是否能形成可比较结果，以及复现状态是否允许正式结论。`,
+    `本文将研究目标拆分为三项可复核问题：证据是否足以支撑方法，${design} 的对照是否能形成可比较结果，以及复现状态是否支撑结果表述。`,
     "RQ1 证据边界：提交的代码、方法描述和源码范围是否足以支撑正文中的方法断言？",
     `RQ2 对照有效性：本文方法、基线和消融是否围绕“${metric}”这一主指标形成可比较记录？`,
-    "RQ3 复现一致性：本机与隔离环境中的状态和主指标是否一致，从而允许结果进入正式结论？",
+    "RQ3 复现一致性：本机与隔离环境中的状态和主指标是否一致，从而支撑结果表述？",
     ready
-      ? "由于当前证据充分性检查已通过，正文只保留已绑定来源和实验结果的结论；完整证据索引放在附录。"
-      : "由于当前证据充分性检查尚未通过，正文会把结论限定为待验证状态，并把缺口写成修复清单。",
+      ? "当前证据链已满足结果表述条件，正文只保留已绑定来源和实验结果的结论；完整证据索引放在附录。"
+      : "当前证据链尚未满足结果表述条件，正文会把结论限定为探索性观察，并把缺口写成修复清单。",
   ])
 }
 
@@ -836,7 +836,7 @@ function contributionsSummary(input: ComposeDraftPaperInput) {
     [
       `1. 第一项贡献是把源码范围、来源和实验记录统一为可审查证据${methodClaim ? `；核心方法断言为：${trimTerminalPunctuation(methodClaim)}` : ""}。`,
       `2. 第二项贡献是将本文方法与 ${counts.baseline} 个基线、${counts.ablation} 个消融放入同一评价协议，并${primaryMetricPhrase(metric).replace("主指标", "主比较指标")}${resultClaim ? `；核心结果断言为：${trimTerminalPunctuation(resultClaim)}` : ""}。`,
-      `3. 第三项贡献是用本机/容器一致性检查约束结果表述${runEvidence}，避免把未复现或只在单一环境中成立的观察写成正式结论。`,
+      `3. 第三项贡献是用本机/容器一致性检查约束结果表述${runEvidence}，避免把未复现或只在单一环境中成立的观察写成结论性表述。`,
     ].join("\n"),
     "这些贡献共同保证方法比较、复现检查和正文表述共享同一套证据边界。",
   ])
@@ -874,13 +874,13 @@ function studyDesignSummary(input: ComposeDraftPaperInput) {
     ["代码证据", `${evidenceCount} 个绑定方法或结果的证据记录`, "把方法表述绑定到文件、源码范围和生成证据。"],
     ["实验协议", `指标=${metric}；基线=${input.experiment_plan?.baselines.length ?? 0}；消融=${input.experiment_plan?.ablations.length ?? 0}`, "形成可比较的本文方法、基线和消融运行。"],
     ["复现执行", `本机=${hostCount}；容器=${containerCount}`, "检查同一观察能否在受控环境中重复出现。"],
-    ["证据充分性", finalReady(input) ? "通过" : "阻断", "决定结果是否可以作为正式结论呈现。"],
+    ["证据链完整性", finalReady(input) ? "通过" : "阻断", "决定结果是否可以作为结论性表述呈现。"],
   ]
   return joinBlocks([
-    "下表展示研究设计与证据流。研究设计由五类证据约束构成：材料边界、代码证据、显式实验协议、本机/容器执行和证据充分性检查；每一类约束都会收窄正文可以声称的内容。",
+    "下表展示研究设计与证据流。研究设计由五类证据约束构成：材料边界、代码证据、显式实验协议、本机/容器执行和证据链完整性约束；每一类约束都会收窄正文可以声称的内容。",
     markdownTable(["阶段", "观测状态", "在论文中的作用"], rows),
     "这个设计把论文结构完整性与结论可支持性分开处理。结构完整性要求研究问题、方法、实验和结论齐备；结论可支持性要求来源记录、实验结果和复现检查能够支撑这些表述。",
-    "因此，研究设计不是简单的流水线说明，而是正文可信度的约束机制。材料边界决定可以讨论哪些对象，代码证据决定方法描述是否有源码范围支撑，实验协议决定结果是否有对照，复现执行决定结果是否可以重复，证据充分性检查则决定这些结果能否进入结论。任一环节缺失时，相关结论应降级为待验证观察，而不是用完整段落掩盖证据缺口。",
+    "因此，研究设计不是简单的执行说明，而是正文可信度的约束机制。材料边界决定可以讨论哪些对象，代码证据决定方法描述是否有源码范围支撑，实验协议决定结果是否有对照，复现执行决定结果是否可以重复，证据链完整性约束则决定这些结果能否进入结论。任一环节缺失时，相关结论应降级为探索性观察，而不是用完整段落掩盖证据缺口。",
     "这种分层也让后续人工审查更直接：审稿人可以先查看主文中的研究问题和结果表，再沿着附录中的来源、断言和实验记录回到具体文件、命令和输出摘要。对计算机类论文而言，这比单纯给出一段生成式解释更重要，因为代码路径、运行脚本、数据版本和环境差异都会影响结果能否成立。",
     "这一设计还能区分两类证据不足：一类是材料不足，例如缺少论文来源或数据许可；另一类是实验链路不足，例如没有基线、消融或隔离环境复现。前者影响背景与引用可信度，后者影响结果与贡献可信度。将两类问题分开呈现，可以避免将结构完整误认为证据充分。",
     "因此，主文中的每个强结论都应能在附录中找到对应证据，而附录中的每条证据也应能解释它为何足以支撑或限制该结论完整成立。",
@@ -900,7 +900,7 @@ function implementationTraceSummary(input: ComposeDraftPaperInput) {
   ])
   return joinBlocks([
     "证据追踪表汇总来源、断言和复核记录，用于说明正文结论如何连接到材料、实验协议和运行结果。",
-    `本研究共有 ${input.ledger.entries.length} 条断言、${evidenceSources.length} 个可追踪来源（其中 ${sourceIds.length} 个直接绑定断言）和 ${artifactIds.length} 个证据记录。断言状态会影响证据充分性判断：待补证据的断言只能出现在待修复草稿中，已支持断言才允许进入正式结论。`,
+    `本研究共有 ${input.ledger.entries.length} 条断言、${evidenceSources.length} 个可追踪来源（其中 ${sourceIds.length} 个直接绑定断言）和 ${artifactIds.length} 个证据记录。断言状态会影响证据链完整性判断：待补证据的断言只能出现在待修复草稿中，已支持断言才允许进入结论性表述。`,
     claimRows.length > 0
       ? markdownTable(["断言", "章节", "状态", "来源类型", "证据概况"], claimRows)
       : "当前没有断言行。",
@@ -971,10 +971,10 @@ function hostContainerConsistencySummary(input: ComposeDraftPaperInput) {
   const rows = comparisons.map((item) => item.row)
   const mismatches = comparisons.filter((item) => item.mismatch)
   return joinBlocks([
-    `可复现性分析比较本机与容器结果，${primaryMetricPhrase(metricLabel)}。只有当本文方法、基线和消融在可复现环境中有一致记录时，相关结果才有资格进入正式结论。`,
+    `可复现性分析比较本机与容器结果，${primaryMetricPhrase(metricLabel)}。只有当本文方法、基线和消融在可复现环境中有一致记录时，相关结果才有资格进入结论性表述。`,
     markdownTable(["实验", "本机状态", `本机 ${metricLabel}`, "容器状态", `容器 ${metricLabel}`, "差值", "容器命令"], rows),
     mismatches.length === 0
-      ? "本机与容器比较没有发现状态或主指标差异，复现检查可以把这些实验作为正式结论的支撑证据。"
+      ? "本机与容器比较没有发现状态或主指标差异，复现检查可以把这些实验作为结论性表述的支撑证据。"
       : `本机与容器比较发现 ${mismatches.length} 个状态或主指标差异，相关断言应降级为探索性观察，直到复现脚本或环境被修复。`,
     "该检查不等价于证明方法泛化有效；它只证明当前工作区、当前协议和当前环境声明可以复现同一组观测结果。泛化结论仍需要更多数据集、更多随机种子和领域基线。",
   ])
@@ -995,7 +995,7 @@ function reproducibilityChecklistSummary(input: ComposeDraftPaperInput) {
     ["本机执行", displayReady(hasHostRuns), hasHostRuns ? "已记录本机输出、退出码、耗时和指标。" : "需要真实执行本机实验。"],
     ["容器复现", displayReady(hasContainerRuns), hasContainerRuns ? "已记录容器复现结果。" : "需要容器或等价隔离环境复现。"],
     ["结果报告", displayReady(hasResultReport), hasResultReport ? "已生成主指标比较、阻断项和建议。" : "需要生成结果报告。"],
-    ["证据充分性", displayReady(finalReady(input)), finalReady(input) ? "允许正式结论。" : "保持阻断或待修复草稿。"],
+    ["证据链完整性", displayReady(finalReady(input)), finalReady(input) ? "允许结论性表述。" : "保持阻断或待修复草稿。"],
   ]
   return joinBlocks([
     "复现清单汇总正式结果所需的最小证据条件。每一项都来自复核记录，而不是人工勾选。",
@@ -1069,10 +1069,10 @@ function experimentSummary(input: ComposeDraftPaperInput) {
     metrics = `${primaryMetricLocus(displayMetricName(report.primary_metric))}，本文方法为 ${displayMetricValue(report.primary_metric, report.proposed.value)}；由于缺少基线，对比性结论仍需保守。`
   }
   if (report.reproduction.status === "passed" && report.final_claims_allowed) {
-    return `${metrics}\n\n容器复现已通过，本机与容器结果可以支撑当前正式结论。`
+    return `${metrics}\n\n容器复现已通过，本机与容器结果可以支撑当前结论性表述。`
   }
   const blockers = report.blockers.length > 0 ? report.blockers.map(paperProseText).join("、") : "复现检查"
-  return `${metrics}\n\n复现检查未通过，阻断项：${blockers}。相关结果只能标为探索性证据，不能进入正式结论。`
+  return `${metrics}\n\n复现检查未通过，阻断项：${blockers}。相关结果只能标为探索性证据，不能进入结论性表述。`
 }
 
 function discussionSummary(input: ComposeDraftPaperInput) {
@@ -1103,12 +1103,12 @@ function discussionSummary(input: ComposeDraftPaperInput) {
 
 function abstractSummary(input: ComposeDraftPaperInput) {
   const ready = finalReady(input)
-  const status = ready ? "在当前证据边界内，证据充分性检查已通过。" : "在当前证据边界内，证据充分性检查尚未通过。"
+  const status = ready ? "在当前证据边界内，证据链已满足本文的结果表述条件。" : "在当前证据边界内，证据链尚未满足结果表述条件。"
   const metric = resultMetricSummary(input)
   const methodClaim = firstClaimText(input, "method")
   const resultClaim = firstClaimText(input, "results")
   return [
-    "计算机类论文若缺少可追踪代码证据、显式对照和隔离复现，容易把流程产物误写成研究结论。",
+    "计算机类论文若缺少可追踪代码证据、显式对照和隔离复现，容易把缺少依据的过程记录误写成研究结论。",
     `本文以“${input.title}”为对象，检验材料、实验协议和结果断言能否形成同一条可复核证据链。`,
     methodClaim ? `方法证据显示：${methodClaim}` : undefined,
     resultClaim ? `结果证据显示：${resultClaim}` : undefined,
@@ -1116,7 +1116,7 @@ function abstractSummary(input: ComposeDraftPaperInput) {
     status,
     ready
       ? "结果表明，当来源、实验协议和复现记录均具备时，正文可以只保留被证据支持的结果和限制。"
-      : "当基线、消融或容器复现缺失时，流程必须保留草稿状态，并把缺口转化为可执行修复步骤。",
+      : "当基线、消融或容器复现缺失时，结果只能作为探索性观察，并把缺口转化为可执行修复步骤。",
   ]
     .filter(Boolean)
     .join("")
@@ -1126,16 +1126,16 @@ function introductionSummary(input: ComposeDraftPaperInput) {
   const methodClaim = firstClaimText(input, "method")
   const resultEvidence = resultEvidenceText(input)
   return [
-    `面向计算机类论文的自动写作不能只追求正文完整，还必须说明代码依据、实验协议、运行结果和复现边界。${sourceSummary(input)}`,
+    `面向计算机类论文，正文完整性必须与代码依据、实验协议、运行结果和复现边界同时成立。${sourceSummary(input)}`,
     methodClaim
-      ? `本研究的直接动机来自方法证据：${methodClaim}这意味着正文必须围绕代码接口、源码范围、实验入口和结论边界展开，而不能只给出泛化的写作流程描述。`
-      : "本文采用证据优先的组织方式：材料进入后先整理来源和可验证断言，再根据实验计划执行或校验结果，最后由证据充分性检查决定结论能否成立。",
+      ? `方法部分的证据边界为：${methodClaim}这要求正文围绕代码接口、源码范围、实验入口和结论边界展开。`
+      : "本文首先整理来源和可验证断言，再根据实验计划执行或校验结果，最后用证据链完整性约束结论强度。",
     resultEvidence
-      ? `结果侧的核心问题是：${resultEvidence}因此，本文需要同时呈现基线、消融、主指标和复现一致性，避免把缺少对照的观察写成贡献。`
+      ? `结果部分需要解释的是：${resultEvidence}因此，本文需要同时呈现基线、消融、主指标和复现一致性，避免把缺少对照的观察写成贡献。`
       : undefined,
     finalReady(input)
-      ? "因此，本文只讨论已绑定证据的结论，并把未被来源、实验或复现记录支撑的表述排除在正式结论之外。"
-      : "因此，本文把未被来源、实验或复现记录支撑的表述标为待修复结论，而不是写成正式结论。",
+      ? "本文据此将讨论范围限定在已有来源、实验与复现记录能够支撑的结论上。"
+      : "本文据此把未被来源、实验或复现记录支撑的表述标为探索性观察。",
   ]
     .filter(Boolean)
     .join("\n\n")
@@ -1147,12 +1147,12 @@ function relatedWorkSummary(input: ComposeDraftPaperInput) {
   return joinBlocks([
     literatureEvidenceSummary(input),
     methodClaim
-      ? `与既有工具使用、自动写作或实验复现研究相比，本研究把相关工作边界放在代码证据上：${methodClaim}`
+      ? `与既有工具使用、智能体协作或实验复现研究相比，本研究把相关工作边界放在代码证据上：${methodClaim}`
       : "相关工作通常强调检索、规划或长文生成；本文关注的是代码证据、实验日志和复现环境如何共同约束论文正文。",
     resultEvidence
-      ? `与只报告单次运行结果的流程相比，本文把结果断言限定在显式对照内：${resultEvidence}`
+      ? `与只报告单次运行结果的研究相比，本文把结果断言限定在显式对照内：${resultEvidence}`
       : "如果没有基线、消融和复现记录，相关结论只能保留为探索性观察。",
-    "本文采用的约束是：写作结果必须限制在已登记来源、断言和证据记录范围内；没有通过复现检查时，相关结论应保持待验证状态，而不是把草稿包装成正式结论。",
+    "本文采用的约束是：结果表述必须限制在已登记来源、断言和证据记录范围内；没有通过复现检查时，相关结论应保持为探索性观察。",
     sourceSummary(input),
   ])
 }
@@ -1182,7 +1182,7 @@ function evidenceModelSummary(input: ComposeDraftPaperInput) {
     "因此，正文中的每个实验结论都应回答两个问题：它来自哪里，以及是否在受控环境中重复出现。没有答案的结论必须降级为探索性观察。",
     "这一约束是后续扩展真实数据集、领域基线、随机种子和更复杂实验资源时不可省略的基本条件，也是审稿可追踪性的基础。",
     "在计算机类论文场景中，这种约束尤其重要，因为代码实现、运行脚本、依赖版本和执行环境的细小差异都可能改变实验结论。",
-    "因此，本文区分文本完整性与结论可支持性：前者关注论文结构，后者要求来源、实验命令、运行结果和复现状态同时可追踪。只有后者成立时，结果才可以写成正式结论；否则正文必须保留限制说明，并把缺口转化为后续实验任务。",
+    "因此，本文区分文本完整性与结论可支持性：前者关注论文结构，后者要求来源、实验命令、运行结果和复现状态同时可追踪。只有后者成立时，结果才可以写成结论性表述；否则正文必须保留限制说明，并把缺口转化为后续实验任务。",
   ])
 }
 
