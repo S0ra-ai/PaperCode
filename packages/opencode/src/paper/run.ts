@@ -1120,15 +1120,22 @@ async function packageCodeMetadata(workspace: string): Promise<CodeAvailabilityM
     repository_url: repositoryUrlFromPackage(parsed.repository),
     version: typeof parsed.version === "string" ? parsed.version : undefined,
     commit_hash: await gitShortCommit(workspace),
+    worktree_dirty: await gitWorktreeDirty(workspace),
     license: typeof parsed.license === "string" ? parsed.license : undefined,
   }
-  return metadata.repository_url || metadata.version || metadata.commit_hash || metadata.license ? metadata : undefined
+  return metadata.repository_url || metadata.version || metadata.commit_hash || typeof metadata.worktree_dirty === "boolean" || metadata.license ? metadata : undefined
 }
 
 async function gitShortCommit(workspace: string) {
   const result = await runExperimentShellCommand("git rev-parse --short HEAD", workspace, 5_000)
   if (result.exitCode !== 0 || result.timedOut) return undefined
   return result.stdout.trim() || undefined
+}
+
+async function gitWorktreeDirty(workspace: string) {
+  const result = await runExperimentShellCommand("git status --porcelain", workspace, 5_000)
+  if (result.exitCode !== 0 || result.timedOut) return undefined
+  return result.stdout.trim().length > 0
 }
 
 async function refreshDraftPaperForFinalExport(input: {
