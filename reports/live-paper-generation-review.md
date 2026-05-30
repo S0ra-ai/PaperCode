@@ -1,9 +1,19 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.96-dev
+- project_version: 0.13.0.97-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 ranking 效度威胁表格复审
+
+- ranking authoring 测试已确认效度威胁章节包含 `效度类型 / 威胁 / 缓解方式` 表格。
+- 标注效度、指标效度、基线效度、消融效度和外部效度分别绑定对应缓解方式。
+- 效度威胁不再以 `标注效度：`、`指标效度：` 等冒号段落堆叠。
+- 相关回归已通过：authoring/live/metadata 定向测试和 `packages/opencode` typecheck 均通过。
+- 本轮未重复触发 protocol live 复审，原因是上一轮完整 protocol 复跑已被 arXiv HTTP 429 rate limit 阻断；为避免扩大限流，只记录当前 authoring 证据。
+- 本报告和 CHANGELOG 记录为后续开发版本 `0.13.0.97-dev`。
+- 质量判断：效度威胁现在更像审稿核对表，威胁与缓解措施逐项对应。
 
 ## 2026-05-30 ranking 限制章节表格复审
 
