@@ -1,9 +1,19 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.85-dev
+- project_version: 0.13.0.86-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 资源预算与降级策略表格复审
+
+- 协议场景复跑 `run-16be78ec-0bd4-4fea-ae19-6ba1b7372208`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-16be78ec-0bd4-4fea-ae19-6ba1b7372208\exports\bundle-final-draft-paper-final-export-9ce50551-3486-4bf3-b7d2-bfadea2ca07a\bundle-final-draft-paper-final-export-9ce50551-3486-4bf3-b7d2-bfadea2ca07a.md`。
+- 实验设置章节现在包含 `### 资源预算` 表格，列出运行时间、内存和 GPU 预算。
+- 实验设置章节现在包含 `### 降级策略` 表格，按条件和处理拆分少基线、数据集不可用和容器复现失败三类降级规则。
+- 最终稿不再把资源预算和降级策略压成一个长段落，也不再使用 `降级策略：...` 串联写法。
+- 最终稿代码版本为 `0.13.0.85-dev`，代码修订为 `941d4b52`；本报告和 CHANGELOG 记录为后续开发版本 `0.13.0.86-dev`。
+- 质量判断：实验约束从段落说明变成可扫描表格，审稿人更容易核对预算边界和失败处理规则。
 
 ## 2026-05-30 实验设置表格间距复审
 
