@@ -5,6 +5,15 @@
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
 
+## 2026-05-30 可复现性表格复审
+
+- 协议场景复跑 `run-72485cb1-7d12-4d05-9f48-b44d7c278ec3`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-72485cb1-7d12-4d05-9f48-b44d7c278ec3\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 可复现性章节的本机/容器比较表只保留实验、状态、主指标和差值，不再显示容器命令。
+- 实验执行摘要只保留环境、实验、角色、状态、指标和耗时，不再显示命令、输出或“见运行日志”。
+- 坏词扫描未发现 `见运行日志`、`审查材料`、`容器命令`、命令/输出宽表、`mock/fake/fixture/placeholder` 或旧工程审计词残留。
+- 质量判断：可复现性章节更像论文中的复现实验比较，而不是运行日志索引。
+
 ## 2026-05-30 相关工作叙事化复审
 
 - 协议场景复跑 `run-4278e1cb-39db-43cb-a0a2-0381826e0d3b`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
