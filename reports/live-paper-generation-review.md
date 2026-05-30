@@ -1,9 +1,18 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.49-dev
+- project_version: 0.13.0.50-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 结果统计解释复审
+
+- 协议场景复跑 `run-04569369-d707-46c6-94ce-d299ff81fd37`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-04569369-d707-46c6-94ce-d299ff81fd37\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 结果章节新增 `统计解释` 段落。
+- 终稿明确本文方法、基线和消融各在本机与容器环境执行一次。
+- 终稿明确当前数值是确定性协议观测，不计算置信区间或显著性检验。
+- 质量判断：结果章节从只报告差值，推进到同时说明统计解释边界，降低把单次协议观测误读为统计显著结论的风险。
 
 ## 2026-05-30 可复现性环境声明复审
 
