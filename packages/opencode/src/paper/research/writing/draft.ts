@@ -1000,6 +1000,32 @@ function experimentRunSummary(input: ComposeDraftPaperInput) {
     : "没有可展示的实验执行摘要。"
 }
 
+function experimentResourceBoundarySummary(input: ComposeDraftPaperInput) {
+  const runs = input.experiment_runs
+  if (!runs) return undefined
+  const allRuns = [...runs.host_runs, ...runs.container_runs]
+  if (allRuns.length === 0) return undefined
+  const hasWallTime = allRuns.some((run) => typeof run.resource_usage.wall_time_seconds === "number")
+  const hasMemory = allRuns.some((run) => typeof run.resource_usage.peak_memory_mb === "number")
+  const hasGpu = allRuns.some((run) => typeof run.resource_usage.gpu_hours === "number")
+  const recorded = [
+    hasWallTime ? "耗时" : undefined,
+    hasMemory ? "峰值内存" : undefined,
+    hasGpu ? "GPU 用量" : undefined,
+  ].filter((item): item is string => Boolean(item))
+  const missing = [
+    hasMemory ? undefined : "峰值内存",
+    hasGpu ? undefined : "GPU 用量",
+  ].filter((item): item is string => Boolean(item))
+  const formatResourceList = (values: string[]) => chineseList(values).replace(/和([A-Za-z0-9])/g, "和 $1")
+  const recordedText = recorded.length > 0 ? formatResourceList(recorded) : "运行状态"
+  const missingText =
+    missing.length > 0
+      ? `；未登记${formatResourceList(missing)}，因此不能把资源结论外推到未记录维度`
+      : "，资源记录覆盖当前可用运行维度"
+  return `资源记录边界：当前实验记录包含${recordedText}${missingText}。`
+}
+
 function displayPlatformName(platform: NodeJS.Platform | "container") {
   if (platform === "win32") return "Windows"
   if (platform === "darwin") return "macOS"
@@ -1911,6 +1937,7 @@ function reproducibilitySummary(input: ComposeDraftPaperInput) {
     hostContainerConsistencySummary(input),
     "### 实验执行摘要",
     experimentRunSummary(input),
+    experimentResourceBoundarySummary(input),
   ])
 }
 
