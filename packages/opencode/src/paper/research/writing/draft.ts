@@ -372,8 +372,10 @@ function claimSourceIds(input: ComposeDraftPaperInput) {
 
 function evidenceSourceIds(input: ComposeDraftPaperInput) {
   const sourceIds = new Set(claimSourceIds(input))
-  for (const source of input.literature_map?.sources ?? []) {
-    if (source.verification.status === "verified") sourceIds.add(source.source_id)
+  if (input.literature_map) {
+    for (const source of verifiedFormalLiteratureSources(input.literature_map)) {
+      sourceIds.add(source.source_id)
+    }
   }
   for (const dataset of input.data_plan?.datasets ?? []) {
     sourceIds.add(dataset.source_id || dataset.dataset_id)
@@ -649,8 +651,22 @@ function literatureContrastSummary(sources: LiteratureMap["sources"]) {
 function literatureEvidenceSummary(input: ComposeDraftPaperInput) {
   const map = input.literature_map
   if (!map || map.sources.length === 0) return undefined
-  const verified = map.sources.filter((source) => source.verification.status === "verified")
-  const selected = verified.length > 0 ? verified : map.sources
+  const verifiedSources = map.sources.filter((source) => source.verification.status === "verified")
+  const verified = verifiedFormalLiteratureSources(map)
+  const placeholderVerified = placeholderVerifiedLiteratureSources(map)
+  if (verified.length === 0) {
+    const placeholderText =
+      placeholderVerified.length > 0
+        ? `${placeholderVerified.length} 条来源使用测试或占位 URL，不能作为代表文献。`
+        : "当前候选文献尚未完成 DOI、arXiv 元数据或出版社页面核验。"
+    const unverifiedCount = map.sources.length - verifiedSources.length
+    const unverifiedText = unverifiedCount > 0 ? `另有 ${unverifiedCount} 条候选文献尚未验证。` : ""
+    return joinBlocks([
+      `当前没有可进入相关工作正文的已验证来源；${placeholderText}${unverifiedText}`,
+      "这些条目只能提示后续检索方向，不能作为已验证相关工作、领域共识或新颖性证明。",
+    ])
+  }
+  const selected = verified
   const rows = selected.slice(0, 5).map((source) => [
     literatureDisplayTitle(source),
     displayVerificationStatus(source.verification.status),
@@ -667,16 +683,13 @@ function literatureEvidenceSummary(input: ComposeDraftPaperInput) {
   const gapText = map.diagnostics.gaps.length > 0 ? `剩余缺口：${map.diagnostics.gaps.map(paperProseText).join("、")}。` : "当前相关工作没有登记阻断性缺口。"
   const verifiedHeading = verified.length > 0 ? "相关工作" : "候选文献"
   const verifiedClaim =
-    verified.length > 0
-      ? `本文纳入 ${map.summary.total_sources} 条相关文献记录，其中 ${map.summary.verified_sources} 条已验证，${map.summary.open_license_sources} 条${displayLicenseStatus("clear")}。`
-      : `本文仅纳入 ${map.summary.total_sources} 条候选文献，尚未完成来源验证；这些条目只能提示检索方向，不能作为已验证相关工作。`
+    `本文纳入 ${map.summary.total_sources} 条相关文献记录，其中 ${verified.length} 条可进入正文，${map.summary.open_license_sources} 条${displayLicenseStatus("clear")}。`
   return joinBlocks([
     `${verifiedClaim}${clusterText}${gapText}`,
-    verified.length > 0 ? literatureSynthesisSummary(map, selected) : undefined,
+    literatureSynthesisSummary(map, selected),
     markdownTable([verifiedHeading, "验证状态", "定位信息", "相关性"], rows),
-    verified.length > 0
-      ? literatureContrastSummary(selected)
-      : "由于当前文献记录未验证，正文不能把这些条目写成领域共识或新颖性证明；需要后续用授权检索、DOI/arXiv 元数据或来源核验补齐相关工作。",
+    placeholderVerified.length > 0 ? `${placeholderVerified.length} 条已验证但使用测试或占位 URL 的来源未进入相关工作正文。` : undefined,
+    literatureContrastSummary(selected),
   ])
 }
 

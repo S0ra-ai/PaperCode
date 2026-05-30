@@ -756,7 +756,7 @@ describe("paper authoring loop", () => {
             source_id: "paper:agent-a",
             kind: "paper",
             title: "Agent Workflow A",
-            url: "https://example.org/agent-a",
+            url: "https://arxiv.org/abs/2605.29444",
             retrieved_at: now,
             provider: "arxiv",
             license: { status: "clear", expression: "CC BY 4.0" },
@@ -764,13 +764,14 @@ describe("paper authoring loop", () => {
             verification: { status: "verified", method: "live", checked_at: now },
             topics: ["agent", "workflow", "validation"],
             abstract: "Studies autonomous agent workflow validation benchmarks.",
+            arxiv_id: "2605.29444",
           },
           {
             schema_version: "SourceRecord.v1",
             source_id: "paper:agent-b",
             kind: "paper",
             title: "Agent Workflow B",
-            url: "https://example.org/agent-b",
+            url: "https://arxiv.org/abs/2605.24060",
             retrieved_at: now,
             provider: "arxiv",
             license: { status: "clear", expression: "CC BY 4.0" },
@@ -778,13 +779,14 @@ describe("paper authoring loop", () => {
             verification: { status: "verified", method: "live", checked_at: now },
             topics: ["agent", "workflow", "validation"],
             abstract: "Reports autonomous agent workflow evaluation.",
+            arxiv_id: "2605.24060",
           },
           {
             schema_version: "SourceRecord.v1",
             source_id: "paper:paper-code",
             kind: "paper",
             title: "Paper-to-Code Execution",
-            url: "https://example.org/paper-code",
+            url: "https://arxiv.org/abs/2605.14853",
             retrieved_at: now,
             provider: "arxiv",
             license: { status: "clear", expression: "CC BY 4.0" },
@@ -792,6 +794,7 @@ describe("paper authoring loop", () => {
             verification: { status: "verified", method: "live", checked_at: now },
             topics: ["benchmark", "execution", "paper to code"],
             abstract: "Evaluates benchmark execution and paper-to-code validation.",
+            arxiv_id: "2605.14853",
           },
         ],
         clusters: [],
@@ -804,6 +807,59 @@ describe("paper authoring loop", () => {
 
     expect(relatedWork).toContain("工具调用与智能体协作方向以 Agent Workflow A、Agent Workflow B 为代表")
     expect(relatedWork).toContain("实验复现与验证风险方向以 Paper-to-Code Execution 为代表")
+  })
+
+  test("keeps placeholder literature seeds out of generic related work", () => {
+    const ledger = composeClaimLedger({
+      topic: "Agent workflow validation",
+      claims: [
+        {
+          text: "The code analysis found source ranges for agent workflow validation.",
+          section_id: "method",
+          confidence: 0.9,
+          source_ids: ["material:code:agent-workflow"],
+          artifact_ids: ["artifact-codebase-map"],
+        },
+      ],
+      now,
+    })
+    const draft = composeDraftPaper({
+      title: "Agent Workflow Validation",
+      ledger,
+      literature_map: {
+        schema_version: "LiteratureMap.v1",
+        topic: "Agent workflow validation",
+        created_at: now,
+        sources: [
+          {
+            schema_version: "SourceRecord.v1",
+            source_id: "paper:agent-placeholder",
+            kind: "paper",
+            title: "Agent Workflow Placeholder",
+            url: "https://example.org/agent-placeholder",
+            retrieved_at: now,
+            provider: "unit-test",
+            license: { status: "clear", expression: "CC BY 4.0" },
+            version: { value: "v1", retrieved_at: now },
+            verification: { status: "verified", method: "unit-test", checked_at: now },
+            topics: ["agent", "workflow", "validation"],
+            abstract: "Studies autonomous agent workflow validation benchmarks.",
+          },
+        ],
+        clusters: [],
+        summary: { total_sources: 1, verified_sources: 1, open_license_sources: 1 },
+        diagnostics: { verification_failures: [], gaps: [] },
+      },
+      now,
+    })
+    const relatedWork = markdownSection(draft.markdown, "相关工作")
+
+    expect(relatedWork).toContain("当前没有可进入相关工作正文的已验证来源")
+    expect(relatedWork).toContain("1 条来源使用测试或占位 URL，不能作为代表文献")
+    expect(relatedWork).not.toContain("Agent Workflow Placeholder")
+    expect(relatedWork).not.toContain("https://example.org/agent-placeholder")
+    expect(relatedWork).not.toContain("| 相关工作 | 验证状态 | 定位信息 | 相关性 |")
+    expect(relatedWork).not.toContain("已验证论文来源 1 个")
   })
 
   test("renders ranking benchmark experiment names as paper-readable labels", () => {
