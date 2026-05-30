@@ -396,3 +396,13 @@ Paper Fucker 当前已经具备“诚实闭环”的关键能力：没有复现�
 - 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-f855d24a-5a69-425b-b360-cb0535d3d6d7\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
 - 抽查：主文未发现新增禁用词、旧方法/可复现性模板句、工程审计词、完整机器 id、`mock/fake/fixture/placeholder`、伪来源或伪容器残留。
 - 验证：`test/paper/authoring.test.ts` 12 pass / 301 assertions；`packages/opencode` typecheck passed；`scripts/live-paper-quality-benchmark.ts --scenario protocol` passed。
+
+## 2026-05-30 讨论、效度与结论论文式收束复审
+
+- 讨论段改为解释结果与证据边界之间的关系，保留“代码证据、显式对照和容器复现”三类支撑，不再输出“自动化系统”“不能替”“后续投稿前”等产品报告句。
+- 效度威胁改为构念效度、内部效度、外部效度、复现效度和解释效度；移除“自动化效度”“自动写作链路”“真实投稿任务”等表述。
+- 限制与结论改为证据边界、材料范围和后续实验范围，不再把终稿写成“正式审查对象”或“替换示例协议”的任务说明。
+- 最新 protocol benchmark：`run-843b4f2a-826e-4df2-9b1f-4a19b2553ff3`，status=`succeeded`，14 个 stage 全通过，final export=`final`，failed checks 为空，Preview ready。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-843b4f2a-826e-4df2-9b1f-4a19b2553ff3\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 抽查：主文未发现本轮新增禁用词、旧数据/实验设置模板句、工程审计词、完整机器 id、`mock/fake/fixture/placeholder`、伪来源或伪容器残留。
+- 验证：`test/paper/authoring.test.ts` 12 pass / 322 assertions；`packages/opencode` typecheck passed；`scripts/live-paper-quality-benchmark.ts --scenario protocol` passed。
