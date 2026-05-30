@@ -5,6 +5,15 @@
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
 
+## 2026-05-30 代码可用性复审
+
+- 协议场景复跑 `run-cfecbbde-7ecc-45c8-a176-ce20754adf25`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-cfecbbde-7ecc-45c8-a176-ce20754adf25\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 数据与代码可用性章节现在包含代码可用性段落。
+- 代码可用性段落写出方法实现 `rankAgentTeamPapers`、`scorePaper`、`claimLedgerCoverage`，以及排名测试、词项匹配基线、无证据覆盖消融和容器复现实验入口。
+- 代码仓库地址、代码版本和代码许可证未登记时明确输出未登记状态，不使用“当前代码工作区”等内部口吻。
+- 质量判断：可用性章节从只有数据集表，推进到数据、代码和复现实验入口同时可审查。
+
 ## 2026-05-30 ranking 公式符号复审
 
 - 协议场景复跑 `run-889f01bc-2688-4079-a911-376cb55a9300`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
