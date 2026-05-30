@@ -1118,13 +1118,14 @@ async function packageCodeMetadata(workspace: string, fallbackWorkspace?: string
   }
   const packageVersion = typeof parsed.version === "string" ? parsed.version : undefined
   const metadata: CodeAvailabilityMetadata = {
+    package_name: typeof parsed.name === "string" ? parsed.name : undefined,
     repository_url: repositoryUrlFromPackage(parsed.repository),
     version: await workspaceProductVersion(workspace, packageVersion, fallbackWorkspace),
     commit_hash: await gitShortCommit(workspace),
     worktree_dirty: await gitWorktreeDirty(workspace),
     license: typeof parsed.license === "string" ? parsed.license : undefined,
   }
-  return metadata.repository_url || metadata.version || metadata.commit_hash || typeof metadata.worktree_dirty === "boolean" || metadata.license ? metadata : undefined
+  return metadata.package_name || metadata.repository_url || metadata.version || metadata.commit_hash || typeof metadata.worktree_dirty === "boolean" || metadata.license ? metadata : undefined
 }
 
 async function gitShortCommit(workspace: string) {
