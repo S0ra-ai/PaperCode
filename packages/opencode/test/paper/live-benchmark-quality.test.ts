@@ -12,6 +12,8 @@ describe("live paper quality benchmark script", () => {
     expect(benchmark).toContain("assertProtocolRankingSignal")
     expect(benchmark).toContain("Protocol scenario generated a degenerate ranking benchmark")
     expect(benchmark).toContain("protocolReferenceSources")
+    expect(benchmark).toContain("citation_author")
+    expect(benchmark).toContain("Verified arXiv source is missing authors")
     expect(benchmark).not.toContain("multi-agent research automation reproducibility")
   })
 

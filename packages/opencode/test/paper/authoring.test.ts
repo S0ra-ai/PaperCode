@@ -966,6 +966,7 @@ describe("paper authoring loop", () => {
             verification: { status: "verified", method: "unit-test", checked_at: now },
             topics: ["agent", "ranking", "reproducibility"],
             abstract: "Studies agent workflow ranking with reproducible baselines and ablations.",
+            authors: ["Ada Zhang", "Bo Chen"],
             retrieved_at: now,
           },
         ],
@@ -996,6 +997,7 @@ describe("paper authoring loop", () => {
     const threatsToValidity = markdownSection(draft.markdown, "效度威胁")
     const limitations = markdownSection(draft.markdown, "限制")
     const conclusion = markdownSection(draft.markdown, "结论")
+    const references = markdownSection(draft.markdown, "参考文献")
     const appendixMaterials = markdownSection(draft.markdown, "附录 A：材料与实现定位")
     const appendixReproduction = markdownSection(draft.markdown, "附录 B：复现实验入口")
     const dataAvailability = markdownSection(draft.markdown, "数据与代码可用性")
@@ -1113,6 +1115,9 @@ describe("paper authoring loop", () => {
     expect(conclusion).toContain("rankAgentTeamPapers 和 scorePaper")
     expect(conclusion).toContain("候选论文排序方法")
     expect(conclusion).not.toContain("降低计算机类论文中结果断言与实验依据脱节")
+    expect(references).toContain("Ada Zhang; Bo Chen. Agent Workflow Ranking.")
+    expect(references).toContain("https://example.org/ranking-agent-workflow")
+    expect(references).not.toContain("1. Agent Workflow Ranking. https://example.org/ranking-agent-workflow")
     expect(draft.markdown).not.toContain("代码证据驱动工作流")
     expect(draft.markdown).not.toContain("证据驱动工作流")
     expect(draft.markdown).not.toContain("带显式基线、消融与容器复现脚本的代码论文")
