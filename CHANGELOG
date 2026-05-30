@@ -2,10 +2,22 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.89-dev
+:version       0.13.0.90-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.90-dev - 2026/05/30 (fae878e9) [fix/mcp-tool-binding-test-isolation]
+        :brief ranking 附录补齐实现定位表
+        :authoring
+            - fix(appendix): ranking 附录 A 新增实现定位表，列出 rankAgentTeamPapers、scorePaper 与 claimLedgerCoverage 的源码定位和复核用途
+            - fix(appendix): 方法材料总览不再只输出粗粒度代码材料/复核材料计数
+            - test(authoring): ranking 成稿断言附录实现定位表存在，并拒绝旧粗粒度材料计数
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - note: protocol live 复审未重复触发，避免 arXiv HTTP 429 限流扩大
 
     0.13.0.89-dev - 2026/05/30 (3fa3b977) [fix/mcp-tool-binding-test-isolation]
         :brief ranking 方法章节结构化
