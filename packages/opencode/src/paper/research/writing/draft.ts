@@ -1324,6 +1324,7 @@ function threatsToValiditySummary(input: ComposeDraftPaperInput) {
   const report = input.result_report
   const metricId = report?.primary_metric ?? "primary_metric"
   const metric = displayMetricName(metricId)
+  if (isRankingContext(input)) return rankingThreatsToValiditySummary(input, metric)
   return joinBlocks([
     `构念效度：主指标来自实验协议和运行结果，能够评价当前任务的执行质量，但不能覆盖方法价值的全部维度。${constructValidityExample(metricId, metric)}`,
     report?.best_baseline && report.proposed
@@ -1332,6 +1333,37 @@ function threatsToValiditySummary(input: ComposeDraftPaperInput) {
     "外部效度：结论范围限于本研究的工作区、数据/代码材料和实验环境。要扩展到更一般的计算机类论文场景，还需要更多任务、更多仓库、更多基线和更严格的复核协议。",
     "复现效度：容器复现能降低环境差异，但不能证明依赖来源永久可用。复核材料需要保存命令、镜像、摘要、输出摘要和证据清单，必要时还需要锁定数据版本。",
     "解释效度：代码证据、显式对照和容器复现提高了结论的可复核性，但不能单独证明研究问题已经覆盖所有应用场景。正文解释应把性能差异、证据范围和任务规模同时呈现。",
+  ])
+}
+
+function rankingCandidateCount(input: ComposeDraftPaperInput) {
+  for (const dataset of input.data_plan?.datasets ?? []) {
+    const diagnostic = dataset.verification.diagnostics?.find((item) => /^candidate_count:\d+$/i.test(item.trim()))
+    const value = diagnostic?.split(":").at(1)?.trim()
+    if (value) return value
+  }
+  return undefined
+}
+
+function rankingNoCoverageAblationValue(input: ComposeDraftPaperInput, metric: string) {
+  const runs = input.experiment_runs
+  if (!runs) return undefined
+  const run = runs.host_runs.find((item) => {
+    const label = `${item.experiment_id} ${contextualExperimentLabel(input, item.experiment_id, item.role)}`.toLowerCase()
+    return item.role === "ablation" && /(no[-_\s]?coverage|coverage|无证据覆盖)/.test(label)
+  })
+  return run ? metricLookup(run, metric) : undefined
+}
+
+function rankingThreatsToValiditySummary(input: ComposeDraftPaperInput, metric: string) {
+  const candidateCount = rankingCandidateCount(input)
+  const candidateText = candidateCount ? `候选数 ${candidateCount}` : "候选集规模有限"
+  return joinBlocks([
+    `标注效度：当前评测集${candidateText}，标签由实时 arXiv 检索排序、主题匹配、元数据完整度和发表时间确定，不是人工相关性标注。因此结果更适合解释自动筛选协议，而不能直接等同于专家相关性判断。`,
+    `指标效度：${metric} 只评价前三位排序质量，能够反映综述准备时最先阅读候选的排序效果，但不能覆盖长列表排序、多主题覆盖或引用多样性。`,
+    "基线效度：词项匹配基线偏弱，主要检验查询词重合能否解释排序收益；后续需要加入 BM25、向量检索、学习排序或人工标注基线，才能判断该评分函数相对强检索系统的价值。",
+    "消融效度：无证据覆盖消融隔离了 claim_coverage 的影响，但 relevance、claim_coverage 和 recency 之间可能存在相关性；更细粒度的特征消融和随机种子重复能够提高解释稳定性。",
+    "外部效度：当前结论限于候选论文排序任务和当前主题。要推广到更广泛的文献推荐或研究助手场景，需要更多主题、更多候选规模和人工相关性标注。容器复现说明运行环境一致，但不替代跨数据集验证。",
   ])
 }
 
@@ -1410,6 +1442,7 @@ function discussionSummary(input: ComposeDraftPaperInput) {
   if (!report) {
     return "讨论部分需要以主指标、基线、消融和复现环境为依据；缺少这些记录时，结论范围应限于研究设计。"
   }
+  if (isRankingContext(input)) return rankingDiscussionSummary(input, report)
   const rows: string[] = []
   if (report.proposed && report.best_baseline) {
     const delta = report.proposed.value - report.best_baseline.value
@@ -1435,6 +1468,33 @@ function discussionSummary(input: ComposeDraftPaperInput) {
   }
   rows.push("结果解释必须与证据边界保持一致；代码证据决定方法表述能否成立，显式对照决定性能差异能否比较，容器复现决定观察是否能在受控环境中重复出现。")
   rows.push("对于需要写代码跑实验的论文，关键不在于生成完整文本，而在于让评价指标、运行环境和结论强度保持一致。类型检查通过、单一数据集通过或单次脚本通过都不能直接解释成普遍性能优势。")
+  return rows.join("\n\n")
+}
+
+function rankingDiscussionSummary(input: ComposeDraftPaperInput, report: NonNullable<ComposeDraftPaperInput["result_report"]>) {
+  const metric = report.primary_metric
+  const metricLabel = displayMetricName(metric)
+  const candidateCount = rankingCandidateCount(input)
+  const candidateText = candidateCount ? `候选数 ${candidateCount}` : "当前候选集"
+  const rows: string[] = []
+  if (report.proposed && report.best_baseline) {
+    const baselineDelta = report.proposed.value - report.best_baseline.value
+    const ablationValue = rankingNoCoverageAblationValue(input, metric)
+    const ablationDelta = typeof ablationValue === "number" ? report.proposed.value - ablationValue : undefined
+    if (typeof ablationDelta === "number") {
+      rows.push(`在候选论文排序任务中，完整排序同时高于词项匹配基线和无证据覆盖消融：在${metricLabel} 上，相对词项匹配基线提升 ${formatMetricValue(baselineDelta)}，相对无证据覆盖消融提升 ${formatMetricValue(ablationDelta)}。这说明当前候选集的前三位排序不只来自查询词重合，证据覆盖特征也参与了排序差异。`)
+    } else {
+      rows.push(`在候选论文排序任务中，完整排序相对词项匹配基线提升 ${formatMetricValue(baselineDelta)}；该差异说明本文评分在当前候选集上优于只看查询词重合的排序。`)
+    }
+  }
+  rows.push("词项匹配基线提供了一个低成本检索对照：如果完整排序不能超过该基线，relevance、claim_coverage 和 recency 的组合就缺少实际意义。当前结果中完整排序优于词项匹配基线，说明评分函数至少捕捉到了查询词之外的排序信号。")
+  rows.push(`无证据覆盖消融去掉 claim_coverage 后排名下降，说明 claim_coverage 对前三位排序产生直接影响。这一结果与任务设定一致：候选论文不仅要与主题相关，还需要覆盖当前研究问题中的关键断言。`)
+  rows.push(`结果仍需要保守解释。${candidateText}，且标签不是人工相关性标注，而是由实时 arXiv 检索排序、主题匹配、元数据完整度和发表时间派生；因此当前结论更适合作为自动筛选协议的证据，而不是人工文献综述质量的最终证明。`)
+  if (report.reproduction.status === "passed") {
+    rows.push("本机和容器结果一致，说明上述比较不是由当前宿主环境偶然触发；但复现一致性只验证同一协议可重复，不证明该评分函数已覆盖更多主题、更多候选规模或人工标注场景。")
+  } else {
+    rows.push("容器复现尚未通过时，排序差异只能作为探索性观察；需要先修复复现环境，再讨论性能差异。")
+  }
   return rows.join("\n\n")
 }
 
