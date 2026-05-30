@@ -2,10 +2,22 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.90-dev
+:version       0.13.0.91-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.91-dev - 2026/05/30 (10c0a60b) [fix/mcp-tool-binding-test-isolation]
+        :brief ranking 复现实验入口补齐执行状态
+        :authoring
+            - fix(appendix): ranking 附录 B 的复现实验入口表新增执行状态与结果位置列
+            - fix(appendix): 本文方法、基线和消融显示本机/容器执行状态，容器复现入口显示容器状态
+            - test(authoring): ranking 成稿断言复现实验入口表包含状态和结果定位
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - note: protocol live 复审未重复触发，避免 arXiv HTTP 429 限流扩大
 
     0.13.0.90-dev - 2026/05/30 (fae878e9) [fix/mcp-tool-binding-test-isolation]
         :brief ranking 附录补齐实现定位表

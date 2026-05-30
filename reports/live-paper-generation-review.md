@@ -1,9 +1,19 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.90-dev
+- project_version: 0.13.0.91-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 ranking 复现实验入口状态复审
+
+- ranking authoring 测试已确认附录 B 的复现实验入口表包含 `执行状态` 和 `结果位置` 两列。
+- 本文方法、词项匹配基线和无证据覆盖消融分别显示 `本机通过；容器通过`，容器复现入口显示 `容器通过`。
+- 附录 B 明确把本文方法、基线和消融的结果定位到 `结果；可复现性`，把容器复现定位到 `可复现性`。
+- 相关回归已通过：authoring/live/metadata 定向测试和 `packages/opencode` typecheck 均通过。
+- 本轮未重复触发 protocol live 复审，原因是上一轮完整 protocol 复跑已被 arXiv HTTP 429 rate limit 阻断；为避免扩大限流，只记录当前 authoring 证据。
+- 本报告和 CHANGELOG 记录为后续开发版本 `0.13.0.91-dev`。
+- 质量判断：复现实验入口现在不只是命令清单，而是能告诉读者入口是否执行、结果应在主文哪个部分核对。
 
 ## 2026-05-30 ranking 附录实现定位复审
 
