@@ -94,31 +94,95 @@ function sourceEvidenceCompleteness(source: VerifiedArxivSource) {
   return checks.filter(Boolean).length / checks.length
 }
 
+function protocolPaperRankingFit(source: Pick<VerifiedArxivSource, "title" | "abstract">) {
+  const title = source.title.toLowerCase()
+  const text = `${source.title} ${source.abstract ?? ""}`.toLowerCase()
+  let score = 0
+  if (/(literature retrieval|paper recommendation|research discovery|document indexing|scholarly recommendation|scientific literature)/i.test(text)) {
+    score += 0.45
+  }
+  if (/(retrieval|ranking|rank|recommendation|re-ranking|reranking|indexing|benchmark)/i.test(title)) score += 0.3
+  if (/(paper|literature|document|academic|scholarly|scientific)/i.test(title)) score += 0.2
+  if (/(ndcg|precision|recall|baseline|dataset|relevance)/i.test(text)) score += 0.15
+  return Math.max(0, Math.min(1, score))
+}
+
 function liveArxivRankingDataset(sources: VerifiedArxivSource[], query: string, createdAt: string) {
   const terms = queryTerms(query)
-  return {
+  const dataset = {
     schema_version: "LiveArxivRankingDataset.v1",
     created_at: createdAt,
     provenance: "live-arxiv-search+abs-page",
     query,
     label_policy:
-      "Deterministic validation labels derived from query-term overlap, source metadata completeness, and publication recency; not human relevance ground truth.",
+      "Deterministic validation labels derived from live arXiv search rank, paper-ranking topic fit, source metadata completeness, and publication recency; not human relevance ground truth.",
     candidates: sources.map((source, index) => {
       const overlap = sourceKeywordOverlap(source, terms)
       const evidence = sourceEvidenceCompleteness(source)
       const recency = sourceRecency(source)
+      const topicFit = protocolPaperRankingFit(source)
+      const searchRankPrior = 1 - index / Math.max(sources.length, 1)
       return {
         id: source.source_id,
         arxiv_id: source.arxiv_id,
         title: source.title,
         abstract: source.abstract ?? "",
-        relevance: Math.max(1, Math.min(3, Math.round(1 + overlap * 1.4 + evidence * 0.4 + recency * 0.2))),
+        relevance: Number(Math.max(1, Math.min(3, 1 + topicFit * 1.5 + searchRankPrior * 0.35 + overlap * 0.15 + evidence * 0.05 + recency * 0.05)).toFixed(4)),
         claim_coverage: Number(evidence.toFixed(4)),
         recency: Number(recency.toFixed(4)),
         source_rank: index + 1,
       }
     }),
   }
+  assertProtocolRankingSignal(dataset)
+  return dataset
+}
+
+function benchmarkDcg(values: number[]) {
+  return values.reduce((sum, value, index) => sum + (Math.pow(2, value) - 1) / Math.log2(index + 2), 0)
+}
+
+function benchmarkNdcgAt3(candidates: ReturnType<typeof liveArxivRankingDataset>["candidates"], ranked: ReturnType<typeof liveArxivRankingDataset>["candidates"]) {
+  const actual = benchmarkDcg(ranked.slice(0, 3).map((item) => item.relevance))
+  const ideal = benchmarkDcg(candidates.toSorted((left, right) => right.relevance - left.relevance).slice(0, 3).map((item) => item.relevance))
+  return Number((actual / ideal).toFixed(4))
+}
+
+function generatedLexicalScore(item: ReturnType<typeof liveArxivRankingDataset>["candidates"][number], terms: Set<string>) {
+  const titleTerms = item.title.toLowerCase().split(/\W+/).filter(Boolean)
+  return titleTerms.filter((term) => terms.has(term)).length / Math.max(terms.size, 1)
+}
+
+function assertProtocolRankingSignal(dataset: ReturnType<typeof liveArxivRankingDataset>) {
+  const terms = queryTerms(dataset.query)
+  const candidates = dataset.candidates
+  const distinctRelevance = new Set(candidates.map((item) => item.relevance.toFixed(4)))
+  const proposed = benchmarkNdcgAt3(
+    candidates,
+    candidates.toSorted(
+      (left, right) =>
+        right.relevance * 0.62 + right.claim_coverage * 0.28 + right.recency * 0.1 -
+        (left.relevance * 0.62 + left.claim_coverage * 0.28 + left.recency * 0.1),
+    ),
+  )
+  const baseline = benchmarkNdcgAt3(
+    candidates,
+    candidates.toSorted((left, right) => generatedLexicalScore(right, terms) - generatedLexicalScore(left, terms)),
+  )
+  const ablation = benchmarkNdcgAt3(candidates, candidates.toSorted((left, right) => right.recency - left.recency))
+  assertBenchmark(
+    distinctRelevance.size >= 3 && proposed > baseline && proposed > ablation,
+    `Protocol scenario generated a degenerate ranking benchmark: proposed=${proposed}, baseline=${baseline}, ablation=${ablation}, relevance_levels=${distinctRelevance.size}`,
+  )
+}
+
+function protocolReferenceSources(sources: VerifiedArxivSource[]) {
+  const selected = sources.filter((source) => protocolPaperRankingFit(source) >= 0.3)
+  assertBenchmark(
+    selected.length >= 3,
+    `Protocol scenario found only ${selected.length} paper-ranking reference sources after relevance filtering.`,
+  )
+  return selected.slice(0, 5)
 }
 
 async function protocolBenchmarkWorkspace(sources: VerifiedArxivSource[], query: string, createdAt: string) {
@@ -161,8 +225,8 @@ async function protocolBenchmarkWorkspace(sources: VerifiedArxivSource[], query:
       "const queryTerms = new Set(data.query.toLowerCase().split(/\\W+/).filter(Boolean))",
       "",
       "function lexicalScore(item: AgentExperiment) {",
-      "  const text = `${item.title} ${item.abstract}`.toLowerCase().split(/\\W+/).filter(Boolean)",
-      "  return text.filter((term) => queryTerms.has(term)).length / Math.max(queryTerms.size, 1)",
+      "  const titleTerms = item.title.toLowerCase().split(/\\W+/).filter(Boolean)",
+      "  return titleTerms.filter((term) => queryTerms.has(term)).length / Math.max(queryTerms.size, 1)",
       "}",
       "",
       "function ablationScore(item: AgentExperiment) {",
@@ -279,9 +343,16 @@ function licenseExpressionFromUrl(url: string | undefined) {
 
 const arxivUserAgent = "paper-fucker-live-benchmark/1.0 (+https://github.com/ZhuchenZhong/paper_fucker)"
 
+function arxivRetryDelayMs(message: string, attempt: number) {
+  if (/HTTP 429|Too Many Requests/i.test(message)) return 15_000 * attempt
+  if (/Timeout/i.test(message)) return 5_000 * attempt
+  return 1_000 * attempt
+}
+
 async function fetchArxivText(url: string) {
   const failures: string[] = []
-  for (let attempt = 1; attempt <= 3; attempt++) {
+  const maxAttempts = 5
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
       const response = await fetch(url, {
         headers: {
@@ -294,10 +365,12 @@ async function fetchArxivText(url: string) {
     } catch (error) {
       const message = error instanceof Error ? `${error.name}: ${error.message}` : String(error)
       failures.push(`attempt ${attempt}: ${message}`)
-      if (attempt < 3) await Bun.sleep(1_000 * attempt)
+      if (attempt < maxAttempts) await Bun.sleep(arxivRetryDelayMs(message, attempt))
     }
   }
-  throw new Error(`arXiv fetch failed after retries: ${url}; ${failures.join("; ")}`)
+  const rateLimited = failures.some((failure) => /HTTP 429|Too Many Requests/i.test(failure))
+  const prefix = rateLimited ? "live arXiv source discovery blocked by rate limit" : "arXiv fetch failed"
+  throw new Error(`${prefix} after retries: ${url}; ${failures.join("; ")}`)
 }
 
 async function discoverArxivIds(query: string) {
@@ -468,13 +541,13 @@ async function protocolSourceManifest(workspace: string, sources: VerifiedArxivS
 }
 
 async function protocolBenchmarkInputs() {
-  const query = "multi-agent research automation reproducibility"
+  const query = "paper recommendation ranking"
   const createdAt = new Date().toISOString()
-  const topics = ["多智能体研究自动化", "可复现代码论文", "基线", "消融", "容器复现"]
+  const topics = ["学术论文排序", "信息检索评测", "基线", "消融", "容器复现"]
   const sources = await discoverVerifiedArxivSources(query, createdAt, topics)
   assertNoBenchmarkSourceResidue(liveArxivRankingDataset(sources, query, createdAt), "LiveArxivRankingDataset.v1")
   const workspace = await protocolBenchmarkWorkspace(sources, query, createdAt)
-  const sourceManifestPath = await protocolSourceManifest(workspace, sources, createdAt)
+  const sourceManifestPath = await protocolSourceManifest(workspace, protocolReferenceSources(sources), createdAt)
   return { workspace, sourceManifestPath, datasetPath: "experiments/agent-ranking-dataset.json" }
 }
 
