@@ -722,9 +722,18 @@ function referenceAuthors(source: LiteratureMap["sources"][number]) {
   return `${authors.slice(0, 6).join("; ")} et al.`
 }
 
+function referenceDate(value?: string) {
+  if (!value) return undefined
+  const trimmed = value.trim()
+  const isoDate = trimmed.match(/^(\d{4}-\d{2}-\d{2})(?:T.*)?$/)
+  return isoDate?.[1] ?? trimmed
+}
+
 function referenceEntry(source: LiteratureMap["sources"][number], index: number) {
-  const published = source.version.published_at ? ` 发表时间：${source.version.published_at}。` : ""
-  const retrieved = source.version.retrieved_at ? ` 检索时间：${source.version.retrieved_at}。` : ""
+  const publishedDate = referenceDate(source.version.published_at)
+  const retrievedDate = referenceDate(source.version.retrieved_at)
+  const published = publishedDate ? ` 发表时间：${publishedDate}。` : ""
+  const retrieved = retrievedDate ? ` 检索时间：${retrievedDate}。` : ""
   const title = literatureDisplayTitle(source)
   const authors = referenceAuthors(source)
   const head = authors ? `${authors}. ${title}` : title
