@@ -2176,7 +2176,7 @@ function scaffoldSections(input: ComposeDraftPaperInput, claimSections: DraftSec
 }
 
 function render(title: string, sections: DraftSection[]) {
-  return [`# ${title}`, ...sections.map((section) => `## ${section.title}\n\n${section.markdown}`)].join("\n\n")
+  return [`# ${title}`, ...sections.map((section) => `## ${section.title}\n\n${section.markdown}`)].join("\n\n").replace(/\n{3,}/g, "\n\n")
 }
 
 export function composeDraftPaper(input: ComposeDraftPaperInput): DraftPaper {
