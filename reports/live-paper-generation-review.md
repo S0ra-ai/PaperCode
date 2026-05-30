@@ -5,6 +5,14 @@
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
 
+## 2026-05-30 数据可用性标签策略复审
+
+- 协议场景复跑 `run-78ee2154-e27d-45f6-b02e-c56ceeb44637`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-78ee2154-e27d-45f6-b02e-c56ceeb44637\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 数据与代码可用性章节将 live ranking dataset 的标签策略写为中文：标签由实时 arXiv 检索排序、论文排序主题匹配、来源元数据完整度和发表时间确定，不是人工相关性标注。
+- 坏词扫描未发现 `Deterministic validation labels`、`not human relevance ground truth`、`paper-ranking topic fit`、`source metadata completeness`、`publication recency`、`标签策略为`、`投稿准备度` 或 `通用预印本`。
+- 质量判断：数据说明不再泄漏英文内部字段，更像论文里的数据来源与标注策略说明。
+
 ## 2026-05-30 live ranking benchmark 贴题性复审
 
 - 协议场景复跑 `run-42d78688-fae5-4c6c-9e09-f215375a2e1b`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
