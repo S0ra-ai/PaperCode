@@ -1,9 +1,19 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.100-dev
+- project_version: 0.13.0.101-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-31 占位相关工作过滤复审
+
+- ranking authoring 测试已确认 `example.org` 来源不再作为相关工作代表文献输出。
+- 相关工作只使用已验证且非占位 URL 的正式文献来源；占位来源会被写成待补检索边界。
+- 相关工作引用编号与正式参考文献来源保持一致，不再给占位来源编号。
+- 真实 arXiv 代表文献测试仍通过，排序解释、检索推荐和复现验证三类代表仍能正确输出。
+- 相关回归已通过：authoring/live/metadata 组合测试和 `packages/opencode` typecheck 均通过。
+- 本报告和 CHANGELOG 记录为后续开发版本 `0.13.0.101-dev`。
+- 质量判断：成稿不会把测试 URL 包装成相关工作，参考文献和相关工作两处真实性边界一致。
 
 ## 2026-05-30 code metadata 清理稳定性复审
 
