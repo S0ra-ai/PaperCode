@@ -5,6 +5,15 @@
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
 
+## 2026-05-30 方法章节排序实现复审
+
+- 协议场景复跑 `run-3781b1c7-9486-4532-847c-4a122a375256`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-3781b1c7-9486-4532-847c-4a122a375256\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 方法章节现在说明 `rankAgentTeamPapers` 接收候选论文集合并按 `scorePaper` 得分降序排列，`scorePaper` 将 `relevance`、`claim_coverage` 和 `recency` 压缩为可比较分数。
+- 方法章节说明排名测试、词项匹配基线、无证据覆盖消融和容器复现分别约束本文方法、词项基线、证据覆盖贡献和环境可重复性。
+- 源码证据记录只保留真实 source range，例如 `rankAgentTeamPapers(src/agent-team-paper.ts:3)`、`scorePaper(src/agent-team-paper.ts:7)`；未再出现 `scorePaper(right)`、`toSorted((left` 或 `并登记 排名测试`。
+- 质量判断：方法章节已经从代码审计摘要转为可读的算法接口说明，距离人工协作稿又近一步。
+
 ## 2026-05-30 具体排序方法焦点复审
 
 - 协议场景复跑 `run-72de0657-e141-4ca8-925a-87fe8ff926f5`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
