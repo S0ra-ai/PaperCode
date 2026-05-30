@@ -1203,6 +1203,28 @@ function rankingMethodNarrative(input: ComposeDraftPaperInput) {
     .join("")
 }
 
+function rankingMethodFigureSummary(input: ComposeDraftPaperInput) {
+  if (!isRankingContext(input)) return undefined
+  const features = parsedScoreFeatures(input)
+  const featureText =
+    features.includes("relevance") && features.includes("claim_coverage") && features.includes("recency")
+      ? "relevance / claim_coverage / recency"
+      : features.length > 0
+      ? features.join(" / ")
+      : "排序特征"
+  const metric = displayMetricName(input.result_report?.primary_metric ?? input.experiment_plan?.proposed.expected_metric ?? "ranking_ndcg_at_3")
+  const entrypoints = experimentEntrypointLabels(input).filter((entrypoint) => entrypoint !== "排名测试")
+  const branch =
+    entrypoints.length > 0
+      ? `对照分支包括${chineseList(entrypoints)}。`
+      : "对照分支包括基线、消融和复现检查。"
+  return [
+    "图 1 候选论文排序与复现实验流程。",
+    `候选论文集合 -> 特征计算(${featureText}) -> scorePaper 评分 -> rankAgentTeamPapers 排序 -> ${metric} 评测。`,
+    branch,
+  ].join("\n")
+}
+
 function methodEvidenceNote(input: ComposeDraftPaperInput) {
   const preferred = input.ledger.entries.find((entry) => entry.section_id === "method" && entry.status === "supported")
   const fallback = input.ledger.entries.find((entry) => entry.section_id === "method")
@@ -1779,9 +1801,11 @@ function relatedWorkSummary(input: ComposeDraftPaperInput) {
 function methodSummary(input: ComposeDraftPaperInput, claimSections: DraftSection[]) {
   const methodClaims = claimSections.find((section) => section.section_id === "method")?.markdown
   const rankingNarrative = rankingMethodNarrative(input)
+  const rankingFigure = rankingMethodFigureSummary(input)
   return [
     rankingNarrative ??
       "本文的方法由三部分组成：材料边界定义、代码证据抽取和可复现实验约束。材料边界先限定可讨论对象，代码分析再绑定接口、源码范围和实验入口，最后用基线、消融和容器复现约束结果表述。",
+    rankingFigure,
     rankingNarrative
       ? methodEvidenceNote(input)
       : methodClaims
