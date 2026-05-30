@@ -5,6 +5,15 @@
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
 
+## 2026-05-30 ranking 限制章节复审
+
+- 协议场景复跑 `run-c1acb453-3fb0-45ff-b14c-a41ad348b1d3`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-c1acb453-3fb0-45ff-b14c-a41ad348b1d3\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 终稿章节标题改为 `限制`，不再显示 `限制与待修复项`。
+- 限制内容明确候选数 `5`、标签不是人工相关性标注、词项匹配基线偏弱，以及后续需要跨主题验证、更大候选池、人工相关性标注和更多随机种子重复。
+- 坏词扫描未发现 `## 限制与待修复项`、`未发现阻断项` 或 `待修复`。
+- 质量判断：限制章节从工程状态说明转为论文边界说明，读者能直接看到当前实验不能外推的原因。
+
 ## 2026-05-30 ranking 讨论与效度威胁复审
 
 - 协议场景复跑 `run-876772fa-cf98-4b3f-9725-045d4902f376`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
