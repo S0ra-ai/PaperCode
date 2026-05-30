@@ -6,6 +6,7 @@ import type { SourceRecord } from "../sources/schemas"
 export type VerificationFindingCategory =
   | "invalid_reference"
   | "missing_verified_reference"
+  | "missing_source_record"
   | "unverified_source"
   | "source_license_failure"
   | "unsupported_claim"
