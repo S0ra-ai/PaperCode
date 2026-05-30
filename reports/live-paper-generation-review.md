@@ -1,9 +1,18 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.82-dev
+- project_version: 0.13.0.83-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 声明表格复审
+
+- 协议场景复跑 `run-fcad9178-e77e-4231-a31c-b1679d5d42f6`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-fcad9178-e77e-4231-a31c-b1679d5d42f6\exports\bundle-final-draft-paper-final-export-527d427d-ad5e-4edf-998a-1c117ff516bb\bundle-final-draft-paper-final-export-527d427d-ad5e-4edf-998a-1c117ff516bb.md`。
+- 声明章节现在使用 `| 项目 | 声明 |` 表格展示基金项目、作者贡献、利益冲突和伦理审批。
+- 最终稿不再使用 `基金项目：...`、`作者贡献：...`、`利益冲突：...` 或 `伦理审批：...` 冒号式声明行。
+- 最终稿代码版本为 `0.13.0.82-dev`，代码修订为 `ab5a3d1e`；本报告和 CHANGELOG 记录为后续开发版本 `0.13.0.83-dev`。
+- 质量判断：声明章节的格式与作者信息、数据代码可用性保持一致，减少导出稿尾部的草稿感。
 
 ## 2026-05-30 作者信息表格复审
 
