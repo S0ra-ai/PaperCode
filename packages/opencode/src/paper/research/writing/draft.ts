@@ -715,6 +715,34 @@ function referenceLocator(source: LiteratureMap["sources"][number]) {
   return url || "缺少可核验定位信息"
 }
 
+function isPlaceholderReferenceUrl(value?: string) {
+  const url = value?.trim()
+  if (!url) return false
+  try {
+    const parsed = new URL(url)
+    const host = parsed.hostname.toLowerCase()
+    return (
+      parsed.protocol === "file:" ||
+      host === "example.org" ||
+      host === "example.com" ||
+      host === "example.net" ||
+      host === "localhost" ||
+      host === "127.0.0.1" ||
+      host === "0.0.0.0" ||
+      host.endsWith(".example") ||
+      host.endsWith(".invalid") ||
+      host.endsWith(".test")
+    )
+  } catch {
+    return false
+  }
+}
+
+function isPlaceholderReferenceSource(source: LiteratureMap["sources"][number]) {
+  if (source.doi || source.arxiv_id) return false
+  return isPlaceholderReferenceUrl(source.url)
+}
+
 function referenceAuthors(source: LiteratureMap["sources"][number]) {
   const authors = source.authors?.map((author) => author.trim()).filter(Boolean) ?? []
   if (authors.length === 0) return undefined
@@ -745,14 +773,24 @@ function referencesSummary(input: ComposeDraftPaperInput) {
   if (!map || map.sources.length === 0) {
     return "当前运行没有登记可验证参考文献。进入投稿前必须补充 DOI、arXiv、出版社页面或其他可复核来源。"
   }
-  const verified = map.sources.filter((source) => source.verification.status === "verified")
+  const verifiedSources = map.sources.filter((source) => source.verification.status === "verified")
+  const unverifiedCount = map.sources.length - verifiedSources.length
+  const placeholderVerified = verifiedSources.filter(isPlaceholderReferenceSource)
+  const verified = verifiedSources.filter((source) => !isPlaceholderReferenceSource(source))
   if (verified.length === 0) {
-    return "当前只有未验证候选文献；这些条目不能进入正式参考文献。进入投稿前必须完成 DOI、arXiv 元数据或来源核验。"
+    const placeholderText =
+      placeholderVerified.length > 0
+        ? `${placeholderVerified.length} 条来源使用测试或占位 URL，已从参考文献排除。`
+        : "当前只有未验证候选文献；这些条目不能进入正式参考文献。"
+    return `当前没有可进入正式参考文献的已验证来源；${placeholderText}进入投稿前必须完成 DOI、arXiv 元数据或出版社页面核验。`
   }
   return joinBlocks([
     verified.slice(0, 20).map(referenceEntry).join("\n"),
-    verified.length < map.sources.length
-      ? `另有 ${map.sources.length - verified.length} 条候选文献尚未验证，未列入正式参考文献。`
+    unverifiedCount > 0
+      ? `另有 ${unverifiedCount} 条候选文献尚未验证，未列入正式参考文献。`
+      : undefined,
+    placeholderVerified.length > 0
+      ? `另有 ${placeholderVerified.length} 条来源使用测试或占位 URL，未列入正式参考文献。`
       : undefined,
   ])
 }
