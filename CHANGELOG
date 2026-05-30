@@ -2,10 +2,23 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.37-dev
+:version       0.13.0.38-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.38-dev - 2026/05/30 (c5af9eaf) [fix/mcp-tool-binding-test-isolation]
+        :brief 参考文献保留作者并从 live arXiv 抓取作者元数据
+        :authoring
+            - fix(reference): SourceCandidate/SourceRecord 增加 authors 字段
+            - fix(reference): 参考文献有作者时以作者、标题、定位信息顺序输出，多作者使用分号分隔
+            - fix(live): live arXiv benchmark 抓取 citation_author 并将作者纳入来源完整性检查
+            - test(authoring): 增加参考文献作者输出断言
+            - test(live): 增加 live benchmark 必须检查 arXiv 作者元数据的断言
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
     0.13.0.37-dev - 2026/05/30 (1f8489af) [fix/mcp-tool-binding-test-isolation]
         :brief ranking 主文移除 gate 口吻并补充特征解释
