@@ -1,9 +1,18 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.108-dev
+- project_version: 0.13.0.109-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-31 缺少正式论文参考文献阻断复审
+
+- `missing_verified_reference` 已从 warning 收紧为 blocker：没有 verified clear paper source record 时不得通过 final export。
+- `evaluateVerificationGate` 测试已确认：只有代码/材料证据、没有正式论文参考文献时，`blocking_report.status=blocked`。
+- 这使最终导出更符合投稿级论文要求：代码证据、实验证据和正式论文参考文献必须同时可审查。
+- 相关回归已通过：verified paper reference/formal References 定向测试、authoring/datasets/live/metadata 组合测试和 `packages/opencode` typecheck。
+- 本报告和 CHANGELOG 记录为后续开发版本 `0.13.0.109-dev`。
+- 质量判断：Paper Fucker 不再把缺少正式文献支撑的稿件视为 final-ready。
 
 ## 2026-05-31 source record manifest 缺失阻断复审
 
