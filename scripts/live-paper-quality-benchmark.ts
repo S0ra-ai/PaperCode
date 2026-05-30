@@ -87,6 +87,7 @@ function sourceEvidenceCompleteness(source: VerifiedArxivSource) {
   const checks = [
     source.verification.status === "verified",
     Boolean(source.title),
+    Boolean(source.authors?.length),
     Boolean(source.abstract),
     Boolean(source.arxiv_id),
     Boolean(source.version.published_at),
@@ -320,6 +321,12 @@ function htmlMetaContent(html: string, name: string) {
   return matched?.[1] ? decodeHtml(matched[1]) : undefined
 }
 
+function htmlMetaContents(html: string, name: string) {
+  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+  const pattern = new RegExp(`<meta\\s+[^>]*name=["']${escaped}["'][^>]*content=["']([^"']*)["'][^>]*>`, "gi")
+  return [...html.matchAll(pattern)].map((match) => decodeHtml(match[1] ?? "")).filter(Boolean)
+}
+
 function htmlLinkHrefByClass(html: string, className: string) {
   const escaped = className.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
   const pattern = new RegExp(`<a\\s+[^>]*href=["']([^"']+)["'][^>]*class=["'][^"']*${escaped}[^"']*["'][^>]*>`, "i")
@@ -417,6 +424,7 @@ async function fetchVerifiedArxivSource(
   const html = await fetchArxivText(url)
   const pageArxivID = htmlMetaContent(html, "citation_arxiv_id")
   const title = htmlMetaContent(html, "citation_title")
+  const authors = htmlMetaContents(html, "citation_author")
   const abstract = htmlMetaContent(html, "citation_abstract")
   const publishedAt = isoDateFromArxiv(htmlMetaContent(html, "citation_date"))
   const canonical = html.match(/<link\s+[^>]*rel=["']canonical["'][^>]*href=["']([^"']+)["'][^>]*>/i)?.[1]
@@ -424,6 +432,7 @@ async function fetchVerifiedArxivSource(
   const licenseExpression = licenseExpressionFromUrl(licenseUrl)
   assertBenchmark(pageArxivID === arxivID, `arXiv metadata mismatch: expected ${arxivID}, got ${pageArxivID ?? "missing"}`)
   assertBenchmark(title, `arXiv metadata missing title for ${arxivID}`)
+  assertBenchmark(authors.length > 0, `arXiv metadata missing authors for ${arxivID}`)
   assertBenchmark(abstract, `arXiv metadata missing abstract for ${arxivID}`)
   assertBenchmark(publishedAt, `arXiv metadata missing publication date for ${arxivID}`)
   return {
@@ -449,6 +458,7 @@ async function fetchVerifiedArxivSource(
       ],
     },
     topics: options.topics,
+    authors,
     abstract,
     arxiv_id: arxivID,
   }
@@ -478,6 +488,7 @@ function assertAuthenticVerifiedArxivSources(sources: VerifiedArxivSource[], con
   for (const source of sources) {
     assertBenchmark(source.provider === "arxiv", `Non-arXiv provider entered live benchmark sources: ${source.provider}`)
     assertBenchmark(Boolean(source.arxiv_id), `Verified arXiv source is missing arxiv_id: ${source.source_id}`)
+    assertBenchmark(Boolean(source.authors?.length), `Verified arXiv source is missing authors: ${source.source_id}`)
     assertBenchmark(
       /^\d{4}\.\d{4,5}$/.test(source.arxiv_id),
       `Verified arXiv source has an invalid arxiv_id: ${source.arxiv_id}`,

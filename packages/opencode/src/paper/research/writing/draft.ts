@@ -638,10 +638,20 @@ function referenceLocator(source: LiteratureMap["sources"][number]) {
   return url || "缺少可核验定位信息"
 }
 
+function referenceAuthors(source: LiteratureMap["sources"][number]) {
+  const authors = source.authors?.map((author) => author.trim()).filter(Boolean) ?? []
+  if (authors.length === 0) return undefined
+  if (authors.length <= 6) return authors.join("; ")
+  return `${authors.slice(0, 6).join("; ")} et al.`
+}
+
 function referenceEntry(source: LiteratureMap["sources"][number], index: number) {
   const published = source.version.published_at ? ` 发表时间：${source.version.published_at}。` : ""
   const retrieved = source.version.retrieved_at ? ` 检索时间：${source.version.retrieved_at}。` : ""
-  return `${index + 1}. ${literatureDisplayTitle(source)}. ${referenceLocator(source)}.${published}${retrieved}`
+  const title = literatureDisplayTitle(source)
+  const authors = referenceAuthors(source)
+  const head = authors ? `${authors}. ${title}` : title
+  return `${index + 1}. ${head}. ${referenceLocator(source)}.${published}${retrieved}`
 }
 
 function referencesSummary(input: ComposeDraftPaperInput) {

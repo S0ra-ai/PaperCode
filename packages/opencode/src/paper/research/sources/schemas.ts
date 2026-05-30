@@ -32,6 +32,7 @@ export type SourceCandidate = {
   version: SourceVersion
   verification: SourceVerification
   topics?: string[]
+  authors?: string[]
   abstract?: string
   doi?: string
   arxiv_id?: string
