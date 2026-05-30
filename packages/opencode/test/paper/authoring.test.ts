@@ -869,7 +869,11 @@ describe("paper authoring loop", () => {
           },
         ],
         resource_budget: { max_wall_time_seconds: 3600, max_memory_mb: 8192, max_gpu_hours: 0 },
-        downgrade_policy: ["If container reproduction fails, block final paper claims."],
+        downgrade_policy: [
+          "If fewer than two baselines can run, downgrade to an engineering report.",
+          "If datasets are unavailable, turn to the nearest open verified benchmark.",
+          "If container reproduction fails, block final paper claims.",
+        ],
       },
       experiment_protocol: {
         discovered_from: "package_scripts",
@@ -1134,7 +1138,9 @@ describe("paper authoring loop", () => {
     expect(experimentalSetup).toContain("词项匹配基线用于只依赖查询词重合的排序对照")
     expect(experimentalSetup).toContain("无证据覆盖消融用于移除 claim_coverage 对排序得分的贡献")
     expect(experimentalSetup).toContain("实验协议包含 4 个可执行入口，覆盖本文方法、词项匹配基线、无证据覆盖消融和容器复现；当前实验协议完整")
+    expect(experimentalSetup).toContain("数据集不可用时只能使用明确标注为替代数据的可核验评测集，并将结论降级为探索性观察")
     expect(experimentalSetup).not.toContain("来源为复现实验入口")
+    expect(experimentalSetup).not.toContain("最近的开放可验证评测集")
     expect(experimentalSetup).not.toContain("结论性表述")
     expect(experimentalSetup).not.toContain("足以支撑")
     expect(experimentalSetup).not.toContain("阻断")
