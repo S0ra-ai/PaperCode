@@ -5,6 +5,15 @@
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
 
+## 2026-05-30 题名摘要具体化复审
+
+- 协议场景复跑 `run-092c3e2e-b216-40ff-ab15-5b02346da40d`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-092c3e2e-b216-40ff-ab15-5b02346da40d\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 题名改为“证据约束的候选论文排序方法：显式基线、消融与容器复现”，不再沿用“带显式基线、消融与容器复现脚本的代码论文”。
+- 摘要直接描述 `rankAgentTeamPapers`、`scorePaper`、`排序 nDCG@3`、词项匹配基线、无证据覆盖消融和容器复现；结论聚焦排序方法、0.1341 差值和 `claim_coverage` 贡献。
+- 坏词扫描未发现 `代码论文`、`缺少可追踪代码证据`、`过程记录`、旧标题、`mock/fake/fixture/placeholder` 或旧工程审计词残留。
+- 质量判断：终稿开头和结尾从元论文叙述转向具体候选论文排序方法，更接近人工协作稿的论文焦点。
+
 ## 2026-05-30 实验证据措辞复审
 
 - 协议场景复跑 `run-b9ca2413-9b6b-47e6-9799-e294b845b986`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
