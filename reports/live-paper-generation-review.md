@@ -1,9 +1,18 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.81-dev
+- project_version: 0.13.0.82-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 作者信息表格复审
+
+- 协议场景复跑 `run-474e6d1b-d07d-4b69-b069-60a587dfd3d9`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-474e6d1b-d07d-4b69-b069-60a587dfd3d9\exports\bundle-final-draft-paper-final-export-5b2992c9-d205-4628-8bbb-7d946ea6f4fa\bundle-final-draft-paper-final-export-5b2992c9-d205-4628-8bbb-7d946ea6f4fa.md`。
+- 作者信息章节现在使用 `| 项目 | 内容 |` 表格展示作者、机构和通信作者。
+- 最终稿不再使用 `作者：...`、`机构：...`、`通信作者：...` 三行冒号式元数据。
+- 最终稿代码版本为 `0.13.0.81-dev`，代码修订为 `1f4e00b8`；本报告和 CHANGELOG 记录为后续开发版本 `0.13.0.82-dev`。
+- 质量判断：论文开头的缺省投稿元数据从散文式标签改为统一表格，和后续数据、代码、实验表格的版式更一致。
 
 ## 2026-05-30 代码可用性小节格式复审
 
