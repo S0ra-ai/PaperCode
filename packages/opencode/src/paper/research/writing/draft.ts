@@ -1291,9 +1291,21 @@ function rankingMethodFigureSummary(input: ComposeDraftPaperInput) {
     entrypoints.length > 0
       ? `对照分支包括${chineseList(entrypoints)}。`
       : "对照分支包括基线、消融和复现检查。"
+  const branchNodes = [
+    entrypoints.includes("词项匹配基线") ? "  baseline[词项匹配基线] -. 对照 .-> metric" : undefined,
+    entrypoints.includes("无证据覆盖消融") ? "  ablation[无证据覆盖消融] -. 消融 .-> metric" : undefined,
+    entrypoints.includes("容器复现") ? "  repro[容器复现] -. 复现 .-> metric" : undefined,
+  ].filter(Boolean)
   return [
     "图 1 候选论文排序与复现实验流程。",
-    `候选论文集合 -> 特征计算(${featureText}) -> scorePaper 评分 -> rankAgentTeamPapers 排序 -> ${metric} 评测。`,
+    "```mermaid",
+    "flowchart LR",
+    "  candidates[候选论文集合] --> features[特征计算<br/>" + featureText + "]",
+    "  features --> score[scorePaper 评分]",
+    "  score --> rank[rankAgentTeamPapers 排序]",
+    `  rank --> metric[${metric} 评测]`,
+    ...branchNodes,
+    "```",
     branch,
   ].join("\n")
 }
