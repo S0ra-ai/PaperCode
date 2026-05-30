@@ -848,23 +848,13 @@ function experimentStarterPackSummary(input: ComposeDraftPaperInput) {
   ].join("\n")
 }
 
-function compactOutput(value: string) {
-  const lines = value
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean)
-  return lines.slice(0, 4).join(" | ") || "none"
-}
-
 function experimentRunSummary(input: ComposeDraftPaperInput) {
   const runs = input.experiment_runs
-  if (!runs) return "尚未登记具体 ExperimentRun 命令输出。"
+  if (!runs) return "尚未登记具体实验执行结果。"
   const rows = [...runs.host_runs, ...runs.container_runs].slice(0, 12).map((run) => {
     const metrics = run.metrics.length > 0 ? run.metrics.map((metric) => `${displayMetricName(metric.name)}=${displayMetricValue(metric.name, metric.value)}${displayMetricUnit(metric.name, metric.unit)}`).join(", ") : "无指标"
-    const command = run.command.argv.join(" ")
     const mode = run.environment.mode
     const environment = mode === "container" ? "container:repro-env" : `${mode}:${run.environment.platform}`
-    const output = [compactOutput(run.stdout), compactOutput(run.stderr)].filter((item) => item && item !== "none").join(" / ")
     return [
       displayEnvironment(environment),
       contextualExperimentLabel(input, run.experiment_id, run.role),
@@ -872,15 +862,14 @@ function experimentRunSummary(input: ComposeDraftPaperInput) {
       displayRunStatus(run.status),
       metrics,
       `${run.resource_usage.wall_time_seconds}s`,
-      command,
-      output ? "见运行日志" : "none",
     ]
   })
   return rows.length > 0
     ? [
-        "表 1 列出本研究登记的本机与容器实验；主文只保留关键指标，完整输出保留在审查材料中。",
+        "表 1 汇总本机与容器实验的状态、主指标和耗时，用于说明复现一致性。",
+        "该摘要只保留解释结果所需的信息：环境、实验角色、状态、主指标和耗时。这样可以让读者直接判断复现是否支持正文结论，而不把可复现性章节变成运行记录清单。若状态或指标不一致，相应结论应降级为探索性观察。",
         "",
-        markdownTable(["环境", "实验", "角色", "状态", "指标", "耗时", "命令", "输出"], rows),
+        markdownTable(["环境", "实验", "角色", "状态", "指标", "耗时"], rows),
       ].join("\n")
     : "没有可展示的实验执行摘要。"
 }
@@ -1229,7 +1218,6 @@ function hostContainerConsistencySummary(input: ComposeDraftPaperInput) {
         displayRunStatus(container?.status ?? "missing"),
         typeof containerValue === "number" ? displayMetricValue(metric, containerValue) : "无",
         typeof delta === "number" ? formatMetricValue(delta) : "无",
-        container ? commandText(container.command) : "无",
       ],
     }
   })
@@ -1237,7 +1225,7 @@ function hostContainerConsistencySummary(input: ComposeDraftPaperInput) {
   const mismatches = comparisons.filter((item) => item.mismatch)
   return joinBlocks([
     `可复现性分析比较本机与容器结果，${primaryMetricPhrase(metricLabel)}。只有当本文方法、基线和消融在可复现环境中有一致记录时，相关结果才有资格进入结论性表述。`,
-    markdownTable(["实验", "本机状态", `本机 ${metricLabel}`, "容器状态", `容器 ${metricLabel}`, "差值", "容器命令"], rows),
+    markdownTable(["实验", "本机状态", `本机 ${metricLabel}`, "容器状态", `容器 ${metricLabel}`, "差值"], rows),
     mismatches.length === 0
       ? "本机与容器比较没有发现状态或主指标差异，复现检查可以把这些实验作为结论性表述的支撑证据。"
       : `本机与容器比较发现 ${mismatches.length} 个状态或主指标差异，相关断言应降级为探索性观察，直到复现脚本或环境被修复。`,
