@@ -5,6 +5,14 @@
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
 
+## 2026-05-30 ranking 主文结构复审
+
+- 协议场景复跑 `run-821b9655-2772-492d-be46-c3b9ceeadbe0`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-821b9655-2772-492d-be46-c3b9ceeadbe0\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 主文章节收敛为摘要、引言、研究问题、贡献、相关工作、方法、数据与代码可用性、实验设置、结果、可复现性、讨论、效度威胁、限制、结论和参考文献。
+- 坏词扫描未发现 `## 研究设计与证据流`、`## 证据与可追踪性`、`下表展示研究设计与证据流`、`证据链完整性`、`多智能体和工具调用研究`、`论文到代码执行研究`、`断言证据表`、`证据记录索引` 或英文 label policy 残留。
+- 质量判断：ranking 终稿主文不再像系统审计报告，证据细节退回附录和复现清单，整体更接近常规计算机论文结构。
+
 ## 2026-05-30 ranking 相关工作三线索复审
 
 - 协议场景复跑 `run-7c0e15f8-b78d-4e06-81fb-75722c8dac20`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
