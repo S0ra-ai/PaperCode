@@ -1210,6 +1210,35 @@ async function gitWorktreeDirty(workspace: string) {
   return result.stdout.trim().length > 0
 }
 
+async function workspaceProductVersion(workspace: string, packageVersion?: string, fallbackWorkspace?: string) {
+  const roots = candidateVersionRoots(workspace, fallbackWorkspace)
+  for (const root of roots) {
+    const readme = await readFile(path.join(root, "README.md"), "utf8").catch(() => undefined)
+    const readmeVersion = readme?.match(/<!--\s*version:start\s*-->([^<]+)<!--\s*version:end\s*-->/)?.[1]?.trim()
+    if (readmeVersion) return readmeVersion
+  }
+  for (const root of roots) {
+    const changelog = await readFile(path.join(root, "CHANGELOG"), "utf8").catch(() => undefined)
+    const changelogVersion = changelog?.match(/^:version\s+(.+)$/m)?.[1]?.trim()
+    if (changelogVersion) return changelogVersion
+  }
+  return packageVersion
+}
+
+function candidateVersionRoots(workspace: string, fallbackWorkspace?: string) {
+  const roots: string[] = []
+  for (const start of [workspace, fallbackWorkspace].filter((item): item is string => Boolean(item))) {
+    let current = path.resolve(start)
+    for (let depth = 0; depth < 8; depth++) {
+      roots.push(current)
+      const parent = path.dirname(current)
+      if (parent === current) break
+      current = parent
+    }
+  }
+  return [...new Set(roots)]
+}
+
 async function workspaceCodeMetadata(request: ResearchIntakeRequest, options?: ResearchRuntimeOptions): Promise<CodeAvailabilityMetadata | undefined> {
   const workspace = request.workspace_path ?? options?.workspace
   if (!workspace) return undefined
@@ -1223,9 +1252,10 @@ async function workspaceCodeMetadata(request: ResearchIntakeRequest, options?: R
       parsed = {}
     }
   }
+  const packageVersion = typeof parsed.version === "string" ? parsed.version : undefined
   const metadata: CodeAvailabilityMetadata = {
     repository_url: repositoryUrlFromPackage(parsed.repository),
-    version: typeof parsed.version === "string" ? parsed.version : undefined,
+    version: await workspaceProductVersion(workspace, packageVersion, options?.workspace),
     commit_hash: await gitShortCommit(workspace),
     worktree_dirty: await gitWorktreeDirty(workspace),
     license: typeof parsed.license === "string" ? parsed.license : undefined,

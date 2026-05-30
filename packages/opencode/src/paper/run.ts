@@ -1106,7 +1106,7 @@ function repositoryUrlFromPackage(value: unknown) {
   return undefined
 }
 
-async function packageCodeMetadata(workspace: string): Promise<CodeAvailabilityMetadata | undefined> {
+async function packageCodeMetadata(workspace: string, fallbackWorkspace?: string): Promise<CodeAvailabilityMetadata | undefined> {
   const raw = await readFile(path.join(workspace, "package.json"), "utf8").catch(() => undefined)
   let parsed: Record<string, unknown> = {}
   if (raw) {
@@ -1116,9 +1116,10 @@ async function packageCodeMetadata(workspace: string): Promise<CodeAvailabilityM
       parsed = {}
     }
   }
+  const packageVersion = typeof parsed.version === "string" ? parsed.version : undefined
   const metadata: CodeAvailabilityMetadata = {
     repository_url: repositoryUrlFromPackage(parsed.repository),
-    version: typeof parsed.version === "string" ? parsed.version : undefined,
+    version: await workspaceProductVersion(workspace, packageVersion, fallbackWorkspace),
     commit_hash: await gitShortCommit(workspace),
     worktree_dirty: await gitWorktreeDirty(workspace),
     license: typeof parsed.license === "string" ? parsed.license : undefined,
@@ -1136,6 +1137,35 @@ async function gitWorktreeDirty(workspace: string) {
   const result = await runExperimentShellCommand("git status --porcelain", workspace, 5_000)
   if (result.exitCode !== 0 || result.timedOut) return undefined
   return result.stdout.trim().length > 0
+}
+
+async function workspaceProductVersion(workspace: string, packageVersion?: string, fallbackWorkspace?: string) {
+  const roots = candidateVersionRoots(workspace, fallbackWorkspace)
+  for (const root of roots) {
+    const readme = await readFile(path.join(root, "README.md"), "utf8").catch(() => undefined)
+    const readmeVersion = readme?.match(/<!--\s*version:start\s*-->([^<]+)<!--\s*version:end\s*-->/)?.[1]?.trim()
+    if (readmeVersion) return readmeVersion
+  }
+  for (const root of roots) {
+    const changelog = await readFile(path.join(root, "CHANGELOG"), "utf8").catch(() => undefined)
+    const changelogVersion = changelog?.match(/^:version\s+(.+)$/m)?.[1]?.trim()
+    if (changelogVersion) return changelogVersion
+  }
+  return packageVersion
+}
+
+function candidateVersionRoots(workspace: string, fallbackWorkspace?: string) {
+  const roots: string[] = []
+  for (const start of [workspace, fallbackWorkspace].filter((item): item is string => Boolean(item))) {
+    let current = path.resolve(start)
+    for (let depth = 0; depth < 8; depth++) {
+      roots.push(current)
+      const parent = path.dirname(current)
+      if (parent === current) break
+      current = parent
+    }
+  }
+  return [...new Set(roots)]
 }
 
 async function refreshDraftPaperForFinalExport(input: {
@@ -1165,7 +1195,7 @@ async function refreshDraftPaperForFinalExport(input: {
     readLatestArtifactBySchema<ExperimentProtocolGuidance>(input.runDir, input.artifacts, "ExperimentProtocolGuidance.v1"),
     readLatestArtifactBySchema<ExperimentProtocolStarterPack>(input.runDir, input.artifacts, "ExperimentProtocolStarterPack.v1"),
     readArtifactsBySchema<ExperimentRun[]>(input.runDir, input.artifacts, "ExperimentRun.v1[]"),
-    packageCodeMetadata(input.run.workspace),
+    packageCodeMetadata(input.run.workspace, input.options?.workspace),
   ])
   const finalClaimsAllowed = resultReport.final_claims_allowed === true
   const experimentRuns = latestExperimentRuns(experimentRunGroups.flat())

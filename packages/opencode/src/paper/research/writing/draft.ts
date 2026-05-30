@@ -789,13 +789,15 @@ function dataAvailabilitySummary(input: ComposeDraftPaperInput) {
       : data.diagnostics.gaps
     const gaps = visibleGaps.length > 0 ? `缺口：${visibleGaps.join("; ")}。` : ""
     if (codeSources) {
+      const codeAvailability = codeAvailabilitySummary(input)
       return [
         "本次研究使用代码仓库和实验脚本作为主要证据，未登记外部数据集。",
         gaps,
+        codeAvailability,
         "因此结果解释限定在当前代码工作区、显式实验协议和复现记录内。",
       ]
         .filter(Boolean)
-        .join("")
+        .join("\n\n")
     }
     return `本研究尚未登记可用数据集。${gaps} 因此实验结果只能依赖用户提供的显式实验记录；若缺少实验记录，结论性表述必须保持阻断。`
   }
