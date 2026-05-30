@@ -942,8 +942,8 @@ function researchQuestionsSummary(input: ComposeDraftPaperInput) {
       `RQ2 特征贡献：完整排序方法相对词项匹配基线和无证据覆盖消融，在${metric} 上是否形成可比较差异？`,
       `RQ3 复现一致性：本机与容器复现环境中的${metric} 是否一致，从而支撑结果表述？`,
       ready
-        ? "当前证据链已满足结果表述条件，正文只保留已绑定来源和实验结果的结论；完整证据索引放在附录。"
-        : "当前证据链尚未满足结果表述条件，正文会把结论限定为探索性观察，并把缺口写成修复清单。",
+        ? "当前来源、实验和复现记录已足以支撑上述问题的结论性表述；完整复核材料保留在附录。"
+        : "当前来源、实验或复现记录尚不足以支撑结论性表述，正文会把相关观察限定为探索性结果。",
     ])
   }
   const design = experimentDesignCountsText(input)
@@ -1176,6 +1176,9 @@ function implementationTraceSummary(input: ComposeDraftPaperInput) {
   const sourceIds = claimSourceIds(input)
   const evidenceSources = evidenceSourceIds(input)
   const evidenceLabel = isRankingContext(input) ? "复核材料" : "结构化证据"
+  const claimStatusRule = isRankingContext(input)
+    ? "断言状态会影响终稿表述条件：待补证据的断言只能出现在待修复草稿中，已支持断言才允许进入结论性表述。"
+    : "断言状态会影响证据链完整性判断：待补证据的断言只能出现在待修复草稿中，已支持断言才允许进入结论性表述。"
   const claimRows = input.ledger.entries.slice(0, 10).map((entry, index) => [
     `断言 ${index + 1}`,
     displaySectionID(entry.section_id),
@@ -1185,7 +1188,7 @@ function implementationTraceSummary(input: ComposeDraftPaperInput) {
   ])
   return joinBlocks([
     "证据追踪表汇总来源、断言和复核记录，用于说明正文结论如何连接到材料、实验协议和运行结果。",
-    `本研究共有 ${input.ledger.entries.length} 条断言、${evidenceSources.length} 个可核验材料来源（其中 ${sourceIds.length} 个直接绑定断言）和 ${artifactIds.length} 个证据记录。断言状态会影响证据链完整性判断：待补证据的断言只能出现在待修复草稿中，已支持断言才允许进入结论性表述。`,
+    `本研究共有 ${input.ledger.entries.length} 条断言、${evidenceSources.length} 个可核验材料来源（其中 ${sourceIds.length} 个直接绑定断言）和 ${artifactIds.length} 个证据记录。${claimStatusRule}`,
     claimRows.length > 0
       ? markdownTable(["断言", "章节", "状态", "来源类型", "证据概况"], claimRows)
       : "当前没有断言行。",
@@ -1271,6 +1274,7 @@ function reproducibilityChecklistSummary(input: ComposeDraftPaperInput) {
   const hasContainerRuns = Boolean(input.experiment_runs?.container_runs.length)
   const hasResultReport = Boolean(input.result_report)
   const hasDataBoundary = Boolean(input.data_plan)
+  const finalGateLabel = isRankingContext(input) ? "结论表述条件" : "证据链完整性"
   const rows = [
     ["研究简报", displayReady(true), "主题、语言、目标模板和预算已明确。"],
     ["数据/代码边界", displayReady(hasDataBoundary), hasDataBoundary ? "已生成数据计划或代码材料边界。" : "需要补充数据许可、访问和代码材料范围。"],
@@ -1279,7 +1283,7 @@ function reproducibilityChecklistSummary(input: ComposeDraftPaperInput) {
     ["本机执行", displayReady(hasHostRuns), hasHostRuns ? "已记录本机输出、退出码、耗时和指标。" : "需要真实执行本机实验。"],
     ["容器复现", displayReady(hasContainerRuns), hasContainerRuns ? "已记录容器复现结果。" : "需要容器或等价隔离环境复现。"],
     ["结果报告", displayReady(hasResultReport), hasResultReport ? "已生成主指标比较、阻断项和建议。" : "需要生成结果报告。"],
-    ["证据链完整性", displayReady(finalReady(input)), finalReady(input) ? "允许结论性表述。" : "保持阻断或待修复草稿。"],
+    [finalGateLabel, displayReady(finalReady(input)), finalReady(input) ? "允许结论性表述。" : "保持阻断或待修复草稿。"],
   ]
   return joinBlocks([
     "复现清单汇总结论性表述所需的最小证据条件。每一项都来自复核记录，而不是人工勾选。",
@@ -1585,15 +1589,16 @@ function scaffoldSections(input: ComposeDraftPaperInput, claimSections: DraftSec
   const unsupported = input.ledger.unsupported_claim_ids
   const ready = finalReady(input)
   const includeInternalAuditAppendices = !isRankingContext(input)
+  const ranking = isRankingContext(input)
   return [
     buildPlainSection("abstract", "摘要", abstractSummary(input)),
     buildPlainSection("introduction", "引言", introductionSummary(input)),
     buildPlainSection("research_questions", "研究问题", researchQuestionsSummary(input)),
     buildPlainSection("contributions", "主要贡献", contributionsSummary(input)),
     buildPlainSection("related_work", "相关工作", relatedWorkSummary(input)),
-    buildPlainSection("study_design", "研究设计与证据流", studyDesignSummary(input)),
+    ...(ranking ? [] : [buildPlainSection("study_design", "研究设计与证据流", studyDesignSummary(input))]),
     buildPlainSection("method", "方法", methodSummary(input, claimSections)),
-    buildPlainSection("evidence_traceability", "证据与可追踪性", evidenceModelSummary(input)),
+    ...(ranking ? [] : [buildPlainSection("evidence_traceability", "证据与可追踪性", evidenceModelSummary(input))]),
     ...claimSections.filter((section) => section.section_id !== "method" && section.section_id !== "results"),
     buildPlainSection("data_availability", "数据与代码可用性", dataAvailabilitySummary(input)),
     buildPlainSection("experimental_setup", "实验设置", experimentProtocolSummary(input)),
