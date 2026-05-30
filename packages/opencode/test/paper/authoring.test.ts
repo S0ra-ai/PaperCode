@@ -1308,6 +1308,7 @@ describe("paper authoring loop", () => {
     expect(draft.markdown).not.toContain("ablation ranking no coverage")
     expect(draft.markdown).not.toContain("| ranking lexical |")
     expect(draft.markdown).not.toContain("| ranking no coverage |")
+    expect(draft.markdown).not.toMatch(/\n{3,}/)
     expect(draft.markdown).not.toContain("## 附录 E：断言证据表")
     expect(draft.markdown).not.toContain("## 附录 F：证据记录索引")
     expect(draft.markdown).not.toContain("## 附录 A：证据追踪")
