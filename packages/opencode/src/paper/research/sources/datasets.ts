@@ -24,7 +24,53 @@ function normalizeDataset(candidate: DatasetCandidate, now: string): DatasetCard
   }
 }
 
+function isWorkspaceDataset(dataset: DatasetCard) {
+  return (
+    dataset.url?.startsWith("file://") ||
+    dataset.provider === "workspace" ||
+    dataset.license.expression === "workspace-authorized local dataset"
+  )
+}
+
+function isPlaceholderDatasetLocator(dataset: DatasetCard) {
+  if (isWorkspaceDataset(dataset)) return false
+  const url = dataset.url?.trim()
+  if (!url) return true
+  try {
+    const parsed = new URL(url)
+    const host = parsed.hostname.toLowerCase()
+    return (
+      host === "example.org" ||
+      host === "example.com" ||
+      host === "example.net" ||
+      host === "localhost" ||
+      host === "127.0.0.1" ||
+      host === "0.0.0.0" ||
+      host.endsWith(".example") ||
+      host.endsWith(".invalid") ||
+      host.endsWith(".test")
+    )
+  } catch {
+    return true
+  }
+}
+
+function isOpenVerifiedDataset(dataset: DatasetCard) {
+  return (
+    dataset.license.status === "clear" &&
+    dataset.verification.status === "verified" &&
+    dataset.access === "open" &&
+    !isPlaceholderDatasetLocator(dataset)
+  )
+}
+
 function verificationFailure(dataset: DatasetCard) {
+  if (isPlaceholderDatasetLocator(dataset)) {
+    return {
+      dataset_id: dataset.dataset_id,
+      reason: "placeholder_dataset_locator",
+    }
+  }
   if (dataset.verification.status !== "failed") return undefined
   return {
     dataset_id: dataset.dataset_id,
@@ -51,9 +97,7 @@ export function discoverDatasets(input: DatasetDiscoveryInput): DataPlan {
       const failures = datasets
         .map(verificationFailure)
         .filter((item): item is { dataset_id: string; reason: string } => Boolean(item))
-      const openVerified = datasets.filter(
-        (dataset) => dataset.license.status === "clear" && dataset.verification.status === "verified" && dataset.access === "open",
-      )
+      const openVerified = datasets.filter(isOpenVerifiedDataset)
       const gaps: string[] = []
       if (datasets.length === 0) gaps.push("missing_dataset_candidates")
       if (datasets.length > 0 && openVerified.length === 0) gaps.push("no_open_verified_dataset")
@@ -78,7 +122,5 @@ export function discoverDatasets(input: DatasetDiscoveryInput): DataPlan {
 }
 
 export function openVerifiedDatasets(dataPlan: DataPlan) {
-  return dataPlan.datasets.filter(
-    (dataset) => dataset.license.status === "clear" && dataset.verification.status === "verified" && dataset.access === "open",
-  )
+  return dataPlan.datasets.filter(isOpenVerifiedDataset)
 }
