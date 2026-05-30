@@ -1204,7 +1204,7 @@ function implementationTraceSummary(input: ComposeDraftPaperInput) {
   const evidenceSources = evidenceSourceIds(input)
   const evidenceLabel = isRankingContext(input) ? "复核材料" : "结构化证据"
   const claimStatusRule = isRankingContext(input)
-    ? "断言状态会影响终稿表述条件：待补证据的断言只能出现在待修复草稿中，已支持断言才允许进入结论性表述。"
+    ? "断言状态会影响终稿表述条件：待补证据的断言不能进入终稿结论，已支持断言才允许进入结论性表述。"
     : "断言状态会影响证据链完整性判断：待补证据的断言只能出现在待修复草稿中，已支持断言才允许进入结论性表述。"
   const claimRows = input.ledger.entries.slice(0, 10).map((entry, index) => [
     `断言 ${index + 1}`,
@@ -1689,6 +1689,38 @@ function conclusionSummary(input: ComposeDraftPaperInput, ready: boolean) {
     : "本文仍处于证据不足状态；只有当来源、断言、引用、许可和复现检查形成闭环后，相关结论才应从探索性观察提升为结论性表述。"
 }
 
+function limitationsSectionTitle(input: ComposeDraftPaperInput) {
+  return isRankingContext(input) ? "限制" : "限制与待修复项"
+}
+
+function limitationsSummary(input: ComposeDraftPaperInput, unsupported: string[], ready: boolean) {
+  if (isRankingContext(input)) {
+    const candidateCount = rankingCandidateCount(input)
+    const candidateText = candidateCount ? `候选数 ${candidateCount}` : "候选集规模有限"
+    if (unsupported.length > 0) {
+      return [
+        `当前排序实验仍受${candidateText}、非人工相关性标注和待补证据限制。以下断言修复前，相关结果只能作为探索性观察：`,
+        "",
+        ...unsupported.map((claimId) => `- ${claimId}: 补充证据、降低表述强度，或从终稿断言中移除。`),
+      ].join("\n")
+    }
+    return joinBlocks([
+      `当前实验的主要限制来自评测集规模和标注方式：${candidateText}，标签由实时 arXiv 检索排序、主题匹配、元数据完整度和发表时间派生，不是人工相关性标注。`,
+      "词项匹配基线偏弱，只能说明完整排序优于简单查询词重合；后续需要加入 BM25、向量检索、学习排序和人工标注基线。",
+      "当前结论仍限于单一主题和当前候选集合。要把结果扩展到通用文献推荐或研究助手场景，需要跨主题验证、更大候选池、人工相关性标注和更多随机种子重复。",
+    ])
+  }
+  return unsupported.length > 0
+    ? [
+        "以下阻断项限制了结论强度；修复前，相关表述应保留为待验证观察：",
+        "",
+        ...unsupported.map((claimId) => `- ${claimId}: 补充证据、降低表述强度，或从终稿断言中移除。`),
+      ].join("\n")
+    : ready
+      ? "在当前证据边界内，引用、许可、代码证据和复现检查未发现阻断项；结论仍限于现有材料、数据集、协议和运行环境。"
+      : "在当前证据边界内，断言虽未出现直接冲突，但引用、许可、代码证据或复现检查仍需补齐。"
+}
+
 function scaffoldSections(input: ComposeDraftPaperInput, claimSections: DraftSection[]): DraftSection[] {
   const artifactIds = [...new Set(input.ledger.entries.flatMap((entry) => entry.artifact_ids))]
   const unsupported = input.ledger.unsupported_claim_ids
@@ -1713,16 +1745,8 @@ function scaffoldSections(input: ComposeDraftPaperInput, claimSections: DraftSec
     buildPlainSection("threats_to_validity", "效度威胁", threatsToValiditySummary(input)),
     buildPlainSection(
       "limitations",
-      "限制与待修复项",
-      unsupported.length > 0
-        ? [
-            "以下阻断项限制了结论强度；修复前，相关表述应保留为待验证观察：",
-            "",
-            ...unsupported.map((claimId) => `- ${claimId}: 补充证据、降低表述强度，或从终稿断言中移除。`),
-          ].join("\n")
-        : ready
-          ? "在当前证据边界内，引用、许可、代码证据和复现检查未发现阻断项；结论仍限于现有材料、数据集、协议和运行环境。"
-          : "在当前证据边界内，断言虽未出现直接冲突，但引用、许可、代码证据或复现检查仍需补齐。",
+      limitationsSectionTitle(input),
+      limitationsSummary(input, unsupported, ready),
     ),
     buildPlainSection(
       "conclusion",
