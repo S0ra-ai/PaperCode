@@ -546,8 +546,7 @@ function rankingRoleRepresentatives(
 }
 
 function sourceReferenceNumber(map: LiteratureMap, source: LiteratureMap["sources"][number]) {
-  const verified = map.sources.filter((item) => item.verification.status === "verified")
-  const referenceSources = verified.length > 0 ? verified : map.sources
+  const referenceSources = verifiedFormalLiteratureSources(map)
   const index = referenceSources.findIndex((item) => item.source_id === source.source_id)
   return index >= 0 ? index + 1 : undefined
 }
@@ -689,8 +688,20 @@ function rankingRelatedWorkSummary(input: ComposeDraftPaperInput) {
       "本文与这些方向的交点在于排序结果必须同时有接口定义、显式对照和复现记录支撑；缺少任一环节时，候选论文排序只能作为探索性结果呈现。",
     ])
   }
-  const verified = map.sources.filter((source) => source.verification.status === "verified")
-  const selected = (verified.length > 0 ? verified : map.sources).slice(0, 5)
+  const verified = verifiedFormalLiteratureSources(map)
+  if (verified.length === 0) {
+    const placeholderCount = placeholderVerifiedLiteratureSources(map).length
+    const placeholderText =
+      placeholderCount > 0
+        ? `当前有 ${placeholderCount} 条来源使用测试或占位 URL，不能作为代表文献。`
+        : "当前候选文献尚未完成 DOI、arXiv 元数据或出版社页面核验。"
+    return joinBlocks([
+      "候选论文排序任务连接了三条研究线索：排序解释研究关注排序结果如何因评分因素、群体约束或解释目标而变化；检索与推荐评测研究关注候选集合、相关性标注和检索目标；复现与验证研究关注基线、消融、评价目标和重复执行。",
+      `当前没有可进入相关工作正文的已验证来源；${placeholderText}`,
+      "因此，本文只能把相关工作作为待补检索边界处理，不能把占位来源写成领域共识或新颖性证明。rankAgentTeamPapers 的结果解释仍应受显式对照、检索评测和可复现执行约束。",
+    ])
+  }
+  const selected = verified.slice(0, 5)
   const usedTitles = new Set<string>()
   const explanationWorks = rankingRoleRepresentativesWithCitations(map, selected, "explanation", usedTitles, 1)
   const retrievalWorks = rankingRoleRepresentativesWithCitations(map, selected, "retrieval", usedTitles, 1)
@@ -743,6 +754,14 @@ function isPlaceholderReferenceSource(source: LiteratureMap["sources"][number]) 
   return isPlaceholderReferenceUrl(source.url)
 }
 
+function verifiedFormalLiteratureSources(map: LiteratureMap) {
+  return map.sources.filter((source) => source.verification.status === "verified" && !isPlaceholderReferenceSource(source))
+}
+
+function placeholderVerifiedLiteratureSources(map: LiteratureMap) {
+  return map.sources.filter((source) => source.verification.status === "verified" && isPlaceholderReferenceSource(source))
+}
+
 function referenceAuthors(source: LiteratureMap["sources"][number]) {
   const authors = source.authors?.map((author) => author.trim()).filter(Boolean) ?? []
   if (authors.length === 0) return undefined
@@ -775,8 +794,8 @@ function referencesSummary(input: ComposeDraftPaperInput) {
   }
   const verifiedSources = map.sources.filter((source) => source.verification.status === "verified")
   const unverifiedCount = map.sources.length - verifiedSources.length
-  const placeholderVerified = verifiedSources.filter(isPlaceholderReferenceSource)
-  const verified = verifiedSources.filter((source) => !isPlaceholderReferenceSource(source))
+  const placeholderVerified = placeholderVerifiedLiteratureSources(map)
+  const verified = verifiedFormalLiteratureSources(map)
   if (verified.length === 0) {
     const placeholderText =
       placeholderVerified.length > 0
