@@ -1,9 +1,17 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.53-dev
+- project_version: 0.13.0.54-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 代码修订元数据复审
+
+- 协议场景复跑 `run-ad87f84f-658d-4eb5-a5c4-bb4cd52cc531`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-ad87f84f-658d-4eb5-a5c4-bb4cd52cc531\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 数据与代码可用性章节现在写出代码修订 `b4c2d644`。
+- 终稿同时保留代码仓库地址、代码版本和代码许可证。
+- 质量判断：代码可用性从包级版本推进到可定位 git 修订，更接近可复现实验论文的代码归档要求。
 
 ## 2026-05-30 资源记录边界复审
 
