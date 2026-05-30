@@ -2,10 +2,22 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.34-dev
+:version       0.13.0.35-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.35-dev - 2026/05/30 (4a6099c0) [fix/mcp-tool-binding-test-isolation]
+        :brief ranking 附录改为材料定位与复现实验入口
+        :authoring
+            - fix(appendix): ranking 附录 A 改为材料与实现定位，不再输出证据追踪和断言 1
+            - fix(appendix): ranking 附录 B 改为复现实验入口，不再输出研究简报、就绪或结论表述条件
+            - fix(protocol): ranking 实验协议来源改为复现实验入口，不再输出项目声明的实验入口
+            - test(authoring): 增加 ranking 附录标题、表头和禁用审计口吻断言
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
     0.13.0.34-dev - 2026/05/30 (24d52409) [fix/mcp-tool-binding-test-isolation]
         :brief ranking 限制章节改为论文式边界说明
