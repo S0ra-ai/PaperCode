@@ -2,10 +2,22 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.50-dev
+:version       0.13.0.51-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.51-dev - 2026/05/30 (25f8171e) [fix/mcp-tool-binding-test-isolation]
+        :brief 摘要补充 ranking 评测边界
+        :authoring
+            - fix(abstract): ranking 摘要写出评测集候选数
+            - fix(abstract): ranking 摘要写出标签由实时 arXiv 检索排序、主题匹配、元数据完整度和发表时间派生
+            - fix(abstract): ranking 摘要明确标签不是人工相关性标注
+            - test(authoring): 增加摘要候选数和非人工标注断言
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
     0.13.0.50-dev - 2026/05/30 (f3197dd0) [fix/mcp-tool-binding-test-isolation]
         :brief 结果章节补充统计解释边界

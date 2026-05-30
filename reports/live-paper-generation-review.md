@@ -1,9 +1,18 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.50-dev
+- project_version: 0.13.0.51-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 摘要评测边界复审
+
+- 协议场景复跑 `run-761eef8e-ee89-463d-b8cd-18374d9e9f95`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-761eef8e-ee89-463d-b8cd-18374d9e9f95\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 摘要现在写出 `评测集候选数 5`。
+- 摘要现在说明标签由实时 arXiv 检索排序、主题匹配、元数据完整度和发表时间派生。
+- 摘要明确这些标签不是人工相关性标注。
+- 质量判断：摘要从只报告指标差异，推进到同步交代评测规模和标注边界，降低读者对结果外推能力的误读。
 
 ## 2026-05-30 结果统计解释复审
 
