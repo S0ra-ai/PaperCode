@@ -1,9 +1,18 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.87-dev
+- project_version: 0.13.0.88-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 方法公式去重复述复审
+
+- ranking authoring 测试已确认方法章节保留独立 `score(p)` 公式块和 `| 特征 | 权重 | 含义 |` 表格。
+- 方法章节不再在权重表后重复输出 `其中，relevance...`、`claim_coverage...` 和 `recency...` 的散文解释。
+- 相关回归已通过：authoring/live/metadata 定向测试和 `packages/opencode` typecheck 均通过。
+- 本轮未重复触发 protocol live 复审，原因是上一轮完整 protocol 复跑已被 arXiv HTTP 429 rate limit 阻断；为避免扩大限流，只记录当前 authoring 证据。
+- 本报告和 CHANGELOG 记录为后续开发版本 `0.13.0.88-dev`。
+- 质量判断：方法章节减少重复说明，公式块和权重表承担主要解释职责，正文更紧凑。
 
 ## 2026-05-30 排名评分公式格式复审
 

@@ -2,10 +2,21 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.87-dev
+:version       0.13.0.88-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.88-dev - 2026/05/30 (e876880a) [fix/mcp-tool-binding-test-isolation]
+        :brief 方法公式去除重复特征解释
+        :authoring
+            - fix(method): 评分公式权重表存在时不再追加重复的 relevance、claim_coverage 与 recency 散文解释
+            - test(authoring): ranking 成稿断言权重表保留，同时拒绝重复散文解释
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - note: protocol live 复审未重复触发，避免 arXiv HTTP 429 限流扩大
 
     0.13.0.87-dev - 2026/05/30 (33114fc5) [fix/mcp-tool-binding-test-isolation]
         :brief 排名评分公式独立成块
