@@ -17,7 +17,7 @@ export function checkReferences(input: VerificationGateInput): VerificationFindi
     },
     () => {
       const available = new Set(input.available_source_ids)
-      return input.ledger.entries.flatMap((entry) =>
+      const invalidReferences = input.ledger.entries.flatMap((entry) =>
         entry.citations
           .filter((citation) => !available.has(citation.source_id))
           .map((citation) =>
@@ -32,6 +32,24 @@ export function checkReferences(input: VerificationGateInput): VerificationFindi
             }),
           ),
       )
+      const verifiedPaperReferences = (input.source_records ?? []).filter(
+        (source) => source.kind === "paper" && source.verification.status === "verified" && source.license.status === "clear",
+      )
+      const referenceReadiness =
+        verifiedPaperReferences.length > 0
+          ? []
+          : [
+              finding({
+                category: "missing_verified_reference",
+                severity: "warning",
+                message: "No verified paper reference is available for the formal References section.",
+                claim_ids: [],
+                source_ids: [],
+                artifact_ids: [],
+                required_action: "Complete DOI/arXiv/publisher verification before treating the draft as submission-ready.",
+              }),
+            ]
+      return [...invalidReferences, ...referenceReadiness]
     },
   )
 }
