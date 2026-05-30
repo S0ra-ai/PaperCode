@@ -5,6 +5,15 @@
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
 
+## 2026-05-30 实验表号复审
+
+- 协议场景复跑 `run-4f293653-3314-4659-a0d0-baa735e0be40`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-4f293653-3314-4659-a0d0-baa735e0be40\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 结果章节主结果表增加 `表 1` 说明。
+- 可复现性章节的本机/容器主指标差异表增加 `表 2` 说明。
+- 实验执行摘要改为 `表 3`，避免复现章节重复占用 `表 1`。
+- 质量判断：核心结果表、复现对比表和执行摘要表现在具备连续表号，更接近正式论文排版。
+
 ## 2026-05-30 作者信息区块复审
 
 - 协议场景复跑 `run-e0d800c5-cc7e-4bf4-a9d7-1cfadf23362a`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
