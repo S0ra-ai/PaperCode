@@ -112,6 +112,13 @@ function closingBraceLine(lines: string[], startIndex: number) {
   return startIndex + 1
 }
 
+function returnedExpression(lines: string[], startIndex: number, endLine: number) {
+  const body = lines.slice(startIndex, endLine)
+  const returnLine = body.find((line) => line.trim().startsWith("return "))
+  if (!returnLine) return undefined
+  return returnLine.trim().replace(/^return\s+/, "").replace(/[;}]?\s*$/, "").trim()
+}
+
 function extractMethods(file: string, text: string): MethodExtraction["methods"] {
   const lines = text.split(/\r?\n/)
   const methods: MethodExtraction["methods"] = []
@@ -121,14 +128,16 @@ function extractMethods(file: string, text: string): MethodExtraction["methods"]
     const match = functionMatch ?? classMatch
     if (!match?.[1]) return
     const kind = functionMatch ? "function" : "class"
+    const endLine = closingBraceLine(lines, index)
+    const expression = kind === "function" ? returnedExpression(lines, index, endLine) : undefined
     methods.push({
       name: match[1],
       kind,
-      summary: `${kind} ${match[1]} is exported from ${file}.`,
+      summary: expression ? `${kind} ${match[1]} is exported from ${file} and returns ${expression}.` : `${kind} ${match[1]} is exported from ${file}.`,
       source_range: {
         path: file,
         start_line: index + 1,
-        end_line: closingBraceLine(lines, index),
+        end_line: endLine,
       },
     })
   })

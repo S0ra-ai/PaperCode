@@ -792,7 +792,7 @@ describe("paper authoring loop", () => {
       topic: "Agent team paper ranking",
       claims: [
         {
-          text: "The code analysis found source ranges for rankAgentTeamPapers and scorePaper. Experiment entrypoints include baseline:ranking-lexical, ablation:ranking-no-coverage, repro:container, and test:ranking.",
+          text: "The code analysis found source ranges for rankAgentTeamPapers(src/agent-team-paper.ts:3) and scorePaper(src/agent-team-paper.ts:7). function scorePaper is exported from src/agent-team-paper.ts and returns item.relevance * 0.62 + item.claim_coverage * 0.28 + item.recency * 0.10. Experiment entrypoints include baseline:ranking-lexical, ablation:ranking-no-coverage, repro:container, and test:ranking.",
           section_id: "method",
           confidence: 0.9,
           source_ids: ["material:code:agent-team-paper"],
@@ -880,6 +880,7 @@ describe("paper authoring loop", () => {
     const abstract = markdownSection(draft.markdown, "摘要")
     const introduction = markdownSection(draft.markdown, "引言")
     const relatedWork = markdownSection(draft.markdown, "相关工作")
+    const method = markdownSection(draft.markdown, "方法")
     const experimentalSetup = markdownSection(draft.markdown, "实验设置")
     const results = markdownSection(draft.markdown, "结果")
     const discussion = markdownSection(draft.markdown, "讨论")
@@ -898,6 +899,12 @@ describe("paper authoring loop", () => {
     expect(contributions).toContain("rankAgentTeamPapers")
     expect(contributions).toContain("排序接口")
     expect(contributions).toContain("把 rankAgentTeamPapers 和 scorePaper 构成的候选论文排序接口、来源和实验记录统一为可审查证据")
+    expect(method).toContain("候选论文排序方法由 rankAgentTeamPapers 和 scorePaper 两个核心接口组成")
+    expect(method).toContain("rankAgentTeamPapers 接收候选论文集合，并按 scorePaper 输出的得分进行降序排列")
+    expect(method).toContain("scorePaper 把 relevance、claim_coverage 和 recency 压缩为可比较分数")
+    expect(method).toContain("排名测试、词项匹配基线、无证据覆盖消融和容器复现分别约束本文方法、词项基线、证据覆盖贡献和环境可重复性")
+    expect(method).toContain("rankAgentTeamPapers(src/agent-team-paper.ts:3)、scorePaper(src/agent-team-paper.ts:7)")
+    expect(method).toContain("并登记排名测试、词项匹配基线、无证据覆盖消融和容器复现等可运行入口")
     expect(experimentalSetup).toContain("本文方法的评价对象为“证据约束的论文排序方法”")
     expect(draft.markdown).toContain("以排序 nDCG@3 作为主指标")
     expect(draft.markdown).toContain("在“排序 nDCG@3”这一主指标上")
@@ -911,6 +918,10 @@ describe("paper authoring loop", () => {
     expect(draft.markdown).not.toContain("把相关工作边界放在代码证据上：对提交代码库")
     expect(contributions).not.toContain("把rank")
     expect(contributions).not.toContain("核心方法断言为：对提交代码库")
+    expect(method).not.toContain("代码理解阶段抽取的方法接口、源码范围和可运行入口如下")
+    expect(method).not.toContain("scorePaper(right)")
+    expect(method).not.toContain("toSorted((left")
+    expect(method).not.toContain("并登记 排名测试")
     expect(draft.markdown).not.toContain("bun run 排名测试")
     expect(draft.markdown).not.toContain("bun run 词项匹配基线")
     expect(draft.markdown).not.toContain("主指标 排序")

@@ -1398,6 +1398,13 @@ function codeMethodClaimText(
   ]
   if (methods.length > 0) {
     parts.push(`系统抽取到 ${methods.length} 个导出方法/类表面，其中包括 ${methodNames.join(", ")}。`)
+    const methodSummaries = methods
+      .slice(0, 5)
+      .map((method) => method.summary)
+      .filter((summary) => summary.includes(" returns "))
+    if (methodSummaries.length > 0) {
+      parts.push(`方法摘要：${methodSummaries.join(" ")}`)
+    }
   }
   if (tests.length > 0 || runnables.length > 0) {
     parts.push(
