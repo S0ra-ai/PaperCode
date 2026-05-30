@@ -1,9 +1,18 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.104-dev
+- project_version: 0.13.0.105-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-31 final gate 占位数据集阻断复审
+
+- final data/experiment check 已确认：只有占位数据集候选时，即使实验复现通过，也会产生 `missing_open_dataset` blocker。
+- blocker 只在“存在数据集候选但没有正式开放或工作区授权数据集”时触发，避免误挡纯代码元数据论文。
+- 这把数据真实性边界从 discovery、authoring 继续延伸到 final gate，减少伪数据绕过成稿过滤后进入最终导出的风险。
+- 相关回归已通过：datasets 定向测试、authoring 定向测试、authoring/datasets/live/metadata 组合测试和 `packages/opencode` typecheck。
+- 本报告和 CHANGELOG 记录为后续开发版本 `0.13.0.105-dev`。
+- 质量判断：论文生成链路更接近人工审查习惯，最终导出不会只因为复现通过就接受占位数据。
 
 ## 2026-05-31 dataset discovery 占位来源过滤复审
 
