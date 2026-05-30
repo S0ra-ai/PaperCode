@@ -2,10 +2,22 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.83-dev
+:version       0.13.0.84-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.84-dev - 2026/05/30 (b7b23103) [fix/mcp-tool-binding-test-isolation]
+        :brief 实验环境声明改为表格
+        :authoring
+            - fix(markdown): 可复现性章节中的实验环境声明改为三级小节和表格
+            - fix(markdown): Node.js、容器镜像和容器摘要拆成独立环境声明行
+            - test(authoring): ranking 与 code-paper 成稿断言环境声明表格存在，并拒绝冒号式列表
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
     0.13.0.83-dev - 2026/05/30 (ab5a3d1e) [fix/mcp-tool-binding-test-isolation]
         :brief 声明章节改为表格
