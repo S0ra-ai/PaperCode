@@ -5,6 +5,15 @@
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
 
+## 2026-05-30 基线消融语义复审
+
+- 协议场景复跑 `run-97ef4162-3306-4e2c-b27f-56e6c622f1c8`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-97ef4162-3306-4e2c-b27f-56e6c622f1c8\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 实验设置把词项匹配基线解释为只依赖查询词重合的排序对照，把无证据覆盖消融解释为移除 `claim_coverage` 对排序得分的贡献。
+- 结果章节新增消融分析：无证据覆盖消融低于本文方法 `0.2682`，说明 `claim_coverage` 特征在当前候选集上提供了可观测贡献。
+- 讨论章节补充词项匹配基线和无证据覆盖消融分别约束词项匹配与证据覆盖特征。
+- 质量判断：实验设置和结果解释更接近论文中的对照实验叙述，不再只是运行入口清单。
+
 ## 2026-05-30 方法章节排序实现复审
 
 - 协议场景复跑 `run-3781b1c7-9486-4532-847c-4a122a375256`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
