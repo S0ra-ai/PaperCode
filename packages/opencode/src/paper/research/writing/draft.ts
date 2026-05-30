@@ -1165,6 +1165,37 @@ function experimentIdsForDisplay(runs: NonNullable<ComposeDraftPaperInput["exper
   return ids
 }
 
+function experimentKey(value: string) {
+  return value.trim().replace(/[:_\s]+/g, "-").toLowerCase()
+}
+
+function runMatchesExperiment(run: Pick<ExperimentRun, "experiment_id" | "role">, experimentId: string, role?: string) {
+  if (role && run.role !== role) return false
+  return experimentKey(run.experiment_id) === experimentKey(experimentId)
+}
+
+function rankingAppendixExecutionStatus(input: ComposeDraftPaperInput, experimentId: string, role: string) {
+  const runs = input.experiment_runs
+  if (!runs) return "未执行"
+  if (role === "container_reproduction") {
+    const statuses = runs.container_runs.map((run) => run.status)
+    if (statuses.length === 0) return "容器缺失"
+    return statuses.every((status) => status === "succeeded") ? "容器通过" : `容器${displayRunStatus(statuses.find((status) => status !== "succeeded") ?? statuses[0] ?? "missing")}`
+  }
+  const host = runs.host_runs.find((run) => runMatchesExperiment(run, experimentId, role))
+  const container = runs.container_runs.find((run) => runMatchesExperiment(run, experimentId, role))
+  const parts = [
+    host ? `本机${displayRunStatus(host.status)}` : "本机缺失",
+    container ? `容器${displayRunStatus(container.status)}` : "容器缺失",
+  ]
+  return parts.join("；")
+}
+
+function rankingAppendixResultLocation(role: string) {
+  if (role === "container_reproduction") return "可复现性"
+  return "结果；可复现性"
+}
+
 function experimentDesignCounts(input: ComposeDraftPaperInput) {
   const baseline = input.experiment_plan?.baselines.length ?? 0
   const ablation = input.experiment_plan?.ablations.length ?? 0
@@ -1708,6 +1739,8 @@ function rankingReproducibilityAppendixSummary(input: ComposeDraftPaperInput) {
         contextualExperimentLabel(input, spec.experiment_id, spec.role),
         commandText(spec.command),
         displayMetricName(spec.expected_metric),
+        rankingAppendixExecutionStatus(input, spec.experiment_id, spec.role),
+        rankingAppendixResultLocation(spec.role),
       ])
     : []
   const protocolRows =
@@ -1716,11 +1749,13 @@ function rankingReproducibilityAppendixSummary(input: ComposeDraftPaperInput) {
       contextualExperimentLabel(input, entry.protocol_id, entry.role === "container_reproduction" ? undefined : entry.role),
       commandText(entry.command),
       displayMetricName(entry.expected_metric),
+      rankingAppendixExecutionStatus(input, entry.protocol_id, entry.role),
+      rankingAppendixResultLocation(entry.role),
     ]) ?? []
   const rows = protocolRows.length > 0 ? protocolRows : planRows
   return joinBlocks([
     "本附录列出复现实验入口，便于读者复核本文方法、词项匹配基线、无证据覆盖消融和容器复现。结果数值以结果章节和可复现性章节为准。",
-    rows.length > 0 ? markdownTable(["角色", "实验", "命令", "指标"], rows.slice(0, 12)) : "当前没有可列出的复现实验入口。",
+    rows.length > 0 ? markdownTable(["角色", "实验", "命令", "指标", "执行状态", "结果位置"], rows.slice(0, 12)) : "当前没有可列出的复现实验入口。",
     "这些入口用于复现评价协议，不替代主文中的结果解释；若入口、环境或指标发生变化，应重新生成结果表和效度分析。",
   ])
 }
