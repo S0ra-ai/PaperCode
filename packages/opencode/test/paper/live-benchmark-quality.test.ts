@@ -9,6 +9,9 @@ describe("live paper quality benchmark script", () => {
     const benchmark = readFileSync(path.join(repoRoot, "scripts", "live-paper-quality-benchmark.ts"), "utf8")
 
     expect(benchmark).toContain("paper recommendation ranking")
+    expect(benchmark).toContain("protocolBenchmarkQueries")
+    expect(benchmark).toContain("scholarly document ranking benchmark")
+    expect(benchmark).toContain("could not build a non-degenerate live ranking benchmark")
     expect(benchmark).toContain("assertProtocolRankingSignal")
     expect(benchmark).toContain("Protocol scenario generated a degenerate ranking benchmark")
     expect(benchmark).toContain("protocolReferenceSources")
