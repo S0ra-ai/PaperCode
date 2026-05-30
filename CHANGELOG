@@ -2,10 +2,22 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.51-dev
+:version       0.13.0.52-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.52-dev - 2026/05/30 (fd74c37a) [fix/mcp-tool-binding-test-isolation]
+        :brief 代码可用性补充仓库版本许可证
+        :authoring
+            - fix(availability): 代码可用性章节支持代码仓库地址、代码版本和代码许可证元数据
+            - fix(runtime): PaperRun authoring 从工作区 package.json 读取 repository、version 和 license
+            - fix(export): final export 刷新草稿时保留 package.json 代码可用性元数据
+            - test(authoring): 增加代码仓库地址、版本和许可证断言
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
     0.13.0.51-dev - 2026/05/30 (25f8171e) [fix/mcp-tool-binding-test-isolation]
         :brief 摘要补充 ranking 评测边界
