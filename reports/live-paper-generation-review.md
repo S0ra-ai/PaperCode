@@ -1,9 +1,17 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.64-dev
+- project_version: 0.13.0.65-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 工作区数据访问列复审
+
+- 协议场景复跑 `run-477e02ac-2716-4002-923f-0d7816b1f15d`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-477e02ac-2716-4002-923f-0d7816b1f15d\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 数据与代码可用性表格现在写为 `agent-ranking-dataset.json | 本地可核验 | 工作区授权本地数据集 | 已验证`。
+- 最终稿不再把 `file://` 工作区数据集显示为外部开放访问。
+- 质量判断：数据访问列和许可列各自表达真实边界，减少读者对本地评测集开放性的误解。
 
 ## 2026-05-30 实验协议覆盖说明复审
 
