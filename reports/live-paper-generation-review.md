@@ -1,9 +1,18 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.48-dev
+- project_version: 0.13.0.49-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 可复现性环境声明复审
+
+- 协议场景复跑 `run-4754d433-f5e5-47e3-9d25-96e91074e454`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-4754d433-f5e5-47e3-9d25-96e91074e454\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 可复现性章节新增 `实验环境声明`。
+- live 终稿写出 `本机平台：Windows，Node.js v24.3.0`，并标明容器隔离复现环境已登记。
+- 作者链路测试覆盖容器镜像场景，确认 `paper-fucker/research-runner:test` 会进入环境声明。
+- 质量判断：可复现性章节从只比较结果，推进到同时说明运行环境边界，更接近计算机类论文复现实验写法。
 
 ## 2026-05-30 ranking 方法图复审
 
