@@ -357,7 +357,7 @@ function sourceSummary(input: ComposeDraftPaperInput) {
 function artifactSummary(input: ComposeDraftPaperInput) {
   const artifactIds = [...new Set(input.ledger.entries.flatMap((entry) => entry.artifact_ids))]
   if (artifactIds.length === 0) return "当前还没有可审查证据记录。"
-  if (isRankingContext(input)) return `附录保留 ${artifactIds.length} 条复核材料，用于定位排序接口、实验入口和复现结果；主文只保留与方法和结果解释直接相关的信息。`
+  if (isRankingContext(input)) return "附录列出实现位置和复现实验入口；主文保留排序规则、对照设计和结果解释。"
   return `正文结论绑定 ${artifactIds.length} 个复核记录；完整证据索引保留在附录中，正文只保留必要说明。`
 }
 
@@ -791,6 +791,14 @@ function experimentProtocolSummary(input: ComposeDraftPaperInput) {
   const protocol = input.experiment_protocol
   const downgradePolicy = plan.downgrade_policy
     .map(humanizeExperimentText)
+    .map((item) =>
+      isRankingContext(input)
+        ? item
+            .replace("少于两个基线可运行时降级为工程报告", "少于两个基线可运行时只报告探索性实验记录")
+            .replace("数据集不可用时转向最近的开放可验证 benchmark", "数据集不可用时转向最近的开放可验证评测集")
+            .replace("容器复现失败时阻断结论性表述", "容器复现失败时将跨环境结果标为探索性观察")
+        : item,
+    )
     .map((item) => item.replace(/[。.]$/, ""))
     .join("；")
   const metricTable = markdownTable(
@@ -817,8 +825,14 @@ function experimentProtocolSummary(input: ComposeDraftPaperInput) {
         semanticExperimentRationale(input, "ablation", ablation.experiment_id, ablation.label, ablation.rationale),
       ]),
   )
+  const intro = isRankingContext(input)
+    ? "实验协议围绕评价对象、主指标、基线和消融展开，目的是比较排序规则在同一候选集上的表现。评价目标是候选论文排序质量。"
+    : `实验协议围绕评价对象、主指标、基线和消融展开，用来判断结果是否足以支撑结论性表述。评价目标是${humanizeExperimentText(plan.objective).replace(/[。.]$/, "")}。`
+  const missingBaseline = isRankingContext(input)
+    ? "当前没有基线运行入口；该缺口会使结果只能作为探索性观察。"
+    : "当前没有基线运行入口；该缺口会阻断结论性表述。"
   return [
-    `实验协议围绕评价对象、主指标、基线和消融展开，用来判断结果是否足以支撑结论性表述。评价目标是${humanizeExperimentText(plan.objective).replace(/[。.]$/, "")}。`,
+    intro,
     "",
     "### 指标",
     metricTable,
@@ -826,7 +840,7 @@ function experimentProtocolSummary(input: ComposeDraftPaperInput) {
     `本文方法的评价对象为“${humanizeProposedLabel(input)}”，主指标为“${displayMetricName(plan.proposed.expected_metric)}”。`,
     "",
     "### 基线",
-    baselineTable || "当前没有基线运行入口；该缺口会阻断结论性表述。",
+    baselineTable || missingBaseline,
     "",
     "### 消融",
     ablationTable || "当前没有消融运行入口；贡献强度需要保持保守。",
@@ -1080,11 +1094,16 @@ function rankingMethodNarrative(input: ComposeDraftPaperInput) {
     features.length > 0
       ? `scorePaper 把 ${readableAsciiList(features)} 压缩为可比较分数。`
       : "scorePaper 作为统一评分入口输出可比较分数。"
+  const featureDetail =
+    features.includes("relevance") && features.includes("claim_coverage") && features.includes("recency")
+      ? "其中，relevance 衡量候选论文与研究主题的匹配程度，claim_coverage 衡量候选论文对当前研究问题关键断言的覆盖，recency 作为发表时间相关的弱排序信号。"
+      : undefined
   const entrypointSentence = methodEntrypointRoles(input)
   return [
     "候选论文排序方法由 rankAgentTeamPapers 和 scorePaper 两个核心接口组成。",
     "rankAgentTeamPapers 接收候选论文集合，并按 scorePaper 输出的得分进行降序排列。",
     featureSentence,
+    featureDetail,
     entrypointSentence ? `${entrypointSentence}。` : undefined,
   ]
     .filter(Boolean)
@@ -1100,7 +1119,7 @@ function methodEvidenceNote(input: ComposeDraftPaperInput) {
   if (!entry && ranges.length === 0 && entrypoints.length === 0) return undefined
   if (isRankingContext(input)) {
     const rangeText = ranges.length > 0 ? `实现上，${ranges.join("、")} 标明了排序入口和评分入口` : "实现上，排序入口和评分入口均保留了可定位实现"
-    const entrypointText = entrypoints.length > 0 ? `；${chineseList(entrypoints)}用于复核完整排序、词项基线、证据覆盖消融和环境一致性` : ""
+    const entrypointText = entrypoints.length > 0 ? `；${chineseList(entrypoints)}用于比较完整排序、词项基线、证据覆盖消融和环境一致性` : ""
     return `${rangeText}${entrypointText}。${entry ? citationText(entry) : ""}`.trim()
   }
   const rangeText = ranges.length > 0 ? `源码证据记录保留了 ${ranges.join("、")} 等接口位置` : "源码证据记录保留了接口位置"
@@ -1299,10 +1318,14 @@ function hostContainerConsistencySummary(input: ComposeDraftPaperInput) {
   const rows = comparisons.map((item) => item.row)
   const mismatches = comparisons.filter((item) => item.mismatch)
   return joinBlocks([
-    `可复现性分析比较本机与容器结果，${primaryMetricPhrase(metricLabel)}。只有当本文方法、基线和消融在可复现环境中有一致记录时，相关结果才有资格进入结论性表述。`,
+    isRankingContext(input)
+      ? `可复现性分析比较本机与容器结果，${primaryMetricPhrase(metricLabel)}。该比较用于检查同一协议在两个环境中的稳定性。`
+      : `可复现性分析比较本机与容器结果，${primaryMetricPhrase(metricLabel)}。只有当本文方法、基线和消融在可复现环境中有一致记录时，相关结果才有资格进入结论性表述。`,
     markdownTable(["实验", "本机状态", `本机 ${metricLabel}`, "容器状态", `容器 ${metricLabel}`, "差值"], rows),
     mismatches.length === 0
-      ? "本机与容器比较没有发现状态或主指标差异，复现检查可以把这些实验作为结论性表述的支撑证据。"
+      ? isRankingContext(input)
+        ? "本机与容器比较没有发现状态或主指标差异，说明当前排序协议在两个环境中保持一致。"
+        : "本机与容器比较没有发现状态或主指标差异，复现检查可以把这些实验作为结论性表述的支撑证据。"
       : `本机与容器比较发现 ${mismatches.length} 个状态或主指标差异，相关断言应降级为探索性观察，直到复现脚本或环境被修复。`,
     "该检查不等价于证明方法泛化有效；它只证明当前工作区、当前协议和当前环境声明可以复现同一组观测结果。泛化结论仍需要更多数据集、更多随机种子和领域基线。",
   ])
@@ -1470,9 +1493,11 @@ function experimentSummary(input: ComposeDraftPaperInput) {
     metrics = `${primaryMetricLocus(displayMetricName(report.primary_metric))}，本文方法为 ${displayMetricValue(report.primary_metric, report.proposed.value)}；由于缺少基线，对比性结论仍需保守。`
   }
   if (report.reproduction.status === "passed" && report.final_claims_allowed) {
+    if (isRankingContext(input)) return `${metrics}\n\n容器复现已通过，本机与容器结果一致。`
     return `${metrics}\n\n容器复现已通过，本机与容器结果可以支撑当前结论性表述。`
   }
   const blockers = report.blockers.length > 0 ? report.blockers.map(paperProseText).join("、") : "复现检查"
+  if (isRankingContext(input)) return `${metrics}\n\n复现检查未通过，阻断项：${blockers}。相关结果应标为探索性观察。`
   return `${metrics}\n\n复现检查未通过，阻断项：${blockers}。相关结果只能标为探索性证据，不能进入结论性表述。`
 }
 
