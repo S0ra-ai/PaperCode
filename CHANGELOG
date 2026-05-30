@@ -2,10 +2,21 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.106-dev
+:version       0.13.0.107-dev
 :last_update   2026/05/31
 
 :history
+
+    0.13.0.107-dev - 2026/05/31 (43a0d469) [fix/mcp-tool-binding-test-isolation]
+        :brief claim source record 强制校验
+        :verification
+            - fix(source): checkSourceAuthenticity 在 claim source_id 缺少 SourceRecord.v1 时输出 missing_source_record blocker
+            - fix(source): final gate 不再只凭 available_source_ids 接受 claim 证据，必须能回查来源记录
+            - test(authoring): 覆盖 source_id 已声明但 source_records 缺失的阻断路径
+        :checks
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "missing source records|formal References"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/datasets.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "missing source records|formal References|complete code-paper|placeholder datasets|blocks final data checks|dataset discovery|renders ranking benchmark|renders ranking related work|placeholder literature|distinct representatives|live paper quality|prefers product README version|retries retryable temporary directory cleanup"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
 
     0.13.0.106-dev - 2026/05/31 (78d83dc5) [fix/mcp-tool-binding-test-isolation]
         :brief 正式参考文献 readiness 提示
