@@ -2,10 +2,25 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.71-dev
+:version       0.13.0.72-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.72-dev - 2026/05/30 (ba8e87b1) [fix/mcp-tool-binding-test-isolation]
+        :brief GPU 预算改为显式启用
+        :experiments
+            - fix(plan): ExperimentPlan 默认不再分配 GPU 预算，只有显式 resource_budget 才记录 GPU 小时
+            - fix(plan): 实验计划支持传入主指标、命令、基线、消融和资源预算，便于真实代码论文协议收口
+            - fix(claims): 无基线的代码实验协议即使容器复现通过，也会阻断 final claims
+        :authoring
+            - fix(setup): max_gpu_hours 为 0 时成稿写为 GPU 未纳入当前资源预算，不再输出 GPU<=0 小时或默认 GPU<=4 小时
+            - test(authoring): ranking 成稿断言默认资源预算不会伪装成 GPU 预算
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/experiment-loop.test.ts test/paper/authoring.test.ts --test-name-pattern "GPU budget|renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/experiment-loop.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|GPU budget|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
     0.13.0.71-dev - 2026/05/30 (c7e9fe29) [fix/mcp-tool-binding-test-isolation]
         :brief 研究问题与引言统一为相关性口径
