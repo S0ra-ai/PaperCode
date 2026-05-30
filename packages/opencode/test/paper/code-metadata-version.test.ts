@@ -10,6 +10,14 @@ const TEST_MODEL = "test-provider/test-model"
 const PAPER_RUN_INTEGRATION_TIMEOUT = 180_000
 const cleanup: string[] = []
 
+type CodeMetadataCleanupOptions = {
+  attempts?: number
+  remove?: (dir: string) => Promise<void>
+  sleep?: () => Promise<void>
+  gc?: () => void
+  warn?: (message: string) => void
+}
+
 function testModelRoles(): Record<PaperModelRole, string> {
   return Object.fromEntries(PAPER_MODEL_ROLES.map((role) => [role, TEST_MODEL])) as Record<PaperModelRole, string>
 }
@@ -24,15 +32,42 @@ function runtimeOptions(workspace: string, home: string): PaperRunRuntimeOptions
   }
 }
 
-async function clean(dir: string, attempts = 60): Promise<void> {
-  await sleep(100)
-  return rm(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 }).catch((error) => {
-    if (attempts <= 1) {
-      console.warn(`Could not remove temporary code metadata test directory ${dir}: ${String(error)}`)
-      return
-    }
-    return clean(dir, attempts - 1)
-  })
+function retryableCleanupError(error: unknown) {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    (error.code === "EBUSY" || error.code === "EACCES" || error.code === "EPERM" || error.code === "ENOTEMPTY" || error.code === "EFAULT")
+  )
+}
+
+async function cleanCodeMetadataTempDir(dir: string, options: CodeMetadataCleanupOptions = {}): Promise<void> {
+  const attempts = options.attempts ?? 80
+  const remove =
+    options.remove ??
+    ((target: string) => rm(target, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 }))
+  const wait = options.sleep ?? (() => sleep(150))
+  const gc = options.gc ?? (() => Bun.gc(true))
+  const warn = options.warn ?? ((message: string) => console.warn(message))
+
+  const run = async (left: number): Promise<void> => {
+    gc()
+    await wait()
+    return remove(dir).catch((error) => {
+      if (!retryableCleanupError(error)) throw error
+      if (left <= 1) {
+        warn(`Could not remove temporary code metadata test directory ${dir}: ${String(error)}`)
+        return
+      }
+      return run(left - 1)
+    })
+  }
+
+  return run(attempts)
+}
+
+async function clean(dir: string): Promise<void> {
+  return cleanCodeMetadataTempDir(dir)
 }
 
 async function fixtureWorkspace() {
@@ -108,40 +143,79 @@ async function fixtureWorkspace() {
   return { root, workspace, home }
 }
 
-afterEach(async () => {
+async function drainCleanup() {
   stopAllPaperRunLivePreviews()
   while (cleanup.length > 0) {
     const dir = cleanup.pop()
     if (dir) await clean(dir)
   }
+}
+
+afterEach(async () => {
+  await drainCleanup()
 })
 
 describe("PaperRun code availability metadata", () => {
-  test("prefers product README version over workspace package version in final paper", async () => {
-    const { root, workspace, home } = await fixtureWorkspace()
-    const run = await createPaperRun(
-      {
-        topic: "代码版本元数据论文",
-        workspace_path: workspace,
-        code_paths: ["src"],
-        paper_files: ["source-evidence.json"],
-        experiment_logs: ["experiment-evidence.json"],
-        target_profile: "generic-preprint",
-        language: "zh-CN",
-        budget_tier: "standard",
-        model_roles: testModelRoles(),
+  test("retries retryable temporary directory cleanup without warning when removal later succeeds", async () => {
+    let calls = 0
+    const warnings: string[] = []
+    await cleanCodeMetadataTempDir("C:\\Temp\\paper-fucker-code-metadata-test", {
+      attempts: 3,
+      sleep: async () => {},
+      gc: () => {},
+      warn: (message) => warnings.push(message),
+      remove: async () => {
+        calls += 1
+        if (calls < 3) {
+          const error = new Error("directory is busy") as Error & { code: string }
+          error.code = "EBUSY"
+          throw error
+        }
       },
-      runtimeOptions(root, home),
-    )
+    })
 
-    expect(run.snapshot.export_state.status).toBe("final")
-    expect(run.snapshot.export_state.failed_checks).toEqual([])
-    const markdownFile = run.snapshot.export_state.files?.find((file) => file.format === "markdown" && file.status === "written")
-    expect(markdownFile).toBeDefined()
-    const finalMarkdown = await readFile(path.join(run.run_dir, markdownFile!.path), "utf8")
-    expect(finalMarkdown).toContain("| 代码包 | fixture-code-paper |")
-    expect(finalMarkdown).toContain("| 代码版本 | 9.8.7-dev |")
-    expect(finalMarkdown).not.toContain("代码版本：0.1.0")
-    expect(finalMarkdown).not.toContain("| 代码版本 | 0.1.0 |")
+    expect(calls).toBe(3)
+    expect(warnings).toEqual([])
+  })
+
+  test("prefers product README version over workspace package version in final paper", async () => {
+    const cleanupWarnings: string[] = []
+    const originalWarn = console.warn
+    console.warn = (...args: unknown[]) => {
+      const message = args.map(String).join(" ")
+      cleanupWarnings.push(message)
+      originalWarn(...args)
+    }
+    const { root, workspace, home } = await fixtureWorkspace()
+    try {
+      const run = await createPaperRun(
+        {
+          topic: "代码版本元数据论文",
+          workspace_path: workspace,
+          code_paths: ["src"],
+          paper_files: ["source-evidence.json"],
+          experiment_logs: ["experiment-evidence.json"],
+          target_profile: "generic-preprint",
+          language: "zh-CN",
+          budget_tier: "standard",
+          model_roles: testModelRoles(),
+        },
+        runtimeOptions(root, home),
+      )
+
+      expect(run.snapshot.export_state.status).toBe("final")
+      expect(run.snapshot.export_state.failed_checks).toEqual([])
+      const markdownFile = run.snapshot.export_state.files?.find((file) => file.format === "markdown" && file.status === "written")
+      expect(markdownFile).toBeDefined()
+      const finalMarkdown = await readFile(path.join(run.run_dir, markdownFile!.path), "utf8")
+      expect(finalMarkdown).toContain("| 代码包 | fixture-code-paper |")
+      expect(finalMarkdown).toContain("| 代码版本 | 9.8.7-dev |")
+      expect(finalMarkdown).not.toContain("代码版本：0.1.0")
+      expect(finalMarkdown).not.toContain("| 代码版本 | 0.1.0 |")
+      await drainCleanup()
+    } finally {
+      console.warn = originalWarn
+    }
+    expect(cleanupWarnings.filter((message) => message.includes("Could not remove temporary code metadata test directory"))).toEqual([])
   }, PAPER_RUN_INTEGRATION_TIMEOUT)
 })
