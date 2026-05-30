@@ -1,9 +1,18 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.109-dev
+- project_version: 0.13.0.110-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-31 缺少模型审稿结果阻断复审
+
+- `runMultiModelReview` 已确认：`model_reviews` 为空时输出 `missing_model_review` blocker。
+- `evaluateVerificationGate` 测试已确认：即使引用、来源、数据和复现都齐备，没有模型审稿结果也不能 final-ready。
+- 这补齐了最终导出前的审稿 gate，避免空审稿输入被默认为 pass。
+- 相关回归已通过：no model review/reference/formal References 定向测试、authoring/datasets/live/metadata 组合测试和 `packages/opencode` typecheck。
+- 本报告和 CHANGELOG 记录为后续开发版本 `0.13.0.110-dev`。
+- 质量判断：最终导出现在至少需要一个已配置模型审稿结果，成稿质量 gate 更接近人工协作流程。
 
 ## 2026-05-31 缺少正式论文参考文献阻断复审
 
