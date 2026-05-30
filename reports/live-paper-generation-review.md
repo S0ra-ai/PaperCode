@@ -1,9 +1,18 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.78-dev
+- project_version: 0.13.0.79-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 Markdown 空行复审
+
+- 协议场景复跑 `run-93688039-f7f3-4fbf-af69-58741d679dbb`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-93688039-f7f3-4fbf-af69-58741d679dbb\exports\bundle-final-draft-paper-final-export-7a66e88a-71af-4b0a-b64f-927e1088f7f2\bundle-final-draft-paper-final-export-7a66e88a-71af-4b0a-b64f-927e1088f7f2.md`。
+- 最终稿通过 `Select-String -Pattern '(?s)\n{3,}'` 检查，未发现三连及以上空行。
+- 数据与代码可用性章节不再在表格、代码可用性段落和下一节之间出现多余空白。
+- 最终稿代码版本为 `0.13.0.78-dev`，代码修订为 `d6ad9b37`；本报告和 CHANGELOG 记录为后续开发版本 `0.13.0.79-dev`。
+- 质量判断：Markdown 导出的段落间距更接近正式论文稿，减少拼接草稿感。
 
 ## 2026-05-30 实验表格顺序复审
 
