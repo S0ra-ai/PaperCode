@@ -1594,6 +1594,22 @@ function abstractSummary(input: ComposeDraftPaperInput) {
     .join("")
 }
 
+function keywordsSummary(input: ComposeDraftPaperInput) {
+  if (isRankingContext(input)) {
+    return "候选论文排序；证据覆盖；排序 nDCG@3；词项匹配基线；容器复现"
+  }
+  const metric = input.result_report?.primary_metric ?? input.experiment_plan?.proposed.expected_metric
+  const keywords = [
+    "可复现研究",
+    "代码实验",
+    metric ? displayMetricName(metric) : undefined,
+    input.experiment_plan?.baselines.length ? "基线对照" : undefined,
+    input.experiment_plan?.ablations.length ? "消融实验" : undefined,
+    input.experiment_runs?.container_runs.length ? "容器复现" : undefined,
+  ].filter((item): item is string => Boolean(item))
+  return [...new Set(keywords)].slice(0, 6).join("；")
+}
+
 function rankingAbstractSummary(input: ComposeDraftPaperInput) {
   const metric = displayMetricName(input.result_report?.primary_metric ?? input.experiment_plan?.proposed.expected_metric ?? "ranking_ndcg_at_3")
   const result = input.result_report
@@ -1811,6 +1827,7 @@ function scaffoldSections(input: ComposeDraftPaperInput, claimSections: DraftSec
   const ranking = isRankingContext(input)
   return [
     buildPlainSection("abstract", "摘要", abstractSummary(input)),
+    buildPlainSection("keywords", "关键词", keywordsSummary(input)),
     buildPlainSection("introduction", "引言", introductionSummary(input)),
     buildPlainSection("research_questions", "研究问题", researchQuestionsSummary(input)),
     buildPlainSection("contributions", "主要贡献", contributionsSummary(input)),
