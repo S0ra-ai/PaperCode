@@ -1756,6 +1756,49 @@ describe("paper authoring loop", () => {
     expect(findings.find((finding) => finding.category === "missing_verified_reference")?.severity).toBe("warning")
   })
 
+  test("does not warn about formal References when a verified paper reference exists", () => {
+    const ledger = composeClaimLedger({
+      topic: "Reference readiness",
+      claims: [
+        {
+          text: "The paper reference is ready.",
+          section_id: "related-work",
+          confidence: 0.8,
+          source_ids: ["paper:arxiv:2305.12571"],
+          artifact_ids: ["artifact-literature"],
+        },
+      ],
+      now,
+    })
+    const draft = composeDraftPaper({ title: "Reference Readiness", ledger, now })
+    const findings = checkReferences({
+      ledger,
+      draft,
+      data_plan: dataPlan(),
+      result_report: resultReport(),
+      available_source_ids: ["paper:arxiv:2305.12571"],
+      source_records: [
+        {
+          schema_version: "SourceRecord.v1",
+          source_id: "paper:arxiv:2305.12571",
+          kind: "paper",
+          title: "Reproducibility Requires Consolidated Artifacts",
+          url: "https://arxiv.org/abs/2305.12571",
+          provider: "arxiv",
+          license: { status: "clear", expression: "CC BY-NC-SA 4.0" },
+          version: { value: "live-arxiv-abs-page", retrieved_at: now, published_at: "2023-05-21" },
+          verification: { status: "verified", method: "unit-test-real-arxiv-record", checked_at: now },
+          retrieved_at: now,
+          arxiv_id: "2305.12571",
+        },
+      ],
+      model_reviews: [],
+      now,
+    })
+
+    expect(findings.map((finding) => finding.category)).not.toContain("missing_verified_reference")
+  })
+
   test("runs ClaimLedger-first authoring through final export and supplementary bundles", async () => {
     const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-authoring-"))
     try {
