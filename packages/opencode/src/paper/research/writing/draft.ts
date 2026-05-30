@@ -1333,7 +1333,7 @@ function rankingContributionsSummary(input: ComposeDraftPaperInput) {
   const counts = experimentDesignCounts(input)
   const reproduction =
     counts.hostRuns > 0 || counts.containerRuns > 0
-      ? `，并用 ${counts.hostRuns} 个本机运行和 ${counts.containerRuns} 个容器运行检查复现一致性`
+      ? `，并用 ${counts.hostRuns} 条本机实验记录和 ${counts.containerRuns} 条容器实验记录检查复现一致性`
       : ""
   return joinBlocks([
     "本文贡献如下：",

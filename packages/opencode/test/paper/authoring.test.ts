@@ -1091,6 +1091,8 @@ describe("paper authoring loop", () => {
     expect(contributions).toContain("排序接口")
     expect(contributions).toContain("提出由 relevance、claim_coverage 和 recency 组成的候选论文排序评分")
     expect(contributions).toContain("构造词项匹配基线和无证据覆盖消融")
+    expect(contributions).toContain("3 条本机实验记录和 3 条容器实验记录")
+    expect(contributions).not.toContain("3 个本机运行和 3 个容器运行")
     expect(contributions).not.toContain("可审查链路")
     expect(contributions).not.toContain("实验记录统一为可审查证据")
     expect(contributions).not.toContain("正文表述")
