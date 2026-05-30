@@ -2,10 +2,22 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.88-dev
+:version       0.13.0.89-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.89-dev - 2026/05/30 (3fa3b977) [fix/mcp-tool-binding-test-isolation]
+        :brief ranking 方法章节结构化
+        :authoring
+            - fix(method): ranking 方法正文拆为“排序接口”“评分函数”“对照与复现”三级小节
+            - fix(method): 对照与复现说明移到流程框之后，避免公式、流程和实验入口挤在同一长段落
+            - test(authoring): ranking 成稿断言方法小节顺序和公式/流程/复现结构
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - note: protocol live 复审未重复触发，避免 arXiv HTTP 429 限流扩大
 
     0.13.0.88-dev - 2026/05/30 (e876880a) [fix/mcp-tool-binding-test-isolation]
         :brief 方法公式去除重复特征解释
