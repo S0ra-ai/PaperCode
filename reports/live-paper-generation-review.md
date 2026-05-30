@@ -5,6 +5,15 @@
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
 
+## 2026-05-30 相关工作与附录机械措辞复审
+
+- 协议场景复跑 `run-02674a61-5645-415b-a414-f5b37e06e13b`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-02674a61-5645-415b-a414-f5b37e06e13b\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 相关工作分类从“工具使用或智能体自动化”改为“工具调用与智能体协作”，主题线索不再输出 `多智能体研究自动化（多智能体研究自动化...）` 这类重复括注。
+- 证据与可追踪性、限制、复现清单和投稿准备度附录不再使用“正式结果”“在本次证据边界内”“本次运行登记”“终稿检查”等运行日志口吻。
+- 坏词扫描未发现 `工具使用或智能体自动化`、`多智能体研究自动化（多智能体研究自动化`、`正式结果`、`复现清单汇总正式结果`、`在本次证据边界内`、`本次运行登记`、`终稿检查`、`mock/fake/fixture/placeholder` 或内部证据 ID 残留。
+- 质量判断：终稿的相关工作和附录更接近论文式复核材料；下一轮可继续处理附录中“系统只把”“运行记录”等剩余审计词，并提高真实仓库实验叙述的领域特异性。
+
 ## 2026-05-30 前置章节论文式表达复审
 
 - 协议场景复跑 `run-df7d2d38-b766-483c-b4b5-3810f3c26ff6`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。

@@ -2,10 +2,22 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.15-dev
+:version       0.13.0.16-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.16-dev - 2026/05/30 (7f18f60e) [fix/mcp-tool-binding-test-isolation]
+        :brief 相关工作与附录机械措辞继续收敛
+        :authoring
+            - fix(related-work): 相关工作分类改为“工具调用与智能体协作”，并去除主题线索中重复的关键词括注
+            - fix(evidence): 证据与可追踪性不再输出“正式结果”，改为结果章节中的结论性表述
+            - fix(appendix): 复现清单、限制和投稿准备度附录移除“本次运行”“终稿检查”等运行日志口吻
+            - test(authoring): 增加相关工作、证据章节、限制和投稿准备度附录禁用词断言
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
     0.13.0.15-dev - 2026/05/30 (136bf987) [fix/mcp-tool-binding-test-isolation]
         :brief 摘要、引言、研究问题与相关工作去流程化
