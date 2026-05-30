@@ -800,7 +800,7 @@ describe("paper authoring loop", () => {
       topic: "Agent team paper ranking",
       claims: [
         {
-          text: "The code analysis found source ranges for rankAgentTeamPapers(src/agent-team-paper.ts:3) and scorePaper(src/agent-team-paper.ts:7). function scorePaper is exported from src/agent-team-paper.ts and returns item.relevance * 0.62 + item.claim_coverage * 0.28 + item.recency * 0.10. Experiment entrypoints include baseline:ranking-lexical, ablation:ranking-no-coverage, repro:container, and test:ranking.",
+          text: "The code analysis found source ranges for rankAgentTeamPapers(src/agent-team-paper.ts:3), scorePaper(src/agent-team-paper.ts:7), and claimLedgerCoverage(src/agent-team-paper.ts:11). function scorePaper is exported from src/agent-team-paper.ts and returns item.relevance * 0.62 + item.claim_coverage * 0.28 + item.recency * 0.10. Experiment entrypoints include baseline:ranking-lexical, ablation:ranking-no-coverage, repro:container, and test:ranking.",
           section_id: "method",
           confidence: 0.9,
           source_ids: ["material:code:agent-team-paper"],
@@ -1103,8 +1103,15 @@ describe("paper authoring loop", () => {
     expect(experimentalSetup).not.toContain("足以支撑")
     expect(experimentalSetup).not.toContain("阻断")
     expect(dataAvailability).toContain("标签由实时 arXiv 检索排序、论文排序主题匹配、来源元数据完整度和发表时间确定，不是人工相关性标注")
+    expect(dataAvailability).toContain("代码可用性")
+    expect(dataAvailability).toContain("方法实现包括 rankAgentTeamPapers(src/agent-team-paper.ts:3)、scorePaper(src/agent-team-paper.ts:7)、claimLedgerCoverage(src/agent-team-paper.ts:11)")
+    expect(dataAvailability).toContain("复现实验入口包括排名测试、词项匹配基线、无证据覆盖消融和容器复现")
+    expect(dataAvailability).toContain("代码仓库地址：未登记")
+    expect(dataAvailability).toContain("代码版本：未登记")
+    expect(dataAvailability).toContain("代码许可证：未登记")
     expect(dataAvailability).not.toContain("Deterministic validation labels")
     expect(dataAvailability).not.toContain("not human relevance ground truth")
+    expect(dataAvailability).not.toContain("当前代码工作区")
     expect(draft.markdown).toContain("以排序 nDCG@3 作为主指标")
     expect(draft.markdown).toContain("在“排序 nDCG@3”这一主指标上")
     expect(results).toContain("| 证据约束的论文排序方法 | 本文方法 | 1.0000 |")
