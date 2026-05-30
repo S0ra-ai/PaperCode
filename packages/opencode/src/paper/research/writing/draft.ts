@@ -806,12 +806,28 @@ function dataAvailabilitySummary(input: ComposeDraftPaperInput) {
     data.access_constraints.length > 0
       ? `\n\n访问约束：${data.access_constraints.map((constraint) => displayDatasetAccess(constraint.access)).join("、")}。`
       : ""
+  const codeAvailability = codeAvailabilitySummary(input)
   return [
     `本研究使用 ${data.datasets.length} 个开放数据集，数据来源、许可和核验结果如下。`,
     "",
     markdownTable(["数据集", "访问", "许可", "验证", "说明"], datasetLines),
+    codeAvailability ? `\n\n${codeAvailability}` : "",
     conflicts,
     constraints,
+  ].join("\n")
+}
+
+function codeAvailabilitySummary(input: ComposeDraftPaperInput) {
+  const ranges = methodSourceRangeSummaries(input)
+  const entrypoints = experimentEntrypointLabels(input)
+  if (ranges.length === 0 && entrypoints.length === 0) return undefined
+  const implementation = ranges.length > 0 ? `方法实现包括 ${ranges.join("、")}。` : "方法实现入口尚未登记。"
+  const reproduction = entrypoints.length > 0 ? `复现实验入口包括${chineseList(entrypoints)}。` : "复现实验入口尚未登记。"
+  return [
+    "代码可用性：",
+    implementation,
+    reproduction,
+    "代码仓库地址：未登记；代码版本：未登记；代码许可证：未登记。",
   ].join("\n")
 }
 
