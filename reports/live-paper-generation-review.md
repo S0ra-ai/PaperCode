@@ -5,6 +5,14 @@
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
 
+## 2026-05-30 关键词章节复审
+
+- 协议场景复跑 `run-208d29b9-a590-4244-99fe-fb10dffd3500`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-208d29b9-a590-4244-99fe-fb10dffd3500\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 终稿现在在 `摘要` 后、`引言` 前输出 `关键词` 章节。
+- 关键词为 `候选论文排序；证据覆盖；排序 nDCG@3；词项匹配基线；容器复现`。
+- 质量判断：生成稿补齐正式论文常见的主题索引信息，结构上更接近投稿稿件。
+
 ## 2026-05-30 参考文献作者复审
 
 - 协议场景复跑 `run-98cdc549-2a3d-4386-b132-f70a9c210b70`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
