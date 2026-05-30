@@ -2,10 +2,23 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.21-dev
+:version       0.13.0.22-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.22-dev - 2026/05/30 (f6644e9c) [fix/mcp-tool-binding-test-isolation]
+        :brief 研究问题改为候选论文排序任务三问
+        :authoring
+            - fix(rq): ranking 场景研究问题改为排序接口、特征贡献和复现一致性三问
+            - fix(rq): RQ1 聚焦 rankAgentTeamPapers 与 scorePaper 是否形成可追踪排序方法
+            - fix(rq): RQ2 聚焦完整排序方法相对词项匹配基线和无证据覆盖消融的排序 nDCG@3 差异
+            - fix(rq): RQ3 聚焦本机与容器复现环境中的排序 nDCG@3 是否一致
+            - test(authoring): 增加 ranking 研究问题领域化断言并禁止泛化证据边界 RQ
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
     0.13.0.21-dev - 2026/05/30 (374f36e1) [fix/mcp-tool-binding-test-isolation]
         :brief 基线、消融和结果解释改为实验语义表述
