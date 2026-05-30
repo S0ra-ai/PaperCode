@@ -5,6 +5,15 @@
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
 
+## 2026-05-30 正式声明区块复审
+
+- 协议场景复跑 `run-6b7c1898-a944-4198-a517-bc9d4f71d4eb`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-6b7c1898-a944-4198-a517-bc9d4f71d4eb\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 作者信息区只保留作者、机构和通信作者登记状态，不再输出“进入投稿前”或“系统不会”等产品说明。
+- 结论后、参考文献前新增 `声明` 区块，包含基金项目、作者贡献、利益冲突和伦理审批状态。
+- 本次 live benchmark 首次遇到真实 arXiv 候选集退化，已改为多组真实 arXiv 查询重试；仍退化时阻断并输出诊断，不生成替代数据。
+- 质量判断：终稿从产品生成说明进一步收敛为正式稿件形态，同时 live 验收对真实外部数据波动更稳健。
+
 ## 2026-05-30 实验表号复审
 
 - 协议场景复跑 `run-4f293653-3314-4659-a0d0-baa735e0be40`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
