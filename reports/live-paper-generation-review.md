@@ -1,9 +1,17 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.54-dev
+- project_version: 0.13.0.55-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 代码工作区状态复审
+
+- 协议场景复跑 `run-fea9a177-212e-449d-a593-f2bb8972737d`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-fea9a177-212e-449d-a593-f2bb8972737d\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 数据与代码可用性章节现在写出代码修订 `b903eb4d`。
+- 数据与代码可用性章节现在写出 `代码工作区状态：含未提交或未跟踪变更`。
+- 质量判断：代码可用性从只定位提交，推进到同时说明工作区是否含未提交状态，避免读者误以为 commit 可以完全复原当前生成上下文。
 
 ## 2026-05-30 代码修订元数据复审
 
