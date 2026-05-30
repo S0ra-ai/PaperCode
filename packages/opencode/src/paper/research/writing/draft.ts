@@ -1688,7 +1688,7 @@ function rankingAblationInterpretation(input: ComposeDraftPaperInput) {
   if (typeof ablationValue !== "number") return undefined
   const delta = report.proposed.value - ablationValue
   if (delta <= 0) return "消融分析显示，无证据覆盖消融没有低于本文方法，claim_coverage 特征在当前候选集上的贡献仍需进一步验证。"
-  return `消融分析显示，无证据覆盖消融低于本文方法，绝对差值为 ${formatMetricValue(delta)}，claim_coverage 特征在当前候选集上提供了可观测贡献。`
+  return `消融分析显示，无证据覆盖消融低于本文方法，绝对差值为 ${formatMetricValue(delta)}，claim_coverage 项与当前候选集上的排序差异相关。`
 }
 
 function resultStatisticalScopeSummary(input: ComposeDraftPaperInput) {
@@ -1798,7 +1798,7 @@ function rankingDiscussionSummary(input: ComposeDraftPaperInput, report: NonNull
     }
   }
   rows.push("词项匹配基线提供了一个低成本检索对照：如果完整排序不能超过该基线，relevance、claim_coverage 和 recency 的组合就缺少实际意义。当前结果中完整排序优于词项匹配基线，说明评分函数至少捕捉到了查询词之外的排序信号。")
-  rows.push(`无证据覆盖消融去掉 claim_coverage 后排名下降，说明 claim_coverage 对前三位排序产生直接影响。这一结果与任务设定一致：候选论文不仅要与主题相关，还需要覆盖当前研究问题中的关键断言。`)
+  rows.push("无证据覆盖消融去掉 claim_coverage 后排名下降，说明 claim_coverage 项与当前前三位排序差异相关。这一结果与任务设定一致：候选论文不仅要与主题相关，还需要覆盖当前研究问题中的关键断言。")
   rows.push(`结果仍需要保守解释。${candidateText}，且标签不是人工相关性标注，而是由实时 arXiv 检索排序、主题匹配、元数据完整度和发表时间派生；因此当前结论更适合作为自动筛选协议的证据，而不是人工文献综述质量的最终证明。`)
   if (report.reproduction.status === "passed") {
     rows.push("本机和容器结果一致，说明上述比较不是由当前宿主环境偶然触发；但复现一致性只验证同一协议可重复，不证明该评分函数已覆盖更多主题、更多候选规模或人工标注场景。")
@@ -2013,7 +2013,7 @@ function conclusionSummary(input: ComposeDraftPaperInput, ready: boolean) {
       "本文围绕 rankAgentTeamPapers 和 scorePaper 构建了候选论文排序方法，并用词项匹配基线、无证据覆盖消融和容器复现约束实验结论。",
       comparison,
       ready
-        ? "当前结果说明，证据覆盖特征能够改善当前候选集上的前三位排序；后续扩展需要更多主题、人工相关性标注和跨数据集重复实验。"
+        ? "当前结果说明，claim_coverage 项与当前候选集上的排序差异相关；后续扩展需要更多主题、人工相关性标注和跨数据集重复实验。"
         : "当前结果仍不足以支撑结论性表述；后续需要补齐来源、对照或复现记录。",
     ].join("")
   }
