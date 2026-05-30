@@ -1,9 +1,18 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.80-dev
+- project_version: 0.13.0.81-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 代码可用性小节格式复审
+
+- 协议场景复跑 `run-5be4ef2b-9e2e-432a-a529-65aeb9a6f60c`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-5be4ef2b-9e2e-432a-a529-65aeb9a6f60c\exports\bundle-final-draft-paper-final-export-db650ef6-6373-487b-809c-bd92963a3475\bundle-final-draft-paper-final-export-db650ef6-6373-487b-809c-bd92963a3475.md`。
+- 数据与代码可用性章节现在包含正式 `### 代码可用性` 小节，方法实现和复现实验入口之后保留空行再进入 `| 项目 | 内容 |` 表格。
+- 代码可用性表格后保留空行，再输出 dirty 工作区复现边界，避免边界说明被并入表格或上一段。
+- 最终稿代码版本为 `0.13.0.80-dev`，代码修订为 `22160ff8`；本报告和 CHANGELOG 记录为后续开发版本 `0.13.0.81-dev`。
+- 质量判断：代码可用性从段落标签升级为正式小节，Markdown 渲染更稳定，也更接近投稿稿件中的数据与代码声明结构。
 
 ## 2026-05-30 代码可用性表格复审
 
