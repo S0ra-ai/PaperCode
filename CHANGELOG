@@ -2,10 +2,22 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.17-dev
+:version       0.13.0.18-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.18-dev - 2026/05/30 (33198226) [fix/mcp-tool-binding-test-isolation]
+        :brief 排序实验对象与讨论改为领域特异表达
+        :authoring
+            - fix(experiment): ranking 场景下将本文方法渲染为“证据约束的论文排序方法”，不再使用代码证据驱动工作流
+            - fix(contribution): 主要贡献从源码断言中抽取 rankAgentTeamPapers、scorePaper 等排序接口，增强具体方法对象
+            - fix(discussion): 讨论解释排序 nDCG@3 在候选论文排序任务和前三位排序上的含义
+            - test(authoring): 增加排序实验对象、结果表和讨论领域特异表达断言
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
     0.13.0.17-dev - 2026/05/30 (18a17a0b) [fix/mcp-tool-binding-test-isolation]
         :brief 证据与附录残余审计口吻收敛

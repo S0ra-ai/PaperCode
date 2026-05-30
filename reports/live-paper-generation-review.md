@@ -5,6 +5,14 @@
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
 
+## 2026-05-30 排序实验领域特异性复审
+
+- 协议场景复跑 `run-613fef31-eb05-45b5-9995-072c6246ac02`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-613fef31-eb05-45b5-9995-072c6246ac02\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 实验设置和结果表把本文方法显示为“证据约束的论文排序方法”，不再显示“代码证据驱动工作流/证据驱动工作流”。
+- 主要贡献抽取 `rankAgentTeamPapers`、`scorePaper` 等排序接口，讨论说明 `排序 nDCG@3` 在候选论文排序任务和前三位排序中的含义。
+- 质量判断：这一轮从清理禁用词转向领域特异叙述，当前协议样本更接近围绕具体实验对象写出的论文。
+
 ## 2026-05-30 证据与附录审计口吻复审
 
 - 协议场景复跑 `run-51193f4e-bd0a-4dd2-b76b-6b86608ddebf`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
