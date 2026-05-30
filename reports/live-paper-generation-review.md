@@ -1,9 +1,18 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.86-dev
+- project_version: 0.13.0.87-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 排名评分公式格式复审
+
+- ranking authoring 测试已确认方法章节包含独立 `score(p)` 公式块和 `| 特征 | 权重 | 含义 |` 表格。
+- 相关回归已通过：authoring/live/metadata 定向测试和 `packages/opencode` typecheck 均通过。
+- 协议场景 live 复跑未完成：arXiv API 返回 HTTP 429 rate limit，未生成新的 protocol final Markdown，因此本项不能记为 protocol live 通过。
+- code 场景可执行到 PaperRun，但 final export 因 `reproduction_failure` 被正确阻断，只能作为运行链路阻断证据，不能替代 ranking protocol final 复审。
+- 本报告和 CHANGELOG 记录为后续开发版本 `0.13.0.87-dev`。
+- 质量判断：单元和集成 authoring 证据证明公式块输出逻辑正确；完整 protocol final 证据需要等 arXiv 限流解除后补跑。
 
 ## 2026-05-30 资源预算与降级策略表格复审
 

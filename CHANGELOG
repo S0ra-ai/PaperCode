@@ -2,10 +2,23 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.86-dev
+:version       0.13.0.87-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.87-dev - 2026/05/30 (33114fc5) [fix/mcp-tool-binding-test-isolation]
+        :brief 排名评分公式独立成块
+        :authoring
+            - fix(method): 候选论文排序评分公式从方法长段落中拆出为独立公式块
+            - fix(method): relevance、claim_coverage 和 recency 权重改为特征/权重/含义表格
+            - test(authoring): ranking 成稿断言公式块和权重表存在，并拒绝旧内联公式长句
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol (blocked: live arXiv HTTP 429 rate limit)
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario code (ran; final export blocked by reproduction_failure)
 
     0.13.0.86-dev - 2026/05/30 (941d4b52) [fix/mcp-tool-binding-test-isolation]
         :brief 资源预算与降级策略表格化
