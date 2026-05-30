@@ -985,6 +985,7 @@ describe("paper authoring loop", () => {
       now,
     })
     const contributions = markdownSection(draft.markdown, "主要贡献")
+    const authorInfo = markdownSection(draft.markdown, "作者信息")
     const abstract = markdownSection(draft.markdown, "摘要")
     const keywords = markdownSection(draft.markdown, "关键词")
     const introduction = markdownSection(draft.markdown, "引言")
@@ -1004,6 +1005,13 @@ describe("paper authoring loop", () => {
     const dataAvailability = markdownSection(draft.markdown, "数据与代码可用性")
 
     expect(draft.markdown.startsWith("# 证据约束的候选论文排序方法：显式基线、消融与容器复现")).toBe(true)
+    expect(draft.markdown.indexOf("## 作者信息")).toBeGreaterThan(draft.markdown.indexOf("# 证据约束"))
+    expect(draft.markdown.indexOf("## 作者信息")).toBeLessThan(draft.markdown.indexOf("## 摘要"))
+    expect(authorInfo).toContain("作者：未登记")
+    expect(authorInfo).toContain("机构：未登记")
+    expect(authorInfo).toContain("通信作者：未登记")
+    expect(authorInfo).not.toContain("Paper Fucker")
+    expect(authorInfo).not.toContain("OpenCode")
     expect(draft.markdown).toContain("词项匹配基线")
     expect(draft.markdown).toContain("无证据覆盖消融")
     expect(draft.markdown).toContain("容器复现")

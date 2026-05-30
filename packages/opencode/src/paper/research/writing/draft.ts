@@ -135,6 +135,16 @@ function buildPlainSection(sectionId: string, title: string, markdown: string): 
   }
 }
 
+function authorInformationSummary() {
+  return [
+    "作者：未登记",
+    "机构：未登记",
+    "通信作者：未登记",
+    "",
+    "进入投稿前需要补齐真实作者、机构、通信作者和基金信息；系统不会代填或推测作者身份。",
+  ].join("\n")
+}
+
 function claimStatusSummary(ledger: ClaimLedger) {
   const unsupported = ledger.unsupported_claim_ids.length
   const supported = ledger.entries.filter((entry) => entry.status === "supported").length
@@ -1854,6 +1864,7 @@ function scaffoldSections(input: ComposeDraftPaperInput, claimSections: DraftSec
   const includeInternalAuditAppendices = !isRankingContext(input)
   const ranking = isRankingContext(input)
   return [
+    buildPlainSection("author_information", "作者信息", authorInformationSummary()),
     buildPlainSection("abstract", "摘要", abstractSummary(input)),
     buildPlainSection("keywords", "关键词", keywordsSummary(input)),
     buildPlainSection("introduction", "引言", introductionSummary(input)),
