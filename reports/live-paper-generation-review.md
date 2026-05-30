@@ -1,9 +1,17 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.59-dev
+- project_version: 0.13.0.60-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 方法图导出兼容复审
+
+- 协议场景复跑 `run-6c33bd36-2eab-41c9-93cf-e8bb1b248d2a`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-6c33bd36-2eab-41c9-93cf-e8bb1b248d2a\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 方法章节的图 1 现在是 Markdown 结构表，不再使用 Mermaid 代码块或纯文本箭头流程。
+- LaTeX 导出中图 1 对应内容生成为 `longtable`，不再把 `flowchart LR` 当作代码块输出。
+- 质量判断：图表从 Markdown-only 可读推进到 Markdown、LaTeX、PDF 和 DOCX 导出都稳定可读，降低最终论文包格式漂移。
 
 ## 2026-05-30 方法流程图复审
 
