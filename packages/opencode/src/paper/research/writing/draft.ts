@@ -938,13 +938,13 @@ function researchQuestionsSummary(input: ComposeDraftPaperInput) {
   const metric = displayMetricName(input.result_report?.primary_metric ?? input.experiment_plan?.proposed.expected_metric ?? "primary_metric")
   if (isRankingContext(input)) {
     return joinBlocks([
-      "本文围绕候选论文排序任务提出三项可复核问题：排序接口是否可追踪，特征贡献是否可比较，复现结果是否一致。",
-      "RQ1 排序接口：rankAgentTeamPapers 和 scorePaper 是否形成可追踪的候选论文排序方法？",
-      `RQ2 特征贡献：完整排序方法相对词项匹配基线和无证据覆盖消融，在${metric} 上是否形成可比较差异？`,
-      `RQ3 复现一致性：本机与容器复现环境中的${metric} 是否一致，从而支撑结果表述？`,
+      "本文围绕候选论文排序任务提出三项研究问题：排序机制是否明确，证据覆盖特征是否带来增益，运行环境是否影响观察结果。",
+      "RQ1 排序机制：relevance、claim_coverage 和 recency 的组合能否形成明确的候选论文排序规则？",
+      `RQ2 特征贡献：引入 claim_coverage 后，相比词项匹配基线和无证据覆盖消融，在${metric} 上是否改善前三位排序？`,
+      `RQ3 环境一致性：本机和容器环境能否得到一致的${metric} 结果？`,
       ready
-        ? "当前来源、实验和复现记录已足以支撑上述问题的结论性表述；完整复核材料保留在附录。"
-        : "当前来源、实验或复现记录尚不足以支撑结论性表述，正文会把相关观察限定为探索性结果。",
+        ? "方法章节回答 RQ1，结果章节回答 RQ2，可复现性章节回答 RQ3；附录列出实现定位和复现实验入口。"
+        : "方法章节给出排序机制，结果与可复现性章节只报告已有观察；缺失实验会在限制中说明。",
     ])
   }
   const design = experimentDesignCountsText(input)
