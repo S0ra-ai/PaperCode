@@ -1743,7 +1743,7 @@ function experimentSummary(input: ComposeDraftPaperInput) {
       metrics = `${primaryMetricLocus(metric)}，本文方法与最佳基线（${displayExperimentLabel(report.best_baseline.experiment_id)}）均为 ${proposed}，说明当前协议下没有观察到性能差异。`
     } else {
       const direction = delta > 0 ? "高于" : "低于"
-      metrics = `${primaryMetricLocus(metric)}，本文方法为 ${proposed}，最佳基线（${displayExperimentLabel(report.best_baseline.experiment_id)}）为 ${baseline}，本文方法${direction}基线，绝对差值为 ${formatMetricValue(Math.abs(delta))}。`
+      metrics = `${primaryMetricLocus(metric)}，本文方法为 ${proposed}，最佳基线（${displayExperimentLabel(report.best_baseline.experiment_id)}）为 ${baseline}，本文方法的${metric} 数值${direction}最佳基线，绝对差值为 ${formatMetricValue(Math.abs(delta))}。`
     }
   } else if (report.proposed) {
     metrics = `${primaryMetricLocus(displayMetricName(report.primary_metric))}，本文方法为 ${displayMetricValue(report.primary_metric, report.proposed.value)}；由于缺少基线，对比性结论仍需保守。`
