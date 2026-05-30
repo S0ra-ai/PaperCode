@@ -386,3 +386,13 @@ Paper Fucker 当前已经具备“诚实闭环”的关键能力：没有复现�
 - 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-77d3b102-38d0-4dc4-92af-651cc46d6126\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
 - 抽查：主文未发现“本文采用证据优先流程”“每个运行”“本节比较”“实验运行记录”、旧摘要/引言模板句、工程审计词、完整机器 id、`mock/fake/fixture/placeholder`、伪来源或伪容器残留。
 - 验证：`test/paper/authoring.test.ts` 12 pass / 282 assertions；`packages/opencode` typecheck passed；`scripts/live-paper-quality-benchmark.ts --scenario protocol` passed。
+
+## 2026-05-30 证据链与实验设置论文式表达复审
+
+- 证据与可追踪性章节改为“证据链约束实验结论”，不再输出“写作阶段只把”“正式正文的候选内容”“能写出段落”等产品说明句。
+- 数据与代码可用性从键值日志改为数据集表格，字段显示为访问、许可、验证和说明；不再出现 `访问=开放`、`验证=已验证`、`数据格式=` 这类拼接文本。
+- 实验设置章节改为评价对象、主指标、基线和消融协议；不再出现“本节定义评价问题”“目标是：”“被评估方法为”“主观测指标为”等模板化表述。
+- 最新 protocol benchmark：`run-f855d24a-5a69-425b-b360-cb0535d3d6d7`，status=`succeeded`，14 个 stage 全通过，final export=`final`，failed checks 为空，Preview ready。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-f855d24a-5a69-425b-b360-cb0535d3d6d7\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 抽查：主文未发现新增禁用词、旧方法/可复现性模板句、工程审计词、完整机器 id、`mock/fake/fixture/placeholder`、伪来源或伪容器残留。
+- 验证：`test/paper/authoring.test.ts` 12 pass / 301 assertions；`packages/opencode` typecheck passed；`scripts/live-paper-quality-benchmark.ts --scenario protocol` passed。
