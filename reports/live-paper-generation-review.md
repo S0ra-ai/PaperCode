@@ -1,9 +1,19 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.97-dev
+- project_version: 0.13.0.98-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 ranking 结论章节表格复审
+
+- ranking authoring 测试已确认结论章节包含 `结论项 / 证据 / 边界` 表格。
+- 排序接口、主结果和 `claim_coverage` 观察分别绑定证据和外推边界。
+- 结论保留正文综合判断，但不再只依赖连续段落表达核心结果。
+- 相关回归已通过：authoring/live/metadata 定向测试和 `packages/opencode` typecheck 均通过。
+- 本轮未重复触发 protocol live 复审，原因是上一轮完整 protocol 复跑已被 arXiv HTTP 429 rate limit 阻断；为避免扩大限流，只记录当前 authoring 证据。
+- 本报告和 CHANGELOG 记录为后续开发版本 `0.13.0.98-dev`。
+- 质量判断：结论现在能被审稿人按条核对，核心发现、证据来源和限制边界更清楚。
 
 ## 2026-05-30 ranking 效度威胁表格复审
 
