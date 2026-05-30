@@ -5,6 +5,14 @@
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
 
+## 2026-05-30 ranking 相关工作三线索复审
+
+- 协议场景复跑 `run-7c0e15f8-b78d-4e06-81fb-75722c8dac20`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-7c0e15f8-b78d-4e06-81fb-75722c8dac20\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 相关工作改为排序解释、检索与推荐评测、复现与验证三条线索，并分别引用 `Explaining Rankings with Hidden Group Bonuses`、`Discrimination Is Generation`、`Same Ranking, Different Winner`。
+- 坏词扫描未发现 `多智能体和工具调用研究`、`工具调用与智能体协作研究`、`论文到代码执行研究`、`以 检索与推荐评测研究 为代表`、`以 复现与验证研究 为代表`、`断言证据表`、`证据记录索引`、`投稿准备度`、`通用预印本` 或英文 label policy 残留。
+- 质量判断：相关工作从上一版泛化流程分类收敛为排序论文需要的领域脉络，更接近人工协作稿。
+
 ## 2026-05-30 数据可用性标签策略复审
 
 - 协议场景复跑 `run-78ee2154-e27d-45f6-b02e-c56ceeb44637`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
