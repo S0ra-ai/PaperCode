@@ -5,6 +5,16 @@
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
 
+## 2026-05-30 live ranking benchmark 贴题性复审
+
+- 协议场景复跑 `run-42d78688-fae5-4c6c-9e09-f215375a2e1b`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-42d78688-fae5-4c6c-9e09-f215375a2e1b\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- live benchmark 查询改为 `paper recommendation ranking`，SourceEvidenceManifest 只保留 ranking/retrieval 相关 arXiv 文献。
+- 参考文献集中为 ranking/retrieval：`Explaining Rankings with Hidden Group Bonuses`、`Same Ranking, Different Winner`、`Discrimination Is Generation`。
+- 结果恢复为非退化排序对比：本文方法 `1.0000`，词项匹配基线 `0.9629`，无证据覆盖消融 `0.9316`。
+- 坏词扫描未发现 `Treatment Effect Estimation`、`Unoptimised Prompts`、`Industrial Inspection`、`Notification Composition`、`断言证据表`、`证据记录索引`、`投稿准备度` 或 `通用预印本`。
+- 质量判断：真实验收样本更贴合候选论文排序主题，并且能检验本文方法相对基线/消融的可比较差异。
+
 ## 2026-05-30 内部附录收口复审
 
 - 协议场景复跑 `run-5074dbc0-7753-4eb7-b158-62b690b2d3c8`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。

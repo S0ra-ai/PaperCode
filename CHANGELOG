@@ -2,10 +2,23 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.27-dev
+:version       0.13.0.28-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.28-dev - 2026/05/30 (0246efae) [fix/mcp-tool-binding-test-isolation]
+        :brief live ranking benchmark 使用更贴题的真实文献与非退化排序信号
+        :benchmark
+            - fix(live): protocol 场景查询从泛化多智能体自动化改为 paper recommendation ranking，减少参考文献偏题
+            - fix(live): SourceEvidenceManifest 只保留 ranking/retrieval 相关 arXiv 文献，避免无关来源进入相关工作
+            - fix(metric): live ranking dataset 增加 topic fit 与 search rank 信号，并阻断本文方法不优于基线/消融的退化样本
+            - fix(network): arXiv 429/timeout 使用更长退避，并将限流诊断标为 live source discovery block
+            - test(benchmark): 新增 live-benchmark-quality focused test 覆盖查询语义、非退化排序信号和限流诊断
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/live-benchmark-quality.test.ts test/paper/strict-acceptance.test.ts
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
     0.13.0.27-dev - 2026/05/30 (10e75517) [fix/mcp-tool-binding-test-isolation]
         :brief ranking 终稿隐藏内部审计附录
