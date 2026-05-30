@@ -186,7 +186,7 @@ function protocolReferenceSources(sources: VerifiedArxivSource[]) {
   return selected.slice(0, 5)
 }
 
-async function protocolBenchmarkWorkspace(sources: VerifiedArxivSource[], query: string, createdAt: string) {
+async function protocolBenchmarkWorkspace(dataset: ReturnType<typeof liveArxivRankingDataset>) {
   const workspace = path.join(outputDir, "workspace")
   await mkdir(path.join(workspace, "src"), { recursive: true })
   await mkdir(path.join(workspace, "experiments"), { recursive: true })
@@ -212,7 +212,7 @@ async function protocolBenchmarkWorkspace(sources: VerifiedArxivSource[], query:
   )
   await writeFile(
     path.join(workspace, "experiments", "agent-ranking-dataset.json"),
-    `${JSON.stringify(liveArxivRankingDataset(sources, query, createdAt), null, 2)}\n`,
+    `${JSON.stringify(dataset, null, 2)}\n`,
     "utf8",
   )
   await writeFile(
@@ -551,13 +551,37 @@ async function protocolSourceManifest(workspace: string, sources: VerifiedArxivS
   return "source-evidence.json"
 }
 
+const protocolBenchmarkQueries = [
+  "paper recommendation ranking",
+  "scholarly document ranking benchmark",
+  "scientific literature retrieval evaluation",
+  "academic paper recommendation benchmark",
+]
+
+async function protocolBenchmarkDataset(createdAt: string, topics: string[]) {
+  const failures: string[] = []
+  for (const query of protocolBenchmarkQueries) {
+    try {
+      const sources = await discoverVerifiedArxivSources(query, createdAt, topics)
+      const dataset = liveArxivRankingDataset(sources, query, createdAt)
+      assertNoBenchmarkSourceResidue(dataset, "LiveArxivRankingDataset.v1")
+      return { query, sources, dataset }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      failures.push(`${query}: ${message}`)
+      if (/live arXiv source discovery blocked by rate limit/i.test(message)) break
+    }
+  }
+  throw new Error(
+    `Protocol scenario could not build a non-degenerate live ranking benchmark from authorized arXiv queries. ${failures.join(" | ")}`,
+  )
+}
+
 async function protocolBenchmarkInputs() {
-  const query = "paper recommendation ranking"
   const createdAt = new Date().toISOString()
   const topics = ["学术论文排序", "信息检索评测", "基线", "消融", "容器复现"]
-  const sources = await discoverVerifiedArxivSources(query, createdAt, topics)
-  assertNoBenchmarkSourceResidue(liveArxivRankingDataset(sources, query, createdAt), "LiveArxivRankingDataset.v1")
-  const workspace = await protocolBenchmarkWorkspace(sources, query, createdAt)
+  const { sources, dataset } = await protocolBenchmarkDataset(createdAt, topics)
+  const workspace = await protocolBenchmarkWorkspace(dataset)
   const sourceManifestPath = await protocolSourceManifest(workspace, protocolReferenceSources(sources), createdAt)
   return { workspace, sourceManifestPath, datasetPath: "experiments/agent-ranking-dataset.json" }
 }

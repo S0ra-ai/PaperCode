@@ -140,8 +140,15 @@ function authorInformationSummary() {
     "作者：未登记",
     "机构：未登记",
     "通信作者：未登记",
-    "",
-    "进入投稿前需要补齐真实作者、机构、通信作者和基金信息；系统不会代填或推测作者身份。",
+  ].join("\n")
+}
+
+function declarationsSummary() {
+  return [
+    "基金项目：未登记。",
+    "作者贡献：未登记。",
+    "利益冲突：未登记。",
+    "伦理审批：未登记；若研究涉及人类受试者、动物实验、个人敏感数据或受限数据，投稿前必须补齐伦理审批和数据授权信息。",
   ].join("\n")
 }
 
@@ -1892,6 +1899,7 @@ function scaffoldSections(input: ComposeDraftPaperInput, claimSections: DraftSec
       "结论",
       conclusionSummary(input, ready),
     ),
+    buildPlainSection("declarations", "声明", declarationsSummary()),
     buildPlainSection("references", "参考文献", referencesSummary(input)),
     buildPlainSection("appendix_evidence_trace", appendixEvidenceTraceTitle(input), implementationTraceSummary(input)),
     buildPlainSection(
