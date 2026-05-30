@@ -2,10 +2,25 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.43-dev
+:version       0.13.0.44-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.44-dev - 2026/05/30 (ff9ca4ca) [fix/mcp-tool-binding-test-isolation]
+        :brief 生成稿增加正式声明区块并增强 live benchmark 退化重试
+        :authoring
+            - fix(metadata): 作者信息区移除进入投稿前和系统不会等产品说明口吻
+            - fix(declarations): 结论后、参考文献前增加基金项目、作者贡献、利益冲突和伦理审批声明
+            - test(authoring): 增加声明区块位置、内容和品牌残留禁用断言
+        :benchmark
+            - fix(live): protocol live benchmark 遇到退化候选集时使用多组真实 arXiv 查询重试
+            - fix(live): 候选集仍退化时输出 non-degenerate live ranking benchmark 诊断，不生成替代数据
+            - test(live): 增加多查询重试和退化诊断静态断言
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
     0.13.0.43-dev - 2026/05/30 (d7ed0181) [fix/mcp-tool-binding-test-isolation]
         :brief 生成稿实验表格增加连续表号
