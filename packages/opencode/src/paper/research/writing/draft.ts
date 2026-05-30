@@ -936,6 +936,73 @@ function methodFocusSummary(input: ComposeDraftPaperInput, fallback?: string, st
   return fallback
 }
 
+function parsedScoreFeatures(input: ComposeDraftPaperInput) {
+  const text = methodEvidenceText(input)
+  const combines = text.match(/scorePaper\s+combines\s+(.+?)(?:[.。]|$)/i)
+  if (combines?.[1]) {
+    return combines[1]
+      .split(/\s*,\s*|\s+and\s+|、|和/)
+      .map((item) => item.trim().replace(/^and\s+/i, ""))
+      .filter(Boolean)
+      .slice(0, 5)
+  }
+  const scorePaperIndex = text.search(/scorePaper\b/i)
+  if (scorePaperIndex < 0) return []
+  const scorePaperText = text.slice(scorePaperIndex)
+  if (!/\breturns\b/i.test(scorePaperText)) return []
+  return [...scorePaperText.matchAll(/\bitem\.([A-Za-z0-9_]+)/g)].map((match) => match[1]).filter(Boolean).slice(0, 5)
+}
+
+function readableAsciiList(values: string[]) {
+  if (values.length <= 1) return values[0] ?? ""
+  if (values.length === 2) return `${values[0]} 和 ${values[1]}`
+  return `${values.slice(0, -1).join("、")} 和 ${values.at(-1)}`
+}
+
+function methodSourceRangeSummaries(input: ComposeDraftPaperInput) {
+  const matches = methodEvidenceText(input).matchAll(/\b([a-z][A-Za-z0-9]*)\(([^)]*:[0-9]+)\)/g)
+  return [...matches].map((match) => `${match[1]}(${match[2]})`).slice(0, 5)
+}
+
+function methodEntrypointRoles(input: ComposeDraftPaperInput) {
+  const entrypoints = experimentEntrypointLabels(input)
+  if (entrypoints.length === 0) return undefined
+  return `${chineseList(entrypoints)}分别约束本文方法、词项基线、证据覆盖贡献和环境可重复性`
+}
+
+function rankingMethodNarrative(input: ComposeDraftPaperInput) {
+  const metric = input.result_report?.primary_metric ?? input.experiment_plan?.proposed.expected_metric
+  if (!isRankingMetric(metric)) return undefined
+  const symbols = methodSymbolNames(methodEvidenceText(input))
+  if (!symbols.includes("rankAgentTeamPapers") || !symbols.includes("scorePaper")) return undefined
+  const features = parsedScoreFeatures(input)
+  const featureSentence =
+    features.length > 0
+      ? `scorePaper 把 ${readableAsciiList(features)} 压缩为可比较分数。`
+      : "scorePaper 作为统一评分入口输出可比较分数。"
+  const entrypointSentence = methodEntrypointRoles(input)
+  return [
+    "候选论文排序方法由 rankAgentTeamPapers 和 scorePaper 两个核心接口组成。",
+    "rankAgentTeamPapers 接收候选论文集合，并按 scorePaper 输出的得分进行降序排列。",
+    featureSentence,
+    entrypointSentence ? `${entrypointSentence}。` : undefined,
+  ]
+    .filter(Boolean)
+    .join("")
+}
+
+function methodEvidenceNote(input: ComposeDraftPaperInput) {
+  const preferred = input.ledger.entries.find((entry) => entry.section_id === "method" && entry.status === "supported")
+  const fallback = input.ledger.entries.find((entry) => entry.section_id === "method")
+  const entry = preferred ?? fallback
+  const ranges = methodSourceRangeSummaries(input)
+  const entrypoints = experimentEntrypointLabels(input)
+  if (!entry && ranges.length === 0 && entrypoints.length === 0) return undefined
+  const rangeText = ranges.length > 0 ? `源码证据记录保留了 ${ranges.join("、")} 等接口位置` : "源码证据记录保留了接口位置"
+  const entrypointText = entrypoints.length > 0 ? `，并登记${chineseList(entrypoints)}等可运行入口` : ""
+  return `${rangeText}${entrypointText}。${entry ? citationText(entry) : ""}`.trim()
+}
+
 function contributionsSummary(input: ComposeDraftPaperInput) {
   const metricId = input.result_report?.primary_metric ?? input.experiment_plan?.proposed.expected_metric
   const metric = displayMetricName(metricId ?? "primary_metric")
@@ -1283,9 +1350,13 @@ function relatedWorkSummary(input: ComposeDraftPaperInput) {
 
 function methodSummary(input: ComposeDraftPaperInput, claimSections: DraftSection[]) {
   const methodClaims = claimSections.find((section) => section.section_id === "method")?.markdown
+  const rankingNarrative = rankingMethodNarrative(input)
   return [
-    "本文的方法由三部分组成：材料边界定义、代码证据抽取和可复现实验约束。材料边界先限定可讨论对象，代码分析再绑定接口、源码范围和实验入口，最后用基线、消融和容器复现约束结果表述。",
-    methodClaims
+    rankingNarrative ??
+      "本文的方法由三部分组成：材料边界定义、代码证据抽取和可复现实验约束。材料边界先限定可讨论对象，代码分析再绑定接口、源码范围和实验入口，最后用基线、消融和容器复现约束结果表述。",
+    rankingNarrative
+      ? methodEvidenceNote(input)
+      : methodClaims
       ? `代码理解阶段抽取的方法接口、源码范围和可运行入口如下：\n\n${methodClaims}`
       : "当前运行没有生成可展开的方法断言；这通常意味着输入材料不足或证据台账仍需补充。",
     artifactSummary(input),

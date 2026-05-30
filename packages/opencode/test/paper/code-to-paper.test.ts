@@ -90,6 +90,7 @@ describe("code-to-paper analysis", () => {
           expect.objectContaining({
             name: "rankPapers",
             kind: "function",
+            summary: expect.stringContaining("returns papers.toSorted((left, right) => right.score - left.score)"),
             source_range: { path: "src/ranker.ts", start_line: 3, end_line: 5 },
           }),
           expect.objectContaining({
