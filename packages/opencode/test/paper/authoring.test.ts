@@ -792,7 +792,7 @@ describe("paper authoring loop", () => {
       topic: "Agent team paper ranking",
       claims: [
         {
-          text: "The code analysis found source ranges for rankAgentTeamPapers. Experiment entrypoints include baseline:ranking-lexical, ablation:ranking-no-coverage, repro:container, and test:ranking.",
+          text: "The code analysis found source ranges for rankAgentTeamPapers and scorePaper. Experiment entrypoints include baseline:ranking-lexical, ablation:ranking-no-coverage, repro:container, and test:ranking.",
           section_id: "method",
           confidence: 0.9,
           source_ids: ["material:code:agent-team-paper"],
@@ -877,6 +877,9 @@ describe("paper authoring loop", () => {
       now,
     })
     const contributions = markdownSection(draft.markdown, "主要贡献")
+    const abstract = markdownSection(draft.markdown, "摘要")
+    const introduction = markdownSection(draft.markdown, "引言")
+    const relatedWork = markdownSection(draft.markdown, "相关工作")
     const experimentalSetup = markdownSection(draft.markdown, "实验设置")
     const results = markdownSection(draft.markdown, "结果")
     const discussion = markdownSection(draft.markdown, "讨论")
@@ -885,8 +888,16 @@ describe("paper authoring loop", () => {
     expect(draft.markdown).toContain("无证据覆盖消融")
     expect(draft.markdown).toContain("容器复现")
     expect(draft.markdown).toContain("排名测试")
+    expect(abstract).toContain("rankAgentTeamPapers 和 scorePaper")
+    expect(abstract).toContain("候选论文排序接口")
+    expect(abstract).toContain("排名测试、词项匹配基线、无证据覆盖消融和容器复现")
+    expect(introduction).toContain("候选论文排序接口")
+    expect(introduction).toContain("排名测试")
+    expect(relatedWork).toContain("候选论文排序任务")
+    expect(relatedWork).toContain("rankAgentTeamPapers")
     expect(contributions).toContain("rankAgentTeamPapers")
     expect(contributions).toContain("排序接口")
+    expect(contributions).toContain("把 rankAgentTeamPapers 和 scorePaper 构成的候选论文排序接口、来源和实验记录统一为可审查证据")
     expect(experimentalSetup).toContain("本文方法的评价对象为“证据约束的论文排序方法”")
     expect(draft.markdown).toContain("以排序 nDCG@3 作为主指标")
     expect(draft.markdown).toContain("在“排序 nDCG@3”这一主指标上")
@@ -895,6 +906,13 @@ describe("paper authoring loop", () => {
     expect(discussion).toContain("前三位排序")
     expect(draft.markdown).not.toContain("代码证据驱动工作流")
     expect(draft.markdown).not.toContain("证据驱动工作流")
+    expect(draft.markdown).not.toContain("方法证据显示：对提交代码库")
+    expect(draft.markdown).not.toContain("方法部分的证据边界为：对提交代码库")
+    expect(draft.markdown).not.toContain("把相关工作边界放在代码证据上：对提交代码库")
+    expect(contributions).not.toContain("把rank")
+    expect(contributions).not.toContain("核心方法断言为：对提交代码库")
+    expect(draft.markdown).not.toContain("bun run 排名测试")
+    expect(draft.markdown).not.toContain("bun run 词项匹配基线")
     expect(draft.markdown).not.toContain("主指标 排序")
     expect(draft.markdown).not.toContain("在 排序")
     expect(draft.markdown).not.toContain("类型检查通过状态可以证明代码可运行")

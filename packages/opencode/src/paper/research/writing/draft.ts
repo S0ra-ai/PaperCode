@@ -875,17 +875,76 @@ function contributionEvidenceSubject(input: ComposeDraftPaperInput, methodClaim?
     .join(" ")
   const symbols = methodSymbolNames(methodText)
   if (isRankingMetric(metric)) {
-    return symbols.length > 0 ? `${symbols.slice(0, 2).join("、")} 等排序接口` : "论文排序接口"
+    if (symbols.length >= 2) return `${codeSymbolPhrase(symbols)} 构成的候选论文排序接口`
+    return symbols.length === 1 ? `${symbols[0]} 构成的候选论文排序接口` : "论文排序接口"
   }
   return symbols.length > 0 ? `${symbols.slice(0, 2).join("、")} 等代码接口` : "源码范围"
 }
 
+function methodEvidenceText(input: ComposeDraftPaperInput) {
+  return input.ledger.entries
+    .filter((entry) => entry.section_id === "method")
+    .map((entry) => entry.text)
+    .join(" ")
+}
+
+function codeSymbolPhrase(symbols: string[]) {
+  if (symbols.length === 0) return ""
+  if (symbols.length === 1) return symbols[0]
+  return `${symbols[0]} 和 ${symbols[1]}`
+}
+
+function commandPurposeLabel(command?: { argv: string[] }) {
+  const raw = command?.argv.at(-1)
+  const token = raw?.trim().split(/\s+/).at(-1)
+  if (!token || /^(proposed|baseline|ablation)$/i.test(token)) return undefined
+  return token ? paperProseText(token) : undefined
+}
+
+function experimentEntrypointLabels(input: ComposeDraftPaperInput) {
+  const labels = [
+    commandPurposeLabel(input.experiment_plan?.proposed.command),
+    ...(input.experiment_plan?.baselines.map((item) => commandPurposeLabel(item.command)) ?? []),
+    ...(input.experiment_plan?.ablations.map((item) => commandPurposeLabel(item.command)) ?? []),
+    ...(input.experiment_runs?.container_runs.map((item) => commandPurposeLabel(item.command)) ?? []),
+    ...(input.experiment_protocol?.entries.map((item) => commandPurposeLabel(item.command)) ?? []),
+  ].filter((item): item is string => Boolean(item))
+  return [...new Set(labels)].slice(0, 4)
+}
+
+function chineseList(values: string[]) {
+  if (values.length <= 1) return values[0] ?? ""
+  if (values.length === 2) return `${values[0]}和${values[1]}`
+  return `${values.slice(0, -1).join("、")}和${values.at(-1)}`
+}
+
+function methodFocusSummary(input: ComposeDraftPaperInput, fallback?: string, style: "abstract" | "introduction" | "related" = "abstract") {
+  const metric = input.result_report?.primary_metric ?? input.experiment_plan?.proposed.expected_metric
+  const symbols = methodSymbolNames(methodEvidenceText(input))
+  if (isRankingMetric(metric) && symbols.length > 0) {
+    const symbolPhrase = codeSymbolPhrase(symbols)
+    const entrypoints = experimentEntrypointLabels(input)
+    const entrypointText = entrypoints.length > 0 ? `，并以${chineseList(entrypoints)}约束排序结果` : ""
+    if (style === "introduction") {
+      return `本文聚焦 ${symbolPhrase} 构成的候选论文排序接口${entrypointText}；正文围绕排序接口、实验入口、基线/消融和结论边界展开。`
+    }
+    if (style === "related") {
+      return `与既有工具使用、智能体协作或实验复现研究相比，本研究把相关工作边界放在候选论文排序任务上：${symbolPhrase} 提供可复核排序接口${entrypointText}。`
+    }
+    return `本文方法围绕 ${symbolPhrase} 构成的候选论文排序接口展开${entrypointText}。`
+  }
+  return fallback
+}
+
 function contributionsSummary(input: ComposeDraftPaperInput) {
-  const metric = displayMetricName(input.result_report?.primary_metric ?? input.experiment_plan?.proposed.expected_metric ?? "primary_metric")
+  const metricId = input.result_report?.primary_metric ?? input.experiment_plan?.proposed.expected_metric
+  const metric = displayMetricName(metricId ?? "primary_metric")
   const methodClaim = firstClaimText(input, "method")
   const resultClaim = firstClaimText(input, "results")
   const counts = experimentDesignCounts(input)
   const evidenceSubject = contributionEvidenceSubject(input, methodClaim)
+  const evidenceObject = /^[A-Za-z0-9_]/.test(evidenceSubject) ? ` ${evidenceSubject}` : evidenceSubject
+  const methodClaimClause = methodClaim && !isRankingMetric(metricId) ? `；核心方法断言为：${trimTerminalPunctuation(methodClaim)}` : ""
   const runEvidence =
     counts.hostRuns > 0 || counts.containerRuns > 0
       ? `，并记录 ${counts.hostRuns} 个本机运行和 ${counts.containerRuns} 个容器运行`
@@ -893,7 +952,7 @@ function contributionsSummary(input: ComposeDraftPaperInput) {
   return joinBlocks([
     "本文贡献集中在三条可审查链路：",
     [
-      `1. 第一项贡献是把${evidenceSubject}、来源和实验记录统一为可审查证据${methodClaim ? `；核心方法断言为：${trimTerminalPunctuation(methodClaim)}` : ""}。`,
+      `1. 第一项贡献是把${evidenceObject}、来源和实验记录统一为可审查证据${methodClaimClause}。`,
       `2. 第二项贡献是将本文方法与 ${counts.baseline} 个基线、${counts.ablation} 个消融放入同一评价协议，并${primaryMetricPhrase(metric).replace("主指标", "主比较指标")}${resultClaim ? `；核心结果断言为：${trimTerminalPunctuation(resultClaim)}` : ""}。`,
       `3. 第三项贡献是用本机/容器一致性检查约束结果表述${runEvidence}，避免把未复现或只在单一环境中成立的观察写成结论性表述。`,
     ].join("\n"),
@@ -1173,7 +1232,7 @@ function abstractSummary(input: ComposeDraftPaperInput) {
   return [
     "计算机类论文若缺少可追踪代码证据、显式对照和隔离复现，容易把缺少依据的过程记录误写成研究结论。",
     `本文以“${input.title}”为对象，检验材料、实验协议和结果断言能否形成同一条可复核证据链。`,
-    methodClaim ? `方法证据显示：${methodClaim}` : undefined,
+    methodClaim ? `方法证据显示：${methodFocusSummary(input, methodClaim, "abstract")}` : undefined,
     resultClaim ? `结果证据显示：${resultClaim}` : undefined,
     metric,
     status,
@@ -1188,10 +1247,11 @@ function abstractSummary(input: ComposeDraftPaperInput) {
 function introductionSummary(input: ComposeDraftPaperInput) {
   const methodClaim = firstClaimText(input, "method")
   const resultEvidence = resultEvidenceText(input)
+  const methodFocus = methodFocusSummary(input, methodClaim, "introduction")
   return [
     `面向计算机类论文，正文完整性必须与代码依据、实验协议、运行结果和复现边界同时成立。${sourceSummary(input)}`,
-    methodClaim
-      ? `方法部分的证据边界为：${methodClaim}这要求正文围绕代码接口、源码范围、实验入口和结论边界展开。`
+    methodFocus
+      ? methodFocus
       : "本文首先整理来源和可验证断言，再根据实验计划执行或校验结果，最后用证据链完整性约束结论强度。",
     resultEvidence
       ? `结果部分需要解释的是：${resultEvidence}因此，本文需要同时呈现基线、消融、主指标和复现一致性，避免把缺少对照的观察写成贡献。`
@@ -1207,10 +1267,11 @@ function introductionSummary(input: ComposeDraftPaperInput) {
 function relatedWorkSummary(input: ComposeDraftPaperInput) {
   const methodClaim = firstClaimText(input, "method")
   const resultEvidence = resultEvidenceText(input)
+  const methodFocus = methodFocusSummary(input, methodClaim, "related")
   return joinBlocks([
     literatureEvidenceSummary(input),
-    methodClaim
-      ? `与既有工具使用、智能体协作或实验复现研究相比，本研究把相关工作边界放在代码证据上：${methodClaim}`
+    methodFocus
+      ? methodFocus
       : "相关工作通常强调检索、规划或长文生成；本文关注的是代码证据、实验日志和复现环境如何共同约束论文正文。",
     resultEvidence
       ? `与只报告单次运行结果的研究相比，本文把结果断言限定在显式对照内：${resultEvidence}`
