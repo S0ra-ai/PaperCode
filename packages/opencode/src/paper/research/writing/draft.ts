@@ -14,6 +14,7 @@ export type CodeAvailabilityMetadata = {
   repository_url?: string
   version?: string
   commit_hash?: string
+  worktree_dirty?: boolean
   license?: string
 }
 
@@ -834,13 +835,16 @@ function codeAvailabilitySummary(input: ComposeDraftPaperInput) {
   const repository = input.code_metadata?.repository_url ?? "未登记"
   const version = input.code_metadata?.version ?? "未登记"
   const revision = input.code_metadata?.commit_hash
+  const worktreeDirty = input.code_metadata?.worktree_dirty
   const license = input.code_metadata?.license ?? "未登记"
   const revisionText = revision ? `；代码修订：${revision}` : ""
+  const worktreeText =
+    typeof worktreeDirty === "boolean" ? `；代码工作区状态：${worktreeDirty ? "含未提交或未跟踪变更" : "干净"}` : ""
   return [
     "代码可用性：",
     implementation,
     reproduction,
-    `代码仓库地址：${repository}；代码版本：${version}${revisionText}；代码许可证：${license}。`,
+    `代码仓库地址：${repository}；代码版本：${version}${revisionText}${worktreeText}；代码许可证：${license}。`,
   ].join("\n")
 }
 
