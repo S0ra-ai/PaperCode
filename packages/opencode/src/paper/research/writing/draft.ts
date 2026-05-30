@@ -146,11 +146,14 @@ function buildPlainSection(sectionId: string, title: string, markdown: string): 
 }
 
 function authorInformationSummary() {
-  return [
-    "作者：本次材料未提供",
-    "机构：本次材料未提供",
-    "通信作者：本次材料未提供",
-  ].join("\n")
+  return markdownTable(
+    ["项目", "内容"],
+    [
+      ["作者", "本次材料未提供"],
+      ["机构", "本次材料未提供"],
+      ["通信作者", "本次材料未提供"],
+    ],
+  )
 }
 
 function declarationsSummary() {
