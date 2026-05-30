@@ -1,9 +1,17 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.61-dev
+- project_version: 0.13.0.62-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 方法结构框编号复审
+
+- 协议场景复跑 `run-d04bc17a-661f-4a01-8928-4e1a024ed899`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-d04bc17a-661f-4a01-8928-4e1a024ed899\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 方法章节的结构表标题现在是 `框 1 候选论文排序与复现实验流程`。
+- 结果章节仍保留 `表 1 汇总本文方法、基线和消融在主指标、运行状态和容器复现上的结果`。
+- 质量判断：结构表不再误称为图，正文编号和导出形态一致，减少读者对图表类型的误解。
 
 ## 2026-05-30 数据可用性开放性复审
 
