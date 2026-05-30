@@ -2,10 +2,23 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.59-dev
+:version       0.13.0.60-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.60-dev - 2026/05/30 (b60949ce) [fix/mcp-tool-binding-test-isolation]
+        :brief 方法图改为导出友好结构表
+        :authoring
+            - fix(figure): ranking 方法图从 Mermaid 代码块改为 Markdown 结构表
+            - fix(export): 方法图表格前后增加空行，确保 Pandoc LaTeX 导出为 longtable
+            - test(authoring): ranking 成稿断言图表不包含 Mermaid 或纯文本箭头流程
+            - test(paper): code metadata 集成测试清理临时目录时容忍 Windows EBUSY 锁
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
     0.13.0.59-dev - 2026/05/30 (a76a6503) [fix/mcp-tool-binding-test-isolation]
         :brief 方法流程图改为可渲染结构图
