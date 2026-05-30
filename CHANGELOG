@@ -2,10 +2,23 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.25-dev
+:version       0.13.0.26-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.26-dev - 2026/05/30 (a90da790) [fix/mcp-tool-binding-test-isolation]
+        :brief 可复现性正文表格去除命令和日志列
+        :authoring
+            - fix(repro): 可复现性本机/容器比较表去除容器命令列，只保留状态、主指标和差值
+            - fix(repro): 实验执行摘要表去除命令和输出列，只保留环境、实验、角色、状态、指标和耗时
+            - fix(repro): 去除正文中的见运行日志和审查材料表述，避免主文变成运行记录清单
+            - refactor(authoring): 移除不再使用的 compactOutput 输出摘要 helper
+            - test(authoring): 增加可复现性章节禁用命令、输出、见运行日志、审查材料和容器命令的断言
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
     0.13.0.25-dev - 2026/05/30 (fb294890) [fix/mcp-tool-binding-test-isolation]
         :brief ranking 相关工作改为论文式综述段落
