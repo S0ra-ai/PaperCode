@@ -1291,21 +1291,19 @@ function rankingMethodFigureSummary(input: ComposeDraftPaperInput) {
     entrypoints.length > 0
       ? `对照分支包括${chineseList(entrypoints)}。`
       : "对照分支包括基线、消融和复现检查。"
-  const branchNodes = [
-    entrypoints.includes("词项匹配基线") ? "  baseline[词项匹配基线] -. 对照 .-> metric" : undefined,
-    entrypoints.includes("无证据覆盖消融") ? "  ablation[无证据覆盖消融] -. 消融 .-> metric" : undefined,
-    entrypoints.includes("容器复现") ? "  repro[容器复现] -. 复现 .-> metric" : undefined,
-  ].filter(Boolean)
+  const branchText = entrypoints.length > 0 ? chineseList(entrypoints) : "基线、消融和复现检查"
   return [
     "图 1 候选论文排序与复现实验流程。",
-    "```mermaid",
-    "flowchart LR",
-    "  candidates[候选论文集合] --> features[特征计算<br/>" + featureText + "]",
-    "  features --> score[scorePaper 评分]",
-    "  score --> rank[rankAgentTeamPapers 排序]",
-    `  rank --> metric[${metric} 评测]`,
-    ...branchNodes,
-    "```",
+    "",
+    "| 环节 | 论文角色 | 输出 |",
+    "| --- | --- | --- |",
+    "| 候选论文集合 | 输入 | 待排序论文列表 |",
+    `| 特征计算 | ${featureText} | 候选级特征向量 |`,
+    "| scorePaper 评分 | 加权评分函数 | 候选分数 |",
+    "| rankAgentTeamPapers 排序 | 排序接口 | 候选顺序 |",
+    `| ${metric} 评测 | 主指标 | 排序质量 |`,
+    "",
+    `分支检查：${branchText}。`,
     branch,
   ].join("\n")
 }
