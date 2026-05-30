@@ -1688,7 +1688,7 @@ function rankingAblationInterpretation(input: ComposeDraftPaperInput) {
   if (typeof ablationValue !== "number") return undefined
   const delta = report.proposed.value - ablationValue
   if (delta <= 0) return "消融分析显示，无证据覆盖消融没有低于本文方法，claim_coverage 特征在当前候选集上的贡献仍需进一步验证。"
-  return `消融分析显示，无证据覆盖消融与本文方法的绝对差值为 ${formatMetricValue(delta)}，claim_coverage 特征在当前候选集上提供了可观测贡献。`
+  return `消融分析显示，无证据覆盖消融低于本文方法，绝对差值为 ${formatMetricValue(delta)}，claim_coverage 特征在当前候选集上提供了可观测贡献。`
 }
 
 function resultStatisticalScopeSummary(input: ComposeDraftPaperInput) {
