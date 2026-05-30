@@ -820,7 +820,7 @@ function dataAvailabilitySummary(input: ComposeDraftPaperInput) {
       : ""
   const codeAvailability = codeAvailabilitySummary(input)
   return [
-    `本研究使用 ${data.datasets.length} 个开放数据集，数据来源、许可和核验结果如下。`,
+    `本研究使用 ${data.datasets.length} 个可核验数据集，数据来源、许可和核验结果如下。`,
     "",
     markdownTable(["数据集", "访问", "许可", "验证", "说明"], datasetLines),
     codeAvailability ? `\n\n${codeAvailability}` : "",
