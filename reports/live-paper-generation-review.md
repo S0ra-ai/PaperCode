@@ -1,9 +1,18 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.52-dev
+- project_version: 0.13.0.53-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 资源记录边界复审
+
+- 协议场景复跑 `run-21e49559-ee4d-4f71-a0b5-bd71da985fd6`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-21e49559-ee4d-4f71-a0b5-bd71da985fd6\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 可复现性章节新增 `资源记录边界`。
+- 终稿明确当前实验记录包含耗时。
+- 终稿明确未登记峰值内存和 GPU 用量，不能把资源结论外推到未记录维度。
+- 质量判断：可复现性章节从只列耗时表，推进到说明资源记录覆盖范围，更接近代码实验论文资源声明。
 
 ## 2026-05-30 代码可用性元数据复审
 
