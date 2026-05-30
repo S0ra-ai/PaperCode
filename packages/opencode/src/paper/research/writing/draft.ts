@@ -1549,6 +1549,20 @@ function rankingCandidateCount(input: ComposeDraftPaperInput) {
   return undefined
 }
 
+function rankingDatasetScopeSummary(input: ComposeDraftPaperInput) {
+  const candidateCount = rankingCandidateCount(input)
+  const diagnostics = input.data_plan?.datasets.flatMap((dataset) => dataset.verification.diagnostics ?? []) ?? []
+  const hasLiveArxivLabelPolicy = diagnostics.some((diagnostic) =>
+    /^label_policy:Deterministic validation labels derived from live arXiv search rank/i.test(diagnostic.trim()),
+  )
+  if (!candidateCount && !hasLiveArxivLabelPolicy) return undefined
+  const countText = candidateCount ? `候选数 ${candidateCount}` : "候选集规模有限"
+  const labelText = hasLiveArxivLabelPolicy
+    ? "标签由实时 arXiv 检索排序、主题匹配、元数据完整度和发表时间派生，不是人工相关性标注"
+    : "标签策略限定了结果解释范围"
+  return `评测集${countText}，${labelText}。`
+}
+
 function rankingNoCoverageAblationValue(input: ComposeDraftPaperInput, metric: string) {
   const runs = input.experiment_runs
   if (!runs) return undefined
@@ -1781,6 +1795,7 @@ function rankingAbstractSummary(input: ComposeDraftPaperInput) {
       ? `结果显示，本文方法达到 ${proposed}，词项匹配基线为 ${baseline}${delta}。`
       : resultMetricSummary(input),
     ablation ? ablation.replace(/消融分析显示，/, "") : undefined,
+    rankingDatasetScopeSummary(input),
     input.result_report?.reproduction.status === "passed"
       ? "容器复现通过，说明当前实验协议在受控环境中可以重复。"
       : "容器复现尚未通过，因此相关结果应保持为探索性观察。",
