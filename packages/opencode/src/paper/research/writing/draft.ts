@@ -461,6 +461,40 @@ function literatureRoleTags(source: LiteratureMap["sources"][number]) {
   return [...new Set(tags)].slice(0, 3)
 }
 
+function rankingLiteratureRoleScore(source: LiteratureMap["sources"][number], role: "explanation" | "retrieval" | "validation") {
+  const title = source.title.toLowerCase()
+  const text = `${source.title} ${source.abstract ?? ""} ${(source.topics ?? []).join(" ")}`.toLowerCase()
+  let score = 0
+  if (role === "explanation") {
+    if (/explain|hidden group|ranking explanation|ranking outcome/.test(text)) score += 3
+    if (/ranking|rankings|rank/.test(title)) score += 1
+  }
+  if (role === "retrieval") {
+    if (/retrieval|recommendation|recommender|document indexing|tokenizer perspective|scientific literature/.test(text)) score += 3
+    if (/ranking and retrieval|retrieval|recommendation/.test(title)) score += 2
+  }
+  if (role === "validation") {
+    if (/benchmark|evaluation|baseline|ablation|scoring target|different winner|reproduc|validat/.test(text)) score += 3
+    if (/benchmark|winner|evaluation/.test(title)) score += 1
+  }
+  return score
+}
+
+function rankingRoleRepresentatives(
+  sources: LiteratureMap["sources"],
+  role: "explanation" | "retrieval" | "validation",
+  usedTitles: Set<string>,
+  limit = 2,
+) {
+  const ranked = sources
+    .map((source, index) => ({ source, index, score: rankingLiteratureRoleScore(source, role) }))
+    .filter((item) => item.score > 0 && !usedTitles.has(literatureDisplayTitle(item.source)))
+    .sort((left, right) => right.score - left.score || left.index - right.index)
+  const selected = ranked.slice(0, limit).map((item) => literatureDisplayTitle(item.source))
+  for (const title of selected) usedTitles.add(title)
+  return selected
+}
+
 function literatureClusterSummary(cluster: LiteratureMap["clusters"][number]) {
   const label = literatureTopicText(cluster.label)
   const keywords = cluster.keywords
@@ -573,30 +607,23 @@ function rankingRelatedWorkSummary(input: ComposeDraftPaperInput) {
   const map = input.literature_map
   if (!map || map.sources.length === 0) {
     return joinBlocks([
-      "候选论文排序任务与三类研究相邻：工具调用与智能体协作研究关注如何组织多步推理和外部工具，复现与验证研究关注实验结果能否被重复，论文到代码执行研究关注论文方法、代码入口和运行环境之间的连接。",
+      "候选论文排序任务与三类研究相邻：排序解释研究关注排序结果为何发生变化，检索与推荐评测研究关注候选集合和相关性标注，复现与验证研究关注实验结果能否被重复。",
       "本文与这些方向的交点在于排序结果必须同时有接口定义、显式对照和复现记录支撑；缺少任一环节时，候选论文排序只能作为探索性结果呈现。",
     ])
   }
   const verified = map.sources.filter((source) => source.verification.status === "verified")
   const selected = (verified.length > 0 ? verified : map.sources).slice(0, 5)
-  const agentWorks = selected
-    .filter((source) => literatureRoleTags(source).includes("工具调用与智能体协作"))
-    .map(literatureDisplayTitle)
-    .slice(0, 2)
-  const reproducibilityWorks = selected
-    .filter((source) => literatureRoleTags(source).includes("实验复现与验证风险"))
-    .map(literatureDisplayTitle)
-    .slice(0, 2)
-  const executionWorks = selected
-    .filter((source) => literatureRoleTags(source).includes("论文到代码执行链路"))
-    .map(literatureDisplayTitle)
-    .slice(0, 2)
-  const named = (values: string[], fallback: string) => (values.length > 0 ? values.join("、") : fallback)
+  const usedTitles = new Set<string>()
+  const explanationWorks = rankingRoleRepresentatives(selected, "explanation", usedTitles, 1)
+  const retrievalWorks = rankingRoleRepresentatives(selected, "retrieval", usedTitles, 1)
+  const reproducibilityWorks = rankingRoleRepresentatives(selected, "validation", usedTitles)
+  const representativeLead = (label: string, values: string[]) =>
+    values.length > 0 ? `${label}以 ${values.join("、")} 为代表，强调` : `${label}强调`
   return joinBlocks([
-    `候选论文排序任务连接了三条研究线索。工具调用与智能体协作研究以 ${named(agentWorks, "多智能体和工具调用研究")} 为代表，强调模型如何分解任务、调用工具并组织中间状态；这类研究为 rankAgentTeamPapers 这类排序接口提供了协作式研究流程背景。`,
-    `复现与验证研究以 ${named(reproducibilityWorks, "实验复现和验证研究")} 为代表，强调基线、消融、环境隔离和重复执行对结果解释的重要性；本文据此把排序 nDCG@3、词项匹配基线、无证据覆盖消融和容器复现放入同一评价协议。`,
-    `论文到代码执行研究以 ${named(executionWorks, "论文到代码执行研究")} 为代表，关注论文方法与可运行代码之间的落差；本文的差异在于不直接评价整篇论文能否转成代码，而是把候选论文排序本身作为研究对象，要求 scorePaper 的特征、排序结果和复现状态同时可复核。`,
-    "因此，本文的相关工作边界不是一般的长文生成或工具调用，而是候选论文排序方法如何在显式对照和可复现执行约束下形成可比较结果。",
+    `候选论文排序任务连接了三条研究线索。${representativeLead("排序解释研究", explanationWorks)}排序结果如何因评分因素、群体约束或解释目标而变化；这类研究为 rankAgentTeamPapers 的结果解释提供背景。`,
+    `${representativeLead("检索与推荐评测研究", retrievalWorks)}候选集合、相关性标注和检索目标如何影响排序质量；本文据此把排序 nDCG@3、词项匹配基线和候选论文集合放入同一评价协议。`,
+    `${representativeLead("复现与验证研究", reproducibilityWorks)}基线、消融、评价目标和重复执行对结果解释的重要性；本文据此加入无证据覆盖消融和容器复现。`,
+    "因此，本文的相关工作边界不是一般的长文生成或工具调用，而是候选论文排序方法如何在显式对照、检索评测和可复现执行约束下形成可比较结果。",
   ])
 }
 

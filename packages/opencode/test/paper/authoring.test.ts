@@ -979,9 +979,11 @@ describe("paper authoring loop", () => {
     expect(researchQuestions).toContain("RQ3 复现一致性：本机与容器复现环境中的排序 nDCG@3 是否一致，从而支撑结果表述？")
     expect(relatedWork).toContain("候选论文排序任务")
     expect(relatedWork).toContain("rankAgentTeamPapers")
-    expect(relatedWork).toContain("工具调用与智能体协作研究")
+    expect(relatedWork).toContain("排序解释研究")
+    expect(relatedWork).toContain("检索与推荐评测研究")
     expect(relatedWork).toContain("复现与验证研究")
-    expect(relatedWork).toContain("论文到代码执行研究")
+    expect(relatedWork).not.toContain("工具调用与智能体协作研究")
+    expect(relatedWork).not.toContain("论文到代码执行研究")
     expect(relatedWork).not.toContain("本文纳入")
     expect(relatedWork).not.toContain("这些文献形成")
     expect(relatedWork).not.toContain("当前相关工作没有登记阻断性缺口")
@@ -990,6 +992,8 @@ describe("paper authoring loop", () => {
     expect(relatedWork).not.toContain("已核验英文摘要；作用")
     expect(relatedWork).not.toContain("| 相关工作 |")
     expect(relatedWork).not.toContain("等工作 为代表")
+    expect(relatedWork).not.toContain("以 检索与推荐评测研究 为代表")
+    expect(relatedWork).not.toContain("以 复现与验证研究 为代表")
     expect(contributions).toContain("rankAgentTeamPapers")
     expect(contributions).toContain("排序接口")
     expect(contributions).toContain("把 rankAgentTeamPapers 和 scorePaper 构成的候选论文排序接口、来源和实验记录统一为可审查证据")
@@ -1059,6 +1063,108 @@ describe("paper authoring loop", () => {
     expect(draft.markdown).not.toContain("证据记录索引")
     expect(draft.markdown).not.toContain("结构化证据")
     expect(draft.markdown).not.toContain("处理 | 来源类型")
+  })
+
+  test("renders ranking related work with ranking and retrieval representatives", () => {
+    const ledger = composeClaimLedger({
+      topic: "Agent team paper ranking",
+      claims: [
+        {
+          text: "The ranking method compares rankAgentTeamPapers against lexical and coverage ablations.",
+          section_id: "method",
+          confidence: 0.9,
+          source_ids: ["material:code:agent-team-paper"],
+          artifact_ids: ["artifact-codebase-map"],
+        },
+      ],
+      now,
+    })
+    const draft = composeDraftPaper({
+      title: "Agent Team Paper Ranking",
+      ledger,
+      result_report: { ...resultReport(), primary_metric: "ranking_ndcg_at_3" },
+      experiment_plan: {
+        objective: "Evaluate paper ranking.",
+        metrics: [{ name: "ranking_ndcg_at_3", direction: "higher_better", primary: true }],
+        proposed: {
+          experiment_id: "proposed",
+          label: "Code-grounded paper_fucker workflow",
+          role: "proposed",
+          dataset_ids: [],
+          command: { argv: ["bun", "run", "test:ranking"] },
+          expected_metric: "ranking_ndcg_at_3",
+          rationale: "Main workflow under evaluation.",
+        },
+        baselines: [],
+        ablations: [],
+        resource_budget: { max_wall_time_seconds: 3600, max_memory_mb: 8192, max_gpu_hours: 0 },
+        downgrade_policy: [],
+      },
+      literature_map: {
+        schema_version: "LiteratureMap.v1",
+        topic: "paper recommendation ranking",
+        created_at: now,
+        sources: [
+          {
+            schema_version: "SourceRecord.v1",
+            source_id: "paper:ranking-hidden-bonus",
+            kind: "paper",
+            title: "Explaining Rankings with Hidden Group Bonuses",
+            url: "https://arxiv.org/abs/2605.29444",
+            provider: "arxiv",
+            license: { status: "clear", expression: "CC BY 4.0" },
+            version: { value: "v1", retrieved_at: now, published_at: "2026-05-28" },
+            verification: { status: "verified", method: "unit-test", checked_at: now },
+            topics: ["ranking", "explanation", "evaluation"],
+            abstract: "Studies how hidden group bonuses change ranking outcomes and ranking explanations.",
+            retrieved_at: now,
+            arxiv_id: "2605.29444",
+          },
+          {
+            schema_version: "SourceRecord.v1",
+            source_id: "paper:same-ranking",
+            kind: "paper",
+            title: "Same Ranking, Different Winner: How Scoring Targets Shape LLM Memory Benchmarks",
+            url: "https://arxiv.org/abs/2605.24060",
+            provider: "arxiv",
+            license: { status: "clear", expression: "CC BY 4.0" },
+            version: { value: "v1", retrieved_at: now, published_at: "2026-05-22" },
+            verification: { status: "verified", method: "unit-test", checked_at: now },
+            topics: ["ranking", "benchmark", "evaluation"],
+            abstract: "Compares scoring targets in ranking benchmarks and shows that evaluation choices can change winners.",
+            retrieved_at: now,
+            arxiv_id: "2605.24060",
+          },
+          {
+            schema_version: "SourceRecord.v1",
+            source_id: "paper:ranking-retrieval",
+            kind: "paper",
+            title: "Discrimination Is Generation: Unifying Ranking and Retrieval from a Tokenizer Perspective",
+            url: "https://arxiv.org/abs/2605.14853",
+            provider: "arxiv",
+            license: { status: "clear", expression: "CC BY 4.0" },
+            version: { value: "v1", retrieved_at: now, published_at: "2026-05-14" },
+            verification: { status: "verified", method: "unit-test", checked_at: now },
+            topics: ["ranking", "retrieval", "recommendation"],
+            abstract: "Unifies ranking and retrieval and discusses ranking from a retrieval perspective.",
+            retrieved_at: now,
+            arxiv_id: "2605.14853",
+          },
+        ],
+        clusters: [],
+        summary: { total_sources: 3, verified_sources: 3, open_license_sources: 3 },
+        diagnostics: { verification_failures: [], gaps: [] },
+      },
+      now,
+    })
+    const relatedWork = markdownSection(draft.markdown, "相关工作")
+
+    expect(relatedWork).toContain("排序解释研究以 Explaining Rankings with Hidden Group Bonuses")
+    expect(relatedWork).toContain("检索与推荐评测研究以 Discrimination Is Generation")
+    expect(relatedWork).toContain("复现与验证研究以 Same Ranking, Different Winner")
+    expect(relatedWork).not.toContain("多智能体和工具调用研究")
+    expect(relatedWork).not.toContain("工具调用与智能体协作研究")
+    expect(relatedWork).not.toContain("论文到代码执行研究")
   })
 
   test("labels unverified literature seeds as candidates rather than prior work", () => {
