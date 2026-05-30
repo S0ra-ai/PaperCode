@@ -127,6 +127,7 @@ function displaySubmissionProfile(value: string) {
 
 function appendProfileAppendix(markdown: string, input: RunPaperAuthoringLoopInput) {
   const profile = input.target_profile ?? "generic-preprint"
+  if (profile === "generic-preprint") return markdown
   const datasetCount = input.data_plan.datasets.length
   const failedChecks = [
     ...input.ledger.unsupported_claim_ids.map((claimId) => `unsupported claim ${claimId}`),

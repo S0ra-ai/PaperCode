@@ -370,8 +370,8 @@ function countedSummary(values: string[], label: (value: string) => string, unit
   return [...counts.entries()].map(([key, count]) => `${key} ${count} ${unit}`).join("、")
 }
 
-function evidenceCountSummary(artifactIds: string[]) {
-  return artifactIds.length > 0 ? `结构化证据 ${artifactIds.length} 条` : "无"
+function evidenceCountSummary(artifactIds: string[], label = "结构化证据") {
+  return artifactIds.length > 0 ? `${label} ${artifactIds.length} 条` : "无"
 }
 
 function displayClaimAction(value: string) {
@@ -1145,12 +1145,13 @@ function implementationTraceSummary(input: ComposeDraftPaperInput) {
   const artifactIds = [...new Set(input.ledger.entries.flatMap((entry) => entry.artifact_ids))]
   const sourceIds = claimSourceIds(input)
   const evidenceSources = evidenceSourceIds(input)
+  const evidenceLabel = isRankingContext(input) ? "复核材料" : "结构化证据"
   const claimRows = input.ledger.entries.slice(0, 10).map((entry, index) => [
     `断言 ${index + 1}`,
     displaySectionID(entry.section_id),
     entry.status === "supported" ? "已支持" : "待补证据",
     countedSummary(entry.source_ids, sourceKindLabel, "个"),
-    evidenceCountSummary(entry.artifact_ids),
+    evidenceCountSummary(entry.artifact_ids, evidenceLabel),
   ])
   return joinBlocks([
     "证据追踪表汇总来源、断言和复核记录，用于说明正文结论如何连接到材料、实验协议和运行结果。",
@@ -1553,6 +1554,7 @@ function scaffoldSections(input: ComposeDraftPaperInput, claimSections: DraftSec
   const artifactIds = [...new Set(input.ledger.entries.flatMap((entry) => entry.artifact_ids))]
   const unsupported = input.ledger.unsupported_claim_ids
   const ready = finalReady(input)
+  const includeInternalAuditAppendices = !isRankingContext(input)
   return [
     buildPlainSection("abstract", "摘要", abstractSummary(input)),
     buildPlainSection("introduction", "引言", introductionSummary(input)),
@@ -1600,25 +1602,29 @@ function scaffoldSections(input: ComposeDraftPaperInput, claimSections: DraftSec
     ...(experimentStarterPackSummary(input)
       ? [buildPlainSection("appendix_experiment_protocol_starter_pack", "附录 D：实验启动包", experimentStarterPackSummary(input)!)]
       : []),
-    buildPlainSection(
-      "appendix_claim_ledger",
-      "附录 E：断言证据表",
-      input.ledger.entries.length > 0
-        ? markdownTable(["断言摘要", "状态", "处理", "来源类型", "证据概况"], input.ledger.entries.map(evidenceSummary))
-        : "无 claim ledger 条目。请先补充可验证 claim。",
-    ),
-    buildPlainSection(
-      "appendix_artifacts",
-      "附录 F：证据记录索引",
-      artifactIds.length > 0
-        ? [
-            `证据记录索引用于定位复核材料。本研究共有 ${artifactIds.length} 条复核记录；为保持正文可读，详细路径、哈希和渲染状态不在正文展开。`,
-            "复核时建议先核对三类记录：代码分析是否覆盖论文声称的方法入口，实验执行是否包含本文方法、基线、消融和复现记录，证据清单是否能连接正文结论与来源材料。若这些记录缺失，正文中的相应结论应降级为待验证观察。",
-            "附录只保留复核所需的摘要；完整材料由结构化记录承担。",
-            "若复核发现证据数量与主文结论不一致，应优先修正实验协议或降低结论强度，而不是补写没有来源支撑的段落、表格、图片或图表内容。",
-          ].join("\n\n")
-        : "当前没有复核记录。",
-    ),
+    ...(includeInternalAuditAppendices
+      ? [
+          buildPlainSection(
+            "appendix_claim_ledger",
+            "附录 E：断言证据表",
+            input.ledger.entries.length > 0
+              ? markdownTable(["断言摘要", "状态", "处理", "来源类型", "证据概况"], input.ledger.entries.map(evidenceSummary))
+              : "无 claim ledger 条目。请先补充可验证 claim。",
+          ),
+          buildPlainSection(
+            "appendix_artifacts",
+            "附录 F：证据记录索引",
+            artifactIds.length > 0
+              ? [
+                  `证据记录索引用于定位复核材料。本研究共有 ${artifactIds.length} 条复核记录；为保持正文可读，详细路径、哈希和渲染状态不在正文展开。`,
+                  "复核时建议先核对三类记录：代码分析是否覆盖论文声称的方法入口，实验执行是否包含本文方法、基线、消融和复现记录，证据清单是否能连接正文结论与来源材料。若这些记录缺失，正文中的相应结论应降级为待验证观察。",
+                  "附录只保留复核所需的摘要；完整材料由结构化记录承担。",
+                  "若复核发现证据数量与主文结论不一致，应优先修正实验协议或降低结论强度，而不是补写没有来源支撑的段落、表格、图片或图表内容。",
+                ].join("\n\n")
+              : "当前没有复核记录。",
+          ),
+        ]
+      : []),
   ]
 }
 
