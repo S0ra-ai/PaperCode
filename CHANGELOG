@@ -2,10 +2,21 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.84-dev
+:version       0.13.0.85-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.85-dev - 2026/05/30 (d45899ea) [fix/mcp-tool-binding-test-isolation]
+        :brief 实验设置表格补齐标题间距
+        :authoring
+            - fix(markdown): 实验设置章节的指标、基线和消融三级标题后补齐空行
+            - test(authoring): ranking 成稿断言三级标题与表格之间存在空行，并拒绝标题紧贴表格
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
     0.13.0.84-dev - 2026/05/30 (b7b23103) [fix/mcp-tool-binding-test-isolation]
         :brief 实验环境声明改为表格

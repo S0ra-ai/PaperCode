@@ -1,9 +1,18 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.84-dev
+- project_version: 0.13.0.85-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 实验设置表格间距复审
+
+- 协议场景复跑 `run-34d16a5f-1676-4fcc-895b-f90d9653f3e7`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-34d16a5f-1676-4fcc-895b-f90d9653f3e7\exports\bundle-final-draft-paper-final-export-4c0cd20a-685b-4ed4-8607-4c7ce0017ca3\bundle-final-draft-paper-final-export-4c0cd20a-685b-4ed4-8607-4c7ce0017ca3.md`。
+- 实验设置章节中的 `### 指标`、`### 基线` 和 `### 消融` 后现在保留空行，再进入对应表格。
+- 最终稿不再出现三级标题紧贴表格的 `### 指标\n| 指标 | ...`、`### 基线\n| 编号 | ...` 或 `### 消融\n| 编号 | ...` 结构。
+- 最终稿代码版本为 `0.13.0.84-dev`，代码修订为 `d45899ea`；本报告和 CHANGELOG 记录为后续开发版本 `0.13.0.85-dev`。
+- 质量判断：实验设置章节的 Markdown 更稳定，标题层级和表格边界更接近正式稿件排版。
 
 ## 2026-05-30 实验环境声明表格复审
 
