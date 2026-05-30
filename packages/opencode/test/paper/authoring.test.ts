@@ -1139,6 +1139,8 @@ describe("paper authoring loop", () => {
     expect(experimentalSetup).not.toContain("足以支撑")
     expect(experimentalSetup).not.toContain("阻断")
     expect(dataAvailability).toContain("标签由实时 arXiv 检索排序、论文排序主题匹配、来源元数据完整度和发表时间确定，不是人工相关性标注")
+    expect(dataAvailability).toContain("| agent-ranking-dataset.json | 本地可核验 | 工作区授权本地数据集 | 已验证 |")
+    expect(dataAvailability).not.toContain("| agent-ranking-dataset.json | 开放 |")
     expect(dataAvailability).toContain("代码可用性")
     expect(dataAvailability).toContain("方法实现包括 rankAgentTeamPapers(src/agent-team-paper.ts:3)、scorePaper(src/agent-team-paper.ts:7)、claimLedgerCoverage(src/agent-team-paper.ts:11)")
     expect(dataAvailability).toContain("复现实验入口包括排名测试、词项匹配基线、无证据覆盖消融和容器复现")
