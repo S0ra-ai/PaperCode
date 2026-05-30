@@ -1351,6 +1351,25 @@ function methodSourceRangeSummaries(input: ComposeDraftPaperInput) {
   return [...matches].map((match) => `${match[1]}(${match[2]})`).slice(0, 5)
 }
 
+function methodSourceRangeRows(input: ComposeDraftPaperInput) {
+  const roleByName = new Map([
+    ["rankAgentTeamPapers", "候选论文排序入口"],
+    ["scorePaper", "排序评分函数"],
+    ["claimLedgerCoverage", "证据覆盖特征来源"],
+  ])
+  const seen = new Set<string>()
+  const rows: string[][] = []
+  for (const match of methodEvidenceText(input).matchAll(/\b([a-z][A-Za-z0-9]*)\(([^)]*:[0-9]+)\)/g)) {
+    const name = match[1] ?? ""
+    const location = match[2] ?? ""
+    if (!name || !location || seen.has(`${name}:${location}`)) continue
+    seen.add(`${name}:${location}`)
+    rows.push([name, location, roleByName.get(name) ?? "方法实现定位"])
+    if (rows.length >= 8) break
+  }
+  return rows
+}
+
 function methodEntrypointRoles(input: ComposeDraftPaperInput) {
   const entrypoints = experimentEntrypointLabels(input)
   if (entrypoints.length === 0) return undefined
@@ -1542,16 +1561,20 @@ function implementationTraceSummary(input: ComposeDraftPaperInput) {
   const evidenceSources = evidenceSourceIds(input)
   const evidenceLabel = isRankingContext(input) ? "复核材料" : "结构化证据"
   if (isRankingContext(input)) {
+    const sourceRangeRows = methodSourceRangeRows(input)
     const rows = input.ledger.entries.slice(0, 10).map((entry) => [
       entry.section_id === "method" ? "排序方法实现" : displaySectionID(entry.section_id),
       displaySectionID(entry.section_id),
       countedSummary(entry.source_ids, sourceKindLabel, "个"),
-      evidenceCountSummary(entry.artifact_ids, evidenceLabel),
+      entry.section_id === "method" && sourceRangeRows.length > 0 ? "见下方实现定位表" : evidenceCountSummary(entry.artifact_ids, evidenceLabel),
     ])
     return joinBlocks([
       "本附录汇总主文所依赖的材料类型、实现位置和复核材料，便于读者定位排序接口与实验入口。",
       `本研究共有 ${evidenceSources.length} 个可核验材料来源，其中 ${sourceIds.length} 个来源直接支撑正文方法或结果表述。`,
       rows.length > 0 ? markdownTable(["条目", "对应章节", "材料类型", "复核材料"], rows) : "当前没有可列出的材料定位条目。",
+      sourceRangeRows.length > 0
+        ? joinBlocks(["### 实现定位", markdownTable(["实现点", "定位", "复核用途"], sourceRangeRows)])
+        : undefined,
       "这些材料用于定位方法实现、数据来源和实验复现路径；结果解释仍以主文结果与讨论为准。",
     ])
   }
