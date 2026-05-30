@@ -172,7 +172,7 @@ function primaryMetricLocus(metric: string) {
 function constructValidityExample(metricId: string, metricLabel: string) {
   if (metricId === "typecheck_pass") return "例如类型检查通过状态可以证明代码可运行，却不能证明算法效果更好。"
   if (metricId === "ranking_ndcg_at_3") {
-    return "例如排序 nDCG@3 可以评价当前候选排序协议，却不能单独证明系统在其他数据集、人工相关性标注或真实投稿任务中同样有效。"
+    return "例如排序 nDCG@3 可以评价当前候选排序协议，却不能单独证明方法在其他数据集、人工相关性标注或开放研究任务中同样有效。"
   }
   if (metricId === "container_reproduction_pass") return "例如容器复现通过状态可以证明当前环境声明可重放，却不能单独证明算法在更多任务上泛化有效。"
   const subject = /^[A-Za-z0-9]/.test(metricLabel) ? `${metricLabel} ` : metricLabel
@@ -1010,13 +1010,13 @@ function threatsToValiditySummary(input: ComposeDraftPaperInput) {
   const metricId = report?.primary_metric ?? "primary_metric"
   const metric = displayMetricName(metricId)
   return joinBlocks([
-    `构念效度：本文当前使用的主指标是从协议或运行结果中登记的指标，能够验证执行链路，但不一定覆盖真实学术贡献。${constructValidityExample(metricId, metric)}`,
+    `构念效度：主指标来自实验协议和运行结果，能够评价当前任务的执行质量，但不能覆盖方法价值的全部维度。${constructValidityExample(metricId, metric)}`,
     report?.best_baseline && report.proposed
       ? `内部效度：本文方法与最佳基线${primaryMetricLocus(metric)}的差异为 ${formatMetricValue(report.proposed.value - report.best_baseline.value)}。如果差异很小，正文不能把流程完整性写成性能优势；如果差异很大，也需要检查随机种子、数据划分和脚本等价性。`
-      : "内部效度：当前缺少本文方法与基线的可比较结果，因此不能声称方法优于对照。",
-    "外部效度：当前结论只覆盖用户提交的工作区、登记的数据/代码材料和当前实验环境。要扩展到更一般的计算机类论文场景，还需要更多任务、更多仓库、更多基线和更严格的人工审稿。",
-    "复现效度：容器复现能降低环境差异，但不能自动证明依赖来源永久可用。审查材料应保存命令、镜像、摘要、输出摘要和证据清单，必要时还需要锁定数据版本。",
-    "自动化效度：自动写作链路不能替代研究者对问题价值、实验设计合理性和投稿伦理的最终判断。可疑结论仍应标为阻断或需要人工审查。",
+      : "内部效度：缺少本文方法与基线的可比较结果时，正文不能声称方法优于对照。",
+    "外部效度：结论范围限于本研究的工作区、数据/代码材料和实验环境。要扩展到更一般的计算机类论文场景，还需要更多任务、更多仓库、更多基线和更严格的复核协议。",
+    "复现效度：容器复现能降低环境差异，但不能证明依赖来源永久可用。复核材料需要保存命令、镜像、摘要、输出摘要和证据清单，必要时还需要锁定数据版本。",
+    "解释效度：代码证据、显式对照和容器复现提高了结论的可复核性，但不能单独证明研究问题已经覆盖所有应用场景。正文解释应把性能差异、证据范围和任务规模同时呈现。",
   ])
 }
 
@@ -1078,13 +1078,13 @@ function experimentSummary(input: ComposeDraftPaperInput) {
 function discussionSummary(input: ComposeDraftPaperInput) {
   const report = input.result_report
   if (!report) {
-    return "当前还没有足够实验结果支撑讨论。下一步应先补齐主指标、基线、消融和复现环境，再扩大结论范围。"
+    return "讨论部分需要以主指标、基线、消融和复现环境为依据；缺少这些记录时，结论范围应限于研究设计。"
   }
   const rows: string[] = []
   if (report.proposed && report.best_baseline) {
     const delta = report.proposed.value - report.best_baseline.value
     if (Math.abs(delta) < 1e-9) {
-      rows.push("主指标与最佳基线持平，因此本文不能声称本文方法在性能上优于基线；可成立的结论是当前方法与对照在该复现指标上表现一致，并且实验链路保留了可复核证据。")
+      rows.push("主指标与最佳基线持平，因此本文不能声称本文方法在性能上优于基线；较稳妥的解释是，当前方法与对照在该复现指标上表现一致，并且实验链路保留了可复核证据。")
     } else if (delta > 0) {
       rows.push("主指标高于最佳基线，但该结论仍需要结合任务规模、数据代表性和容器复现稳定性解释，避免把单次运行写成泛化结论。")
     } else {
@@ -1092,12 +1092,12 @@ function discussionSummary(input: ComposeDraftPaperInput) {
     }
   }
   if (report.reproduction.status === "passed") {
-    rows.push("容器复现通过说明当前证据链可以被重新执行；这降低了复核成本，也让失败原因能定位到具体脚本、输出摘要或环境差异。")
+    rows.push("代码证据、显式对照和容器复现共同说明，当前结果不是孤立脚本输出，而是可以沿材料、命令和指标回溯的观察。")
   } else {
-    rows.push("复现检查尚未通过，所有实验结果只能作为探索性证据。流程应继续保留待修复草稿，并把缺口转化为可执行修复清单。")
+    rows.push("复现检查尚未通过时，所有实验结果只能作为探索性证据；正文应保留限制说明，并把缺失环节转化为可执行修复清单。")
   }
-  rows.push("本节的重点不是夸大自动化能力，而是说明结果解释必须受证据、实验协议和复现状态约束。")
-  rows.push("对于需要写代码跑实验的论文，这个边界尤其重要：自动化系统可以帮助发现入口脚本、组织对照组、记录容器复现结果，但不能替研究者决定任务是否有学术价值，也不能把类型检查通过、单一数据集通过或单次脚本通过解释成普遍性能优势。后续投稿前仍需要人工审查研究问题、实验充分性和引用支撑。")
+  rows.push("结果解释必须与证据边界保持一致；代码证据决定方法表述能否成立，显式对照决定性能差异能否比较，容器复现决定观察是否能在受控环境中重复出现。")
+  rows.push("对于需要写代码跑实验的论文，关键不在于生成完整文本，而在于让评价指标、运行环境和结论强度保持一致。类型检查通过、单一数据集通过或单次脚本通过都不能直接解释成普遍性能优势。")
   return rows.join("\n\n")
 }
 
@@ -1242,20 +1242,20 @@ function scaffoldSections(input: ComposeDraftPaperInput, claimSections: DraftSec
       "限制与待修复项",
       unsupported.length > 0
         ? [
-            "当前必须修复以下阻断项后才能生成终稿；在修复前终稿输出必须保持阻断：",
+            "以下阻断项限制了结论强度；修复前，相关表述应保留为待验证观察：",
             "",
             ...unsupported.map((claimId) => `- ${claimId}: 补充证据、降低表述强度，或从终稿断言中移除。`),
           ].join("\n")
         : ready
-          ? "当前没有未支持断言，引用、许可、代码证据和复现检查已满足正式结论条件。"
-          : "当前没有未支持断言；仍需通过引用、许可、代码证据和复现检查。",
+          ? "在本次证据边界内，引用、许可、代码证据和复现检查未发现阻断项；结论仍限于现有材料、数据集、协议和运行环境。"
+          : "在本次证据边界内，断言虽未出现直接冲突，但引用、许可、代码证据或复现检查仍需补齐。",
     ),
     buildPlainSection(
       "conclusion",
       "结论",
       ready
-        ? "本文结果已绑定来源、断言、引用与复现证据，可作为正式审查对象。后续若要进入真实投稿，还需要替换示例协议、扩大评测数据并补充领域相关基线。"
-        : "本草稿是可审查工作包的中间产物。只有当来源、断言、引用、license 与 reproduction gate 全部通过后，才能升级为终稿。",
+        ? "本文表明，将材料来源、代码证据、显式对照和容器复现纳入同一证据链，可以降低计算机类论文中结果断言与实验依据脱节的风险。在现有任务范围内，本文方法的结论由来源、实验协议和复现记录共同支撑；进一步扩展仍需要更多数据集、更多领域基线和更长周期的重复实验。"
+        : "本文仍处于证据不足状态；只有当来源、断言、引用、许可和复现检查形成闭环后，相关结论才应从探索性观察提升为正式结果。",
     ),
     buildPlainSection("references", "参考文献", referencesSummary(input)),
     buildPlainSection("appendix_evidence_trace", "附录 A：证据追踪", implementationTraceSummary(input)),
