@@ -1834,6 +1834,40 @@ describe("paper authoring loop", () => {
     )
   })
 
+  test("blocks claim sources when the source record manifest is missing", () => {
+    const ledger = composeClaimLedger({
+      topic: "Source manifest readiness",
+      claims: [
+        {
+          text: "The claim names a source id without a manifest.",
+          section_id: "method",
+          confidence: 0.8,
+          source_ids: ["paper:missing-manifest"],
+          artifact_ids: ["artifact-method"],
+        },
+      ],
+      now,
+    })
+    const draft = composeDraftPaper({ title: "Source Manifest Readiness", ledger, now })
+    const findings = checkSourceAuthenticity({
+      ledger,
+      draft,
+      data_plan: dataPlan(),
+      result_report: resultReport(),
+      available_source_ids: ["paper:missing-manifest"],
+      model_reviews: [],
+      now,
+    })
+
+    expect(findings).toContainEqual(
+      expect.objectContaining({
+        category: "missing_source_record",
+        severity: "blocker",
+        source_ids: ["paper:missing-manifest"],
+      }),
+    )
+  })
+
   test("runs ClaimLedger-first authoring through final export and supplementary bundles", async () => {
     const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-authoring-"))
     try {
