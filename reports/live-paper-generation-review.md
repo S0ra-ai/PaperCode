@@ -1,9 +1,18 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.92-dev
+- project_version: 0.13.0.93-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 ranking 研究问题表格复审
+
+- ranking authoring 测试已确认研究问题章节包含 `编号 / 关注点 / 问题 / 回答章节` 表格。
+- RQ1、RQ2 和 RQ3 不再以冒号长行堆叠，读者可以直接扫描每个问题对应的方法、结果和可复现性章节。
+- 相关回归已通过：authoring/live/metadata 定向测试和 `packages/opencode` typecheck 均通过。
+- 本轮未重复触发 protocol live 复审，原因是上一轮完整 protocol 复跑已被 arXiv HTTP 429 rate limit 阻断；为避免扩大限流，只记录当前 authoring 证据。
+- 本报告和 CHANGELOG 记录为后续开发版本 `0.13.0.93-dev`。
+- 质量判断：研究问题从散文列表改为结构化表格，主文导航更清楚。
 
 ## 2026-05-30 参考文献时间戳复审
 
