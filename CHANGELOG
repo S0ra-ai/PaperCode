@@ -2,10 +2,22 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.57-dev
+:version       0.13.0.58-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.58-dev - 2026/05/30 (a6c6071b) [fix/mcp-tool-binding-test-isolation]
+        :brief 作者与声明缺失信息改为论文模板口吻
+        :authoring
+            - fix(manuscript): 作者信息缺失时输出待补充而不是未登记
+            - fix(manuscript): 基金、贡献、利益冲突和伦理审批声明缺失时输出待补充
+            - test(authoring): ranking 论文成稿覆盖作者信息和声明占位文案
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
     0.13.0.57-dev - 2026/05/30 (c8fe4431) [fix/mcp-tool-binding-test-isolation]
         :brief 代码可用性补充代码包名

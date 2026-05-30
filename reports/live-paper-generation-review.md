@@ -1,9 +1,17 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.57-dev
+- project_version: 0.13.0.58-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 作者与声明占位文案复审
+
+- 协议场景复跑 `run-7f9755a5-7fae-4515-8ff3-4add5f9d79be`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-7f9755a5-7fae-4515-8ff3-4add5f9d79be\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 作者信息现在输出作者、机构和通信作者为 `待补充`。
+- 声明章节现在输出基金项目、作者贡献、利益冲突和伦理审批为 `待补充`。
+- 质量判断：成稿不再把作者与声明缺失信息写成内部台账式 `未登记`，更接近正式论文模板中的待填字段。
 
 ## 2026-05-30 代码包名元数据复审
 
