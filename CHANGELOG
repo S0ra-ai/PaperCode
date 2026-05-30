@@ -2,10 +2,23 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.22-dev
+:version       0.13.0.23-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.23-dev - 2026/05/30 (782b54a2) [fix/mcp-tool-binding-test-isolation]
+        :brief 实验证据措辞去除工程审计残留
+        :authoring
+            - fix(wording): 将可追踪来源改为可核验材料来源，减少运行审计口吻
+            - fix(wording): 将 package script 与 package_scripts 渲染为实验入口和项目声明的实验入口
+            - fix(wording): 将提交代码库类断言摘要改为研究代码表述
+            - fix(repro): 附录命令区改为复现实验入口，去除登记命令和仓库提供表述
+            - test(authoring): 增加 ranking 完整稿禁用 package.json 脚本、可追踪来源、提交代码库、登记命令和仓库提供的断言
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
     0.13.0.22-dev - 2026/05/30 (f6644e9c) [fix/mcp-tool-binding-test-isolation]
         :brief 研究问题改为候选论文排序任务三问
