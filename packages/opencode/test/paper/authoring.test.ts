@@ -1080,6 +1080,8 @@ describe("paper authoring loop", () => {
     expect(method).toContain("候选论文排序方法由 rankAgentTeamPapers 和 scorePaper 两个核心接口组成")
     expect(method).toContain("rankAgentTeamPapers 接收候选论文集合，并按 scorePaper 输出的得分进行降序排列")
     expect(method).toContain("scorePaper 把 relevance、claim_coverage 和 recency 压缩为可比较分数")
+    expect(method).toContain("评分公式为：score(p) = 0.62 * relevance(p) + 0.28 * claim_coverage(p) + 0.10 * recency(p)")
+    expect(method).toContain("三个权重来自 scorePaper 的当前实现")
     expect(method).toContain("relevance 衡量候选论文与研究主题的匹配程度")
     expect(method).toContain("claim_coverage 衡量候选论文对当前研究问题关键断言的覆盖")
     expect(method).toContain("recency 作为发表时间相关的弱排序信号")
