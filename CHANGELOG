@@ -2,10 +2,21 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.107-dev
+:version       0.13.0.108-dev
 :last_update   2026/05/31
 
 :history
+
+    0.13.0.108-dev - 2026/05/31 (7a9df2bb) [fix/mcp-tool-binding-test-isolation]
+        :brief source record manifest 缺失阻断
+        :verification
+            - fix(source): checkSourceAuthenticity 在 source_records manifest 未传入时也按缺失 SourceRecord.v1 阻断 claim source
+            - fix(source): source_records undefined 与空数组使用同一 missing_source_record blocker，避免 final gate 只因 manifest 缺失而跳过真实性检查
+            - test(authoring): 覆盖 source_id 存在但 source record manifest 缺失的阻断路径
+        :checks
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "source records|source record manifest|formal References"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/datasets.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "source records|source record manifest|formal References|complete code-paper|placeholder datasets|blocks final data checks|dataset discovery|renders ranking benchmark|renders ranking related work|placeholder literature|distinct representatives|live paper quality|prefers product README version|retries retryable temporary directory cleanup"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
 
     0.13.0.107-dev - 2026/05/31 (43a0d469) [fix/mcp-tool-binding-test-isolation]
         :brief claim source record 强制校验

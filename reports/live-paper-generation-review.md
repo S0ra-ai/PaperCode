@@ -1,9 +1,17 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.107-dev
+- project_version: 0.13.0.108-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-31 source record manifest 缺失阻断复审
+
+- `checkSourceAuthenticity` 已确认：`source_records` manifest 未传入时，claim source 会按缺失 `SourceRecord.v1` 产生 `missing_source_record` blocker。
+- 这修掉了“source_records 缺失时直接跳过真实性检查”的漏洞，空 manifest 和缺失 manifest 现在语义一致。
+- 相关回归已通过：source records/source record manifest/formal References 定向测试、authoring/datasets/live/metadata 组合测试和 `packages/opencode` typecheck。
+- 本报告和 CHANGELOG 记录为后续开发版本 `0.13.0.108-dev`。
+- 质量判断：最终导出前必须具备完整来源 manifest，不能因为 manifest 没传就绕过来源真实性校验。
 
 ## 2026-05-31 claim source record 强制校验复审
 
