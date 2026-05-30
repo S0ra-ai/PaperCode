@@ -2,10 +2,22 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.26-dev
+:version       0.13.0.27-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.27-dev - 2026/05/30 (10e75517) [fix/mcp-tool-binding-test-isolation]
+        :brief ranking 终稿隐藏内部审计附录
+        :authoring
+            - fix(appendix): ranking 场景不再输出附录 E 断言证据表和附录 F 证据记录索引
+            - fix(appendix): ranking 证据追踪表将结构化证据改为复核材料，减少系统字段口吻
+            - fix(profile): 通用预印本不再追加投稿准备度附录，明确期刊 profile 仍保留投稿准备度
+            - test(authoring): 增加 ranking 完整稿禁用内部审计附录和 generic profile 禁用投稿准备度断言
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
     0.13.0.26-dev - 2026/05/30 (a90da790) [fix/mcp-tool-binding-test-isolation]
         :brief 可复现性正文表格去除命令和日志列

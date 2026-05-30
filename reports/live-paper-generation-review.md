@@ -5,6 +5,14 @@
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
 
+## 2026-05-30 内部附录收口复审
+
+- 协议场景复跑 `run-5074dbc0-7753-4eb7-b158-62b690b2d3c8`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-5074dbc0-7753-4eb7-b158-62b690b2d3c8\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- ranking 终稿只保留附录 A 证据追踪和附录 B 复现清单；不再输出附录 E 断言证据表、附录 F 证据记录索引和附录 G 投稿准备度。
+- 坏词扫描未发现 `断言证据表`、`证据记录索引`、`结构化证据`、`处理 | 来源类型`、`导出条件`、`投稿准备度` 或 `通用预印本`。
+- 质量判断：终稿附录从系统审计清单收敛为读者需要的证据追踪和复现说明，更接近人工协作稿。
+
 ## 2026-05-30 可复现性表格复审
 
 - 协议场景复跑 `run-72485cb1-7d12-4d05-9f48-b44d7c278ec3`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
