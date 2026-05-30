@@ -1,9 +1,19 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.89-dev
+- project_version: 0.13.0.90-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 ranking 附录实现定位复审
+
+- ranking authoring 测试已确认附录 A 包含 `### 实现定位` 表格。
+- 表格列出 `rankAgentTeamPapers`、`scorePaper` 和 `claimLedgerCoverage` 的源码定位，并说明各自复核用途。
+- 附录 A 不再只用 `代码材料 N 个 / 复核材料 N 条` 作为方法定位信息。
+- 相关回归已通过：authoring/live/metadata 定向测试和 `packages/opencode` typecheck 均通过。
+- 本轮未重复触发 protocol live 复审，原因是上一轮完整 protocol 复跑已被 arXiv HTTP 429 rate limit 阻断；为避免扩大限流，只记录当前 authoring 证据。
+- 本报告和 CHANGELOG 记录为后续开发版本 `0.13.0.90-dev`。
+- 质量判断：读者现在可以从附录直接定位排序入口、评分函数和证据覆盖特征来源，附录更接近可复核论文而不是系统摘要。
 
 ## 2026-05-30 ranking 方法章节结构复审
 
