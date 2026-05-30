@@ -959,7 +959,7 @@ function experimentRunSummary(input: ComposeDraftPaperInput) {
   })
   return rows.length > 0
     ? [
-        "表 1 汇总本机与容器实验的状态、主指标和耗时，用于说明复现一致性。",
+        "表 3 汇总本机与容器实验的状态、主指标和耗时，用于说明复现一致性。",
         "该摘要只保留解释结果所需的信息：环境、实验角色、状态、主指标和耗时。这样可以让读者直接判断复现是否支持正文结论，而不把可复现性章节变成运行记录清单。若状态或指标不一致，相应结论应降级为探索性观察。",
         "",
         markdownTable(["环境", "实验", "角色", "状态", "指标", "耗时"], rows),
@@ -1369,6 +1369,7 @@ function hostContainerConsistencySummary(input: ComposeDraftPaperInput) {
     isRankingContext(input)
       ? `可复现性分析比较本机与容器结果，${primaryMetricPhrase(metricLabel)}。该比较用于检查同一协议在两个环境中的稳定性。`
       : `可复现性分析比较本机与容器结果，${primaryMetricPhrase(metricLabel)}。只有当本文方法、基线和消融在可复现环境中有一致记录时，相关结果才有资格进入结论性表述。`,
+    "表 2 汇总本机与容器主指标差异，用于检查复现一致性。",
     markdownTable(["实验", "本机状态", `本机 ${metricLabel}`, "容器状态", `容器 ${metricLabel}`, "差值"], rows),
     mismatches.length === 0
       ? isRankingContext(input)
@@ -1778,7 +1779,7 @@ function resultSummary(input: ComposeDraftPaperInput, claimSections: DraftSectio
   return [
     resultClaim ? `${resultClaim}\n\n` : "",
     experimentSummary(input),
-    table ? `\n\n${table}` : "",
+    table ? `\n\n表 1 汇总本文方法、基线和消融在主指标、运行状态和容器复现上的结果。\n\n${table}` : "",
     ablation ? `\n\n${ablation}` : "",
   ]
     .filter(Boolean)
