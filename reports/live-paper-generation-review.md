@@ -5,6 +5,15 @@
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
 
+## 2026-05-30 ranking 讨论与效度威胁复审
+
+- 协议场景复跑 `run-876772fa-cf98-4b3f-9725-045d4902f376`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-876772fa-cf98-4b3f-9725-045d4902f376\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 讨论章节改为具体解释：完整排序相对词项匹配基线提升 `0.0371`，相对无证据覆盖消融提升 `0.0684`，并说明 `claim_coverage` 对前三位排序的影响。
+- 效度威胁改为标注效度、指标效度、基线效度、消融效度和外部效度，明确候选数 `5`、标签不是人工相关性标注、词项匹配基线偏弱和后续需要 BM25/向量检索/学习排序等强基线。
+- 坏词扫描未发现 `结果解释必须与证据边界保持一致`、`类型检查通过、单一数据集通过或单次脚本通过`、`流程完整性`、`复核材料需要保存命令` 或 `证据范围`。
+- 质量判断：讨论与效度威胁从防御性安全声明转为结果解释和实验限制分析，更接近论文讨论章节。
+
 ## 2026-05-30 ranking 引言与贡献复审
 
 - 协议场景复跑 `run-0d762879-9235-49f1-83d4-7e3a2a531f7e`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
