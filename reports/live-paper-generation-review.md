@@ -1,9 +1,17 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.106-dev
+- project_version: 0.13.0.107-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-31 claim source record 强制校验复审
+
+- `checkSourceAuthenticity` 已确认：claim 使用的 `source_id` 如果没有对应 `SourceRecord.v1`，会产生 `missing_source_record` blocker。
+- 这避免 final gate 只凭 `available_source_ids` 字符串接受证据，要求每条 claim source 都能回查来源记录。
+- 相关回归已通过：missing source records/formal References 定向测试、authoring/datasets/live/metadata 组合测试和 `packages/opencode` typecheck。
+- 本报告和 CHANGELOG 记录为后续开发版本 `0.13.0.107-dev`。
+- 质量判断：最终导出前的证据链更完整，减少“看似有来源 id、实际无来源详情”的不可审查稿件。
 
 ## 2026-05-31 正式参考文献 readiness 复审
 
