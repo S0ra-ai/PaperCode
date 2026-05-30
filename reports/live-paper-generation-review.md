@@ -1,9 +1,18 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.73-dev
+- project_version: 0.13.0.74-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 dirty 工作区复现边界复审
+
+- 协议场景复跑 `run-65455420-991c-4ad8-9cd2-215fd910fc09`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-65455420-991c-4ad8-9cd2-215fd910fc09\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 数据与代码可用性章节现在在 `代码工作区状态：含未提交或未跟踪变更` 后补充复现边界。
+- 新增边界为 `复现应以导出包、代码修订和已登记实验材料为准，不把该工作区状态视为可发布源码快照`。
+- 最终稿代码版本为 `0.13.0.73-dev`，代码修订为 `3ef630a3`；本报告和 CHANGELOG 记录为后续开发版本 `0.13.0.74-dev`。
+- 质量判断：dirty 工作区不再只是裸状态标签，读者能明确区分当前运行证据和可发布源码快照。
 
 ## 2026-05-30 基线解释口径复审
 
