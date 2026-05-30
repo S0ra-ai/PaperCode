@@ -1,9 +1,19 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.72-dev
+- project_version: 0.13.0.73-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 基线解释口径复审
+
+- 协议场景复跑 `run-abb90c52-3638-4ae1-9b42-28b3925f1163`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-abb90c52-3638-4ae1-9b42-28b3925f1163\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 实验设置现在写为 `检验完整排序与简单词项排序在当前候选集上的差异`。
+- 效度威胁现在写为 `主要检验查询词重合是否能解释当前排序差异`。
+- 最终稿不再出现 `检验代码证据排序是否优于简单词项排序`、`排序收益`、`缺少实际意义`、`查询词之外的排序信号` 或 `完整排序优于词项匹配基线`。
+- 最终稿代码版本为 `0.13.0.72-dev`，代码修订为 `364199fb`；本报告和 CHANGELOG 记录为后续开发版本 `0.13.0.73-dev`。
+- 质量判断：基线解释从强胜出叙述收紧为当前候选集差异叙述，减少小样本自动标签场景下的过度解释。
 
 ## 2026-05-30 GPU 预算口径复审
 
