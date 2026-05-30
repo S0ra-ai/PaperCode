@@ -1,9 +1,18 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.79-dev
+- project_version: 0.13.0.80-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 代码可用性表格复审
+
+- 协议场景复跑 `run-23f74298-f8e5-4dda-8058-92a5bc1cd0c9`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-23f74298-f8e5-4dda-8058-92a5bc1cd0c9\exports\bundle-final-draft-paper-final-export-13e44a77-ea39-40d7-8b25-98358c36f1ea\bundle-final-draft-paper-final-export-13e44a77-ea39-40d7-8b25-98358c36f1ea.md`。
+- 代码可用性章节现在使用 `| 项目 | 内容 |` 表格展示方法实现、复现实验入口、代码包、代码仓库地址、代码版本、代码修订、代码工作区状态和代码许可证。
+- 最终稿不再出现散文式 `代码仓库地址：...`、`代码版本：...`、`代码修订：...` 或 `代码许可证：...` 串联行。
+- 最终稿代码版本为 `0.13.0.79-dev`，代码修订为 `1e8ea41b`；本报告和 CHANGELOG 记录为后续开发版本 `0.13.0.80-dev`。
+- 质量判断：代码可用性从键值散文改为表格，元数据更易扫描和复核。
 
 ## 2026-05-30 Markdown 空行复审
 

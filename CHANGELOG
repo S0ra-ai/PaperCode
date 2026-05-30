@@ -2,10 +2,22 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.79-dev
+:version       0.13.0.80-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.80-dev - 2026/05/30 (1e8ea41b) [fix/mcp-tool-binding-test-isolation]
+        :brief 代码可用性改为表格
+        :authoring
+            - fix(availability): 代码可用性章节用表格展示方法实现、复现实验入口、代码包、仓库、版本、修订、工作区状态和许可证
+            - test(authoring): ranking 成稿断言代码可用性表存在并拒绝散文式代码元数据
+            - test(metadata): 代码版本元数据集成测试改为检查代码可用性表格行
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
     0.13.0.79-dev - 2026/05/30 (d6ad9b37) [fix/mcp-tool-binding-test-isolation]
         :brief Markdown 导出压缩多余空行
