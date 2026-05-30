@@ -1219,10 +1219,11 @@ async function workspaceCodeMetadata(request: ResearchIntakeRequest, options?: R
   }
   const metadata: CodeAvailabilityMetadata = {
     repository_url: repositoryUrlFromPackage(parsed.repository),
-    version: typeof parsed.version === "string" ? parsed.version : await gitShortCommit(workspace),
+    version: typeof parsed.version === "string" ? parsed.version : undefined,
+    commit_hash: await gitShortCommit(workspace),
     license: typeof parsed.license === "string" ? parsed.license : undefined,
   }
-  return metadata.repository_url || metadata.version || metadata.license ? metadata : undefined
+  return metadata.repository_url || metadata.version || metadata.commit_hash || metadata.license ? metadata : undefined
 }
 
 function localCodeExperimentRunner(input: {

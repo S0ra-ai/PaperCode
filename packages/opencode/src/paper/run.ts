@@ -1108,19 +1108,27 @@ function repositoryUrlFromPackage(value: unknown) {
 
 async function packageCodeMetadata(workspace: string): Promise<CodeAvailabilityMetadata | undefined> {
   const raw = await readFile(path.join(workspace, "package.json"), "utf8").catch(() => undefined)
-  if (!raw) return undefined
-  let parsed: Record<string, unknown>
-  try {
-    parsed = JSON.parse(raw) as Record<string, unknown>
-  } catch {
-    return undefined
+  let parsed: Record<string, unknown> = {}
+  if (raw) {
+    try {
+      parsed = JSON.parse(raw) as Record<string, unknown>
+    } catch {
+      parsed = {}
+    }
   }
   const metadata: CodeAvailabilityMetadata = {
     repository_url: repositoryUrlFromPackage(parsed.repository),
     version: typeof parsed.version === "string" ? parsed.version : undefined,
+    commit_hash: await gitShortCommit(workspace),
     license: typeof parsed.license === "string" ? parsed.license : undefined,
   }
-  return metadata.repository_url || metadata.version || metadata.license ? metadata : undefined
+  return metadata.repository_url || metadata.version || metadata.commit_hash || metadata.license ? metadata : undefined
+}
+
+async function gitShortCommit(workspace: string) {
+  const result = await runExperimentShellCommand("git rev-parse --short HEAD", workspace, 5_000)
+  if (result.exitCode !== 0 || result.timedOut) return undefined
+  return result.stdout.trim() || undefined
 }
 
 async function refreshDraftPaperForFinalExport(input: {
