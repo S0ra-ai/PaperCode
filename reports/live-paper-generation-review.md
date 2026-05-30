@@ -1,9 +1,19 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.75-dev
+- project_version: 0.13.0.76-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 消融比较指标口径复审
+
+- 协议场景复跑 `run-4de485ec-04c5-4e98-8cbc-3c827b40dff4`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-4de485ec-04c5-4e98-8cbc-3c827b40dff4\exports\bundle-final-draft-paper-final-export-957d2bc7-4912-4ba7-8a02-6c5928d067cf\bundle-final-draft-paper-final-export-957d2bc7-4912-4ba7-8a02-6c5928d067cf.md`。
+- 摘要和结果章节现在写为 `无证据覆盖消融的排序 nDCG@3 数值低于本文方法`。
+- 讨论章节现在写为 `无证据覆盖消融移除 claim_coverage 后，排序 nDCG@3 数值低于完整排序`。
+- 最终稿不再出现裸 `无证据覆盖消融低于本文方法` 或 `排名下降`。
+- 最终稿代码版本为 `0.13.0.75-dev`，代码修订为 `c201e490`；本报告和 CHANGELOG 记录为后续开发版本 `0.13.0.76-dev`。
+- 质量判断：消融比较与基线比较一样使用指标数值口径，减少小样本自动标签场景下的泛化误读。
 
 ## 2026-05-30 结果段基线比较口径复审
 

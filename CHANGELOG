@@ -2,10 +2,23 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.75-dev
+:version       0.13.0.76-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.76-dev - 2026/05/30 (c201e490) [fix/mcp-tool-binding-test-isolation]
+        :brief 消融比较补齐指标口径
+        :authoring
+            - fix(abstract): 无证据覆盖消融改为排序 nDCG@3 数值低于本文方法
+            - fix(result): 消融分析改为排序 nDCG@3 数值低于本文方法
+            - fix(discussion): 讨论章节改为移除 claim_coverage 后排序 nDCG@3 数值低于完整排序
+            - test(authoring): ranking 成稿断言不再出现裸消融低于本文方法或排名下降
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
     0.13.0.75-dev - 2026/05/30 (4d1bacc4) [fix/mcp-tool-binding-test-isolation]
         :brief 结果段基线比较补齐指标口径
