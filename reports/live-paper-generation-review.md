@@ -1,9 +1,18 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.83-dev
+- project_version: 0.13.0.84-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 实验环境声明表格复审
+
+- 协议场景复跑 `run-1d090503-7765-4c57-816f-9ef8163c4213`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-1d090503-7765-4c57-816f-9ef8163c4213\exports\bundle-final-draft-paper-final-export-fec50a84-c8e2-4b59-87e4-3278a1f93679\bundle-final-draft-paper-final-export-fec50a84-c8e2-4b59-87e4-3278a1f93679.md`。
+- 可复现性章节现在包含正式 `### 实验环境声明` 小节，并用 `| 项目 | 内容 |` 表格列出本机平台、Node.js 和容器环境。
+- 最终稿不再使用 `实验环境声明：` 加 `- 本机平台：...` / `- 容器环境：...` 的列表式写法。
+- 最终稿代码版本为 `0.13.0.83-dev`，代码修订为 `b7b23103`；本报告和 CHANGELOG 记录为后续开发版本 `0.13.0.84-dev`。
+- 质量判断：可复现性章节的环境信息从运行日志式列表改为正式表格，更便于读者扫描复现条件。
 
 ## 2026-05-30 声明表格复审
 
