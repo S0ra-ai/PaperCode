@@ -2,10 +2,23 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.77-dev
+:version       0.13.0.78-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.78-dev - 2026/05/30 (9eadc40d) [fix/mcp-tool-binding-test-isolation]
+        :brief 结果与复现表格统一论文顺序
+        :authoring
+            - fix(results): 结果表按本文方法、基线、消融输出，不再沿用运行记录原始顺序
+            - fix(reproducibility): 本机/容器一致性表按本文方法、基线、消融输出
+            - fix(reproducibility): 实验执行摘要在本机和容器分组内按本文方法、基线、消融输出
+            - test(authoring): ranking 成稿使用乱序运行记录断言表格仍保持论文阅读顺序
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
     0.13.0.77-dev - 2026/05/30 (98da67ea) [fix/mcp-tool-binding-test-isolation]
         :brief 作者与声明缺省项去除模板占位
