@@ -2,10 +2,22 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.100-dev
-:last_update   2026/05/30
+:version       0.13.0.101-dev
+:last_update   2026/05/31
 
 :history
+
+    0.13.0.101-dev - 2026/05/31 (29d68727) [fix/mcp-tool-binding-test-isolation]
+        :brief 占位相关工作过滤
+        :authoring
+            - fix(related-work): ranking 相关工作只使用已验证且非占位 URL 的正式文献来源
+            - fix(citation): 相关工作引用编号与正式参考文献来源保持一致，不再给占位来源编号
+            - test(authoring): ranking 成稿断言 example.org 来源不再作为代表相关工作输出
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking related work|renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|renders ranking related work|live paper quality|prefers product README version|retries retryable temporary directory cleanup"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
 
     0.13.0.100-dev - 2026/05/30 (168909e2) [fix/mcp-tool-binding-test-isolation]
         :brief code metadata 清理稳定化
