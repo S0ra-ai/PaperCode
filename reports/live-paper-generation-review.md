@@ -1,9 +1,19 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.95-dev
+- project_version: 0.13.0.96-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 ranking 限制章节表格复审
+
+- ranking authoring 测试已确认限制章节包含 `限制 / 影响 / 后续处理` 表格。
+- 评测集规模与标注、基线强度、外部推广三类限制分别绑定到明确影响和后续处理。
+- 限制章节不再以 `当前实验的主要限制来自...` 开头的散文段落呈现。
+- 相关回归已通过：authoring/live/metadata 定向测试和 `packages/opencode` typecheck 均通过。
+- 本轮未重复触发 protocol live 复审，原因是上一轮完整 protocol 复跑已被 arXiv HTTP 429 rate limit 阻断；为避免扩大限流，只记录当前 authoring 证据。
+- 本报告和 CHANGELOG 记录为后续开发版本 `0.13.0.96-dev`。
+- 质量判断：限制章节现在更像审稿人可核对的限制清单，问题、影响和后续工作一一对应。
 
 ## 2026-05-30 ranking 结果章节小节复审
 
