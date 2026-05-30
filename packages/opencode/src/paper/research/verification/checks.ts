@@ -89,7 +89,21 @@ export function checkSourceAuthenticity(input: VerificationGateInput): Verificat
       const citedSourceIds = Array.from(new Set(input.ledger.entries.flatMap((entry) => entry.source_ids)))
       return citedSourceIds.flatMap((sourceId) => {
         const source = records.get(sourceId)
-        if (!source) return []
+        if (!source) {
+          return [
+            finding({
+              category: "missing_source_record",
+              severity: "blocker",
+              message: `Source ${sourceId} is cited by claims but has no source record.`,
+              claim_ids: input.ledger.entries
+                .filter((entry) => entry.source_ids.includes(sourceId))
+                .map((entry) => entry.claim_id),
+              source_ids: [sourceId],
+              artifact_ids: [],
+              required_action: "Attach a verified SourceRecord.v1 entry or remove the claim source before final export.",
+            }),
+          ]
+        }
         const findings: VerificationFinding[] = []
         if (source.verification.status !== "verified") {
           findings.push(

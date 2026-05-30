@@ -13,7 +13,7 @@ import { type ExportRenderer } from "@/paper/research/export"
 import { createResearchRun, type ResearchRuntimeOptions } from "@/paper/research/runtime"
 import { discoverLiterature, type DataPlan } from "@/paper/research/sources"
 import { type ResultReport } from "@/paper/research/experiments"
-import { checkReferences } from "@/paper/research/verification"
+import { checkReferences, checkSourceAuthenticity } from "@/paper/research/verification"
 import { composeClaimLedger, composeDraftPaper } from "@/paper/research/writing"
 
 const now = "2026-05-09T00:00:00Z"
@@ -1797,6 +1797,41 @@ describe("paper authoring loop", () => {
     })
 
     expect(findings.map((finding) => finding.category)).not.toContain("missing_verified_reference")
+  })
+
+  test("blocks claim sources that are missing source records", () => {
+    const ledger = composeClaimLedger({
+      topic: "Source record readiness",
+      claims: [
+        {
+          text: "The claim names an available source id.",
+          section_id: "method",
+          confidence: 0.8,
+          source_ids: ["paper:missing-record"],
+          artifact_ids: ["artifact-method"],
+        },
+      ],
+      now,
+    })
+    const draft = composeDraftPaper({ title: "Source Record Readiness", ledger, now })
+    const findings = checkSourceAuthenticity({
+      ledger,
+      draft,
+      data_plan: dataPlan(),
+      result_report: resultReport(),
+      available_source_ids: ["paper:missing-record"],
+      source_records: [],
+      model_reviews: [],
+      now,
+    })
+
+    expect(findings).toContainEqual(
+      expect.objectContaining({
+        category: "missing_source_record",
+        severity: "blocker",
+        source_ids: ["paper:missing-record"],
+      }),
+    )
   })
 
   test("runs ClaimLedger-first authoring through final export and supplementary bundles", async () => {
