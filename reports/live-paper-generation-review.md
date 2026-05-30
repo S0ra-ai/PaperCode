@@ -5,6 +5,14 @@
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
 
+## 2026-05-30 ranking 公式符号复审
+
+- 协议场景复跑 `run-889f01bc-2688-4079-a911-376cb55a9300`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-889f01bc-2688-4079-a911-376cb55a9300\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 方法章节的评分公式后现在说明 `p` 表示待排序候选论文。
+- 方法章节同时说明 `relevance`、`claim_coverage` 和 `recency` 均按候选论文逐项计算。
+- 质量判断：公式从可读表达推进到符号自洽表达，减少读者对变量含义的猜测。
+
 ## 2026-05-30 ranking 评分公式复审
 
 - 协议场景复跑 `run-5a379d74-d0e0-42e3-b520-6efc60eda2ba`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
