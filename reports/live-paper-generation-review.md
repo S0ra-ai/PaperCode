@@ -1,9 +1,17 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.68-dev
+- project_version: 0.13.0.69-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 消融差异方向复审
+
+- 协议场景复跑 `run-032133ed-1916-465c-8541-9c1702fef1f8`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-032133ed-1916-465c-8541-9c1702fef1f8\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 摘要和结果现在写为 `无证据覆盖消融低于本文方法，绝对差值为 0.0684`。
+- 最终稿不再出现 `无证据覆盖消融与本文方法的绝对差值` 这种缺少方向的表述。
+- 质量判断：消融结果同时保留方向和差值，读者不需要从上下文推断哪一个设置更好。
 
 ## 2026-05-30 排序指标差异口径复审
 
