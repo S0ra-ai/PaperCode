@@ -1,9 +1,18 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.69-dev
+- project_version: 0.13.0.70-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 证据覆盖表述复审
+
+- 协议场景复跑 `run-6f673936-a9c9-426f-a6cc-3da8c013aa47`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-6f673936-a9c9-426f-a6cc-3da8c013aa47\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 摘要、结果和结论现在写为 `claim_coverage 项与当前候选集上的排序差异相关`。
+- 讨论现在写为 `claim_coverage 项与当前前三位排序差异相关`。
+- 最终稿不再出现 `可观测贡献`、`产生直接影响` 或 `能够改善当前候选集`。
+- 质量判断：证据覆盖消融从因果化贡献表述，收紧为单一候选集上的相关性表述。
 
 ## 2026-05-30 消融差异方向复审
 
