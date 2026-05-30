@@ -5,6 +5,14 @@
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
 
+## 2026-05-30 内部来源标记复审
+
+- 协议场景复跑 `run-5e567e47-2155-4625-be20-7f9de4404108`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-5e567e47-2155-4625-be20-7f9de4404108\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 方法章节不再出现 `[来源 1]`、`[来源 2]` 或类似内部证据标记。
+- 实现定位改为“具体实现位置见附录 A”，主文保留论文式方法说明。
+- 质量判断：主文减少系统内部导出痕迹，证据定位留在附录，更接近正式论文排版。
+
 ## 2026-05-30 相关工作编号引用复审
 
 - 协议场景复跑 `run-58eab6bf-39bc-4cc1-98a2-87890c66a79f`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
