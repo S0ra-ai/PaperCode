@@ -1017,6 +1017,12 @@ describe("paper authoring loop", () => {
     expect(draft.markdown).not.toContain("ablation ranking no coverage")
     expect(draft.markdown).not.toContain("| ranking lexical |")
     expect(draft.markdown).not.toContain("| ranking no coverage |")
+    expect(draft.markdown).not.toContain("## 附录 E：断言证据表")
+    expect(draft.markdown).not.toContain("## 附录 F：证据记录索引")
+    expect(draft.markdown).not.toContain("断言证据表")
+    expect(draft.markdown).not.toContain("证据记录索引")
+    expect(draft.markdown).not.toContain("结构化证据")
+    expect(draft.markdown).not.toContain("处理 | 来源类型")
   })
 
   test("labels unverified literature seeds as candidates rather than prior work", () => {
@@ -1231,6 +1237,8 @@ describe("paper authoring loop", () => {
       expect(result.export.bundle.verification_summary.failed_checks).toContain("unsupported_claim")
       expect(result.preview.artifacts.markdown?.content).toContain("FORCED DRAFT")
       expect(result.preview.annotations.some((annotation) => annotation.severity === "blocker")).toBe(true)
+      expect(result.revision.next_markdown).not.toContain("## 附录 G：投稿准备度")
+      expect(result.revision.next_markdown).not.toContain("通用预印本")
     } finally {
       await clean(dir)
     }
