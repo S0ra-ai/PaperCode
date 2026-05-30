@@ -1082,6 +1082,8 @@ describe("paper authoring loop", () => {
     expect(method).toContain("scorePaper 把 relevance、claim_coverage 和 recency 压缩为可比较分数")
     expect(method).toContain("评分公式为：score(p) = 0.62 * relevance(p) + 0.28 * claim_coverage(p) + 0.10 * recency(p)")
     expect(method).toContain("三个权重来自 scorePaper 的当前实现")
+    expect(method).toContain("其中 p 表示待排序候选论文")
+    expect(method).toContain("三项特征均按候选论文逐项计算")
     expect(method).toContain("relevance 衡量候选论文与研究主题的匹配程度")
     expect(method).toContain("claim_coverage 衡量候选论文对当前研究问题关键断言的覆盖")
     expect(method).toContain("recency 作为发表时间相关的弱排序信号")
