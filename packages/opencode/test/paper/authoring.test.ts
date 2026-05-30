@@ -1133,6 +1133,8 @@ describe("paper authoring loop", () => {
     expect(experimentalSetup).toContain("实验协议围绕评价对象、主指标、基线和消融展开，目的是比较排序规则在同一候选集上的表现")
     expect(experimentalSetup).toContain("词项匹配基线用于只依赖查询词重合的排序对照")
     expect(experimentalSetup).toContain("无证据覆盖消融用于移除 claim_coverage 对排序得分的贡献")
+    expect(experimentalSetup).toContain("实验协议包含 4 个可执行入口，覆盖本文方法、词项匹配基线、无证据覆盖消融和容器复现；当前实验协议完整")
+    expect(experimentalSetup).not.toContain("来源为复现实验入口")
     expect(experimentalSetup).not.toContain("结论性表述")
     expect(experimentalSetup).not.toContain("足以支撑")
     expect(experimentalSetup).not.toContain("阻断")
