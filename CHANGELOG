@@ -2,10 +2,21 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.47-dev
+:version       0.13.0.48-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.48-dev - 2026/05/30 (bce24843) [fix/mcp-tool-binding-test-isolation]
+        :brief ranking 方法章节增加图 1 流程概览
+        :authoring
+            - fix(method): ranking 方法章节增加图 1 候选论文排序与复现实验流程
+            - fix(method): 图 1 串联候选论文集合、特征计算、scorePaper 评分、rankAgentTeamPapers 排序和排序 nDCG@3 评测
+            - test(authoring): 增加 ranking 方法图题、流程链路和对照分支断言
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
     0.13.0.47-dev - 2026/05/30 (5c7e70a4) [fix/mcp-tool-binding-test-isolation]
         :brief 数据与代码可用性补充代码状态

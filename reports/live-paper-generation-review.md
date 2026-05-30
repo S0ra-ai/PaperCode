@@ -1,9 +1,18 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0-dev
+- project_version: 0.13.0.48-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 ranking 方法图复审
+
+- 协议场景复跑 `run-3d4325f0-74e9-47c0-81a5-bcc9512513d4`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-3d4325f0-74e9-47c0-81a5-bcc9512513d4\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 方法章节新增 `图 1 候选论文排序与复现实验流程`。
+- 图 1 串联候选论文集合、特征计算、`scorePaper` 评分、`rankAgentTeamPapers` 排序和排序 nDCG@3 评测。
+- 对照分支列出词项匹配基线、无证据覆盖消融和容器复现，不把主实验重复列为对照。
+- 质量判断：方法章节从纯 prose 和公式推进到有流程图题的论文式方法说明。
 
 ## 2026-05-30 代码可用性复审
 
