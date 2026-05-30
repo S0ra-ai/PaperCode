@@ -1,9 +1,19 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.77-dev
+- project_version: 0.13.0.78-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 实验表格顺序复审
+
+- 协议场景复跑 `run-33882c30-de6e-40b3-963c-b07bdfc797b2`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-33882c30-de6e-40b3-963c-b07bdfc797b2\exports\bundle-final-draft-paper-final-export-24709d24-dabf-4ae8-be95-7d975191cac0\bundle-final-draft-paper-final-export-24709d24-dabf-4ae8-be95-7d975191cac0.md`。
+- 结果表现在按 `证据约束的论文排序方法`、`词项匹配基线`、`无证据覆盖消融` 输出。
+- 本机/容器一致性表现在按 `证据约束的论文排序方法`、`词项匹配基线`、`无证据覆盖消融` 输出。
+- 实验执行摘要在本机和容器分组内都按 `证据约束的论文排序方法`、`词项匹配基线`、`无证据覆盖消融` 输出。
+- 最终稿代码版本为 `0.13.0.77-dev`，代码修订为 `9eadc40d`；本报告和 CHANGELOG 记录为后续开发版本 `0.13.0.78-dev`。
+- 质量判断：读者先看到本文方法，再比较基线和消融，表格叙事顺序与论文正文一致。
 
 ## 2026-05-30 作者与声明缺省项复审
 
