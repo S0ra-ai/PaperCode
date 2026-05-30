@@ -2,10 +2,22 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.98-dev
+:version       0.13.0.99-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.99-dev - 2026/05/30 (c90ecaef) [fix/mcp-tool-binding-test-isolation]
+        :brief 占位参考文献过滤
+        :authoring
+            - fix(references): DOI/arXiv 缺失且 URL 为 example、localhost、file 等占位来源时不进入正式参考文献
+            - fix(references): 参考文献章节输出中文诊断，提示占位来源已排除并要求补齐 DOI、arXiv 或出版社页面核验
+            - test(authoring): ranking 成稿断言 example.org 不再作为正式参考文献输出
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - note: protocol live 复审未重复触发，避免 arXiv HTTP 429 限流扩大
 
     0.13.0.98-dev - 2026/05/30 (443f6f65) [fix/mcp-tool-binding-test-isolation]
         :brief ranking 结论章节表格化
