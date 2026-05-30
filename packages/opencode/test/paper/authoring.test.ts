@@ -1167,6 +1167,7 @@ describe("paper authoring loop", () => {
     expect(dataAvailability).toContain("代码版本：0.13.0-test")
     expect(dataAvailability).toContain("代码修订：abc1234")
     expect(dataAvailability).toContain("代码工作区状态：含未提交或未跟踪变更")
+    expect(dataAvailability).toContain("含未提交或未跟踪变更时，复现应以导出包、代码修订和已登记实验材料为准，不把该工作区状态视为可发布源码快照。")
     expect(dataAvailability).toContain("代码许可证：MPL-2.0")
     expect(dataAvailability).not.toContain("Deterministic validation labels")
     expect(dataAvailability).not.toContain("not human relevance ground truth")

@@ -860,11 +860,16 @@ function codeAvailabilitySummary(input: ComposeDraftPaperInput) {
   const revisionText = revision ? `；代码修订：${revision}` : ""
   const worktreeText =
     typeof worktreeDirty === "boolean" ? `；代码工作区状态：${worktreeDirty ? "含未提交或未跟踪变更" : "干净"}` : ""
+  const worktreeBoundary =
+    worktreeDirty === true
+      ? "含未提交或未跟踪变更时，复现应以导出包、代码修订和已登记实验材料为准，不把该工作区状态视为可发布源码快照。"
+      : ""
   return [
     "代码可用性：",
     implementation,
     reproduction,
     `代码包：${packageName}；代码仓库地址：${repository}；代码版本：${version}${revisionText}${worktreeText}；代码许可证：${license}。`,
+    worktreeBoundary,
   ].join("\n")
 }
 
