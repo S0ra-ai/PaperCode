@@ -2,10 +2,23 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.23-dev
+:version       0.13.0.24-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.24-dev - 2026/05/30 (805efee7) [fix/mcp-tool-binding-test-isolation]
+        :brief ranking 论文标题、摘要和结论转向具体排序方法
+        :authoring
+            - fix(title): ranking 场景标题改为证据约束的候选论文排序方法，不再沿用泛化代码论文标题
+            - fix(abstract): ranking 场景摘要直接描述 rankAgentTeamPapers、scorePaper、排序 nDCG@3、基线、消融和容器复现
+            - fix(conclusion): ranking 场景结论聚焦候选论文排序方法、词项匹配基线差值和证据覆盖特征贡献
+            - fix(related-work): 相关工作主题线索将代码论文改写为论文到代码执行，避免泛化标题词残留
+            - test(authoring): 增加泛化标题、代码论文、元论文开头和旧结论口吻的禁用断言
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
     0.13.0.23-dev - 2026/05/30 (782b54a2) [fix/mcp-tool-binding-test-isolation]
         :brief 实验证据措辞去除工程审计残留
