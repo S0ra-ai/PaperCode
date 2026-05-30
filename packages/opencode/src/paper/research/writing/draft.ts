@@ -569,6 +569,37 @@ function literatureEvidenceSummary(input: ComposeDraftPaperInput) {
   ])
 }
 
+function rankingRelatedWorkSummary(input: ComposeDraftPaperInput) {
+  const map = input.literature_map
+  if (!map || map.sources.length === 0) {
+    return joinBlocks([
+      "候选论文排序任务与三类研究相邻：工具调用与智能体协作研究关注如何组织多步推理和外部工具，复现与验证研究关注实验结果能否被重复，论文到代码执行研究关注论文方法、代码入口和运行环境之间的连接。",
+      "本文与这些方向的交点在于排序结果必须同时有接口定义、显式对照和复现记录支撑；缺少任一环节时，候选论文排序只能作为探索性结果呈现。",
+    ])
+  }
+  const verified = map.sources.filter((source) => source.verification.status === "verified")
+  const selected = (verified.length > 0 ? verified : map.sources).slice(0, 5)
+  const agentWorks = selected
+    .filter((source) => literatureRoleTags(source).includes("工具调用与智能体协作"))
+    .map(literatureDisplayTitle)
+    .slice(0, 2)
+  const reproducibilityWorks = selected
+    .filter((source) => literatureRoleTags(source).includes("实验复现与验证风险"))
+    .map(literatureDisplayTitle)
+    .slice(0, 2)
+  const executionWorks = selected
+    .filter((source) => literatureRoleTags(source).includes("论文到代码执行链路"))
+    .map(literatureDisplayTitle)
+    .slice(0, 2)
+  const named = (values: string[], fallback: string) => (values.length > 0 ? values.join("、") : fallback)
+  return joinBlocks([
+    `候选论文排序任务连接了三条研究线索。工具调用与智能体协作研究以 ${named(agentWorks, "多智能体和工具调用研究")} 为代表，强调模型如何分解任务、调用工具并组织中间状态；这类研究为 rankAgentTeamPapers 这类排序接口提供了协作式研究流程背景。`,
+    `复现与验证研究以 ${named(reproducibilityWorks, "实验复现和验证研究")} 为代表，强调基线、消融、环境隔离和重复执行对结果解释的重要性；本文据此把排序 nDCG@3、词项匹配基线、无证据覆盖消融和容器复现放入同一评价协议。`,
+    `论文到代码执行研究以 ${named(executionWorks, "论文到代码执行研究")} 为代表，关注论文方法与可运行代码之间的落差；本文的差异在于不直接评价整篇论文能否转成代码，而是把候选论文排序本身作为研究对象，要求 scorePaper 的特征、排序结果和复现状态同时可复核。`,
+    "因此，本文的相关工作边界不是一般的长文生成或工具调用，而是候选论文排序方法如何在显式对照和可复现执行约束下形成可比较结果。",
+  ])
+}
+
 function referenceLocator(source: LiteratureMap["sources"][number]) {
   const url = source.url?.trim()
   if (source.doi) return url ? `doi:${source.doi} (${url})` : `doi:${source.doi}`
@@ -693,7 +724,7 @@ function dataAvailabilitySummary(input: ComposeDraftPaperInput) {
       ? `\n\n访问约束：${data.access_constraints.map((constraint) => displayDatasetAccess(constraint.access)).join("、")}。`
       : ""
   return [
-    `本研究使用 ${data.datasets.length} 个开放数据集，数据来源、许可和验证状态如下。`,
+    `本研究使用 ${data.datasets.length} 个开放数据集，数据来源、许可和核验结果如下。`,
     "",
     markdownTable(["数据集", "访问", "许可", "验证", "说明"], datasetLines),
     conflicts,
@@ -1426,6 +1457,7 @@ function introductionSummary(input: ComposeDraftPaperInput) {
 }
 
 function relatedWorkSummary(input: ComposeDraftPaperInput) {
+  if (isRankingContext(input)) return rankingRelatedWorkSummary(input)
   const methodClaim = firstClaimText(input, "method")
   const resultEvidence = resultEvidenceText(input)
   const methodFocus = methodFocusSummary(input, methodClaim, "related")
