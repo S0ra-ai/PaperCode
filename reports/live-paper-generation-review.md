@@ -5,6 +5,16 @@
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
 
+## 2026-05-30 ranking 引言与贡献复审
+
+- 协议场景复跑 `run-0d762879-9235-49f1-83d4-7e3a2a531f7e`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-0d762879-9235-49f1-83d4-7e3a2a531f7e\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 引言改为文献检索、综述准备和研究选题中的候选论文排序动机，说明仅依赖词项匹配的局限和证据覆盖特征的评价目标。
+- 主要贡献改为三项论文贡献：`relevance`、`claim_coverage`、`recency` 评分，词项匹配基线/无证据覆盖消融，以及排序 nDCG@3 与本机/容器复现评价。
+- 方法章节将实现位置和实验入口写成排序入口、评分入口、完整排序、词项基线、证据覆盖消融和环境一致性，不再使用审计式“源码证据记录”口吻。
+- 坏词扫描未发现 `面向计算机类论文，正文完整性`、`结果部分需要解释的是`、`当前结果显示：以排序 nDCG@3 作为主指标`、`可审查链路`、`实验记录统一为可审查证据`、`源码证据记录`、`正文结论绑定` 或内部 gate 词残留。
+- 质量判断：前置章节从产品生成说明转为任务动机、评分方法和实验贡献，更接近人工协作稿。
+
 ## 2026-05-30 ranking 主文结构复审
 
 - 协议场景复跑 `run-821b9655-2772-492d-be46-c3b9ceeadbe0`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
