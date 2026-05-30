@@ -2,10 +2,21 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.74-dev
+:version       0.13.0.75-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.75-dev - 2026/05/30 (4d1bacc4) [fix/mcp-tool-binding-test-isolation]
+        :brief 结果段基线比较补齐指标口径
+        :authoring
+            - fix(result): 结果章节将本文方法高于基线改为本文方法的排序 nDCG@3 数值高于最佳基线
+            - test(authoring): ranking 成稿断言结果段不再出现裸本文方法高于基线
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
     0.13.0.74-dev - 2026/05/30 (3ef630a3) [fix/mcp-tool-binding-test-isolation]
         :brief dirty 工作区补齐复现边界

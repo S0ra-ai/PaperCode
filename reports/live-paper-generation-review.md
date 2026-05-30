@@ -1,9 +1,18 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.74-dev
+- project_version: 0.13.0.75-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 结果段基线比较口径复审
+
+- 协议场景复跑 `run-0b2f9625-5c63-4af3-8d95-c8c3205ed5e8`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-0b2f9625-5c63-4af3-8d95-c8c3205ed5e8\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 结果章节现在写为 `本文方法的排序 nDCG@3 数值高于最佳基线，绝对差值为 0.0371`。
+- 最终稿不再出现裸 `本文方法高于基线`。
+- 最终稿代码版本为 `0.13.0.74-dev`，代码修订为 `4d1bacc4`；本报告和 CHANGELOG 记录为后续开发版本 `0.13.0.75-dev`。
+- 质量判断：结果段和讨论段都以指标数值口径描述基线比较，减少小样本自动标签场景下的泛化误读。
 
 ## 2026-05-30 dirty 工作区复现边界复审
 
