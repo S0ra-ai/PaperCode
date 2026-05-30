@@ -13,6 +13,7 @@ import type { CheckpointGuidance, ClaimLedger, ClaimLedgerEntry, DraftPaper, Dra
 export type CodeAvailabilityMetadata = {
   repository_url?: string
   version?: string
+  commit_hash?: string
   license?: string
 }
 
@@ -832,12 +833,14 @@ function codeAvailabilitySummary(input: ComposeDraftPaperInput) {
   const reproduction = entrypoints.length > 0 ? `复现实验入口包括${chineseList(entrypoints)}。` : "复现实验入口尚未登记。"
   const repository = input.code_metadata?.repository_url ?? "未登记"
   const version = input.code_metadata?.version ?? "未登记"
+  const revision = input.code_metadata?.commit_hash
   const license = input.code_metadata?.license ?? "未登记"
+  const revisionText = revision ? `；代码修订：${revision}` : ""
   return [
     "代码可用性：",
     implementation,
     reproduction,
-    `代码仓库地址：${repository}；代码版本：${version}；代码许可证：${license}。`,
+    `代码仓库地址：${repository}；代码版本：${version}${revisionText}；代码许可证：${license}。`,
   ].join("\n")
 }
 
