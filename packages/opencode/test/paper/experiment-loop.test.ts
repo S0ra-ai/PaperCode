@@ -6,7 +6,7 @@ import {
   type ExperimentClaimEligibility,
 } from "@/paper"
 import { createResearchCapabilityRegistry, defaultResearchCapabilities } from "@/paper"
-import type { ResultReport } from "@/paper/research/experiments"
+import { analyzeExperimentResults, planExperiments, type ResultReport } from "@/paper/research/experiments"
 
 const passedReport: ResultReport = {
   schema_version: "ResultReport.v1",
@@ -76,6 +76,97 @@ describe("paper experiment MCP loop", () => {
       final_claim_allowed: false,
       citation_label: "exploratory",
       blockers: [],
+    })
+  })
+
+  test("blocks final claims when code experiment protocol has no baseline", () => {
+    const plan = planExperiments({
+      topic: "code protocol",
+      method_name: "proposed code workflow",
+      dataset_ids: [],
+      primary_metric: "typecheck_pass",
+      proposed_command: { argv: ["bun run typecheck"], timeout_seconds: 120 },
+      baseline_specs: [],
+      ablation_specs: [],
+      include_default_baselines: false,
+      now: "2026-05-09T00:00:00Z",
+    })
+    const report = analyzeExperimentResults({
+      plan,
+      now: "2026-05-09T00:00:00Z",
+      host_runs: [
+        {
+          schema_version: "ExperimentRun.v1",
+          experiment_run_id: "host:proposed",
+          plan_id: plan.plan_id,
+          experiment_id: "proposed",
+          role: "proposed",
+          status: "succeeded",
+          environment: { mode: "host", platform: process.platform, node: process.version },
+          command: plan.proposed.command,
+          metrics: [{ name: "typecheck_pass", value: 1, direction: "higher_better", unit: "ratio" }],
+          stdout: "typecheck passed",
+          stderr: "",
+          exit_code: 0,
+          resource_usage: { wall_time_seconds: 1 },
+          started_at: "2026-05-09T00:00:00Z",
+          finished_at: "2026-05-09T00:00:00Z",
+          reproduction: { container_reproduced: false },
+        },
+      ],
+      container_runs: [
+        {
+          schema_version: "ExperimentRun.v1",
+          experiment_run_id: "container:proposed",
+          plan_id: plan.plan_id,
+          experiment_id: "proposed",
+          role: "proposed",
+          status: "succeeded",
+          environment: { mode: "container", platform: "container", image: "local", digest: "sha256:test" },
+          command: plan.proposed.command,
+          metrics: [{ name: "container_reproduction_pass", value: 1, direction: "higher_better", unit: "ratio" }],
+          stdout: "container reproduction passed",
+          stderr: "",
+          exit_code: 0,
+          resource_usage: { wall_time_seconds: 1 },
+          started_at: "2026-05-09T00:00:00Z",
+          finished_at: "2026-05-09T00:00:00Z",
+          reproduction: { container_reproduced: true, image: "local", digest: "sha256:test" },
+        },
+      ],
+    })
+
+    expect(report.reproduction.status).toBe("passed")
+    expect(report.final_claims_allowed).toBe(false)
+    expect(report.blockers).toContain("experiment_protocol_incomplete")
+  })
+
+  test("does not allocate GPU budget unless explicitly requested", () => {
+    const defaultPlan = planExperiments({
+      topic: "deterministic ranking protocol",
+      method_name: "ranking workflow",
+      dataset_ids: ["dataset:ranking"],
+      primary_metric: "ranking_ndcg_at_3",
+      include_default_baselines: false,
+      now: "2026-05-09T00:00:00Z",
+    })
+
+    expect(defaultPlan.resource_budget.max_gpu_hours).toBe(0)
+
+    const gpuPlan = planExperiments({
+      topic: "vision model fine-tuning",
+      method_name: "gpu training workflow",
+      dataset_ids: ["dataset:images"],
+      primary_metric: "accuracy",
+      include_default_baselines: false,
+      resource_budget: { max_wall_time_seconds: 7200, max_memory_mb: 32768, max_gpu_hours: 2 },
+      now: "2026-05-09T00:00:00Z",
+    })
+
+    expect(gpuPlan.resource_budget).toEqual({
+      max_wall_time_seconds: 7200,
+      max_memory_mb: 32768,
+      max_gpu_hours: 2,
     })
   })
 })

@@ -938,6 +938,11 @@ function experimentProtocolSummary(input: ComposeDraftPaperInput) {
   const missingBaseline = isRankingContext(input)
     ? "当前没有基线运行入口；该缺口会使结果只能作为探索性观察。"
     : "当前没有基线运行入口；该缺口会阻断结论性表述。"
+  const gpuBudget = plan.resource_budget.max_gpu_hours
+  const resourceBudget =
+    typeof gpuBudget === "number" && gpuBudget > 0
+      ? `资源预算为运行时间<=${plan.resource_budget.max_wall_time_seconds}s、内存<=${plan.resource_budget.max_memory_mb}MB、GPU<=${gpuBudget} 小时。`
+      : `资源预算为运行时间<=${plan.resource_budget.max_wall_time_seconds}s、内存<=${plan.resource_budget.max_memory_mb}MB；GPU 未纳入当前资源预算。`
   return [
     intro,
     "",
@@ -958,7 +963,7 @@ function experimentProtocolSummary(input: ComposeDraftPaperInput) {
         : `实验协议包含 ${protocol.entries.length} 个可执行入口，来源为${displayProtocolSource(protocol.discovered_from)}；${protocol.gaps.length > 0 ? `仍需处理的协议缺口包括：${protocol.gaps.map(paperProseText).join("、")}。` : "当前实验协议完整。"}`
       : "当前没有显式仓库实验协议；流程只能根据已登记证据和受控执行结果组织评价。",
     "",
-    `资源预算为运行时间<=${plan.resource_budget.max_wall_time_seconds}s、内存<=${plan.resource_budget.max_memory_mb}MB、GPU<=${plan.resource_budget.max_gpu_hours ?? 0} 小时。降级策略：${downgradePolicy}。`,
+    `${resourceBudget}降级策略：${downgradePolicy}。`,
   ].join("\n")
 }
 

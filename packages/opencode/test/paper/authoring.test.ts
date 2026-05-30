@@ -1148,6 +1148,8 @@ describe("paper authoring loop", () => {
     expect(experimentalSetup).toContain("无证据覆盖消融用于移除 claim_coverage 项，检验证据覆盖项是否与候选排序差异相关")
     expect(experimentalSetup).not.toContain("检验证据覆盖特征是否影响候选排序")
     expect(experimentalSetup).toContain("实验协议包含 4 个可执行入口，覆盖本文方法、词项匹配基线、无证据覆盖消融和容器复现；当前实验协议完整")
+    expect(experimentalSetup).toContain("资源预算为运行时间<=3600s、内存<=8192MB；GPU 未纳入当前资源预算。")
+    expect(experimentalSetup).not.toContain("GPU<=0 小时")
     expect(experimentalSetup).toContain("数据集不可用时只能使用明确标注为替代数据的可核验评测集，并将结论降级为探索性观察")
     expect(experimentalSetup).not.toContain("来源为复现实验入口")
     expect(experimentalSetup).not.toContain("最近的开放可验证评测集")
