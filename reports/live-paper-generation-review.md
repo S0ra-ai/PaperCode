@@ -5,6 +5,15 @@
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
 
+## 2026-05-30 参考文献作者复审
+
+- 协议场景复跑 `run-98cdc549-2a3d-4386-b132-f70a9c210b70`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-98cdc549-2a3d-4386-b132-f70a9c210b70\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- `SourceEvidenceManifest.v1` 中 3 条 arXiv 来源均包含作者字段，作者数分别为 5、2、1。
+- 参考文献改为作者、标题、arXiv 定位信息、发表时间和检索时间顺序；多作者使用分号分隔。
+- 坏词扫描确认不再出现 `1. Explaining Rankings with Hidden Group Bonuses. arXiv...` 这种无作者引用开头。
+- 质量判断：参考文献从检索清单更接近正式论文引用格式，便于读者识别来源责任主体。
+
 ## 2026-05-30 ranking 主文 gate 口吻复审
 
 - 协议场景复跑 `run-b1ac9807-fe7b-4fd5-9b03-ed28c8fcc377`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
