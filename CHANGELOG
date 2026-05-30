@@ -2,10 +2,21 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.38-dev
+:version       0.13.0.39-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.39-dev - 2026/05/30 (89a8eee0) [fix/mcp-tool-binding-test-isolation]
+        :brief 生成稿增加关键词章节
+        :authoring
+            - fix(structure): 论文 scaffold 在摘要后、引言前增加关键词章节
+            - fix(keywords): ranking 场景输出候选论文排序、证据覆盖、排序 nDCG@3、词项匹配基线和容器复现关键词
+            - test(authoring): 增加关键词章节位置和内容断言
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
     0.13.0.38-dev - 2026/05/30 (c5af9eaf) [fix/mcp-tool-binding-test-isolation]
         :brief 参考文献保留作者并从 live arXiv 抓取作者元数据
