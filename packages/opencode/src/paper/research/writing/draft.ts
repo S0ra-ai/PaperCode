@@ -333,7 +333,7 @@ function sourceSummary(input: ComposeDraftPaperInput) {
 function artifactSummary(input: ComposeDraftPaperInput) {
   const artifactIds = [...new Set(input.ledger.entries.flatMap((entry) => entry.artifact_ids))]
   if (artifactIds.length === 0) return "当前还没有可审查证据记录。"
-  return `正文结论绑定 ${artifactIds.length} 个证据记录；完整证据索引保留在附录和本地审查材料中，正文只保留必要说明。`
+  return `正文结论绑定 ${artifactIds.length} 个复核记录；完整证据索引保留在附录中，正文只保留必要说明。`
 }
 
 function countedSummary(values: string[], label: (value: string) => string, unit: string) {
@@ -537,7 +537,7 @@ function literatureEvidenceSummary(input: ComposeDraftPaperInput) {
     markdownTable([verifiedHeading, "验证状态", "定位信息", "相关性"], rows),
     verified.length > 0
       ? literatureContrastSummary(selected)
-      : "由于当前文献记录未验证，正文不能把这些条目写成领域共识或新颖性证明；需要后续用授权检索、DOI/arXiv 元数据或人工审查补齐相关工作。",
+      : "由于当前文献记录未验证，正文不能把这些条目写成领域共识或新颖性证明；需要后续用授权检索、DOI/arXiv 元数据或来源核验补齐相关工作。",
   ])
 }
 
@@ -564,7 +564,7 @@ function referencesSummary(input: ComposeDraftPaperInput) {
   }
   const verified = map.sources.filter((source) => source.verification.status === "verified")
   if (verified.length === 0) {
-    return "当前只有未验证候选文献；这些条目不能进入正式参考文献。进入投稿前必须完成 DOI、arXiv 元数据或人工审查验证。"
+    return "当前只有未验证候选文献；这些条目不能进入正式参考文献。进入投稿前必须完成 DOI、arXiv 元数据或来源核验。"
   }
   return joinBlocks([
     verified.slice(0, 20).map(referenceEntry).join("\n"),
@@ -891,7 +891,7 @@ function studyDesignSummary(input: ComposeDraftPaperInput) {
     markdownTable(["阶段", "观测状态", "在论文中的作用"], rows),
     "这个设计把论文结构完整性与结论可支持性分开处理。结构完整性要求研究问题、方法、实验和结论齐备；结论可支持性要求来源记录、实验结果和复现检查能够支撑这些表述。",
     "因此，研究设计不是简单的执行说明，而是正文可信度的约束机制。材料边界决定可以讨论哪些对象，代码证据决定方法描述是否有源码范围支撑，实验协议决定结果是否有对照，复现执行决定结果是否可以重复，证据链完整性约束则决定这些结果能否进入结论。任一环节缺失时，相关结论应降级为探索性观察，而不是用完整段落掩盖证据缺口。",
-    "这种分层也让后续人工审查更直接：审稿人可以先查看主文中的研究问题和结果表，再沿着附录中的来源、断言和实验记录回到具体文件、命令和输出摘要。对计算机类论文而言，这比单纯给出一段生成式解释更重要，因为代码路径、运行脚本、数据版本和环境差异都会影响结果能否成立。",
+    "这种分层也让复核路径更直接：读者可以先查看主文中的研究问题和结果表，再沿着附录中的来源、断言和实验执行摘要回到具体文件、命令和输出摘要。对计算机类论文而言，这比单纯给出一段生成式解释更重要，因为代码路径、运行脚本、数据版本和环境差异都会影响结果能否成立。",
     "这一设计还能区分两类证据不足：一类是材料不足，例如缺少论文来源或数据许可；另一类是实验链路不足，例如没有基线、消融或隔离环境复现。前者影响背景与引用可信度，后者影响结果与贡献可信度。将两类问题分开呈现，可以避免将结构完整误认为证据充分。",
     "因此，主文中的每个强结论都应能在附录中找到对应证据，而附录中的每条证据也应能解释它为何足以支撑或限制该结论完整成立。",
   ])
@@ -914,7 +914,7 @@ function implementationTraceSummary(input: ComposeDraftPaperInput) {
     claimRows.length > 0
       ? markdownTable(["断言", "章节", "状态", "来源类型", "证据概况"], claimRows)
       : "当前没有断言行。",
-    "读者如果需要复核某个结果，可以从正文断言跳到附录证据清单，再定位到代码分析、实验运行和审稿记录。",
+    "读者如果需要复核某个结果，可以从正文断言跳到附录证据清单，再定位到代码分析、实验执行和复核记录。",
   ])
 }
 
@@ -942,7 +942,7 @@ function registeredCommandsSummary(input: ComposeDraftPaperInput) {
     rows.length > 0
       ? markdownTable(["角色", "编号", "命令", "指标", "来源"], rows.slice(0, 12))
       : "当前没有登记命令；需要先在 package.json、manifest 或手工协议中声明本文方法、基线、消融与复现入口。",
-    "命令登记的作用不是代替实验，而是为后续执行提供可审查的入口。系统只把实际运行过的实验记录写入结果章节；仅登记但未执行的命令会保留在协议章节或修复清单中。",
+    "登记命令用于说明可复核入口，并不等同于实验结果。结果章节仅报告已经执行并留下输出摘要的实验；未执行命令保留在协议章节或修复清单中。",
   ])
 }
 
@@ -998,7 +998,7 @@ function reproducibilityChecklistSummary(input: ComposeDraftPaperInput) {
   const hasResultReport = Boolean(input.result_report)
   const hasDataBoundary = Boolean(input.data_plan)
   const rows = [
-    ["研究简报", displayReady(true), "主题、语言、目标模板和预算已进入运行记录。"],
+    ["研究简报", displayReady(true), "主题、语言、目标模板和预算已明确。"],
     ["数据/代码边界", displayReady(hasDataBoundary), hasDataBoundary ? "已生成数据计划或代码材料边界。" : "需要补充数据许可、访问和代码材料范围。"],
     ["实验计划", displayReady(hasPlan), hasPlan ? "指标、基线、消融和资源预算已登记。" : "缺少评价目标和对照设计。"],
     ["协议命令", displayReady(hasProtocol), hasProtocol ? "已登记可执行命令。" : "缺少本文方法、基线、消融和复现命令。"],
@@ -1188,9 +1188,9 @@ function evidenceModelSummary(input: ComposeDraftPaperInput) {
     "本文采用证据链约束实验结论。证据链由材料来源、可审查断言和复核记录组成，分别对应论文材料、代码文件、数据集、实验日志以及与这些材料相连的结论表述。",
     `本研究登记 ${evidenceSources.length} 个可追踪来源、${input.ledger.entries.length} 条断言和 ${artifactIds.length} 个复核记录；其中 ${sourceIds.length} 个来源直接绑定断言，${supported} 条断言已有证据支持，${unsupported} 条断言仍缺证据。`,
     "只有同时具备源码范围、实验结果和复现记录的结论，才被写入结果章节中的结论性表述；缺少任一环节时，相关表述只能作为限制或后续工作保留。",
-    "这种证据链让读者能够从正文中的方法或结果句子追溯到材料、实验命令、指标和审稿记录，从而形成可追踪性。它也为后续人工审稿提供定位入口：审稿人可以先读主文，再进入附录检查完整证据索引。",
+    "这种证据链让读者能够从正文中的方法或结果句子追溯到材料、实验命令、指标和复核记录，从而形成可追踪性。它也为后续复核提供定位入口：读者可以先读主文，再进入附录检查完整证据索引。",
     "因此，正文中的每个实验结论都应回答两个问题：它来自哪里，以及是否在受控环境中重复出现。没有答案的结论必须降级为探索性观察。",
-    "这一约束是后续扩展真实数据集、领域基线、随机种子和更复杂实验资源时不可省略的基本条件，也是审稿可追踪性的基础。",
+    "这一约束是后续扩展真实数据集、领域基线、随机种子和更复杂实验资源时不可省略的基本条件，也是结论可追踪性的基础。",
     "在计算机类论文场景中，这种约束尤其重要，因为代码实现、运行脚本、依赖版本和执行环境的细小差异都可能改变实验结论。",
     "因此，本文区分文本完整性与结论可支持性：前者关注论文结构，后者要求来源、实验命令、运行结果和复现状态同时可追踪。只有后者成立时，结果才可以写成结论性表述；否则正文必须保留限制说明，并把缺口转化为后续实验任务。",
   ])
@@ -1292,12 +1292,12 @@ function scaffoldSections(input: ComposeDraftPaperInput, claimSections: DraftSec
       "附录 F：证据记录索引",
       artifactIds.length > 0
         ? [
-            `证据记录索引用于定位复核材料。本研究共有 ${artifactIds.length} 条结构化证据记录；为保持正文可读，详细路径、哈希和渲染状态不在正文展开。`,
-            "复核时建议先核对三类记录：代码分析是否覆盖论文声称的方法入口，实验运行是否包含本文方法、基线、消融和复现记录，导出记录是否说明 Markdown、LaTeX、PDF 与 DOCX 的生成状态。若这些记录缺失，正文中的相应结论应降级为待验证观察。",
-            "附录只保留人工复核所需的摘要；完整复核材料由运行目录中的结构化记录承担。",
-            "若人工复核发现证据数量与主文结论不一致，应优先修正实验协议或降低结论强度，而不是补写没有来源支撑的段落、表格、图片或图表内容。",
+            `证据记录索引用于定位复核材料。本研究共有 ${artifactIds.length} 条复核记录；为保持正文可读，详细路径、哈希和渲染状态不在正文展开。`,
+            "复核时建议先核对三类记录：代码分析是否覆盖论文声称的方法入口，实验执行是否包含本文方法、基线、消融和复现记录，证据清单是否能连接正文结论与来源材料。若这些记录缺失，正文中的相应结论应降级为待验证观察。",
+            "附录只保留复核所需的摘要；完整材料由结构化记录承担。",
+            "若复核发现证据数量与主文结论不一致，应优先修正实验协议或降低结论强度，而不是补写没有来源支撑的段落、表格、图片或图表内容。",
           ].join("\n\n")
-        : "当前没有结构化证据记录。",
+        : "当前没有复核记录。",
     ),
   ]
 }
