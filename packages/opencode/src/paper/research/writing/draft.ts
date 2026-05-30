@@ -875,6 +875,17 @@ function experimentDesignCountsText(input: ComposeDraftPaperInput) {
 function researchQuestionsSummary(input: ComposeDraftPaperInput) {
   const ready = finalReady(input)
   const metric = displayMetricName(input.result_report?.primary_metric ?? input.experiment_plan?.proposed.expected_metric ?? "primary_metric")
+  if (isRankingContext(input)) {
+    return joinBlocks([
+      "本文围绕候选论文排序任务提出三项可复核问题：排序接口是否可追踪，特征贡献是否可比较，复现结果是否一致。",
+      "RQ1 排序接口：rankAgentTeamPapers 和 scorePaper 是否形成可追踪的候选论文排序方法？",
+      `RQ2 特征贡献：完整排序方法相对词项匹配基线和无证据覆盖消融，在${metric} 上是否形成可比较差异？`,
+      `RQ3 复现一致性：本机与容器复现环境中的${metric} 是否一致，从而支撑结果表述？`,
+      ready
+        ? "当前证据链已满足结果表述条件，正文只保留已绑定来源和实验结果的结论；完整证据索引放在附录。"
+        : "当前证据链尚未满足结果表述条件，正文会把结论限定为探索性观察，并把缺口写成修复清单。",
+    ])
+  }
   const design = experimentDesignCountsText(input)
   return joinBlocks([
     `本文将研究目标拆分为三项可复核问题：证据是否足以支撑方法，${design} 的对照是否能形成可比较结果，以及复现状态是否支撑结果表述。`,
