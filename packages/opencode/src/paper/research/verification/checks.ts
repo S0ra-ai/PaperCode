@@ -84,8 +84,7 @@ export function checkSourceAuthenticity(input: VerificationGateInput): Verificat
       "paper_fucker.research.sources.records": input.source_records?.length ?? 0,
     },
     () => {
-      if (!input.source_records) return []
-      const records = new Map(input.source_records.map((source) => [source.source_id, source]))
+      const records = new Map((input.source_records ?? []).map((source) => [source.source_id, source]))
       const citedSourceIds = Array.from(new Set(input.ledger.entries.flatMap((entry) => entry.source_ids)))
       return citedSourceIds.flatMap((sourceId) => {
         const source = records.get(sourceId)
