@@ -1322,7 +1322,22 @@ function rankingScoreFormulaSummary(input: ComposeDraftPaperInput) {
   const required = ["relevance", "claim_coverage", "recency"]
   if (!required.every((feature) => weights.some((item) => item.feature === feature))) return undefined
   const byFeature = new Map(weights.map((item) => [item.feature, item.weight]))
-  return `评分公式为：score(p) = ${byFeature.get("relevance")} * relevance(p) + ${byFeature.get("claim_coverage")} * claim_coverage(p) + ${byFeature.get("recency")} * recency(p)。其中 p 表示待排序候选论文，三项特征均按候选论文逐项计算；三个权重来自 scorePaper 的当前实现。`
+  const rows = [
+    ["relevance", byFeature.get("relevance") ?? "", "候选论文与研究主题的匹配程度"],
+    ["claim_coverage", byFeature.get("claim_coverage") ?? "", "候选论文对当前研究问题关键断言的覆盖"],
+    ["recency", byFeature.get("recency") ?? "", "发表时间相关的弱排序信号"],
+  ]
+  return [
+    "评分公式如下：",
+    "",
+    "```text",
+    `score(p) = ${byFeature.get("relevance")} * relevance(p) + ${byFeature.get("claim_coverage")} * claim_coverage(p) + ${byFeature.get("recency")} * recency(p)`,
+    "```",
+    "",
+    "其中 p 表示待排序候选论文，三项特征均按候选论文逐项计算；权重来自 scorePaper 的当前实现。",
+    "",
+    markdownTable(["特征", "权重", "含义"], rows),
+  ].join("\n")
 }
 
 function readableAsciiList(values: string[]) {
@@ -1367,7 +1382,7 @@ function rankingMethodNarrative(input: ComposeDraftPaperInput) {
     entrypointSentence ? `${entrypointSentence}。` : undefined,
   ]
     .filter(Boolean)
-    .join("")
+    .join("\n\n")
 }
 
 function rankingMethodFigureSummary(input: ComposeDraftPaperInput) {
