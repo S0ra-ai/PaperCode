@@ -872,13 +872,9 @@ function codeAvailabilitySummary(input: ComposeDraftPaperInput) {
     ["代码工作区状态", worktreeStatus],
     ["代码许可证", license],
   ]
-  return [
-    "代码可用性：",
-    implementation,
-    reproduction,
-    markdownTable(["项目", "内容"], rows),
-    worktreeBoundary,
-  ].join("\n")
+  const parts = ["### 代码可用性", "", implementation, reproduction, "", markdownTable(["项目", "内容"], rows)]
+  if (worktreeBoundary) parts.push("", worktreeBoundary)
+  return parts.join("\n")
 }
 
 function displayDatasetDiagnostic(value: string) {
