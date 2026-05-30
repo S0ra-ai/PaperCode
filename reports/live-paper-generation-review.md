@@ -5,6 +5,15 @@
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
 
+## 2026-05-30 前置章节论文式表达复审
+
+- 协议场景复跑 `run-df7d2d38-b766-483c-b4b5-3810f3c26ff6`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-df7d2d38-b766-483c-b4b5-3810f3c26ff6\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 摘要、引言、研究问题与相关工作不再使用“自动写作”“流程产物”“证据充分性检查”“正式结论”“包装成正式结论”等产品流程口吻。
+- 主文统一改为“结果表述”“结论性表述”和“证据链完整性约束”，更接近论文中的证据边界和复现约束表述。
+- 坏词扫描未发现 `流程产物`、`证据充分性检查`、`正式结论`、`自动写作`、`mock/fake/fixture/placeholder`、`PaperRun` 或内部证据 ID 残留。
+- 质量判断：当前协议样本的前置章节已更接近直接由 Codex 写作的论文口吻；下一轮重点应放在相关工作深度、实验对象抽象和真实用户仓库的泛化叙述。
+
 ## 2026-05-30 指标文案与实时来源复审
 
 - 协议场景复跑 `run-8664dcbc-5828-4c2f-9fc2-1ef582c814da`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
