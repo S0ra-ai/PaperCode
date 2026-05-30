@@ -788,7 +788,7 @@ function semanticExperimentRationale(input: ComposeDraftPaperInput, role: "basel
   if (!isRankingContext(input)) return humanizeExperimentText(fallback)
   const text = `${experimentId} ${label} ${fallback}`.toLowerCase()
   if (role === "baseline" && /lexical|词项/.test(text)) {
-    return "词项匹配基线用于只依赖查询词重合的排序对照，检验代码证据排序是否优于简单词项排序。"
+    return "词项匹配基线用于只依赖查询词重合的排序对照，检验完整排序与简单词项排序在当前候选集上的差异。"
   }
   if (role === "ablation" && /(no[-_\s]?coverage|coverage|证据覆盖)/.test(text)) {
     return "无证据覆盖消融用于移除 claim_coverage 项，检验证据覆盖项是否与候选排序差异相关。"
@@ -1653,7 +1653,7 @@ function rankingThreatsToValiditySummary(input: ComposeDraftPaperInput, metric: 
   return joinBlocks([
     `标注效度：当前评测集${candidateText}，标签由实时 arXiv 检索排序、主题匹配、元数据完整度和发表时间确定，不是人工相关性标注。因此结果更适合解释自动筛选协议，而不能直接等同于专家相关性判断。`,
     `指标效度：${metric} 只评价前三位排序质量，能够反映综述准备时最先阅读候选的排序效果，但不能覆盖长列表排序、多主题覆盖或引用多样性。`,
-    "基线效度：词项匹配基线偏弱，主要检验查询词重合能否解释排序收益；后续需要加入 BM25、向量检索、学习排序或人工标注基线，才能判断该评分函数相对强检索系统的价值。",
+    "基线效度：词项匹配基线偏弱，主要检验查询词重合是否能解释当前排序差异；后续需要加入 BM25、向量检索、学习排序或人工标注基线，才能判断该评分函数相对强检索系统的价值。",
     "消融效度：无证据覆盖消融隔离了 claim_coverage 的影响，但 relevance、claim_coverage 和 recency 之间可能存在相关性；更细粒度的特征消融和随机种子重复能够提高解释稳定性。",
     "外部效度：当前结论限于候选论文排序任务和当前主题。要推广到更广泛的文献推荐或研究助手场景，需要更多主题、更多候选规模和人工相关性标注。容器复现说明运行环境一致，但不替代跨数据集验证。",
   ])
@@ -1797,12 +1797,12 @@ function rankingDiscussionSummary(input: ComposeDraftPaperInput, report: NonNull
     const ablationValue = rankingNoCoverageAblationValue(input, metric)
     const ablationDelta = typeof ablationValue === "number" ? report.proposed.value - ablationValue : undefined
     if (typeof ablationDelta === "number") {
-      rows.push(`在候选论文排序任务中，完整排序同时高于词项匹配基线和无证据覆盖消融：在${metricLabel} 上，相对词项匹配基线的绝对差值为 ${formatMetricValue(Math.abs(baselineDelta))}，相对无证据覆盖消融的绝对差值为 ${formatMetricValue(Math.abs(ablationDelta))}。这说明当前候选集的前三位排序不只来自查询词重合，证据覆盖特征也参与了排序差异。`)
+      rows.push(`在候选论文排序任务中，在${metricLabel} 上，完整排序数值同时高于词项匹配基线和无证据覆盖消融：相对词项匹配基线的绝对差值为 ${formatMetricValue(Math.abs(baselineDelta))}，相对无证据覆盖消融的绝对差值为 ${formatMetricValue(Math.abs(ablationDelta))}。这说明当前候选集的前三位排序不只来自查询词重合，证据覆盖特征也参与了排序差异。`)
     } else {
-      rows.push(`在候选论文排序任务中，完整排序相对词项匹配基线的绝对差值为 ${formatMetricValue(Math.abs(baselineDelta))}；该差异说明本文评分在当前候选集上优于只看查询词重合的排序。`)
+      rows.push(`在候选论文排序任务中，完整排序相对词项匹配基线的绝对差值为 ${formatMetricValue(Math.abs(baselineDelta))}；该差异说明本文评分与只看查询词重合的排序在当前候选集上表现不同。`)
     }
   }
-  rows.push("词项匹配基线提供了一个低成本检索对照：如果完整排序不能超过该基线，relevance、claim_coverage 和 recency 的组合就缺少实际意义。当前结果中完整排序优于词项匹配基线，说明评分函数至少捕捉到了查询词之外的排序信号。")
+  rows.push("词项匹配基线提供了一个低成本检索对照：当前结果显示，完整排序与词项匹配基线存在可观测差异；该差异提示 relevance、claim_coverage 和 recency 的组合需要在更强基线和更大候选集上继续验证。")
   rows.push("无证据覆盖消融去掉 claim_coverage 后排名下降，说明 claim_coverage 项与当前前三位排序差异相关。这一结果与任务设定一致：候选论文不仅要与主题相关，还需要覆盖当前研究问题中的关键断言。")
   rows.push(`结果仍需要保守解释。${candidateText}，且标签不是人工相关性标注，而是由实时 arXiv 检索排序、主题匹配、元数据完整度和发表时间派生；因此当前结论更适合作为自动筛选协议的证据，而不是人工文献综述质量的最终证明。`)
   if (report.reproduction.status === "passed") {
@@ -2052,7 +2052,7 @@ function limitationsSummary(input: ComposeDraftPaperInput, unsupported: string[]
     }
     return joinBlocks([
       `当前实验的主要限制来自评测集规模和标注方式：${candidateText}，标签由实时 arXiv 检索排序、主题匹配、元数据完整度和发表时间派生，不是人工相关性标注。`,
-      "词项匹配基线偏弱，只能说明完整排序优于简单查询词重合；后续需要加入 BM25、向量检索、学习排序和人工标注基线。",
+      "词项匹配基线偏弱，只能说明当前完整排序在 nDCG@3 上高于简单查询词重合；后续需要加入 BM25、向量检索、学习排序和人工标注基线。",
       "当前结论仍限于单一主题和当前候选集合。要把结果扩展到通用文献推荐或研究助手场景，需要跨主题验证、更大候选池、人工相关性标注和更多随机种子重复。",
     ])
   }
