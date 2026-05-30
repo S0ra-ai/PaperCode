@@ -1837,13 +1837,36 @@ function rankingNoCoverageAblationValue(input: ComposeDraftPaperInput, metric: s
 function rankingThreatsToValiditySummary(input: ComposeDraftPaperInput, metric: string) {
   const candidateCount = rankingCandidateCount(input)
   const candidateText = candidateCount ? `候选数 ${candidateCount}` : "候选集规模有限"
-  return joinBlocks([
-    `标注效度：当前评测集${candidateText}，标签由实时 arXiv 检索排序、主题匹配、元数据完整度和发表时间确定，不是人工相关性标注。因此结果更适合解释自动筛选协议，而不能直接等同于专家相关性判断。`,
-    `指标效度：${metric} 只评价前三位排序质量，能够反映综述准备时最先阅读候选的排序效果，但不能覆盖长列表排序、多主题覆盖或引用多样性。`,
-    "基线效度：词项匹配基线偏弱，主要检验查询词重合是否能解释当前排序差异；后续需要加入 BM25、向量检索、学习排序或人工标注基线，才能判断该评分函数相对强检索系统的价值。",
-    "消融效度：无证据覆盖消融隔离了 claim_coverage 的影响，但 relevance、claim_coverage 和 recency 之间可能存在相关性；更细粒度的特征消融和随机种子重复能够提高解释稳定性。",
-    "外部效度：当前结论限于候选论文排序任务和当前主题。要推广到更广泛的文献推荐或研究助手场景，需要更多主题、更多候选规模和人工相关性标注。容器复现说明运行环境一致，但不替代跨数据集验证。",
-  ])
+  return markdownTable(
+    ["效度类型", "威胁", "缓解方式"],
+    [
+      [
+        "标注效度",
+        `当前评测集${candidateText}；标签由实时 arXiv 检索排序、主题匹配、元数据完整度和发表时间确定，不是人工相关性标注。`,
+        "将结果解释为自动筛选协议观察，不等同于专家相关性判断。",
+      ],
+      [
+        "指标效度",
+        `${metric} 只评价前三位排序质量，不能覆盖长列表排序、多主题覆盖或引用多样性。`,
+        "后续补充长列表、多主题和引用多样性指标。",
+      ],
+      [
+        "基线效度",
+        "词项匹配基线偏弱，主要检验查询词重合是否能解释当前排序差异。",
+        "后续加入 BM25、向量检索、学习排序或人工标注基线。",
+      ],
+      [
+        "消融效度",
+        "无证据覆盖消融隔离了 claim_coverage 的影响，但 relevance、claim_coverage 和 recency 之间可能存在相关性。",
+        "补充更细粒度特征消融和随机种子重复。",
+      ],
+      [
+        "外部效度",
+        "当前结论限于候选论文排序任务和当前主题；容器复现说明运行环境一致，但不替代跨数据集验证。",
+        "扩展更多主题、候选规模和人工相关性标注。",
+      ],
+    ],
+  )
 }
 
 function experimentResultTable(input: ComposeDraftPaperInput) {
