@@ -1229,11 +1229,14 @@ function researchQuestionsSummary(input: ComposeDraftPaperInput) {
   const ready = finalReady(input)
   const metric = displayMetricName(input.result_report?.primary_metric ?? input.experiment_plan?.proposed.expected_metric ?? "primary_metric")
   if (isRankingContext(input)) {
+    const rows = [
+      ["RQ1", "排序机制", "relevance、claim_coverage 和 recency 的组合能否形成明确的候选论文排序规则？", "方法"],
+      ["RQ2", "特征关联", `移除 claim_coverage 后，相比完整排序，在${metric} 上是否出现前三位排序差异？`, "结果"],
+      ["RQ3", "环境一致性", `本机和容器环境能否得到一致的${metric} 结果？`, "可复现性"],
+    ]
     return joinBlocks([
       "本文围绕候选论文排序任务提出三项研究问题：排序机制是否明确，claim_coverage 项是否与排序差异相关，运行环境是否影响观察结果。",
-      "RQ1 排序机制：relevance、claim_coverage 和 recency 的组合能否形成明确的候选论文排序规则？",
-      `RQ2 特征关联：移除 claim_coverage 后，相比完整排序，在${metric} 上是否出现前三位排序差异？`,
-      `RQ3 环境一致性：本机和容器环境能否得到一致的${metric} 结果？`,
+      markdownTable(["编号", "关注点", "问题", "回答章节"], rows),
       ready
         ? "方法章节回答 RQ1，结果章节回答 RQ2，可复现性章节回答 RQ3；附录列出实现定位和复现实验入口。"
         : "方法章节给出排序机制，结果与可复现性章节只报告已有观察；缺失实验会在限制中说明。",
