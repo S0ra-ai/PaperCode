@@ -1329,6 +1329,8 @@ describe("paper authoring loop", () => {
     expect(declarations).not.toContain("系统")
     expect(references).toContain("Ada Zhang; Bo Chen. Agent Workflow Ranking.")
     expect(references).toContain("https://example.org/ranking-agent-workflow")
+    expect(references).toContain("检索时间：2026-05-09。")
+    expect(references).not.toContain("检索时间：2026-05-09T00:00:00Z")
     expect(references).not.toContain("1. Agent Workflow Ranking. https://example.org/ranking-agent-workflow")
     expect(draft.markdown).not.toContain("代码证据驱动工作流")
     expect(draft.markdown).not.toContain("证据驱动工作流")
