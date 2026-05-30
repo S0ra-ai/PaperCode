@@ -1,9 +1,19 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.102-dev
+- project_version: 0.13.0.103-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-31 占位数据集过滤复审
+
+- authoring 测试已确认 `example.org/dataset` 不再作为可核验数据集进入数据可用性表。
+- 数据可用性和材料来源统计现在只使用已验证且非占位 URL 的正式数据集；工作区授权本地数据集仍可保留。
+- 占位数据源会输出中文诊断，不再被算作“数据集来源 1 个”。
+- 完整成稿测试的数据集 fixture 已改为正式 Hugging Face 定位，避免测试自身继续依赖 `example.org`。
+- 相关回归已通过：authoring/live/metadata 组合测试和 `packages/opencode` typecheck 均通过。
+- 本报告和 CHANGELOG 记录为后续开发版本 `0.13.0.103-dev`。
+- 质量判断：文献、相关工作和数据可用性三处真实性边界已统一，减少伪来源进入成稿的风险。
 
 ## 2026-05-31 通用相关工作占位来源过滤复审
 
