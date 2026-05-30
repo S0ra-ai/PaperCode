@@ -1,9 +1,18 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.99-dev
+- project_version: 0.13.0.100-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 code metadata 清理稳定性复审
+
+- code metadata 测试已增加可控 `EBUSY` 重试用例，确认临时目录清理在后续删除成功时不输出警告。
+- PaperRun code metadata 集成用例显式断言清理阶段不输出 `Could not remove temporary code metadata test directory`。
+- 本轮组合回归中未再出现 Windows 临时目录清理警告。
+- 相关回归已通过：code metadata 定向测试、authoring/live/metadata 组合测试和 `packages/opencode` typecheck 均通过。
+- 本报告和 CHANGELOG 记录为后续开发版本 `0.13.0.100-dev`。
+- 质量判断：验证日志更干净，减少 Windows 文件句柄释放竞态对论文生成验收的干扰。
 
 ## 2026-05-30 占位参考文献过滤复审
 
