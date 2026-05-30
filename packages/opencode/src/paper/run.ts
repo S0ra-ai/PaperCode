@@ -57,7 +57,7 @@ import {
 } from "./orchestrator"
 import { budgetTierPolicy } from "./budget"
 import { recordExportBundle, type ExportBundle } from "./research/export"
-import { composeDraftPaper, streamMarkdownDraft, type ClaimLedger, type DraftPaper } from "./research/writing"
+import { composeDraftPaper, streamMarkdownDraft, type ClaimLedger, type CodeAvailabilityMetadata, type DraftPaper } from "./research/writing"
 import type { DataPlan, LiteratureMap } from "./research/sources"
 import {
   paperObservabilityAuditFromEvents,
@@ -1098,6 +1098,31 @@ async function loadLatestDraftPaper(input: {
   }
 }
 
+function repositoryUrlFromPackage(value: unknown) {
+  if (typeof value === "string") return value.trim().replace(/^git\+/, "").replace(/^git:\/\//, "https://").replace(/\.git$/, "") || undefined
+  if (typeof value === "object" && value !== null && "url" in value && typeof value.url === "string") {
+    return value.url.trim().replace(/^git\+/, "").replace(/^git:\/\//, "https://").replace(/\.git$/, "") || undefined
+  }
+  return undefined
+}
+
+async function packageCodeMetadata(workspace: string): Promise<CodeAvailabilityMetadata | undefined> {
+  const raw = await readFile(path.join(workspace, "package.json"), "utf8").catch(() => undefined)
+  if (!raw) return undefined
+  let parsed: Record<string, unknown>
+  try {
+    parsed = JSON.parse(raw) as Record<string, unknown>
+  } catch {
+    return undefined
+  }
+  const metadata: CodeAvailabilityMetadata = {
+    repository_url: repositoryUrlFromPackage(parsed.repository),
+    version: typeof parsed.version === "string" ? parsed.version : undefined,
+    license: typeof parsed.license === "string" ? parsed.license : undefined,
+  }
+  return metadata.repository_url || metadata.version || metadata.license ? metadata : undefined
+}
+
 async function refreshDraftPaperForFinalExport(input: {
   runDir: string
   run: Awaited<ReturnType<typeof loadResearchRun>>
@@ -1116,6 +1141,7 @@ async function refreshDraftPaperForFinalExport(input: {
     experimentGuidance,
     experimentStarterPack,
     experimentRunGroups,
+    codeMetadata,
   ] = await Promise.all([
     readLatestArtifactBySchema<DataPlan>(input.runDir, input.artifacts, "DataPlan.v1"),
     readLatestArtifactBySchema<LiteratureMap>(input.runDir, input.artifacts, "LiteratureMap.v1"),
@@ -1124,6 +1150,7 @@ async function refreshDraftPaperForFinalExport(input: {
     readLatestArtifactBySchema<ExperimentProtocolGuidance>(input.runDir, input.artifacts, "ExperimentProtocolGuidance.v1"),
     readLatestArtifactBySchema<ExperimentProtocolStarterPack>(input.runDir, input.artifacts, "ExperimentProtocolStarterPack.v1"),
     readArtifactsBySchema<ExperimentRun[]>(input.runDir, input.artifacts, "ExperimentRun.v1[]"),
+    packageCodeMetadata(input.run.workspace),
   ])
   const finalClaimsAllowed = resultReport.final_claims_allowed === true
   const experimentRuns = latestExperimentRuns(experimentRunGroups.flat())
@@ -1141,6 +1168,7 @@ async function refreshDraftPaperForFinalExport(input: {
       container_runs: experimentRuns.filter((run) => run.environment.mode === "container"),
     },
     result_report: resultReport,
+    code_metadata: codeMetadata,
     now: input.options?.clock?.().toISOString(),
   })
   const refreshedDraft: DraftPaper = {

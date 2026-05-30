@@ -36,7 +36,7 @@ import type {
   ExperimentPlan,
   ExperimentRunner,
 } from "./research/experiments"
-import type { ClaimLedger } from "./research/writing"
+import type { ClaimLedger, CodeAvailabilityMetadata } from "./research/writing"
 import { createExperimentNoveltyGate, createNoveltyCheckpoint, type NoveltyCheckpoint } from "./novelty"
 import { createResearchWikiDigest } from "./research-wiki"
 import { createPaperSpine, type PaperSpineClaim } from "./paper-spine"
@@ -1185,6 +1185,46 @@ function runShellCommand(command: string, cwd: string, timeoutMs: number) {
   })
 }
 
+function repositoryUrlFromPackage(value: unknown) {
+  if (typeof value === "string") return cleanRepositoryUrl(value)
+  if (typeof value === "object" && value !== null && "url" in value && typeof value.url === "string") {
+    return cleanRepositoryUrl(value.url)
+  }
+  return undefined
+}
+
+function cleanRepositoryUrl(value: string) {
+  const clean = value.trim().replace(/^git\+/, "").replace(/^git:\/\//, "https://").replace(/\.git$/, "")
+  return clean || undefined
+}
+
+async function gitShortCommit(workspace: string) {
+  const result = await runShellCommand("git rev-parse --short HEAD", workspace, 5_000)
+  if (result.exitCode !== 0 || result.timedOut) return undefined
+  return result.stdout.trim() || undefined
+}
+
+async function workspaceCodeMetadata(request: ResearchIntakeRequest, options?: ResearchRuntimeOptions): Promise<CodeAvailabilityMetadata | undefined> {
+  const workspace = request.workspace_path ?? options?.workspace
+  if (!workspace) return undefined
+  const packagePath = path.join(workspace, "package.json")
+  const raw = await readFile(packagePath, "utf8").catch(() => undefined)
+  let parsed: Record<string, unknown> = {}
+  if (raw) {
+    try {
+      parsed = JSON.parse(raw) as Record<string, unknown>
+    } catch {
+      parsed = {}
+    }
+  }
+  const metadata: CodeAvailabilityMetadata = {
+    repository_url: repositoryUrlFromPackage(parsed.repository),
+    version: typeof parsed.version === "string" ? parsed.version : await gitShortCommit(workspace),
+    license: typeof parsed.license === "string" ? parsed.license : undefined,
+  }
+  return metadata.repository_url || metadata.version || metadata.license ? metadata : undefined
+}
+
 function localCodeExperimentRunner(input: {
   request: ResearchIntakeRequest
   code: DefaultCodeAnalysisResult
@@ -1684,6 +1724,7 @@ async function defaultAuthoring(runDir: string, request: ResearchIntakeRequest, 
   if (cache.authoring) return cache.authoring
   const claims = await defaultClaimLedger(runDir, request, options)
   const result = await defaultResultReport(runDir, request, options)
+  const codeMetadata = await workspaceCodeMetadata(request, options)
   cache.authoring = await runPaperAuthoringLoop(
     runDir,
     {
@@ -1697,6 +1738,7 @@ async function defaultAuthoring(runDir: string, request: ResearchIntakeRequest, 
       experiment_starter_pack: result.experimentStarterPack,
       experiment_runs: result.experimentRuns,
       result_report: result.resultReport,
+      code_metadata: codeMetadata,
       available_source_ids: result.sourceIds,
       source_records: result.sourceRecords,
       model_reviews: [
@@ -1950,6 +1992,7 @@ const DEFAULT_STAGE_HANDLERS: Partial<Record<PaperResearchStageId, PaperStageHan
   drafting: async ({ run_dir, request, options }) => {
     const claims = await defaultClaimLedger(run_dir, request, options)
     const result = await defaultResultReport(run_dir, request, options)
+    const codeMetadata = await workspaceCodeMetadata(request, options)
     const draft = composeDraftPaper({
       title: normalizeResearchIntake(request).topic,
       ledger: claims.ledger,
@@ -1960,6 +2003,7 @@ const DEFAULT_STAGE_HANDLERS: Partial<Record<PaperResearchStageId, PaperStageHan
       experiment_guidance: result.experimentGuidance,
       experiment_runs: result.experimentRuns,
       result_report: result.resultReport,
+      code_metadata: codeMetadata,
       now: nowIso(options),
     })
     await writeStageLog(
@@ -2029,6 +2073,7 @@ const DEFAULT_STAGE_HANDLERS: Partial<Record<PaperResearchStageId, PaperStageHan
   revision: async ({ run_dir, request, options }) => {
     const claims = await defaultClaimLedger(run_dir, request, options)
     const result = await defaultResultReport(run_dir, request, options)
+    const codeMetadata = await workspaceCodeMetadata(request, options)
     const draft = composeDraftPaper({
       title: normalizeResearchIntake(request).topic,
       ledger: claims.ledger,
@@ -2039,6 +2084,7 @@ const DEFAULT_STAGE_HANDLERS: Partial<Record<PaperResearchStageId, PaperStageHan
       experiment_guidance: result.experimentGuidance,
       experiment_runs: result.experimentRuns,
       result_report: result.resultReport,
+      code_metadata: codeMetadata,
       now: nowIso(options),
     })
     await writeStageLog(

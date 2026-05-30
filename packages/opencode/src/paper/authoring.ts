@@ -71,6 +71,7 @@ export type RunPaperAuthoringLoopInput = {
   model_reviews: ModelReviewInput[]
   target_profile?: string
   code_artifact_ids?: string[]
+  code_metadata?: Parameters<typeof composeDraftPaper>[0]["code_metadata"]
   source_artifact_ids?: string[]
   renderers?: ExportRenderer
   tools?: PreviewDiagnostics["tools"]
@@ -314,6 +315,7 @@ export async function runPaperAuthoringLoop(
         experiment_starter_pack: input.experiment_starter_pack,
         experiment_runs: input.experiment_runs,
         result_report: input.result_report,
+        code_metadata: input.code_metadata,
         now: input.now,
       })
       const revision = createProfileAwareDraftRevision({ draft: baseDraft, authoring: input, now: input.now })
