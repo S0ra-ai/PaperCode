@@ -1,9 +1,17 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.66-dev
+- project_version: 0.13.0.67-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 方法框分支说明复审
+
+- 协议场景复跑 `run-0289f1b6-c521-45c3-9254-2019b597e80f`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-0289f1b6-c521-45c3-9254-2019b597e80f\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 方法框后现在只保留 `分支检查覆盖词项匹配基线、无证据覆盖消融和容器复现`。
+- 最终稿不再出现重复的 `对照分支包括...` 句。
+- 质量判断：方法章节减少同义重复，结构表后的说明更像正式论文正文。
 
 ## 2026-05-30 数据缺失降级策略复审
 
