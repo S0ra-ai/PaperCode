@@ -1158,7 +1158,7 @@ function methodEvidenceNote(input: ComposeDraftPaperInput) {
   if (isRankingContext(input)) {
     const rangeText = ranges.length > 0 ? `实现上，${ranges.join("、")} 标明了排序入口和评分入口` : "实现上，排序入口和评分入口均保留了可定位实现"
     const entrypointText = entrypoints.length > 0 ? `；${chineseList(entrypoints)}用于比较完整排序、词项基线、证据覆盖消融和环境一致性` : ""
-    return `${rangeText}${entrypointText}。${entry ? citationText(entry) : ""}`.trim()
+    return `${rangeText}${entrypointText}。具体实现位置见附录 A。`
   }
   const rangeText = ranges.length > 0 ? `源码证据记录保留了 ${ranges.join("、")} 等接口位置` : "源码证据记录保留了接口位置"
   const entrypointText = entrypoints.length > 0 ? `，并覆盖${chineseList(entrypoints)}等可复现实验入口` : ""
