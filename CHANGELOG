@@ -2,10 +2,23 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.14-dev
+:version       0.13.0.15-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.15-dev - 2026/05/30 (136bf987) [fix/mcp-tool-binding-test-isolation]
+        :brief 摘要、引言、研究问题与相关工作去流程化
+        :authoring
+            - fix(front-matter): 摘要改为“缺少依据的过程记录”与“证据链满足结果表述条件”，移除流程产物、成稿和证据充分性检查口吻
+            - fix(introduction): 引言改为正文完整性与代码依据、实验协议、运行结果和复现边界同时成立，移除自动写作和结果侧模板句
+            - fix(related-work): 相关工作改为工具调用、智能体协作与复现评测边界，移除自动化研究、自动化流程和草稿包装口吻
+            - fix(conclusion-language): 主文和附录统一使用“结论性表述”和“证据链完整性约束”，不再输出“正式结论”或“证据充分性检查”
+            - test(authoring): 增加摘要、引言、研究问题、相关工作和全文禁用词断言
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
     0.13.0.14-dev - 2026/05/30 (9e7ca20d) [fix/mcp-tool-binding-test-isolation]
         :brief 研究设计与附录改为论文式复核材料
