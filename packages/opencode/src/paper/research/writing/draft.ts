@@ -1015,7 +1015,7 @@ function experimentStarterPackSummary(input: ComposeDraftPaperInput) {
 function experimentRunSummary(input: ComposeDraftPaperInput) {
   const runs = input.experiment_runs
   if (!runs) return "尚未登记具体实验执行结果。"
-  const rows = [...runs.host_runs, ...runs.container_runs].slice(0, 12).map((run) => {
+  const rows = [...sortExperimentRunsForDisplay(runs.host_runs), ...sortExperimentRunsForDisplay(runs.container_runs)].slice(0, 12).map((run) => {
     const metrics = run.metrics.length > 0 ? run.metrics.map((metric) => `${displayMetricName(metric.name)}=${displayMetricValue(metric.name, metric.value)}${displayMetricUnit(metric.name, metric.unit)}`).join(", ") : "无指标"
     const mode = run.environment.mode
     const environment = mode === "container" ? "container:repro-env" : `${mode}:${run.environment.platform}`
@@ -1096,6 +1096,34 @@ function commandText(command: { argv: string[] }) {
 
 function metricLookup(run: Pick<ExperimentRun, "metrics">, metric: string) {
   return run.metrics.find((item) => item.name === metric)?.value
+}
+
+function experimentRoleDisplayRank(role?: string) {
+  if (role === "proposed") return 0
+  if (role === "baseline") return 1
+  if (role === "ablation") return 2
+  if (role === "container_reproduction") return 3
+  return 4
+}
+
+function sortExperimentRunsForDisplay<T extends { role?: string; experiment_id: string }>(runs: T[]) {
+  return runs
+    .map((run, index) => ({ run, index }))
+    .sort((left, right) => {
+      const roleDelta = experimentRoleDisplayRank(left.run.role) - experimentRoleDisplayRank(right.run.role)
+      if (roleDelta !== 0) return roleDelta
+      return left.index - right.index
+    })
+    .map((item) => item.run)
+}
+
+function experimentIdsForDisplay(runs: NonNullable<ComposeDraftPaperInput["experiment_runs"]>) {
+  const ordered = sortExperimentRunsForDisplay([...runs.host_runs, ...runs.container_runs])
+  const ids: string[] = []
+  for (const run of ordered) {
+    if (!ids.includes(run.experiment_id)) ids.push(run.experiment_id)
+  }
+  return ids
 }
 
 function experimentDesignCounts(input: ComposeDraftPaperInput) {
@@ -1511,7 +1539,7 @@ function hostContainerConsistencySummary(input: ComposeDraftPaperInput) {
   if (!runs) {
     return "尚未登记本机/容器实验运行，因此无法比较复现一致性。当前论文只能说明协议设计，不能说明执行结果。"
   }
-  const ids = [...new Set([...runs.host_runs.map((run) => run.experiment_id), ...runs.container_runs.map((run) => run.experiment_id)])]
+  const ids = experimentIdsForDisplay(runs)
   const comparisons = ids.map((id) => {
     const host = runs.host_runs.find((run) => run.experiment_id === id)
     const container = runs.container_runs.find((run) => run.experiment_id === id)
@@ -1669,7 +1697,7 @@ function experimentResultTable(input: ComposeDraftPaperInput) {
   const report = input.result_report
   if (!runs || !report) return undefined
   const metric = report.primary_metric
-  const rows = runs.host_runs
+  const rows = sortExperimentRunsForDisplay(runs.host_runs)
     .filter((run) => run.metrics.some((item) => item.name === metric))
     .map((run) => {
       const value = run.metrics.find((item) => item.name === metric)?.value

@@ -921,14 +921,14 @@ describe("paper authoring loop", () => {
       },
       experiment_runs: {
         host_runs: [
-          run("proposed", "proposed", "host"),
-          run("baseline ranking lexical", "baseline", "host"),
           run("ablation ranking no coverage", "ablation", "host"),
+          run("baseline ranking lexical", "baseline", "host"),
+          run("proposed", "proposed", "host"),
         ],
         container_runs: [
-          run("proposed", "proposed", "container"),
-          run("baseline ranking lexical", "baseline", "container"),
           run("ablation ranking no coverage", "ablation", "container"),
+          run("baseline ranking lexical", "baseline", "container"),
+          run("proposed", "proposed", "container"),
         ],
       },
       code_metadata: {
@@ -1177,6 +1177,12 @@ describe("paper authoring loop", () => {
     expect(draft.markdown).toContain("以排序 nDCG@3 作为主指标")
     expect(draft.markdown).toContain("在“排序 nDCG@3”这一主指标上")
     expect(results).toContain("| 证据约束的论文排序方法 | 本文方法 | 1.0000 |")
+    const resultMethodRow = results.indexOf("| 证据约束的论文排序方法 | 本文方法 | 1.0000 |")
+    const resultBaselineRow = results.indexOf("| 词项匹配基线 | 基线 | 0.8659 |")
+    const resultAblationRow = results.indexOf("| 无证据覆盖消融 | 消融 | 0.7318 |")
+    expect(resultMethodRow).toBeGreaterThan(-1)
+    expect(resultBaselineRow).toBeGreaterThan(resultMethodRow)
+    expect(resultAblationRow).toBeGreaterThan(resultBaselineRow)
     expect(results).toContain("表 1 汇总本文方法、基线和消融在主指标、运行状态和容器复现上的结果。")
     expect(results).toContain("本文方法的排序 nDCG@3 数值高于最佳基线，绝对差值为 0.1341")
     expect(results).not.toContain("本文方法高于基线")
@@ -1193,6 +1199,18 @@ describe("paper authoring loop", () => {
     expect(reproducibility).toContain("| 环境 | 实验 | 角色 | 状态 | 指标 | 耗时 |")
     expect(reproducibility).toContain("表 2 汇总本机与容器主指标差异，用于检查复现一致性。")
     expect(reproducibility).toContain("表 3 汇总本机与容器实验的状态、主指标和耗时")
+    const reproducibilityMethodRow = reproducibility.indexOf("| 证据约束的论文排序方法 | 通过 | 1.0000 | 通过 | 1.0000 | 0.0000 |")
+    const reproducibilityBaselineRow = reproducibility.indexOf("| 词项匹配基线 | 通过 | 0.8659 | 通过 | 0.8659 | 0.0000 |")
+    const reproducibilityAblationRow = reproducibility.indexOf("| 无证据覆盖消融 | 通过 | 0.7318 | 通过 | 0.7318 | 0.0000 |")
+    expect(reproducibilityMethodRow).toBeGreaterThan(-1)
+    expect(reproducibilityBaselineRow).toBeGreaterThan(reproducibilityMethodRow)
+    expect(reproducibilityAblationRow).toBeGreaterThan(reproducibilityBaselineRow)
+    const executionMethodRow = reproducibility.indexOf("| 本机 Windows | 证据约束的论文排序方法 | 本文方法 | 通过 | 排序 nDCG@3=1.0000 |")
+    const executionBaselineRow = reproducibility.indexOf("| 本机 Windows | 词项匹配基线 | 基线 | 通过 | 排序 nDCG@3=0.8659 |")
+    const executionAblationRow = reproducibility.indexOf("| 本机 Windows | 无证据覆盖消融 | 消融 | 通过 | 排序 nDCG@3=0.7318 |")
+    expect(executionMethodRow).toBeGreaterThan(-1)
+    expect(executionBaselineRow).toBeGreaterThan(executionMethodRow)
+    expect(executionAblationRow).toBeGreaterThan(executionBaselineRow)
     expect(reproducibility).not.toContain("表 1 汇总本机与容器实验")
     expect(reproducibility).toContain("该比较用于检查同一协议在两个环境中的稳定性")
     expect(reproducibility).not.toContain("命令")
