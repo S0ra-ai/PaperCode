@@ -1518,13 +1518,26 @@ function rankingContributionsSummary(input: ComposeDraftPaperInput) {
     counts.hostRuns > 0 || counts.containerRuns > 0
       ? `，并用 ${counts.hostRuns} 条本机实验记录和 ${counts.containerRuns} 条容器实验记录检查复现一致性`
       : ""
+  const rows = [
+    [
+      "排序评分",
+      `提出由 ${featureText} 组成的候选论文排序评分，并通过 rankAgentTeamPapers 和 scorePaper 形成候选论文排序接口。`,
+      "方法；附录 A",
+    ],
+    [
+      "对照协议",
+      "构造词项匹配基线和无证据覆盖消融，以区分简单查询词匹配、证据覆盖特征和完整排序接口的影响。",
+      "实验设置；结果",
+    ],
+    [
+      "复现约束",
+      `以${metric} 评价当前候选集的前三位排序质量${reproduction}，使性能差异与复现状态同时可见。`,
+      "结果；可复现性；附录 B",
+    ],
+  ]
   return joinBlocks([
     "本文贡献如下：",
-    [
-      `1. 提出由 ${featureText} 组成的候选论文排序评分，并通过 rankAgentTeamPapers 和 scorePaper 形成候选论文排序接口。`,
-      "2. 构造词项匹配基线和无证据覆盖消融，以区分简单查询词匹配、证据覆盖特征和完整排序接口的影响。",
-      `3. 以${metric} 评价当前候选集的前三位排序质量${reproduction}，使性能差异与复现状态同时可见。`,
-    ].join("\n"),
+    markdownTable(["贡献", "内容", "证据位置"], rows),
   ])
 }
 
