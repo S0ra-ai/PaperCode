@@ -2,10 +2,21 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.91-dev
+:version       0.13.0.92-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.92-dev - 2026/05/30 (9d3d0aa6) [fix/mcp-tool-binding-test-isolation]
+        :brief 参考文献时间戳日期化
+        :authoring
+            - fix(references): 参考文献发表时间和检索时间将 ISO 时间戳收敛为日期格式
+            - test(authoring): ranking 成稿断言参考文献检索时间为日期，并拒绝裸 ISO 时间戳
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - note: protocol live 复审未重复触发，避免 arXiv HTTP 429 限流扩大
 
     0.13.0.91-dev - 2026/05/30 (10c0a60b) [fix/mcp-tool-binding-test-isolation]
         :brief ranking 复现实验入口补齐执行状态

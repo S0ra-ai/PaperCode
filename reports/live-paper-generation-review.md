@@ -1,9 +1,18 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.91-dev
+- project_version: 0.13.0.92-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 参考文献时间戳复审
+
+- ranking authoring 测试已确认参考文献中的检索时间输出为 `YYYY-MM-DD` 日期。
+- 参考文献不再把 `2026-05-09T00:00:00Z` 这类 ISO 时间戳直接暴露到论文正文。
+- 相关回归已通过：authoring/live/metadata 定向测试和 `packages/opencode` typecheck 均通过。
+- 本轮未重复触发 protocol live 复审，原因是上一轮完整 protocol 复跑已被 arXiv HTTP 429 rate limit 阻断；为避免扩大限流，只记录当前 authoring 证据。
+- 本报告和 CHANGELOG 记录为后续开发版本 `0.13.0.92-dev`。
+- 质量判断：参考文献从运行日志式时间戳改为论文读者更容易扫描的日期格式。
 
 ## 2026-05-30 ranking 复现实验入口状态复审
 
