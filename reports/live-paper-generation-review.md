@@ -406,3 +406,14 @@ Paper Fucker 当前已经具备“诚实闭环”的关键能力：没有复现�
 - 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-843b4f2a-826e-4df2-9b1f-4a19b2553ff3\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
 - 抽查：主文未发现本轮新增禁用词、旧数据/实验设置模板句、工程审计词、完整机器 id、`mock/fake/fixture/placeholder`、伪来源或伪容器残留。
 - 验证：`test/paper/authoring.test.ts` 12 pass / 322 assertions；`packages/opencode` typecheck passed；`scripts/live-paper-quality-benchmark.ts --scenario protocol` passed。
+
+## 2026-05-30 研究设计与附录论文式复核材料复审
+
+- 研究设计章节改为“五类证据约束”，不再输出“生成流畅正文”“写作阶段”“在实际使用中”“用户”“格式完整误判”等流程或产品说明口吻。
+- 附录 A 证据追踪改为来源、断言和复核记录的关系说明，不再提“实现层面”“内部运行日志”“结构化产物”。
+- 附录 B 复现清单改为正式结果所需的最小证据条件，不再提用户、可交付论文、界面、TUI 或实时预览。
+- 附录 F 证据记录索引改为复核材料定位说明，不再提导出清单、实时监控台、机器可追踪性或完整标识。
+- 最新 protocol benchmark：`run-dbff03a1-5590-4616-bd01-911d704d2fc9`，status=`succeeded`，14 个 stage 全通过，final export=`final`，failed checks 为空，Preview ready。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-dbff03a1-5590-4616-bd01-911d704d2fc9\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 抽查：全文未发现本轮新增禁用词、旧讨论/效度/结论模板句、工程审计词、完整机器 id、`mock/fake/fixture/placeholder`、伪来源或伪容器残留。
+- 验证：`test/paper/authoring.test.ts` 12 pass / 346 assertions；`packages/opencode` typecheck passed；`scripts/live-paper-quality-benchmark.ts --scenario protocol` passed。
