@@ -1098,6 +1098,8 @@ describe("paper authoring loop", () => {
     expect(relatedWork).toContain("排序解释研究")
     expect(relatedWork).toContain("检索与推荐评测研究")
     expect(relatedWork).toContain("复现与验证研究")
+    expect(relatedWork).toContain("当前没有可进入相关工作正文的已验证来源")
+    expect(relatedWork).not.toContain("Agent Workflow Ranking")
     expect(relatedWork).not.toContain("工具调用与智能体协作研究")
     expect(relatedWork).not.toContain("论文到代码执行研究")
     expect(relatedWork).not.toContain("本文纳入")
