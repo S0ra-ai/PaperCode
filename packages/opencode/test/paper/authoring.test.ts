@@ -956,6 +956,7 @@ describe("paper authoring loop", () => {
     const reproducibility = markdownSection(draft.markdown, "可复现性")
     const discussion = markdownSection(draft.markdown, "讨论")
     const threatsToValidity = markdownSection(draft.markdown, "效度威胁")
+    const limitations = markdownSection(draft.markdown, "限制")
     const conclusion = markdownSection(draft.markdown, "结论")
     const dataAvailability = markdownSection(draft.markdown, "数据与代码可用性")
 
@@ -1049,6 +1050,12 @@ describe("paper authoring loop", () => {
     expect(threatsToValidity).not.toContain("流程完整性")
     expect(threatsToValidity).not.toContain("复核材料需要保存命令")
     expect(threatsToValidity).not.toContain("证据范围")
+    expect(limitations).toContain("候选数 5")
+    expect(limitations).toContain("不是人工相关性标注")
+    expect(limitations).toContain("词项匹配基线偏弱")
+    expect(limitations).toContain("跨主题验证")
+    expect(limitations).not.toContain("未发现阻断项")
+    expect(limitations).not.toContain("待修复")
     expect(conclusion).toContain("rankAgentTeamPapers 和 scorePaper")
     expect(conclusion).toContain("候选论文排序方法")
     expect(conclusion).not.toContain("降低计算机类论文中结果断言与实验依据脱节")
@@ -1089,6 +1096,8 @@ describe("paper authoring loop", () => {
     expect(draft.markdown).not.toContain("证据记录索引")
     expect(draft.markdown).not.toContain("结构化证据")
     expect(draft.markdown).not.toContain("处理 | 来源类型")
+    expect(draft.markdown).not.toContain("## 限制与待修复项")
+    expect(draft.markdown).not.toContain("待修复")
   })
 
   test("renders ranking related work with ranking and retrieval representatives", () => {
