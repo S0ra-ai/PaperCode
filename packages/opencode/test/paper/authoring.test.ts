@@ -13,7 +13,7 @@ import { type ExportRenderer } from "@/paper/research/export"
 import { createResearchRun, type ResearchRuntimeOptions } from "@/paper/research/runtime"
 import { discoverLiterature, type DataPlan } from "@/paper/research/sources"
 import { type ResultReport } from "@/paper/research/experiments"
-import { checkReferences, checkSourceAuthenticity } from "@/paper/research/verification"
+import { checkReferences, checkSourceAuthenticity, evaluateVerificationGate } from "@/paper/research/verification"
 import { composeClaimLedger, composeDraftPaper } from "@/paper/research/writing"
 
 const now = "2026-05-09T00:00:00Z"
@@ -1713,7 +1713,7 @@ describe("paper authoring loop", () => {
     expect(references).not.toContain("paper_fucker-default-source-discovery")
   })
 
-  test("warns when a draft has no verified paper reference for formal References", () => {
+  test("blocks when a draft has no verified paper reference for formal References", () => {
     const ledger = composeClaimLedger({
       topic: "Reference readiness",
       claims: [
@@ -1753,7 +1753,55 @@ describe("paper authoring loop", () => {
     })
 
     expect(findings.map((finding) => finding.category)).toContain("missing_verified_reference")
-    expect(findings.find((finding) => finding.category === "missing_verified_reference")?.severity).toBe("warning")
+    expect(findings.find((finding) => finding.category === "missing_verified_reference")?.severity).toBe("blocker")
+  })
+
+  test("blocks final export when no verified paper reference exists", () => {
+    const ledger = composeClaimLedger({
+      topic: "Reference readiness",
+      claims: [
+        {
+          text: "The code path is reproducible.",
+          section_id: "method",
+          confidence: 0.8,
+          source_ids: ["material:code:reference-readiness"],
+          artifact_ids: ["artifact-codebase-map"],
+        },
+      ],
+      now,
+    })
+    const draft = composeDraftPaper({ title: "Reference Readiness", ledger, now })
+    const result = evaluateVerificationGate({
+      ledger,
+      draft,
+      data_plan: dataPlan(),
+      result_report: resultReport(),
+      available_source_ids: ["material:code:reference-readiness"],
+      source_records: [
+        {
+          schema_version: "SourceRecord.v1",
+          source_id: "material:code:reference-readiness",
+          kind: "code",
+          title: "reference readiness code",
+          url: "file:///workspace/src/index.ts",
+          provider: "unit-test",
+          license: { status: "clear", expression: "workspace-authorized" },
+          version: { value: "local", retrieved_at: now },
+          verification: { status: "verified", method: "unit-test", checked_at: now },
+          retrieved_at: now,
+        },
+      ],
+      model_reviews: [{ model: "unit-reviewer", verdict: "pass" }],
+      now,
+    })
+
+    expect(result.blocking_report.status).toBe("blocked")
+    expect(result.blocking_report.blockers).toContainEqual(
+      expect.objectContaining({
+        category: "missing_verified_reference",
+        severity: "blocker",
+      }),
+    )
   })
 
   test("does not warn about formal References when a verified paper reference exists", () => {

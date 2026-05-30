@@ -41,12 +41,12 @@ export function checkReferences(input: VerificationGateInput): VerificationFindi
           : [
               finding({
                 category: "missing_verified_reference",
-                severity: "warning",
+                severity: "blocker",
                 message: "No verified paper reference is available for the formal References section.",
                 claim_ids: [],
                 source_ids: [],
                 artifact_ids: [],
-                required_action: "Complete DOI/arXiv/publisher verification before treating the draft as submission-ready.",
+                required_action: "Complete DOI/arXiv/publisher verification before final export.",
               }),
             ]
       return [...invalidReferences, ...referenceReadiness]
