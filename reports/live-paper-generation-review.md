@@ -1,9 +1,17 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.55-dev
+- project_version: 0.13.0.56-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 产品版本元数据复审
+
+- 协议场景复跑 `run-6a244ca0-0caf-414e-8ee0-be7c4de57012`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-6a244ca0-0caf-414e-8ee0-be7c4de57012\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 数据与代码可用性章节现在写出产品版本 `0.13.0.55-dev`，不再回退到临时 workspace package 版本 `0.1.0`。
+- 数据与代码可用性章节同时写出代码修订 `31f522b1` 和工作区状态。
+- 质量判断：代码可用性从 fixture package 版本推进到产品版本，避免临时实验工作区 package 版本误导复现实验读者。
 
 ## 2026-05-30 代码工作区状态复审
 

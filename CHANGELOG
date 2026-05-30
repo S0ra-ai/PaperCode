@@ -2,10 +2,23 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.55-dev
+:version       0.13.0.56-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.56-dev - 2026/05/30 (31f522b1) [fix/mcp-tool-binding-test-isolation]
+        :brief 代码可用性优先使用产品版本
+        :authoring
+            - fix(availability): 代码可用性章节优先输出 README/CHANGELOG 中的产品版本
+            - fix(runtime): PaperRun authoring 从论文工作区向上查找产品 README 与 CHANGELOG
+            - fix(export): final export 刷新草稿时使用同一产品版本解析逻辑
+            - fix(availability): 无外部数据集但存在代码证据时仍输出代码可用性信息
+            - test(authoring): 新增 code-metadata-version 集成测试，覆盖产品版本优先于 workspace package 版本
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
     0.13.0.55-dev - 2026/05/30 (b903eb4d) [fix/mcp-tool-binding-test-isolation]
         :brief 代码可用性补充工作区状态
