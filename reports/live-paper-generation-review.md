@@ -1,9 +1,19 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.98-dev
+- project_version: 0.13.0.99-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 占位参考文献过滤复审
+
+- ranking authoring 测试已确认 `example.org` 不再作为正式参考文献进入生成稿。
+- DOI/arXiv 缺失且 URL 为 example、localhost、file 等占位来源时，参考文献章节会输出中文诊断并要求补齐可核验来源。
+- 已验证但使用占位 URL 的来源不再被误当作正式参考文献。
+- 相关回归已通过：authoring/live/metadata 定向测试和 `packages/opencode` typecheck 均通过。
+- 本轮未重复触发 protocol live 复审，原因是上一轮完整 protocol 复跑已被 arXiv HTTP 429 rate limit 阻断；为避免扩大限流，只记录当前 authoring 证据。
+- 本报告和 CHANGELOG 记录为后续开发版本 `0.13.0.99-dev`。
+- 质量判断：成稿不再把测试或占位 URL 伪装成可投稿参考文献，真实性边界更硬。
 
 ## 2026-05-30 ranking 结论章节表格复审
 
