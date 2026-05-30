@@ -5,6 +5,15 @@
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
 
+## 2026-05-30 ranking 附录复审
+
+- 协议场景复跑 `run-20512e64-1a0d-4eca-82f7-efe68a55b787`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-20512e64-1a0d-4eca-82f7-efe68a55b787\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 附录 A 改为材料与实现定位，包含材料类型、排序方法实现和复核材料。
+- 附录 B 改为复现实验入口，列出本文方法、词项匹配基线、无证据覆盖消融和容器复现入口。
+- 坏词扫描未发现 `## 附录 A：证据追踪`、`## 附录 B：复现清单`、`断言 1`、`断言状态`、`证据追踪表`、`研究简报`、`就绪`、`结论表述条件` 或 `项目声明的实验入口`。
+- 质量判断：附录从产品审计清单收敛为论文复核材料和复现实验入口。
+
 ## 2026-05-30 ranking 限制章节复审
 
 - 协议场景复跑 `run-c1acb453-3fb0-45ff-b14c-a41ad348b1d3`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
