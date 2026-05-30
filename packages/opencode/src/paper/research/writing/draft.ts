@@ -1357,6 +1357,20 @@ function methodEntrypointRoles(input: ComposeDraftPaperInput) {
   return `${chineseList(entrypoints)}分别约束本文方法、词项基线、证据覆盖相关性和环境可重复性`
 }
 
+function rankingControlAndReproductionSummary(input: ComposeDraftPaperInput) {
+  if (!isRankingContext(input)) return undefined
+  const entrypointSentence = methodEntrypointRoles(input)
+  const evidenceNote = methodEvidenceNote(input)
+  return [
+    "### 对照与复现",
+    "",
+    entrypointSentence ? `${entrypointSentence}。` : undefined,
+    evidenceNote,
+  ]
+    .filter(Boolean)
+    .join("\n\n")
+}
+
 function rankingMethodNarrative(input: ComposeDraftPaperInput) {
   const metric = input.result_report?.primary_metric ?? input.experiment_plan?.proposed.expected_metric
   if (!isRankingMetric(metric)) return undefined
@@ -1372,14 +1386,17 @@ function rankingMethodNarrative(input: ComposeDraftPaperInput) {
     !formula && features.includes("relevance") && features.includes("claim_coverage") && features.includes("recency")
       ? "其中，relevance 衡量候选论文与研究主题的匹配程度，claim_coverage 衡量候选论文对当前研究问题关键断言的覆盖，recency 作为发表时间相关的弱排序信号。"
       : undefined
-  const entrypointSentence = methodEntrypointRoles(input)
   return [
+    "### 排序接口",
+    "",
     "候选论文排序方法由 rankAgentTeamPapers 和 scorePaper 两个核心接口组成。",
     "rankAgentTeamPapers 接收候选论文集合，并按 scorePaper 输出的得分进行降序排列。",
+    "",
+    "### 评分函数",
+    "",
     featureSentence,
     formula,
     featureDetail,
-    entrypointSentence ? `${entrypointSentence}。` : undefined,
   ]
     .filter(Boolean)
     .join("\n\n")
@@ -2026,12 +2043,13 @@ function methodSummary(input: ComposeDraftPaperInput, claimSections: DraftSectio
   const methodClaims = claimSections.find((section) => section.section_id === "method")?.markdown
   const rankingNarrative = rankingMethodNarrative(input)
   const rankingFigure = rankingMethodFigureSummary(input)
+  const rankingControl = rankingControlAndReproductionSummary(input)
   return [
     rankingNarrative ??
       "本文的方法由三部分组成：材料边界定义、代码证据抽取和可复现实验约束。材料边界先限定可讨论对象，代码分析再绑定接口、源码范围和实验入口，最后用基线、消融和容器复现约束结果表述。",
     rankingFigure,
     rankingNarrative
-      ? methodEvidenceNote(input)
+      ? rankingControl
       : methodClaims
       ? `代码理解阶段抽取的方法接口、源码范围和可运行入口如下：\n\n${methodClaims}`
       : "当前运行没有生成可展开的方法断言；这通常意味着输入材料不足或证据台账仍需补充。",
