@@ -1293,7 +1293,7 @@ function rankingMethodFigureSummary(input: ComposeDraftPaperInput) {
       : "对照分支包括基线、消融和复现检查。"
   const branchText = entrypoints.length > 0 ? chineseList(entrypoints) : "基线、消融和复现检查"
   return [
-    "图 1 候选论文排序与复现实验流程。",
+    "框 1 候选论文排序与复现实验流程。",
     "",
     "| 环节 | 论文角色 | 输出 |",
     "| --- | --- | --- |",
