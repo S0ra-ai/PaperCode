@@ -1367,11 +1367,11 @@ function rankingMethodNarrative(input: ComposeDraftPaperInput) {
     features.length > 0
       ? `scorePaper 把 ${readableAsciiList(features)} 压缩为可比较分数。`
       : "scorePaper 作为统一评分入口输出可比较分数。"
+  const formula = rankingScoreFormulaSummary(input)
   const featureDetail =
-    features.includes("relevance") && features.includes("claim_coverage") && features.includes("recency")
+    !formula && features.includes("relevance") && features.includes("claim_coverage") && features.includes("recency")
       ? "其中，relevance 衡量候选论文与研究主题的匹配程度，claim_coverage 衡量候选论文对当前研究问题关键断言的覆盖，recency 作为发表时间相关的弱排序信号。"
       : undefined
-  const formula = rankingScoreFormulaSummary(input)
   const entrypointSentence = methodEntrypointRoles(input)
   return [
     "候选论文排序方法由 rankAgentTeamPapers 和 scorePaper 两个核心接口组成。",
