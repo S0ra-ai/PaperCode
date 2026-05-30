@@ -57,11 +57,11 @@ function dataPlan(): DataPlan {
         dataset_id: "dataset-open-retrieval",
         source_id: "source-dataset-open-retrieval",
         title: "Open Retrieval Dataset",
-        url: "https://example.org/dataset",
-        provider: "fixture",
+        url: "https://huggingface.co/datasets/mteb/msmarco",
+        provider: "huggingface",
         license: { status: "clear", expression: "CC-BY-4.0" },
         version: { value: "v1", retrieved_at: now },
-        verification: { status: "verified", method: "fixture", checked_at: now },
+        verification: { status: "verified", method: "unit-test-huggingface-record", checked_at: now },
         access: "open",
         task_fit: 0.9,
         created_at: now,
@@ -860,6 +860,58 @@ describe("paper authoring loop", () => {
     expect(relatedWork).not.toContain("https://example.org/agent-placeholder")
     expect(relatedWork).not.toContain("| 相关工作 | 验证状态 | 定位信息 | 相关性 |")
     expect(relatedWork).not.toContain("已验证论文来源 1 个")
+  })
+
+  test("keeps placeholder datasets out of data availability and source counts", () => {
+    const ledger = composeClaimLedger({
+      topic: "Claim-aware retrieval",
+      claims: [
+        {
+          text: "The code analysis found source ranges for claim-aware retrieval.",
+          section_id: "method",
+          confidence: 0.9,
+          source_ids: ["material:code:retrieval"],
+          artifact_ids: ["artifact-codebase-map"],
+        },
+      ],
+      now,
+    })
+    const draft = composeDraftPaper({
+      title: "Claim-aware retrieval",
+      ledger,
+      data_plan: {
+        datasets: [
+          {
+            schema_version: "DatasetCard.v1",
+            dataset_id: "dataset-placeholder",
+            source_id: "source-dataset-placeholder",
+            title: "Placeholder Retrieval Dataset",
+            url: "https://example.org/dataset",
+            provider: "unit-test",
+            license: { status: "clear", expression: "CC-BY-4.0" },
+            version: { value: "v1", retrieved_at: now },
+            verification: { status: "verified", method: "unit-test", checked_at: now },
+            access: "open",
+            task_fit: 0.9,
+            created_at: now,
+          },
+        ],
+        license_conflicts: [],
+        access_constraints: [],
+        diagnostics: { verification_failures: [], gaps: [] },
+        recommendation: "use",
+      },
+      now,
+    })
+    const introduction = markdownSection(draft.markdown, "引言")
+    const dataAvailability = markdownSection(draft.markdown, "数据与代码可用性")
+
+    expect(dataAvailability).toContain("当前没有可进入数据可用性章节的已验证数据集")
+    expect(dataAvailability).toContain("1 个数据集使用测试或占位 URL，已从数据可用性表排除")
+    expect(dataAvailability).not.toContain("Placeholder Retrieval Dataset")
+    expect(dataAvailability).not.toContain("https://example.org/dataset")
+    expect(dataAvailability).not.toContain("| 数据集 | 访问 | 许可 | 验证 | 说明 |")
+    expect(introduction).not.toContain("数据集来源 1 个")
   })
 
   test("renders ranking benchmark experiment names as paper-readable labels", () => {
