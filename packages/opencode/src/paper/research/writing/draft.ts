@@ -2235,13 +2235,31 @@ function conclusionSummary(input: ComposeDraftPaperInput, ready: boolean) {
       result?.proposed && result.best_baseline
         ? `在${metric} 上，本文方法达到 ${displayMetricValue(result.primary_metric, result.proposed.value)}，较词项匹配基线的绝对差值为 ${formatMetricValue(Math.abs(result.proposed.value - result.best_baseline.value))}。`
         : `${primaryMetricPhrase(metric)}的比较结果仍需补齐。`
-    return [
+    const resultEvidence =
+      result?.proposed && result.best_baseline
+        ? `${metric} 为 ${displayMetricValue(result.primary_metric, result.proposed.value)}，较词项匹配基线的绝对差值为 ${formatMetricValue(Math.abs(result.proposed.value - result.best_baseline.value))}。`
+        : `${primaryMetricPhrase(metric)}的比较结果仍需补齐。`
+    const table = markdownTable(
+      ["结论项", "证据", "边界"],
+      [
+        ["排序接口", "rankAgentTeamPapers 和 scorePaper 构成候选论文排序方法。", "仅覆盖当前代码实现和候选论文排序任务。"],
+        ["主结果", resultEvidence, "当前标签来自自动筛选协议，不等同于人工相关性标注。"],
+        [
+          "特征观察",
+          ready ? "claim_coverage 项与当前候选集上的排序差异相关。" : "当前证据仍不足以确认 claim_coverage 项的排序差异。",
+          "该观察需要更多主题、人工标注和跨数据集重复实验验证。",
+        ],
+      ],
+    )
+    const boundary = ready
+      ? "因此，本文只把当前结果解释为候选论文自动筛选协议下的可复现实验观察，不把它外推为人工文献综述质量或跨领域排序性能的证明。"
+      : "当前结果仍不足以支撑结论性表述；后续需要补齐来源、对照或复现记录。"
+    return joinBlocks([
       "本文围绕 rankAgentTeamPapers 和 scorePaper 构建了候选论文排序方法，并用词项匹配基线、无证据覆盖消融和容器复现约束实验结论。",
       comparison,
-      ready
-        ? "当前结果说明，claim_coverage 项与当前候选集上的排序差异相关；后续扩展需要更多主题、人工相关性标注和跨数据集重复实验。"
-        : "当前结果仍不足以支撑结论性表述；后续需要补齐来源、对照或复现记录。",
-    ].join("")
+      table,
+      boundary,
+    ])
   }
   return ready
     ? "本文表明，将材料来源、代码证据、显式对照和容器复现纳入同一证据链，可以降低计算机类论文中结果断言与实验依据脱节的风险。在现有任务范围内，本文方法的结论由来源、实验协议和复现记录共同支撑；进一步扩展仍需要更多数据集、更多领域基线和更长周期的重复实验。"
