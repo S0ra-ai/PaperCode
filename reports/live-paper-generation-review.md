@@ -5,6 +5,15 @@
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
 
+## 2026-05-30 ranking 主文 gate 口吻复审
+
+- 协议场景复跑 `run-b1ac9807-fe7b-4fd5-9b03-ed28c8fcc377`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-b1ac9807-fe7b-4fd5-9b03-ed28c8fcc377\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 方法章节补充 `relevance`、`claim_coverage` 和 `recency` 的语义，说明排序规则而不是只列接口名。
+- 实验设置改为比较同一候选集上的排序规则表现；结果和可复现性章节改为环境一致性表述。
+- 坏词扫描显示方法、实验设置、结果和可复现性章节未出现 `结论性表述`、`足以支撑`、`支撑证据`、`复核材料` 或 `复核完整排序`。
+- 质量判断：主文更像论文方法与实验说明，减少了产品 gate 和审计报告口吻。
+
 ## 2026-05-30 ranking 研究问题复审
 
 - 协议场景复跑 `run-de8331e2-fc53-4c31-b70c-cdf212b47ad4`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
