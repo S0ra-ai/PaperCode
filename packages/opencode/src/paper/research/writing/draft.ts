@@ -752,7 +752,7 @@ function humanizeExperimentText(value: string) {
     .replace(/^Baseline runner declared by package script\.$/, "仓库 package.json 显式声明的基线运行入口。")
     .replace(/^Ablation runner declared by package script\.$/, "仓库 package.json 显式声明的消融运行入口。")
     .replace(/^If fewer than two baselines can run, downgrade to an engineering report\.$/, "少于两个基线可运行时降级为工程报告。")
-    .replace(/^If datasets are unavailable, turn to the nearest open verified benchmark\.$/, "数据集不可用时转向最近的开放可验证 benchmark。")
+    .replace(/^If datasets are unavailable, turn to the nearest open verified benchmark\.$/, "数据集不可用时只能使用明确标注为替代数据的可核验评测集，并将结论降级为探索性观察。")
     .replace(/^If container reproduction fails, block final paper claims\.$/, "容器复现失败时阻断结论性表述。")
 }
 
@@ -903,7 +903,6 @@ function experimentProtocolSummary(input: ComposeDraftPaperInput) {
       isRankingContext(input)
         ? item
             .replace("少于两个基线可运行时降级为工程报告", "少于两个基线可运行时只报告探索性实验记录")
-            .replace("数据集不可用时转向最近的开放可验证 benchmark", "数据集不可用时转向最近的开放可验证评测集")
             .replace("容器复现失败时阻断结论性表述", "容器复现失败时将跨环境结果标为探索性观察")
         : item,
     )
