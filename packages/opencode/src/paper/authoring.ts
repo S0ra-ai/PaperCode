@@ -140,14 +140,14 @@ function appendProfileAppendix(markdown: string, input: RunPaperAuthoringLoopInp
     "",
     `目标稿件配置：${displaySubmissionProfile(profile)}。`,
     datasetCount > 0
-      ? `数据可用性：本次运行登记 ${datasetCount} 个数据集，详细清单见数据与代码可用性章节和运行证据清单。`
-      : "数据可用性：本次运行未登记数据集。",
+      ? `数据可用性：已登记 ${datasetCount} 个数据集，详细清单见数据与代码可用性章节和证据清单。`
+      : "数据可用性：尚未登记数据集。",
     (input.code_artifact_ids ?? []).length > 0
-      ? `代码可用性：本次运行登记 ${input.code_artifact_ids!.length} 个代码证据记录，详细清单见运行证据清单。`
-      : "代码可用性：本次运行未登记代码证据记录。",
+      ? `代码可用性：已登记 ${input.code_artifact_ids!.length} 个代码证据记录，详细清单见证据清单。`
+      : "代码可用性：尚未登记代码证据记录。",
     failedChecks.length === 0
-      ? "终稿检查：已满足当前导出条件。"
-      : `终稿检查：仍需处理 ${failedChecks.map(finalGateIssueText).join("；")}。`,
+      ? "导出条件：已满足当前导出条件。"
+      : `导出条件：仍需处理 ${failedChecks.map(finalGateIssueText).join("；")}。`,
   ].join("\n")
 }
 
