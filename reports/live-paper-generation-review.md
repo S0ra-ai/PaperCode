@@ -1,9 +1,17 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.65-dev
+- project_version: 0.13.0.66-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 数据缺失降级策略复审
+
+- 协议场景复跑 `run-df808017-028f-4619-bccf-3dbf1bde7d16`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-df808017-028f-4619-bccf-3dbf1bde7d16\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 实验设置现在写为 `数据集不可用时只能使用明确标注为替代数据的可核验评测集，并将结论降级为探索性观察`。
+- 最终稿不再出现 `最近的开放可验证评测集`。
+- 质量判断：降级策略从自动替换数据的模糊表达，收紧到替代数据必须明示且只能支持探索性结论。
 
 ## 2026-05-30 工作区数据访问列复审
 
