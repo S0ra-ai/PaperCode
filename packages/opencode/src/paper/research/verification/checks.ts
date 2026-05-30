@@ -1,4 +1,5 @@
 import { withSpan } from "../telemetry"
+import { openVerifiedDatasets } from "../sources"
 import type { VerificationFinding, VerificationGateInput } from "./schemas"
 
 function finding(input: Omit<VerificationFinding, "finding_id">): VerificationFinding {
@@ -126,6 +127,21 @@ export function checkDataAndExperiments(input: VerificationGateInput): Verificat
           required_action: "Replace dataset with clear license data or pause for user approval.",
         }),
       )
+      const openDatasets = openVerifiedDatasets(input.data_plan)
+      const datasetFindings =
+        input.data_plan.datasets.length === 0 || openDatasets.length > 0
+          ? []
+          : [
+              finding({
+                category: "missing_open_dataset",
+                severity: "blocker",
+                message: "Dataset candidates were provided, but none are open verified or workspace-authorized for final experimental claims.",
+                claim_ids: [],
+                source_ids: input.data_plan.datasets.map((dataset) => dataset.dataset_id),
+                artifact_ids: [],
+                required_action: "Attach a verified open dataset or workspace-authorized local dataset before final export.",
+              }),
+            ]
       const reproductionFindings =
         input.result_report.reproduction.status === "passed" && input.result_report.final_claims_allowed
           ? []
@@ -142,7 +158,7 @@ export function checkDataAndExperiments(input: VerificationGateInput): Verificat
                 required_action: "Re-run final experiments in container and regenerate the result report.",
               }),
             ]
-      return [...licenseFindings, ...reproductionFindings]
+      return [...licenseFindings, ...datasetFindings, ...reproductionFindings]
     },
   )
 }

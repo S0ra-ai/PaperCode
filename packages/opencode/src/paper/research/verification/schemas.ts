@@ -9,6 +9,7 @@ export type VerificationFindingCategory =
   | "source_license_failure"
   | "unsupported_claim"
   | "dataset_license_failure"
+  | "missing_open_dataset"
   | "reproduction_failure"
   | "reviewer_warning"
   | "review_conflict"
