@@ -879,6 +879,38 @@ describe("paper authoring loop", () => {
           run("ablation ranking no coverage", "ablation", "container"),
         ],
       },
+      data_plan: {
+        datasets: [
+          {
+            schema_version: "DatasetCard.v1",
+            dataset_id: "dataset-live-arxiv-ranking",
+            source_id: "source-live-arxiv-ranking",
+            title: "agent-ranking-dataset.json",
+            url: "file://agent-ranking-dataset.json",
+            provider: "workspace",
+            license: { status: "clear", expression: "workspace-authorized local dataset" },
+            version: { value: "v1", retrieved_at: now },
+            verification: {
+              status: "verified",
+              method: "unit-test",
+              checked_at: now,
+              diagnostics: [
+                "schema_version:LiveArxivRankingDataset.v1",
+                "provenance:live-arxiv-search+abs-page",
+                "label_policy:Deterministic validation labels derived from live arXiv search rank, paper-ranking topic fit, source metadata completeness, and publication recency; not human relevance ground truth.",
+                "candidate_count:5",
+              ],
+            },
+            access: "open",
+            task_fit: 0.9,
+            created_at: now,
+          },
+        ],
+        license_conflicts: [],
+        access_constraints: [],
+        diagnostics: { verification_failures: [], gaps: [] },
+        recommendation: "use",
+      },
       literature_map: {
         schema_version: "LiteratureMap.v1",
         topic: "Agent Team Paper Ranking",
@@ -924,6 +956,7 @@ describe("paper authoring loop", () => {
     const reproducibility = markdownSection(draft.markdown, "可复现性")
     const discussion = markdownSection(draft.markdown, "讨论")
     const conclusion = markdownSection(draft.markdown, "结论")
+    const dataAvailability = markdownSection(draft.markdown, "数据与代码可用性")
 
     expect(draft.markdown.startsWith("# 证据约束的候选论文排序方法：显式基线、消融与容器复现")).toBe(true)
     expect(draft.markdown).toContain("词项匹配基线")
@@ -969,6 +1002,9 @@ describe("paper authoring loop", () => {
     expect(experimentalSetup).toContain("本文方法的评价对象为“证据约束的论文排序方法”")
     expect(experimentalSetup).toContain("词项匹配基线用于只依赖查询词重合的排序对照")
     expect(experimentalSetup).toContain("无证据覆盖消融用于移除 claim_coverage 对排序得分的贡献")
+    expect(dataAvailability).toContain("标签由实时 arXiv 检索排序、论文排序主题匹配、来源元数据完整度和发表时间确定，不是人工相关性标注")
+    expect(dataAvailability).not.toContain("Deterministic validation labels")
+    expect(dataAvailability).not.toContain("not human relevance ground truth")
     expect(draft.markdown).toContain("以排序 nDCG@3 作为主指标")
     expect(draft.markdown).toContain("在“排序 nDCG@3”这一主指标上")
     expect(results).toContain("| 证据约束的论文排序方法 | 本文方法 | 1.0000 |")

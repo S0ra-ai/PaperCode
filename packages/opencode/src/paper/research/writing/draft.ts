@@ -746,6 +746,9 @@ function displayDatasetDiagnostic(value: string) {
   if (value.startsWith("candidate_count:")) return `候选数 ${value.slice("candidate_count:".length)}`
   if (value.startsWith("label_policy:")) {
     const policy = value.slice("label_policy:".length)
+    if (/Deterministic validation labels derived from live arXiv search rank/i.test(policy)) {
+      return "标签由实时 arXiv 检索排序、论文排序主题匹配、来源元数据完整度和发表时间确定，不是人工相关性标注"
+    }
     if (/Deterministic validation labels derived from query-term overlap/i.test(policy)) {
       return "标签由检索词重合、来源元数据完整度和发表时间确定，不是人工相关性标注"
     }
