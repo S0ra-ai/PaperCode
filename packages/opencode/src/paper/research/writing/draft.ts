@@ -72,7 +72,8 @@ function paperProseText(value: string) {
     .replace(/source range/g, "源码范围")
     .replace(/系统抽取到/g, "分析阶段抽取到")
     .replace(/导出方法\/类表面/g, "导出方法或类接口")
-    .replace(/package script/g, "package.json 脚本")
+    .replace(/package script/g, "实验入口")
+    .replace(/提交代码库/g, "研究代码")
     .replace(/final gate/g, "证据链完整性约束")
     .replace(/final claim/g, "结论性表述")
     .replace(/最终 claim/g, "结论性表述")
@@ -264,7 +265,7 @@ function displayReady(value: boolean) {
 }
 
 function displayProtocolSource(value: string) {
-  if (value === "package_scripts") return "package.json 脚本"
+  if (value === "package_scripts") return "项目声明的实验入口"
   if (value === "manifest") return "实验清单"
   if (value === "manual") return "手工协议"
   return value
@@ -345,7 +346,7 @@ function evidenceSourceIds(input: ComposeDraftPaperInput) {
 function sourceSummary(input: ComposeDraftPaperInput) {
   const sourceIds = evidenceSourceIds(input)
   if (sourceIds.length === 0) return "本研究尚未登记可引用来源，因此正文只能作为研究骨架。"
-  return `本研究使用 ${sourceIds.length} 个可追踪来源，其中${countedSummary(sourceIds, sourceKindLabel, "个")}。`
+  return `本研究使用 ${sourceIds.length} 个可核验材料来源，其中${countedSummary(sourceIds, sourceKindLabel, "个")}。`
 }
 
 function artifactSummary(input: ComposeDraftPaperInput) {
@@ -760,7 +761,7 @@ function experimentProtocolSummary(input: ComposeDraftPaperInput) {
     ablationTable || "当前没有消融运行入口；贡献强度需要保持保守。",
     "",
     protocol
-      ? `仓库提供 ${protocol.entries.length} 个可执行入口，来源为 ${displayProtocolSource(protocol.discovered_from)}；${protocol.gaps.length > 0 ? `仍需处理的协议缺口包括：${protocol.gaps.map(paperProseText).join("、")}。` : "当前没有登记协议缺口。"}`
+      ? `实验协议包含 ${protocol.entries.length} 个可执行入口，来源为${displayProtocolSource(protocol.discovered_from)}；${protocol.gaps.length > 0 ? `仍需处理的协议缺口包括：${protocol.gaps.map(paperProseText).join("、")}。` : "当前实验协议完整。"}`
       : "当前没有显式仓库实验协议；流程只能根据已登记证据和受控执行结果组织评价。",
     "",
     `资源预算为运行时间<=${plan.resource_budget.max_wall_time_seconds}s、内存<=${plan.resource_budget.max_memory_mb}MB、GPU<=${plan.resource_budget.max_gpu_hours ?? 0} 小时。降级策略：${downgradePolicy}。`,
@@ -1038,7 +1039,7 @@ function methodEvidenceNote(input: ComposeDraftPaperInput) {
   const entrypoints = experimentEntrypointLabels(input)
   if (!entry && ranges.length === 0 && entrypoints.length === 0) return undefined
   const rangeText = ranges.length > 0 ? `源码证据记录保留了 ${ranges.join("、")} 等接口位置` : "源码证据记录保留了接口位置"
-  const entrypointText = entrypoints.length > 0 ? `，并登记${chineseList(entrypoints)}等可运行入口` : ""
+  const entrypointText = entrypoints.length > 0 ? `，并覆盖${chineseList(entrypoints)}等可复现实验入口` : ""
   return `${rangeText}${entrypointText}。${entry ? citationText(entry) : ""}`.trim()
 }
 
@@ -1124,7 +1125,7 @@ function implementationTraceSummary(input: ComposeDraftPaperInput) {
   ])
   return joinBlocks([
     "证据追踪表汇总来源、断言和复核记录，用于说明正文结论如何连接到材料、实验协议和运行结果。",
-    `本研究共有 ${input.ledger.entries.length} 条断言、${evidenceSources.length} 个可追踪来源（其中 ${sourceIds.length} 个直接绑定断言）和 ${artifactIds.length} 个证据记录。断言状态会影响证据链完整性判断：待补证据的断言只能出现在待修复草稿中，已支持断言才允许进入结论性表述。`,
+    `本研究共有 ${input.ledger.entries.length} 条断言、${evidenceSources.length} 个可核验材料来源（其中 ${sourceIds.length} 个直接绑定断言）和 ${artifactIds.length} 个证据记录。断言状态会影响证据链完整性判断：待补证据的断言只能出现在待修复草稿中，已支持断言才允许进入结论性表述。`,
     claimRows.length > 0
       ? markdownTable(["断言", "章节", "状态", "来源类型", "证据概况"], claimRows)
       : "当前没有断言行。",
@@ -1152,11 +1153,11 @@ function registeredCommandsSummary(input: ComposeDraftPaperInput) {
     : []
   const rows = protocolRows.length > 0 ? protocolRows : planRows
   return joinBlocks([
-    "### 登记命令",
+    "### 复现实验入口",
     rows.length > 0
       ? markdownTable(["角色", "编号", "命令", "指标", "来源"], rows.slice(0, 12))
-      : "当前没有登记命令；需要先在 package.json、manifest 或手工协议中声明本文方法、基线、消融与复现入口。",
-    "登记命令用于说明可复核入口，并不等同于实验结果。结果章节仅报告已经执行并留下输出摘要的实验；未执行命令保留在协议章节或修复清单中。",
+      : "当前没有复现实验入口；需要先声明本文方法、基线、消融与复现入口。",
+    "这些入口用于说明可复核实验路径，并不等同于实验结果。结果章节仅报告已经执行并留下输出摘要的实验；未执行入口保留在协议章节或修复清单中。",
   ])
 }
 
@@ -1215,7 +1216,7 @@ function reproducibilityChecklistSummary(input: ComposeDraftPaperInput) {
     ["研究简报", displayReady(true), "主题、语言、目标模板和预算已明确。"],
     ["数据/代码边界", displayReady(hasDataBoundary), hasDataBoundary ? "已生成数据计划或代码材料边界。" : "需要补充数据许可、访问和代码材料范围。"],
     ["实验计划", displayReady(hasPlan), hasPlan ? "指标、基线、消融和资源预算已登记。" : "缺少评价目标和对照设计。"],
-    ["协议命令", displayReady(hasProtocol), hasProtocol ? "已登记可执行命令。" : "缺少本文方法、基线、消融和复现命令。"],
+    ["实验入口", displayReady(hasProtocol), hasProtocol ? "已登记可执行入口。" : "缺少本文方法、基线、消融和复现入口。"],
     ["本机执行", displayReady(hasHostRuns), hasHostRuns ? "已记录本机输出、退出码、耗时和指标。" : "需要真实执行本机实验。"],
     ["容器复现", displayReady(hasContainerRuns), hasContainerRuns ? "已记录容器复现结果。" : "需要容器或等价隔离环境复现。"],
     ["结果报告", displayReady(hasResultReport), hasResultReport ? "已生成主指标比较、阻断项和建议。" : "需要生成结果报告。"],
@@ -1428,7 +1429,7 @@ function evidenceModelSummary(input: ComposeDraftPaperInput) {
   const unsupported = input.ledger.unsupported_claim_ids.length
   return joinBlocks([
     "本文采用证据链约束实验结论。证据链由材料来源、可审查断言和复核记录组成，分别对应论文材料、代码文件、数据集、实验日志以及与这些材料相连的结论表述。",
-    `本研究登记 ${evidenceSources.length} 个可追踪来源、${input.ledger.entries.length} 条断言和 ${artifactIds.length} 个复核记录；其中 ${sourceIds.length} 个来源直接绑定断言，${supported} 条断言已有证据支持，${unsupported} 条断言仍缺证据。`,
+    `本研究登记 ${evidenceSources.length} 个可核验材料来源、${input.ledger.entries.length} 条断言和 ${artifactIds.length} 个复核记录；其中 ${sourceIds.length} 个来源直接绑定断言，${supported} 条断言已有证据支持，${unsupported} 条断言仍缺证据。`,
     "只有同时具备源码范围、实验结果和复现记录的结论，才被写入结果章节中的结论性表述；缺少任一环节时，相关表述只能作为限制或后续工作保留。",
     "这种证据链让读者能够从正文中的方法或结果句子追溯到材料、实验命令、指标和复核记录，从而形成可追踪性。它也为后续复核提供定位入口：读者可以先读主文，再进入附录检查完整证据索引。",
     "因此，正文中的每个实验结论都应回答两个问题：它来自哪里，以及是否在受控环境中重复出现。没有答案的结论必须降级为探索性观察。",
