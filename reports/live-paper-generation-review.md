@@ -1,9 +1,18 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.105-dev
+- project_version: 0.13.0.106-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-31 正式参考文献 readiness 复审
+
+- `checkReferences` 已确认：没有 verified clear paper source record 时输出 `missing_verified_reference` warning。
+- 反向测试已确认：存在 verified paper reference 时不产生 readiness warning，避免正式参考文献已齐时误报。
+- 这让 final gate 能区分“代码/材料证据存在”和“可投稿参考文献齐备”，降低生成稿只有代码证据但参考文献不足的风险。
+- 相关回归已通过：formal References 定向测试、authoring/datasets/live/metadata 组合测试和 `packages/opencode` typecheck。
+- 本报告和 CHANGELOG 记录为后续开发版本 `0.13.0.106-dev`。
+- 质量判断：成稿前的引用检查更接近人工审稿要求，能提示缺少正式论文来源而不是只检查 citation id 是否存在。
 
 ## 2026-05-31 final gate 占位数据集阻断复审
 
