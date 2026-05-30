@@ -1,9 +1,20 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.76-dev
+- project_version: 0.13.0.77-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 作者与声明缺省项复审
+
+- 协议场景复跑 `run-10ec710e-b517-4bff-8780-d74cb9e1de9d`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-10ec710e-b517-4bff-8780-d74cb9e1de9d\exports\bundle-final-draft-paper-final-export-d6371e20-063e-4471-b5cd-2b46349fd62c\bundle-final-draft-paper-final-export-d6371e20-063e-4471-b5cd-2b46349fd62c.md`。
+- 作者信息现在写为 `作者：本次材料未提供`、`机构：本次材料未提供` 和 `通信作者：本次材料未提供`。
+- 声明章节现在写为 `基金项目：本次材料未提供。`、`作者贡献：本次材料未提供。`、`利益冲突：本次材料未提供。`。
+- 伦理审批现在写为 `本研究材料未包含人类受试者、动物实验、个人敏感数据或受限数据`，并说明后续纳入相关材料时需要补充审批和授权。
+- 最终稿不再出现 `待补充`。
+- 最终稿代码版本为 `0.13.0.76-dev`，代码修订为 `98da67ea`；本报告和 CHANGELOG 记录为后续开发版本 `0.13.0.77-dev`。
+- 质量判断：缺失投稿元数据从模板占位改为正式缺省声明，减少导出稿的草稿感。
 
 ## 2026-05-30 消融比较指标口径复审
 
