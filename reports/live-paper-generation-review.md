@@ -5,6 +5,15 @@
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
 
+## 2026-05-30 具体排序方法焦点复审
+
+- 协议场景复跑 `run-72de0657-e141-4ca8-925a-87fe8ff926f5`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-72de0657-e141-4ca8-925a-87fe8ff926f5\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 摘要和引言直接说明 `rankAgentTeamPapers` 与 `scorePaper` 构成候选论文排序接口，并以排名测试、词项匹配基线、无证据覆盖消融和容器复现约束排序结果。
+- 相关工作把差异点落到候选论文排序任务，不再复述“对提交代码库的 3 个文件进行基于源码范围的分析”。
+- 主要贡献改为“把 rankAgentTeamPapers 和 scorePaper 构成的候选论文排序接口、来源和实验记录统一为可审查证据”，不再出现 `把rank`、`bun run 排名测试` 或泛泛源码范围开头。
+- 质量判断：这一轮提升了前置章节的方法对象可读性，协议样本更像围绕具体算法接口和实验协议写出的计算机论文。
+
 ## 2026-05-30 排序实验领域特异性复审
 
 - 协议场景复跑 `run-613fef31-eb05-45b5-9995-072c6246ac02`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。

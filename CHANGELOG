@@ -2,10 +2,22 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.18-dev
+:version       0.13.0.19-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.19-dev - 2026/05/30 (07afe00a) [fix/mcp-tool-binding-test-isolation]
+        :brief 摘要、引言和贡献改为具体排序方法焦点
+        :authoring
+            - fix(abstract): ranking 场景摘要使用 rankAgentTeamPapers 和 scorePaper 构成的候选论文排序接口，不再以源码范围作为主表达
+            - fix(introduction): 引言直接说明排名测试、词项匹配基线、无证据覆盖消融和容器复现如何约束排序结果
+            - fix(contribution): 主要贡献去除把rank和核心方法断言的机械拼接，改为方法对象、来源和实验记录统一表述
+            - test(authoring): 增加摘要、引言、相关工作和贡献段具体方法焦点断言
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
     0.13.0.18-dev - 2026/05/30 (33198226) [fix/mcp-tool-binding-test-isolation]
         :brief 排序实验对象与讨论改为领域特异表达
