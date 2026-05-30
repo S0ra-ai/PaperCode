@@ -2,10 +2,21 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.13-dev
+:version       0.13.0.14-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.14-dev - 2026/05/30 (9e7ca20d) [fix/mcp-tool-binding-test-isolation]
+        :brief 研究设计与附录改为论文式复核材料
+        :authoring
+            - fix(study-design): 研究设计章节改为五类证据约束，不再输出“生成流畅正文”“写作阶段”等流程说明
+            - fix(appendix): 证据追踪、复现清单和证据记录索引改为复核材料说明，移除 TUI、实时预览、导出清单等产品界面口吻
+            - test(authoring): 增加研究设计和附录禁用词断言
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
     0.13.0.13-dev - 2026/05/30 (8cd5275f) [fix/mcp-tool-binding-test-isolation]
         :brief 讨论、效度威胁、限制与结论改为论文式收束
