@@ -147,18 +147,18 @@ function buildPlainSection(sectionId: string, title: string, markdown: string): 
 
 function authorInformationSummary() {
   return [
-    "作者：未登记",
-    "机构：未登记",
-    "通信作者：未登记",
+    "作者：待补充",
+    "机构：待补充",
+    "通信作者：待补充",
   ].join("\n")
 }
 
 function declarationsSummary() {
   return [
-    "基金项目：未登记。",
-    "作者贡献：未登记。",
-    "利益冲突：未登记。",
-    "伦理审批：未登记；若研究涉及人类受试者、动物实验、个人敏感数据或受限数据，投稿前必须补齐伦理审批和数据授权信息。",
+    "基金项目：待补充。",
+    "作者贡献：待补充。",
+    "利益冲突：待补充。",
+    "伦理审批：待补充；若研究涉及人类受试者、动物实验、个人敏感数据或受限数据，投稿前必须补齐伦理审批和数据授权信息。",
   ].join("\n")
 }
 
