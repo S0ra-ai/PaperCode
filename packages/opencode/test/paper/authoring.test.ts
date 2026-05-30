@@ -1033,6 +1033,8 @@ describe("paper authoring loop", () => {
     expect(abstract).toContain("rankAgentTeamPapers 和 scorePaper")
     expect(abstract).toContain("候选论文排序接口")
     expect(abstract).toContain("排名测试、词项匹配基线、无证据覆盖消融和容器复现")
+    expect(abstract).toContain("候选数 5")
+    expect(abstract).toContain("不是人工相关性标注")
     expect(draft.markdown.indexOf("## 摘要")).toBeLessThan(draft.markdown.indexOf("## 关键词"))
     expect(draft.markdown.indexOf("## 关键词")).toBeLessThan(draft.markdown.indexOf("## 引言"))
     expect(keywords).toContain("候选论文排序")
