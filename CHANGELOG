@@ -2,10 +2,22 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.93-dev
+:version       0.13.0.94-dev
 :last_update   2026/05/30
 
 :history
+
+    0.13.0.94-dev - 2026/05/30 (fe334224) [fix/mcp-tool-binding-test-isolation]
+        :brief ranking 主要贡献表格化
+        :authoring
+            - fix(markdown): ranking 主要贡献改为贡献/内容/证据位置表格
+            - fix(markdown): 贡献条目显式绑定方法、实验设置、结果、可复现性和附录证据位置
+            - test(authoring): ranking 成稿断言贡献表格存在并拒绝旧编号段落
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - note: protocol live 复审未重复触发，避免 arXiv HTTP 429 限流扩大
 
     0.13.0.93-dev - 2026/05/30 (014f864e) [fix/mcp-tool-binding-test-isolation]
         :brief ranking 研究问题表格化
