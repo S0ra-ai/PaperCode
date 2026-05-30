@@ -357,6 +357,7 @@ function sourceSummary(input: ComposeDraftPaperInput) {
 function artifactSummary(input: ComposeDraftPaperInput) {
   const artifactIds = [...new Set(input.ledger.entries.flatMap((entry) => entry.artifact_ids))]
   if (artifactIds.length === 0) return "当前还没有可审查证据记录。"
+  if (isRankingContext(input)) return `附录保留 ${artifactIds.length} 条复核材料，用于定位排序接口、实验入口和复现结果；主文只保留与方法和结果解释直接相关的信息。`
   return `正文结论绑定 ${artifactIds.length} 个复核记录；完整证据索引保留在附录中，正文只保留必要说明。`
 }
 
@@ -1097,13 +1098,39 @@ function methodEvidenceNote(input: ComposeDraftPaperInput) {
   const ranges = methodSourceRangeSummaries(input)
   const entrypoints = experimentEntrypointLabels(input)
   if (!entry && ranges.length === 0 && entrypoints.length === 0) return undefined
+  if (isRankingContext(input)) {
+    const rangeText = ranges.length > 0 ? `实现上，${ranges.join("、")} 标明了排序入口和评分入口` : "实现上，排序入口和评分入口均保留了可定位实现"
+    const entrypointText = entrypoints.length > 0 ? `；${chineseList(entrypoints)}用于复核完整排序、词项基线、证据覆盖消融和环境一致性` : ""
+    return `${rangeText}${entrypointText}。${entry ? citationText(entry) : ""}`.trim()
+  }
   const rangeText = ranges.length > 0 ? `源码证据记录保留了 ${ranges.join("、")} 等接口位置` : "源码证据记录保留了接口位置"
   const entrypointText = entrypoints.length > 0 ? `，并覆盖${chineseList(entrypoints)}等可复现实验入口` : ""
   return `${rangeText}${entrypointText}。${entry ? citationText(entry) : ""}`.trim()
 }
 
+function rankingContributionsSummary(input: ComposeDraftPaperInput) {
+  const metricId = input.result_report?.primary_metric ?? input.experiment_plan?.proposed.expected_metric ?? "ranking_ndcg_at_3"
+  const metric = displayMetricName(metricId)
+  const features = parsedScoreFeatures(input)
+  const featureText = features.length > 0 ? readableAsciiList(features) : "relevance、claim_coverage 和 recency"
+  const counts = experimentDesignCounts(input)
+  const reproduction =
+    counts.hostRuns > 0 || counts.containerRuns > 0
+      ? `，并用 ${counts.hostRuns} 个本机运行和 ${counts.containerRuns} 个容器运行检查复现一致性`
+      : ""
+  return joinBlocks([
+    "本文贡献如下：",
+    [
+      `1. 提出由 ${featureText} 组成的候选论文排序评分，并通过 rankAgentTeamPapers 和 scorePaper 形成候选论文排序接口。`,
+      "2. 构造词项匹配基线和无证据覆盖消融，以区分简单查询词匹配、证据覆盖特征和完整排序接口的影响。",
+      `3. 以${metric} 评价当前候选集的前三位排序质量${reproduction}，使性能差异与复现状态同时可见。`,
+    ].join("\n"),
+  ])
+}
+
 function contributionsSummary(input: ComposeDraftPaperInput) {
   const metricId = input.result_report?.primary_metric ?? input.experiment_plan?.proposed.expected_metric
+  if (isRankingMetric(metricId)) return rankingContributionsSummary(input)
   const metric = displayMetricName(metricId ?? "primary_metric")
   const methodClaim = firstClaimText(input, "method")
   const resultClaim = firstClaimText(input, "results")
@@ -1460,6 +1487,7 @@ function rankingAbstractSummary(input: ComposeDraftPaperInput) {
 }
 
 function introductionSummary(input: ComposeDraftPaperInput) {
+  if (isRankingContext(input)) return rankingIntroductionSummary(input)
   const methodClaim = firstClaimText(input, "method")
   const resultEvidence = resultEvidenceText(input)
   const methodFocus = methodFocusSummary(input, methodClaim, "introduction")
@@ -1477,6 +1505,23 @@ function introductionSummary(input: ComposeDraftPaperInput) {
   ]
     .filter(Boolean)
     .join("\n\n")
+}
+
+function rankingIntroductionSummary(input: ComposeDraftPaperInput) {
+  const metric = displayMetricName(input.result_report?.primary_metric ?? input.experiment_plan?.proposed.expected_metric ?? "ranking_ndcg_at_3")
+  const result = input.result_report
+  const resultEvidence =
+    result?.proposed && result.best_baseline
+      ? `当前结果显示，本文方法为 ${displayMetricValue(result.primary_metric, result.proposed.value)}，词项匹配基线为 ${displayMetricValue(result.primary_metric, result.best_baseline.value)}，差值 ${formatMetricValue(result.proposed.value - result.best_baseline.value)}。`
+      : resultEvidenceText(input)
+  return [
+    "候选论文排序常用于文献检索、综述准备和研究选题：系统需要在有限候选集内判断哪些论文最能支持当前研究问题。仅依赖词项匹配的排序容易忽略候选论文是否覆盖关键断言，单独报告排序结果又难以解释差异来自何处。",
+    "本文研究由 rankAgentTeamPapers 和 scorePaper 构成的候选论文排序接口。scorePaper 将 relevance、claim_coverage 和 recency 合成为排序分数，rankAgentTeamPapers 根据该分数生成候选顺序。",
+    `为检验证据覆盖特征是否带来排序收益，本文设置排名测试、词项匹配基线和无证据覆盖消融，并以${metric} 作为主指标。${resultEvidence ?? ""}`,
+    input.result_report?.reproduction.status === "passed"
+      ? "容器复现用于确认同一协议在受控环境中能重复得到相同观察；因此本文只讨论当前候选集、标注策略和复现条件能够支持的结论。"
+      : "容器复现尚未通过时，本文只把排序结果作为探索性观察，并把缺失环节转化为后续实验任务。",
+  ].join("\n\n")
 }
 
 function relatedWorkSummary(input: ComposeDraftPaperInput) {
