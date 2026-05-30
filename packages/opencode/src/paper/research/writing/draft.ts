@@ -427,6 +427,22 @@ function displayDatasetAccess(value: string) {
   return value
 }
 
+function displayDatasetAccessForTable(dataset: {
+  access: string
+  url?: string
+  provider?: string
+  license: { status: string; expression?: string }
+}) {
+  if (
+    dataset.url?.startsWith("file://") ||
+    dataset.provider === "workspace" ||
+    dataset.license.expression === "workspace-authorized local dataset"
+  ) {
+    return "本地可核验"
+  }
+  return displayDatasetAccess(dataset.access)
+}
+
 function displayDatasetLicense(value: string) {
   if (value === "workspace-authorized local dataset") return "工作区授权本地数据集"
   return paperProseText(value)
@@ -808,7 +824,7 @@ function dataAvailabilitySummary(input: ComposeDraftPaperInput) {
       ?.map(displayDatasetDiagnostic)
       .filter(Boolean)
       .join("；") || "无补充说明"
-    return [dataset.title, displayDatasetAccess(dataset.access), license, displayVerificationStatus(dataset.verification.status), metadata]
+    return [dataset.title, displayDatasetAccessForTable(dataset), license, displayVerificationStatus(dataset.verification.status), metadata]
   })
   const conflicts =
     data.license_conflicts.length > 0
