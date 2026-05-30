@@ -791,7 +791,7 @@ function semanticExperimentRationale(input: ComposeDraftPaperInput, role: "basel
     return "词项匹配基线用于只依赖查询词重合的排序对照，检验代码证据排序是否优于简单词项排序。"
   }
   if (role === "ablation" && /(no[-_\s]?coverage|coverage|证据覆盖)/.test(text)) {
-    return "无证据覆盖消融用于移除 claim_coverage 对排序得分的贡献，检验证据覆盖特征是否影响候选排序。"
+    return "无证据覆盖消融用于移除 claim_coverage 项，检验证据覆盖项是否与候选排序差异相关。"
   }
   return humanizeExperimentText(fallback)
 }
@@ -1113,9 +1113,9 @@ function researchQuestionsSummary(input: ComposeDraftPaperInput) {
   const metric = displayMetricName(input.result_report?.primary_metric ?? input.experiment_plan?.proposed.expected_metric ?? "primary_metric")
   if (isRankingContext(input)) {
     return joinBlocks([
-      "本文围绕候选论文排序任务提出三项研究问题：排序机制是否明确，证据覆盖特征是否带来增益，运行环境是否影响观察结果。",
+      "本文围绕候选论文排序任务提出三项研究问题：排序机制是否明确，claim_coverage 项是否与排序差异相关，运行环境是否影响观察结果。",
       "RQ1 排序机制：relevance、claim_coverage 和 recency 的组合能否形成明确的候选论文排序规则？",
-      `RQ2 特征贡献：引入 claim_coverage 后，相比词项匹配基线和无证据覆盖消融，在${metric} 上是否改善前三位排序？`,
+      `RQ2 特征关联：移除 claim_coverage 后，相比完整排序，在${metric} 上是否出现前三位排序差异？`,
       `RQ3 环境一致性：本机和容器环境能否得到一致的${metric} 结果？`,
       ready
         ? "方法章节回答 RQ1，结果章节回答 RQ2，可复现性章节回答 RQ3；附录列出实现定位和复现实验入口。"
@@ -1262,7 +1262,7 @@ function methodSourceRangeSummaries(input: ComposeDraftPaperInput) {
 function methodEntrypointRoles(input: ComposeDraftPaperInput) {
   const entrypoints = experimentEntrypointLabels(input)
   if (entrypoints.length === 0) return undefined
-  return `${chineseList(entrypoints)}分别约束本文方法、词项基线、证据覆盖贡献和环境可重复性`
+  return `${chineseList(entrypoints)}分别约束本文方法、词项基线、证据覆盖相关性和环境可重复性`
 }
 
 function rankingMethodNarrative(input: ComposeDraftPaperInput) {
@@ -1904,7 +1904,7 @@ function rankingIntroductionSummary(input: ComposeDraftPaperInput) {
   return [
     "候选论文排序常用于文献检索、综述准备和研究选题：系统需要在有限候选集内判断哪些论文最能支持当前研究问题。仅依赖词项匹配的排序容易忽略候选论文是否覆盖关键断言，单独报告排序结果又难以解释差异来自何处。",
     "本文研究由 rankAgentTeamPapers 和 scorePaper 构成的候选论文排序接口。scorePaper 将 relevance、claim_coverage 和 recency 合成为排序分数，rankAgentTeamPapers 根据该分数生成候选顺序。",
-    `为检验证据覆盖特征是否带来排序收益，本文设置排名测试、词项匹配基线和无证据覆盖消融，并以${metric} 作为主指标。${resultEvidence ?? ""}`,
+    `为检查 claim_coverage 项是否与排序差异相关，本文设置排名测试、词项匹配基线和无证据覆盖消融，并以${metric} 作为主指标。${resultEvidence ?? ""}`,
     input.result_report?.reproduction.status === "passed"
       ? "容器复现用于确认同一协议在受控环境中能重复得到相同观察；因此本文只讨论当前候选集、标注策略和复现条件能够支持的结论。"
       : "容器复现尚未通过时，本文只把排序结果作为探索性观察，并把缺失环节转化为后续实验任务。",
