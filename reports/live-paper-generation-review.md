@@ -1,9 +1,18 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.94-dev
+- project_version: 0.13.0.95-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 ranking 结果章节小节复审
+
+- ranking authoring 测试已确认结果章节包含 `### 主结果`、`### 结果表`、`### 消融分析` 和 `### 统计解释`。
+- 消融分析小节不再在标题后重复输出 `消融分析显示`，统计解释小节不再在标题后重复输出 `统计解释：`。
+- 相关回归已通过：authoring/live/metadata 定向测试和 `packages/opencode` typecheck 均通过。
+- 本轮未重复触发 protocol live 复审，原因是上一轮完整 protocol 复跑已被 arXiv HTTP 429 rate limit 阻断；为避免扩大限流，只记录当前 authoring 证据。
+- 本报告和 CHANGELOG 记录为后续开发版本 `0.13.0.95-dev`。
+- 质量判断：结果章节从连续段落改为可扫描的小节结构，读者能更快定位主结果、表格、消融和统计口径。
 
 ## 2026-05-30 ranking 主要贡献表格复审
 
