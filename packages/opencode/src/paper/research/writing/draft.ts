@@ -912,7 +912,7 @@ function experimentProtocolSummary(input: ComposeDraftPaperInput) {
   const plan = input.experiment_plan
   if (!plan) return "尚未生成实验计划；需要补充评估目标、指标、基线、消融、资源预算和降级策略。"
   const protocol = input.experiment_protocol
-  const downgradePolicy = plan.downgrade_policy
+  const downgradePolicyItems = plan.downgrade_policy
     .map(humanizeExperimentText)
     .map((item) =>
       isRankingContext(input)
@@ -922,7 +922,6 @@ function experimentProtocolSummary(input: ComposeDraftPaperInput) {
         : item,
     )
     .map((item) => item.replace(/[。.]$/, ""))
-    .join("；")
   const metricTable = markdownTable(
     ["指标", "方向", "角色"],
     plan.metrics.map((metric) => [displayMetricName(metric.name), displayMetricDirection(metric.direction), metric.primary ? "主指标" : "辅助指标"]),
@@ -954,10 +953,18 @@ function experimentProtocolSummary(input: ComposeDraftPaperInput) {
     ? "当前没有基线运行入口；该缺口会使结果只能作为探索性观察。"
     : "当前没有基线运行入口；该缺口会阻断结论性表述。"
   const gpuBudget = plan.resource_budget.max_gpu_hours
-  const resourceBudget =
-    typeof gpuBudget === "number" && gpuBudget > 0
-      ? `资源预算为运行时间<=${plan.resource_budget.max_wall_time_seconds}s、内存<=${plan.resource_budget.max_memory_mb}MB、GPU<=${gpuBudget} 小时。`
-      : `资源预算为运行时间<=${plan.resource_budget.max_wall_time_seconds}s、内存<=${plan.resource_budget.max_memory_mb}MB；GPU 未纳入当前资源预算。`
+  const resourceBudgetTable = markdownTable(
+    ["项目", "上限"],
+    [
+      ["运行时间", `<=${plan.resource_budget.max_wall_time_seconds}s`],
+      ["内存", `<=${plan.resource_budget.max_memory_mb}MB`],
+      ["GPU", typeof gpuBudget === "number" && gpuBudget > 0 ? `<=${gpuBudget} 小时` : "未纳入当前资源预算"],
+    ],
+  )
+  const downgradePolicyTable =
+    downgradePolicyItems.length > 0
+      ? markdownTable(["条件", "处理"], downgradePolicyItems.map(splitDowngradePolicyItem))
+      : "当前未登记降级策略。"
   return [
     intro,
     "",
@@ -981,8 +988,23 @@ function experimentProtocolSummary(input: ComposeDraftPaperInput) {
         : `实验协议包含 ${protocol.entries.length} 个可执行入口，来源为${displayProtocolSource(protocol.discovered_from)}；${protocol.gaps.length > 0 ? `仍需处理的协议缺口包括：${protocol.gaps.map(paperProseText).join("、")}。` : "当前实验协议完整。"}`
       : "当前没有显式仓库实验协议；流程只能根据已登记证据和受控执行结果组织评价。",
     "",
-    `${resourceBudget}降级策略：${downgradePolicy}。`,
+    "### 资源预算",
+    "",
+    resourceBudgetTable,
+    "",
+    "### 降级策略",
+    "",
+    downgradePolicyTable,
   ].join("\n")
+}
+
+function splitDowngradePolicyItem(item: string) {
+  const normalized = item.replace(/[。.]$/, "")
+  const marker = normalized.indexOf("时")
+  if (marker > 0 && marker < normalized.length - 1) {
+    return [normalized.slice(0, marker), normalized.slice(marker + 1)]
+  }
+  return ["降级规则", normalized]
 }
 
 function experimentGuidanceSummary(input: ComposeDraftPaperInput) {
