@@ -1,9 +1,17 @@
 # Paper Fucker 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
-- project_version: 0.13.0.67-dev
+- project_version: 0.13.0.68-dev
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
+
+## 2026-05-30 排序指标差异口径复审
+
+- 协议场景复跑 `run-6fbfc261-f2f3-40f0-ba3b-6ad7ddb29b24`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
+- 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-6fbfc261-f2f3-40f0-ba3b-6ad7ddb29b24\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
+- 摘要、引言、结果、讨论和结论现在都使用 `绝对差值` 描述排序 nDCG@3 差异。
+- 最终稿不再出现 `提升 0.x` 这类容易被读成相对百分比提升的口径。
+- 质量判断：指标差异从泛化“提升”收紧到绝对差值，更符合排序指标论文的严谨写法。
 
 ## 2026-05-30 方法框分支说明复审
 
