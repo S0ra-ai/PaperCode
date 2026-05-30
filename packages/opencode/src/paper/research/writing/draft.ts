@@ -429,12 +429,22 @@ function literatureDisplayTitle(source: LiteratureMap["sources"][number]) {
 function literatureRoleTags(source: LiteratureMap["sources"][number]) {
   const text = `${source.title} ${source.abstract ?? ""} ${(source.topics ?? []).join(" ")}`.toLowerCase()
   const tags: string[] = []
-  if (/tool|agent|multi-agent|workflow|autonomous|harness/.test(text)) tags.push("工具使用或智能体自动化")
+  if (/tool|agent|multi-agent|workflow|autonomous|harness/.test(text)) tags.push("工具调用与智能体协作")
   if (/reproduc|validat|baseline|ablation|benchmark|experiment|evaluation/.test(text)) tags.push("实验复现与验证风险")
   if (/paper[-\s]?to[-\s]?code|code generation|execution|program|software|source/.test(text)) tags.push("论文到代码执行链路")
   if (/data|dataset|spatial|multimodal|modeling|neuroimaging/.test(text)) tags.push("任务数据与领域评测")
   if (/language model|llm|large language/.test(text)) tags.push("大模型方法基础")
   return [...new Set(tags)].slice(0, 3)
+}
+
+function literatureClusterSummary(cluster: LiteratureMap["clusters"][number]) {
+  const label = paperProseText(cluster.label)
+  const keywords = cluster.keywords
+    .map(paperProseText)
+    .filter((keyword) => keyword && keyword !== label)
+    .slice(0, 4)
+  if (keywords.length === 0) return label
+  return `${label}（${keywords.join("、")}）`
 }
 
 function literatureRelevanceSummary(source: LiteratureMap["sources"][number]) {
@@ -512,7 +522,7 @@ function literatureEvidenceSummary(input: ComposeDraftPaperInput) {
     map.clusters.length > 0
       ? `这些文献形成 ${map.clusters.length} 条主题线索：${map.clusters
           .slice(0, 3)
-          .map((cluster) => `${cluster.label}（${cluster.keywords.map(paperProseText).join("、")}）`)
+          .map(literatureClusterSummary)
           .join("；")}。`
       : "这些文献尚未形成稳定主题线索。"
   const gapText = map.diagnostics.gaps.length > 0 ? `剩余缺口：${map.diagnostics.gaps.map(paperProseText).join("、")}。` : "当前相关工作没有登记阻断性缺口。"
@@ -998,7 +1008,7 @@ function reproducibilityChecklistSummary(input: ComposeDraftPaperInput) {
     ["证据链完整性", displayReady(finalReady(input)), finalReady(input) ? "允许结论性表述。" : "保持阻断或待修复草稿。"],
   ]
   return joinBlocks([
-    "复现清单汇总正式结果所需的最小证据条件。每一项都来自复核记录，而不是人工勾选。",
+    "复现清单汇总结论性表述所需的最小证据条件。每一项都来自复核记录，而不是人工勾选。",
     markdownTable(["项目", "就绪", "证据"], rows),
     registeredCommandsSummary(input),
     "当清单中任一关键项为“否”时，相关结论应降级为探索性观察，并在正文或附录中说明缺失的证据类型。这样可以避免把完整段落误读为完整研究。",
@@ -1177,7 +1187,7 @@ function evidenceModelSummary(input: ComposeDraftPaperInput) {
   return joinBlocks([
     "本文采用证据链约束实验结论。证据链由材料来源、可审查断言和复核记录组成，分别对应论文材料、代码文件、数据集、实验日志以及与这些材料相连的结论表述。",
     `本研究登记 ${evidenceSources.length} 个可追踪来源、${input.ledger.entries.length} 条断言和 ${artifactIds.length} 个复核记录；其中 ${sourceIds.length} 个来源直接绑定断言，${supported} 条断言已有证据支持，${unsupported} 条断言仍缺证据。`,
-    "只有同时具备源码范围、实验结果和复现记录的结论，才被写入正式结果；缺少任一环节时，相关表述只能作为限制或后续工作保留。",
+    "只有同时具备源码范围、实验结果和复现记录的结论，才被写入结果章节中的结论性表述；缺少任一环节时，相关表述只能作为限制或后续工作保留。",
     "这种证据链让读者能够从正文中的方法或结果句子追溯到材料、实验命令、指标和审稿记录，从而形成可追踪性。它也为后续人工审稿提供定位入口：审稿人可以先读主文，再进入附录检查完整证据索引。",
     "因此，正文中的每个实验结论都应回答两个问题：它来自哪里，以及是否在受控环境中重复出现。没有答案的结论必须降级为探索性观察。",
     "这一约束是后续扩展真实数据集、领域基线、随机种子和更复杂实验资源时不可省略的基本条件，也是审稿可追踪性的基础。",
@@ -1247,15 +1257,15 @@ function scaffoldSections(input: ComposeDraftPaperInput, claimSections: DraftSec
             ...unsupported.map((claimId) => `- ${claimId}: 补充证据、降低表述强度，或从终稿断言中移除。`),
           ].join("\n")
         : ready
-          ? "在本次证据边界内，引用、许可、代码证据和复现检查未发现阻断项；结论仍限于现有材料、数据集、协议和运行环境。"
-          : "在本次证据边界内，断言虽未出现直接冲突，但引用、许可、代码证据或复现检查仍需补齐。",
+          ? "在当前证据边界内，引用、许可、代码证据和复现检查未发现阻断项；结论仍限于现有材料、数据集、协议和运行环境。"
+          : "在当前证据边界内，断言虽未出现直接冲突，但引用、许可、代码证据或复现检查仍需补齐。",
     ),
     buildPlainSection(
       "conclusion",
       "结论",
       ready
         ? "本文表明，将材料来源、代码证据、显式对照和容器复现纳入同一证据链，可以降低计算机类论文中结果断言与实验依据脱节的风险。在现有任务范围内，本文方法的结论由来源、实验协议和复现记录共同支撑；进一步扩展仍需要更多数据集、更多领域基线和更长周期的重复实验。"
-        : "本文仍处于证据不足状态；只有当来源、断言、引用、许可和复现检查形成闭环后，相关结论才应从探索性观察提升为正式结果。",
+        : "本文仍处于证据不足状态；只有当来源、断言、引用、许可和复现检查形成闭环后，相关结论才应从探索性观察提升为结论性表述。",
     ),
     buildPlainSection("references", "参考文献", referencesSummary(input)),
     buildPlainSection("appendix_evidence_trace", "附录 A：证据追踪", implementationTraceSummary(input)),
