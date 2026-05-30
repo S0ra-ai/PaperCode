@@ -1087,17 +1087,21 @@ function experimentEnvironmentDeclaration(input: ComposeDraftPaperInput) {
   if (!runs) return undefined
   const host = runs.host_runs.find((run) => run.environment.mode === "host")?.environment
   const container = runs.container_runs.find((run) => run.environment.mode === "container")?.environment
-  const rows: string[] = []
+  const rows: string[][] = []
   if (host) {
-    const node = host.node ? `，Node.js ${host.node}` : ""
-    rows.push(`本机平台：${displayPlatformName(host.platform)}${node}。`)
+    rows.push(["本机平台", displayPlatformName(host.platform)])
+    if (host.node) rows.push(["Node.js", host.node])
   }
   if (container) {
-    const digest = container.digest ? `，摘要 ${container.digest}` : ""
-    rows.push(container.image ? `容器镜像：${container.image}${digest}。` : "容器环境：已登记隔离复现环境。")
+    if (container.image) {
+      rows.push(["容器镜像", container.image])
+      if (container.digest) rows.push(["容器摘要", container.digest])
+    } else {
+      rows.push(["容器环境", "已登记隔离复现环境"])
+    }
   }
   if (rows.length === 0) return undefined
-  return ["实验环境声明：", ...rows.map((row) => `- ${row}`)].join("\n")
+  return ["### 实验环境声明", "", markdownTable(["项目", "内容"], rows)].join("\n")
 }
 
 function commandText(command: { argv: string[] }) {
