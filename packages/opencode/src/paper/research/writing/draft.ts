@@ -1139,7 +1139,7 @@ function rankingScoreFormulaSummary(input: ComposeDraftPaperInput) {
   const required = ["relevance", "claim_coverage", "recency"]
   if (!required.every((feature) => weights.some((item) => item.feature === feature))) return undefined
   const byFeature = new Map(weights.map((item) => [item.feature, item.weight]))
-  return `评分公式为：score(p) = ${byFeature.get("relevance")} * relevance(p) + ${byFeature.get("claim_coverage")} * claim_coverage(p) + ${byFeature.get("recency")} * recency(p)。三个权重来自 scorePaper 的当前实现。`
+  return `评分公式为：score(p) = ${byFeature.get("relevance")} * relevance(p) + ${byFeature.get("claim_coverage")} * claim_coverage(p) + ${byFeature.get("recency")} * recency(p)。其中 p 表示待排序候选论文，三项特征均按候选论文逐项计算；三个权重来自 scorePaper 的当前实现。`
 }
 
 function readableAsciiList(values: string[]) {
