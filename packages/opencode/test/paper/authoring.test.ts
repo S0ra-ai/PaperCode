@@ -1764,6 +1764,85 @@ describe("paper authoring loop", () => {
     expect(appendixReproduction).not.toContain("项目声明的实验入口")
   })
 
+  test("matches ranking appendix protocol rows to unique runs by role when ids differ", () => {
+    const ledger = composeClaimLedger({
+      topic: "Agent team paper ranking",
+      claims: [
+        {
+          text: "The ranking method compares rankAgentTeamPapers against lexical and coverage ablations.",
+          section_id: "method",
+          confidence: 0.9,
+          source_ids: ["material:code:agent-team-paper"],
+          artifact_ids: ["artifact-codebase-map"],
+        },
+      ],
+      now,
+    })
+    const draft = composeDraftPaper({
+      title: "Agent Team Paper Ranking",
+      ledger,
+      experiment_protocol: {
+        discovered_from: "package_scripts",
+        gaps: [],
+        entries: [
+          {
+            protocol_id: "test:ranking",
+            role: "proposed",
+            label: "Ranking test",
+            command: { argv: ["bun", "run", "test:ranking"] },
+            expected_metric: "ranking_ndcg_at_3",
+            rationale: "Main ranking protocol.",
+          },
+        ],
+      },
+      experiment_runs: {
+        host_runs: [
+          {
+            experiment_id: "proposed-ranking-host",
+            role: "proposed",
+            status: "succeeded",
+            command: { argv: ["bun", "run", "test:ranking"] },
+            environment: { mode: "host", platform: "win32", node: "v24.3.0" },
+            metrics: [{ name: "ranking_ndcg_at_3", value: 1, direction: "higher_better" }],
+            stdout: "ok",
+            stderr: "",
+            exit_code: 0,
+            resource_usage: { wall_time_seconds: 0.2 },
+          },
+        ],
+        container_runs: [
+          {
+            experiment_id: "proposed-ranking-container",
+            role: "proposed",
+            status: "succeeded",
+            command: { argv: ["bun", "run", "test:ranking"] },
+            environment: { mode: "container", platform: "container" },
+            metrics: [{ name: "ranking_ndcg_at_3", value: 1, direction: "higher_better" }],
+            stdout: "ok",
+            stderr: "",
+            exit_code: 0,
+            resource_usage: { wall_time_seconds: 0.2 },
+          },
+        ],
+      },
+      result_report: {
+        ...resultReport(),
+        primary_metric: "ranking_ndcg_at_3",
+        proposed: { experiment_id: "proposed-ranking-host", value: 1 },
+        best_baseline: undefined,
+        reproduction: { status: "passed", container_run_ids: ["proposed-ranking-container"] },
+      },
+      now,
+    })
+
+    const appendixReproduction =
+      markdownSection(draft.markdown, "附录 B：复现实验入口") || markdownSection(draft.markdown, "附录 B：复现清单")
+    expect(appendixReproduction).toContain(
+      "| 本文方法 | 证据约束的论文排序方法 | bun run test:ranking | 排序 nDCG@3 | 本机通过；容器通过 | 结果；可复现性 |",
+    )
+    expect(appendixReproduction).not.toContain("本机缺失；容器缺失")
+  })
+
   test("renders ranking related work with ranking and retrieval representatives", () => {
     const ledger = composeClaimLedger({
       topic: "Agent team paper ranking",

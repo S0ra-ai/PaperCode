@@ -1317,6 +1317,13 @@ function runMatchesExperiment(run: Pick<ExperimentRun, "experiment_id" | "role">
   return experimentKey(run.experiment_id) === experimentKey(experimentId)
 }
 
+function findRunForExperiment<T extends Pick<ExperimentRun, "experiment_id" | "role">>(runs: T[], experimentId: string, role?: string) {
+  const exact = runs.find((run) => runMatchesExperiment(run, experimentId, role))
+  if (exact || !role) return exact
+  const roleMatches = runs.filter((run) => run.role === role)
+  return roleMatches.length === 1 ? roleMatches[0] : undefined
+}
+
 function rankingAppendixExecutionStatus(input: ComposeDraftPaperInput, experimentId: string, role: string) {
   const runs = input.experiment_runs
   if (!runs) return "未执行"
@@ -1325,8 +1332,8 @@ function rankingAppendixExecutionStatus(input: ComposeDraftPaperInput, experimen
     if (statuses.length === 0) return "容器缺失"
     return statuses.every((status) => status === "succeeded") ? "容器通过" : `容器${displayRunStatus(statuses.find((status) => status !== "succeeded") ?? statuses[0] ?? "missing")}`
   }
-  const host = runs.host_runs.find((run) => runMatchesExperiment(run, experimentId, role))
-  const container = runs.container_runs.find((run) => runMatchesExperiment(run, experimentId, role))
+  const host = findRunForExperiment(runs.host_runs, experimentId, role)
+  const container = findRunForExperiment(runs.container_runs, experimentId, role)
   const parts = [
     host ? `本机${displayRunStatus(host.status)}` : "本机缺失",
     container ? `容器${displayRunStatus(container.status)}` : "容器缺失",
