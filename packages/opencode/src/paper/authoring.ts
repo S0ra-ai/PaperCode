@@ -153,11 +153,13 @@ function tableCell(markdown: string, key: string) {
 
 function cjcAuthorMetadata(draft: DraftPaper) {
   const authorSection = sectionMarkdown(draft, "author_information") ?? ""
+  const authors = tableCell(authorSection, "作者") ?? "匿名作者"
+  const affiliation = tableCell(authorSection, "机构") ?? "匿名单位"
   return {
-    authors: tableCell(authorSection, "作者") ?? "作者待定",
-    affiliation: tableCell(authorSection, "机构") ?? "单位待定",
-    englishAuthors: "Author TBD",
-    englishAffiliation: "Affiliation TBD",
+    authors,
+    affiliation,
+    englishAuthors: authors === "匿名作者" ? "Anonymous author" : authors,
+    englishAffiliation: affiliation === "匿名单位" ? "Anonymous affiliation" : affiliation,
   }
 }
 
