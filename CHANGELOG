@@ -2,21 +2,22 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.161-dev
+:version       0.13.0.162-dev
 :last_update   2026/05/31
 
 :history
 
-    0.13.0.161-dev - 2026/05/31 (e70a51ea) [fix/mcp-tool-binding-test-isolation]
-        :brief 开发手册按 ReadTheDocs 式结构补强开发主线
-        :docs
-            - docs(development): 总览新增维护者任务卡，按论文质量、代码实验、模型工作台、Web Monitor 和关键函数定位问题
-            - docs(development): 开发指南新增产品运行模式、开发含义和代码阅读顺序，明确主题、材料、代码和恢复运行的验收边界
-            - docs(development): 修改手册新增完整论文质量回归和开发手册维护配方，覆盖中国计算机学报格式、引用、实验、正文内部词和文档同步
-            - docs(development): 文档搜索关键词补充 CJC、paper quality 和 documentation，便于维护者检索质量回归路径
+    0.13.0.162-dev - 2026/05/31 (f6240567) [fix/mcp-tool-binding-test-isolation]
+        :brief 修复排序论文附录复现状态与主文结果不一致
+        :fix
+            - fix(authoring): ranking appendix 执行状态先按 experiment id 精确匹配，匹配不到且同角色运行唯一时按角色回退，避免 protocol_id 与 ExperimentRun.experiment_id 不一致时误报缺失
+            - fix(authoring): 本文方法、基线、消融附录状态继续保留多实验保护；只有唯一同角色运行才允许回退，避免多个 baseline 或 ablation 被错配
+        :test
+            - test(authoring): 新增 protocol row id 与 host/container run id 不一致的排序论文回归，断言附录 B 显示本机通过、容器通过
         :changelog
-            - docs(changelog): 0.13.0.160 开发历史移入 docs/changelog/v0/0.13.0.160.CHANGELOG
+            - docs(changelog): 0.13.0.161 开发历史移入 docs/changelog/v0/0.13.0.161.CHANGELOG
         :checks
-            - docs smoke: node --check docs/development/assets/manual.js and docs HTML link/nav smoke passed
+            - targeted tests: npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --timeout 180000 passed
+            - typecheck: npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
             - readme version: scripts/check-readme-version.ps1 passed
             - changelog format: scripts/check-changelog-format.ps1 -IncludeArchives passed

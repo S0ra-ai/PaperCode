@@ -1,0 +1,22 @@
+:project       paper_fucker - 可验证论文研究自动化系统
+:author        k1d (https://github.com/ZhuchenZhong)
+:repo
+:desc          记录 0.13.0.161-dev 开发历史归档
+:version       0.13.0.161-dev
+:last_update   2026/05/31
+
+:history
+
+    0.13.0.161-dev - 2026/05/31 (e70a51ea) [fix/mcp-tool-binding-test-isolation]
+        :brief 开发手册按 ReadTheDocs 式结构补强开发主线
+        :docs
+            - docs(development): 总览新增维护者任务卡，按论文质量、代码实验、模型工作台、Web Monitor 和关键函数定位问题
+            - docs(development): 开发指南新增产品运行模式、开发含义和代码阅读顺序，明确主题、材料、代码和恢复运行的验收边界
+            - docs(development): 修改手册新增完整论文质量回归和开发手册维护配方，覆盖中国计算机学报格式、引用、实验、正文内部词和文档同步
+            - docs(development): 文档搜索关键词补充 CJC、paper quality 和 documentation，便于维护者检索质量回归路径
+        :changelog
+            - docs(changelog): 0.13.0.160 开发历史移入 docs/changelog/v0/0.13.0.160.CHANGELOG
+        :checks
+            - docs smoke: node --check docs/development/assets/manual.js and docs HTML link/nav smoke passed
+            - readme version: scripts/check-readme-version.ps1 passed
+            - changelog format: scripts/check-changelog-format.ps1 -IncludeArchives passed
