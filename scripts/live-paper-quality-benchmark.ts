@@ -49,9 +49,36 @@ const outputDir = path.join(scenarioOutputRoot, "attempts", attemptId)
 const summaryPath = path.join(outputDir, "paperrun-summary.json")
 const publishedSummaryPath = path.join(scenarioOutputRoot, "paperrun-summary.json")
 const attemptErrorPath = path.join(outputDir, "attempt-error.json")
+const attemptReadmePath = path.join(outputDir, "README.md")
 await mkdir(outputDir, { recursive: true })
 await writeFile(path.join(scenarioOutputRoot, "last-attempt.txt"), `${path.relative(scenarioOutputRoot, outputDir).replace(/\\/g, "/")}\n`, "utf8")
 let benchmarkErrorRecorded = false
+
+function repoRelative(value: string) {
+  return path.relative(repoRoot, value).replace(/\\/g, "/")
+}
+
+async function writeAttemptReadme(status: "running" | "succeeded" | "failed", details: Record<string, unknown> = {}) {
+  const lines = [
+    "# Live Paper Quality Benchmark Attempt",
+    "",
+    `- status: ${status}`,
+    `- scenario: ${scenario}`,
+    `- project_version: ${await currentProjectVersion()}`,
+    `- generated_at: ${new Date().toISOString()}`,
+    `- attempt_dir: ${repoRelative(outputDir)}`,
+    `- attempt_summary: ${repoRelative(summaryPath)}`,
+    `- attempt_error: ${repoRelative(attemptErrorPath)}`,
+    `- published_summary: ${repoRelative(publishedSummaryPath)}`,
+    ...Object.entries(details).map(([key, value]) => `- ${key}: ${String(value)}`),
+    "",
+    "Published summaries are updated only after a successful benchmark attempt. Failed or interrupted attempts keep diagnostics inside the attempt directory.",
+    "",
+  ]
+  await writeFile(attemptReadmePath, lines.join("\n"), "utf8")
+}
+
+await writeAttemptReadme("running")
 
 function errorDetails(error: unknown) {
   const code = benchmarkErrorCode(error)
@@ -93,11 +120,15 @@ async function recordBenchmarkAttemptError(error: unknown) {
     project_version: await currentProjectVersion(),
     scenario,
     generated_at: new Date().toISOString(),
-    attempt_dir: path.relative(repoRoot, outputDir).replace(/\\/g, "/"),
-    published_summary_path: path.relative(repoRoot, publishedSummaryPath).replace(/\\/g, "/"),
+    attempt_dir: repoRelative(outputDir),
+    published_summary_path: repoRelative(publishedSummaryPath),
     error: errorDetails(error),
   }
   await writeFile(attemptErrorPath, `${JSON.stringify(payload, null, 2)}\n`, "utf8")
+  await writeAttemptReadme("failed", {
+    error_code: payload.error.code,
+    error_message: payload.error.message,
+  })
   await writeFile(
     path.join(scenarioOutputRoot, "last-failed-attempt.txt"),
     `${path.relative(scenarioOutputRoot, outputDir).replace(/\\/g, "/")}\n`,
@@ -106,7 +137,7 @@ async function recordBenchmarkAttemptError(error: unknown) {
   console.error(
     JSON.stringify(
       {
-        attempt_error_path: path.relative(repoRoot, attemptErrorPath).replace(/\\/g, "/"),
+        attempt_error_path: repoRelative(attemptErrorPath),
         scenario: payload.scenario,
         project_version: payload.project_version,
         code: payload.error.code,
@@ -156,6 +187,11 @@ async function publishBenchmarkSummary(summary: unknown) {
     `${path.relative(scenarioOutputRoot, outputDir).replace(/\\/g, "/")}\n`,
     "utf8",
   )
+  const summaryRecord = summary && typeof summary === "object" ? (summary as Record<string, unknown>) : {}
+  await writeAttemptReadme("succeeded", {
+    run_id: summaryRecord.run_id ?? "unknown",
+    run_status: summaryRecord.status ?? "unknown",
+  })
 }
 
 function summaryOutput(summary: Record<string, unknown>, extra: Record<string, unknown>) {
