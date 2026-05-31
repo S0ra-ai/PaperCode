@@ -66,7 +66,7 @@ export function createPaperWorkbenchHomeState(input: {
   return {
     schema_version: "TuiPaperWorkbenchState.v1",
     language: "zh-CN",
-    title: "paper_fucker 论文工作台",
+    title: "PaperCode 论文工作台",
     primary_input_modes: ["主题", "代码路径", "论文材料", "数据集", "实验日志"],
     model_roles: input.provider_model_roles ?? {},
     health_summary: [

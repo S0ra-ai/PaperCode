@@ -62,7 +62,7 @@ export function formatInitResult(result: InitWizardResult) {
     `本地密钥: ${result.wrote_secrets ? "已写入加密密钥文件" : "未写入；可稍后添加 provider key"}`,
     "",
     "下一步:",
-    "  1. 运行 paper_fucker 打开中文论文工作台",
+    "  1. 运行 papercode 打开中文论文工作台",
     "  2. 运行 papercode init doctor 查看配置健康状态",
     "  3. 需要自动化脚本读取完整结果时，加 --json",
   ].join("\n")
@@ -109,11 +109,11 @@ export function formatDoctorResult(result: DoctorResult) {
   ]
 
   const nextSteps = []
-  if (!result.config_exists) nextSteps.push("先运行 paper_fucker init 创建本地配置")
+  if (!result.config_exists) nextSteps.push("先运行 papercode init 创建本地配置")
   if (!result.secrets_exists) nextSteps.push("添加 provider key 后再运行 provider smoke")
   if (!config?.model_roles.default_model) nextSteps.push("进入 /models 添加 provider、勾选允许模型并选择主决策模型")
-  if (optionalMissing.length > 0) nextSteps.push("按需运行 paper_fucker init 修复可选工具或 Skill")
-  if (nextSteps.length === 0) nextSteps.push("基础环境可用，可以打开 paper_fucker 开始测试")
+  if (optionalMissing.length > 0) nextSteps.push("按需运行 papercode init 修复可选工具或 Skill")
+  if (nextSteps.length === 0) nextSteps.push("基础环境可用，可以打开 papercode 开始测试")
   nextSteps.push("需要完整机器可读诊断时，加 --json")
 
   const lines = [

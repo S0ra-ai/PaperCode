@@ -273,7 +273,7 @@ async function renderLatex(input: {
   const pandoc = input.tools.pandoc
   if (!pandoc) {
     return failedFile(input.bundleID, "latex", [
-      "pandoc not available for Markdown to LaTeX conversion. Run `paper_fucker init` or set PAPER_FUCKER_TOOL_PANDOC.",
+      "Pandoc 不可用，无法将 Markdown 转为 LaTeX。请运行 `papercode init` 修复导出工具链。",
     ])
   }
   const markdownPath = outputFile(input.runDir, input.bundleID, "markdown")
@@ -328,7 +328,7 @@ async function renderPdf(input: {
   const engines = latexEngines(input.tools)
   if (engines.length === 0) {
     return failedFile(input.bundleID, "pdf", [
-      "LaTeX engine not available for PDF rendering. Install latexmk, tectonic, xelatex, pdflatex, or lualatex, then run `paper_fucker init`.",
+      "LaTeX 引擎不可用，无法渲染 PDF。请安装 latexmk、tectonic、xelatex、pdflatex 或 lualatex 后运行 `papercode init`。",
     ])
   }
   const cwd = outputDir(input.runDir, input.bundleID)
@@ -392,7 +392,7 @@ async function renderDocx(input: {
   const pandoc = input.tools.pandoc
   if (!pandoc) {
     return failedFile(input.bundleID, "docx", [
-      "pandoc not available for Markdown to DOCX conversion. Run `paper_fucker init` or set PAPER_FUCKER_TOOL_PANDOC.",
+      "Pandoc 不可用，无法将 Markdown 转为 DOCX。请运行 `papercode init` 修复导出工具链。",
     ])
   }
   const markdownPath = outputFile(input.runDir, input.bundleID, "markdown")

@@ -3,7 +3,7 @@ import { resetInitState, type InitResetScope } from "./reset"
 import { formatDoctorResult, formatInitResult, formatResetResult } from "./format"
 
 function usage() {
-  return `paper_fucker init|doctor|diagnostics|reset [options]
+  return `papercode init|doctor|diagnostics|reset [options]
 
 Commands:
   init [--yes] [--json] [--home PATH] [--workspace PATH] [--tool name=path] [--secret name=value]
