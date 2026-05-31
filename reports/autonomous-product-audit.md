@@ -1,6 +1,6 @@
 ﻿# Autonomous Product Audit
 
-- Generated: 2026-05-31T12:56:52.4273224+08:00
+- Generated: 2026-05-31T13:00:16.9023384+08:00
 - Status: passed
 - Allow active task: True
 
@@ -14,4 +14,5 @@
 | `full-workspace-evidence` | pass | Latest full workspace strict acceptance report is passed and includes server/full workspace coverage. |
 | `dangerous-residue` | pass | No dangerous TODO/FIXME/not-implemented/mock residue found in product paper paths. |
 | `brand-surface` | pass | Paper Fucker and PaperRun remain the documented user-visible product surface. |
+| `public-surface-no-legacy-branding` | pass | User-visible README, TUI, paper API, and Preview surfaces do not contain legacy product wording. |
 | `git-flow` | pass | Branch fix/mcp-tool-binding-test-isolation follows Git Flow; forbidden local branches absent. |

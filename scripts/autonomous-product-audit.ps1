@@ -193,6 +193,54 @@ function Test-BrandSurface {
     }
 }
 
+function Test-PublicSurfaceNoLegacyBranding {
+    $surfacePaths = @(
+        "README.md",
+        "packages/opencode/src/index.ts",
+        "packages/opencode/src/cli/logo.ts",
+        "packages/opencode/src/cli/cmd/tui/routes/home.tsx",
+        "packages/opencode/src/cli/cmd/tui/routes/paper-models.tsx",
+        "packages/opencode/src/cli/cmd/tui/routes/paper/index.tsx",
+        "packages/opencode/src/cli/cmd/tui/routes/paper/workbench.ts",
+        "packages/opencode/src/cli/cmd/tui/feature-plugins/home/tips-view.tsx",
+        "packages/opencode/src/cli/cmd/tui/feature-plugins/sidebar/footer.tsx",
+        "packages/opencode/src/cli/cmd/tui/routes/session/sidebar.tsx",
+        "packages/opencode/src/server/routes/instance/httpapi/groups/paper.ts",
+        "packages/preview/src/client.js",
+        "packages/preview/src/server.ts"
+    )
+    $patterns = @(
+        "OpenCode",
+        "Open Code",
+        "Please report an issue",
+        "Ask anything",
+        "<b>Open</b>",
+        "<b>Code</b>",
+        "Login with opencode",
+        "opencode-login",
+        "opencode.ai"
+    )
+    $findings = New-Object "System.Collections.Generic.List[string]"
+    foreach ($relativePath in $surfacePaths) {
+        $path = Join-Path $RepoRoot $relativePath
+        if (-not (Test-Path -LiteralPath $path)) {
+            $findings.Add("${relativePath}: missing public surface file") | Out-Null
+            continue
+        }
+        $text = Get-Content -Raw -LiteralPath $path
+        foreach ($pattern in $patterns) {
+            if ($text.Contains($pattern)) {
+                $findings.Add("${relativePath}: contains '$pattern'") | Out-Null
+            }
+        }
+    }
+    if ($findings.Count -eq 0) {
+        Add-AuditResult "public-surface-no-legacy-branding" "pass" "User-visible README, TUI, paper API, and Preview surfaces do not contain legacy product wording."
+    } else {
+        Add-AuditResult "public-surface-no-legacy-branding" "fail" ($findings -join "; ")
+    }
+}
+
 function Test-GitFlow {
     $branch = (Invoke-RepoCommand "git" @("rev-parse", "--abbrev-ref", "HEAD")).output[-1].Trim()
     $forbidden = Invoke-RepoCommand "git" @("branch", "--format", "%(refname:short)")
@@ -234,6 +282,7 @@ Test-StrictEvidence
 Test-FullWorkspaceEvidence
 Test-DangerousResidue
 Test-BrandSurface
+Test-PublicSurfaceNoLegacyBranding
 Test-GitFlow
 Write-AuditReport
 
