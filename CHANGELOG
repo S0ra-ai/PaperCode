@@ -2,25 +2,24 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.137-dev
+:version       0.13.0.138-dev
 :last_update   2026/05/31
 
 :history
 
-    0.13.0.137-dev - 2026/05/31 (0517e0ad) [fix/mcp-tool-binding-test-isolation]
-        :brief 清理 TUI、Prompt 与系统提示中的用户可见旧产品语义，统一为 PaperRun 工作台表达
-        :tui
-            - fix(tui): PaperRun 创建、分支、删除、共享、工作区切换和消息操作的用户提示改为中文 PaperRun 语义
-            - fix(tui): 命令面板可见分类从 Session/Prompt 收口到 PaperRun，并移除明显旧 session 文案
-            - fix(tui): 首页 tips 收口到当前中国计算机学报 profile，不再提示未开放的期刊 profile 入口
-        :prompt
-            - fix(prompt): 默认、Anthropic、Gemini、Copilot、Beast 与 Trinity 系统提示统一使用 Paper Fucker 产品身份
-            - fix(prompt): 反馈地址和项目源码地址统一指向 ZhuchenZhong/paper_fucker
+    0.13.0.138-dev - 2026/05/31 (fbec350f) [fix/mcp-tool-binding-test-isolation]
+        :brief 初始化、reset、skill 安装与全局路径解析忽略字符串化空 home 环境变量
+        :init
+            - fix(init): resolveInitHome 忽略空字符串、"undefined" 和 "null"，避免写入错误本机状态目录
+            - fix(reset): defaultResetHome 复用 resolveInitHome，reset 默认 home 与 init 路径语义保持一致
+            - fix(skill): managed skill 安装 home 解析忽略字符串化空值，避免安装到 undefined/.paper_fucker
+        :runtime
+            - fix(global): Global.Path.home 对 PAPER_FUCKER_TEST_HOME 做同样规范化，并保留模块加载时的有效测试 home
         :test
-            - test(surface): public-surface 覆盖 TUI 命令、错误页、工作区切换、Prompt 和 PaperRun 文案
-            - test(prompt): 新增 prompt-brand 测试，阻断系统提示回退到旧产品身份或旧上游反馈地址
+            - test(init): 覆盖字符串化 PAPER_FUCKER_TEST_HOME/PAPER_FUCKER_HOME 和显式 home 优先级
+            - test(core): 覆盖 Global.Path.home 忽略字符串化 undefined
         :changelog
-            - docs(changelog): 0.13.0.136 开发历史移入 docs/changelog/v0/0.13.0.136.CHANGELOG
+            - docs(changelog): 0.13.0.137 开发历史移入 docs/changelog/v0/0.13.0.137.CHANGELOG
         :checks
-            - targeted tests: bun public-surface 与 prompt-brand
-            - static checks: packages/opencode typecheck 与 git diff --check
+            - targeted tests: packages/core global.test、packages/opencode init.test
+            - static checks: packages/core typecheck、packages/opencode typecheck 与 git diff --check

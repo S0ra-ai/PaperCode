@@ -1,0 +1,26 @@
+:project       paper_fucker - 可验证论文研究自动化系统
+:author        k1d (https://github.com/ZhuchenZhong)
+:repo
+:desc          0.13.0.137 开发历史归档
+:version       0.13.0.137-dev
+:last_update   2026/05/31
+
+:history
+
+    0.13.0.137-dev - 2026/05/31 (0517e0ad) [fix/mcp-tool-binding-test-isolation]
+        :brief 清理 TUI、Prompt 与系统提示中的用户可见旧产品语义，统一为 PaperRun 工作台表达
+        :tui
+            - fix(tui): PaperRun 创建、分支、删除、共享、工作区切换和消息操作的用户提示改为中文 PaperRun 语义
+            - fix(tui): 命令面板可见分类从 Session/Prompt 收口到 PaperRun，并移除明显旧 session 文案
+            - fix(tui): 首页 tips 收口到当前中国计算机学报 profile，不再提示未开放的期刊 profile 入口
+        :prompt
+            - fix(prompt): 默认、Anthropic、Gemini、Copilot、Beast 与 Trinity 系统提示统一使用 Paper Fucker 产品身份
+            - fix(prompt): 反馈地址和项目源码地址统一指向 ZhuchenZhong/paper_fucker
+        :test
+            - test(surface): public-surface 覆盖 TUI 命令、错误页、工作区切换、Prompt 和 PaperRun 文案
+            - test(prompt): 新增 prompt-brand 测试，阻断系统提示回退到旧产品身份或旧上游反馈地址
+        :changelog
+            - docs(changelog): 0.13.0.136 开发历史移入 docs/changelog/v0/0.13.0.136.CHANGELOG
+        :checks
+            - targeted tests: bun public-surface 与 prompt-brand
+            - static checks: packages/opencode typecheck 与 git diff --check
