@@ -51,7 +51,7 @@
 cd paper_fucker
 bun install
 bun run build
-.\paper_fucker.exe</code></pre>
+.\papercode.exe</code></pre>
         <p>终端最低尺寸为 <code>96x28</code>，推荐 <code>120x34</code>。窗口不足时 TUI 会显示中文尺寸提示，恢复尺寸后自动回到原页面。</p>
 
         <h2 id="parameters">使用参数</h2>
@@ -95,7 +95,7 @@ bun run build
 
         <h2 id="workspace">选择工作区</h2>
         <p><code>/folder</code> 优先打开系统目录选择器。Windows 需要能选择驱动器；原生选择器不可用时回退到中文 TUI 目录选择器。</p>
-        <div class="callout">默认 run 写入 <code>~/.paper_fucker/runs</code>。只有用户明确选择工作区后，才写入 <code>&lt;workspace&gt;/.paper_fucker/runs</code>。</div>
+        <div class="callout">默认 run 保存在用户目录。只有用户明确选择工作区后，才写入对应项目工作区。</div>
 
         <h2 id="materials">输入材料</h2>
         <table class="table">
@@ -133,8 +133,8 @@ bun run build
 
         <h2 id="resume">恢复与退出</h2>
         <p>TUI 使用 <code>/resume</code> 选择历史 run。CLI 可使用：</p>
-        <pre><code>paper_fucker runs list
-paper_fucker resume &lt;run-id&gt;</code></pre>
+        <pre><code>papercode runs list
+papercode resume &lt;run-id&gt;</code></pre>
         <p>退出时展示 run id、状态、token/cost 摘要和恢复命令，方便继续任务。</p>
 
         <h2 id="next">What's Next?</h2>

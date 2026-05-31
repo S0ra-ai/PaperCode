@@ -64,7 +64,7 @@ const MANAGED_SKILLS: ManagedSkillSpec[] = [
     required: false,
     install_policy: "built_in",
     impact: "Nature-style formatting, figure, supplementary material, and submission checks are degraded.",
-    install_hint: "运行 paper_fucker init，或从项目内置 skill 包安装 nature-paper。",
+    install_hint: "运行 papercode init，或从项目内置 skill 包安装 nature-paper。",
   },
   {
     id: "architecture-diagram",
@@ -73,7 +73,7 @@ const MANAGED_SKILLS: ManagedSkillSpec[] = [
     required: false,
     install_policy: "built_in",
     impact: "系统架构、方法管线和平台拓扑图需要回退到普通文本或手工绘制。",
-    install_hint: "运行 paper_fucker init，安装 PaperCode 内置 architecture-diagram skill。",
+    install_hint: "运行 papercode init，安装 PaperCode 内置 architecture-diagram skill。",
   },
   {
     id: "paper-framework-figure-studio-pro",
@@ -82,7 +82,7 @@ const MANAGED_SKILLS: ManagedSkillSpec[] = [
     required: false,
     install_policy: "built_in",
     impact: "论文 framework figure、method overview 和 reviewer-facing schematic 的生成与审稿循环会降级。",
-    install_hint: "运行 paper_fucker init，安装 PaperCode 内置 paper-framework-figure-studio-pro skill。",
+    install_hint: "运行 papercode init，安装 PaperCode 内置 paper-framework-figure-studio-pro skill。",
   },
   {
     id: "bb-browser",

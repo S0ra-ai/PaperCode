@@ -1,6 +1,6 @@
 # PaperCode
 
-当前版本：<!-- version:start -->0.13.0.182-dev<!-- version:end --> ｜ 作者：k1d ([ZhuchenZhong](https://github.com/ZhuchenZhong)) ｜ 状态：开发态 ｜ 许可证：MPL-2.0
+当前版本：<!-- version:start -->0.13.0.183-dev<!-- version:end --> ｜ 作者：k1d ([ZhuchenZhong](https://github.com/ZhuchenZhong)) ｜ 状态：开发态 ｜ 许可证：MPL-2.0
 
 PaperCode 是一个中文优先、私有优先的论文研究工作台。你输入主题，或拖入论文、代码、数据和实验日志，它会把任务组织成可恢复、可审查的 `PaperRun`：研究规划、资料检索、代码理解、实验设计、复现记录、证据账本、真实性审查、实时预览和导出。
 
@@ -62,14 +62,14 @@ papercode resume <run-id>
 常用命令：
 
 - `/models` 配置 provider、允许模型、主决策模型和阶段模型。
-- `/folder` 选择当前 TUI 对话工作区；只有选择后，新 run 才会写入该工作区的 `.paper_fucker/runs`。
+- `/folder` 选择当前 TUI 对话工作区；只有选择后，新 run 才会写入该工作区。
 - `/file` 添加论文草稿、PDF、Markdown、LaTeX 或 DOCX。
 - `/data` 添加数据集。
 - `/log` 添加实验日志。
 - `/status` 查看模型、MCP、Skill 和工具链状态。
 - `/resume` 打开历史 `PaperRun` 选择器。
 
-默认情况下，`PaperRun` 写入 `~/.paper_fucker/runs/<run-id>`。选择工作区或显式传入 `storage_scope: "workspace"` 后，才写入 `<workspace>/.paper_fucker/runs/<run-id>`。
+默认情况下，`PaperRun` 保存在用户目录。选择工作区或显式传入 `storage_scope: "workspace"` 后，才写入对应项目工作区。
 
 运行中会自动打开本地只读 Monitor。它通过 SSE 持续显示阶段图、查新结果、论文脊梁、全局图、草稿、证据账本、agent、成本和 gate 状态；没有 token 的请求会被拒绝，写请求会被阻断。
 
@@ -107,7 +107,7 @@ papercode resume <run-id>
 PaperCode 默认 private-first：
 
 - 配置、密钥和运行记录保存在 PaperCode 本机状态目录。
-- 运行状态写入 `~/.paper_fucker/` 或你显式选择的工作区 `.paper_fucker/`。
+- 默认运行记录保存在用户目录；选择工作区后，该项目的中间产物和恢复记录保存在工作区状态目录。
 - 本地代码、数据和论文材料不会默认全文发给外部模型或 MCP。
 - secrets、ignored files、大二进制和敏感配置会被排除。
 - 外部模型、MCP、Skill 和工具调用写入 audit/tool trace。
@@ -131,7 +131,7 @@ PaperCode 默认 private-first：
 可以启动，但 `PaperRun` 会暂停并引导你进入 `/models` 添加 provider、勾选允许模型并选择主决策模型。
 
 **默认会污染当前仓库吗？**  
-不会。默认 run 存在用户 home 的 `~/.paper_fucker/runs`。只有你选择当前目录作为工作区，才会写入工作区 `.paper_fucker/runs`。
+不会。默认 run 保存在用户目录。只有你选择当前目录作为工作区，才会把该任务的中间产物写入当前项目。
 
 **可以恢复历史任务吗？**  
 可以。TUI 使用 `/resume`，CLI 使用 `papercode runs list` 和 `papercode resume <run-id>`。
