@@ -2,24 +2,24 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.166-dev
+:version       0.13.0.167-dev
 :last_update   2026/05/31
 
 :history
 
-    0.13.0.166-dev - 2026/05/31 (7e0edc81) [fix/mcp-tool-binding-test-isolation]
-        :brief CJC 成稿默认作者与声明表述去半成品化
+    0.13.0.167-dev - 2026/05/31 (ffc46aea) [fix/mcp-tool-binding-test-isolation]
+        :brief CJC 投稿准备度附录按现有附录连续编号
         :fix
-            - fix(authoring): DraftPaper 默认作者信息从“本次材料未提供”改为匿名作者、匿名单位和匿名通信作者
-            - fix(authoring): CJC front matter 默认作者从“作者待定 / Author TBD”改为“匿名作者 / Anonymous author”
-            - fix(authoring): 声明表中基金项目、作者贡献和利益冲突从“本次材料未提供”改为“未声明”
+            - fix(authoring): 投稿准备度附录不再硬编码为附录 G，改为扫描当前 Markdown 中已有附录并自动续号
+            - fix(authoring): ranking final 场景已有附录 A/B 时，投稿准备度输出为附录 C，避免读者误以为缺少 C-F
+            - fix(authoring): 保留完整 CJC authoring 场景中的附录 E/F 后续号语义，已有 E/F 时仍输出附录 G
         :test
-            - test(authoring): 覆盖默认作者信息不再输出待定、TBD 或本次材料未提供
-            - test(authoring): 覆盖声明表默认使用未声明语义
+            - test(authoring): 覆盖 ranking CJC draft 投稿准备度为附录 C 且不出现附录 G
+            - test(authoring): 覆盖完整 CJC authoring 流程仍按已有附录继续编号
         :changelog
-            - docs(changelog): 0.13.0.165 开发历史移入 docs/changelog/v0/0.13.0.165.CHANGELOG
+            - docs(changelog): 0.13.0.166 开发历史移入 docs/changelog/v0/0.13.0.166.CHANGELOG
         :checks
             - targeted tests: npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --timeout 180000 passed
             - typecheck: npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
-            - final benchmark: scripts/live-paper-quality-benchmark.ts --scenario final passed, run-bb73f5fd-4bc5-485f-b2e4-f70091ddb8fa final export passed
-            - final audit: latest final Markdown contains 匿名作者, 匿名单位, Anonymous author and 未声明, and no longer contains 作者待定, Author TBD or 本次材料未提供
+            - final benchmark: scripts/live-paper-quality-benchmark.ts --scenario final passed, run-842e8469-3313-49dc-90b8-674aad04ad26 final export passed
+            - final audit: latest final Markdown contains 附录 A、附录 B、附录 C：投稿准备度 and no longer jumps to 附录 G
