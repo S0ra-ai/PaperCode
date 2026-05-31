@@ -1,0 +1,24 @@
+:project       paper_fucker - 可验证论文研究自动化系统
+:author        k1d (https://github.com/ZhuchenZhong)
+:repo
+:desc          记录项目的重大变更和版本历史
+:version       0.13.0.168-dev
+:last_update   2026/05/31
+
+:history
+
+    0.13.0.168-dev - 2026/05/31 (2b067431) [fix/mcp-tool-binding-test-isolation]
+        :brief ranking 成稿引言与资源边界口吻论文语体化
+        :fix
+            - fix(authoring): ranking 引言从“系统需要在有限候选集内判断”改为“研究者需要在有限候选集内判断”，减少产品口吻残留
+            - fix(authoring): 资源记录边界从“未登记峰值内存和 GPU 用量”改为“峰值内存和 GPU 用量未采集”，贴近实验记录语义
+        :test
+            - test(authoring): 覆盖 ranking 引言不再出现系统需要表述
+            - test(authoring): 覆盖资源边界不再出现未登记峰值内存和 GPU 用量
+        :changelog
+            - docs(changelog): 0.13.0.167 开发历史移入 docs/changelog/v0/0.13.0.167.CHANGELOG
+        :checks
+            - targeted tests: npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --timeout 180000 passed
+            - typecheck: npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+            - final benchmark: scripts/live-paper-quality-benchmark.ts --scenario final passed, run-4a781cbe-ed95-4ca2-af6e-6052e12150e2 final export passed
+            - final audit: latest final Markdown contains 研究者需要在有限候选集内判断 and 峰值内存和 GPU 用量未采集, with no 系统需要 or 未登记峰值内存 residual
