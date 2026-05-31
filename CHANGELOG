@@ -2,20 +2,20 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.155-dev
+:version       0.13.0.156-dev
 :last_update   2026/05/31
 
 :history
 
-    0.13.0.155-dev - 2026/05/31 (73b378fa) [fix/mcp-tool-binding-test-isolation]
-        :brief reports 归档策略纳入 autonomous product audit
+    0.13.0.156-dev - 2026/05/31 (da8d1cbd) [fix/mcp-tool-binding-test-isolation]
+        :brief 可见命令面纳入 autonomous product audit
         :test
-            - test(audit): autonomous-product-audit 新增 report-governance 检查，要求 reports/README.md 说明 active/historical reports 与 reports/archive 边界
-            - test(audit): active strict-live-full-acceptance.md 若存在必须匹配当前 CHANGELOG 版本，否则要求归档或重新运行 full workspace acceptance
-            - test(audit): archived strict-live-full-acceptance 报告文件名必须携带 proven -dev version，并保留 strict-live-full mode
-            - test(acceptance): strict-acceptance 单测覆盖 report-governance 审计项，避免报告治理规则退化
+            - test(audit): autonomous-product-audit 新增 visible-command-surface 检查，锁定 PaperVisibleCommandRegistry 精确只包含 /models、/status、/file、/folder、/data、/log、/preview、/export、/stop、/resume
+            - test(audit): visible-command-surface 明确禁止 /connect、/agents、/variants、session/provider 等旧聊天命令进入用户可见命令面
+            - test(audit): 审计确认 command palette 与 slash autocomplete 都通过 Paper Fucker filter 过滤命令
+            - test(acceptance): strict-acceptance 单测覆盖 visible-command-surface 审计项，paper-visible-commands 单测继续覆盖 Shift+Tab 研究深度绑定
         :changelog
-            - docs(changelog): 0.13.0.154 开发历史移入 docs/changelog/v0/0.13.0.154.CHANGELOG
+            - docs(changelog): 0.13.0.155 开发历史移入 docs/changelog/v0/0.13.0.155.CHANGELOG
         :checks
-            - targeted tests: packages/opencode strict-acceptance.test
+            - targeted tests: packages/opencode strict-acceptance.test and paper-visible-commands.test
             - audit: scripts/autonomous-product-audit.ps1 -AllowActiveTask
