@@ -163,6 +163,9 @@ function cjcAuthorMetadata(draft: DraftPaper) {
 
 function cjcEnglishAbstract(draft: DraftPaper, abstract: string) {
   if (/^[\x00-\x7F\s:;,.!?;'"()[\]-]+$/.test(abstract)) return abstract
+  if (draft.title.includes("候选论文排序")) {
+    return cjcRankingEnglishAbstract(abstract)
+  }
   if (draft.title.includes("Text2Action") || draft.title.includes("text2action")) {
     return [
       "This paper presents a Text2Action method for embodied service robot command planning.",
@@ -175,6 +178,43 @@ function cjcEnglishAbstract(draft: DraftPaper, abstract: string) {
     `This paper presents ${englishTitle}.`,
     "The manuscript follows a Chinese Computer Journal oriented structure and keeps research questions, method claims, experiment records, and reproducibility boundaries traceable to the submitted materials.",
   ].join(" ")
+}
+
+function cjcRankingEnglishAbstract(abstract: string) {
+  const metric = englishMetricName(abstract.match(/实验以([^，。]+)为主指标/)?.[1]?.trim() ?? "ranking nDCG@3")
+  const proposed = abstract.match(/本文方法达到\s*([0-9.]+)/)?.[1]
+  const baseline = abstract.match(/词项匹配基线为\s*([0-9.]+)/)?.[1]
+  const baselineDelta = abstract.match(/较词项匹配基线的绝对差值为\s*([0-9.]+)/)?.[1]
+  const ablationDelta = abstract.match(/无证据覆盖消融的[^。]*绝对差值为\s*([0-9.]+)/)?.[1]
+  const candidateCount = abstract.match(/候选数\s*([0-9]+)/)?.[1]
+  const labelBoundary = abstract.includes("不是人工相关性标注")
+    ? "The evaluation labels are derived from live arXiv search rank, topic matching, metadata completeness, and publication time, rather than manual relevance annotation."
+    : "The evaluation labels are bounded by the current dataset construction policy."
+  const reproduction = abstract.includes("容器复现通过")
+    ? "Container reproduction passes, indicating that the current protocol can be repeated in the controlled environment."
+    : "Container reproduction has not passed, so the results should be interpreted as exploratory observations."
+  const result =
+    proposed && baseline && baselineDelta
+      ? `The proposed method reaches ${proposed} on ${metric}, compared with ${baseline} for the lexical matching baseline, with an absolute difference of ${baselineDelta}.`
+      : `The experiment uses ${metric} as the primary metric.`
+  const ablation = ablationDelta
+    ? `The no-claim-coverage ablation is lower than the proposed method by ${ablationDelta}, suggesting that the claim-coverage term is associated with the observed ranking difference on the current candidate set.`
+    : "The ablation study is used to separate lexical matching from the claim-coverage component."
+  const dataset = candidateCount ? `The benchmark contains ${candidateCount} candidate papers.` : "The benchmark has a limited candidate set."
+  return [
+    "This study addresses candidate paper ranking under an evidence-constrained setting.",
+    "The ranking interface consists of rankAgentTeamPapers and scorePaper, where scorePaper combines relevance, claim coverage, and recency into a unified score.",
+    result,
+    ablation,
+    `${dataset} ${labelBoundary}`,
+    reproduction,
+  ].join(" ")
+}
+
+function englishMetricName(value: string) {
+  const normalized = value.trim()
+  if (normalized === "排序 nDCG@3") return "ranking nDCG@3"
+  return normalized.replace(/排序/g, "ranking")
 }
 
 function cjcKeywordList(value: string) {
