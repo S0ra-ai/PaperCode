@@ -2,20 +2,19 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.149-dev
+:version       0.13.0.150-dev
 :last_update   2026/05/31
 
 :history
 
-    0.13.0.149-dev - 2026/05/31 (8b050800) [fix/mcp-tool-binding-test-isolation]
-        :brief 开发手册新增渲染验收与 favicon，防止交互控件回退
-        :docs
-            - docs(development): 16 个开发手册 HTML 页面统一声明 favicon，浏览器打开时不再产生 favicon 404
-            - test(docs): check-development-docs 增强为校验 doc-toolbar、主题切换、正文展开、代码复制和 favicon 链接
-            - test(audit): autonomous-product-audit 对开发手册启用 render 检查，确认首页和接口页实际挂载工具条、目录和复制按钮
+    0.13.0.150-dev - 2026/05/31 (ecf75aa7) [fix/mcp-tool-binding-test-isolation]
+        :brief 自主审计要求 strict live 证据必须匹配当前版本
+        :audit
+            - test(audit): strict-live-evidence 从 CHANGELOG :version 读取当前版本，并拒绝 project_version 缺失或指向旧版本的 strict live 报告
+            - report(strict): 重新运行 focused strict acceptance，刷新 crawler、HF、Preview browser、topic/code/final PaperRun benchmark 证据到 0.13.0.149-dev
+            - report(audit): autonomous product audit 显示 strict live 证据覆盖当前版本，避免旧通过报告继续被当作当前验收
         :changelog
-            - docs(changelog): 0.13.0.148 开发历史移入 docs/changelog/v0/0.13.0.148.CHANGELOG
+            - docs(changelog): 0.13.0.149 开发历史移入 docs/changelog/v0/0.13.0.149.CHANGELOG
         :checks
-            - docs check: scripts/check-development-docs.ps1 -Render
-            - browser smoke: http://127.0.0.1:8765/index.html favicon、toolbar、copy button、horizontal overflow
+            - strict acceptance: scripts/strict-acceptance.ps1 -CheckTimeoutSeconds 900
             - audit: scripts/autonomous-product-audit.ps1 -AllowActiveTask

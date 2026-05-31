@@ -1,0 +1,21 @@
+:project       paper_fucker - 可验证论文研究自动化系统
+:author        k1d (https://github.com/ZhuchenZhong)
+:repo
+:desc          0.13.0.149 开发历史归档
+:version       0.13.0.149-dev
+:last_update   2026/05/31
+
+:history
+
+    0.13.0.149-dev - 2026/05/31 (8b050800) [fix/mcp-tool-binding-test-isolation]
+        :brief 开发手册新增渲染验收与 favicon，防止交互控件回退
+        :docs
+            - docs(development): 16 个开发手册 HTML 页面统一声明 favicon，浏览器打开时不再产生 favicon 404
+            - test(docs): check-development-docs 增强为校验 doc-toolbar、主题切换、正文展开、代码复制和 favicon 链接
+            - test(audit): autonomous-product-audit 对开发手册启用 render 检查，确认首页和接口页实际挂载工具条、目录和复制按钮
+        :changelog
+            - docs(changelog): 0.13.0.148 开发历史移入 docs/changelog/v0/0.13.0.148.CHANGELOG
+        :checks
+            - docs check: scripts/check-development-docs.ps1 -Render
+            - browser smoke: http://127.0.0.1:8765/index.html favicon、toolbar、copy button、horizontal overflow
+            - audit: scripts/autonomous-product-audit.ps1 -AllowActiveTask
