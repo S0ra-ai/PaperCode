@@ -70,6 +70,7 @@ function errorDetails(error: unknown) {
 
 function benchmarkErrorCode(error: unknown) {
   const message = error instanceof Error ? error.message : String(error)
+  if (/interrupted by SIGINT|terminated by SIGTERM/i.test(message)) return "benchmark_interrupted"
   if (/live arXiv source discovery timed out|Timeout|timed out/i.test(message)) return "source_discovery_timeout"
   if (/live arXiv source discovery blocked by rate limit|HTTP 429|Too Many Requests/i.test(message)) return "source_discovery_rate_limited"
   if (/No verified arXiv sources|source candidates|metadata missing|arXiv metadata mismatch/i.test(message)) {
@@ -115,7 +116,10 @@ async function recordBenchmarkAttemptError(error: unknown) {
 }
 
 function installBenchmarkFailureRecorder() {
+  let finalizing = false
   const finalizeFailure = (error: unknown) => {
+    if (finalizing) return
+    finalizing = true
     void recordBenchmarkAttemptError(error)
       .catch((recordError) => {
         console.error(`Failed to record live benchmark attempt error: ${recordError instanceof Error ? recordError.message : String(recordError)}`)
@@ -127,6 +131,8 @@ function installBenchmarkFailureRecorder() {
   }
   process.on("uncaughtException", finalizeFailure)
   process.on("unhandledRejection", finalizeFailure)
+  process.on("SIGINT", () => finalizeFailure(new Error("live benchmark interrupted by SIGINT")))
+  process.on("SIGTERM", () => finalizeFailure(new Error("live benchmark terminated by SIGTERM")))
 }
 
 installBenchmarkFailureRecorder()
