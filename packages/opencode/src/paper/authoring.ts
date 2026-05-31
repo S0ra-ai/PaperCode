@@ -229,7 +229,7 @@ const cjcSectionPlan: Record<string, { order: number; heading: string; level: 2 
   reproducibility: { order: 600, heading: "6 可复现性", level: 2 },
   discussion: { order: 700, heading: "7 讨论", level: 2 },
   threats_to_validity: { order: 800, heading: "8 效度威胁", level: 2 },
-  limitations: { order: 810, heading: "8.1 限制与待修复项", level: 3 },
+  limitations: { order: 810, heading: "8.1 限制与未来工作", level: 3 },
   conclusion: { order: 900, heading: "9 结论", level: 2 },
   declarations: { order: 1000, heading: "声明", level: 2 },
   references: { order: 1100, heading: "参考文献", level: 2 },

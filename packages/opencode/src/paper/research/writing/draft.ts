@@ -995,7 +995,7 @@ function codeAvailabilitySummary(input: ComposeDraftPaperInput) {
   const worktreeStatus = typeof worktreeDirty === "boolean" ? (worktreeDirty ? "含未提交或未跟踪变更" : "干净") : undefined
   const worktreeBoundary =
     worktreeDirty === true
-      ? "含未提交或未跟踪变更时，复现应以导出包、代码修订和已登记实验材料为准，不把该工作区状态视为可发布源码快照。"
+      ? "含未提交或未跟踪变更时，复现应以已登记材料、代码修订和实验记录为准，不把该工作区状态视为可发布源码快照。"
       : ""
   const rows = [
     ["方法实现", ranges.length > 0 ? ranges.join("、") : "未登记"],
@@ -2666,7 +2666,7 @@ function conclusionSummary(input: ComposeDraftPaperInput, ready: boolean) {
 }
 
 function limitationsSectionTitle(input: ComposeDraftPaperInput) {
-  return isRankingContext(input) ? "限制" : "限制与待修复项"
+  return isRankingContext(input) ? "限制" : "限制与未来工作"
 }
 
 function appendixEvidenceTraceTitle(input: ComposeDraftPaperInput) {
