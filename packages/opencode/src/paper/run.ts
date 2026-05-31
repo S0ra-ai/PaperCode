@@ -38,6 +38,7 @@ import { normalizeResearchIntake, type ResearchBrief, type ResearchIntakeRequest
 import {
   createModelRoleRouter,
   PAPER_MODEL_ROLES,
+  parsePaperModelId,
   type PaperModelRef,
   type PaperModelRole,
 } from "./model-router"
@@ -950,6 +951,15 @@ function metadataRoutingDecisions(value: unknown): ModelRoutingDecision[] {
     const record = jsonRecord(item)
     return record.schema_version === "ModelRoutingDecision.v1" && typeof record.role === "string"
   })
+}
+
+function modelRolesFromRouting(decisions: ModelRoutingDecision[]): Partial<Record<PaperModelRole, PaperModelRef>> {
+  const roles: Partial<Record<PaperModelRole, PaperModelRef>> = {}
+  for (const decision of decisions) {
+    if (!decision.selected_model) continue
+    roles[decision.role] = parsePaperModelId(decision.selected_model, decision.role)
+  }
+  return roles
 }
 
 function dataEgressCandidates(request: ResearchIntakeRequest) {
@@ -2612,17 +2622,7 @@ export async function createPaperRun(
     workspace_path: workspace,
   }
   const modelInventory = await loadPaperModelInventory({ home: normalized.home })
-  const requestedRoleModels = Object.values(request.model_roles ?? {}).filter((value): value is string => {
-    return typeof value === "string" && value.includes("/")
-  })
-  const runModelInventory: PaperModelInventory = {
-    ...modelInventory,
-    allowlist: Array.from(new Set([...modelInventory.allowlist, ...requestedRoleModels])),
-    role_overrides: {
-      ...modelInventory.role_overrides,
-      ...(request.model_roles ?? {}),
-    },
-  }
+  const runModelInventory: PaperModelInventory = modelInventory
   const modelRouting = PAPER_MODEL_ROLES.map((role) =>
     routePaperModel(runModelInventory, {
       role,
@@ -2630,7 +2630,7 @@ export async function createPaperRun(
       forced_model: request.model_roles?.[role],
     }),
   )
-  const routedRoles = modelRolesFromInventory(runModelInventory)
+  const routedRoles = modelRolesFromRouting(modelRouting)
   const handle = await createResearchRun(
     {
       topic: brief.topic,

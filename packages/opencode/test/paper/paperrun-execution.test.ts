@@ -13,6 +13,7 @@ import {
   previewPaperRun,
   runPaperRunExperimentProtocol,
   stopAllPaperRunLivePreviews,
+  updatePaperModelAllowlist,
   type PaperModelRole,
   type PaperRunRuntimeOptions,
 } from "@/paper"
@@ -25,6 +26,10 @@ const PAPER_RUN_INTEGRATION_TIMEOUT = 180_000
 
 function testModelRoles(): Record<PaperModelRole, string> {
   return Object.fromEntries(PAPER_MODEL_ROLES.map((role) => [role, TEST_MODEL])) as Record<PaperModelRole, string>
+}
+
+async function seedTestModelInventory(home: string) {
+  await updatePaperModelAllowlist([TEST_MODEL], { home, decision_model: TEST_MODEL })
 }
 
 const cleanup: string[] = []
@@ -58,6 +63,7 @@ async function fixtureWorkspace() {
   const home = path.join(dir, "home")
   await mkdir(path.join(workspace, "src"), { recursive: true })
   await mkdir(home, { recursive: true })
+  await seedTestModelInventory(home)
   await writeFile(
     path.join(workspace, "package.json"),
     JSON.stringify({ scripts: { test: "bun test", bench: "bun test test/paper/code-to-paper.test.ts" } }, null, 2),

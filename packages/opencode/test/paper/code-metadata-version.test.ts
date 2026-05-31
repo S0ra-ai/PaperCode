@@ -3,7 +3,14 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from "fs/promises"
 import os from "os"
 import path from "path"
 import { setTimeout as sleep } from "node:timers/promises"
-import { createPaperRun, PAPER_MODEL_ROLES, stopAllPaperRunLivePreviews, type PaperModelRole, type PaperRunRuntimeOptions } from "@/paper"
+import {
+  createPaperRun,
+  PAPER_MODEL_ROLES,
+  stopAllPaperRunLivePreviews,
+  updatePaperModelAllowlist,
+  type PaperModelRole,
+  type PaperRunRuntimeOptions,
+} from "@/paper"
 
 const now = "2026-05-10T00:00:00Z"
 const TEST_MODEL = "test-provider/test-model"
@@ -20,6 +27,10 @@ type CodeMetadataCleanupOptions = {
 
 function testModelRoles(): Record<PaperModelRole, string> {
   return Object.fromEntries(PAPER_MODEL_ROLES.map((role) => [role, TEST_MODEL])) as Record<PaperModelRole, string>
+}
+
+async function seedTestModelInventory(home: string) {
+  await updatePaperModelAllowlist([TEST_MODEL], { home, decision_model: TEST_MODEL })
 }
 
 function runtimeOptions(workspace: string, home: string): PaperRunRuntimeOptions {
@@ -77,6 +88,7 @@ async function fixtureWorkspace() {
   const home = path.join(root, "home")
   await mkdir(path.join(workspace, "src"), { recursive: true })
   await mkdir(home, { recursive: true })
+  await seedTestModelInventory(home)
   await writeFile(path.join(root, "README.md"), "# Fixture Product Root\n\n当前版本：<!-- version:start -->9.8.7-dev<!-- version:end -->\n")
   await writeFile(
     path.join(workspace, "package.json"),

@@ -369,6 +369,68 @@ function Test-VisibleCommandSurface {
     Add-AuditResult "visible-command-surface" "pass" "Visible slash command registry is exact, and palette/autocomplete use the Paper Fucker filter."
 }
 
+function Test-ModelRoutingBoundary {
+    $inventoryPath = "packages/opencode/src/paper/model-inventory.ts"
+    $runPath = "packages/opencode/src/paper/run.ts"
+    $modelTestPath = "packages/opencode/test/paper/model-discovery.test.ts"
+    $runTestPath = "packages/opencode/test/paper/run-api.test.ts"
+    $inventory = Read-RepoText $inventoryPath
+    $run = Read-RepoText $runPath
+    $modelTests = Read-RepoText $modelTestPath
+    $runTests = Read-RepoText $runTestPath
+
+    $requiredInventory = @(
+        "const allowedModels = inventory.allowlist.filter",
+        "const allowedCandidates = inventory.candidates.filter",
+        "forced_model_not_allowed",
+        "model_allowlist_empty",
+        "decision_model_missing"
+    )
+    $missingInventory = @($requiredInventory | Where-Object { -not $inventory.Contains($_) })
+    if ($missingInventory.Count -gt 0) {
+        Add-AuditResult "model-routing-boundary" "fail" "Model inventory routing boundary missing: $($missingInventory -join ', ')"
+        return
+    }
+
+    $requiredRun = @(
+        "function modelRolesFromRouting",
+        "forced_model: request.model_roles?.[role]",
+        "const runModelInventory: PaperModelInventory = modelInventory",
+        "paper_model_routing: modelRouting"
+    )
+    $missingRun = @($requiredRun | Where-Object { -not $run.Contains($_) })
+    if ($missingRun.Count -gt 0) {
+        Add-AuditResult "model-routing-boundary" "fail" "PaperRun routing integration missing: $($missingRun -join ', ')"
+        return
+    }
+
+    $forbiddenRun = @(
+        "requestedRoleModels",
+        "new Set([...modelInventory.allowlist",
+        "...(request.model_roles ?? {})"
+    )
+    $foundForbidden = @($forbiddenRun | Where-Object { $run.Contains($_) })
+    if ($foundForbidden.Count -gt 0) {
+        Add-AuditResult "model-routing-boundary" "fail" "PaperRun request model roles can still contaminate allowlist or overrides: $($foundForbidden -join ', ')"
+        return
+    }
+
+    $requiredTests = @(
+        "does not treat stale candidate.allowed or decision_model as user allowlist",
+        "blocks forced models that are not in the user allowlist",
+        "does not let request model_roles bypass the user allowlist",
+        "forced_model_not_allowed"
+    )
+    $joinedTests = "$modelTests`n$runTests"
+    $missingTests = @($requiredTests | Where-Object { -not $joinedTests.Contains($_) })
+    if ($missingTests.Count -gt 0) {
+        Add-AuditResult "model-routing-boundary" "fail" "Model routing boundary tests missing: $($missingTests -join ', ')"
+        return
+    }
+
+    Add-AuditResult "model-routing-boundary" "pass" "PaperRun and Agent routing can only select allowlisted models; request model_roles remain forced requests, not allowlist mutations."
+}
+
 function Test-DangerousResidue {
     $paths = @("packages/opencode/src/paper", "research-tools/src", "README.md")
     $patterns = @("scrapling_live_fetch_not_implemented", "network_not_authorized_mock_used", "TODO", "FIXME")
@@ -492,6 +554,7 @@ Test-StrictEvidence
 Test-FullWorkspaceEvidence
 Test-ReportGovernance
 Test-VisibleCommandSurface
+Test-ModelRoutingBoundary
 Test-DangerousResidue
 Test-BrandSurface
 Test-PublicSurfaceNoLegacyBranding
