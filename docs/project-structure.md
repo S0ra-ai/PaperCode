@@ -35,7 +35,7 @@
 
 - `legacy/`：用于架构分析的参考项目、bundle 和旧实验材料，不是活跃 runtime。
 - `upstream/`：OpenCode 上游 README、来源和迁移参考，不是对外 Paper Fucker 文档。
-- `NOTICE.md`、`LICENSE`：上游许可证/来源说明和当前私有项目许可边界。
+- `NOTICE.md`、`LICENSE`：上游许可证/来源说明和当前 MPL-2.0 项目许可边界。
 
 ## 根目录治理
 

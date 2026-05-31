@@ -92,8 +92,8 @@ rustPlatform.buildRustPackage (finalAttrs: {
 
   meta = {
     description = "paper_fucker Desktop App";
-    homepage = "https://github.com/S0ra-ai/paper_fucker";
-    license = lib.licenses.mit;
+    homepage = "https://github.com/ZhuchenZhong/paper_fucker";
+    license = lib.licenses.mpl20;
     mainProgram = "paper_fucker-desktop";
     inherit (paper_fucker.meta) platforms;
   };
