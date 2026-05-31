@@ -1,0 +1,22 @@
+:project       paper_fucker - 可验证论文研究自动化系统
+:author        k1d (https://github.com/ZhuchenZhong)
+:repo
+:desc          记录项目的重大变更和版本历史
+:version       0.13.0.171-dev
+:last_update   2026/05/31
+
+:history
+
+    0.13.0.171-dev - 2026/05/31 (fade6e75) [fix/mcp-tool-binding-test-isolation]
+        :brief live arXiv source discovery 增加全局预算与超时诊断
+        :fix
+            - fix(benchmark): arXiv fetch、单 query 和 protocol source discovery 分别增加可配置时间预算
+            - fix(benchmark): arXiv verification 候选数改为有上限，避免 abs page 逐个验证导致 final benchmark 长时间挂起
+            - fix(benchmark): source discovery 超时返回 live arXiv source discovery timed out 诊断，不生成替代或伪来源
+        :test
+            - test(benchmark): 覆盖 live arXiv discovery 预算、deadline signal、候选上限和旧无限验证路径不再出现
+        :changelog
+            - docs(changelog): 0.13.0.170 开发历史移入 docs/changelog/v0/0.13.0.170.CHANGELOG
+        :checks
+            - targeted tests: npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/live-benchmark-quality.test.ts --timeout 60000 passed
+            - typecheck: npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
