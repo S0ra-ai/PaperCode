@@ -2,24 +2,19 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.142-dev
+:version       0.13.0.143-dev
 :last_update   2026/05/31
 
 :history
 
-    0.13.0.142-dev - 2026/05/31 (eef8e551) [fix/mcp-tool-binding-test-isolation]
-        :brief strict live acceptance 刷新当前验收报告，并修复 changelog 归档检查的版本硬编码
-        :acceptance
-            - fix(strict): changelog-split-archives 改为校验 root :version 与唯一活跃 history header 一致，不再硬编码旧 0.8.x 线
-            - test(strict): strict-acceptance 单测阻断 changelog archive 检查回退到旧版本硬编码
-            - test(secret): tracked secret 示例报告中的 provider key 形状改为 <provider-api-key> 占位，避免被宽口径扫描误判
-        :report
-            - test(provider): provider matrix smoke 刷新到 2026-05-31，DeepSeek provider /models 与最小 chat completion 通过
-            - test(strict): strict-live-focused 刷新到 2026-05-31，32 项检查全部通过，包含 topic/code/final 三条 PaperRun benchmark
-            - test(preview): live-preview-browser-smoke 刷新浏览器级 token、只读、SSE、experiment、terminal 和 machine environment 证据
+    0.13.0.143-dev - 2026/05/31 (9c431d9f) [fix/mcp-tool-binding-test-isolation]
+        :brief 开发手册补齐接口与数据契约页面，并增加文档搜索与导航
+        :docs
+            - docs(development): 新增 api-contracts.html，集中说明 PaperRun HTTP API、结构化错误、事实日志、artifact schema、事件、Preview snapshot 与 export manifest 契约
+            - docs(development): 手册左侧导航新增“接口与数据契约”，总览阅读路线和手册结构同步该开发主线
+            - docs(development): manual.js 增加本地文档搜索，覆盖模块、函数、流程和测试关键词，不依赖远程索引
+            - docs(readme/internal): README 与内部维护入口同步开发手册的接口契约和搜索说明
         :changelog
-            - docs(changelog): 0.13.0.141 开发历史移入 docs/changelog/v0/0.13.0.141.CHANGELOG
+            - docs(changelog): 0.13.0.142 开发历史移入 docs/changelog/v0/0.13.0.142.CHANGELOG
         :checks
-            - targeted tests: packages/opencode strict-acceptance.test
-            - live checks: scripts/provider-matrix-smoke.ps1 与 scripts/strict-acceptance.ps1 -CheckTimeoutSeconds 900
-            - static checks: README version、CHANGELOG format、宽口径 tracked sk-* scan 与 git diff --check
+            - static docs: node --check manual.js、development docs link audit、Chrome headless dump-dom/screenshot 与 git diff --check
