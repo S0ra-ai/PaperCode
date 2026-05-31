@@ -1,0 +1,27 @@
+:project       paper_fucker - 可验证论文研究自动化系统
+:author        k1d (https://github.com/ZhuchenZhong)
+:repo
+:desc          记录 0.13.0.163-dev 开发历史归档
+:version       0.13.0.163-dev
+:last_update   2026/05/31
+
+:history
+
+    0.13.0.163-dev - 2026/05/31 (45608f68) [fix/mcp-tool-binding-test-isolation]
+        :brief 打磨 final CJC 论文限制章节与主文工程词
+        :fix
+            - fix(authoring): CJC profile 将 limitations 标题从“限制与待修复项”改为“限制与未来工作”，避免通过 final gate 的论文主文出现待修复标题
+            - fix(authoring): 非 CJC raw draft 的 limitations 标题同步改为“限制与未来工作”，保持普通稿件和 CJC 稿件文案一致
+            - fix(authoring): 代码可用性章节将“导出包”替换为“已登记材料、代码修订和实验记录”，减少主文中的工程运行词
+        :test
+            - test(authoring): 覆盖 CJC final Markdown 包含 8.1 限制与未来工作，并不再包含限制与待修复项
+            - test(authoring): 覆盖数据与代码可用性章节不再出现导出包
+        :changelog
+            - docs(changelog): 0.13.0.162 开发历史移入 docs/changelog/v0/0.13.0.162.CHANGELOG
+        :checks
+            - final benchmark: scripts/live-paper-quality-benchmark.ts --scenario final passed, run-7dd2eb35-7a19-4c6e-84bd-6d20fadce2ff final export passed
+            - final audit: latest final Markdown has 限制与未来工作 and no 限制与待修复项, 待修复, 导出包, 本机缺失 or 容器缺失 matches
+            - targeted tests: npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --timeout 180000 passed
+            - typecheck: npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+            - readme version: scripts/check-readme-version.ps1 passed
+            - changelog format: scripts/check-changelog-format.ps1 -IncludeArchives passed
