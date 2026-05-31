@@ -73,6 +73,7 @@ describe("strict live acceptance script", () => {
     expect(script).toContain("sk-[A-Za-z0-9]")
     expect(script).toContain("reports/strict-live-acceptance.md")
     expect(script).toContain("check-development-docs.ps1")
+    expect(script).toContain('".\\scripts\\check-development-docs.ps1", "-Render"')
   })
 
   test("bounds each check and writes partial reports during execution", () => {

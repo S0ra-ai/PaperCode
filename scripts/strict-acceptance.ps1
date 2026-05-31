@@ -626,7 +626,7 @@ Invoke-Check "readme-changelog-version" "README version matches latest CHANGELOG
     Invoke-CheckedCommand "powershell" @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\scripts\check-readme-version.ps1")
 }
 Invoke-Check "development-docs-check" "Development manual links, navigation, and client script are valid" {
-    Invoke-CheckedCommand "powershell" @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\scripts\check-development-docs.ps1")
+    Invoke-CheckedCommand "powershell" @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\scripts\check-development-docs.ps1", "-Render")
 }
 Invoke-Check "tracked-secret-scan" "Tracked secret scan" {
     Invoke-TrackedSecretScan
