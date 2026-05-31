@@ -1,0 +1,24 @@
+:project       paper_fucker - 可验证论文研究自动化系统
+:author        k1d (https://github.com/ZhuchenZhong)
+:repo
+:desc          0.13.0.144 开发历史归档
+:version       0.13.0.144-dev
+:last_update   2026/05/31
+
+:history
+
+    0.13.0.144-dev - 2026/05/31 (6da21ac0) [fix/mcp-tool-binding-test-isolation]
+        :brief 开发手册检查脚本固化导航、链接、客户端脚本和可选渲染验收
+        :test
+            - test(docs): 新增 scripts/check-development-docs.ps1，校验 docs/development 页面清单、共享脚本、样式、active 导航和内部链接
+            - test(docs): check-development-docs 支持 -Render 与 -RequireChrome，使用 Chrome/Edge headless 验证文档搜索和本页目录已渲染
+            - test(strict): strict acceptance 新增 development-docs-check，防止开发手册导航或链接回退
+            - test(strict): strict-acceptance 单测同步检查 development-docs-check 和 check-development-docs.ps1 接入
+        :docs
+            - docs(development): 测试与维护、开发工作流补充 check-development-docs 命令和渲染检查说明
+            - docs(development): function-reference 导航补齐接口与数据契约链接
+        :changelog
+            - docs(changelog): 0.13.0.143 开发历史移入 docs/changelog/v0/0.13.0.143.CHANGELOG
+        :checks
+            - static docs: check-development-docs.ps1、check-development-docs.ps1 -Render -RequireChrome 与 PowerShell ASCII safety
+            - targeted tests: packages/opencode strict-acceptance.test
