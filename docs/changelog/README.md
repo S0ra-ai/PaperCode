@@ -22,5 +22,6 @@
 - `v0/0.13.0.123-133.CHANGELOG`
 - `v0/0.13.0.134.CHANGELOG`
 - `v0/0.13.0.135.CHANGELOG`
+- `v0/0.13.0.136.CHANGELOG`
 
 归档文件不参与当前版本解析，也不会进入 release source archive。
