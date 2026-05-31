@@ -224,21 +224,21 @@ const cjcSectionPlan: Record<string, { order: number; heading: string; level: 2 
   method: { order: 310, heading: "3.1 方法", level: 3 },
   evidence_traceability: { order: 320, heading: "3.2 证据与可追踪性", level: 3 },
   data_availability: { order: 400, heading: "4 实验设置与材料", level: 2 },
-  experimental_setup: { order: 410, heading: "4.1 实验协议", level: 3 },
+  experimental_setup: { order: 410, heading: "4.2 实验协议", level: 3 },
   results: { order: 500, heading: "5 结果与分析", level: 2 },
-  reproducibility: { order: 510, heading: "5.1 可复现性", level: 3 },
-  discussion: { order: 600, heading: "6 讨论", level: 2 },
-  threats_to_validity: { order: 700, heading: "7 效度威胁", level: 2 },
-  limitations: { order: 710, heading: "7.1 限制与待修复项", level: 3 },
-  conclusion: { order: 800, heading: "8 结论", level: 2 },
-  declarations: { order: 900, heading: "声明", level: 2 },
-  references: { order: 1000, heading: "参考文献", level: 2 },
-  appendix_evidence_trace: { order: 1100, heading: "附录 A：证据追踪", level: 2 },
-  appendix_operational_reproducibility_checklist: { order: 1110, heading: "附录 B：复现清单", level: 2 },
-  appendix_experiment_protocol_guidance: { order: 1120, heading: "附录 C：实验协议修复清单", level: 2 },
-  appendix_experiment_protocol_starter_pack: { order: 1130, heading: "附录 D：实验启动包", level: 2 },
-  appendix_claim_ledger: { order: 1140, heading: "附录 E：断言证据表", level: 2 },
-  appendix_artifacts: { order: 1150, heading: "附录 F：证据记录索引", level: 2 },
+  reproducibility: { order: 600, heading: "6 可复现性", level: 2 },
+  discussion: { order: 700, heading: "7 讨论", level: 2 },
+  threats_to_validity: { order: 800, heading: "8 效度威胁", level: 2 },
+  limitations: { order: 810, heading: "8.1 限制与待修复项", level: 3 },
+  conclusion: { order: 900, heading: "9 结论", level: 2 },
+  declarations: { order: 1000, heading: "声明", level: 2 },
+  references: { order: 1100, heading: "参考文献", level: 2 },
+  appendix_evidence_trace: { order: 1200, heading: "附录 A：证据追踪", level: 2 },
+  appendix_operational_reproducibility_checklist: { order: 1210, heading: "附录 B：复现清单", level: 2 },
+  appendix_experiment_protocol_guidance: { order: 1220, heading: "附录 C：实验协议修复清单", level: 2 },
+  appendix_experiment_protocol_starter_pack: { order: 1230, heading: "附录 D：实验启动包", level: 2 },
+  appendix_claim_ledger: { order: 1240, heading: "附录 E：断言证据表", level: 2 },
+  appendix_artifacts: { order: 1250, heading: "附录 F：证据记录索引", level: 2 },
 }
 
 function cjcOrderedSections(draft: DraftPaper) {
@@ -260,12 +260,60 @@ function cjcEffectiveSectionPlan(draft: DraftPaper, sectionId: string) {
   return plan
 }
 
+function cjcHeadingPrefix(heading: string) {
+  const numeric = heading.match(/^(\d+(?:\.\d+)*)\s+/)?.[1]
+  if (numeric) return numeric
+  const appendix = heading.match(/^附录\s*([A-Z])[:：]\s*/i)?.[1]
+  if (appendix) return `附录 ${appendix.toUpperCase()}`
+  return undefined
+}
+
+function cjcHeadingAlreadyNumbered(title: string) {
+  return /^\d+(?:\.\d+)*\s+/.test(title) || /^附录\s+[A-Z](?:\.\d+)*\s+/.test(title)
+}
+
+function cjcNumberedChildMarkdown(markdown: string, parentHeading: string, parentLevel: 2 | 3) {
+  const parentPrefix = cjcHeadingPrefix(parentHeading)
+  if (!parentPrefix) return markdown.trim()
+
+  const counters: number[] = []
+  let inFence = false
+  const lines = markdown.trim().split(/\r?\n/)
+  return lines
+    .map((line) => {
+      if (/^\s*```/.test(line)) {
+        inFence = !inFence
+        return line
+      }
+      if (inFence) return line
+
+      const match = line.match(/^(\s*)(#{1,6})\s+(.+?)\s*$/)
+      if (!match) return line
+
+      const [, indent, marker, rawTitle] = match
+      const title = rawTitle.trim()
+      if (cjcHeadingAlreadyNumbered(title)) return line
+
+      const depth = Math.max(marker.length, Math.min(parentLevel + 1, 6))
+      const relativeDepth = Math.max(1, depth - parentLevel)
+      while (counters.length > relativeDepth) counters.pop()
+      for (let index = 0; index < relativeDepth - 1; index++) {
+        if (!counters[index]) counters[index] = 1
+      }
+      counters[relativeDepth - 1] = (counters[relativeDepth - 1] ?? 0) + 1
+
+      const prefix = [parentPrefix, ...counters.slice(0, relativeDepth)].join(".")
+      return `${indent}${"#".repeat(depth)} ${prefix} ${title}`
+    })
+    .join("\n")
+}
+
 function cjcBodyMarkdown(draft: DraftPaper) {
   return cjcOrderedSections(draft).map(({ section, plan }) => {
     const effectivePlan = cjcEffectiveSectionPlan(draft, section.section_id) ?? plan
     const heading = effectivePlan?.heading ?? section.title
     const level = effectivePlan?.level ?? 2
-    return `${"#".repeat(level)} ${heading}\n\n${section.markdown.trim()}`
+    return `${"#".repeat(level)} ${heading}\n\n${cjcNumberedChildMarkdown(section.markdown, heading, level)}`
   })
 }
 

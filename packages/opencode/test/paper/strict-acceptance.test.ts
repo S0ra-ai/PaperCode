@@ -208,4 +208,14 @@ describe("strict live acceptance script", () => {
     expect(script).toContain("does not let request model_roles bypass the user allowlist")
     expect(script).toContain('Add-AuditResult "model-routing-boundary" "pass"')
   })
+
+  test("autonomous audit locks CJC heading format boundaries", () => {
+    const script = readFileSync(autonomousAuditPath, "utf8")
+    expect(script).toContain("Test-CJCFormatBoundary")
+    expect(script).toContain("function cjcNumberedChildMarkdown")
+    expect(script).toContain("numbers raw CJC child headings without touching fenced code")
+    expect(script).toContain("experimental_setup: { order: 410")
+    expect(script).toContain("reproducibility: { order: 600")
+    expect(script).toContain('Add-AuditResult "cjc-format-boundary" "pass"')
+  })
 })

@@ -431,6 +431,42 @@ function Test-ModelRoutingBoundary {
     Add-AuditResult "model-routing-boundary" "pass" "PaperRun and Agent routing can only select allowlisted models; request model_roles remain forced requests, not allowlist mutations."
 }
 
+function Test-CJCFormatBoundary {
+    $authoringPath = "packages/opencode/src/paper/authoring.ts"
+    $authoringTestPath = "packages/opencode/test/paper/authoring.test.ts"
+    $authoring = Read-RepoText $authoringPath
+    $tests = Read-RepoText $authoringTestPath
+
+    $requiredAuthoring = @(
+        "function cjcNumberedChildMarkdown",
+        "function cjcHeadingAlreadyNumbered",
+        "cjcNumberedChildMarkdown(section.markdown, heading, level)",
+        "experimental_setup: { order: 410",
+        "reproducibility: { order: 600",
+        "discussion: { order: 700"
+    )
+    $missingAuthoring = @($requiredAuthoring | Where-Object { -not $authoring.Contains($_) })
+    if ($missingAuthoring.Count -gt 0) {
+        Add-AuditResult "cjc-format-boundary" "fail" "CJC authoring format boundary missing: $($missingAuthoring -join ', ')"
+        return
+    }
+
+    $requiredTests = @(
+        "numbers raw CJC child headings without touching fenced code",
+        "### 3.1 ",
+        "### 4.2 ",
+        "## 6 ",
+        "### 5.1 "
+    )
+    $missingTests = @($requiredTests | Where-Object { -not $tests.Contains($_) })
+    if ($missingTests.Count -gt 0) {
+        Add-AuditResult "cjc-format-boundary" "fail" "CJC authoring format tests missing: $($missingTests -join ', ')"
+        return
+    }
+
+    Add-AuditResult "cjc-format-boundary" "pass" "CJC exports number nested headings and keep section numbers monotonic for experiment, result, and reproduction sections."
+}
+
 function Test-DangerousResidue {
     $paths = @("packages/opencode/src/paper", "research-tools/src", "README.md")
     $patterns = @("scrapling_live_fetch_not_implemented", "network_not_authorized_mock_used", "TODO", "FIXME")
@@ -555,6 +591,7 @@ Test-FullWorkspaceEvidence
 Test-ReportGovernance
 Test-VisibleCommandSurface
 Test-ModelRoutingBoundary
+Test-CJCFormatBoundary
 Test-DangerousResidue
 Test-BrandSurface
 Test-PublicSurfaceNoLegacyBranding
