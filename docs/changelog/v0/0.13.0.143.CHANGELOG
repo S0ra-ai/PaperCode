@@ -1,0 +1,20 @@
+:project       paper_fucker - 可验证论文研究自动化系统
+:author        k1d (https://github.com/ZhuchenZhong)
+:repo
+:desc          0.13.0.143 开发历史归档
+:version       0.13.0.143-dev
+:last_update   2026/05/31
+
+:history
+
+    0.13.0.143-dev - 2026/05/31 (9c431d9f) [fix/mcp-tool-binding-test-isolation]
+        :brief 开发手册补齐接口与数据契约页面，并增加文档搜索与导航
+        :docs
+            - docs(development): 新增 api-contracts.html，集中说明 PaperRun HTTP API、结构化错误、事实日志、artifact schema、事件、Preview snapshot 与 export manifest 契约
+            - docs(development): 手册左侧导航新增“接口与数据契约”，总览阅读路线和手册结构同步该开发主线
+            - docs(development): manual.js 增加本地文档搜索，覆盖模块、函数、流程和测试关键词，不依赖远程索引
+            - docs(readme/internal): README 与内部维护入口同步开发手册的接口契约和搜索说明
+        :changelog
+            - docs(changelog): 0.13.0.142 开发历史移入 docs/changelog/v0/0.13.0.142.CHANGELOG
+        :checks
+            - static docs: node --check manual.js、development docs link audit、Chrome headless dump-dom/screenshot 与 git diff --check
