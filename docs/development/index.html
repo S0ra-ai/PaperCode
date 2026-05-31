@@ -72,6 +72,39 @@
           </div>
         </section>
 
+        <section id="doc-pattern">
+          <h2>文档写法基准</h2>
+          <p>
+            开发手册参考 ReadTheDocs 的信息组织方式：先给入口和参数，再解释模式、输入、输出、调优、实时状态和排障。区别是本文档主线不是用户教程，而是维护者如何改代码、验证链路和判断质量边界。
+          </p>
+          <div class="pattern-grid">
+            <article>
+              <strong>参数</strong>
+              <span>说明一个功能受哪些配置、状态、schema、环境和模型策略影响。</span>
+            </article>
+            <article>
+              <strong>模式</strong>
+              <span>说明主题到论文、材料到论文、代码到论文等不同运行链路的开发差异。</span>
+            </article>
+            <article>
+              <strong>输入</strong>
+              <span>列清 TUI、HTTP API、artifact、source ledger、环境探测和外部工具入口。</span>
+            </article>
+            <article>
+              <strong>输出</strong>
+              <span>写明 TUI、Preview、export bundle、diagnostics、报告和测试证据如何落盘。</span>
+            </article>
+            <article>
+              <strong>调优</strong>
+              <span>覆盖论文质量、格式、实验复现、模型路由、性能和可恢复性。</span>
+            </article>
+            <article>
+              <strong>排障</strong>
+              <span>把常见错误映射到代码路径、日志路径、检查脚本和可执行修复步骤。</span>
+            </article>
+          </div>
+        </section>
+
         <section id="manual-structure">
           <h2>手册结构</h2>
           <table class="table">
@@ -158,6 +191,7 @@
         <strong>本页目录</strong>
         <a href="#overview">总览</a>
         <a href="#quick-map">阅读路线</a>
+        <a href="#doc-pattern">文档写法基准</a>
         <a href="#manual-structure">手册结构</a>
         <a href="#system-shape">系统形态</a>
         <a href="#runtime-flow">核心流程</a>

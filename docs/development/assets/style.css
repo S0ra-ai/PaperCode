@@ -395,6 +395,36 @@ li {
   gap: 14px;
 }
 
+.pattern-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 20px 0 26px;
+}
+
+.pattern-grid article {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: linear-gradient(180deg, var(--panel), rgba(20, 27, 37, 0.72));
+  padding: 16px;
+}
+
+.pattern-grid strong {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--amber);
+}
+
+.pattern-grid span {
+  display: block;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.pattern-grid.compact {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .card,
 .panel {
   border: 1px solid var(--line);
@@ -752,6 +782,8 @@ body.theme-light .lane span {
   }
 
   .toc-list a,
+  .pattern-grid,
+  .pattern-grid.compact,
   .mode-list article,
   .lane,
   .prev-next {
