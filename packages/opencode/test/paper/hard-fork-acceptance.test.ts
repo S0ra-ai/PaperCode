@@ -11,6 +11,7 @@ import {
   exportPaperRun,
   createPaperRun,
   spawnPaperSubagent,
+  updatePaperModelAllowlist,
   type PaperRunRuntimeOptions,
 } from "@/paper"
 import { parsePaperWorkbenchPrompt } from "../../src/cli/cmd/tui/routes/paper/workbench"
@@ -60,6 +61,10 @@ describe("hard fork acceptance", () => {
       const home = path.join(dir, "home")
       await mkdir(workspace, { recursive: true })
       await mkdir(home, { recursive: true })
+      await updatePaperModelAllowlist(["deepseek/deepseek-v4-pro", "openai/gpt-5.2"], {
+        home,
+        decision_model: "deepseek/deepseek-v4-pro",
+      })
 
       const request = parsePaperWorkbenchPrompt(
         "--code packages/opencode --data data/results.csv --log logs/run.log --profile nature-paper --submission 上传代码生成投稿候选论文",

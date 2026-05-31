@@ -197,4 +197,15 @@ describe("strict live acceptance script", () => {
     expect(script).toContain("Command palette/autocomplete filter missing")
     expect(script).toContain('Add-AuditResult "visible-command-surface" "pass"')
   })
+
+  test("autonomous audit locks PaperRun model routing boundaries", () => {
+    const script = readFileSync(autonomousAuditPath, "utf8")
+    expect(script).toContain("Test-ModelRoutingBoundary")
+    expect(script).toContain("forced_model_not_allowed")
+    expect(script).toContain("model_allowlist_empty")
+    expect(script).toContain("decision_model_missing")
+    expect(script).toContain("requestedRoleModels")
+    expect(script).toContain("does not let request model_roles bypass the user allowlist")
+    expect(script).toContain('Add-AuditResult "model-routing-boundary" "pass"')
+  })
 })

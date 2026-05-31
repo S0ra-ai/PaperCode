@@ -12,6 +12,7 @@ import {
   recordPaperDataEgressAudit,
   recordPaperObservabilityAudit,
   recordPaperToolTrace,
+  updatePaperModelAllowlist,
 } from "@/paper"
 import type { ResearchRuntimeOptions } from "@/paper/research/runtime"
 
@@ -21,6 +22,10 @@ const TEST_MODEL = "test-provider/test-model"
 
 function testModelRoles(): Record<PaperModelRole, string> {
   return Object.fromEntries(PAPER_MODEL_ROLES.map((role) => [role, TEST_MODEL])) as Record<PaperModelRole, string>
+}
+
+async function seedTestModelInventory(home: string) {
+  await updatePaperModelAllowlist([TEST_MODEL], { home, decision_model: TEST_MODEL })
 }
 
 async function clean(dir: string, attempts = 80): Promise<void> {
@@ -55,6 +60,7 @@ async function newPaperRun() {
   const home = path.join(dir, "home")
   await mkdir(workspace, { recursive: true })
   await mkdir(home, { recursive: true })
+  await seedTestModelInventory(home)
   const options = runtimeOptions(workspace, home)
   const run = await createPaperRun(
     {

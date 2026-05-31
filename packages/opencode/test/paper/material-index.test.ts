@@ -7,6 +7,7 @@ import {
   createPaperRun,
   indexResearchMaterials,
   PAPER_MODEL_ROLES,
+  updatePaperModelAllowlist,
   type PaperModelRole,
   type PaperRunRuntimeOptions,
 } from "@/paper"
@@ -17,6 +18,10 @@ const TEST_MODEL = "test-provider/test-model"
 
 function testModelRoles(): Record<PaperModelRole, string> {
   return Object.fromEntries(PAPER_MODEL_ROLES.map((role) => [role, TEST_MODEL])) as Record<PaperModelRole, string>
+}
+
+async function seedTestModelInventory(home: string) {
+  await updatePaperModelAllowlist([TEST_MODEL], { home, decision_model: TEST_MODEL })
 }
 
 async function clean(dir: string, attempts = 30): Promise<void> {
@@ -54,6 +59,7 @@ async function fixture() {
   await mkdir(path.join(workspace, "logs"), { recursive: true })
   await mkdir(path.join(workspace, "paper"), { recursive: true })
   await mkdir(home, { recursive: true })
+  await seedTestModelInventory(home)
   await writeFile(path.join(workspace, "src", "method.ts"), "export function method() {\n  return 42\n}\n")
   await writeFile(path.join(workspace, "paper", "draft.md"), "# Draft\n\nClaim text.\n")
   await writeFile(path.join(workspace, "paper", "main.tex"), "\\section{Method}\nText.\n")

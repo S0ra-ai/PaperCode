@@ -9,6 +9,7 @@ import {
   createPaperRun,
   PAPER_MODEL_ROLES,
   stopAllPaperRunLivePreviews,
+  updatePaperModelAllowlist,
   type PaperModelRole,
 } from "../../src/paper"
 import { createResearchRun } from "../../src/paper/research/runtime"
@@ -27,6 +28,10 @@ const TEST_MODEL = "test-provider/test-model"
 
 function testModelRoles(): Record<PaperModelRole, string> {
   return Object.fromEntries(PAPER_MODEL_ROLES.map((role) => [role, TEST_MODEL])) as Record<PaperModelRole, string>
+}
+
+async function seedTestModelInventory(home: string) {
+  await updatePaperModelAllowlist([TEST_MODEL], { home, decision_model: TEST_MODEL })
 }
 
 function app() {
@@ -310,6 +315,34 @@ describe("PaperRun HttpApi", () => {
     expect(routingBody.diagnostics).toContain("model_allowlist_empty")
   })
 
+  test("does not let request model_roles bypass the user allowlist", async () => {
+    await using tmp = await tmpdir({ git: true, config: { formatter: false, lsp: false } })
+    const run = await createPaperRun(
+      {
+        topic: "未授权阶段模型应阻断",
+        workspace_path: tmp.path,
+        language: "zh-CN",
+        model_roles: testModelRoles(),
+      },
+      { workspace: tmp.path, home: tmp.path },
+    )
+
+    expect(run.snapshot.status).toBe("blocked")
+    expect(run.snapshot.diagnostics.model_roles).toEqual({})
+    const routing = run.snapshot.diagnostics.model_routing
+    expect(routing).toBeDefined()
+    expect(routing!.every((decision) => decision.source === "blocked")).toBe(true)
+    expect(routing!.every((decision) => decision.diagnostics.includes("forced_model_not_allowed"))).toBe(true)
+    const inventory = run.snapshot.diagnostics.model_inventory
+    expect(inventory).toBeDefined()
+    expect(inventory!.allowlist).toEqual([])
+    expect(run.snapshot.agent_tree.nodes[0]).toMatchObject({
+      provider_id: "unconfigured",
+      model_id: "unconfigured",
+      status: "blocked",
+    })
+  })
+
   test("dry-runs and applies experiment starter files to the workspace without overwriting by default", async () => {
     await using tmp = await tmpdir({
       git: true,
@@ -332,6 +365,7 @@ describe("PaperRun HttpApi", () => {
     })
     previousPaperHome = process.env.PAPER_FUCKER_TEST_HOME
     process.env.PAPER_FUCKER_TEST_HOME = tmp.extra.home
+    await seedTestModelInventory(tmp.extra.home)
     const headers = { "x-paper-fucker-directory": tmp.extra.workspace }
     const run = await createPaperRun(
       {
