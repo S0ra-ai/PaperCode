@@ -1,4 +1,3 @@
-import { existsSync } from "fs"
 import { appendFile, mkdir, readFile } from "fs/promises"
 import path from "path"
 import { randomUUID } from "crypto"
@@ -120,18 +119,50 @@ export function nextResearchId(kind: "run" | "event" | "artifact", options?: Res
   return options?.idFactory?.(kind) ?? `${kind}-${randomUUID()}`
 }
 
-async function nextUniqueResearchRunId(root: string, input: CreateResearchRunInput, options?: ResearchRuntimeOptions) {
-  const existing = new Set((await discoverRunDirs({ workspace: options?.workspace, home: options?.home })).map((runDir) => path.basename(runDir)))
-  const available = (runId: string) => {
+async function claimUniqueResearchRunDirectory(
+  root: string,
+  input: CreateResearchRunInput,
+  options?: ResearchRuntimeOptions,
+) {
+  const existing = new Set(
+    (await discoverRunDirs({ workspace: options?.workspace, home: options?.home })).map((runDir) =>
+      path.basename(runDir),
+    ),
+  )
+  const tried = new Set<string>()
+  const claim = async (runId: string) => {
+    if (tried.has(runId)) return undefined
+    tried.add(runId)
     const runDir = runDirectoryPath(root, runId)
-    return !existsSync(runDir) && !existing.has(path.basename(runDir))
+    if (existing.has(path.basename(runDir))) return undefined
+    try {
+      await mkdir(runDir)
+      return { runId, runDir }
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === "EEXIST") return undefined
+      throw error
+    }
   }
-  if (input.run_id && available(input.run_id)) return input.run_id
+
+  if (input.run_id) {
+    const preferred = await claim(input.run_id)
+    if (preferred) return preferred
+    for (let attempt = 1; attempt <= 25; attempt++) {
+      const fallback = await claim(`${input.run_id}-${attempt}`)
+      if (fallback) return fallback
+    }
+  } else {
+    for (let attempt = 0; attempt < 25; attempt++) {
+      const generated = await claim(nextResearchId("run", options))
+      if (generated) return generated
+    }
+  }
+
   for (let attempt = 0; attempt < 10; attempt++) {
-    const candidate = input.run_id ? `${input.run_id}-${attempt + 1}` : nextResearchId("run", options)
-    if (available(candidate)) return candidate
+    const fallback = await claim(`run-${randomUUID()}`)
+    if (fallback) return fallback
   }
-  return `run-${randomUUID()}`
+  throw new Error("Unable to allocate a unique PaperRun directory after repeated attempts.")
 }
 
 async function nextUniqueResearchEventId(runDir: string, options?: ResearchRuntimeOptions) {
@@ -259,8 +290,7 @@ export async function createResearchRun(
       const createdAt = nowIso(options)
       const workspace = path.resolve(input.workspace ?? options?.workspace ?? process.cwd())
       const runRoot = await chooseRunRoot({ workspace, home: options?.home, storage_scope: input.storage_scope })
-      const runId = await nextUniqueResearchRunId(runRoot.root, input, { ...options, workspace })
-      const runDir = runDirectoryPath(runRoot.root, runId)
+      const { runId, runDir } = await claimUniqueResearchRunDirectory(runRoot.root, input, { ...options, workspace })
       await initializeFactFiles(runDir)
 
       const run: ResearchRun = {

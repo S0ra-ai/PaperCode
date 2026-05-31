@@ -144,6 +144,7 @@ export async function rebuildRunIndex(runDir: string): Promise<ResearchIndexSumm
     const indexPath = runIndexPath(runDir)
     const db = new Database(indexPath, { create: true })
     try {
+      db.exec("PRAGMA busy_timeout = 30000;")
       createRunSchema(db)
       db.prepare("INSERT INTO meta (key, value) VALUES (?, ?)").run("run", JSON.stringify(facts.run))
       db.prepare("INSERT INTO meta (key, value) VALUES (?, ?)").run("storage", JSON.stringify(defaultStorageLayout))
@@ -224,8 +225,17 @@ export async function rebuildGlobalIndex(runDirs: string[], options?: { home?: s
   return withSpan("research.index.rebuild_global", { "paper_fucker.research.runs.count": runDirs.length }, async (span) => {
     const indexPath = globalIndexPath(options?.home)
     await mkdir(path.dirname(indexPath), { recursive: true })
+    const runs: Array<{ run: ResearchRun; runDir: string }> = []
+    const seenRunIds = new Set<string>()
+    for (const runDir of runDirs) {
+      const run = validate("run", await readJson(path.join(runDir, storageFacts.run)))
+      if (seenRunIds.has(run.run_id)) continue
+      seenRunIds.add(run.run_id)
+      runs.push({ run, runDir })
+    }
     const db = new Database(indexPath, { create: true })
     try {
+      db.exec("PRAGMA busy_timeout = 30000;")
       db.exec(`
         CREATE TABLE IF NOT EXISTS runs (
           run_id TEXT PRIMARY KEY,
@@ -235,17 +245,20 @@ export async function rebuildGlobalIndex(runDirs: string[], options?: { home?: s
           updated_at TEXT NOT NULL,
           run_dir TEXT NOT NULL
         );
-        DELETE FROM runs;
       `)
-      const insert = db.prepare(
-        "INSERT INTO runs (run_id, topic, workspace, status, updated_at, run_dir) VALUES (?, ?, ?, ?, ?, ?)",
-      )
-      const seenRunIds = new Set<string>()
-      for (const runDir of runDirs) {
-        const run = validate("run", await readJson(path.join(runDir, storageFacts.run)))
-        if (seenRunIds.has(run.run_id)) continue
-        seenRunIds.add(run.run_id)
-        insert.run(run.run_id, run.topic, run.workspace, run.status, run.updated_at, runDir)
+      db.exec("BEGIN IMMEDIATE;")
+      try {
+        db.exec("DELETE FROM runs;")
+        const insert = db.prepare(
+          "INSERT INTO runs (run_id, topic, workspace, status, updated_at, run_dir) VALUES (?, ?, ?, ?, ?, ?)",
+        )
+        for (const item of runs) {
+          insert.run(item.run.run_id, item.run.topic, item.run.workspace, item.run.status, item.run.updated_at, item.runDir)
+        }
+        db.exec("COMMIT;")
+      } catch (error) {
+        db.exec("ROLLBACK;")
+        throw error
       }
     } finally {
       db.close()

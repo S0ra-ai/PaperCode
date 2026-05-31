@@ -44,7 +44,8 @@ describe("research intake", () => {
       workflow: "topic_to_paper",
       topic: "低资源场景下的多智能体论文写作评估",
       language: "zh-CN",
-      target_profile: "generic-preprint",
+      target_profile: "cjc-paper",
+      target_journal: "中国计算机学报",
     })
     expect(brief.research_questions[0]).toContain("低资源场景下的多智能体论文写作评估")
     expect(brief.contribution_candidates).toContain("Open literature and data discovery for the topic")
@@ -70,7 +71,8 @@ describe("research intake", () => {
     expect(brief.workflow).toBe("code_to_paper")
     expect(brief.inputs.workspace_path).toBe("E:/Project/paper_fucker")
     expect(brief.inputs.code_paths).toEqual(["packages/opencode/src/paper", "packages/opencode/src/paper/research"])
-    expect(brief.target_profile).toBe("nature-paper")
+    expect(brief.target_profile).toBe("cjc-paper")
+    expect(brief.target_journal).toBe("中国计算机学报")
     expect(brief.model_roles?.reviewer).toBe("openrouter/anthropic/claude-3.7-sonnet")
     expect(brief.needed_evidence).toEqual(
       expect.arrayContaining(["source-range-bound codebase map", "method extraction tied to file paths"]),
@@ -107,19 +109,16 @@ describe("research intake", () => {
     expect(brief.generated_journal_profile).toBeUndefined()
   })
 
-  test("keeps unknown journal profile as a generated draft that still needs official guidance", () => {
+  test("keeps unknown journal selection on the CJC-only product profile", () => {
     const brief = normalizeResearchIntake({
       topic: "未知期刊格式生成",
       target_journal: "Journal of Unknown Systems",
       target_journal_url: "https://example.org/for-authors",
     })
 
-    expect(brief.target_profile).toBe("custom-journal")
-    expect(brief.target_journal).toBe("Journal of Unknown Systems")
-    expect(brief.generated_journal_profile).toMatchObject({
-      schema_version: "PaperGeneratedJournalProfile.v1",
-      status: "needs_official_guidance",
-    })
+    expect(brief.target_profile).toBe("cjc-paper")
+    expect(brief.target_journal).toBe("中国计算机学报")
+    expect(brief.generated_journal_profile).toBeUndefined()
   })
 
   test("records ResearchBrief.v1 as a run artifact and intake event", async () => {

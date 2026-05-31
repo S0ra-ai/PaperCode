@@ -87,7 +87,7 @@ describe("Agent Team capability acceptance", () => {
       call_id: "call-hf-job",
       stage: "experiment_execution",
       capability_name: "hf.jobs",
-      payload: { job_id: "job-fixture" },
+      payload: { job_id: "job-test" },
     })
 
     expect(crawl.status).toBe("approval_required")
@@ -178,14 +178,14 @@ describe("Agent Team capability acceptance", () => {
       run_id: "run-acceptance",
       records: [
         createHFDatasetRecord({
-          dataset_id: "fixture/dataset",
-          title: "Fixture dataset",
-          url: "https://huggingface.co/datasets/fixture/dataset",
+          dataset_id: "test/dataset",
+          title: "Test dataset",
+          url: "https://huggingface.co/datasets/test/dataset",
           license: "apache-2.0",
-          version: "fixture",
+          version: "test",
           splits: ["train"],
           task_categories: ["text-generation"],
-          trust: "local_fixture",
+          trust: "test_record",
         }),
       ],
     })

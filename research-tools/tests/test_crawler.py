@@ -8,7 +8,7 @@ from threading import Thread
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from paper_fucker_tools.crawler import crawl_html_fixture, crawl_url, parse_html, scrapling_status
+from paper_fucker_tools.crawler import crawl_html_provided, crawl_url, parse_html, scrapling_status
 from paper_fucker_tools.mcp_tools import TOOL_REGISTRY, call_tool
 
 
@@ -49,8 +49,8 @@ class CrawlerToolTest(unittest.TestCase):
         self.assertIn("Visible", parsed["text"])
         self.assertNotIn("hidden", parsed["text"])
 
-    def test_fixture_crawl_returns_auditable_source_record(self) -> None:
-        record = crawl_html_fixture(
+    def test_provided_html_returns_auditable_source_record(self) -> None:
+        record = crawl_html_provided(
             url="https://example.test/data",
             html="<html><title>Data</title><body>sample table</body></html>",
             license_status="compatible",
@@ -59,10 +59,11 @@ class CrawlerToolTest(unittest.TestCase):
         self.assertEqual(record["schema_version"], "CrawlSourceRecord.v1")
         self.assertEqual(record["status"], "fetched")
         self.assertEqual(record["license_status"], "compatible")
+        self.assertEqual(record["extraction_evidence"]["method"], "provided_html")
         self.assertEqual(len(record["content_sha256"]), 64)
         self.assertIn("sample table", record["text_excerpt"])
 
-    def test_live_crawl_is_blocked_without_fixture_or_authorization(self) -> None:
+    def test_live_crawl_is_blocked_without_provided_html_or_authorization(self) -> None:
         record = crawl_url({"url": "https://example.test/live"})
 
         self.assertEqual(record["schema_version"], "CrawlSourceRecord.v1")
@@ -87,7 +88,7 @@ class CrawlerToolTest(unittest.TestCase):
         self.assertIn("live crawl text", record["text_excerpt"])
         self.assertNotIn("scrapling_live_fetch_not_implemented", record["diagnostics"])
 
-    def test_mcp_web_crawl_probe_uses_fixture_path(self) -> None:
+    def test_mcp_web_crawl_probe_uses_provided_html_path(self) -> None:
         self.assertIn("web_crawl_probe", TOOL_REGISTRY)
         result = call_tool(
             "web_crawl_probe",

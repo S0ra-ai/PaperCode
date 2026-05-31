@@ -49,7 +49,7 @@ describe("Hugging Face research loop", () => {
       title: "paper_fucker benchmark",
       url: "https://huggingface.co/datasets/s0ra/paper-fucker-bench",
       license: "apache-2.0",
-      version: "sha-fixture",
+      version: "sha-test",
       splits: ["train", "test"],
       task_categories: ["text-generation"],
     })
@@ -105,6 +105,10 @@ describe("Hugging Face research loop", () => {
       status: "succeeded",
       reproduction: { container_reproduced: true },
     })
+    expect(run.environment.image).toBeUndefined()
+    expect(run.environment.digest).toBeUndefined()
+    expect(run.reproduction.image).toBeUndefined()
+    expect(run.reproduction.digest).toBeUndefined()
     expect(trace).toMatchObject({
       tool_name: "hf.jobs",
       status: "succeeded",

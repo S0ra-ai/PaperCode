@@ -565,8 +565,8 @@ function Invoke-HFNoMockBoundary {
     $hfTests = Read-RepoText "research-tools/tests/test_huggingface_loop.py"
     Assert-HardFork ($hfBridge -match "network_not_authorized" -and $hfBridge -match "mode = `"blocked`"") "HF bridge does not block unauthorized product calls."
     Assert-HardFork (-not ($hfBridge -match "network_not_authorized_mock_used")) "HF bridge still contains a mock fallback diagnostic."
-    Assert-HardFork ($hfTests -match "test_probe_blocks_when_network_is_not_authorized" -and $hfTests -match "fixture") "HF tests do not lock the no-mock product boundary."
-    return "HF product calls fail closed without authorized live access; fixture data is explicit only"
+    Assert-HardFork ($hfTests -match "test_probe_blocks_when_network_is_not_authorized" -and $hfTests -match "allow_test_records") "HF tests do not lock the no-mock product boundary."
+    return "HF product calls fail closed without authorized live access; test data requires an explicit test switch"
 }
 
 function Invoke-ChangelogSplitArchives {

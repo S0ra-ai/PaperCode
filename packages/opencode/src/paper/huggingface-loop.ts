@@ -3,7 +3,7 @@ import { RESEARCH_SCHEMA_VERSION, type ResearchSource, type ResearchToolTrace } 
 import type { ExperimentRun } from "./research/experiments"
 
 export type HFResearchKind = "docs" | "papers" | "datasets" | "models" | "spaces" | "jobs" | "trackio"
-export type HFResearchTrust = "hf_official" | "community" | "local_fixture" | "user_provided_trackio_export"
+export type HFResearchTrust = "hf_official" | "community" | "test_record" | "user_provided_trackio_export"
 
 export interface HFResearchLoopCapability {
   schema_version: "HFResearchLoopCapability.v1"
@@ -90,6 +90,8 @@ export interface HFJobRecord {
   metrics: Array<{ name: string; value: number; direction: "higher_better" | "lower_better"; unit?: string }>
   logs_uri?: string
   cost_usd?: number
+  runtime_image?: string
+  runtime_digest?: string
   source_verified: boolean
   trust: HFResearchTrust
 }
@@ -335,8 +337,8 @@ export function hfJobToExperimentRun(input: {
     environment: {
       mode: "container",
       platform: "container",
-      image: "huggingface/jobs",
-      digest: input.job.source_verified ? "hf-verified" : undefined,
+      image: input.job.runtime_image,
+      digest: input.job.runtime_digest,
     },
     command: {
       argv: input.job.command,
@@ -354,8 +356,8 @@ export function hfJobToExperimentRun(input: {
     finished_at: nowIso(input.finished_at ?? input.started_at),
     reproduction: {
       container_reproduced: status === "succeeded",
-      image: "huggingface/jobs",
-      digest: input.job.source_verified ? "hf-verified" : undefined,
+      image: input.job.runtime_image,
+      digest: input.job.runtime_digest,
     },
   }
 }

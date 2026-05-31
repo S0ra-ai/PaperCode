@@ -119,6 +119,37 @@ describe("strict live acceptance script", () => {
     expect(script).not.toContain('"test/research/e2e.test.ts"')
   })
 
+  test("live benchmark discovers arXiv sources instead of pinning a fake locator", () => {
+    const benchmark = readFileSync(path.join(repoRoot, "scripts", "live-paper-quality-benchmark.ts"), "utf8")
+    expect(benchmark).toContain("discoverVerifiedArxivSource")
+    expect(benchmark).toContain("assertAuthenticVerifiedArxivSources")
+    expect(benchmark).toContain("assertNoBenchmarkSourceResidue")
+    expect(benchmark).toContain("assertNoBenchmarkSourceResidue(finalMarkdown")
+    expect(benchmark).toContain('await rm(outputDir, { recursive: true, force: true })')
+    expect(benchmark).toContain("source.source_id === `paper:arxiv:${source.arxiv_id}`")
+    expect(benchmark).toContain("source.url === `https://arxiv.org/abs/${source.arxiv_id}`")
+    expect(benchmark).toContain("live-arxiv-search+abs-page")
+    expect(benchmark).toContain("liveArxivRankingDataset")
+    expect(benchmark).toContain("dataset_paths: [datasetPath]")
+    expect(benchmark).not.toMatch(/fetchVerifiedArxivSource\(["']\d{4}\.\d{4,5}["']/)
+    expect(benchmark).not.toContain("2401.00001")
+    expect(benchmark).not.toContain("paper-a")
+    expect(benchmark).not.toContain("Evidence-grounded agent teams")
+    expect(benchmark).not.toContain("source discovery seed")
+    expect(benchmark).not.toContain("search-seed")
+  })
+
+  test("experiment runner does not invent container image or digest metadata", () => {
+    const runner = readFileSync(
+      path.join(repoRoot, "packages", "opencode", "src", "paper", "research", "experiments", "runner.ts"),
+      "utf8",
+    )
+    expect(runner).not.toContain("paper-fucker/research-runner:fixture")
+    expect(runner).not.toContain("sha256:fixture")
+    expect(runner).toContain("if (options?.container_image) result.image = options.container_image")
+    expect(runner).toContain("if (options?.container_digest) result.digest = options.container_digest")
+  })
+
   test("allows Git Flow feature and fix branches during active task work", () => {
     const script = readFileSync(scriptPath, "utf8")
     expect(script).toContain("^(feature|fix)/[a-z0-9-]+$")

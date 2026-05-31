@@ -101,6 +101,94 @@ async function collectFiles(root: string, relativeInput: string): Promise<string
   return files
 }
 
+async function existingPath(root: string, relativeInput: string) {
+  const normalized = toPosix(relativeInput)
+  const item = await stat(path.join(root, normalized)).catch(() => undefined)
+  return item ? normalized : undefined
+}
+
+async function associatedTestInputs(root: string, codePaths: string[]) {
+  const candidates = new Set<string>()
+  for (const codePath of codePaths.map(toPosix)) {
+    const srcIndex = codePath.indexOf("/src/")
+    if (srcIndex >= 0) {
+      candidates.add(`${codePath.slice(0, srcIndex)}/test/${codePath.slice(srcIndex + "/src/".length)}`)
+    }
+    if (codePath.endsWith("/src")) candidates.add(`${codePath.slice(0, -"/src".length)}/test`)
+    if (codePath.includes("/src/")) {
+      const packageRoot = codePath.slice(0, codePath.indexOf("/src/"))
+      candidates.add(`${packageRoot}/test`)
+    }
+  }
+  const existing = await Promise.all(Array.from(candidates).map((candidate) => existingPath(root, candidate)))
+  return existing.filter((candidate): candidate is string => Boolean(candidate))
+}
+
+async function nearestPackageJsons(root: string, codePaths: string[]) {
+  const packages = new Set<string>()
+  for (const input of codePaths.map(toPosix)) {
+    let absolute = path.join(root, input)
+    const item = await stat(absolute).catch(() => undefined)
+    if (item?.isFile()) absolute = path.dirname(absolute)
+    let current = item ? absolute : path.join(root, path.dirname(input))
+    while (current.startsWith(root)) {
+      const packagePath = path.join(current, "package.json")
+      if (await stat(packagePath).then((entry) => entry.isFile(), () => false)) packages.add(toPosix(path.relative(root, packagePath)))
+      if (current === root) break
+      current = path.dirname(current)
+    }
+  }
+  if (await stat(path.join(root, "package.json")).then((entry) => entry.isFile(), () => false)) packages.add("package.json")
+  return Array.from(packages).sort((left, right) => {
+    if (left === "package.json") return 1
+    if (right === "package.json") return -1
+    return left.localeCompare(right)
+  })
+}
+
+function isRunnableExperimentScript(name: string, script: string, packageFile: string) {
+  const normalizedName = name.toLowerCase()
+  const normalizedScript = script.toLowerCase()
+  if (/do not run tests from root/.test(normalizedScript)) return false
+  if (/^(dev|start|serve|preview|build|postinstall|prepare|db|fix-node-pty|upgrade-opentui)(:|$)/.test(normalizedName)) return false
+  if (/(\brm\s+-rf\b|\brmdir\b|\bdel\s+\/[sq]\b|\bdeploy\b|\bpublish\b)/.test(normalizedScript)) return false
+  if (/^(test|typecheck|check|lint|bench|benchmark)(:|$)/.test(normalizedName)) return true
+  if (/^(baseline|ablation|container|repro|reproduce)(:|$)/.test(normalizedName)) return true
+  if (/^(bench|benchmark):(baseline|ablation)(:|$)/.test(normalizedName)) return true
+  if (packageFile === "package.json" && /^(typecheck|lint|check)$/.test(normalizedName)) return true
+  return false
+}
+
+function runnablePriority(entry: ExperimentSurface["runnable_entries"][number]) {
+  const name = entry.name.toLowerCase()
+  const isPackageScoped = entry.source_range.path !== "package.json" ? 0 : 10
+  const scriptPriority =
+    name === "test:paper"
+      ? 0
+      : name === "test:unit"
+        ? 1
+        : name === "typecheck"
+          ? 2
+          : name === "check"
+            ? 3
+            : name === "lint"
+              ? 4
+              : name.startsWith("baseline")
+                ? 5
+                : name.startsWith("ablation")
+                  ? 6
+                  : /^(container|repro|reproduce)(:|$)/.test(name)
+                    ? 7
+                    : name === "test"
+                      ? 8
+                      : name.startsWith("test:")
+                        ? 9
+                  : name.startsWith("bench")
+                    ? 10
+                    : 11
+  return isPackageScoped + scriptPriority
+}
+
 function closingBraceLine(lines: string[], startIndex: number) {
   let balance = 0
   for (let index = startIndex; index < lines.length; index++) {
@@ -144,32 +232,56 @@ function extractMethods(file: string, text: string): MethodExtraction["methods"]
   return methods
 }
 
-async function packageScripts(root: string): Promise<ExperimentSurface["runnable_entries"]> {
-  const packagePath = path.join(root, "package.json")
-  const text = await readFile(packagePath, "utf8").catch((error: NodeJS.ErrnoException) => {
-    if (error.code === "ENOENT") return undefined
-    throw error
-  })
-  if (!text) return []
-  const parsed = JSON.parse(text) as { scripts?: Record<string, string> }
-  const lines = text.split(/\r?\n/)
-  return Object.entries(parsed.scripts ?? {}).map(([name, command]) => {
-    const scriptLine = lines.findIndex((line) => line.includes(JSON.stringify(name)))
-    return {
-      name,
-      command,
-      source_range: {
-        path: "package.json",
-        start_line: scriptLine >= 0 ? scriptLine + 1 : 1,
-        end_line: scriptLine >= 0 ? scriptLine + 1 : lines.length,
-      },
-    }
-  })
+async function packageScripts(root: string, codePaths: string[]): Promise<ExperimentSurface["runnable_entries"]> {
+  const packageFiles = await nearestPackageJsons(root, codePaths)
+  const allEntries: ExperimentSurface["runnable_entries"] = []
+  for (const packageFile of packageFiles) {
+    const packagePath = path.join(root, packageFile)
+    const text = await readFile(packagePath, "utf8").catch((error: NodeJS.ErrnoException) => {
+      if (error.code === "ENOENT") return undefined
+      throw error
+    })
+    if (!text) continue
+    const parsed = JSON.parse(text) as { scripts?: Record<string, string> }
+    const lines = text.split(/\r?\n/)
+    const packageDir = toPosix(path.dirname(packageFile))
+    const cwd = packageDir === "." ? "" : packageDir
+    allEntries.push(
+      ...Object.entries(parsed.scripts ?? {})
+        .filter(([name, command]) => isRunnableExperimentScript(name, command, packageFile))
+        .map(([name]) => {
+          const scriptLine = lines.findIndex((line) => line.includes(JSON.stringify(name)))
+          const runnableCommand = cwd ? `bun run --cwd ${cwd} ${name}` : `bun run ${name}`
+          return {
+            name,
+            command: runnableCommand,
+            source_range: {
+              path: packageFile,
+              start_line: scriptLine >= 0 ? scriptLine + 1 : 1,
+              end_line: scriptLine >= 0 ? scriptLine + 1 : lines.length,
+            },
+          }
+        }),
+    )
+  }
+  const seen = new Set<string>()
+  return allEntries
+    .filter((entry) => {
+      if (seen.has(entry.command)) return false
+      seen.add(entry.command)
+      return true
+    })
+    .sort((left, right) => {
+      const priority = runnablePriority(left) - runnablePriority(right)
+      if (priority !== 0) return priority
+      return `${left.source_range.path}/${left.name}`.localeCompare(`${right.source_range.path}/${right.name}`)
+    })
 }
 
 export async function analyzeCodebaseForPaper(input: AnalyzeCodebaseForPaperInput): Promise<CodeToPaperAnalysis> {
   const workspace = path.resolve(input.workspace_path)
-  const files = (await Promise.all(input.code_paths.map((codePath) => collectFiles(workspace, toPosix(codePath))))).flat().sort()
+  const analysisInputs = [...new Set([...input.code_paths.map(toPosix), ...(await associatedTestInputs(workspace, input.code_paths))])]
+  const files = (await Promise.all(analysisInputs.map((codePath) => collectFiles(workspace, codePath)))).flat().sort()
   const readable = await Promise.all(
     files.map(async (file) => ({
       path: file,
@@ -190,7 +302,7 @@ export async function analyzeCodebaseForPaper(input: AnalyzeCodebaseForPaperInpu
       }
     }),
   }
-  const runnableEntries = await packageScripts(workspace)
+  const runnableEntries = await packageScripts(workspace, input.code_paths)
   const experiment_surface: ExperimentSurface = {
     schema_version: "ExperimentSurface.v1",
     tests: codebase_map.files
