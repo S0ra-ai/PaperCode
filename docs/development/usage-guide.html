@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>使用入口 - Paper Fucker 开发手册</title>
+    <title>使用指南 - Paper Fucker 开发手册</title>
     <link rel="stylesheet" href="./assets/style.css" />
     <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml" />
   </head>
@@ -15,7 +15,7 @@
           <div class="nav-group">入门</div>
           <a href="./index.html">总览</a>
           <div class="nav-group">使用</div>
-          <a class="active" href="./usage-guide.html">使用入口</a>
+          <a class="active" href="./usage-guide.html">使用指南</a>
           <div class="nav-group">开发</div>
           <a href="./development-guide.html">开发指南</a>
           <a href="./development-workflow.html">开发工作流</a>
@@ -38,18 +38,13 @@
       </aside>
 
       <main class="content">
-        <div class="breadcrumbs"><a href="./index.html">开发手册</a><span>使用入口</span></div>
+        <div class="breadcrumbs"><a href="./index.html">开发手册</a><span>使用指南</span></div>
         <section class="hero" id="purpose">
-          <div class="eyebrow">Usage for Maintainers</div>
-          <h1>从源码跑通一条 PaperRun</h1>
-          <p class="lead">本页用于开发者本机验收：启动 TUI、配置模型、选择工作区、创建 PaperRun、查看实时 Monitor、导出和恢复历史任务。</p>
-          <p>它不是手册主线。主线开发入口在 <a href="./development-guide.html">开发指南</a>，本页用于确认本机环境和用户路径是否可用。</p>
+          <div class="eyebrow">Usage Guide</div>
+          <h1>使用 Paper Fucker 完成一条论文任务</h1>
+          <p class="lead">本页按“使用参数、运行模式、输入材料、质量调优、实时监控、恢复导出”组织，便于用户和维护者按同一条路径跑通产品。</p>
+          <p>开发者调试代码时也从这里开始：先用真实 TUI 创建一条 <code>PaperRun</code>，再进入开发指南定位模块。</p>
         </section>
-
-        <div class="admonition">
-          <strong>验收口径</strong>
-          使用入口只记录维护者需要亲自跑通的步骤：模型、工作区、PaperRun、Preview、导出和恢复。面向代码修改的说明放在开发指南、模块地图和关键函数索引。
-        </div>
 
         <h2 id="install">源码启动</h2>
         <pre><code>git clone https://github.com/ZhuchenZhong/paper_fucker.git
@@ -57,27 +52,76 @@ cd paper_fucker
 bun install
 bun run build
 .\paper_fucker.exe</code></pre>
-        <p>终端最低尺寸为 <code>96x28</code>，推荐 <code>120x34</code>。低于最低尺寸时 TUI 会显示中文阻断页，恢复尺寸后回到原页面。</p>
+        <p>终端最低尺寸为 <code>96x28</code>，推荐 <code>120x34</code>。窗口不足时 TUI 会显示中文尺寸提示，恢复尺寸后自动回到原页面。</p>
+
+        <h2 id="parameters">使用参数</h2>
+        <table class="table">
+          <thead><tr><th>参数</th><th>是否必需</th><th>说明</th><th>配置入口</th></tr></thead>
+          <tbody>
+            <tr><td>研究目标</td><td>必需</td><td>自然语言主题、代码仓库目标、已有论文改写目标或实验复现目标。</td><td>首页输入框。</td></tr>
+            <tr><td>模型池</td><td>必需</td><td>用户注册 provider 后，从所有可用模型中勾选候选池，再选择主/备用决策模型。</td><td><code>/models</code></td></tr>
+            <tr><td>工作区</td><td>可选</td><td>不选择时运行写入用户目录；选择后把中间文件、代码和导出放入当前工作区。</td><td><code>/folder</code></td></tr>
+            <tr><td>材料</td><td>可选</td><td>论文、代码、数据、实验日志和补充说明会进入 intake，并写入 source ledger。</td><td><code>/file</code>、<code>/data</code>、<code>/log</code></td></tr>
+            <tr><td>研究深度</td><td>可选</td><td>快速、标准、深入、投稿和自定义，用于控制检索、实验、审稿和预算强度。</td><td><span class="kbd">Shift</span>+<span class="kbd">Tab</span></td></tr>
+          </tbody>
+        </table>
+
+        <h2 id="modes">三种运行模式</h2>
+        <div class="mode-list">
+          <article>
+            <strong>主题到论文</strong>
+            <span>只输入研究主题。系统先做检索、查新、研究规划，再生成草稿、证据账本和审稿意见。</span>
+          </article>
+          <article>
+            <strong>材料到论文</strong>
+            <span>拖入论文、数据或日志。系统围绕材料抽取 claim、方法和实验事实，避免把外部结论写成未验证事实。</span>
+          </article>
+          <article>
+            <strong>代码到论文</strong>
+            <span>选择代码工作区。系统读取 source range，生成实验协议，执行 baseline/ablation/container 复现后再写结果。</span>
+          </article>
+        </div>
 
         <h2 id="models">配置模型</h2>
+        <p><code>/models</code> 打开全屏模型工作台。用户先注册 provider，再从可用模型中勾选候选池；候选池之外的模型不会被 PaperRun、Agent Team 或子 agent 使用。</p>
         <table class="table">
-          <thead><tr><th>入口</th><th>用途</th><th>验收点</th></tr></thead>
+          <thead><tr><th>页面</th><th>用途</th><th>操作</th></tr></thead>
           <tbody>
-            <tr><td><code>/models</code></td><td>打开全屏模型工作台。</td><td>只显示用户已注册 provider；未注册 provider 不进入候选池。</td></tr>
-            <tr><td>已注册</td><td>管理 ChatGPT 订阅、Copilot CLI 订阅、自定义 endpoint。</td><td>支持删除 provider、清空全部、刷新模型和保存。</td></tr>
-            <tr><td>所有模型</td><td>从已注册 provider 的模型中多选候选池。</td><td>主决策模型和备用模型只能从候选池选。</td></tr>
-            <tr><td>全流程模型</td><td>为 planner、writer、reviewer 等阶段设置自动、动态或强制模型。</td><td>强制模型不可用时必须阻断，不静默降级。</td></tr>
+            <tr><td>已注册</td><td>显示已授权的 ChatGPT 订阅、Copilot CLI 订阅和自定义 endpoint。</td><td>刷新模型、smoke、删除 provider、清空全部。</td></tr>
+            <tr><td>所有模型</td><td>展示已注册 provider 返回的全部模型。</td><td>多选候选池，设置主决策模型和备用决策模型。</td></tr>
+            <tr><td>全流程模型</td><td>配置 planner、writer、reviewer、citation_checker、experiment 等阶段策略。</td><td>自动选择、动态选择或强制指定。</td></tr>
           </tbody>
         </table>
 
         <h2 id="workspace">选择工作区</h2>
-        <p><code>/folder</code> 优先打开原生文件夹选择器。Windows 需要支持驱动器选择；原生选择器不可用时回退中文 TUI 选择器。</p>
+        <p><code>/folder</code> 优先打开系统目录选择器。Windows 需要能选择驱动器；原生选择器不可用时回退到中文 TUI 目录选择器。</p>
         <div class="callout">默认 run 写入 <code>~/.paper_fucker/runs</code>。只有用户明确选择工作区后，才写入 <code>&lt;workspace&gt;/.paper_fucker/runs</code>。</div>
+
+        <h2 id="materials">输入材料</h2>
+        <table class="table">
+          <thead><tr><th>材料类型</th><th>入口</th><th>进入系统后的用途</th></tr></thead>
+          <tbody>
+            <tr><td>论文 PDF / DOCX / Markdown</td><td><code>/file</code></td><td>进入文献和材料 source ledger，用于相关工作、方法对齐和引用检查。</td></tr>
+            <tr><td>代码仓库</td><td><code>/folder</code></td><td>触发代码扫描、source range、实验协议和复现证据。</td></tr>
+            <tr><td>数据文件</td><td><code>/data</code></td><td>进入数据字典、指标计算、baseline/ablation 或可视化建议。</td></tr>
+            <tr><td>实验日志</td><td><code>/log</code></td><td>进入 terminal trace、ResultReport 和 reproduction gate。</td></tr>
+          </tbody>
+        </table>
 
         <h2 id="run">创建 PaperRun</h2>
         <pre><code>输入示例：
 我想研究 agent team 在代码实验论文生成中的应用，要求包含可复现实验设计</code></pre>
-        <p>TUI 会把输入、当前工作区、期刊 profile、研究深度和材料入口传给 <code>POST /paper/runs</code>。创建失败必须返回中文结构化诊断。</p>
+        <p>TUI 会把输入、当前工作区、默认期刊 profile、研究深度和材料入口传给 <code>POST /paper/runs</code>。创建失败时显示中文结构化诊断，包括原因、处理动作和日志路径。</p>
+
+        <h2 id="quality">质量调优</h2>
+        <table class="table">
+          <thead><tr><th>目标</th><th>调法</th><th>验收</th></tr></thead>
+          <tbody>
+            <tr><td>论文更完整</td><td>提高研究深度，补充论文材料和实验日志。</td><td>章节完整，Related Work 和 References 使用 verified source。</td></tr>
+            <tr><td>实验更可信</td><td>选择工作区，补齐 baseline、ablation、容器复现和 GPU/编译器环境。</td><td>ResultReport 有真实 terminal trace，final gate 不因复现缺失阻断。</td></tr>
+            <tr><td>格式更稳定</td><td>默认中国计算机学报 profile，先修 Markdown 结构，再修 Pandoc/LaTeX 导出。</td><td>中文题名、摘要、英文摘要、关键词、正文、参考文献和附录可读。</td></tr>
+          </tbody>
+        </table>
 
         <h2 id="monitor">实时 Monitor</h2>
         <p>运行中可以通过 TUI 或 <code>/preview</code> 打开只读 Web Monitor。它显示 stage graph、draft、source ledger、claim ledger、agent tree、cost/token、gate、export 和实验终端摘要。</p>
@@ -93,6 +137,13 @@ bun run build
 paper_fucker resume &lt;run-id&gt;</code></pre>
         <p>退出时展示 run id、状态、token/cost 摘要和恢复命令，方便继续任务。</p>
 
+        <h2 id="next">What's Next?</h2>
+        <ul>
+          <li>要修改产品链路，继续读 <a href="./development-guide.html">开发指南</a>。</li>
+          <li>要定位代码，读 <a href="./module-map.html">模块地图</a> 和 <a href="./function-reference.html">关键函数索引</a>。</li>
+          <li>要看运行状态协议，读 <a href="./paperrun-flow.html">PaperRun 流程</a> 和 <a href="./preview-export.html">Preview 与导出</a>。</li>
+        </ul>
+
         <div class="prev-next">
           <a href="./index.html"><span>上一页</span>总览</a>
           <a href="./development-guide.html"><span>下一页</span>开发指南</a>
@@ -103,11 +154,16 @@ paper_fucker resume &lt;run-id&gt;</code></pre>
         <strong>本页目录</strong>
         <a href="#purpose">用途</a>
         <a href="#install">源码启动</a>
+        <a href="#parameters">使用参数</a>
+        <a href="#modes">运行模式</a>
         <a href="#models">配置模型</a>
         <a href="#workspace">选择工作区</a>
+        <a href="#materials">输入材料</a>
         <a href="#run">创建 PaperRun</a>
+        <a href="#quality">质量调优</a>
         <a href="#monitor">实时 Monitor</a>
         <a href="#resume">恢复与退出</a>
+        <a href="#next">What's Next</a>
       </aside>
     </div>
     <script src="./assets/manual.js" defer></script>
