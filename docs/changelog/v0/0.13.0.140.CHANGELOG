@@ -1,0 +1,25 @@
+:project       paper_fucker - 可验证论文研究自动化系统
+:author        k1d (https://github.com/ZhuchenZhong)
+:repo
+:desc          0.13.0.140 开发历史归档
+:version       0.13.0.140-dev
+:last_update   2026/05/31
+
+:history
+
+    0.13.0.140-dev - 2026/05/31 (dee367d4) [fix/mcp-tool-binding-test-isolation]
+        :brief Provider 授权入口按订阅类型收口，公开安装、发布和 Nix 元数据迁移到 ZhuchenZhong 与 MPL-2.0
+        :tui
+            - fix(models): 从模型工作台注册 ChatGPT 或 GitHub Copilot 订阅时，只展示对应 provider 的授权入口
+            - fix(models): 指定 provider 授权不再暴露 Other/custom 入口，避免订阅登录流程混杂
+        :release
+            - chore(install): 安装脚本、GitHub Action 示例、更新检查和 MCP OAuth client_uri 指向 ZhuchenZhong/paper_fucker
+            - chore(publish): Arch/Homebrew 发布元数据使用 Paper Fucker 研究工作台描述，并改为 MPL-2.0 许可证
+            - chore(nix): Nix 包 homepage 指向 ZhuchenZhong/paper_fucker，license 改为 lib.licenses.mpl20
+        :test
+            - test(tui): provider-options 覆盖指定 provider 过滤，不暴露 Other/custom 入口
+        :changelog
+            - docs(changelog): 0.13.0.139 开发历史移入 docs/changelog/v0/0.13.0.139.CHANGELOG
+        :checks
+            - targeted tests: packages/opencode provider-options
+            - static checks: packages/opencode typecheck、install bash syntax after CRLF normalization 与 git diff --check
