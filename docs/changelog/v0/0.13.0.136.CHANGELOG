@@ -1,0 +1,19 @@
+:project       paper_fucker - 可验证论文研究自动化系统
+:author        k1d (https://github.com/ZhuchenZhong)
+:repo
+:desc          0.13.0.136 开发历史归档
+:version       0.13.0.136-dev
+:last_update   2026/05/31
+
+:history
+
+    0.13.0.136-dev - 2026/05/31 (4fdec923) [fix/mcp-tool-binding-test-isolation]
+        :brief 开发手册补齐 ReadTheDocs 风格自动目录、章节锚点和全页翻页导航
+        :docs
+            - docs(development): 新增 manual.js，为所有开发手册 HTML 页面自动生成本页目录、标题锚点、面包屑和上一页/下一页
+            - docs(development): 开发手册样式补齐平滑锚点跳转、三级目录缩进、表格横向滚动和首列不换行
+            - docs(development): 所有开发手册页面接入统一脚本，使用入口继续保留为维护者本机验收路径
+        :changelog
+            - docs(changelog): 0.13.0.135 开发历史移入 docs/changelog/v0/0.13.0.135.CHANGELOG
+        :checks
+            - static docs: node --check manual.js、Chrome headless render/dump-dom、git diff --check
