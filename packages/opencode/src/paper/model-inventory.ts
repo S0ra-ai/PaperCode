@@ -155,6 +155,39 @@ function providerKindFromSource(source: PaperModelCandidate["source"]): PaperPro
   return "manual"
 }
 
+type PaperProviderCandidateSource = { provider_id: string; source?: PaperModelCandidate["source"] }
+
+function hasCustomCandidate(providerID: string, candidates: ReadonlyArray<PaperProviderCandidateSource>) {
+  return candidates.some(
+    (candidate) =>
+      candidate.provider_id === providerID &&
+      (candidate.source === "openai_compatible" || candidate.source === "manual"),
+  )
+}
+
+export function isConfiguredPaperProviderRegistration(
+  providerID: string,
+  registration: PaperProviderRegistration,
+  candidates: ReadonlyArray<PaperProviderCandidateSource>,
+  connectedProviderIDs: ReadonlySet<string> = new Set<string>(),
+) {
+  if (registration.status !== "registered") return false
+  if (registration.kind === "openai_compatible") return true
+  if (registration.kind === "manual") return hasCustomCandidate(providerID, candidates)
+  if (providerID === "openai" || providerID === "github-copilot") return connectedProviderIDs.has(providerID)
+  return false
+}
+
+function isSupportedUserProviderRegistration(
+  providerID: string,
+  registration: PaperProviderRegistration,
+  candidates: ReadonlyArray<PaperProviderCandidateSource>,
+) {
+  if (registration.kind === "openai_compatible") return true
+  if (registration.kind === "manual") return hasCustomCandidate(providerID, candidates)
+  return providerID === "openai" || providerID === "github-copilot"
+}
+
 function summarizeProviderRegistration(
   providerID: string,
   candidates: PaperModelCandidate[],
@@ -214,17 +247,14 @@ function normalizeInventory(input: unknown): PaperModelInventory {
       : undefined
   const rawRegistrations =
     record.provider_registrations && typeof record.provider_registrations === "object"
-      ? (record.provider_registrations as Record<string, PaperProviderRegistration>)
+      ? (Object.fromEntries(
+          Object.entries(record.provider_registrations as Record<string, PaperProviderRegistration>).filter(
+            ([providerID, registration]) => isSupportedUserProviderRegistration(providerID, registration, mergedCandidates),
+          ),
+        ) as Record<string, PaperProviderRegistration>)
       : {}
-  const providerIDs = new Set([
-    ...Object.keys(rawRegistrations),
-    ...mergedCandidates.map((candidate) => candidate.provider_id),
-    ...Array.from(mergedAllowlist)
-      .map((ref) => ref.split("/")[0])
-      .filter((id): id is string => Boolean(id)),
-  ])
   const providerRegistrations = Object.fromEntries(
-    Array.from(providerIDs)
+    Object.keys(rawRegistrations)
       .sort()
       .map((providerID) => [
         providerID,
@@ -363,7 +393,13 @@ export function mergeModelCandidates(
   candidates: PaperModelCandidate[],
 ): PaperModelInventory {
   const allowlist = new Set(inventory.allowlist)
-  const next = new Map(inventory.candidates.map((candidate) => [candidate.model_ref, candidate]))
+  const registeredProviderIDs = new Set(Object.keys(inventory.provider_registrations))
+  const incomingProviderIDs = new Set(candidates.map((candidate) => candidate.provider_id))
+  const next = new Map(
+    inventory.candidates
+      .filter((candidate) => registeredProviderIDs.has(candidate.provider_id) || incomingProviderIDs.has(candidate.provider_id))
+      .map((candidate) => [candidate.model_ref, candidate]),
+  )
   for (const candidate of candidates) {
     const previous = next.get(candidate.model_ref)
     next.set(candidate.model_ref, {
@@ -382,7 +418,7 @@ export function mergeModelCandidates(
       allowed: allowlist.has(candidate.model_ref),
     })),
     provider_registrations: Object.fromEntries(
-      Array.from(new Set([...Object.keys(inventory.provider_registrations), ...Array.from(next.values()).map((candidate) => candidate.provider_id)]))
+      Object.keys(inventory.provider_registrations)
         .sort()
         .map((providerID) => [
           providerID,

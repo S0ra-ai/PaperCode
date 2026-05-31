@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.133-dev - 2026/05/31 (96e49a2f) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.133-dev - 2026/05/31 (1bf488a8) [fix/mcp-tool-binding-test-isolation]
         :brief PaperRun 并发创建、模型工作台 provider 注册语义、响应式模型页、中国计算机学报正文格式、开发手册、MPL-2.0 授权、MCP 工具绑定、Session prompt、App i18n 与用户入口清理
         :prompt
             - fix(prompt): default、anthropic、beast、trinity、gemini 与 copilot-gpt-5 session prompt 统一使用 Paper Fucker 身份
@@ -24,6 +24,10 @@
             - fix(models): 模型库存不再由 builtin 候选或 allowlist 反向生成已注册 provider，避免 /models 把未授权 provider 显示为可用
             - fix(models): 模型工作台和 model-inventory API 统一使用订阅授权或自定义 endpoint 注册作为已注册 provider 来源
             - test(models): 覆盖旧 manual+builtin provider 注册清理，防止历史 OpenCode provider 目录污染 Paper Fucker 模型工作台
+            - feat(models): ChatGPT 订阅与 GitHub Copilot 订阅作为一等 Paper provider 进入库存契约，但仍必须经用户 allowlist 路由
+            - feat(models): 新增订阅 provider 同步脚本，登录后可刷新模型、默认启用该 provider 返回的模型并写入主决策模型
+            - fix(models): provider 注册过滤复用统一判断，未连接订阅 provider 不展示为已注册可用 provider
+            - chore(provider): provider referer 与登录提示链接更新为 ZhuchenZhong/paper_fucker
         :runtime
             - fix(run): PaperRun 创建改为原子占位运行目录，并发请求生成同一 run_id 时自动换 id，避免 runs.run_id 唯一约束失败
             - test(run): 新增并发 createResearchRun 回归，确认固定 idFactory 下也能创建两个独立 PaperRun 目录
@@ -54,14 +58,6 @@
             - test(mcp): 新增 fake FastMCP 回归，验证每个注册 tool 调用自己的 handler
             - fix(test): packages/opencode test preload 清理临时目录时覆盖 Windows ENOTEMPTY 与 EFAULT 重试
         :checks
-            - npx --yes bun@1.3.13 --cwd packages/opencode test test/session/prompt-brand.test.ts
-            - npx --yes bun@1.3.13 --cwd packages/app test src/i18n/paper-surface.test.ts
-            - npx --yes bun@1.3.13 --cwd packages/opencode test test/cli/tui/paper-workbench.test.ts test/paper/profiles.test.ts
-            - python -m unittest research-tools.tests.test_tools.MCPServerAdapterTest
-            - python -m unittest discover -s research-tools/tests
-            - npx --yes bun@1.3.13 --cwd packages/opencode test test/preload.ts test/paper/model-discovery.test.ts --timeout 60000
-            - node package license metadata check
-            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
-            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1
-            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-changelog-format.ps1 -IncludeArchives
-            - git diff --check -- CHANGELOG README.md docs/internal/README.md docs/development/agents-capabilities.html packages/opencode/src/cli/cmd/tui/feature-plugins/home/tips-view.tsx packages/opencode/src/cli/cmd/tui/routes/home.tsx packages/opencode/src/cli/cmd/tui/routes/paper/workbench.ts packages/opencode/src/cli/cmd/tui/routes/paper-journal.tsx packages/opencode/test/paper/profiles.test.ts scripts/live-paper-quality-benchmark.ts
+            - bun targeted tests: prompt-brand, app i18n surface, paper-workbench, profiles, preload, model-discovery, run-api 与 auth
+            - Python unittest: research-tools MCPServerAdapterTest 与完整 research-tools/tests discovery
+            - static checks: package license metadata、packages/opencode typecheck、README version、CHANGELOG IncludeArchives 与 git diff --check
