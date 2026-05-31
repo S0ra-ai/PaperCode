@@ -54,5 +54,6 @@
 - `v0/0.13.0.165.CHANGELOG`
 - `v0/0.13.0.166.CHANGELOG`
 - `v0/0.13.0.167.CHANGELOG`
+- `v0/0.13.0.168.CHANGELOG`
 
 归档文件不参与当前版本解析，也不会进入 release source archive。
