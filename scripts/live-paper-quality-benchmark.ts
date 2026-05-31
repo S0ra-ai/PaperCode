@@ -57,6 +57,12 @@ const codePaths = [
   "packages/opencode/src/cli/cmd/tui/routes/paper",
 ]
 
+const cjcBenchmarkTarget = {
+  target_profile: "cjc-paper" as const,
+  target_journal: "中国计算机学报",
+  target_journal_url: "https://cjc.ict.ac.cn/",
+}
+
 type VerifiedArxivSource = Awaited<ReturnType<typeof fetchVerifiedArxivSource>>
 
 function queryTerms(value: string) {
@@ -629,7 +635,7 @@ const request = await (async () => {
         workspace_path: repoRoot,
         paper_files: ["README.md"],
         experiment_logs: ["reports/strict-live-acceptance.md"],
-        target_profile: "generic-preprint" as const,
+        ...cjcBenchmarkTarget,
         language: "zh-CN",
         budget_tier: "standard" as const,
         quality_mode: "reviewable_bundle" as const,
@@ -647,7 +653,7 @@ const request = await (async () => {
       code_paths: ["src", "experiments"],
       paper_files: [sourceManifestPath],
       dataset_paths: [datasetPath],
-      target_profile: "generic-preprint" as const,
+      ...cjcBenchmarkTarget,
       language: "zh-CN",
       budget_tier: "standard" as const,
       quality_mode: "reviewable_bundle" as const,
@@ -665,7 +671,7 @@ const request = await (async () => {
       code_paths: ["src", "experiments"],
       paper_files: [sourceManifestPath],
       dataset_paths: [datasetPath],
-      target_profile: "generic-preprint" as const,
+      ...cjcBenchmarkTarget,
       language: "zh-CN",
       budget_tier: "standard" as const,
       quality_mode: "reviewable_bundle" as const,
@@ -681,7 +687,7 @@ const request = await (async () => {
       topic: "从实验 starter 补齐 baseline ablation 与容器复现的代码论文",
       workspace_path: workspace,
       code_paths: ["src"],
-      target_profile: "generic-preprint" as const,
+      ...cjcBenchmarkTarget,
       language: "zh-CN",
       budget_tier: "standard" as const,
       quality_mode: "reviewable_bundle" as const,
@@ -697,7 +703,7 @@ const request = await (async () => {
     code_paths: codePaths,
     paper_files: ["README.md"],
     experiment_logs: ["reports/strict-live-acceptance.md"],
-    target_profile: "generic-preprint" as const,
+    ...cjcBenchmarkTarget,
     language: "zh-CN",
     budget_tier: "standard" as const,
     quality_mode: "reviewable_bundle" as const,
@@ -708,7 +714,12 @@ const request = await (async () => {
   }
 })()
 
+assertBenchmark(request.target_profile === "cjc-paper", "Live paper benchmark must use the active CJC target profile.")
+assertBenchmark(request.target_journal === "中国计算机学报", "Live paper benchmark must target 中国计算机学报.")
+
 const run = await createPaperRun(request, { workspace: repoRoot })
+assertBenchmark(run.snapshot.intake.target_profile === "cjc-paper", "PaperRun intake did not resolve to the CJC target profile.")
+assertBenchmark(run.snapshot.intake.target_journal === "中国计算机学报", "PaperRun intake did not resolve to 中国计算机学报.")
 
 if (scenario === "starter-rerun") {
   assertBenchmark(run.snapshot.status === "blocked", "Starter rerun scenario should begin blocked.")

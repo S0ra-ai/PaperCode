@@ -21,12 +21,13 @@ function nowIso(override?: string) {
 
 function environment(mode: ExperimentEnvironment["mode"], options?: ExperimentRunOptions): ExperimentEnvironment {
   if (mode === "container") {
-    return {
+    const result: ExperimentEnvironment = {
       mode,
-      image: options?.container_image ?? "paper-fucker/research-runner:fixture",
-      digest: options?.container_digest ?? "sha256:fixture",
       platform: "container",
     }
+    if (options?.container_image) result.image = options.container_image
+    if (options?.container_digest) result.digest = options.container_digest
+    return result
   }
   return {
     mode,
@@ -61,7 +62,7 @@ async function executeSpec(
     role: spec.role,
     status: result.status,
     environment: env,
-    command: spec.command,
+    command: result.command ?? spec.command,
     metrics: result.metrics,
     stdout: result.stdout,
     stderr: result.stderr,

@@ -1,6 +1,6 @@
 import { mkdir, writeFile } from "fs/promises"
 import path from "path"
-import { createHash } from "crypto"
+import { createHash, randomUUID } from "crypto"
 import {
   RESEARCH_SCHEMA_VERSION,
   type ResearchArtifact,
@@ -46,10 +46,12 @@ type NormalizedArtifactData = {
 }
 
 function stableJson(value: unknown): string {
+  if (typeof value === "undefined") return "null"
   if (value === null || typeof value !== "object") return JSON.stringify(value)
   if (Array.isArray(value)) return `[${value.map((item) => stableJson(item)).join(",")}]`
   const object = value as Record<string, unknown>
   return `{${Object.keys(object)
+    .filter((key) => typeof object[key] !== "undefined")
     .sort()
     .map((key) => `${JSON.stringify(key)}:${stableJson(object[key])}`)
     .join(",")}}`
@@ -96,6 +98,15 @@ function nowIso(options?: ResearchRuntimeOptions) {
   return (options?.clock?.() ?? new Date()).toISOString()
 }
 
+async function nextUniqueResearchArtifactId(runDir: string, options?: ResearchRuntimeOptions) {
+  const existing = new Set((await readJsonlFacts(runDir, "artifact")).map((artifact) => artifact.artifact_id))
+  for (let attempt = 0; attempt < 10; attempt++) {
+    const candidate = nextResearchId("artifact", options)
+    if (!existing.has(candidate)) return candidate
+  }
+  return `artifact-${randomUUID()}`
+}
+
 export async function writeResearchArtifact(
   runDir: string,
   input: WriteResearchArtifactInput,
@@ -127,7 +138,7 @@ export async function writeResearchArtifact(
       const createdAt = input.created_at ?? nowIso(options)
       const artifact = await appendResearchFact(runDir, "artifact", {
         schema_version: RESEARCH_SCHEMA_VERSION,
-        artifact_id: input.artifact_id ?? nextResearchId("artifact", options),
+        artifact_id: input.artifact_id ?? (await nextUniqueResearchArtifactId(runDir, options)),
         run_id: run.run_id,
         kind: input.kind,
         path: relativeDataPath,

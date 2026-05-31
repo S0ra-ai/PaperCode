@@ -18,7 +18,7 @@ export interface WebCrawlPlan {
 }
 
 export interface CrawlExtractionEvidence {
-  method: "scrapling" | "html_parser" | "manual_fixture" | "external_mcp"
+  method: "scrapling" | "html_parser" | "provided_html" | "external_mcp"
   selector?: string
   confidence: number
   source_range?: {

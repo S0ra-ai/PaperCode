@@ -20,24 +20,34 @@ class HuggingFaceLoopToolTest(unittest.TestCase):
         self.assertEqual(result["records"], [])
         self.assertEqual(result["diagnostics"], ["network_not_authorized"])
 
-    def test_fixture_records_are_explicit_test_inputs(self) -> None:
-        fixture = {
+    def test_records_require_explicit_test_mode(self) -> None:
+        test_record = {
             "schema_version": "HFDatasetRecord.v1",
-            "dataset_id": "fixture/dataset",
-            "title": "fixture dataset",
-            "url": "https://huggingface.co/datasets/fixture/dataset",
+            "dataset_id": "test/dataset",
+            "title": "test dataset",
+            "url": "https://huggingface.co/datasets/test/dataset",
             "license": "apache-2.0",
-            "version": "fixture",
+            "version": "test",
             "splits": ["train"],
             "task_categories": ["text-generation"],
             "source_verified": True,
-            "trust": "local_fixture",
+            "trust": "test_record",
         }
 
-        result = hf_research_probe({"kind": "datasets", "query": "paper generation", "fixture": fixture})
+        blocked = hf_research_probe({"kind": "datasets", "query": "paper generation", "test_records": test_record})
+        result = hf_research_probe(
+            {
+                "kind": "datasets",
+                "query": "paper generation",
+                "test_records": test_record,
+                "allow_test_records": True,
+            }
+        )
 
-        self.assertEqual(result["mode"], "fixture")
-        self.assertEqual(result["records"], [fixture])
+        self.assertEqual(blocked["mode"], "blocked")
+        self.assertEqual(blocked["diagnostics"], ["test_records_require_allow_test_records"])
+        self.assertEqual(result["mode"], "test_records")
+        self.assertEqual(result["records"], [test_record])
         self.assertEqual(result["diagnostics"], [])
 
     def test_live_paper_records_use_huggingface_api_data(self) -> None:
@@ -94,26 +104,27 @@ class HuggingFaceLoopToolTest(unittest.TestCase):
         self.assertEqual(result.metadata["mode"], "blocked")
         self.assertIn("network_not_authorized", result.error or "")
 
-    def test_mcp_probe_succeeds_with_explicit_fixture(self) -> None:
+    def test_mcp_probe_succeeds_with_explicit_test_records(self) -> None:
         result = call_tool(
             "hf_research_probe",
             {
                 "kind": "papers",
                 "query": "paper generation",
-                "fixture": {
+                "test_records": {
                     "schema_version": "HFPaperRecord.v1",
-                    "paper_id": "fixture-paper",
-                    "title": "fixture paper",
-                    "url": "https://huggingface.co/papers/fixture-paper",
-                    "authors": ["paper_fucker fixture"],
+                    "paper_id": "test-paper",
+                    "title": "test paper",
+                    "url": "https://huggingface.co/papers/test-paper",
+                    "authors": ["paper_fucker test"],
                     "source_verified": True,
-                    "trust": "local_fixture",
+                    "trust": "test_record",
                 },
+                "allow_test_records": True,
             },
         )
 
         self.assertEqual(result.status, "succeeded")
-        self.assertEqual(result.metadata["mode"], "fixture")
+        self.assertEqual(result.metadata["mode"], "test_records")
 
 
 if __name__ == "__main__":

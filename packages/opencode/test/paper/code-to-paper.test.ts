@@ -8,7 +8,7 @@ import {
   recordCodeToPaperArtifacts,
   type CodeToPaperAnalysis,
 } from "@/paper"
-import { createResearchRun, readJsonlFacts, type ResearchRuntimeOptions } from "@/paper/research/runtime"
+import { createResearchRun, readJsonlFacts, writeResearchArtifact, type ResearchRuntimeOptions } from "@/paper/research/runtime"
 
 const now = "2026-05-09T00:00:00Z"
 
@@ -69,6 +69,28 @@ async function fixtureCodebase() {
   return dir
 }
 
+async function fixtureProtocolCodebase() {
+  const dir = await fixtureCodebase()
+  await writeFile(
+    path.join(dir, "package.json"),
+    JSON.stringify(
+      {
+        scripts: {
+          typecheck: "bun --version",
+          "baseline:toy": "bun --version",
+          "ablation:toy": "bun --version",
+          "repro:container": "bun --version",
+          dev: "bun run --watch src/ranker.ts",
+          build: "bun build src/ranker.ts",
+        },
+      },
+      null,
+      2,
+    ),
+  )
+  return dir
+}
+
 describe("code-to-paper analysis", () => {
   test("produces code-grounded artifacts with source ranges", async () => {
     const workspace = await fixtureCodebase()
@@ -105,9 +127,30 @@ describe("code-to-paper analysis", () => {
         source_range: { path: "test/ranker.test.ts", start_line: 1, end_line: 6 },
       })
       expect(analysis.reproduction_plan.steps[0]).toMatchObject({
-        command: "bun test",
+        command: "bun run test",
         source_range: { path: "package.json" },
       })
+    } finally {
+      await clean(workspace)
+    }
+  })
+
+  test("keeps explicit experiment protocol scripts and filters non-experiment scripts", async () => {
+    const workspace = await fixtureProtocolCodebase()
+    try {
+      const analysis = await analyzeCodebaseForPaper({
+        workspace_path: workspace,
+        code_paths: ["src", "test"],
+      })
+
+      expect(analysis.experiment_surface.runnable_entries.map((entry) => entry.name)).toEqual([
+        "typecheck",
+        "baseline:toy",
+        "ablation:toy",
+        "repro:container",
+      ])
+      expect(analysis.experiment_surface.runnable_entries.map((entry) => entry.name)).not.toContain("dev")
+      expect(analysis.experiment_surface.runnable_entries.map((entry) => entry.name)).not.toContain("build")
     } finally {
       await clean(workspace)
     }
@@ -131,6 +174,41 @@ describe("code-to-paper analysis", () => {
       ])
       const events = await readJsonlFacts(handle.run_dir, "event")
       expect(events.map((event) => event.type)).toContain("codetopaper.artifacts.created")
+    } finally {
+      await clean(workspace)
+      await clean(home)
+    }
+  })
+
+  test("writes valid JSON artifacts when optional fields are undefined", async () => {
+    const workspace = await fixtureCodebase()
+    const home = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-code-to-paper-home-"))
+    try {
+      const options = runtimeOptions(workspace, home)
+      const handle = await createResearchRun({ topic: "artifact json", workspace }, options)
+
+      const artifact = await writeResearchArtifact(
+        handle.run_dir,
+        {
+          kind: "log",
+          logical_path: "experiments/result-report.json",
+          data: {
+            schema_version: "ResultReport.v1",
+            best_baseline: undefined,
+            nested: { value: undefined, kept: true },
+            array: [undefined, "ok"],
+          },
+        },
+        options,
+      )
+
+      const text = await Bun.file(path.join(handle.run_dir, artifact.path)).text()
+      expect(() => JSON.parse(text)).not.toThrow()
+      expect(JSON.parse(text)).toEqual({
+        array: [null, "ok"],
+        nested: { kept: true },
+        schema_version: "ResultReport.v1",
+      })
     } finally {
       await clean(workspace)
       await clean(home)

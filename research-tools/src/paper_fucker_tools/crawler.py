@@ -1,8 +1,8 @@
 """Web crawler bridge for paper_fucker research runs.
 
-The real crawler path is Scrapling-first when the dependency is available. The
-fixture path is intentionally dependency-free so unit tests and offline research
-runs can still produce auditable source records without live network access.
+The real crawler path is Scrapling-first when the dependency is available. Tests
+may also pass explicit HTML content; product calls without authorized network
+access return blocked diagnostics instead of synthesizing web records.
 """
 
 from __future__ import annotations
@@ -91,7 +91,7 @@ def scrapling_status() -> dict[str, Any]:
     }
 
 
-def crawl_html_fixture(
+def crawl_html_provided(
     *,
     url: str,
     html: str,
@@ -114,7 +114,7 @@ def crawl_html_fixture(
         "robots_allowed": robots_allowed,
         "license_status": license_status,
         "extraction_evidence": {
-            "method": "manual_fixture",
+            "method": "provided_html",
             "selector": "html",
             "confidence": 0.85,
         },
@@ -258,7 +258,7 @@ def crawl_url(input_data: dict[str, Any]) -> dict[str, Any]:
     license_status = str(input_data.get("license_status", "unknown"))
     if isinstance(html, str):
         robots_allowed = bool(input_data.get("robots_allowed", True))
-        return crawl_html_fixture(
+        return crawl_html_provided(
             url=url,
             html=html,
             robots_allowed=robots_allowed,

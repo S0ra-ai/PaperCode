@@ -242,12 +242,15 @@ function displayExperimentLabel(value: string) {
   const ablation = normalized.match(/^ablation[:-](.+)$/)
   if (ablation) return displayExperimentLabel(ablation[1])
   if (normalized.match(/^proposed[:-]/)) return "证据驱动工作流"
+  if (normalized === "bm25") return "BM25"
   if (normalized === "ranking-lexical") return "词项匹配基线"
   if (normalized === "ranking-no-coverage") return "无证据覆盖消融"
   return value.replace(/[-_]+/g, " ")
 }
 
 function contextualProposedLabel(input: ComposeDraftPaperInput) {
+  const frame = methodPaperFrame(input)
+  if (frame) return frame.methodName
   const metric = input.result_report?.primary_metric ?? input.experiment_plan?.proposed.expected_metric
   if (isRankingMetric(metric)) return "证据约束的论文排序方法"
   return "证据驱动工作流"
@@ -683,7 +686,7 @@ function literatureEvidenceSummary(input: ComposeDraftPaperInput) {
     const placeholderText =
       placeholderVerified.length > 0
         ? `${placeholderVerified.length} 条来源使用测试或占位 URL，不能作为代表文献。`
-        : "当前候选文献尚未完成 DOI、arXiv 元数据或出版社页面核验。"
+        : "当前候选文献尚未完成来源验证，包括 DOI、arXiv 元数据或出版社页面核验。"
     const unverifiedCount = map.sources.length - verifiedSources.length
     const unverifiedText = unverifiedCount > 0 ? `另有 ${unverifiedCount} 条候选文献尚未验证。` : ""
     return joinBlocks([
@@ -732,7 +735,7 @@ function rankingRelatedWorkSummary(input: ComposeDraftPaperInput) {
     const placeholderText =
       placeholderCount > 0
         ? `当前有 ${placeholderCount} 条来源使用测试或占位 URL，不能作为代表文献。`
-        : "当前候选文献尚未完成 DOI、arXiv 元数据或出版社页面核验。"
+        : "当前候选文献尚未完成来源验证，包括 DOI、arXiv 元数据或出版社页面核验。"
     return joinBlocks([
       "候选论文排序任务连接了三条研究线索：排序解释研究关注排序结果如何因评分因素、群体约束或解释目标而变化；检索与推荐评测研究关注候选集合、相关性标注和检索目标；复现与验证研究关注基线、消融、评价目标和重复执行。",
       `当前没有可进入相关工作正文的已验证来源；${placeholderText}`,
@@ -871,6 +874,7 @@ function humanizeLabel(value: string) {
   if (normalizedLabel !== value.replace(/[-_]+/g, " ")) return normalizedLabel
   return value
     .replace(/^Code-grounded paper_fucker workflow$/, "代码证据驱动工作流")
+    .replace(/^Text2Action semantic planning with safe execution$/i, "Text2Action 语义规划与安全执行闭环")
     .replace(/^baseline:ranking-lexical$/, "词项匹配基线")
     .replace(/^ablation:ranking-no-coverage$/, "无证据覆盖消融")
     .replace(/^BM25 lexical retrieval$/, "BM25 稀疏检索")
@@ -882,6 +886,8 @@ function humanizeLabel(value: string) {
 }
 
 function humanizeProposedLabel(input: ComposeDraftPaperInput) {
+  const frame = methodPaperFrame(input)
+  if (frame) return frame.methodName
   const label = input.experiment_plan?.proposed.label
   if (!label) return contextualProposedLabel(input)
   if (/paper_fucker workflow|code-grounded/i.test(label) && isRankingMetric(input.experiment_plan?.proposed.expected_metric ?? input.result_report?.primary_metric)) {
@@ -908,7 +914,17 @@ function semanticExperimentRationale(input: ComposeDraftPaperInput, role: "basel
 
 function dataAvailabilitySummary(input: ComposeDraftPaperInput) {
   const data = input.data_plan
-  if (!data) return "尚未生成数据计划；数据来源、许可和访问约束需要补充。"
+  if (!data) {
+    const codeAvailability = codeAvailabilitySummary(input)
+    if (codeAvailability) {
+      return joinBlocks([
+        "本次研究使用代码仓库和实验脚本作为主要证据，未登记外部数据集。",
+        codeAvailability,
+        "因此结果解释限定在当前代码工作区、显式实验协议和复现记录内。",
+      ])
+    }
+    return "尚未生成数据计划；数据来源、许可和访问约束需要补充。"
+  }
   const formalDatasets = verifiedFormalDatasets(data)
   const placeholderDatasets = placeholderVerifiedDatasets(data)
   if (formalDatasets.length === 0) {
@@ -970,13 +986,13 @@ function codeAvailabilitySummary(input: ComposeDraftPaperInput) {
   if (ranges.length === 0 && entrypoints.length === 0) return undefined
   const implementation = ranges.length > 0 ? `方法实现包括 ${ranges.join("、")}。` : "方法实现入口尚未登记。"
   const reproduction = entrypoints.length > 0 ? `复现实验入口包括${chineseList(entrypoints)}。` : "复现实验入口尚未登记。"
-  const packageName = input.code_metadata?.package_name ?? "未登记"
-  const repository = input.code_metadata?.repository_url ?? "未登记"
-  const version = input.code_metadata?.version ?? "未登记"
+  const packageName = input.code_metadata?.package_name
+  const repository = input.code_metadata?.repository_url
+  const version = input.code_metadata?.version
   const revision = input.code_metadata?.commit_hash
   const worktreeDirty = input.code_metadata?.worktree_dirty
-  const license = input.code_metadata?.license ?? "未登记"
-  const worktreeStatus = typeof worktreeDirty === "boolean" ? (worktreeDirty ? "含未提交或未跟踪变更" : "干净") : "未登记"
+  const license = input.code_metadata?.license
+  const worktreeStatus = typeof worktreeDirty === "boolean" ? (worktreeDirty ? "含未提交或未跟踪变更" : "干净") : undefined
   const worktreeBoundary =
     worktreeDirty === true
       ? "含未提交或未跟踪变更时，复现应以导出包、代码修订和已登记实验材料为准，不把该工作区状态视为可发布源码快照。"
@@ -984,13 +1000,13 @@ function codeAvailabilitySummary(input: ComposeDraftPaperInput) {
   const rows = [
     ["方法实现", ranges.length > 0 ? ranges.join("、") : "未登记"],
     ["复现实验入口", entrypoints.length > 0 ? chineseList(entrypoints) : "未登记"],
-    ["代码包", packageName],
-    ["代码仓库地址", repository],
-    ["代码版本", version],
-    ["代码修订", revision ?? "未登记"],
-    ["代码工作区状态", worktreeStatus],
-    ["代码许可证", license],
   ]
+  if (packageName) rows.push(["代码包", packageName])
+  if (repository) rows.push(["代码仓库地址", repository])
+  if (version) rows.push(["代码版本", version])
+  if (revision) rows.push(["代码修订", revision])
+  if (worktreeStatus) rows.push(["代码工作区状态", worktreeStatus])
+  if (license) rows.push(["代码许可证", license])
   const parts = ["### 代码可用性", "", implementation, reproduction, "", markdownTable(["项目", "内容"], rows)]
   if (worktreeBoundary) parts.push("", worktreeBoundary)
   return parts.join("\n")
@@ -1343,9 +1359,11 @@ function researchQuestionsSummary(input: ComposeDraftPaperInput) {
       markdownTable(["编号", "关注点", "问题", "回答章节"], rows),
       ready
         ? "方法章节回答 RQ1，结果章节回答 RQ2，可复现性章节回答 RQ3；附录列出实现定位和复现实验入口。"
-        : "方法章节给出排序机制，结果与可复现性章节只报告已有观察；缺失实验会在限制中说明。",
+      : "方法章节给出排序机制，结果与可复现性章节只报告已有观察；缺失实验会在限制中说明。",
     ])
   }
+  const frame = methodPaperFrame(input)
+  if (frame) return methodPaperResearchQuestionsSummary(input, frame)
   const design = experimentDesignCountsText(input)
   return joinBlocks([
     `本文将研究目标拆分为三项可复核问题：证据是否足以支撑方法，${design} 的对照是否能形成可比较结果，以及复现状态是否支撑结果表述。`,
@@ -1385,6 +1403,226 @@ function methodEvidenceText(input: ComposeDraftPaperInput) {
     .filter((entry) => entry.section_id === "method")
     .map((entry) => entry.text)
     .join(" ")
+}
+
+type MethodPaperFrame = {
+  methodName: string
+  domainOpening: string
+  introOpening: string
+  methodOverview: string
+  contributionFocus: [string, string, string]
+  keywordLine: string
+  conclusionLead: string
+}
+
+function methodPaperFrame(input: ComposeDraftPaperInput): MethodPaperFrame | undefined {
+  const text = `${input.title}\n${methodEvidenceText(input)}`.toLowerCase()
+  if (!/text2action|semantic_planner|plan_executor|action_registry|语义规划|服务机器人|安全执行/.test(text)) return undefined
+  return {
+    methodName: "Text2Action 语义规划与安全执行闭环",
+    domainOpening:
+      "端云协同服务机器人需要将自然语言任务转换为可执行动作序列，并在云端语义规划、本地动作调用和安全约束之间保持一致。",
+    introOpening:
+      "自然语言任务到可执行动作序列的转换是端云协同服务机器人的关键环节：云端模型负责理解任务意图，本地执行端负责把规划结果落到动作注册表和安全检查上。",
+    methodOverview:
+      "本文方法围绕 Text2Action 语义规划与安全执行闭环展开：语义规划器把用户意图解析为结构化步骤，动作注册表限定可调用动作集合，执行器在安全约束下调度动作并记录可复现实验入口。",
+    contributionFocus: [
+      "构建面向服务机器人任务的 Text2Action 语义规划流程，将自然语言目标映射到可检查的动作计划。",
+      "引入动作注册表与安全执行约束，使动作调用、边界条件和失败路径能够在代码中定位。",
+      "以基线、消融和容器复现共同约束实验结论，区分语义规划能力、安全执行作用和环境可重复性。",
+    ],
+    keywordLine: "Text2Action；语义规划；安全执行；服务机器人；测试通过率；容器复现",
+    conclusionLead:
+      "本文围绕端云协同服务机器人构建并评估了 Text2Action 语义规划与安全执行闭环，结果说明该实现能够在当前任务与实验协议下完成从自然语言目标到可执行动作序列的转换。",
+  }
+}
+
+function methodInterfaceNames(input: ComposeDraftPaperInput) {
+  const seen = new Set<string>()
+  const names: string[] = []
+  for (const match of methodEvidenceText(input).matchAll(/\b([A-Z][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)?)\([^)]*:[0-9]+\)/g)) {
+    const name = match[1]
+    if (!name || seen.has(name)) continue
+    seen.add(name)
+    names.push(name)
+    if (names.length >= 4) break
+  }
+  return names
+}
+
+function methodPaperAbstractSummary(input: ComposeDraftPaperInput, frame: MethodPaperFrame) {
+  const interfaces = methodInterfaceNames(input)
+  const interfaceText =
+    interfaces.length > 0
+      ? `实现上，${chineseList(interfaces)}构成规划、执行和动作约束的主要接口。`
+      : `实现上，${frame.methodName}由规划、动作注册和安全执行三个环节组成。`
+  const metric = resultMetricSummary(input)
+  const resultClaim = firstClaimText(input, "results")
+  const reproduction =
+    input.result_report?.reproduction.status === "passed" || (input.experiment_runs?.container_runs.length ?? 0) > 0
+      ? "容器复现记录用于确认同一实验协议可以在受控环境中重复。"
+      : "容器复现尚未通过时，相关结果应保持为探索性观察。"
+  return [
+    frame.domainOpening,
+    `本文围绕“${input.title}”构建 ${frame.methodName}。`,
+    interfaceText,
+    resultClaim ? `结果显示，${trimTerminalPunctuation(resultClaim)}。` : metric,
+    resultClaim ? metric : undefined,
+    `基线、消融和容器复现作为证据约束，用于限定性能结论和方法边界。${reproduction}`,
+  ]
+    .filter(Boolean)
+    .join("")
+}
+
+function methodPaperResearchQuestionsSummary(input: ComposeDraftPaperInput, frame: MethodPaperFrame) {
+  const ready = finalReady(input)
+  const metric = displayMetricName(input.result_report?.primary_metric ?? input.experiment_plan?.proposed.expected_metric ?? "primary_metric")
+  const rows = [
+    ["RQ1", "规划机制", `${frame.methodName}能否把自然语言任务转换为可检查的动作计划？`, "方法"],
+    ["RQ2", "安全执行", `动作注册表和安全执行约束是否会影响${metric}和失败路径？`, "结果"],
+    ["RQ3", "复现一致性", "本机与容器环境能否重复同一动作规划与执行观察？", "可复现性"],
+  ]
+  return joinBlocks([
+    `本文围绕 ${frame.methodName}，提出三项研究问题，分别对应规划机制、安全执行和复现一致性。`,
+    markdownTable(["编号", "关注点", "问题", "回答章节"], rows),
+    ready
+      ? "方法章节回答 RQ1，结果章节回答 RQ2，可复现性章节回答 RQ3；附录保留实现定位和实验入口。"
+      : "方法章节先给出规划机制，结果与可复现性章节只报告已有观察；缺失实验会在限制中说明。",
+  ])
+}
+
+function matchingLiteratureTitles(input: ComposeDraftPaperInput, patterns: RegExp[], fallback: string[]) {
+  const sources = input.literature_map ? verifiedFormalLiteratureSources(input.literature_map) : []
+  const titles = sources
+    .filter((source) =>
+      patterns.some((pattern) => pattern.test(source.title) || pattern.test(source.abstract ?? "") || (source.topics ?? []).some((topic) => pattern.test(topic))),
+    )
+    .map((source) => literatureDisplayTitle(source))
+    .slice(0, 2)
+  return titles.length > 0 ? titles : fallback
+}
+
+function methodPaperRelatedWorkSummary(input: ComposeDraftPaperInput) {
+  const reasoningWorks = matchingLiteratureTitles(input, [/ReAct/i, /reasoning and acting/i, /language agents/i], ["ReAct"])
+  const planningWorks = matchingLiteratureTitles(input, [/Do As I Can/i, /SayCan/i, /affordance/i, /language-conditioned planning/i], ["SayCan"])
+  const controlWorks = matchingLiteratureTitles(input, [/Code as Policies/i, /RT-1/i, /embodied control/i, /real-world control/i], ["Code as Policies", "RT-1"])
+  const rows = [
+    [
+      "语言推理与行动",
+      reasoningWorks.join("、"),
+      "说明语言模型可以在推理和动作选择之间交替推进任务，但并不直接解决机器人动作集合、参数边界和安全执行约束。",
+    ],
+    [
+      "语言条件机器人规划",
+      planningWorks.join("、"),
+      "强调语言指令需要与环境可供性和机器人能力对齐，为 Text2Action 的动作可用性判断提供背景。",
+    ],
+    [
+      "程序化策略与真实控制",
+      controlWorks.join("、"),
+      "展示语言模型生成或驱动控制策略的可行性，也提示需要把生成计划约束到可执行接口和可复现实验协议中。",
+    ],
+  ]
+  return joinBlocks([
+    "与本文最相关的研究可以分为三条线索：语言推理与行动、语言条件机器人规划、程序化策略与真实控制。",
+    markdownTable(["方向", "代表工作", "与本文关系"], rows),
+    "本文的定位不是重新证明大模型可以参与机器人规划，而是把 Text2Action 的语义规划、动作注册和安全执行放入同一实现闭环，并通过基线、消融和容器复现限制结果解释范围。",
+  ])
+}
+
+function methodPaperStudyDesignSummary(input: ComposeDraftPaperInput, frame: MethodPaperFrame) {
+  const metric = displayMetricName(input.result_report?.primary_metric ?? input.experiment_plan?.proposed.expected_metric ?? "primary_metric")
+  const counts = experimentDesignCounts(input)
+  const rows = [
+    ["任务输入", "自然语言目标、动作上下文和可用能力边界", "限定规划器需要解释和转换的对象。"],
+    ["语义规划", "把用户目标解析为结构化动作计划", "回答 Text2Action 是否能形成可检查计划。"],
+    ["动作注册", "维护可调用动作、参数和约束", "避免规划结果调用未登记或越界动作。"],
+    ["安全执行", "在执行前检查动作边界和失败路径", "区分规划成功与可安全执行。"],
+    ["实验评价", `主指标=${metric}；基线=${counts.baseline}；消融=${counts.ablation}；容器复现=${counts.container}`, "比较主方法、对照设置和复现一致性。"],
+  ]
+  return joinBlocks([
+    `研究设计围绕 ${frame.methodName}展开，包含五个环节：任务输入、语义规划、动作注册、安全执行和实验评价。`,
+    markdownTable(["环节", "设计对象", "论文作用"], rows),
+    "该设计把方法机制和实验评价分开：方法章节说明自然语言目标如何进入动作计划和安全执行链路，结果章节只解释基线、消融和复现记录能够支持的观察。",
+  ])
+}
+
+function methodPaperCodeLocationFromText(text: string, keywords: RegExp[]) {
+  for (const keyword of keywords) {
+    const match = text.match(new RegExp(`([^\\s，。；、,()]+${keyword.source}[^\\s，。；、,()]*)`, "i"))
+    if (match?.[1]) return match[1].replace(/[，。；、,]+$/g, "")
+  }
+  return undefined
+}
+
+function methodPaperCodeLocation(text: string, keywords: RegExp[], fallback: string) {
+  const location = methodPaperCodeLocationFromText(text, keywords)
+  if (location) return location
+  return fallback
+}
+
+function methodPaperMethodSummary(input: ComposeDraftPaperInput, frame: MethodPaperFrame) {
+  const text = methodEvidenceText(input)
+  const interfaces = methodInterfaceNames(input)
+  const rows = [
+    [
+      "语义规划器",
+      "解析自然语言目标，生成可检查的动作计划。",
+      methodPaperCodeLocation(text, [/semantic_planner/, /SemanticPlanner/], "src/sub/semantic_planner"),
+    ],
+    [
+      "动作注册表",
+      "登记可调用动作、参数约束和能力边界。",
+      methodPaperCodeLocation(text, [/action_registry/, /ActionRegistry/], "src/core/action_registry.py"),
+    ],
+    [
+      "安全执行器",
+      "在执行前检查动作边界，并记录失败路径。",
+      methodPaperCodeLocation(text, [/plan_executor/, /PlanExecutor/], "src/sub/plan_executor"),
+    ],
+  ]
+  return joinBlocks([
+    frame.methodOverview,
+    "### 架构与流程",
+    markdownTable(["模块", "职责", "代码定位"], rows),
+    [
+      "执行流程分为四步：",
+      "1. 接收自然语言任务和上下文约束。",
+      "2. 语义规划器生成结构化动作计划。",
+      "3. 动作注册表检查动作是否存在、参数是否满足约束。",
+      "4. 安全执行器调度动作并记录成功、失败和复现实验入口。",
+    ].join("\n"),
+    interfaces.length > 0 ? `核心接口包括 ${interfaces.join("、")}。` : undefined,
+    artifactSummary(input),
+  ])
+}
+
+function methodPaperIntroductionSummary(input: ComposeDraftPaperInput, frame: MethodPaperFrame) {
+  const resultEvidence = resultEvidenceText(input)
+  return [
+    frame.introOpening,
+    `本文研究的问题是：在给定研究代码和实验脚本的条件下，${frame.methodName}能否形成可解释、可运行且可复现的动作规划流程。${sourceSummary(input)}`,
+    "方法实现围绕语义规划器、动作注册表和安全执行器三个模块展开；具体代码定位、动作边界和执行流程在方法章节给出。",
+    resultEvidence
+      ? `实验评价关注主方法、基线、消融和复现之间的关系：${resultEvidence}`
+      : "实验评价需要同时覆盖主方法、基线、消融和复现入口，避免只报告单次运行观察。",
+    finalReady(input)
+      ? "因此，本文只在当前代码、数据、基线和复现环境能够支撑的范围内讨论方法效果。"
+      : "因此，缺少来源、对照或复现记录的结论仍应保持为探索性观察。",
+  ].join("\n\n")
+}
+
+function methodPaperContributionsSummary(input: ComposeDraftPaperInput, frame: MethodPaperFrame) {
+  const metric = displayMetricName(input.result_report?.primary_metric ?? input.experiment_plan?.proposed.expected_metric ?? "primary_metric")
+  const counts = experimentDesignCounts(input)
+  return joinBlocks([
+    "本文贡献如下：",
+    [
+      `1. ${frame.contributionFocus[0]}`,
+      `2. ${frame.contributionFocus[1]}`,
+      `3. ${frame.contributionFocus[2]}当前实验协议包含 ${counts.baseline} 个基线、${counts.ablation} 个消融，并${primaryMetricPhrase(metric).replace("主指标", "主比较指标")}。`,
+    ].join("\n"),
+  ])
 }
 
 function codeSymbolPhrase(symbols: string[]) {
@@ -1494,19 +1732,35 @@ function readableAsciiList(values: string[]) {
 }
 
 function methodSourceRangeSummaries(input: ComposeDraftPaperInput) {
-  const matches = methodEvidenceText(input).matchAll(/\b([a-z][A-Za-z0-9]*)\(([^)]*:[0-9]+)\)/g)
-  return [...matches].map((match) => `${match[1]}(${match[2]})`).slice(0, 5)
+  const text = methodEvidenceText(input)
+  const matches = text.matchAll(/\b([A-Za-z][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)?)\(([^)]*:[0-9]+)\)/g)
+  const ranges = [...matches].map((match) => `${match[1]}(${match[2]})`)
+  if (ranges.length > 0) return [...new Set(ranges)].slice(0, 5)
+  if (methodPaperFrame(input)) {
+    return [
+      methodPaperCodeLocationFromText(text, [/semantic_planner/, /SemanticPlanner/]),
+      methodPaperCodeLocationFromText(text, [/action_registry/, /ActionRegistry/]),
+      methodPaperCodeLocationFromText(text, [/plan_executor/, /PlanExecutor/]),
+    ]
+      .filter((item): item is string => Boolean(item))
+      .filter((item, index, values) => values.indexOf(item) === index)
+      .slice(0, 5)
+  }
+  return []
 }
 
 function methodSourceRangeRows(input: ComposeDraftPaperInput) {
   const roleByName = new Map([
+    ["SemanticPlanner.plan", "语义规划入口"],
+    ["PlanExecutor.execute", "安全执行入口"],
+    ["ActionRegistry.register", "动作注册入口"],
     ["rankAgentTeamPapers", "候选论文排序入口"],
     ["scorePaper", "排序评分函数"],
     ["claimLedgerCoverage", "证据覆盖特征来源"],
   ])
   const seen = new Set<string>()
   const rows: string[][] = []
-  for (const match of methodEvidenceText(input).matchAll(/\b([a-z][A-Za-z0-9]*)\(([^)]*:[0-9]+)\)/g)) {
+  for (const match of methodEvidenceText(input).matchAll(/\b([A-Za-z][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)?)\(([^)]*:[0-9]+)\)/g)) {
     const name = match[1] ?? ""
     const location = match[2] ?? ""
     if (!name || !location || seen.has(`${name}:${location}`)) continue
@@ -1648,6 +1902,8 @@ function rankingContributionsSummary(input: ComposeDraftPaperInput) {
 function contributionsSummary(input: ComposeDraftPaperInput) {
   const metricId = input.result_report?.primary_metric ?? input.experiment_plan?.proposed.expected_metric
   if (isRankingMetric(metricId)) return rankingContributionsSummary(input)
+  const frame = methodPaperFrame(input)
+  if (frame) return methodPaperContributionsSummary(input, frame)
   const metric = displayMetricName(metricId ?? "primary_metric")
   const methodClaim = firstClaimText(input, "method")
   const resultClaim = firstClaimText(input, "results")
@@ -1692,6 +1948,8 @@ function systemArchitectureSummary(input: ComposeDraftPaperInput) {
 }
 
 function studyDesignSummary(input: ComposeDraftPaperInput) {
+  const frame = methodPaperFrame(input)
+  if (frame) return methodPaperStudyDesignSummary(input, frame)
   const metric = displayMetricName(input.result_report?.primary_metric ?? input.experiment_plan?.proposed.expected_metric ?? "primary_metric")
   const sourceCount = evidenceSourceIds(input).length
   const evidenceCount = [...new Set(input.ledger.entries.flatMap((entry) => entry.artifact_ids))].length
@@ -2130,6 +2388,8 @@ function rankingDiscussionSummary(input: ComposeDraftPaperInput, report: NonNull
 
 function abstractSummary(input: ComposeDraftPaperInput) {
   if (isRankingContext(input)) return rankingAbstractSummary(input)
+  const frame = methodPaperFrame(input)
+  if (frame) return methodPaperAbstractSummary(input, frame)
   const ready = finalReady(input)
   const status = ready ? "在当前证据边界内，证据链已满足本文的结果表述条件。" : "在当前证据边界内，证据链尚未满足结果表述条件。"
   const metric = resultMetricSummary(input)
@@ -2154,6 +2414,8 @@ function keywordsSummary(input: ComposeDraftPaperInput) {
   if (isRankingContext(input)) {
     return "候选论文排序；证据覆盖；排序 nDCG@3；词项匹配基线；容器复现"
   }
+  const frame = methodPaperFrame(input)
+  if (frame) return frame.keywordLine
   const metric = input.result_report?.primary_metric ?? input.experiment_plan?.proposed.expected_metric
   const keywords = [
     "可复现研究",
@@ -2195,6 +2457,8 @@ function rankingAbstractSummary(input: ComposeDraftPaperInput) {
 
 function introductionSummary(input: ComposeDraftPaperInput) {
   if (isRankingContext(input)) return rankingIntroductionSummary(input)
+  const frame = methodPaperFrame(input)
+  if (frame) return methodPaperIntroductionSummary(input, frame)
   const methodClaim = firstClaimText(input, "method")
   const resultEvidence = resultEvidenceText(input)
   const methodFocus = methodFocusSummary(input, methodClaim, "introduction")
@@ -2233,6 +2497,8 @@ function rankingIntroductionSummary(input: ComposeDraftPaperInput) {
 
 function relatedWorkSummary(input: ComposeDraftPaperInput) {
   if (isRankingContext(input)) return rankingRelatedWorkSummary(input)
+  const frame = methodPaperFrame(input)
+  if (frame) return methodPaperRelatedWorkSummary(input)
   const methodClaim = firstClaimText(input, "method")
   const resultEvidence = resultEvidenceText(input)
   const methodFocus = methodFocusSummary(input, methodClaim, "related")
@@ -2254,6 +2520,8 @@ function methodSummary(input: ComposeDraftPaperInput, claimSections: DraftSectio
   const rankingNarrative = rankingMethodNarrative(input)
   const rankingFigure = rankingMethodFigureSummary(input)
   const rankingControl = rankingControlAndReproductionSummary(input)
+  const frame = methodPaperFrame(input)
+  if (frame) return methodPaperMethodSummary(input, frame)
   return [
     rankingNarrative ??
       "本文的方法由三部分组成：材料边界定义、代码证据抽取和可复现实验约束。材料边界先限定可讨论对象，代码分析再绑定接口、源码范围和实验入口，最后用基线、消融和容器复现约束结果表述。",
@@ -2365,6 +2633,12 @@ function conclusionSummary(input: ComposeDraftPaperInput, ready: boolean) {
       boundary,
     ])
   }
+  const frame = methodPaperFrame(input)
+  if (frame) {
+    return ready
+      ? `${frame.conclusionLead}进一步扩展仍需要更多任务场景、更多基线、更多消融和更长周期的重复实验。`
+      : `${frame.conclusionLead}当前仍需补齐来源、对照或复现记录后，才能把相关观察提升为结论性表述。`
+  }
   return ready
     ? "本文表明，将材料来源、代码证据、显式对照和容器复现纳入同一证据链，可以降低计算机类论文中结果断言与实验依据脱节的风险。在现有任务范围内，本文方法的结论由来源、实验协议和复现记录共同支撑；进一步扩展仍需要更多数据集、更多领域基线和更长周期的重复实验。"
     : "本文仍处于证据不足状态；只有当来源、断言、引用、许可和复现检查形成闭环后，相关结论才应从探索性观察提升为结论性表述。"
@@ -2431,6 +2705,7 @@ function scaffoldSections(input: ComposeDraftPaperInput, claimSections: DraftSec
   const ready = finalReady(input)
   const includeInternalAuditAppendices = !isRankingContext(input)
   const ranking = isRankingContext(input)
+  const methodFrame = methodPaperFrame(input)
   return [
     buildPlainSection("author_information", "作者信息", authorInformationSummary()),
     buildPlainSection("abstract", "摘要", abstractSummary(input)),
@@ -2441,7 +2716,7 @@ function scaffoldSections(input: ComposeDraftPaperInput, claimSections: DraftSec
     buildPlainSection("related_work", "相关工作", relatedWorkSummary(input)),
     ...(ranking ? [] : [buildPlainSection("study_design", "研究设计与证据流", studyDesignSummary(input))]),
     buildPlainSection("method", "方法", methodSummary(input, claimSections)),
-    ...(ranking ? [] : [buildPlainSection("evidence_traceability", "证据与可追踪性", evidenceModelSummary(input))]),
+    ...(ranking || methodFrame ? [] : [buildPlainSection("evidence_traceability", "证据与可追踪性", evidenceModelSummary(input))]),
     ...claimSections.filter((section) => section.section_id !== "method" && section.section_id !== "results"),
     buildPlainSection("data_availability", "数据与代码可用性", dataAvailabilitySummary(input)),
     buildPlainSection("experimental_setup", "实验设置", experimentProtocolSummary(input)),

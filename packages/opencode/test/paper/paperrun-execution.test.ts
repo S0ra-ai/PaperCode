@@ -1,18 +1,27 @@
 import { afterEach, describe, expect, test } from "bun:test"
-import { mkdir, mkdtemp, rm, writeFile } from "fs/promises"
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "fs/promises"
 import { setTimeout as sleep } from "node:timers/promises"
 import os from "os"
 import path from "path"
 import {
+  applyPaperRunExperimentStarterPack,
   createPaperRun,
+  exportPaperRun,
+  getPaperRunSnapshot,
   PAPER_MODEL_ROLES,
   PAPER_RESEARCH_STAGE_IDS,
+  previewPaperRun,
+  runPaperRunExperimentProtocol,
+  stopAllPaperRunLivePreviews,
   type PaperModelRole,
   type PaperRunRuntimeOptions,
 } from "@/paper"
+import { createResearchRun, setResearchFinalGate, writeResearchArtifact } from "@/paper/research/runtime"
+import type { ExportBundle } from "@/paper/research/export"
 
 const now = "2026-05-10T00:00:00Z"
 const TEST_MODEL = "test-provider/test-model"
+const PAPER_RUN_INTEGRATION_TIMEOUT = 180_000
 
 function testModelRoles(): Record<PaperModelRole, string> {
   return Object.fromEntries(PAPER_MODEL_ROLES.map((role) => [role, TEST_MODEL])) as Record<PaperModelRole, string>
@@ -70,33 +79,75 @@ async function fixtureWorkspace() {
   return { dir, workspace, home }
 }
 
+async function fixtureProtocolWorkspace() {
+  const context = await fixtureWorkspace()
+  await writeFile(
+    path.join(context.workspace, "package.json"),
+    JSON.stringify(
+      {
+        scripts: {
+          typecheck: "bun --version",
+          "baseline:toy": "bun --version",
+          "ablation:toy": "bun --version",
+          "repro:container": "bun --version",
+        },
+      },
+      null,
+      2,
+    ),
+  )
+  return context
+}
+
+async function fixtureRecoverableProtocolWorkspace() {
+  const context = await fixtureWorkspace()
+  await writeFile(
+    path.join(context.workspace, "package.json"),
+    JSON.stringify(
+      {
+        scripts: {
+          typecheck: "bun --version",
+          "baseline:toy": "bun --version",
+          "ablation:toy": "bun --version",
+          "repro:container": "bun run missing-container-script",
+        },
+      },
+      null,
+      2,
+    ),
+  )
+  return context
+}
+
 function verifiedSourceEvidence(topic: string) {
   return {
     schema_version: "SourceEvidenceManifest.v1",
     created_at: now,
-    provenance: "unit-test-verified-source-evidence",
+    provenance: "unit-test-real-arxiv-source-evidence",
     sources: [
       {
-        source_id: "paper:verified-source:evidence",
+        source_id: "paper:arxiv:2305.12571",
         kind: "paper",
-        title: `${topic} verified source`,
-        url: "https://arxiv.org/abs/2401.00001",
-        provider: "unit-test-source-manifest",
-        license: { status: "clear", expression: "arXiv non-exclusive distribution" },
-        version: { value: "v1", retrieved_at: now },
+        title: "Reproducibility Requires Consolidated Artifacts",
+        url: "https://arxiv.org/abs/2305.12571",
+        provider: "arxiv",
+        license: { status: "clear", expression: "CC BY-NC-SA 4.0", url: "http://creativecommons.org/licenses/by-nc-sa/4.0/" },
+        version: { value: "live-arxiv-abs-page", retrieved_at: now, published_at: "2023-05-21" },
         verification: {
           status: "verified",
-          method: "unit-test-source-manifest",
+          method: "unit-test-real-arxiv-record",
           checked_at: now,
           diagnostics: [],
         },
         topics: [topic],
+        arxiv_id: "2305.12571",
       },
     ],
   }
 }
 
 afterEach(async () => {
+  stopAllPaperRunLivePreviews()
   while (cleanup.length > 0) {
     const dir = cleanup.pop()
     if (dir) await clean(dir)
@@ -104,6 +155,87 @@ afterEach(async () => {
 })
 
 describe("PaperRun default execution engine", () => {
+  test("snapshot export state preserves failed formats from the final export bundle artifact", async () => {
+    const { workspace, home } = await fixtureWorkspace()
+    const options = runtimeOptions(workspace, home)
+    const handle = await createResearchRun({ topic: "partial export recovery", workspace }, options)
+    await setResearchFinalGate(handle.run_dir, { status: "passed", blockers: [] }, options)
+    const bundle: ExportBundle = {
+      schema_version: "ExportBundle.v1",
+      bundle_id: "bundle-final-partial",
+      created_at: now,
+      status: "final",
+      draft_id: "draft-partial",
+      final_gate: { status: "passed", blockers: [], updated_at: now },
+      verification_summary: { final_gate_status: "passed", failed_checks: [], forced: false },
+      files: [
+        {
+          format: "markdown",
+          path: "exports/bundle-final-partial/bundle-final-partial.md",
+          mime_type: "text/markdown",
+          sha256: "sha-markdown",
+          bytes: 10,
+          status: "written",
+          diagnostics: [],
+        },
+        {
+          format: "pdf",
+          path: "exports/bundle-final-partial/bundle-final-partial.pdf",
+          mime_type: "application/pdf",
+          sha256: "sha-empty",
+          bytes: 0,
+          status: "failed",
+          diagnostics: ["PDF renderer output is not a valid PDF file header."],
+        },
+      ],
+      manifest: {
+        schema_version: "PaperExportManifest.v1",
+        bundle_id: "bundle-final-partial",
+        status: "final",
+        final_gate_status: "passed",
+        forced: false,
+        failed_checks: [],
+        path: "exports/bundle-final-partial/manifest.json",
+        files: [
+          {
+            format: "markdown",
+            path: "exports/bundle-final-partial/bundle-final-partial.md",
+            sha256: "sha-markdown",
+            bytes: 10,
+            status: "written",
+          },
+          {
+            format: "pdf",
+            path: "exports/bundle-final-partial/bundle-final-partial.pdf",
+            sha256: "sha-empty",
+            bytes: 0,
+            status: "failed",
+          },
+        ],
+        source_artifact_ids: ["artifact-source"],
+        tool_diagnostics: ["pdf: PDF renderer output is not a valid PDF file header."],
+      },
+    }
+    await writeResearchArtifact(
+      handle.run_dir,
+      {
+        kind: "export",
+        logical_path: "exports/export-bundle.json",
+        data: bundle,
+        metadata: { artifact_schema: "ExportBundle.v1", bundle_id: bundle.bundle_id },
+      },
+      options,
+    )
+
+    const snapshot = await getPaperRunSnapshot(handle.run.run_id, options)
+
+    expect(snapshot.export_state.status).toBe("final")
+    expect(snapshot.export_state.formats).toEqual(["markdown"])
+    expect(snapshot.export_state.files?.map((file) => `${file.format}:${file.status}`)).toEqual(["markdown:written", "pdf:failed"])
+    expect(snapshot.export_state.tool_diagnostics).toEqual(["pdf: PDF renderer output is not a valid PDF file header."])
+    expect(snapshot.export_state.message).toContain("pdf export failed")
+  })
+
   test("creation drives the default paper stage graph without injected fixture handlers", async () => {
     const { workspace, home } = await fixtureWorkspace()
     const run = await createPaperRun(
@@ -128,27 +260,80 @@ describe("PaperRun default execution engine", () => {
     expect(run.snapshot.events.map((event) => event.type)).toContain("export.bundle.completed")
     expect(run.snapshot.artifacts.some((artifact) => artifact.metadata?.artifact_schema === "ResearchRunController.v1")).toBe(true)
     expect(run.snapshot.artifacts.some((artifact) => artifact.metadata?.artifact_schema === "CodebaseMap.v1")).toBe(true)
+    expect(run.snapshot.artifacts.some((artifact) => artifact.metadata?.artifact_schema === "ExperimentProtocolGuidance.v1")).toBe(true)
+    expect(run.snapshot.artifacts.some((artifact) => artifact.metadata?.artifact_schema === "ExperimentProtocolStarterPack.v1")).toBe(true)
+    const starterFileArtifacts = run.snapshot.artifacts.filter(
+      (artifact) => artifact.metadata?.artifact_schema === "ExperimentProtocolStarterFile.v1",
+    )
+    expect(starterFileArtifacts.map((artifact) => artifact.metadata?.starter_file_path)).toContain(
+      "experiments/starter/Dockerfile.repro",
+    )
+    expect(run.snapshot.diagnostics.experiment_guidance).toMatchObject({
+      status: "needs_protocol",
+      final_export_blocked: true,
+    })
+    expect(run.snapshot.diagnostics.experiment_guidance?.suggestions.map((item) => item.recommended_script)).toContain(
+      "repro:container",
+    )
+    expect(run.snapshot.diagnostics.experiment_starter_pack).toMatchObject({
+      status: "ready",
+    })
+    expect(Object.keys(run.snapshot.diagnostics.experiment_starter_pack?.package_json_scripts ?? {})).toContain(
+      "repro:container:starter",
+    )
+    expect(run.snapshot.diagnostics.experiment_starter_pack?.files.every((file) => Boolean(file.artifact_id))).toBe(true)
     expect(run.snapshot.claim_ledger.length).toBeGreaterThan(0)
     expect(run.snapshot.novelty.checkpoints.length).toBeGreaterThan(0)
-    expect(run.snapshot.paper_spine?.readiness).toBe("needs_evidence")
+    expect(run.snapshot.paper_spine?.readiness).toBe("ready")
     expect(run.snapshot.global_figure?.panels.length).toBeGreaterThan(0)
     expect(run.snapshot.drafts.length).toBeGreaterThan(0)
-    expect(run.snapshot.exports.length).toBeGreaterThan(0)
+    const latestDraft = run.snapshot.drafts.at(-1)
+    expect(latestDraft).toBeDefined()
+    const latestDraftMarkdown = await readFile(path.join(run.run_dir, latestDraft!.path), "utf8")
+    expect(latestDraftMarkdown).toContain("实验协议修复清单")
+    expect(latestDraftMarkdown).toContain("实验启动包")
+    expect(latestDraftMarkdown).toContain("missing_container_reproduction_runner")
     expect(run.snapshot.export_state.status).toBe("blocked")
     expect(run.snapshot.export_state.failed_checks).toContain("reproduction_failure")
     expect(run.snapshot.status).toBe("blocked")
     expect(run.snapshot.controller_state.status).toBe("review_required")
     expect(stageStatus.get("reproduction")).toBe("blocked")
-    expect(run.snapshot.stage_graph.stages.find((stage) => stage.id === "reproduction")?.summary).toContain(
-      "reproduction_failure",
-    )
     expect(run.snapshot.experiment_status.reproduction_gate).toBe("blocked")
+    const preview = await previewPaperRun(run.run_id, runtimeOptions(workspace, home))
+    expect(preview.snapshot.monitor?.experiment_guidance).toMatchObject({
+      status: "needs_protocol",
+      final_export_blocked: true,
+    })
+    expect(preview.snapshot.monitor?.experiment_starter_pack).toMatchObject({
+      status: "ready",
+      apply_endpoint: `/paper/runs/${run.snapshot.run_id}/experiment-starter/apply`,
+      recommended_payload: {
+        dry_run: false,
+        overwrite: false,
+        update_package_json: true,
+      },
+    })
+    expect(preview.snapshot.monitor?.experiment_starter_pack?.files.map((file) => file.path)).toContain(
+      "experiments/starter/Dockerfile.repro",
+    )
+    expect(preview.snapshot.monitor?.experiment_starter_pack?.files.every((file) => Boolean(file.artifact_path))).toBe(true)
+    expect(preview.snapshot.monitor?.experiment_runs?.some((item) => item.command.startsWith("bun run "))).toBe(true)
+    expect(preview.snapshot.monitor?.experiment_runs?.some((item) => item.status !== "succeeded")).toBe(true)
+    expect(preview.snapshot.monitor?.experiment_runs?.every((item) => typeof item.wall_time_seconds === "number")).toBe(true)
+    expect(preview.snapshot.monitor?.machine_environment).toMatchObject({
+      status: "available",
+      workspace,
+      default_run_root: expect.stringContaining(".paper_fucker"),
+    })
+    expect(preview.snapshot.monitor?.machine_environment?.runtimes.some((item) => item.id === "bun")).toBe(true)
+    expect(preview.snapshot.annotations.some((annotation) => annotation.id.startsWith("experiment-guidance:"))).toBe(true)
+    expect(preview.snapshot.annotations.some((annotation) => annotation.id === "experiment-starter-pack")).toBe(true)
 
     const blockedDiagnostics = run.snapshot.artifacts.filter(
       (artifact) => artifact.metadata?.artifact_schema === "BlockedDiagnostic.v1",
     )
     expect(blockedDiagnostics.length).toBe(0)
-  })
+  }, PAPER_RUN_INTEGRATION_TIMEOUT)
 
   test("experiment evidence manifest allows final export when reproduction passes", async () => {
     const { workspace, home } = await fixtureWorkspace()
@@ -195,16 +380,287 @@ describe("PaperRun default execution engine", () => {
     expect(run.snapshot.status).toBe("succeeded")
     expect(run.snapshot.export_state.status).toBe("final")
     expect(run.snapshot.export_state.failed_checks).toEqual([])
+    expect(run.snapshot.export_state.artifact_ids).toEqual([...new Set(run.snapshot.export_state.artifact_ids)])
+    expect(run.snapshot.export_state.files?.map((file) => file.path)).toEqual([
+      ...new Set(run.snapshot.export_state.files?.map((file) => file.path)),
+    ])
     expect(run.snapshot.experiment_status.reproduction_gate).toBe("passed")
-    expect(run.snapshot.novelty.experiment_gate?.status).toBe("review_required")
+    expect(run.snapshot.novelty.experiment_gate?.status).toBe("passed")
     expect(run.snapshot.paper_spine?.readiness).toBe("ready")
     expect(run.snapshot.global_figure?.status).toBe("ready")
+    expect(run.snapshot.claim_ledger.every((claim) => claim.source_ids.some((sourceID) => sourceID.startsWith("material:code:")))).toBe(true)
     expect(run.snapshot.stage_graph.stages.find((stage) => stage.id === "reproduction")?.status).toBe("succeeded")
     expect(run.snapshot.artifacts.some((artifact) => artifact.metadata?.artifact_schema === "ExperimentEvidenceManifest.v1")).toBe(true)
     expect(run.snapshot.artifacts.some((artifact) => artifact.metadata?.artifact_schema === "SourceEvidenceManifest.v1")).toBe(true)
-  })
+    const markdownFile = run.snapshot.export_state.files?.find((file) => file.format === "markdown" && file.status === "written")
+    expect(markdownFile).toBeDefined()
+    const finalMarkdown = await readFile(path.join(run.run_dir, markdownFile!.path), "utf8")
+    expect(finalMarkdown).toContain("## 摘要")
+    expect(finalMarkdown).toContain("**关键词**：")
+    expect(finalMarkdown).toContain("## 英文摘要")
+    expect(finalMarkdown).toContain("**Abstract**:")
+    expect(finalMarkdown).toContain("**Keywords**:")
+    expect(finalMarkdown).toContain("## 1 引言")
+    expect(finalMarkdown).not.toContain("## 作者信息")
+    expect(finalMarkdown).not.toContain("## Key words")
+  }, PAPER_RUN_INTEGRATION_TIMEOUT)
 
-  test("reproduction evidence alone cannot bypass verified source requirements", async () => {
+  test("explicit repository experiment protocol can drive container reproduction", async () => {
+    const { workspace, home } = await fixtureProtocolWorkspace()
+    await writeFile(
+      path.join(workspace, "source-evidence.json"),
+      JSON.stringify(verifiedSourceEvidence("显式实验协议驱动的代码论文"), null, 2),
+    )
+    const run = await createPaperRun(
+      {
+        topic: "显式实验协议驱动的代码论文",
+        workspace_path: workspace,
+        code_paths: ["src"],
+        paper_files: ["source-evidence.json"],
+        target_profile: "cjc-paper",
+        target_journal: "中国计算机学报",
+        language: "zh-CN",
+        budget_tier: "standard",
+        model_roles: testModelRoles(),
+      },
+      runtimeOptions(workspace, home),
+    )
+
+    expect(run.snapshot.artifacts.some((artifact) => artifact.metadata?.artifact_schema === "ExperimentProtocol.v1")).toBe(true)
+    expect(run.snapshot.artifacts.some((artifact) => artifact.metadata?.artifact_schema === "ExperimentProtocolGuidance.v1")).toBe(false)
+    expect(run.snapshot.artifacts.some((artifact) => artifact.metadata?.artifact_schema === "ExperimentProtocolStarterPack.v1")).toBe(false)
+    expect(run.snapshot.artifacts.some((artifact) => artifact.metadata?.artifact_schema === "ExperimentProtocolStarterFile.v1")).toBe(false)
+    expect(run.snapshot.diagnostics.experiment_guidance).toBeUndefined()
+    expect(run.snapshot.diagnostics.experiment_starter_pack).toBeUndefined()
+    expect(run.snapshot.experiment_status.reproduction_gate).toBe("passed")
+    expect(run.snapshot.export_state.status).toBe("final")
+    expect(run.snapshot.export_state.failed_checks).toEqual([])
+    const preview = await previewPaperRun(run.run_id, runtimeOptions(workspace, home))
+    expect(preview.snapshot.monitor?.experiment_runs?.some((item) => item.environment === "container" && item.status === "succeeded")).toBe(true)
+    const containerArtifact = run.snapshot.artifacts.find(
+      (artifact) => artifact.metadata?.artifact_schema === "ExperimentRun.v1[]" && artifact.path.includes("container-runs"),
+    )
+    expect(containerArtifact).toBeDefined()
+    const containerRuns = JSON.parse(await readFile(path.join(run.run_dir, containerArtifact!.path), "utf8"))
+    expect(
+      containerRuns.every(
+        (item: { environment?: { image?: string; digest?: string }; reproduction?: { image?: string; digest?: string } }) =>
+          item.environment?.image === undefined &&
+          item.environment?.digest === undefined &&
+          item.reproduction?.image === undefined &&
+          item.reproduction?.digest === undefined,
+      ),
+    ).toBe(true)
+  }, PAPER_RUN_INTEGRATION_TIMEOUT)
+
+  test("can rerun the current experiment protocol as a controlled PaperRun action", async () => {
+    const { workspace, home } = await fixtureProtocolWorkspace()
+    const run = await createPaperRun(
+      {
+        topic: "可手动重跑的实验协议",
+        workspace_path: workspace,
+        code_paths: ["src"],
+        target_profile: "generic-preprint",
+        language: "zh-CN",
+        budget_tier: "standard",
+        model_roles: testModelRoles(),
+      },
+      runtimeOptions(workspace, home),
+    )
+
+    const result = await runPaperRunExperimentProtocol(
+      run.run_id,
+      { dry_run: false, workspace_path: workspace, timeout_seconds: 30 },
+      runtimeOptions(workspace, home),
+    )
+
+    expect(result.status).toBe("succeeded")
+    expect(result.dry_run).toBe(false)
+    expect(result.host_runs.some((item) => item.command === "bun run typecheck" && item.status === "succeeded")).toBe(true)
+    expect(result.container_runs.some((item) => item.command === "bun run repro:container" && item.status === "succeeded")).toBe(true)
+    expect(result.report?.final_claims_allowed).toBe(true)
+    expect(result.artifact_ids.length).toBeGreaterThanOrEqual(4)
+    const updated = await previewPaperRun(run.run_id, runtimeOptions(workspace, home))
+    const updatedRun = await getPaperRunSnapshot(run.run_id, runtimeOptions(workspace, home))
+    expect(updated.snapshot.monitor?.experiment_runs?.some((item) => item.command === "bun run repro:container")).toBe(true)
+    expect(
+      updated.snapshot.monitor?.experiment_terminal_traces?.some(
+        (trace) => trace.command === "bun run typecheck" && trace.stdout_bytes >= 0 && trace.output_truncated === false,
+      ),
+    ).toBe(true)
+    expect(result.terminal_traces.length).toBeGreaterThanOrEqual(result.host_runs.length + result.container_runs.length)
+    expect(
+      result.terminal_traces.some(
+        (trace) =>
+          trace.command === "bun run typecheck" &&
+          trace.status === "succeeded" &&
+          trace.stdout_bytes >= 0 &&
+          trace.stderr_bytes >= 0 &&
+          trace.output_truncated === false,
+      ),
+    ).toBe(true)
+    expect(
+      updatedRun.events.some(
+        (event) => event.type === "experiment.command.started" && event.payload.command === "bun run typecheck",
+      ),
+    ).toBe(true)
+    expect(
+      updatedRun.events.some(
+        (event) => event.type === "experiment.command.completed" && event.payload.command === "bun run repro:container",
+      ),
+    ).toBe(true)
+    const traceArtifact = updatedRun.artifacts.find(
+      (artifact) => artifact.metadata?.artifact_schema === "ExperimentTerminalTrace.v1",
+    )
+    expect(traceArtifact).toBeDefined()
+    const traceData = JSON.parse(await readFile(path.join(run.run_dir, traceArtifact!.path), "utf8"))
+    expect(traceData.schema_version).toBe("ExperimentTerminalTrace.v1")
+    expect(traceData.cwd).toBe(workspace)
+    expect(traceData.stdout_excerpt.length).toBeLessThanOrEqual(64 * 1024)
+  }, PAPER_RUN_INTEGRATION_TIMEOUT)
+
+  test("successful protocol rerun clears the reproduction gate blocker", async () => {
+    const { workspace, home } = await fixtureRecoverableProtocolWorkspace()
+    await writeFile(path.join(workspace, "source-evidence.json"), JSON.stringify(verifiedSourceEvidence("修复容器复现后的代码论文"), null, 2))
+    const run = await createPaperRun(
+      {
+        topic: "修复容器复现后的代码论文",
+        workspace_path: workspace,
+        code_paths: ["src"],
+        paper_files: ["source-evidence.json"],
+        target_profile: "cjc-paper",
+        target_journal: "中国计算机学报",
+        language: "zh-CN",
+        budget_tier: "standard",
+        model_roles: testModelRoles(),
+      },
+      runtimeOptions(workspace, home),
+    )
+
+    expect(run.snapshot.export_state.status).toBe("blocked")
+    expect(run.snapshot.export_state.failed_checks).toContain("reproduction_failure")
+    await writeFile(
+      path.join(workspace, "package.json"),
+      JSON.stringify(
+        {
+          scripts: {
+            typecheck: "bun --version",
+            "baseline:toy": "bun --version",
+            "ablation:toy": "bun --version",
+            "repro:container": "bun --version",
+          },
+        },
+        null,
+        2,
+      ),
+    )
+
+    const result = await runPaperRunExperimentProtocol(
+      run.run_id,
+      { dry_run: false, workspace_path: workspace, timeout_seconds: 30 },
+      runtimeOptions(workspace, home),
+    )
+    const updatedRun = await getPaperRunSnapshot(run.run_id, runtimeOptions(workspace, home))
+
+    expect(result.status).toBe("succeeded")
+    expect(updatedRun.experiment_status.reproduction_gate).toBe("passed")
+    expect(updatedRun.export_state.failed_checks).not.toContain("reproduction_failure")
+    expect(updatedRun.export_state.status).toBe("blocked")
+    expect(updatedRun.export_state.failed_checks).toContain("final_export_missing")
+
+    const exported = await exportPaperRun(run.run_id, { forced: false }, runtimeOptions(workspace, home))
+    const exportedRun = await getPaperRunSnapshot(run.run_id, runtimeOptions(workspace, home))
+    expect(exported.status).toBe("final")
+    expect(exportedRun.export_state.status).toBe("final")
+    expect(exportedRun.export_state.failed_checks).toEqual([])
+    const exportedMarkdown = exported.files?.find((file) => file.format === "markdown" && file.status === "written")
+    expect(exportedMarkdown).toBeDefined()
+    const finalMarkdown = await readFile(path.join(run.run_dir, exportedMarkdown!.path), "utf8")
+    expect(finalMarkdown).not.toContain("missing-container-script")
+    expect(finalMarkdown).not.toContain("reproduction_failure")
+    expect(finalMarkdown).not.toContain("实验协议修复清单")
+    expect(finalMarkdown).not.toContain("实验启动包")
+    expect(finalMarkdown).not.toContain("missing_container_reproduction_runner")
+    expect(finalMarkdown).toContain("| 证据驱动工作流 | 本文方法 |")
+    expect(finalMarkdown).not.toContain("| proposed | 通过 | 1 | 失败 | 0 | -1 |")
+    expect(finalMarkdown).not.toContain("| container:paper-fucker/research-runner:fixture | proposed | 本文方法 | 失败 |")
+    expect(finalMarkdown).toContain("容器复现已通过")
+  }, PAPER_RUN_INTEGRATION_TIMEOUT)
+
+  test("applied starter scripts can become the rerun protocol after user completes them", async () => {
+    const { workspace, home } = await fixtureWorkspace()
+    await writeFile(
+      path.join(workspace, "source-evidence.json"),
+      JSON.stringify(verifiedSourceEvidence("从 starter 补齐实验协议的代码论文"), null, 2),
+    )
+    const options = runtimeOptions(workspace, home)
+    const run = await createPaperRun(
+      {
+        topic: "从 starter 补齐实验协议的代码论文",
+        workspace_path: workspace,
+        code_paths: ["src"],
+        paper_files: ["source-evidence.json"],
+        target_profile: "cjc-paper",
+        target_journal: "中国计算机学报",
+        language: "zh-CN",
+        budget_tier: "standard",
+        model_roles: testModelRoles(),
+      },
+      options,
+    )
+
+    expect(run.snapshot.export_state.status).toBe("blocked")
+    expect(run.snapshot.diagnostics.experiment_starter_pack?.status).toBe("ready")
+    const applied = await applyPaperRunExperimentStarterPack(
+      run.run_id,
+      { dry_run: false, update_package_json: true, workspace_path: workspace },
+      options,
+    )
+    expect(applied.status).toBe("ready")
+
+    await writeFile(
+      path.join(workspace, "package.json"),
+      JSON.stringify(
+        {
+          scripts: {
+            typecheck: "bun --version",
+            "baseline:starter": "bun --version",
+            "ablation:starter": "bun --version",
+            "repro:container:starter": "bun --version",
+          },
+        },
+        null,
+        2,
+      ),
+    )
+
+    const result = await runPaperRunExperimentProtocol(
+      run.run_id,
+      { dry_run: false, workspace_path: workspace, timeout_seconds: 30 },
+      options,
+    )
+
+    expect(result.status).toBe("succeeded")
+    expect(result.planned_commands.map((item) => item.command)).toContain("bun run baseline:starter")
+    expect(result.planned_commands.map((item) => item.command)).toContain("bun run ablation:starter")
+    expect(result.planned_commands.map((item) => item.command)).toContain("bun run repro:container:starter")
+    expect(result.host_runs.some((item) => item.command === "bun run baseline:starter" && item.status === "succeeded")).toBe(true)
+    expect(result.host_runs.some((item) => item.command === "bun run ablation:starter" && item.status === "succeeded")).toBe(true)
+    expect(result.container_runs.some((item) => item.command === "bun run repro:container:starter" && item.status === "succeeded")).toBe(true)
+    expect(result.report?.final_claims_allowed).toBe(true)
+
+    const exported = await exportPaperRun(run.run_id, { forced: false }, options)
+    expect(exported.status).toBe("final")
+    const exportedMarkdown = exported.files?.find((file) => file.format === "markdown" && file.status === "written")
+    expect(exportedMarkdown).toBeDefined()
+    const finalMarkdown = await readFile(path.join(run.run_dir, exportedMarkdown!.path), "utf8")
+    expect(finalMarkdown).toContain("baseline:starter")
+    expect(finalMarkdown).toContain("ablation:starter")
+    expect(finalMarkdown).toContain("容器复现已通过")
+    expect(finalMarkdown).not.toContain("Experiment Protocol Starter Pack")
+  }, PAPER_RUN_INTEGRATION_TIMEOUT)
+
+  test("code source ranges plus reproduction evidence can support a code-grounded final export", async () => {
     const { workspace, home } = await fixtureWorkspace()
     await writeFile(
       path.join(workspace, "experiment-evidence.json"),
@@ -230,13 +686,19 @@ describe("PaperRun default execution engine", () => {
         2,
       ),
     )
+    await writeFile(
+      path.join(workspace, "source-evidence.json"),
+      JSON.stringify(verifiedSourceEvidence("代码来源、验证文献与复现实验证据"), null, 2),
+    )
     const run = await createPaperRun(
       {
-        topic: "缺少验证来源时禁止最终导出",
+        topic: "代码来源、验证文献与复现实验证据",
         workspace_path: workspace,
         code_paths: ["src"],
+        paper_files: ["source-evidence.json"],
         experiment_logs: ["experiment-evidence.json"],
-        target_profile: "generic-preprint",
+        target_profile: "cjc-paper",
+        target_journal: "中国计算机学报",
         language: "zh-CN",
         budget_tier: "standard",
         model_roles: testModelRoles(),
@@ -244,8 +706,11 @@ describe("PaperRun default execution engine", () => {
       runtimeOptions(workspace, home),
     )
 
-    expect(run.snapshot.experiment_status.reproduction_gate).toBe("blocked")
-    expect(run.snapshot.export_state.status).toBe("blocked")
-    expect(run.snapshot.export_state.failed_checks).toContain("unsupported_claim")
-  })
+    expect(run.snapshot.source_ledger.some((source) => source.kind === "code")).toBe(true)
+    expect(run.snapshot.claim_ledger.every((claim) => claim.source_ids.some((sourceID) => sourceID.startsWith("material:code:")))).toBe(true)
+    expect(run.snapshot.experiment_status.reproduction_gate).toBe("passed")
+    expect(run.snapshot.export_state.status).toBe("final")
+    expect(run.snapshot.export_state.failed_checks).toEqual([])
+    expect(run.snapshot.export_state.artifact_ids).toEqual([...new Set(run.snapshot.export_state.artifact_ids)])
+  }, PAPER_RUN_INTEGRATION_TIMEOUT)
 })

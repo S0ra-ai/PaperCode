@@ -20,21 +20,8 @@ function slug(value: string) {
     .slice(0, 48)
 }
 
-function defaultLiteratureCandidates(topic: string, now: string): SourceCandidate[] {
-  const normalized = slug(topic) || "topic"
-  return [
-    {
-      source_id: `paper:${normalized}:survey`,
-      kind: "paper",
-      title: `${topic} open survey`,
-      url: `https://arxiv.org/search/?query=${encodeURIComponent(topic)}`,
-      provider: "arxiv",
-      license: { status: "clear", expression: "arXiv non-exclusive distribution" },
-      version: { value: "search-snapshot", retrieved_at: now },
-      verification: { status: "unverified", method: "search-seed", checked_at: now },
-      topics: [topic],
-    },
-  ]
+function defaultLiteratureCandidates(_topic: string, _now: string): SourceCandidate[] {
+  return []
 }
 
 function verificationFailure(source: SourceRecord) {

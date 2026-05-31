@@ -31,6 +31,65 @@ export type ExperimentCommand = {
   env?: Record<string, string>
 }
 
+export type ExperimentProtocolEntry = {
+  protocol_id: string
+  role: "proposed" | "baseline" | "ablation" | "container_reproduction"
+  label: string
+  command: ExperimentCommand
+  expected_metric: string
+  rationale: string
+  source_range?: {
+    path: string
+    start_line: number
+    end_line: number
+  }
+}
+
+export type ExperimentProtocol = {
+  schema_version: "ExperimentProtocol.v1"
+  discovered_from: "package_scripts" | "manifest" | "manual"
+  entries: ExperimentProtocolEntry[]
+  gaps: string[]
+}
+
+export type ExperimentProtocolGuidanceItem = {
+  gap: string
+  severity: "blocking" | "warning"
+  recommended_script: string
+  package_json_example?: Record<string, string>
+  rationale: string
+  next_action: string
+}
+
+export type ExperimentProtocolGuidance = {
+  schema_version: "ExperimentProtocolGuidance.v1"
+  created_at: string
+  status: "complete" | "needs_protocol"
+  summary: string
+  final_export_blocked: boolean
+  gaps: string[]
+  suggestions: ExperimentProtocolGuidanceItem[]
+}
+
+export type ExperimentProtocolStarterFile = {
+  path: string
+  purpose: string
+  content: string
+  mime_type?: string
+  artifact_id?: string
+  artifact_path?: string
+}
+
+export type ExperimentProtocolStarterPack = {
+  schema_version: "ExperimentProtocolStarterPack.v1"
+  created_at: string
+  status: "ready" | "not_needed"
+  summary: string
+  package_json_scripts: Record<string, string>
+  files: ExperimentProtocolStarterFile[]
+  next_steps: string[]
+}
+
 export type ExperimentSpec = {
   experiment_id: string
   label: string
@@ -93,6 +152,7 @@ export type ExperimentFinding = {
     | "resource_exceeded"
     | "container_reproduction_failed"
     | "metric_missing"
+    | "experiment_protocol_incomplete"
   severity: "info" | "warning" | "blocking"
   message: string
   experiment_ids: string[]
@@ -123,6 +183,7 @@ export type ResultReport = {
 
 export type ExperimentRunnerResult = {
   status: ExperimentRunStatus
+  command?: ExperimentCommand
   metrics: ExperimentMetric[]
   stdout: string
   stderr: string

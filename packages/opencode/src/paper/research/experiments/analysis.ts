@@ -71,6 +71,22 @@ export function analyzeExperimentResults(input: ExperimentAnalysisInput): Result
       }, undefined)
 
       const findings: ExperimentFinding[] = [...blockingRunFindings(input.host_runs), ...blockingRunFindings(input.container_runs)]
+      if (input.plan.baselines.length === 0) {
+        findings.push({
+          category: "experiment_protocol_incomplete",
+          severity: "blocking",
+          message: "No baseline runner is declared; final research claims require at least one explicit baseline protocol.",
+          experiment_ids: [input.plan.proposed.experiment_id],
+        })
+      }
+      if (input.plan.ablations.length === 0) {
+        findings.push({
+          category: "experiment_protocol_incomplete",
+          severity: "warning",
+          message: "No ablation runner is declared; keep contribution claims narrow until ablation evidence exists.",
+          experiment_ids: [input.plan.proposed.experiment_id],
+        })
+      }
       if (typeof proposedValue !== "number") {
         findings.push({
           category: "metric_missing",

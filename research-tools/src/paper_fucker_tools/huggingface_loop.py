@@ -1,8 +1,8 @@
 """Hugging Face research loop bridge.
 
-This module keeps fixture records available only when tests or callers pass an
-explicit ``fixture`` payload. Product calls never synthesize Hugging Face records
-when live access is not authorized; they return a blocked diagnostic instead.
+Product calls never synthesize Hugging Face records when live access is not
+authorized; they return a blocked diagnostic instead. Tests may pass explicit
+``test_records`` records, but only with ``allow_test_records=True``.
 """
 
 from __future__ import annotations
@@ -15,74 +15,6 @@ from typing import Any
 
 
 HF_API_ROOT = "https://huggingface.co/api"
-
-
-def _fixture_record(kind: str, query: str) -> dict[str, Any]:
-    if kind == "papers":
-        return {
-            "schema_version": "HFPaperRecord.v1",
-            "paper_id": f"paper-fixture:{query}",
-            "title": f"HF paper fixture for {query}",
-            "url": f"https://huggingface.co/papers?q={urllib.parse.quote(query)}",
-            "summary": "Fixture paper metadata for offline research-loop validation.",
-            "authors": ["paper_fucker fixture"],
-            "source_verified": True,
-            "trust": "local_fixture",
-        }
-    if kind == "datasets":
-        return {
-            "schema_version": "HFDatasetRecord.v1",
-            "dataset_id": f"dataset-fixture/{query.replace(' ', '-')}",
-            "title": f"HF dataset fixture for {query}",
-            "url": f"https://huggingface.co/datasets/dataset-fixture/{urllib.parse.quote(query.replace(' ', '-'))}",
-            "license": "apache-2.0",
-            "version": "fixture",
-            "splits": ["train", "validation"],
-            "task_categories": ["text-classification"],
-            "source_verified": True,
-            "trust": "local_fixture",
-        }
-    if kind == "models":
-        return {
-            "schema_version": "HFModelRecord.v1",
-            "model_id": f"model-fixture/{query.replace(' ', '-')}",
-            "title": f"HF model fixture for {query}",
-            "url": f"https://huggingface.co/model-fixture/{urllib.parse.quote(query.replace(' ', '-'))}",
-            "pipeline_tag": "text-generation",
-            "license": "apache-2.0",
-            "source_verified": True,
-            "trust": "local_fixture",
-        }
-    if kind == "spaces":
-        return {
-            "schema_version": "HFSpaceRecord.v1",
-            "space_id": f"space-fixture/{query.replace(' ', '-')}",
-            "title": f"HF Space fixture for {query}",
-            "url": f"https://huggingface.co/spaces/space-fixture/{urllib.parse.quote(query.replace(' ', '-'))}",
-            "sdk": "gradio",
-            "source_verified": True,
-            "trust": "local_fixture",
-        }
-    if kind == "jobs":
-        return {
-            "schema_version": "HFJobRecord.v1",
-            "job_id": f"job-fixture-{query.replace(' ', '-')}",
-            "title": f"HF job fixture for {query}",
-            "status": "approval_required",
-            "command": ["python", "train.py", "--fixture", query],
-            "metrics": [{"name": "accuracy", "value": 0.88, "direction": "higher_better"}],
-            "cost_usd": 0.0,
-            "source_verified": True,
-            "trust": "local_fixture",
-        }
-    return {
-        "schema_version": "HFTrackioRecord.v1",
-        "run_id": f"trackio-fixture-{query.replace(' ', '-')}",
-        "title": f"HF Trackio fixture for {query}",
-        "metrics": [{"name": "loss", "value": 0.42, "step": 1}],
-        "source_verified": True,
-        "trust": "local_fixture",
-    }
 
 
 def _hf_get(path: str, params: dict[str, Any] | None = None, token: str | None = None) -> Any:
@@ -237,15 +169,25 @@ def hf_research_probe(input_data: dict[str, Any]) -> dict[str, Any]:
     kind = str(input_data.get("kind", "datasets"))
     query = str(input_data.get("query", input_data.get("topic", ""))).strip() or "paper_fucker"
     limit = int(input_data.get("limit", 3))
-    fixture = input_data.get("fixture")
-    if isinstance(fixture, dict):
-        records = [fixture]
-        mode = "fixture"
-        diagnostics: list[str] = []
-    elif isinstance(fixture, list):
-        records = [item for item in fixture if isinstance(item, dict)]
-        mode = "fixture"
-        diagnostics = []
+    test_records = input_data.get("test_records")
+    if isinstance(test_records, dict):
+        if not bool(input_data.get("allow_test_records", False)):
+            records = []
+            mode = "blocked"
+            diagnostics: list[str] = ["test_records_require_allow_test_records"]
+        else:
+            records = [test_records]
+            mode = "test_records"
+            diagnostics = []
+    elif isinstance(test_records, list):
+        if not bool(input_data.get("allow_test_records", False)):
+            records = []
+            mode = "blocked"
+            diagnostics = ["test_records_require_allow_test_records"]
+        else:
+            records = [item for item in test_records if isinstance(item, dict)]
+            mode = "test_records"
+            diagnostics = []
     elif kind == "trackio" and (record := _trackio_record(input_data, query)) is not None:
         records = [record]
         mode = "provided"
