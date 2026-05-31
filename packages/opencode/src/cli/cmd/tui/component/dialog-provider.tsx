@@ -75,7 +75,12 @@ export function normalizeCustomProviderID(value: string) {
   return providerID
 }
 
-export function createDialogProviderOptions() {
+export function filterProviderOptions(options: ProviderOption[], providerID?: string) {
+  if (!providerID) return options
+  return options.filter((provider) => provider.type === "provider" && provider.providerID === providerID)
+}
+
+export function createDialogProviderOptions(input: { providerID?: string } = {}) {
   const sync = useSync()
   const dialog = useDialog()
   const sdk = useSDK()
@@ -107,7 +112,7 @@ export function createDialogProviderOptions() {
 
   const options = createMemo(() => {
     return pipe(
-      providerOptions(sync.data.provider_next.all),
+      filterProviderOptions(providerOptions(sync.data.provider_next.all), input.providerID),
       map((provider) => {
         if (provider.type === "custom") {
           return {
@@ -217,8 +222,8 @@ export function createDialogProviderOptions() {
   return options
 }
 
-export function DialogProvider() {
-  const options = createDialogProviderOptions()
+export function DialogProvider(props: { providerID?: string } = {}) {
+  const options = createDialogProviderOptions({ providerID: props.providerID })
   return <DialogSelect title="添加 provider" options={options()} />
 }
 

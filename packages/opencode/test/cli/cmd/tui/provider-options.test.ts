@@ -1,5 +1,9 @@
 import { describe, expect, test } from "bun:test"
-import { normalizeCustomProviderID, providerOptions } from "../../../../src/cli/cmd/tui/component/dialog-provider"
+import {
+  filterProviderOptions,
+  normalizeCustomProviderID,
+  providerOptions,
+} from "../../../../src/cli/cmd/tui/component/dialog-provider"
 
 describe("providerOptions", () => {
   test("includes a synthetic Other option for custom providers", () => {
@@ -25,5 +29,21 @@ describe("providerOptions", () => {
     expect(normalizeCustomProviderID("@ai-sdk/custom-provider")).toBe("custom-provider")
     expect(normalizeCustomProviderID("-custom-provider")).toBeUndefined()
     expect(normalizeCustomProviderID("Custom Provider")).toBeUndefined()
+  })
+
+  test("filters to a selected subscription provider without exposing Other", () => {
+    const options = providerOptions([
+      { id: "openai", name: "ChatGPT" },
+      { id: "github-copilot", name: "GitHub Copilot" },
+      { id: "anthropic", name: "Anthropic" },
+    ])
+
+    expect(filterProviderOptions(options, "github-copilot")).toEqual([
+      expect.objectContaining({
+        type: "provider",
+        providerID: "github-copilot",
+        title: "GitHub Copilot",
+      }),
+    ])
   })
 })
