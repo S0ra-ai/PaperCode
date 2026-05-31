@@ -2,21 +2,21 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.172-dev
+:version       0.13.0.173-dev
 :last_update   2026/05/31
 
 :history
 
-    0.13.0.172-dev - 2026/05/31 (fb07ba3a) [fix/mcp-tool-binding-test-isolation]
-        :brief live source discovery 预算配置增加硬上限
+    0.13.0.173-dev - 2026/05/31 (dc752ad1) [fix/mcp-tool-binding-test-isolation]
+        :brief live benchmark 失败 attempt 结构化落盘
         :fix
-            - fix(benchmark): PAPER_FUCKER_BENCHMARK_* 预算环境变量改为 bounded int 解析，非法值回退默认值
-            - fix(benchmark): arXiv fetch、attempts、query budget、source budget 和验证候选数均设置最小/最大边界
-            - fix(benchmark): 防止错误配置把 live source discovery 扩大成无界验证流程
+            - fix(benchmark): live-paper-quality-benchmark 注册 uncaughtException 和 unhandledRejection 处理器
+            - fix(benchmark): 失败 attempt 写入 attempt-error.json，包含版本、场景、attempt 目录、发布 summary 路径和错误堆栈
+            - fix(benchmark): 失败时更新 last-failed-attempt.txt，但不发布为成功 paperrun-summary.json
         :test
-            - test(benchmark): 覆盖 benchmarkBoundedIntEnv、预算硬上限和 source budget 最大 300000ms
+            - test(benchmark): 覆盖 failed attempt error schema、last-failed-attempt 与失败不发布成功 summary
         :changelog
-            - docs(changelog): 0.13.0.171 开发历史移入 docs/changelog/v0/0.13.0.171.CHANGELOG
+            - docs(changelog): 0.13.0.172 开发历史移入 docs/changelog/v0/0.13.0.172.CHANGELOG
         :checks
             - targeted tests: npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/live-benchmark-quality.test.ts --timeout 60000 passed
             - typecheck: npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
