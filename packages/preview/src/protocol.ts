@@ -158,6 +158,9 @@ export type PreviewMonitorSummary = {
     command: string
     exit_code: number
     wall_time_seconds: number
+    peak_memory_mb?: number
+    gpu_hours?: number
+    cost_usd?: number
     metrics: Array<{ name: string; value: number; unit?: string }>
     stdout_excerpt?: string
     stderr_excerpt?: string

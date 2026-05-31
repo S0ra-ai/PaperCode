@@ -484,11 +484,14 @@ describe("PaperRun default execution engine", () => {
     expect(result.dry_run).toBe(false)
     expect(result.host_runs.some((item) => item.command === "bun run typecheck" && item.status === "succeeded")).toBe(true)
     expect(result.container_runs.some((item) => item.command === "bun run repro:container" && item.status === "succeeded")).toBe(true)
+    expect(result.host_runs.every((item) => "peak_memory_mb" in item && "gpu_hours" in item)).toBe(true)
+    expect(result.container_runs.every((item) => "peak_memory_mb" in item && "gpu_hours" in item)).toBe(true)
     expect(result.report?.final_claims_allowed).toBe(true)
     expect(result.artifact_ids.length).toBeGreaterThanOrEqual(4)
     const updated = await previewPaperRun(run.run_id, runtimeOptions(workspace, home))
     const updatedRun = await getPaperRunSnapshot(run.run_id, runtimeOptions(workspace, home))
     expect(updated.snapshot.monitor?.experiment_runs?.some((item) => item.command === "bun run repro:container")).toBe(true)
+    expect(updated.snapshot.monitor?.experiment_runs?.every((item) => "peak_memory_mb" in item && "gpu_hours" in item)).toBe(true)
     expect(
       updated.snapshot.monitor?.experiment_terminal_traces?.some(
         (trace) => trace.command === "bun run typecheck" && trace.stdout_bytes >= 0 && trace.output_truncated === false,

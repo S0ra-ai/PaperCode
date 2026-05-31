@@ -36,6 +36,21 @@ function badge(value) {
   return `<span class="badge ${tone}">${escapeHtml(normalized)}</span>`
 }
 
+function formatResourceValue(value, suffix) {
+  const numeric = Number(value)
+  if (!Number.isFinite(numeric)) return "未采集"
+  if (numeric === 0) return `0${suffix}`
+  return `${numeric.toFixed(4).replace(/\.?0+$/, "")}${suffix}`
+}
+
+function experimentRunResources(run) {
+  return [
+    `mem ${formatResourceValue(run.peak_memory_mb, "MB")}`,
+    `gpu ${formatResourceValue(run.gpu_hours, " GPU h")}`,
+    Number.isFinite(Number(run.cost_usd)) ? `cost $${Number(run.cost_usd).toFixed(4)}` : undefined,
+  ].filter(Boolean).join(" · ")
+}
+
 function artifact(snapshot, kind) {
   const item = snapshot.artifacts[kind]
   if (!item) return `<div class="empty">尚未生成 ${kind} artifact。</div>`
@@ -327,7 +342,7 @@ function renderGate(snapshot) {
               (run) => `<section class="list-row">
                 <strong>${escapeHtml(run.environment)} · ${escapeHtml(run.experiment_id)} · ${escapeHtml(run.status)}</strong>
                 <p><code>${escapeHtml(run.command)}</code></p>
-                <small>exit ${escapeHtml(run.exit_code)} · ${Number(run.wall_time_seconds || 0).toFixed(3)}s · ${run.metrics
+                <small>exit ${escapeHtml(run.exit_code)} · ${Number(run.wall_time_seconds || 0).toFixed(3)}s · ${escapeHtml(experimentRunResources(run))} · ${run.metrics
                   .map((metric) => `${escapeHtml(metric.name)}=${escapeHtml(metric.value)}${metric.unit ? ` ${escapeHtml(metric.unit)}` : ""}`)
                   .join(", ")}</small>
               </section>`,
@@ -377,7 +392,7 @@ export function renderExperimentRunsPane(monitor) {
                 (run) => `<article class="experiment-run">
                   <div>${badge(run.status)} <strong>${escapeHtml(run.environment)} · ${escapeHtml(run.experiment_id)}</strong></div>
                   <p><code>${escapeHtml(run.command)}</code></p>
-                  <small>${escapeHtml(run.role)} · exit ${escapeHtml(run.exit_code)} · ${Number(run.wall_time_seconds || 0).toFixed(3)}s</small>
+                  <small>${escapeHtml(run.role)} · exit ${escapeHtml(run.exit_code)} · ${Number(run.wall_time_seconds || 0).toFixed(3)}s · ${escapeHtml(experimentRunResources(run))}</small>
                   <small>${(run.metrics ?? [])
                     .map((metric) => `${escapeHtml(metric.name)}=${escapeHtml(metric.value)}${metric.unit ? ` ${escapeHtml(metric.unit)}` : ""}`)
                     .join(", ")}</small>

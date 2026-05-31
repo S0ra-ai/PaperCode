@@ -1190,16 +1190,30 @@ function experimentRunSummary(input: ComposeDraftPaperInput) {
       displayRunStatus(run.status),
       metrics,
       `${run.resource_usage.wall_time_seconds}s`,
+      displayMemoryUsage(run.resource_usage.peak_memory_mb),
+      displayGpuUsage(run.resource_usage.gpu_hours),
     ]
   })
   return rows.length > 0
     ? [
-        "表 3 汇总本机与容器实验的状态、主指标和耗时，用于说明复现一致性。",
-        "该摘要只保留解释结果所需的信息：环境、实验角色、状态、主指标和耗时。这样可以让读者直接判断复现是否支持正文结论，而不把可复现性章节变成运行记录清单。若状态或指标不一致，相应结论应降级为探索性观察。",
+        "表 3 汇总本机与容器实验的状态、主指标、耗时和资源记录，用于说明复现一致性。",
+        "该摘要只保留解释结果所需的信息：环境、实验角色、状态、主指标、耗时、峰值内存和 GPU 用量。这样可以让读者直接判断复现是否支持正文结论，并看清资源证据是否完整。若状态或指标不一致，相应结论应降级为探索性观察。",
         "",
-        markdownTable(["环境", "实验", "角色", "状态", "指标", "耗时"], rows),
+        markdownTable(["环境", "实验", "角色", "状态", "指标", "耗时", "峰值内存", "GPU 用量"], rows),
       ].join("\n")
     : "没有可展示的实验执行摘要。"
+}
+
+function displayMemoryUsage(value: number | undefined) {
+  if (typeof value !== "number" || !Number.isFinite(value)) return "未采集"
+  if (value >= 1024) return `${formatMetricValue(value / 1024)}GB`
+  return `${formatMetricValue(value)}MB`
+}
+
+function displayGpuUsage(value: number | undefined) {
+  if (typeof value !== "number" || !Number.isFinite(value)) return "未采集"
+  if (value === 0) return "0 GPU h"
+  return `${formatMetricValue(value)} GPU h`
 }
 
 function experimentResourceBoundarySummary(input: ComposeDraftPaperInput) {

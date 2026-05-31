@@ -430,6 +430,9 @@ export interface PaperExperimentProtocolRunSummary {
   command: string
   exit_code: number
   wall_time_seconds: number
+  peak_memory_mb?: number
+  gpu_hours?: number
+  cost_usd?: number
   metrics: Array<{ name: string; value: number; unit?: string }>
 }
 
@@ -1644,6 +1647,9 @@ function summarizeExperimentRun(run: ExperimentRun): PaperExperimentProtocolRunS
     command: experimentCommandText(run.command),
     exit_code: run.exit_code,
     wall_time_seconds: run.resource_usage.wall_time_seconds,
+    peak_memory_mb: run.resource_usage.peak_memory_mb,
+    gpu_hours: run.resource_usage.gpu_hours,
+    cost_usd: run.resource_usage.cost_usd,
     metrics: run.metrics.map((metric) => ({ name: metric.name, value: metric.value, unit: metric.unit })),
   }
 }
@@ -2134,6 +2140,9 @@ function createPreviewMonitor(snapshot: PaperRunSnapshot): PreviewMonitorSummary
       command: run.command.argv.length === 1 ? run.command.argv[0] : run.command.argv.join(" "),
       exit_code: run.exit_code,
       wall_time_seconds: run.resource_usage.wall_time_seconds,
+      peak_memory_mb: run.resource_usage.peak_memory_mb,
+      gpu_hours: run.resource_usage.gpu_hours,
+      cost_usd: run.resource_usage.cost_usd,
       metrics: run.metrics.map((metric) => ({
         name: metric.name,
         value: metric.value,
