@@ -1,0 +1,23 @@
+:project       paper_fucker - 可验证论文研究自动化系统
+:author        k1d (https://github.com/ZhuchenZhong)
+:repo
+:desc          0.13.0.147 开发历史归档
+:version       0.13.0.147-dev
+:last_update   2026/05/31
+
+:history
+
+    0.13.0.147-dev - 2026/05/31 (117b6d73) [fix/mcp-tool-binding-test-isolation]
+        :brief 禁止 disabled 或 needs_auth provider 的历史 allowlist 继续进入模型路由
+        :model
+            - fix(models): model inventory 归一化时按 provider 注册状态过滤 allowlist，disabled、needs_auth 或不支持的旧注册不能继续被 routePaperModel 使用
+            - fix(models): provider 不可用后同步清理 decision model、backup decision model、role overrides 和 forced stage policy，candidate.allowed 也回落为 false
+            - test(models): model-discovery 增加 disabled/auth-pending provider 回归，确认历史无注册 allowlist 仍可作为兼容恢复路径保留
+        :audit
+            - report(audit): 刷新 autonomous product audit，确认版本同步、changelog 形态、开发手册、live evidence、public surface 和 Git Flow 均通过
+        :changelog
+            - docs(changelog): 0.13.0.146 开发历史移入 docs/changelog/v0/0.13.0.146.CHANGELOG
+        :checks
+            - targeted tests: packages/opencode model-discovery.test
+            - typecheck: packages/opencode typecheck
+            - audit: scripts/autonomous-product-audit.ps1 -AllowActiveTask

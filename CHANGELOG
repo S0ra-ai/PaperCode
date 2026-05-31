@@ -2,22 +2,19 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.147-dev
+:version       0.13.0.148-dev
 :last_update   2026/05/31
 
 :history
 
-    0.13.0.147-dev - 2026/05/31 (117b6d73) [fix/mcp-tool-binding-test-isolation]
-        :brief 禁止 disabled 或 needs_auth provider 的历史 allowlist 继续进入模型路由
-        :model
-            - fix(models): model inventory 归一化时按 provider 注册状态过滤 allowlist，disabled、needs_auth 或不支持的旧注册不能继续被 routePaperModel 使用
-            - fix(models): provider 不可用后同步清理 decision model、backup decision model、role overrides 和 forced stage policy，candidate.allowed 也回落为 false
-            - test(models): model-discovery 增加 disabled/auth-pending provider 回归，确认历史无注册 allowlist 仍可作为兼容恢复路径保留
-        :audit
-            - report(audit): 刷新 autonomous product audit，确认版本同步、changelog 形态、开发手册、live evidence、public surface 和 Git Flow 均通过
+    0.13.0.148-dev - 2026/05/31 (1ac40f69) [fix/mcp-tool-binding-test-isolation]
+        :brief 开发手册补齐 ReadTheDocs 风格导航与交互
+        :docs
+            - docs(development): 多页 HTML 手册增加顶部工具条，支持目录收起、正文展开、浅色/深色切换和查看本页源码
+            - docs(development): 文档搜索支持 / 快捷键聚焦，代码块增加复制按钮，便于按模块、函数和流程查阅
+            - docs(development): 样式补齐 sticky 工具条、响应式宽正文、亮色主题和代码块操作，手册结构继续以开发为主并保留使用入口
         :changelog
-            - docs(changelog): 0.13.0.146 开发历史移入 docs/changelog/v0/0.13.0.146.CHANGELOG
+            - docs(changelog): 0.13.0.147 开发历史移入 docs/changelog/v0/0.13.0.147.CHANGELOG
         :checks
-            - targeted tests: packages/opencode model-discovery.test
-            - typecheck: packages/opencode typecheck
-            - audit: scripts/autonomous-product-audit.ps1 -AllowActiveTask
+            - static checks: node --check docs/development/assets/manual.js
+            - static checks: git diff --check docs/development/assets/manual.js docs/development/assets/style.css
