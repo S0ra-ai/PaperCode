@@ -100,6 +100,17 @@ function markdownSection(markdown: string, title: string) {
   return next < 0 ? markdown.slice(bodyStart).trim() : markdown.slice(bodyStart, bodyStart + next).trim()
 }
 
+function buildPlainTestSection(section_id: string, title: string, markdown: string) {
+  return {
+    section_id,
+    title,
+    level: 2,
+    markdown,
+    claim_ids: [],
+    source_ranges: [],
+  }
+}
+
 const renderers: ExportRenderer = {
   pdf: async () => ({ status: "written", bytes: new TextEncoder().encode("%PDF-1.7\n% authoring test renderer\n"), diagnostics: [] }),
   docx: async () => ({ status: "written", bytes: new Uint8Array([0x50, 0x4b, 0x03, 0x04, 0x14, 0x00]), diagnostics: [] }),
@@ -2493,11 +2504,72 @@ describe("paper authoring loop", () => {
     expect(formatted).toContain("This paper presents an Evidence-Constrained Candidate Paper Ranking Method")
     expect(formatted).toContain("**Keywords**: candidate paper ranking; evidence coverage; ranking nDCG@3; lexical matching baseline; container reproduction")
     expect(formatted).toContain("## 3 方法")
+    expect(formatted).toContain("### 4.1 代码可用性")
+    expect(formatted).toContain("### 4.2 实验协议")
+    expect(formatted).toContain("#### 4.2.1 指标")
+    expect(formatted).toContain("#### 4.2.2 基线")
+    expect(formatted).toContain("### 5.1 主结果")
+    expect(formatted).toContain("### 5.2 结果表")
+    expect(formatted).toContain("## 6 可复现性")
+    expect(formatted).toContain("### 6.1 实验环境声明")
+    expect(formatted).toContain("## 9 结论")
+    expect(formatted).not.toContain("### 指标")
+    expect(formatted).not.toContain("### 5.1 可复现性")
     expect(formatted).not.toContain("### 3.1 方法")
     expect(formatted).not.toContain("# A Verifiable Method Study for Computer-System Research")
     expect(formatted.indexOf("## 英文摘要")).toBeLessThan(formatted.indexOf("## 1 引言"))
     expect(formatted.indexOf("## 2 相关工作")).toBeLessThan(formatted.indexOf("## 3 方法"))
     expect(formatted.indexOf("## 3 方法")).toBeLessThan(formatted.indexOf("## 4 实验设置与材料"))
+    expect(formatted.indexOf("### 4.1 代码可用性")).toBeLessThan(formatted.indexOf("### 4.2 实验协议"))
+    expect(formatted.indexOf("### 5.2 结果表")).toBeLessThan(formatted.indexOf("## 6 可复现性"))
+  })
+
+  test("numbers raw CJC child headings without touching fenced code", () => {
+    const draft = {
+      schema_version: "DraftPaper.v1" as const,
+      draft_id: "draft-cjc-headings",
+      title: "CJC Heading Check",
+      created_at: now,
+      version: 1,
+      sections: [
+        buildPlainTestSection("author_information", "作者信息", ""),
+        buildPlainTestSection("abstract", "摘要", "摘要。"),
+        buildPlainTestSection("keywords", "关键词", "排序；复现"),
+        buildPlainTestSection(
+          "method",
+          "方法",
+          [
+            "### 排序接口",
+            "",
+            "正文。",
+            "",
+            "```text",
+            "### 代码块标题",
+            "```",
+            "",
+            "### 评分函数",
+          ].join("\n"),
+        ),
+        buildPlainTestSection("appendix_evidence_trace", "附录 A", "### 实现定位\n\n附录正文。"),
+      ],
+      markdown: "",
+      claim_ids: [],
+      applied_guidance_ids: [],
+    }
+    const formatted = formatDraftPaperForProfile(draft, {
+      target_profile: "cjc-paper",
+      ledger: composeClaimLedger({ topic: "CJC Heading Check", claims: [], now }),
+      data_plan: dataPlan(),
+      result_report: resultReport(),
+    })
+
+    expect(formatted).toContain("### 3.1 排序接口")
+    expect(formatted).toContain("### 3.2 评分函数")
+    expect(formatted).toContain("### 附录 A.1 实现定位")
+    expect(formatted).toContain("### 代码块标题")
+    expect(formatted).not.toContain("### 排序接口")
+    expect(formatted).not.toContain("### 评分函数")
+    expect(formatted).not.toContain("### 实现定位")
   })
 
   test("does not invent default literature candidates without verified sources", () => {
