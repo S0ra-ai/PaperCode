@@ -2,23 +2,24 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.141-dev
+:version       0.13.0.142-dev
 :last_update   2026/05/31
 
 :history
 
-    0.13.0.141-dev - 2026/05/31 (a974e709) [fix/mcp-tool-binding-test-isolation]
-        :brief TaskFlow 计划状态同步到 137 个完成任务，并归档测试隔离审计报告
-        :taskflow
-            - docs(taskflow): 新增并固化 16 个已完成 confirmed 任务，覆盖论文生成、实验协议、容器/本地执行、订阅 provider、MPL-2.0 与开发手册
-            - docs(taskflow): .plan/index.yaml 计数同步为 done 137、completed 137、无 confirmed/ideas/in_progress 队列
-            - docs(taskflow): taskflow validate --plan-dir .plan 全量通过，确认新增任务语义与依赖图有效
+    0.13.0.142-dev - 2026/05/31 (eef8e551) [fix/mcp-tool-binding-test-isolation]
+        :brief strict live acceptance 刷新当前验收报告，并修复 changelog 归档检查的版本硬编码
+        :acceptance
+            - fix(strict): changelog-split-archives 改为校验 root :version 与唯一活跃 history header 一致，不再硬编码旧 0.8.x 线
+            - test(strict): strict-acceptance 单测阻断 changelog archive 检查回退到旧版本硬编码
+            - test(secret): tracked secret 示例报告中的 provider key 形状改为 <provider-api-key> 占位，避免被宽口径扫描误判
         :report
-            - docs(report): 新增 reports/test-isolation-audit.md，记录 MCP 工具绑定、provider/model 测试隔离和订阅 provider 路由风险边界
-        :test
-            - test(secret): 新增计划文件与测试隔离报告未命中 sk-*、GitHub token 或 Google API key 模式
+            - test(provider): provider matrix smoke 刷新到 2026-05-31，DeepSeek provider /models 与最小 chat completion 通过
+            - test(strict): strict-live-focused 刷新到 2026-05-31，32 项检查全部通过，包含 topic/code/final 三条 PaperRun benchmark
+            - test(preview): live-preview-browser-smoke 刷新浏览器级 token、只读、SSE、experiment、terminal 和 machine environment 证据
         :changelog
-            - docs(changelog): 0.13.0.140 开发历史移入 docs/changelog/v0/0.13.0.140.CHANGELOG
+            - docs(changelog): 0.13.0.141 开发历史移入 docs/changelog/v0/0.13.0.141.CHANGELOG
         :checks
-            - taskflow validate --plan-dir .plan
-            - static checks: sensitive token rg scan 与 git diff --check
+            - targeted tests: packages/opencode strict-acceptance.test
+            - live checks: scripts/provider-matrix-smoke.ps1 与 scripts/strict-acceptance.ps1 -CheckTimeoutSeconds 900
+            - static checks: README version、CHANGELOG format、宽口径 tracked sk-* scan 与 git diff --check
