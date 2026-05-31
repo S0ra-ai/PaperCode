@@ -1,0 +1,31 @@
+:project       paper_fucker - 可验证论文研究自动化系统
+:author        k1d (https://github.com/ZhuchenZhong)
+:repo
+:desc          记录项目的重大变更和版本历史
+:version       0.13.0.159-dev
+:last_update   2026/05/31
+
+:history
+
+    0.13.0.159-dev - 2026/05/31 (06a12b57) [fix/mcp-tool-binding-test-isolation]
+        :brief 中国计算机学报正文小标题编号与开发手册风格确认
+        :fix
+            - fix(authoring): CJC profile 对未编号的小标题按父章节补齐层级编号，避免 PDF/目录出现裸小标题
+            - fix(authoring): 实验协议调整为 4.2，可复现性调整为第 6 节，避免 4.1 与 5.1 重复编号
+            - fix(authoring): 代码块内 Markdown 标题保持原样，不参与 CJC 小标题编号
+        :docs
+            - docs(development): 开发手册继续按 ReadTheDocs 风格维护，主线是开发指南、架构、接口契约、PaperRun 流程、关键函数和使用指南
+            - docs(readme): README 版本同步到 0.13.0.159-dev，保留开发手册入口
+        :test
+            - test(authoring): 覆盖 CJC 4.1/4.2、5.x、6.x 与 9 结论的单调编号
+            - test(authoring): 覆盖原始小标题自动编号，并确认 fenced code 内标题不被改写
+            - test(strict): live provider smoke 对瞬时网络发送失败增加 3 次退避重试
+            - test(audit): autonomous-product-audit 新增 cjc-format-boundary，防止 CJC 章节编号回退
+            - test(acceptance): strict-acceptance 单测覆盖 cjc-format-boundary 审计项
+        :changelog
+            - docs(changelog): 0.13.0.158 开发历史移入 docs/changelog/v0/0.13.0.158.CHANGELOG
+        :checks
+            - targeted tests: packages/opencode authoring and strict-acceptance tests
+            - typecheck: npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - provider: scripts/provider-matrix-smoke.ps1
+            - audit: scripts/autonomous-product-audit.ps1 -AllowActiveTask
