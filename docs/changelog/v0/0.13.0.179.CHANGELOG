@@ -1,0 +1,24 @@
+:project       paper_fucker - 可验证论文研究自动化系统
+:author        k1d (https://github.com/ZhuchenZhong)
+:repo
+:desc          0.13.0.179 开发历史归档
+:version       0.13.0.179-dev
+:last_update   2026/05/31
+
+:history
+
+    0.13.0.179-dev - 2026/05/31 (e96c82e5) [fix/mcp-tool-binding-test-isolation]
+        :brief CJC 表格长文本列宽提示增强
+        :fix
+            - fix(authoring): CJC profile formatting 为 Markdown pipe table separator 写入 CJK-aware 列宽提示，Pandoc LaTeX 会给长叙述列更宽比例
+            - fix(authoring): 研究问题、贡献、结果和效度威胁等表格不再让短编号列与长问题/内容列均分宽度
+        :test
+            - test(authoring): 新增 CJC 长叙述列宽提示回归，断言问题列宽度明显大于短编号列
+        :docs
+            - docs(report): reports/live-paper-generation-review.md 记录 CJC 表格列宽复审与剩余格式打磨项
+        :changelog
+            - docs(changelog): README 当前版本同步到 0.13.0.179-dev
+            - docs(changelog): 0.13.0.178 开发历史移入 docs/changelog/v0/0.13.0.178.CHANGELOG
+        :checks
+            - targeted tests: npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/export-pipeline.test.ts --timeout 60000 passed
+            - typecheck: npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
