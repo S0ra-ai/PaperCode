@@ -1237,7 +1237,7 @@ function experimentResourceBoundarySummary(input: ComposeDraftPaperInput) {
   const recordedText = recorded.length > 0 ? formatResourceList(recorded) : "运行状态"
   const missingText =
     missing.length > 0
-      ? `；未登记${formatResourceList(missing)}，因此不能把资源结论外推到未记录维度`
+      ? `；${formatResourceList(missing)}未采集，因此不能把资源结论外推到未记录维度`
       : "，资源记录覆盖当前可用运行维度"
   return `资源记录边界：当前实验记录包含${recordedText}${missingText}。`
 }
@@ -2507,7 +2507,7 @@ function rankingIntroductionSummary(input: ComposeDraftPaperInput) {
       ? `当前结果显示，本文方法为 ${displayMetricValue(result.primary_metric, result.proposed.value)}，词项匹配基线为 ${displayMetricValue(result.primary_metric, result.best_baseline.value)}，绝对差值为 ${formatMetricValue(Math.abs(result.proposed.value - result.best_baseline.value))}。`
       : resultEvidenceText(input)
   return [
-    "候选论文排序常用于文献检索、综述准备和研究选题：系统需要在有限候选集内判断哪些论文最能支持当前研究问题。仅依赖词项匹配的排序容易忽略候选论文是否覆盖关键断言，单独报告排序结果又难以解释差异来自何处。",
+    "候选论文排序常用于文献检索、综述准备和研究选题：研究者需要在有限候选集内判断哪些论文最能支持当前研究问题。仅依赖词项匹配的排序容易忽略候选论文是否覆盖关键断言，单独报告排序结果又难以解释差异来自何处。",
     "本文研究由 rankAgentTeamPapers 和 scorePaper 构成的候选论文排序接口。scorePaper 将 relevance、claim_coverage 和 recency 合成为排序分数，rankAgentTeamPapers 根据该分数生成候选顺序。",
     `为检查 claim_coverage 项是否与排序差异相关，本文设置排名测试、词项匹配基线和无证据覆盖消融，并以${metric} 作为主指标。${resultEvidence ?? ""}`,
     input.result_report?.reproduction.status === "passed"
