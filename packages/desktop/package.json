@@ -3,8 +3,8 @@
   "private": true,
   "version": "1.14.41",
   "type": "module",
-  "license": "MIT",
-  "homepage": "https://github.com/S0ra-ai/paper_fucker",
+  "license": "MPL-2.0",
+  "homepage": "https://github.com/ZhuchenZhong/paper_fucker",
   "author": {
     "name": "s0ra",
     "email": ""

@@ -4,7 +4,7 @@
   "name": "paper_fucker",
   "author": "k1d (https://github.com/ZhuchenZhong)",
   "type": "module",
-  "license": "MIT",
+  "license": "MPL-2.0",
   "private": true,
   "files": [
     "bin/",

@@ -4,7 +4,7 @@
   "version": "1.14.41",
   "private": true,
   "type": "module",
-  "license": "MIT",
+  "license": "MPL-2.0",
   "dependencies": {
     "@aws-sdk/client-sts": "3.782.0",
     "@jsx-email/render": "1.1.1",
