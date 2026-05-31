@@ -396,18 +396,34 @@ function licenseExpressionFromUrl(url: string | undefined) {
 
 const arxivUserAgent = "paper-fucker-live-benchmark/1.0 (+https://github.com/ZhuchenZhong/paper_fucker)"
 
-function benchmarkPositiveIntEnv(name: string, fallback: number) {
+function benchmarkBoundedIntEnv(name: string, fallback: number, bounds: { min: number; max: number }) {
   const raw = process.env[name]
   if (raw === undefined) return fallback
   const value = Number(raw)
-  return Number.isFinite(value) && value > 0 ? Math.floor(value) : fallback
+  if (!Number.isFinite(value)) return fallback
+  return Math.max(bounds.min, Math.min(bounds.max, Math.floor(value)))
 }
 
-const arxivFetchTimeoutMs = benchmarkPositiveIntEnv("PAPER_FUCKER_BENCHMARK_ARXIV_FETCH_TIMEOUT_MS", 15_000)
-const arxivMaxAttempts = benchmarkPositiveIntEnv("PAPER_FUCKER_BENCHMARK_ARXIV_MAX_ATTEMPTS", 3)
-const arxivQueryBudgetMs = benchmarkPositiveIntEnv("PAPER_FUCKER_BENCHMARK_ARXIV_QUERY_BUDGET_MS", 90_000)
-const arxivVerificationCandidateLimit = benchmarkPositiveIntEnv("PAPER_FUCKER_BENCHMARK_ARXIV_VERIFY_LIMIT", 6)
-const protocolBenchmarkBudgetMs = benchmarkPositiveIntEnv("PAPER_FUCKER_BENCHMARK_SOURCE_BUDGET_MS", 240_000)
+const arxivFetchTimeoutMs = benchmarkBoundedIntEnv("PAPER_FUCKER_BENCHMARK_ARXIV_FETCH_TIMEOUT_MS", 15_000, {
+  min: 1_000,
+  max: 30_000,
+})
+const arxivMaxAttempts = benchmarkBoundedIntEnv("PAPER_FUCKER_BENCHMARK_ARXIV_MAX_ATTEMPTS", 3, {
+  min: 1,
+  max: 5,
+})
+const arxivQueryBudgetMs = benchmarkBoundedIntEnv("PAPER_FUCKER_BENCHMARK_ARXIV_QUERY_BUDGET_MS", 90_000, {
+  min: 15_000,
+  max: 120_000,
+})
+const arxivVerificationCandidateLimit = benchmarkBoundedIntEnv("PAPER_FUCKER_BENCHMARK_ARXIV_VERIFY_LIMIT", 6, {
+  min: 3,
+  max: 8,
+})
+const protocolBenchmarkBudgetMs = benchmarkBoundedIntEnv("PAPER_FUCKER_BENCHMARK_SOURCE_BUDGET_MS", 240_000, {
+  min: 30_000,
+  max: 300_000,
+})
 
 function arxivRetryDelayMs(message: string, attempt: number) {
   if (/HTTP 429|Too Many Requests/i.test(message)) return 15_000 * attempt
