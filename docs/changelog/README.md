@@ -11,5 +11,14 @@
 - `v0/0.5.x.CHANGELOG`
 - `v0/0.6.x.CHANGELOG`
 - `v0/0.7.x.CHANGELOG`
+- `v0/0.8.x.CHANGELOG`
+- `v0/0.9.x.CHANGELOG`
+- `v0/0.10.x.CHANGELOG`
+- `v0/0.11.x.CHANGELOG`
+- `v0/0.13.0.000-050.CHANGELOG`
+- `v0/0.13.0.051-100.CHANGELOG`
+- `v0/0.13.0.101-110.CHANGELOG`
+- `v0/0.13.0.111-122.CHANGELOG`
+- `v0/0.13.0.123-133.CHANGELOG`
 
 归档文件不参与当前版本解析，也不会进入 release source archive。

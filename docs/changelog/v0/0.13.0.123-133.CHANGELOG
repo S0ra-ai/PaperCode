@@ -1,0 +1,69 @@
+:project       paper_fucker - 可验证论文研究自动化系统
+:author        k1d (https://github.com/ZhuchenZhong)
+:repo
+:desc          0.13.0.123-133 开发历史归档
+:version       0.13.0.133-dev
+:last_update   2026/05/31
+
+:history
+
+    0.13.0.133-dev - 2026/05/31 (564bd8fd) [fix/mcp-tool-binding-test-isolation]
+        :brief PaperRun 并发创建、模型工作台 provider 注册语义、响应式模型页、中国计算机学报正文格式、开发手册、MPL-2.0 授权、MCP 工具绑定、Session prompt、App i18n 与用户入口清理
+        :prompt
+            - fix(prompt): default、anthropic、beast、trinity、gemini 与 copilot-gpt-5 session prompt 统一使用 Paper Fucker 身份
+            - fix(prompt): session prompt 反馈入口改为 ZhuchenZhong/paper_fucker issues，移除旧 anomalyco/opencode 链接
+            - test(prompt): 新增 prompt-brand 回归，阻断旧 opencode 身份和旧 issue 链接回流到产品 prompt
+        :tui
+            - fix(copy): README、TUI tips 与内部说明改为当前仅启用中国计算机学报 profile，不再暗示多期刊用户入口已开放
+            - fix(home): 首页提交 PaperRun 时直接携带当前会话期刊名称，去除 generic-preprint 兼容分支
+            - fix(status): 环境状态中 Nature skill 缺失提示不再引用 generic-preprint，改为说明中国计算机学报主流程仍可运行
+            - fix(copy): TUI 隐藏命令、分支失败 toast、删除提示、默认标题前缀和运行路由菜单统一为 PaperRun 语义，阻断旧 session 文案回流
+            - fix(models-ui): 模型工作台布局改用可测试响应式计算，96x28 使用紧凑导航、隐藏详情栏并压缩快捷键区
+            - feat(tui): PaperRun 面板新增实验环境区，展示 GPU、运行时、编译器、容器/虚拟化和可选缺失项
+            - fix(journal): 期刊工作台暂时只开放中国计算机学报，关闭未知期刊抓取与 custom profile 草案入口
+            - test(models-ui): 新增模型工作台 layout 回归，覆盖 96x28、120x34 与宽屏完整快捷键模式
+        :model
+            - fix(models): 模型库存不再由 builtin 候选或 allowlist 反向生成已注册 provider，避免 /models 把未授权 provider 显示为可用
+            - fix(models): 模型工作台和 model-inventory API 统一使用订阅授权或自定义 endpoint 注册作为已注册 provider 来源
+            - test(models): 覆盖旧 manual+builtin provider 注册清理，防止历史 OpenCode provider 目录污染 Paper Fucker 模型工作台
+            - feat(models): ChatGPT 订阅与 GitHub Copilot 订阅作为一等 Paper provider 进入库存契约，但仍必须经用户 allowlist 路由
+            - feat(models): 新增订阅 provider 同步脚本，登录后可刷新模型、默认启用该 provider 返回的模型并写入主决策模型
+            - fix(models): provider 注册过滤复用统一判断，未连接订阅 provider 不展示为已注册可用 provider
+            - chore(provider): provider referer 与登录提示链接更新为 ZhuchenZhong/paper_fucker
+        :runtime
+            - fix(run): PaperRun 创建改为原子占位运行目录，并发请求生成同一 run_id 时自动换 id，避免 runs.run_id 唯一约束失败
+            - feat(machine): 本机能力检测记录主流运行时、编译器、GPU 工具和虚拟化工具版本，用于代码实验可运行性诊断
+            - fix(storage): 运行根目录写探针使用 UUID 文件名，并对 Windows 临时删除 EFAULT/EPERM/EBUSY/EACCES/ENOTEMPTY 做重试
+            - test(run): 新增并发 createResearchRun 回归，确认固定 idFactory 下也能创建两个独立 PaperRun 目录
+        :preview
+            - feat(preview): Web Monitor 协议与前端补齐 source/claim ledger、cost/token、agent tree/team、model routing、实验运行、终端 trace、机器环境和新 tab
+            - test(preview): 浏览器 smoke 扩展为 token、只读、SSE、DOM、实验运行、终端 trace 与机器环境端到端验收
+        :export
+            - fix(export): final export 前重新按目标 profile 格式化 Markdown，中文稿件 Pandoc 使用 ctexart 并优先 XeLaTeX
+        :authoring
+            - fix(cjc): 中国计算机学报 profile 的英文摘要改为正文块，不再生成第二个 H1 或泛化英文标题
+            - fix(cjc): 候选论文排序类论文使用明确英文题名，ranking 场景缺少研究设计章时将方法提升为 3 级主章
+            - test(authoring): 新增 CJC ranking 格式回归，阻断重复英文 H1、泛化标题和缺失 3 方法主章
+        :app
+            - fix(i18n): app 英文、简中与繁中主输入提示改为研究目标/PaperRun 导向，移除 Ask anything 聊天式入口
+            - fix(i18n): app provider 与模型选择文案去除旧订阅和旧品牌表达，改为自定义 provider 与内置模型模板
+            - fix(i18n): app 高频导航、toast、通知、分享、删除与设置文案统一为 PaperRun，减少旧 session/会话语义
+            - test(i18n): 新增 app i18n surface 回归，阻断 Ask anything、旧订阅、旧品牌和所有 value 级 session/chat 文案回流
+        :changelog
+            - docs(changelog): 0.13.0.111-122 详细历史移入 docs/changelog/v0/0.13.0.111-122.CHANGELOG，root 仅保留当前活跃条目
+            - docs(changelog): 0.8.x、0.9.x、0.10.x、0.11.x 与 0.13.0 分段历史补入 docs/changelog/v0 归档
+        :docs
+            - docs(development): 开发手册改为 ReadTheDocs 风格的左侧分组导航、右侧本页目录和多页入口
+            - docs(development): 新增使用入口、开发指南和开发工作流页面，覆盖源码启动、模型配置、工作区、PaperRun、Preview、恢复、分支版本、验证闭环和质量调优路径
+            - docs(readme/internal): README 与内部维护入口同步开发手册链接和结构说明
+        :license
+            - chore(license): root LICENSE 从 private license 切换为 Mozilla Public License 2.0
+            - chore(package): root、workspace packages、preview、desktop、sdk 与 GitHub package license 元数据统一为 MPL-2.0
+            - docs(notice): NOTICE 明确原始 Paper Fucker 代码、上游 OpenCode 快照和内置 skills 的许可边界
+        :test
+            - fix(mcp): research-tools MCP server 为每个 registry handler 创建独立 tool callable，避免循环注册闭包绑定到错误 handler
+            - test(mcp): 新增 fake FastMCP 回归，验证每个注册 tool 调用自己的 handler
+            - fix(test): packages/opencode test preload 清理临时目录时覆盖 Windows ENOTEMPTY 与 EFAULT 重试
+        :checks
+            - targeted tests: bun prompt/i18n/TUI/profile/machine/preview/export/model/run/auth，Python research-tools，browser smoke token/readonly/SSE/DOM/experiment/trace/machine
+            - static checks: package license metadata、packages/opencode typecheck、packages/preview typecheck、README version、CHANGELOG IncludeArchives 与 git diff --check
