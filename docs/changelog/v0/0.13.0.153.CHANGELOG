@@ -1,0 +1,21 @@
+:project       paper_fucker - 可验证论文研究自动化系统
+:author        k1d (https://github.com/ZhuchenZhong)
+:repo
+:desc          0.13.0.153 开发历史归档
+:version       0.13.0.153-dev
+:last_update   2026/05/31
+
+:history
+
+    0.13.0.153-dev - 2026/05/31 (99cd21e1) [fix/mcp-tool-binding-test-isolation]
+        :brief 开发手册使用指南改为完整产品路径手册
+        :docs
+            - docs(development): 使用页按使用参数、运行模式、输入材料、质量调优、实时监控、恢复导出重写，贴近 ReadTheDocs/Furo 手册结构
+            - docs(development): 全站导航统一为“使用指南”，总览页说明开发主线与可执行使用路径的关系
+            - docs(readme): README 与 internal README 同步开发手册说明，明确使用指南用于用户和维护者同流程验收
+        :test
+            - test(docs): check-development-docs 增加 usage-guide 结构断言，并改用 ASCII section id 避免 PowerShell 5.1 中文 literal mojibake
+        :changelog
+            - docs(changelog): 0.13.0.152 开发历史移入 docs/changelog/v0/0.13.0.152.CHANGELOG
+        :checks
+            - docs check: scripts/check-development-docs.ps1 -Render

@@ -2,20 +2,18 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.153-dev
+:version       0.13.0.154-dev
 :last_update   2026/05/31
 
 :history
 
-    0.13.0.153-dev - 2026/05/31 (99cd21e1) [fix/mcp-tool-binding-test-isolation]
-        :brief 开发手册使用指南改为完整产品路径手册
-        :docs
-            - docs(development): 使用页按使用参数、运行模式、输入材料、质量调优、实时监控、恢复导出重写，贴近 ReadTheDocs/Furo 手册结构
-            - docs(development): 全站导航统一为“使用指南”，总览页说明开发主线与可执行使用路径的关系
-            - docs(readme): README 与 internal README 同步开发手册说明，明确使用指南用于用户和维护者同流程验收
-        :test
-            - test(docs): check-development-docs 增加 usage-guide 结构断言，并改用 ASCII section id 避免 PowerShell 5.1 中文 literal mojibake
+    0.13.0.154-dev - 2026/05/31 (de87597e) [fix/mcp-tool-binding-test-isolation]
+        :brief 过期 full workspace 验收报告移入归档并补齐 reports 治理说明
+        :reports
+            - chore(reports): 将 0.8.1-dev 的 strict-live-full-acceptance 从活跃报告位移到 reports/archive/strict-live-full-acceptance-0.8.1-dev.md，避免当前审计误读旧证据
+            - docs(reports): 新增 reports/README.md，说明 active reports、historical reports 与 full workspace 报告生成边界
+            - report(audit): autonomous product audit 的 full-workspace-evidence 从 warn 变为 pass，当前 focused strict live evidence 继续作为必需里程碑证据
         :changelog
-            - docs(changelog): 0.13.0.152 开发历史移入 docs/changelog/v0/0.13.0.152.CHANGELOG
+            - docs(changelog): 0.13.0.153 开发历史移入 docs/changelog/v0/0.13.0.153.CHANGELOG
         :checks
-            - docs check: scripts/check-development-docs.ps1 -Render
+            - audit: scripts/autonomous-product-audit.ps1 -AllowActiveTask
