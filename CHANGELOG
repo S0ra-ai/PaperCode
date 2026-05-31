@@ -2,25 +2,21 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.170-dev
+:version       0.13.0.171-dev
 :last_update   2026/05/31
 
 :history
 
-    0.13.0.170-dev - 2026/05/31 (7684b62a) [fix/mcp-tool-binding-test-isolation]
-        :brief live benchmark summary 成功发布保护与开发手册写作规范
+    0.13.0.171-dev - 2026/05/31 (fade6e75) [fix/mcp-tool-binding-test-isolation]
+        :brief live arXiv source discovery 增加全局预算与超时诊断
         :fix
-            - fix(benchmark): live-paper-quality-benchmark 不再在启动时清空场景输出目录，改为每次写入 attempts 子目录
-            - fix(benchmark): 成功后才发布场景级 paperrun-summary.json，并记录 last-successful-attempt
-            - fix(benchmark): 控制台输出同时给出发布 summary 与本次 attempt summary 路径
-        :docs
-            - docs(development): 开发指南新增手册写作规范，明确文档站分组、本页目录、参数表、模式章节、可执行示例和 What's Next
+            - fix(benchmark): arXiv fetch、单 query 和 protocol source discovery 分别增加可配置时间预算
+            - fix(benchmark): arXiv verification 候选数改为有上限，避免 abs page 逐个验证导致 final benchmark 长时间挂起
+            - fix(benchmark): source discovery 超时返回 live arXiv source discovery timed out 诊断，不生成替代或伪来源
         :test
-            - test(benchmark): 覆盖 summary 只在成功 attempt 后发布，防止中断破坏上一轮证据
-            - test(docs): check-development-docs 固化手册写作规范锚点
+            - test(benchmark): 覆盖 live arXiv discovery 预算、deadline signal、候选上限和旧无限验证路径不再出现
         :changelog
-            - docs(changelog): 0.13.0.169 开发历史移入 docs/changelog/v0/0.13.0.169.CHANGELOG
+            - docs(changelog): 0.13.0.170 开发历史移入 docs/changelog/v0/0.13.0.170.CHANGELOG
         :checks
             - targeted tests: npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/live-benchmark-quality.test.ts --timeout 60000 passed
-            - docs: scripts/check-development-docs.ps1 passed
             - typecheck: npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
