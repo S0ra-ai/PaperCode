@@ -1,0 +1,22 @@
+:project       paper_fucker - 可验证论文研究自动化系统
+:author        k1d (https://github.com/ZhuchenZhong)
+:repo
+:desc          0.13.0.157 开发历史归档
+:version       0.13.0.157-dev
+:last_update   2026/05/31
+
+:history
+
+    0.13.0.157-dev - 2026/05/31 (5d9cd647) [fix/mcp-tool-binding-test-isolation]
+        :brief 开发手册明确 ReadTheDocs 式开发写法基准
+        :docs
+            - docs(development): 总览新增文档写法基准，按参数、模式、输入、输出、调优、排障组织后续开发页面
+            - docs(development): 开发指南新增开发页模板，要求新增页面直接落到代码、状态、接口、artifact、event、snapshot 和测试
+            - docs(development): 测试与维护补充文档质量要求，保留使用指南但将开发手册主线固定为维护者视角
+            - style(docs): 新增 pattern-grid 响应式卡片样式，保持手册在宽屏和移动视口下可读
+        :test
+            - test(docs): check-development-docs 增加 doc-pattern、page-template 和 pattern-grid 检查
+        :changelog
+            - docs(changelog): 0.13.0.156 开发历史移入 docs/changelog/v0/0.13.0.156.CHANGELOG
+        :checks
+            - docs: scripts/check-development-docs.ps1 -Render
