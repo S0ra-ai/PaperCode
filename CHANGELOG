@@ -2,20 +2,34 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.134-dev
+:version       0.13.0.135-dev
 :last_update   2026/05/31
 
 :history
 
-    0.13.0.134-dev - 2026/05/31 (5c6c49ce) [fix/mcp-tool-binding-test-isolation]
-        :brief 开发手册按 ReadTheDocs 风格收口，并将 root CHANGELOG 当前线拆为活跃摘要与归档历史
-        :docs
-            - docs(development): 总览页明确开发手册主线，使用入口仅作为维护者本机验收路径
-            - docs(development): 开发指南补齐状态输入、输出契约、故障定位和 What's Next，便于按产品链路查修改点
-            - docs(readme/internal): README 与内部维护入口同步 ReadTheDocs 风格开发手册说明
+    0.13.0.135-dev - 2026/05/31 (5cf7246e) [fix/mcp-tool-binding-test-isolation]
+        :brief 强化代码实验论文生成、实验协议重跑、CJC final gate 和 no-mock 来源边界
+        :paper
+            - feat(authoring): Text2Action 代码论文按方法型论文组织摘要、研究问题、贡献、研究设计、相关工作、方法、结果和结论
+            - fix(authoring): 代码可用性章节只展示已登记字段，不再用未登记元数据填充正文表格
+            - fix(literature): 产品路径不再生成默认 arXiv 搜索种子或伪候选文献
+        :experiment
+            - feat(experiment): code-to-paper 分析自动纳入关联 test 目录和最近 package.json，可筛选 baseline、ablation、repro 与 typecheck 脚本
+            - feat(experiment): 新增 ExperimentProtocol、Guidance 与 StarterPack 契约，缺基线/消融/容器复现时给出可执行修复建议
+            - fix(experiment): 实验运行记录不再自动填充 fixture 容器镜像或伪 digest，命令以实际执行命令为准
+        :runtime
+            - fix(runtime): ResearchRun 与 artifact id 分配改为目录/事实级去重，降低并发创建和重复 artifact 的冲突风险
+            - fix(storage): SQLite index 重建增加 busy_timeout 与事务保护，并跳过重复 run_id
+            - fix(export): CJC final export 保留中文“英文摘要”章节，final gate 仍要求可核验文献来源、代码来源和容器复现共同通过
+        :sources
+            - fix(crawler): 测试 HTML 路径命名为 provided_html，产品 live crawl 无授权时继续阻断
+            - fix(hf): Hugging Face 测试记录必须显式 allow_test_records，产品路径无授权时不合成 HF 记录
+            - fix(hf): HF job 转实验运行时不再发明容器镜像和 digest
+        :test
+            - test(paper): 覆盖实验协议 starter 应用、协议重跑、容器复现 gate 清理、CJC final export 与代码证据 final gate
+            - test(no-mock): 覆盖 live benchmark 真实 arXiv 来源发现、无伪 locator、无 fixture 容器镜像和 HF 测试记录开关
         :changelog
-            - docs(changelog): 0.13.0.133 详细历史移入 docs/changelog/v0/0.13.0.123-133.CHANGELOG
-            - docs(changelog): root CHANGELOG 仅保留当前活跃小批次摘要，避免巨型聚合条目继续膨胀
-            - docs(changelog): changelog 归档索引补齐 0.8.x、0.9.x、0.10.x、0.11.x 与 0.13.0 分段文件
+            - docs(changelog): 0.13.0.134 开发手册小批次移入 docs/changelog/v0/0.13.0.134.CHANGELOG
         :checks
-            - static docs: development HTML links、README version、CHANGELOG IncludeArchives 与 git diff --check
+            - targeted tests: bun authoring/code-to-paper/PaperRun/HF/intake/strict/agent acceptance，Python research-tools
+            - static checks: packages/opencode typecheck、packages/preview typecheck、README version、CHANGELOG IncludeArchives 与 git diff --check
