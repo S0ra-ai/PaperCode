@@ -187,4 +187,14 @@ describe("strict live acceptance script", () => {
     expect(script).toContain("strict-live-full-acceptance-[0-9]+")
     expect(script).toContain('Add-AuditResult "report-governance" "pass"')
   })
+
+  test("autonomous audit locks Paper Fucker visible command surface", () => {
+    const script = readFileSync(autonomousAuditPath, "utf8")
+    expect(script).toContain("Test-VisibleCommandSurface")
+    expect(script).toContain("PaperVisibleCommandRegistry")
+    expect(script).toContain('"models", "status", "file", "folder", "data", "log", "preview", "export", "stop", "resume"')
+    expect(script).toContain('"connect", "agents", "variants", "session", "sessions", "provider", "providers"')
+    expect(script).toContain("Command palette/autocomplete filter missing")
+    expect(script).toContain('Add-AuditResult "visible-command-surface" "pass"')
+  })
 })
