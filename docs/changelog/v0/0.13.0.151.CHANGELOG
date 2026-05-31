@@ -1,0 +1,23 @@
+:project       paper_fucker - 可验证论文研究自动化系统
+:author        k1d (https://github.com/ZhuchenZhong)
+:repo
+:desc          0.13.0.151 开发历史归档
+:version       0.13.0.151-dev
+:last_update   2026/05/31
+
+:history
+
+    0.13.0.151-dev - 2026/05/31 (7a4c1cf7) [fix/mcp-tool-binding-test-isolation]
+        :brief strict acceptance 主验收纳入开发手册渲染检查
+        :test
+            - test(acceptance): development-docs-check 改为调用 check-development-docs.ps1 -Render，主验收报告也确认工具条、目录、搜索与复制按钮实际挂载
+            - test(acceptance): strict-acceptance 单测要求开发手册检查携带 -Render，避免退回静态扫描
+            - report(strict): 重新运行 focused strict acceptance，刷新 crawler、HF、Preview browser、topic/code/final PaperRun benchmark 证据到 0.13.0.151-dev
+            - report(audit): autonomous product audit 确认 strict live evidence 与当前版本一致
+        :changelog
+            - docs(changelog): 0.13.0.150 开发历史移入 docs/changelog/v0/0.13.0.150.CHANGELOG
+        :checks
+            - targeted tests: packages/opencode strict-acceptance.test
+            - docs check: scripts/check-development-docs.ps1 -Render
+            - strict acceptance: scripts/strict-acceptance.ps1 -CheckTimeoutSeconds 900
+            - audit: scripts/autonomous-product-audit.ps1 -AllowActiveTask
