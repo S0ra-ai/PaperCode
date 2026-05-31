@@ -32,7 +32,9 @@ describe("live paper quality benchmark script", () => {
 
     expect(benchmark).toContain("PAPER_FUCKER_BENCHMARK_SOURCE_BUDGET_MS")
     expect(benchmark).toContain("PAPER_FUCKER_BENCHMARK_ARXIV_QUERY_BUDGET_MS")
-    expect(benchmark).toContain("benchmarkPositiveIntEnv")
+    expect(benchmark).toContain("benchmarkBoundedIntEnv")
+    expect(benchmark).toContain("Math.max(bounds.min, Math.min(bounds.max")
+    expect(benchmark).toContain("max: 300_000")
     expect(benchmark).toContain("ensureBeforeDeadline")
     expect(benchmark).toContain("deadlineSignal")
     expect(benchmark).toContain("live arXiv source discovery timed out")
