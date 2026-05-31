@@ -177,4 +177,14 @@ describe("strict live acceptance script", () => {
     expect(script).toContain("Full workspace report is stale")
     expect(script).toContain('Add-AuditResult "full-workspace-evidence" "warn"')
   })
+
+  test("autonomous audit locks active and archived report governance", () => {
+    const script = readFileSync(autonomousAuditPath, "utf8")
+    expect(script).toContain("Test-ReportGovernance")
+    expect(script).toContain("reports/README.md")
+    expect(script).toContain("reports/archive")
+    expect(script).toContain("Active full workspace report is not current")
+    expect(script).toContain("strict-live-full-acceptance-[0-9]+")
+    expect(script).toContain('Add-AuditResult "report-governance" "pass"')
+  })
 })
