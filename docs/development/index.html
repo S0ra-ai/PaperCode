@@ -25,6 +25,7 @@
           <a href="./architecture.html">架构</a>
           <a href="./module-map.html">模块地图</a>
           <a href="./function-reference.html">关键函数索引</a>
+          <a href="./api-contracts.html">接口与数据契约</a>
           <div class="nav-group">运行时</div>
           <a href="./paperrun-flow.html">PaperRun 流程</a>
           <a href="./paper-generation.html">论文生成链路</a>
@@ -64,7 +65,8 @@
             <a href="./architecture.html"><strong>2. 架构</strong><span>说明 TUI、Paper Core、HTTP API、Preview、research tools、schemas 和 run storage 的边界。</span></a>
             <a href="./paperrun-flow.html"><strong>3. PaperRun 流程</strong><span>解释 intake、stage graph、artifact、ledger、diagnostics、controller 和 SSE 事件。</span></a>
             <a href="./function-reference.html"><strong>4. 关键函数索引</strong><span>按真实调用链定位 create、orchestrator、writing、experiment runner、Preview 和模型路由。</span></a>
-            <a href="./developer-recipes.html"><strong>5. 修改手册</strong><span>新增 stage、artifact、TUI 页面、Preview 字段、模型策略和测试时的文件清单。</span></a>
+            <a href="./api-contracts.html"><strong>5. 接口与数据契约</strong><span>集中说明 HTTP API、事件、artifact schema、Preview snapshot 和 export manifest 的稳定边界。</span></a>
+            <a href="./developer-recipes.html"><strong>6. 修改手册</strong><span>新增 stage、artifact、TUI 页面、Preview 字段、模型策略和测试时的文件清单。</span></a>
             <a href="./usage-guide.html"><strong>使用入口</strong><span>给维护者快速跑通 TUI、模型、工作区、PaperRun、Preview、导出和恢复。</span></a>
           </div>
         </section>
@@ -75,7 +77,7 @@
             <thead><tr><th>分组</th><th>页面</th><th>用途</th></tr></thead>
             <tbody>
               <tr><td>入门</td><td>总览、使用入口、开发指南、开发工作流</td><td>让维护者先跑通产品，再明确分支、版本、验证和提交约束。</td></tr>
-              <tr><td>架构</td><td>架构、模块地图、关键函数索引</td><td>说明代码如何分层、关键函数在哪里、跨模块修改从哪里开始。</td></tr>
+              <tr><td>架构</td><td>架构、模块地图、关键函数索引、接口与数据契约</td><td>说明代码如何分层、关键函数在哪里、跨模块修改从哪里开始，以及运行数据如何在模块间传递。</td></tr>
               <tr><td>运行时</td><td>PaperRun、论文生成、实验执行、Preview 与导出</td><td>解释状态机、写作链路、代码实验、实时监控和 final gate。</td></tr>
               <tr><td>工作台</td><td>TUI 与模型、Agent / MCP / Skills、测试与维护、修改手册</td><td>覆盖用户界面、模型路由、能力包、回归测试和常见改动配方。</td></tr>
             </tbody>

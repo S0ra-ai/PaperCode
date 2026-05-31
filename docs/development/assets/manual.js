@@ -1,20 +1,21 @@
 (function () {
   const pages = [
-    ["index.html", "总览"],
-    ["usage-guide.html", "使用入口"],
-    ["development-guide.html", "开发指南"],
-    ["development-workflow.html", "开发工作流"],
-    ["architecture.html", "架构"],
-    ["module-map.html", "模块地图"],
-    ["function-reference.html", "关键函数索引"],
-    ["paperrun-flow.html", "PaperRun 流程"],
-    ["paper-generation.html", "论文生成链路"],
-    ["experiment-execution.html", "实验执行链路"],
-    ["preview-export.html", "Preview 与导出"],
-    ["tui-models.html", "TUI 与模型"],
-    ["agents-capabilities.html", "Agent / MCP / Skills"],
-    ["testing-maintenance.html", "测试与维护"],
-    ["developer-recipes.html", "修改手册"],
+    ["index.html", "总览", "readthedocs furo manual overview"],
+    ["usage-guide.html", "使用入口", "tui models workspace preview export resume"],
+    ["development-guide.html", "开发指南", "developer workflow state artifact tests"],
+    ["development-workflow.html", "开发工作流", "git flow version changelog verification"],
+    ["architecture.html", "架构", "system layers paper core preview research tools storage"],
+    ["module-map.html", "模块地图", "directories packages paper tui preview research-tools"],
+    ["function-reference.html", "关键函数索引", "createPaperRun orchestrator draft export routing"],
+    ["api-contracts.html", "接口与数据契约", "http api payload events artifact schema snapshot export"],
+    ["paperrun-flow.html", "PaperRun 流程", "stage graph events run storage diagnostics"],
+    ["paper-generation.html", "论文生成链路", "draft claim ledger literature writing final paper"],
+    ["experiment-execution.html", "实验执行链路", "gpu docker container baseline ablation terminal trace"],
+    ["preview-export.html", "Preview 与导出", "sse monitor pdf docx manifest final gate"],
+    ["tui-models.html", "TUI 与模型", "provider allowlist decision model stage policy"],
+    ["agents-capabilities.html", "Agent / MCP / Skills", "agent team mcp skill capability bus"],
+    ["testing-maintenance.html", "测试与维护", "strict acceptance browser smoke typecheck"],
+    ["developer-recipes.html", "修改手册", "recipes add stage artifact tui preview model"],
   ]
 
   const current = (window.location.pathname.split("/").pop() || "index.html").toLowerCase()
@@ -24,6 +25,7 @@
   if (!layout || !content) return
 
   layout.classList.add("with-toc")
+  installSearch()
 
   if (!content.querySelector(".breadcrumbs")) {
     const title = pages[currentIndex]?.[1] || document.title.replace(" - Paper Fucker 开发手册", "")
@@ -88,5 +90,38 @@
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;")
+  }
+
+  function installSearch() {
+    const sidebar = layout.querySelector(".sidebar")
+    const brand = sidebar?.querySelector(".brand")
+    if (!sidebar || !brand || sidebar.querySelector(".doc-search")) return
+
+    const wrapper = document.createElement("div")
+    wrapper.className = "doc-search"
+    wrapper.innerHTML = [
+      '<label for="manual-search">文档搜索</label>',
+      '<input id="manual-search" type="search" autocomplete="off" placeholder="搜索模块、函数、流程" />',
+      '<div class="doc-search-results" hidden></div>',
+    ].join("")
+    brand.insertAdjacentElement("afterend", wrapper)
+
+    const input = wrapper.querySelector("input")
+    const results = wrapper.querySelector(".doc-search-results")
+    input.addEventListener("input", () => {
+      const query = input.value.trim().toLowerCase()
+      if (!query) {
+        results.hidden = true
+        results.innerHTML = ""
+        return
+      }
+      const matches = pages
+        .filter(([, title, keywords]) => `${title} ${keywords}`.toLowerCase().includes(query))
+        .slice(0, 8)
+      results.innerHTML = matches.length
+        ? matches.map(([href, title]) => `<a href="./${href}">${escapeHtml(title)}</a>`).join("")
+        : '<span>未找到匹配页面</span>'
+      results.hidden = false
+    })
   }
 })()

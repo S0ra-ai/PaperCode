@@ -79,6 +79,64 @@ a:hover {
   font-size: 13px;
 }
 
+.doc-search {
+  position: relative;
+  margin: -8px 0 18px;
+}
+
+.doc-search label {
+  display: block;
+  margin-bottom: 6px;
+  color: #708095;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.doc-search input {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #070b11;
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  padding: 8px 10px;
+  outline: none;
+}
+
+.doc-search input:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.14);
+}
+
+.doc-search-results {
+  position: absolute;
+  z-index: 10;
+  left: 0;
+  right: 0;
+  top: calc(100% + 6px);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #0a0f16;
+  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.34);
+  overflow: hidden;
+}
+
+.doc-search-results a,
+.doc-search-results span {
+  display: block;
+  padding: 9px 10px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.doc-search-results a:hover {
+  background: var(--panel);
+  color: var(--text);
+  text-decoration: none;
+}
+
 .nav-group {
   margin: 18px 0 8px;
   padding: 0 10px;
