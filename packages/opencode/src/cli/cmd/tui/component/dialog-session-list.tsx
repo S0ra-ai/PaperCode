@@ -206,7 +206,7 @@ export function DialogSessionList() {
                   } else {
                     toast.show({
                       variant: "error",
-                      title: "Failed to delete session",
+                      title: "PaperRun 删除失败",
                       message: errorMessage(result.error),
                     })
                   }
@@ -219,7 +219,7 @@ export function DialogSessionList() {
                 } else {
                   toast.show({
                     variant: "error",
-                    title: "Failed to delete session",
+                    title: "PaperRun 删除失败",
                     message: errorMessage(err),
                   })
                 }

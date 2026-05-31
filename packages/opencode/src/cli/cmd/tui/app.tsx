@@ -412,7 +412,7 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
           if (result.data?.id) {
             route.navigate({ type: "session", sessionID: result.data.id })
           } else {
-            toast.show({ message: "Failed to fork session", variant: "error" })
+            toast.show({ message: "PaperRun 分支创建失败", variant: "error" })
           }
         })
       } else {
@@ -432,7 +432,7 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
       if (result.data?.id) {
         route.navigate({ type: "session", sessionID: result.data.id })
       } else {
-        toast.show({ message: "Failed to fork session", variant: "error" })
+        toast.show({ message: "PaperRun 分支创建失败", variant: "error" })
       }
     })
   })
@@ -449,10 +449,10 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
 
   command.register(() => [
     {
-      title: "Switch session",
+      title: "切换 PaperRun",
       value: "session.list",
       keybind: "session_list",
-      category: "Session",
+      category: "PaperRun",
       hidden: true,
       suggested: sync.data.session.length > 0,
       onSelect: () => {
@@ -460,11 +460,11 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
       },
     },
     {
-      title: "New session",
+      title: "新建 PaperRun",
       suggested: route.data.type === "session",
       value: "session.new",
       keybind: "session_new",
-      category: "Session",
+      category: "PaperRun",
       hidden: true,
       onSelect: () => {
         route.navigate({
@@ -872,8 +872,8 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
     },
     {
       title: kv.get("session_directory_filter_enabled", true)
-        ? "Disable session directory filtering"
-        : "Enable session directory filtering",
+        ? "关闭 PaperRun 目录过滤"
+        : "开启 PaperRun 目录过滤",
       value: "app.toggle.session_directory_filter",
       category: "System",
       onSelect: async (dialog) => {
@@ -919,7 +919,7 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
       route.navigate({ type: "home" })
       toast.show({
         variant: "info",
-        message: "The current session was deleted",
+        message: "当前 PaperRun 已删除",
       })
     }
   })

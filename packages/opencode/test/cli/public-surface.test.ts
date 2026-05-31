@@ -131,13 +131,31 @@ describe("public Paper Fucker surface", () => {
     const local = await source("cli/cmd/tui/context/local.tsx")
     const home = await source("cli/cmd/tui/routes/home.tsx")
     const error = await source("cli/cmd/tui/component/error-component.tsx")
+    const session = await source("session/session.ts")
+    const sessionRoute = await source("cli/cmd/tui/routes/session/index.tsx")
+    const sessionList = await source("cli/cmd/tui/component/dialog-session-list.tsx")
+    const sessionDeleteFailed = await source("cli/cmd/tui/component/dialog-session-delete-failed.tsx")
+    const forkTimeline = await source("cli/cmd/tui/routes/session/dialog-fork-from-timeline.tsx")
+    const messageDialog = await source("cli/cmd/tui/routes/session/dialog-message.tsx")
+    const subagentDialog = await source("cli/cmd/tui/routes/session/dialog-subagent.tsx")
+    const systemSessionV2 = await source("cli/cmd/tui/feature-plugins/system/session-v2.tsx")
+    const workspaceCreate = await source("cli/cmd/tui/component/dialog-workspace-create.tsx")
 
     expect(app).toContain("Paper Fucker 模型工作台")
+    expect(app).toContain("PaperRun 分支创建失败")
+    expect(app).toContain("新建 PaperRun")
+    expect(app).toContain("当前 PaperRun 已删除")
+    expect(app).toContain('category: "PaperRun"')
     expect(app).not.toContain('name: "connect"')
     expect(app).not.toContain('name: "agents"')
     expect(app).not.toContain('name: "variants"')
     expect(app).not.toContain("provider.connect")
     expect(app).not.toContain("<DialogModel />")
+    expect(app).not.toContain("Failed to fork session")
+    expect(app).not.toContain("Switch session")
+    expect(app).not.toContain("New session")
+    expect(app).not.toContain("The current session was deleted")
+    expect(app).not.toContain("session directory filtering")
     expect(prompt).toContain("请先在模型工作台配置可用模型")
     expect(local).toContain("未配置模型")
     expect(prompt).not.toContain("Ask anything")
@@ -148,5 +166,64 @@ describe("public Paper Fucker surface", () => {
     expect(error).toContain("Paper Fucker 遇到运行错误")
     expect(error).not.toContain("Please report an issue")
     expect(error).not.toContain("A fatal error occurred")
+    expect(session).toContain("New PaperRun - ")
+    expect(session).toContain("Child PaperRun - ")
+    expect(session).not.toContain("New session - ")
+    expect(session).not.toContain("Child session - ")
+
+    const tuiSessionSurface = [
+      sessionRoute,
+      sessionList,
+      sessionDeleteFailed,
+      forkTimeline,
+      messageDialog,
+      subagentDialog,
+      systemSessionV2,
+      workspaceCreate,
+      prompt,
+    ].join("\n")
+
+    expect(tuiSessionSurface).toContain("PaperRun 删除失败")
+    expect(tuiSessionSurface).toContain("创建 PaperRun 分支")
+    expect(tuiSessionSurface).toContain("PaperRun 创建失败，请查看控制台日志。")
+    expect(tuiSessionSurface).toContain("查看 PaperRun v2 消息")
+    expect(tuiSessionSurface).toContain("无法切换工作区")
+    expect(tuiSessionSurface).toContain('category: "PaperRun"')
+
+    for (const legacyText of [
+      'category: "Session"',
+      "Failed to Delete Session",
+      "Failed to delete session",
+      'title: "Share session"',
+      '"Share Session"',
+      "Share URL copied to clipboard!",
+      "Failed to copy URL to clipboard",
+      "Failed to share session",
+      'title: "Rename session"',
+      'title: "Fork session"',
+      'title: "Compact session"',
+      'title: "Unshare session"',
+      "Session unshared successfully",
+      "Failed to unshare session",
+      'title: "Toggle session scrollbar"',
+      'title: "Copy session transcript"',
+      'title: "Export session transcript"',
+      "Failed to export session",
+      'title: "Go to child session"',
+      'title: "Go to parent session"',
+      'title: "Full session"',
+      "create a new session",
+      "the subagent's session",
+      'title: "Interrupt session"',
+      "Change the workspace for the session",
+      "Unable to Warp Session",
+      "Failed to warp session",
+      "Warped to",
+      "Creating a session failed",
+      "View v2 session messages",
+      "Missing sessionID",
+    ]) {
+      expect(tuiSessionSurface).not.toContain(legacyText)
+    }
   })
 })

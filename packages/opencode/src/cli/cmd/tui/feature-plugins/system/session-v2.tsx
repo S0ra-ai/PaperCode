@@ -1106,7 +1106,7 @@ const tui: TuiPlugin = async (api) => {
       render(input) {
         const sessionID = input.params?.sessionID
         if (typeof sessionID !== "string") {
-          return <text fg={api.theme.current.error}>Missing sessionID</text>
+          return <text fg={api.theme.current.error}>缺少 PaperRun ID</text>
         }
         return <View api={api} sessionID={sessionID} />
       },
@@ -1115,7 +1115,7 @@ const tui: TuiPlugin = async (api) => {
 
   api.command.register(() => [
     {
-      title: "View v2 session messages",
+      title: "查看 PaperRun v2 消息",
       value: route,
       category: "Debug",
       suggested: api.route.current.name === "session",

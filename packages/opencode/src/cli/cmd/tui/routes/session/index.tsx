@@ -184,7 +184,7 @@ export function Session() {
       const result = await sdk.client.session.get({ sessionID }, { throwOnError: true })
       if (!result.data) {
         toast.show({
-          message: `Session not found: ${sessionID}`,
+          message: `未找到 PaperRun：${sessionID}`,
           variant: "error",
           duration: 5000,
         })
@@ -369,11 +369,11 @@ export function Session() {
   const command = useCommandDialog()
   command.register(() => [
     {
-      title: session()?.share?.url ? "Copy share link" : "Share session",
+      title: session()?.share?.url ? "复制共享链接" : "共享 PaperRun",
       value: "session.share",
       suggested: route.type === "session",
       keybind: "session_share",
-      category: "Session",
+      category: "PaperRun",
       enabled: sync.data.config.share !== "disabled",
       slash: {
         name: "share",
@@ -381,8 +381,8 @@ export function Session() {
       onSelect: async (dialog) => {
         const copy = (url: string) =>
           Clipboard.copy(url)
-            .then(() => toast.show({ message: "Share URL copied to clipboard!", variant: "success" }))
-            .catch(() => toast.show({ message: "Failed to copy URL to clipboard", variant: "error" }))
+            .then(() => toast.show({ message: "共享链接已复制到剪贴板", variant: "success" }))
+            .catch(() => toast.show({ message: "共享链接复制失败", variant: "error" }))
         const url = session()?.share?.url
         if (url) {
           await copy(url)
@@ -390,7 +390,7 @@ export function Session() {
           return
         }
         if (!kv.get("share_consent", false)) {
-          const ok = await DialogConfirm.show(dialog, "Share Session", "Are you sure you want to share it?")
+          const ok = await DialogConfirm.show(dialog, "共享 PaperRun", "确认共享当前 PaperRun？")
           if (ok !== true) return
           kv.set("share_consent", true)
         }
@@ -401,7 +401,7 @@ export function Session() {
           .then((res) => copy(res.data!.share!.url))
           .catch((error) => {
             toast.show({
-              message: error instanceof Error ? error.message : "Failed to share session",
+              message: error instanceof Error ? error.message : "PaperRun 共享失败",
               variant: "error",
             })
           })
@@ -409,10 +409,10 @@ export function Session() {
       },
     },
     {
-      title: "Rename session",
+      title: "重命名 PaperRun",
       value: "session.rename",
       keybind: "session_rename",
-      category: "Session",
+      category: "PaperRun",
       slash: {
         name: "rename",
       },
@@ -421,10 +421,10 @@ export function Session() {
       },
     },
     {
-      title: "Jump to message",
+      title: "跳转到消息",
       value: "session.timeline",
       keybind: "session_timeline",
-      category: "Session",
+      category: "PaperRun",
       slash: {
         name: "timeline",
       },
@@ -444,10 +444,10 @@ export function Session() {
       },
     },
     {
-      title: "Fork session",
+      title: "创建 PaperRun 分支",
       value: "session.fork",
       keybind: "session_fork",
-      category: "Session",
+      category: "PaperRun",
       slash: {
         name: "fork",
       },
@@ -467,10 +467,10 @@ export function Session() {
       },
     },
     {
-      title: "Compact session",
+      title: "压缩 PaperRun 上下文",
       value: "session.compact",
       keybind: "session_compact",
-      category: "Session",
+      category: "PaperRun",
       slash: {
         name: "compact",
         aliases: ["summarize"],
@@ -494,10 +494,10 @@ export function Session() {
       },
     },
     {
-      title: "Unshare session",
+      title: "取消共享 PaperRun",
       value: "session.unshare",
       keybind: "session_unshare",
-      category: "Session",
+      category: "PaperRun",
       enabled: !!session()?.share?.url,
       slash: {
         name: "unshare",
@@ -507,10 +507,10 @@ export function Session() {
           .unshare({
             sessionID: route.sessionID,
           })
-          .then(() => toast.show({ message: "Session unshared successfully", variant: "success" }))
+          .then(() => toast.show({ message: "PaperRun 已取消共享", variant: "success" }))
           .catch((error) => {
             toast.show({
-              message: error instanceof Error ? error.message : "Failed to unshare session",
+              message: error instanceof Error ? error.message : "PaperRun 取消共享失败",
               variant: "error",
             })
           })
@@ -518,10 +518,10 @@ export function Session() {
       },
     },
     {
-      title: "Undo previous message",
+      title: "撤销上一条消息",
       value: "session.undo",
       keybind: "messages_undo",
-      category: "Session",
+      category: "PaperRun",
       slash: {
         name: "undo",
       },
@@ -556,10 +556,10 @@ export function Session() {
       },
     },
     {
-      title: "Redo",
+      title: "重做",
       value: "session.redo",
       keybind: "messages_redo",
-      category: "Session",
+      category: "PaperRun",
       enabled: !!session()?.revert?.messageID,
       slash: {
         name: "redo",
@@ -583,10 +583,10 @@ export function Session() {
       },
     },
     {
-      title: sidebarVisible() ? "Hide sidebar" : "Show sidebar",
+      title: sidebarVisible() ? "隐藏侧边栏" : "显示侧边栏",
       value: "session.sidebar.toggle",
       keybind: "sidebar_toggle",
-      category: "Session",
+      category: "PaperRun",
       onSelect: (dialog) => {
         batch(() => {
           const isVisible = sidebarVisible()
@@ -597,19 +597,19 @@ export function Session() {
       },
     },
     {
-      title: conceal() ? "Disable code concealment" : "Enable code concealment",
+      title: conceal() ? "关闭代码折叠" : "开启代码折叠",
       value: "session.toggle.conceal",
       keybind: "messages_toggle_conceal",
-      category: "Session",
+      category: "PaperRun",
       onSelect: (dialog) => {
         setConceal((prev) => !prev)
         dialog.clear()
       },
     },
     {
-      title: showTimestamps() ? "Hide timestamps" : "Show timestamps",
+      title: showTimestamps() ? "隐藏时间戳" : "显示时间戳",
       value: "session.toggle.timestamps",
-      category: "Session",
+      category: "PaperRun",
       slash: {
         name: "timestamps",
         aliases: ["toggle-timestamps"],
@@ -620,10 +620,10 @@ export function Session() {
       },
     },
     {
-      title: showThinking() ? "Hide thinking" : "Show thinking",
+      title: showThinking() ? "隐藏思考过程" : "显示思考过程",
       value: "session.toggle.thinking",
       keybind: "display_thinking",
-      category: "Session",
+      category: "PaperRun",
       slash: {
         name: "thinking",
         aliases: ["toggle-thinking"],
@@ -634,39 +634,39 @@ export function Session() {
       },
     },
     {
-      title: showDetails() ? "Hide tool details" : "Show tool details",
+      title: showDetails() ? "隐藏工具详情" : "显示工具详情",
       value: "session.toggle.actions",
       keybind: "tool_details",
-      category: "Session",
+      category: "PaperRun",
       onSelect: (dialog) => {
         setShowDetails((prev) => !prev)
         dialog.clear()
       },
     },
     {
-      title: "Toggle session scrollbar",
+      title: "切换 PaperRun 滚动条",
       value: "session.toggle.scrollbar",
       keybind: "scrollbar_toggle",
-      category: "Session",
+      category: "PaperRun",
       onSelect: (dialog) => {
         setShowScrollbar((prev) => !prev)
         dialog.clear()
       },
     },
     {
-      title: showGenericToolOutput() ? "Hide generic tool output" : "Show generic tool output",
+      title: showGenericToolOutput() ? "隐藏通用工具输出" : "显示通用工具输出",
       value: "session.toggle.generic_tool_output",
-      category: "Session",
+      category: "PaperRun",
       onSelect: (dialog) => {
         setShowGenericToolOutput((prev) => !prev)
         dialog.clear()
       },
     },
     {
-      title: "Page up",
+      title: "向上翻页",
       value: "session.page.up",
       keybind: "messages_page_up",
-      category: "Session",
+      category: "PaperRun",
       hidden: true,
       onSelect: (dialog) => {
         scroll.scrollBy(-scroll.height / 2)
@@ -674,10 +674,10 @@ export function Session() {
       },
     },
     {
-      title: "Page down",
+      title: "向下翻页",
       value: "session.page.down",
       keybind: "messages_page_down",
-      category: "Session",
+      category: "PaperRun",
       hidden: true,
       onSelect: (dialog) => {
         scroll.scrollBy(scroll.height / 2)
@@ -685,10 +685,10 @@ export function Session() {
       },
     },
     {
-      title: "Line up",
+      title: "向上滚动一行",
       value: "session.line.up",
       keybind: "messages_line_up",
-      category: "Session",
+      category: "PaperRun",
       disabled: true,
       onSelect: (dialog) => {
         scroll.scrollBy(-1)
@@ -696,10 +696,10 @@ export function Session() {
       },
     },
     {
-      title: "Line down",
+      title: "向下滚动一行",
       value: "session.line.down",
       keybind: "messages_line_down",
-      category: "Session",
+      category: "PaperRun",
       disabled: true,
       onSelect: (dialog) => {
         scroll.scrollBy(1)
@@ -707,10 +707,10 @@ export function Session() {
       },
     },
     {
-      title: "Half page up",
+      title: "向上滚动半页",
       value: "session.half.page.up",
       keybind: "messages_half_page_up",
-      category: "Session",
+      category: "PaperRun",
       hidden: true,
       onSelect: (dialog) => {
         scroll.scrollBy(-scroll.height / 4)
@@ -718,10 +718,10 @@ export function Session() {
       },
     },
     {
-      title: "Half page down",
+      title: "向下滚动半页",
       value: "session.half.page.down",
       keybind: "messages_half_page_down",
-      category: "Session",
+      category: "PaperRun",
       hidden: true,
       onSelect: (dialog) => {
         scroll.scrollBy(scroll.height / 4)
@@ -729,10 +729,10 @@ export function Session() {
       },
     },
     {
-      title: "First message",
+      title: "跳到第一条消息",
       value: "session.first",
       keybind: "messages_first",
-      category: "Session",
+      category: "PaperRun",
       hidden: true,
       onSelect: (dialog) => {
         scroll.scrollTo(0)
@@ -740,10 +740,10 @@ export function Session() {
       },
     },
     {
-      title: "Last message",
+      title: "跳到最后一条消息",
       value: "session.last",
       keybind: "messages_last",
-      category: "Session",
+      category: "PaperRun",
       hidden: true,
       onSelect: (dialog) => {
         scroll.scrollTo(scroll.scrollHeight)
@@ -751,10 +751,10 @@ export function Session() {
       },
     },
     {
-      title: "Jump to last user message",
+      title: "跳到最后一条用户消息",
       value: "session.messages_last_user",
       keybind: "messages_last_user",
-      category: "Session",
+      category: "PaperRun",
       hidden: true,
       onSelect: () => {
         const messages = sync.data.message[route.sessionID]
@@ -783,33 +783,33 @@ export function Session() {
       },
     },
     {
-      title: "Next message",
+      title: "下一条消息",
       value: "session.message.next",
       keybind: "messages_next",
-      category: "Session",
+      category: "PaperRun",
       hidden: true,
       onSelect: (dialog) => scrollToMessage("next", dialog),
     },
     {
-      title: "Previous message",
+      title: "上一条消息",
       value: "session.message.previous",
       keybind: "messages_previous",
-      category: "Session",
+      category: "PaperRun",
       hidden: true,
       onSelect: (dialog) => scrollToMessage("prev", dialog),
     },
     {
-      title: "Copy last assistant message",
+      title: "复制最后一条助手消息",
       value: "messages.copy",
       keybind: "messages_copy",
-      category: "Session",
+      category: "PaperRun",
       onSelect: (dialog) => {
         const revertID = session()?.revert?.messageID
         const lastAssistantMessage = messages().findLast(
           (msg) => msg.role === "assistant" && (!revertID || msg.id < revertID),
         )
         if (!lastAssistantMessage) {
-          toast.show({ message: "No assistant messages found", variant: "error" })
+          toast.show({ message: "未找到助手消息", variant: "error" })
           dialog.clear()
           return
         }
@@ -817,7 +817,7 @@ export function Session() {
         const parts = sync.data.part[lastAssistantMessage.id] ?? []
         const textParts = parts.filter((part) => part.type === "text")
         if (textParts.length === 0) {
-          toast.show({ message: "No text parts found in last assistant message", variant: "error" })
+          toast.show({ message: "最后一条助手消息没有文本内容", variant: "error" })
           dialog.clear()
           return
         }
@@ -828,7 +828,7 @@ export function Session() {
           .trim()
         if (!text) {
           toast.show({
-            message: "No text content found in last assistant message",
+            message: "最后一条助手消息没有可复制文本",
             variant: "error",
           })
           dialog.clear()
@@ -836,15 +836,15 @@ export function Session() {
         }
 
         Clipboard.copy(text)
-          .then(() => toast.show({ message: "Message copied to clipboard!", variant: "success" }))
-          .catch(() => toast.show({ message: "Failed to copy to clipboard", variant: "error" }))
+          .then(() => toast.show({ message: "消息已复制到剪贴板", variant: "success" }))
+          .catch(() => toast.show({ message: "复制到剪贴板失败", variant: "error" }))
         dialog.clear()
       },
     },
     {
-      title: "Copy session transcript",
+      title: "复制 PaperRun 记录",
       value: "session.copy",
-      category: "Session",
+      category: "PaperRun",
       slash: {
         name: "copy",
       },
@@ -864,18 +864,18 @@ export function Session() {
             },
           )
           await Clipboard.copy(transcript)
-          toast.show({ message: "Session transcript copied to clipboard!", variant: "success" })
+          toast.show({ message: "PaperRun 记录已复制到剪贴板", variant: "success" })
         } catch {
-          toast.show({ message: "Failed to copy session transcript", variant: "error" })
+          toast.show({ message: "PaperRun 记录复制失败", variant: "error" })
         }
         dialog.clear()
       },
     },
     {
-      title: "Export session transcript",
+      title: "导出 PaperRun 记录",
       value: "session.export",
       keybind: "session_export",
-      category: "Session",
+      category: "PaperRun",
       slash: {
         name: "export",
       },
@@ -885,7 +885,7 @@ export function Session() {
           if (!sessionData) return
           const sessionMessages = messages()
 
-          const defaultFilename = `session-${sessionData.id.slice(0, 8)}.md`
+          const defaultFilename = `paperrun-${sessionData.id.slice(0, 8)}.md`
 
           const options = await DialogExportOptions.show(
             dialog,
@@ -925,19 +925,19 @@ export function Session() {
               await Filesystem.write(filepath, result)
             }
 
-            toast.show({ message: `Session exported to ${filename}`, variant: "success" })
+            toast.show({ message: `PaperRun 已导出到 ${filename}`, variant: "success" })
           }
         } catch {
-          toast.show({ message: "Failed to export session", variant: "error" })
+          toast.show({ message: "PaperRun 导出失败", variant: "error" })
         }
         dialog.clear()
       },
     },
     {
-      title: "Go to child session",
+      title: "打开子 PaperRun",
       value: "session.child.first",
       keybind: "session_child_first",
-      category: "Session",
+      category: "PaperRun",
       hidden: true,
       onSelect: (dialog) => {
         moveFirstChild()
@@ -945,10 +945,10 @@ export function Session() {
       },
     },
     {
-      title: "Go to parent session",
+      title: "打开父 PaperRun",
       value: "session.parent",
       keybind: "session_parent",
-      category: "Session",
+      category: "PaperRun",
       hidden: true,
       enabled: !!session()?.parentID,
       onSelect: childSessionHandler((dialog) => {
@@ -963,10 +963,10 @@ export function Session() {
       }),
     },
     {
-      title: "Next child session",
+      title: "下一个子 PaperRun",
       value: "session.child.next",
       keybind: "session_child_cycle",
-      category: "Session",
+      category: "PaperRun",
       hidden: true,
       enabled: !!session()?.parentID,
       onSelect: childSessionHandler((dialog) => {
@@ -975,10 +975,10 @@ export function Session() {
       }),
     },
     {
-      title: "Previous child session",
+      title: "上一个子 PaperRun",
       value: "session.child.previous",
       keybind: "session_child_cycle_reverse",
-      category: "Session",
+      category: "PaperRun",
       hidden: true,
       enabled: !!session()?.parentID,
       onSelect: childSessionHandler((dialog) => {
