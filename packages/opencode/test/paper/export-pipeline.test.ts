@@ -139,6 +139,59 @@ describe("PaperRun export renderer pipeline", () => {
     expect(manifest.files).toHaveLength(4)
   })
 
+  test("passes CJK-aware Pandoc variables and prefers XeLaTeX for Chinese manuscripts", async () => {
+    const run = await newRun()
+    const calls: Array<{ tool: string; args: string[] }> = []
+    const command: PaperExportCommandRunner = async (input) => {
+      calls.push({ tool: input.tool, args: input.args })
+      const outputIndex = input.args.findIndex((arg) => arg === "-o")
+      const output = outputIndex >= 0 ? input.args[outputIndex + 1] : undefined
+      if (input.tool === "pandoc" && output?.endsWith(".tex")) {
+        await Bun.write(output, "\\documentclass{ctexart}\n\\begin{document}\n中文\n\\end{document}\n")
+        return { exit_code: 0, stdout: "", stderr: "" }
+      }
+      if (input.tool === "pandoc" && output?.endsWith(".docx")) {
+        await Bun.write(output, validDocxBytes)
+        return { exit_code: 0, stdout: "", stderr: "" }
+      }
+      if (input.tool === "xelatex") {
+        const outdir = input.args.find((arg) => arg.startsWith("-output-directory="))?.slice("-output-directory=".length)
+        if (!outdir) return { exit_code: 1, stdout: "", stderr: "missing output directory" }
+        await Bun.write(path.join(outdir, "bundle-cjk.pdf"), validPdfBytes)
+        return { exit_code: 0, stdout: "", stderr: "" }
+      }
+      return { exit_code: 1, stdout: "", stderr: `unexpected command ${input.tool}` }
+    }
+
+    const result = await renderPaperExportPipeline(
+      run.run_dir,
+      {
+        mode: "final",
+        bundle_id: "bundle-cjk",
+        draft: {
+          ...run.draft,
+          markdown: "# 中文标题\n\n## 摘要\n\n中文摘要。\n\n## 1 引言\n\n正文。",
+        },
+        final_gate: passedGate,
+        source_artifact_ids: [],
+        tools: { pandoc: "pandoc", latexmk: "latexmk", xelatex: "xelatex" },
+        command,
+        now,
+      },
+      run.options,
+    )
+
+    const pandocCall = calls.find((call) => call.tool === "pandoc" && call.args.includes("-t"))
+    expect(pandocCall?.args).toContain("--wrap=none")
+    expect(pandocCall?.args).toContain("documentclass=ctexart")
+    expect(pandocCall?.args).toContain("pagestyle=plain")
+    expect(pandocCall?.args).toContain("CJKmainfont=SimSun")
+    const engineCalls = calls.filter((call) => call.tool !== "pandoc")
+    expect(engineCalls[0]?.tool).toBe("xelatex")
+    expect(engineCalls.map((call) => call.tool)).not.toContain("latexmk")
+    expect(result.bundle.files.find((file) => file.format === "pdf")?.status).toBe("written")
+  })
+
   test("returns actionable diagnostics when pandoc or a LaTeX engine is missing", async () => {
     const run = await newRun()
 
@@ -162,7 +215,7 @@ describe("PaperRun export renderer pipeline", () => {
     expect(result.bundle.files.filter((file) => file.status === "failed").map((file) => file.format)).toContain("pdf")
   })
 
-  test("falls back to the next LaTeX engine when latexmk fails", async () => {
+  test("falls back to the next LaTeX engine when XeLaTeX fails", async () => {
     const run = await newRun()
     const calls: Array<{ tool: string; args: string[] }> = []
     const command: PaperExportCommandRunner = async (input) => {
@@ -177,8 +230,14 @@ describe("PaperRun export renderer pipeline", () => {
         await Bun.write(output, validDocxBytes)
         return { exit_code: 0, stdout: "", stderr: "" }
       }
-      if (input.tool === "latexmk") return { exit_code: 1, stdout: "", stderr: "latexmk runscript.tlu failure" }
-      if (input.tool === "xelatex") {
+      if (input.tool === "xelatex") return { exit_code: 1, stdout: "", stderr: "xelatex font failure" }
+      if (input.tool === "latexmk") {
+        const outdir = input.args.find((arg) => arg.startsWith("-outdir="))?.slice("-outdir=".length)
+        if (!outdir) return { exit_code: 1, stdout: "", stderr: "missing output directory" }
+        await Bun.write(path.join(outdir, "bundle-fallback.pdf"), validPdfBytes)
+        return { exit_code: 0, stdout: "", stderr: "" }
+      }
+      if (input.tool === "lualatex") {
         const outdir = input.args.find((arg) => arg.startsWith("-output-directory="))?.slice("-output-directory=".length)
         if (!outdir) return { exit_code: 1, stdout: "", stderr: "missing output directory" }
         await Bun.write(path.join(outdir, "bundle-fallback.pdf"), validPdfBytes)
@@ -195,7 +254,7 @@ describe("PaperRun export renderer pipeline", () => {
         draft: run.draft,
         final_gate: passedGate,
         source_artifact_ids: [],
-        tools: { pandoc: "pandoc", latexmk: "latexmk", xelatex: "xelatex" },
+        tools: { pandoc: "pandoc", xelatex: "xelatex", latexmk: "latexmk" },
         command,
         now,
       },
@@ -203,12 +262,13 @@ describe("PaperRun export renderer pipeline", () => {
     )
 
     const pdf = result.bundle.files.find((file) => file.format === "pdf")
-    expect(calls.map((call) => call.tool)).toContain("latexmk")
     expect(calls.map((call) => call.tool)).toContain("xelatex")
+    expect(calls.map((call) => call.tool)).toContain("latexmk")
+    expect(calls.findIndex((call) => call.tool === "xelatex")).toBeLessThan(calls.findIndex((call) => call.tool === "latexmk"))
     expect(calls.find((call) => call.tool === "xelatex")?.args.join("\n")).not.toContain("\\")
     expect(pdf?.status).toBe("written")
-    expect(pdf?.diagnostics.join("\n")).not.toContain("latexmk failed")
-    expect(result.bundle.manifest.tool_diagnostics.join("\n")).not.toContain("latexmk failed")
+    expect(pdf?.diagnostics.join("\n")).not.toContain("xelatex failed")
+    expect(result.bundle.manifest.tool_diagnostics.join("\n")).not.toContain("xelatex failed")
     expect(await Bun.file(path.join(run.run_dir, pdf!.path)).exists()).toBe(true)
   })
 

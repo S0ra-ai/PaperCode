@@ -126,7 +126,7 @@ function discoveredTools(explicit?: PaperExportToolPaths): PaperExportToolPaths 
 }
 
 function latexEngines(tools: PaperExportToolPaths) {
-  return (["latexmk", "xelatex", "pdflatex", "lualatex", "tectonic"] as PaperExportToolName[])
+  return (["xelatex", "lualatex", "latexmk", "tectonic", "pdflatex"] as PaperExportToolName[])
     .map((name) => ({ name, path: tools[name] }))
     .filter((item): item is { name: PaperExportToolName; path: string } => Boolean(item.path))
 }
@@ -202,9 +202,35 @@ function latexCliPath(value: string) {
 function pdfArgs(engine: PaperExportToolName, cwd: string, texPath: string) {
   const latexCwd = latexCliPath(cwd)
   const latexTexPath = latexCliPath(texPath)
-  if (engine === "latexmk") return ["-pdf", "-interaction=nonstopmode", `-outdir=${latexCwd}`, latexTexPath]
+  if (engine === "latexmk") return ["-xelatex", "-interaction=nonstopmode", `-outdir=${latexCwd}`, latexTexPath]
   if (engine === "tectonic") return ["--outdir", latexCwd, latexTexPath]
   return ["-interaction=nonstopmode", `-output-directory=${latexCwd}`, latexTexPath]
+}
+
+function hasCjk(value: string) {
+  return /[\u3400-\u9fff]/.test(value)
+}
+
+function pandocLatexArgs(markdownPath: string, latexPath: string, markdown: string) {
+  const args = [markdownPath, "-s", "-t", "latex", "--wrap=none"]
+  if (hasCjk(markdown)) {
+    args.push(
+      "-V",
+      "documentclass=ctexart",
+      "-V",
+      "papersize=a4",
+      "-V",
+      "geometry:margin=25mm",
+      "-V",
+      "pagestyle=plain",
+      "-V",
+      "CJKmainfont=SimSun",
+      "-V",
+      "mainfont=Times New Roman",
+    )
+  }
+  args.push("-o", latexPath)
+  return args
 }
 
 async function renderMarkdown(runDir: string, bundleID: string, markdown: string) {
@@ -255,7 +281,7 @@ async function renderLatex(input: {
   return commandFile({
     command: input.command,
     tool: pandoc,
-    args: [markdownPath, "-s", "-t", "latex", "-o", latexPath],
+    args: pandocLatexArgs(markdownPath, latexPath, input.markdown),
     cwd: outputDir(input.runDir, input.bundleID),
     output: latexPath,
     format: "latex",

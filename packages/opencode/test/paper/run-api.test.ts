@@ -97,6 +97,30 @@ describe("PaperRun HttpApi", () => {
     expect(existsSync(second.run_dir)).toBe(true)
   })
 
+  test("allocates unique PaperRun directories for concurrent creates with the same generated id", async () => {
+    await using tmp = await tmpdir({ git: true, config: { formatter: false, lsp: false } })
+    let eventIndex = 0
+    const options = {
+      workspace: tmp.path,
+      home: tmp.path,
+      idFactory: (kind: "run" | "event" | "artifact") =>
+        kind === "run" ? "run-fixed" : `${kind}-${++eventIndex}`,
+    }
+
+    const [first, second] = await Promise.all([
+      createResearchRun({ topic: "first" }, options),
+      createResearchRun({ topic: "second" }, options),
+    ])
+    const ids = new Set([first.run.run_id, second.run.run_id])
+
+    expect(ids.size).toBe(2)
+    expect(ids.has("run-fixed")).toBe(true)
+    expect([...ids].some((id) => id.startsWith("run-") && id !== "run-fixed")).toBe(true)
+    expect(first.run_dir).not.toBe(second.run_dir)
+    expect(existsSync(first.run_dir)).toBe(true)
+    expect(existsSync(second.run_dir)).toBe(true)
+  })
+
   test("serves Paper model inventory JSON through the default Hono TUI backend", async () => {
     await using tmp = await tmpdir({ git: true, config: { formatter: false, lsp: false } })
     previousPaperHome = process.env.PAPER_FUCKER_TEST_HOME
@@ -227,6 +251,18 @@ describe("PaperRun HttpApi", () => {
     expect(previewBody.readonly).toBe(true)
     expect(previewBody.url).toContain("http://127.0.0.1:")
     expect(previewBody.snapshot.schema_version).toBe("preview.v1")
+    expect(previewBody.snapshot.monitor.experiment_environment.status_label).toBe("可用")
+    expect(previewBody.snapshot.monitor.experiment_environment.groups.map((group: { label: string }) => group.label)).toEqual([
+      "GPU",
+      "运行时",
+      "编译器",
+      "容器 / 虚拟化",
+    ])
+    expect(Array.isArray(previewBody.snapshot.monitor.ledger.sources)).toBe(true)
+    expect(Array.isArray(previewBody.snapshot.monitor.ledger.claims)).toBe(true)
+    expect(previewBody.snapshot.monitor.cost_agent.agent_tree.total_agents).toBeGreaterThanOrEqual(1)
+    expect(previewBody.snapshot.monitor.cost_agent.tokens.total_tokens).toBeGreaterThanOrEqual(0)
+    expect(Array.isArray(previewBody.snapshot.monitor.model_routing)).toBe(true)
 
     const exportResponse = await app().request(runPath(PaperPaths.export, runID), {
       ...json({ forced: true }),

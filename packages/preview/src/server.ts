@@ -76,6 +76,7 @@ export function startPreviewServer(options: PreviewServerOptions): PreviewServer
   const server = Bun.serve({
     hostname,
     port: options.port ?? 0,
+    idleTimeout: 60,
     async fetch(request) {
       const url = new URL(request.url)
       if (isWriteMethod(request.method)) return json({ error: "Preview is read-only." }, { status: 405 })

@@ -208,6 +208,68 @@ small {
   gap: 8px 16px;
 }
 
+.experiment-environment small {
+  display: block;
+  margin-top: 4px;
+}
+
+.environment-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.environment-group {
+  border: 1px solid var(--line);
+  background: #0a0f13;
+  padding: 10px;
+}
+
+.experiment-run-grid,
+.experiment-traces {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.experiment-run {
+  border: 1px solid var(--line);
+  background: #0a0f13;
+  padding: 10px;
+  min-width: 0;
+}
+
+.experiment-run code,
+.experiment-traces code {
+  overflow-wrap: anywhere;
+}
+
+.model-routing-board {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 10px;
+}
+
+.model-routing-decision p,
+.model-routing-decision small {
+  overflow-wrap: anywhere;
+}
+
+.tool-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  padding-top: 8px;
+}
+
+.tool-row small {
+  grid-column: 1 / -1;
+  overflow-wrap: anywhere;
+}
+
 .timeline-item time {
   display: block;
   color: var(--muted);
@@ -233,10 +295,33 @@ pre,
   min-height: 0;
 }
 
+.terminal-excerpt {
+  min-height: 0;
+  max-height: 220px;
+  margin-top: 8px;
+  padding: 10px;
+  font-size: 12px;
+  white-space: pre-wrap;
+}
+
+.terminal-excerpt.stderr {
+  border-color: var(--amber);
+}
+
 .annotation-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 12px;
+}
+
+.ledger-board {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 16px;
+}
+
+.ledger-column {
+  min-width: 0;
 }
 
 .annotation {
