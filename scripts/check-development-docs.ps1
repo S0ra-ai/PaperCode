@@ -121,6 +121,9 @@ foreach ($file in $htmlFiles) {
     if ($text -notmatch '<link rel="stylesheet" href="./assets/style.css"') {
         Add-Problem "${relative}: missing shared stylesheet"
     }
+    if ($text -notmatch '<link rel="icon" href="./assets/favicon.svg" type="image/svg\+xml" />') {
+        Add-Problem "${relative}: missing development manual favicon"
+    }
     if ($text -notmatch 'class="active"') {
         Add-Problem "${relative}: missing active navigation item"
     }
@@ -143,9 +146,15 @@ foreach ($file in $htmlFiles) {
 }
 
 $styleText = [System.IO.File]::ReadAllText($styleCss, $utf8)
-foreach ($selector in @(".doc-search", ".page-toc", ".prev-next", "@media (max-width: 860px)")) {
+foreach ($selector in @(".doc-toolbar", ".doc-search", ".page-toc", ".prev-next", ".code-block", ".copy-code", "body.theme-light", "@media (max-width: 860px)")) {
     if ($styleText -notmatch [regex]::Escape($selector)) {
         Add-Problem "docs/development/assets/style.css missing selector '$selector'"
+    }
+}
+
+foreach ($needle in @("installToolbar", "installCodeCopy", "data-action=`"theme`"", "data-action=`"wide`"", "data-action=`"nav`"", "sourceHref", "copy-code")) {
+    if ($manualText -notmatch [regex]::Escape($needle)) {
+        Add-Problem "docs/development/assets/manual.js missing '$needle'"
     }
 }
 
@@ -166,7 +175,7 @@ if ($Render) {
                 Add-Problem "Chrome failed to render docs/development/${pageName}"
                 continue
             }
-            foreach ($needle in @("doc-search", "page-toc")) {
+            foreach ($needle in @("doc-toolbar", "doc-search", "page-toc", "copy-code")) {
                 if ($rendered -notmatch [regex]::Escape($needle)) {
                     Add-Problem "Chrome render for docs/development/$pageName did not include '$needle'"
                 }
