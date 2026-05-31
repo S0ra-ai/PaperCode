@@ -2,18 +2,20 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.154-dev
+:version       0.13.0.155-dev
 :last_update   2026/05/31
 
 :history
 
-    0.13.0.154-dev - 2026/05/31 (de87597e) [fix/mcp-tool-binding-test-isolation]
-        :brief 过期 full workspace 验收报告移入归档并补齐 reports 治理说明
-        :reports
-            - chore(reports): 将 0.8.1-dev 的 strict-live-full-acceptance 从活跃报告位移到 reports/archive/strict-live-full-acceptance-0.8.1-dev.md，避免当前审计误读旧证据
-            - docs(reports): 新增 reports/README.md，说明 active reports、historical reports 与 full workspace 报告生成边界
-            - report(audit): autonomous product audit 的 full-workspace-evidence 从 warn 变为 pass，当前 focused strict live evidence 继续作为必需里程碑证据
+    0.13.0.155-dev - 2026/05/31 (73b378fa) [fix/mcp-tool-binding-test-isolation]
+        :brief reports 归档策略纳入 autonomous product audit
+        :test
+            - test(audit): autonomous-product-audit 新增 report-governance 检查，要求 reports/README.md 说明 active/historical reports 与 reports/archive 边界
+            - test(audit): active strict-live-full-acceptance.md 若存在必须匹配当前 CHANGELOG 版本，否则要求归档或重新运行 full workspace acceptance
+            - test(audit): archived strict-live-full-acceptance 报告文件名必须携带 proven -dev version，并保留 strict-live-full mode
+            - test(acceptance): strict-acceptance 单测覆盖 report-governance 审计项，避免报告治理规则退化
         :changelog
-            - docs(changelog): 0.13.0.153 开发历史移入 docs/changelog/v0/0.13.0.153.CHANGELOG
+            - docs(changelog): 0.13.0.154 开发历史移入 docs/changelog/v0/0.13.0.154.CHANGELOG
         :checks
+            - targeted tests: packages/opencode strict-acceptance.test
             - audit: scripts/autonomous-product-audit.ps1 -AllowActiveTask

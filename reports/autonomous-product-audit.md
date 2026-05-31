@@ -1,16 +1,16 @@
 ﻿# Autonomous Product Audit
 
-- Generated: 2026-05-31T15:28:35.6099196+08:00
+- Generated: 2026-05-31T15:44:11.2249997+08:00
 - Status: passed
 - Allow active task: True
 
 | Check | Status | Detail |
 | --- | --- | --- |
 | `taskflow-queue` | pass | TaskFlow queue is empty; done=137. |
-| `version-sync` | pass | README version 0.13.0.154-dev matches CHANGELOG latest version. |
+| `version-sync` | pass | README version 0.13.0.155-dev matches CHANGELOG latest version. |
 | `changelog-shape` | pass | CHANGELOG keeps one active colon DSL entry with matching :version, Git Flow branch, and real commit id. |
 | `development-docs` | pass | Development docs check passed for 16 HTML page(s) with render check. |
-| `strict-live-evidence` | pass | focused strict live report proves crawler, HF, topic/code, and final export scenarios for 0.13.0.154-dev. |
+| `strict-live-evidence` | pass | focused strict live report proves crawler, HF, topic/code, and final export scenarios for 0.13.0.155-dev. |
 | `full-workspace-evidence` | pass | No full workspace report is present; focused strict live report remains the required milestone evidence. |
 | `report-governance` | pass | Active reports are documented, and archived full workspace evidence is versioned outside the active report slot. |
 | `dangerous-residue` | pass | No dangerous TODO/FIXME/not-implemented/mock residue found in product paper paths. |
