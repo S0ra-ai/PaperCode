@@ -77,6 +77,20 @@
           <article><strong>6. 排障/下一步</strong><span>给出常见错误、日志路径、测试命令和相邻页面。</span></article>
         </div>
 
+        <h2 id="manual-page-scope">页面粒度要求</h2>
+        <p>开发手册不是宣传页，也不是泛泛的架构摘要。每个页面必须把“设计意图”和“代码修改点”放在同一条链路里。</p>
+        <table class="table">
+          <thead><tr><th>页面类型</th><th>必须包含</th><th>避免</th></tr></thead>
+          <tbody>
+            <tr><td>架构页</td><td>层级边界、数据流、运行目录、跨模块依赖和不能跨越的权限边界。</td><td>只画图，不说明哪些文件负责哪些边界。</td></tr>
+            <tr><td>流程页</td><td>入口、状态迁移、artifact 写入、event/snapshot 更新、失败分支和恢复点。</td><td>把流程写成一段自然语言，缺少函数和 schema 名。</td></tr>
+            <tr><td>模块页</td><td>目录、关键文件、核心函数、常见改动、测试入口和风险点。</td><td>只列目录树，不说明维护职责。</td></tr>
+            <tr><td>工作台页</td><td>用户动作、TUI route、持久化状态、HTTP endpoint、错误提示和键盘/滚动行为。</td><td>只描述界面长什么样，不写状态如何保存。</td></tr>
+            <tr><td>质量页</td><td>可读论文标准、真实来源边界、实验复现 gate、导出格式和人工审阅点。</td><td>只依赖单元测试，不要求生成真实论文检查。</td></tr>
+            <tr><td>使用页</td><td>用户路径、命令、输入材料、实时监控、恢复和导出。</td><td>混入内部实现讨论，导致用户路径难读。</td></tr>
+          </tbody>
+        </table>
+
         <h2 id="modes">三类常见开发模式</h2>
         <div class="grid">
           <article class="card">
@@ -216,6 +230,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-changelog-fo
         <a href="#purpose">用途</a>
         <a href="#workflow">开发参数</a>
         <a href="#page-template">开发页模板</a>
+        <a href="#manual-page-scope">页面粒度要求</a>
         <a href="#modes">开发模式</a>
         <a href="#runtime-modes">运行模式</a>
         <a href="#state-input">状态输入</a>

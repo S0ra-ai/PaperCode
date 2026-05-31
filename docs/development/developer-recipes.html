@@ -124,6 +124,19 @@
           <li>文档页面按“用途、参数、模式、输入/输出、调优、排障、下一步”组织，保持左侧导航和本页目录可用。</li>
         </ol>
 
+        <h2>新增或重写开发文档页面</h2>
+        <table class="table">
+          <thead><tr><th>步骤</th><th>文件</th><th>验收点</th></tr></thead>
+          <tbody>
+            <tr><td>定义页面职责</td><td>目标 HTML 页面</td><td>首屏说明该页解决哪个维护问题，不把使用教程和内部设计混在一起。</td></tr>
+            <tr><td>接入导航</td><td><code>assets/manual.js</code> 与所有页面侧栏</td><td>左侧目录、搜索、上一页/下一页和“查看本页源码”都能工作。</td></tr>
+            <tr><td>写代码关联</td><td>页面正文</td><td>至少包含关键目录、关键函数、输入状态、输出 artifact/event/snapshot 和测试命令。</td></tr>
+            <tr><td>写修改路径</td><td><code>developer-recipes.html</code></td><td>说明开发者要改哪些文件、同步哪些契约、跑哪些检查。</td></tr>
+            <tr><td>写排障路径</td><td>页面正文或 <code>testing-maintenance.html</code></td><td>常见错误要能映射到日志路径、诊断 code、测试文件和修复方向。</td></tr>
+            <tr><td>跑文档校验</td><td><code>scripts/check-development-docs.ps1</code></td><td>静态链接、页面清单、共享脚本、样式和可选浏览器渲染检查通过。</td></tr>
+          </tbody>
+        </table>
+
         <h2>新增本机环境/GPU 页面</h2>
         <ol>
           <li>新增环境探测模块，使用 Node/Bun API 或受控命令采集 CPU、内存、GPU、CUDA、编译器、Python、Docker/Podman/Conda。</li>
