@@ -2,21 +2,23 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.178-dev
+:version       0.13.0.179-dev
 :last_update   2026/05/31
 
 :history
 
-    0.13.0.178-dev - 2026/05/31 (f165aabd) [fix/mcp-tool-binding-test-isolation]
-        :brief final benchmark 完整论文包复审证据落库
+    0.13.0.179-dev - 2026/05/31 (e96c82e5) [fix/mcp-tool-binding-test-isolation]
+        :brief CJC 表格长文本列宽提示增强
+        :fix
+            - fix(authoring): CJC profile formatting 为 Markdown pipe table separator 写入 CJK-aware 列宽提示，Pandoc LaTeX 会给长叙述列更宽比例
+            - fix(authoring): 研究问题、贡献、结果和效度威胁等表格不再让短编号列与长问题/内容列均分宽度
+        :test
+            - test(authoring): 新增 CJC 长叙述列宽提示回归，断言问题列宽度明显大于短编号列
         :docs
-            - docs(report): reports/live-paper-generation-review.md 记录 final benchmark 真实运行命令、run id、summary、导出路径和 PDF 视觉抽查结果
-            - docs(report): 明确当前可生成结构完整、基础排版正确、final gate 通过的中国计算机学报目标论文包
-        :quality
-            - note: 本轮质量判断保留投稿模板差距，后续继续打磨表格宽度、作者单位元数据、参考文献样式和 PDF 细节
+            - docs(report): reports/live-paper-generation-review.md 记录 CJC 表格列宽复审与剩余格式打磨项
         :changelog
-            - docs(changelog): README 当前版本同步到 0.13.0.178-dev
-            - docs(changelog): 0.13.0.177 开发历史移入 docs/changelog/v0/0.13.0.177.CHANGELOG
+            - docs(changelog): README 当前版本同步到 0.13.0.179-dev
+            - docs(changelog): 0.13.0.178 开发历史移入 docs/changelog/v0/0.13.0.178.CHANGELOG
         :checks
-            - live benchmark: npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario final passed
-            - pdf visual smoke: pdftoppm rendered first two pages for manual inspection
+            - targeted tests: npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/export-pipeline.test.ts --timeout 60000 passed
+            - typecheck: npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
