@@ -63,6 +63,8 @@ describe("live paper quality benchmark script", () => {
     expect(benchmark).toContain("PAPER_FUCKER_BENCHMARK_OUTPUT_ROOT")
     expect(benchmark).toContain("PAPER_FUCKER_BENCHMARK_SELF_TEST_FAILURE")
     expect(benchmark).toContain("attempt-error.json")
+    expect(benchmark).toContain('path.join(outputDir, "README.md")')
+    expect(benchmark).toContain("writeAttemptReadme")
     expect(benchmark).toContain("last-failed-attempt.txt")
     expect(benchmark).toContain("installBenchmarkFailureRecorder")
     expect(benchmark).toContain('process.on("uncaughtException"')
@@ -109,7 +111,9 @@ describe("live paper quality benchmark script", () => {
 
       const failedAttempt = readFileSync(lastFailedPath, "utf8").trim()
       const attemptErrorPath = path.join(scenarioRoot, failedAttempt, "attempt-error.json")
+      const attemptReadmePath = path.join(scenarioRoot, failedAttempt, "README.md")
       expect(existsSync(attemptErrorPath)).toBe(true)
+      expect(existsSync(attemptReadmePath)).toBe(true)
       expect(existsSync(path.join(scenarioRoot, "paperrun-summary.json"))).toBe(false)
 
       const attemptError = JSON.parse(readFileSync(attemptErrorPath, "utf8"))
@@ -117,6 +121,12 @@ describe("live paper quality benchmark script", () => {
       expect(attemptError.scenario).toBe("topic")
       expect(attemptError.error.code).toBe("benchmark_failed")
       expect(attemptError.error.message).toContain("live benchmark self-test failure recorder")
+
+      const attemptReadme = readFileSync(attemptReadmePath, "utf8")
+      expect(attemptReadme).toContain("status: failed")
+      expect(attemptReadme).toContain("scenario: topic")
+      expect(attemptReadme).toContain("error_code: benchmark_failed")
+      expect(attemptReadme).toContain("Published summaries are updated only after a successful benchmark attempt")
     } finally {
       rmSync(outputRoot, { recursive: true, force: true })
     }
