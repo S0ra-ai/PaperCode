@@ -366,7 +366,7 @@ function Test-VisibleCommandSurface {
         return
     }
 
-    Add-AuditResult "visible-command-surface" "pass" "Visible slash command registry is exact, and palette/autocomplete use the Paper Fucker filter."
+    Add-AuditResult "visible-command-surface" "pass" "Visible slash command registry is exact, and palette/autocomplete use the PaperCode filter."
 }
 
 function Test-ModelRoutingBoundary {
@@ -494,10 +494,10 @@ function Test-DangerousResidue {
 function Test-BrandSurface {
     $logo = Read-RepoText "packages/opencode/src/cli/logo.ts"
     $readme = Read-RepoText "README.md"
-    if ($logo.Contains("Paper Fucker") -and $readme.Contains("Paper Fucker") -and $readme.Contains("PaperRun")) {
-        Add-AuditResult "brand-surface" "pass" "Paper Fucker and PaperRun remain the documented user-visible product surface."
+    if ($logo.Contains("PaperCode") -and $readme.Contains("PaperCode") -and $readme.Contains("PaperRun")) {
+        Add-AuditResult "brand-surface" "pass" "PaperCode and PaperRun remain the documented user-visible product surface."
     } else {
-        Add-AuditResult "brand-surface" "fail" "Paper Fucker/PaperRun product surface is missing from logo or README."
+        Add-AuditResult "brand-surface" "fail" "PaperCode/PaperRun product surface is missing from logo or README."
     }
 }
 

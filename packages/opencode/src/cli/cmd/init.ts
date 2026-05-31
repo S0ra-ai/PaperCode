@@ -15,7 +15,7 @@ function readPairs(values: string[] | undefined) {
 
 export const InitCommand = effectCmd({
   command: "init [action]",
-  describe: "initialize, inspect, or reset local Paper Fucker state",
+  describe: "initialize, inspect, or reset local PaperCode state",
   instance: false,
   builder: (yargs) =>
     yargs
@@ -33,7 +33,7 @@ export const InitCommand = effectCmd({
         type: "boolean",
       })
       .option("home", {
-        describe: "override user home for Paper Fucker global state",
+        describe: "override user home for PaperCode global state",
         type: "string",
       })
       .option("workspace", {

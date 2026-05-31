@@ -347,7 +347,7 @@ export function defaultPaperProfiles(): PaperProfile[] {
       "自定义期刊 profile 草案",
       [
         {
-          name: "Paper Fucker 自定义期刊草案",
+          name: "PaperCode 自定义期刊草案",
           url: "local://paper_fucker/profiles/custom-journal",
           trust: "local",
           refresh: "manual",

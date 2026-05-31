@@ -5,7 +5,7 @@ description: Build and check Nature Portfolio paper profiles for paper_fucker re
 
 # Nature Paper
 
-Use this skill when a paper_fucker run targets Nature, Nature Portfolio, or a nearby Nature-style profile.
+Use this skill when a PaperCode run targets Nature, Nature Portfolio, or a nearby Nature-style profile.
 
 ## Source Policy
 

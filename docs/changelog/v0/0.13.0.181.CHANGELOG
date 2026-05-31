@@ -1,0 +1,20 @@
+:project       paper_fucker - 可验证论文研究自动化系统
+:author        k1d (https://github.com/ZhuchenZhong)
+:repo
+:desc          0.13.0.181 开发历史归档
+:version       0.13.0.181-dev
+:last_update   2026/05/31
+
+:history
+
+    0.13.0.181-dev - 2026/05/31 (aa4581d8) [fix/mcp-tool-binding-test-isolation]
+        :brief README 同步 CJC 生成质量状态
+        :docs
+            - docs(readme): README 增加当前验收状态，记录 final benchmark、四格式导出、CJC 表格列宽和参考文献样式进展
+            - docs(readme): README 明确仍处开发态，作者单位元数据、参考文献细节、整页 PDF 视觉验收和官方模板完全对齐还需迭代
+        :changelog
+            - docs(changelog): README 当前版本同步到 0.13.0.181-dev
+            - docs(changelog): 0.13.0.180 开发历史移入 docs/changelog/v0/0.13.0.180.CHANGELOG
+        :checks
+            - readme version: powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
+            - changelog format: powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-changelog-format.ps1 -IncludeArchives passed

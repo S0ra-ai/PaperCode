@@ -138,7 +138,7 @@ export function PaperJournalWorkbenchPage() {
     <box width="100%" height="100%" paddingLeft={3} paddingRight={3} paddingTop={1} paddingBottom={1} flexDirection="column" gap={1}>
       <box flexDirection="row" justifyContent="space-between">
         <box flexDirection="column">
-          <text fg={theme.text} attributes={TextAttributes.BOLD}>Paper Fucker 期刊工作台</text>
+          <text fg={theme.text} attributes={TextAttributes.BOLD}>PaperCode 期刊工作台</text>
           <text fg={theme.textMuted}>当前仅启用中国计算机学报格式；其他期刊入口暂不开放。</text>
         </box>
         <text fg={theme.textMuted}>Esc 返回首页</text>

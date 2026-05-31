@@ -1,6 +1,6 @@
 # NOTICE
 
-This repository contains original `paper_fucker` project work licensed under
+This repository contains original `PaperCode` project work licensed under
 the Mozilla Public License 2.0 (MPL-2.0).
 
 Third-party software and source snapshots keep their original copyright notices
@@ -15,7 +15,7 @@ project is imported, record at minimum:
 - filtering decisions
 - local location in this repository
 
-The root `LICENSE` applies to original `paper_fucker` project work unless a file
+The root `LICENSE` applies to original `PaperCode` project work unless a file
 or directory explicitly carries a different third-party license.
 
 ## OpenCode
@@ -39,7 +39,7 @@ git history. Active upstream GitHub workflows were not imported.
 - Local location: `.paper_fucker/skills/architecture-diagram`
 - License: MIT
 
-Paper Fucker bundles this as an optional built-in research diagram skill for
+PaperCode bundles this as an optional built-in research diagram skill for
 HTML/SVG architecture and system diagrams.
 
 ## Paper Framework Figure Studio Pro
@@ -49,7 +49,7 @@ HTML/SVG architecture and system diagrams.
 - Local location: `.paper_fucker/skills/paper-framework-figure-studio-pro`
 - License: MIT-0
 
-Paper Fucker bundles this as an optional built-in research figure skill for
+PaperCode bundles this as an optional built-in research figure skill for
 publication-ready framework, pipeline, method overview, and agent workflow
 figures. The bundled package keeps its local `LICENSE` and metadata.
 
@@ -59,7 +59,21 @@ figures. The bundled package keeps its local `LICENSE` and metadata.
 - Repository: https://github.com/epiral/bb-browser
 - Local status: managed capability, not vendored as first-party product source
 
-Paper Fucker treats bb-browser as an optional managed browser and web-data
-acquisition capability. It is diagnosed by `paper_fucker init doctor` and should
-be installed through Paper Fucker-managed setup rather than requiring manual
+PaperCode treats bb-browser as an optional managed browser and web-data
+acquisition capability. It is diagnosed by `papercode init doctor` and should
+be installed through PaperCode-managed setup rather than requiring manual
 user installation.
+
+## oh-my-opencode / oh-my-openagent
+
+- Project: oh-my-opencode / oh-my-openagent
+- Repository: https://github.com/code-yeongyu/oh-my-openagent
+- Local reference snapshot: `tmp/upstream-oh-my-opencode`
+- Version inspected: 4.5.12
+- License: Sustainable Use License 1.0
+- Preserved license summary: `upstream/oh-my-opencode-LICENSE.md`
+
+PaperCode adapts a small set of project-scope command, skill, and agent workflow
+patterns from this local reference snapshot. The adapted files live under
+`.paper_fucker/command`, `.paper_fucker/skills`, and `.paper_fucker/agent` with
+PaperCode naming and product copy.

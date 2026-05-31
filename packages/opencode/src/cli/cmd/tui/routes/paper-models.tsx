@@ -612,7 +612,7 @@ export function PaperModelWorkbenchPage() {
     >
       <box flexDirection="row" justifyContent="space-between" alignItems="center">
         <box flexDirection="column">
-          <text fg={theme.text} attributes={TextAttributes.BOLD}>Paper Fucker 模型工作台</text>
+          <text fg={theme.text} attributes={TextAttributes.BOLD}>PaperCode 模型工作台</text>
           <text fg={theme.textMuted}>{SECTION_DESCRIPTIONS[currentSection()]}</text>
         </box>
         <text fg={dirty() ? theme.warning : theme.textMuted}>{dirty() ? "有未保存修改 Ctrl+S 保存" : "Esc 返回首页"}</text>

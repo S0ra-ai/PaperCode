@@ -434,7 +434,7 @@ describe("PaperRun HttpApi", () => {
     expect(snapshot.events.some((event: { type: string }) => event.type === "experiment.starterpack.applied")).toBe(true)
   })
 
-  test("stores PaperRuns in Paper Fucker home by default and resumes home/workspace history", async () => {
+  test("stores PaperRuns in PaperCode home by default and resumes home/workspace history", async () => {
     await using tmp = await tmpdir({
       git: true,
       config: { formatter: false, lsp: false },

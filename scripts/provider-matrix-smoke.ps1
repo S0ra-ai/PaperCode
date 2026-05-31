@@ -105,7 +105,7 @@ if (-not (Test-Path -LiteralPath $ProviderDir)) {
                 messages = @(
                     @{
                         role = "user"
-                        content = "Paper Fucker provider matrix smoke. Reply OK."
+                        content = "PaperCode provider matrix smoke. Reply OK."
                     }
                 )
                 max_tokens = 8

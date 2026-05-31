@@ -25,8 +25,8 @@ const packageName = `paper_fucker-${platform}-${arch}`
 const binDir = path.join(opencodeDir, "dist", packageName, "bin")
 
 const sourceNames = process.platform === "win32" ? ["paper_fucker.exe", "paper_fucker"] : ["paper_fucker"]
-const targetName = process.platform === "win32" ? "paper_fucker.exe" : "paper_fucker"
-const target = path.join(repoRoot, targetName)
+const targetNames =
+  process.platform === "win32" ? ["papercode.exe", "paper_fucker.exe"] : ["papercode", "paper_fucker"]
 
 async function exists(file: string) {
   try {
@@ -53,9 +53,11 @@ if (!source) {
   process.exit(1)
 }
 
-await copyFile(source, target)
-if (process.platform !== "win32") {
-  await chmod(target, 0o755)
+for (const targetName of targetNames) {
+  const target = path.join(repoRoot, targetName)
+  await copyFile(source, target)
+  if (process.platform !== "win32") {
+    await chmod(target, 0o755)
+  }
+  console.log(`Linked root executable: ${path.relative(repoRoot, target)} -> ${path.relative(repoRoot, source)}`)
 }
-
-console.log(`Linked root executable: ${path.relative(repoRoot, target)} -> ${path.relative(repoRoot, source)}`)

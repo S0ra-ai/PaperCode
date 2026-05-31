@@ -115,7 +115,7 @@ export function PaperFolderPickerPage() {
   onMount(() => {
     void openPaperNativePicker({
       mode: "folder",
-      title: "Paper Fucker 选择当前对话工作目录",
+      title: "PaperCode 选择当前对话工作目录",
       initialPath: current(),
     })
       .then((result) => {

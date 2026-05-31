@@ -1,4 +1,4 @@
-# Paper Fucker 自生成论文包质量评审
+# PaperCode 自生成论文包质量评审
 
 - generated_at: 2026-05-27T14:15:00+08:00
 - project_version: 0.13.0.110-dev
@@ -49,7 +49,7 @@
 - 这使最终导出更符合投稿级论文要求：代码证据、实验证据和正式论文参考文献必须同时可审查。
 - 相关回归已通过：verified paper reference/formal References 定向测试、authoring/datasets/live/metadata 组合测试和 `packages/opencode` typecheck。
 - 本报告和 CHANGELOG 记录为后续开发版本 `0.13.0.109-dev`。
-- 质量判断：Paper Fucker 不再把缺少正式文献支撑的稿件视为 final-ready。
+- 质量判断：PaperCode 不再把缺少正式文献支撑的稿件视为 final-ready。
 
 ## 2026-05-31 source record manifest 缺失阻断复审
 
@@ -92,7 +92,7 @@
 - 占位数据集会写入 `placeholder_dataset_locator` verification diagnostic；如果没有正式开放数据集，仍保留 `no_open_verified_dataset` 缺口。
 - 相关回归已通过：datasets 定向测试、authoring 定向测试、authoring/datasets/live/metadata 组合测试和 `packages/opencode` typecheck。
 - 本报告和 CHANGELOG 记录为后续开发版本 `0.13.0.104-dev`。
-- 质量判断：伪数据被拦截得更早，Paper Fucker 在生成接近人工协作质量论文时不会把占位数据源用于方向可行性判断。
+- 质量判断：伪数据被拦截得更早，PaperCode 在生成接近人工协作质量论文时不会把占位数据源用于方向可行性判断。
 
 ## 2026-05-31 占位数据集过滤复审
 
@@ -648,7 +648,7 @@
 - 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-e0d800c5-cc7e-4bf4-a9d7-1cfadf23362a\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
 - 终稿现在在题名后、摘要前输出作者信息区块。
 - 未登记作者、机构和通信作者时输出未登记状态，不伪造作者或机构。
-- 扫描未发现 `Paper Fucker` 或 `OpenCode` 品牌进入作者信息。
+- 扫描未发现 `PaperCode` 或 `OpenCode` 品牌进入作者信息。
 - 质量判断：题名页元数据缺口已显式化，后续可由 TUI 作者和期刊配置替换为真实信息。
 
 ## 2026-05-30 内部来源标记复审
@@ -961,7 +961,7 @@
 
 ## 质量判断
 
-Paper Fucker 当前已经具备“诚实闭环”的关键能力：没有复现证据时不会生成 final export；有明确实验协议和证据清单时可以生成 Markdown、LaTeX、PDF、DOCX bundle。
+PaperCode 当前已经具备“诚实闭环”的关键能力：没有复现证据时不会生成 final export；有明确实验协议和证据清单时可以生成 Markdown、LaTeX、PDF、DOCX bundle。
 
 对计算机类论文，最重要的改进点已经生效：
 
@@ -1022,7 +1022,7 @@ Paper Fucker 当前已经具备“诚实闭环”的关键能力：没有复现�
 - Forced draft 输出已改为论文式结构：Abstract、Introduction、Related Work、Method、Data and Code Availability、Evaluation Protocol、Results、Discussion、Experiments and Reproducibility、Limitations、Conclusion，诊断清单进入附录。
 - 显式 baseline/ablation/container 协议场景复跑 `run-02d5ec9a-260d-4d75-a740-9889da9f902b`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
 - 最新 final Markdown：`C:\Users\13750\.paper_fucker\runs\run-02d5ec9a-260d-4d75-a740-9889da9f902b\exports\bundle-final-draft-baseline-ablation\bundle-final-draft-baseline-ablation.md`。
-- 结论：Paper Fucker 已能在代码论文场景中生成可读论文包；当实验协议完整时产出 final，当真实仓库实验失败或协议缺失时诚实阻断并给出可执行补齐清单。
+- 结论：PaperCode 已能在代码论文场景中生成可读论文包；当实验协议完整时产出 final，当真实仓库实验失败或协议缺失时诚实阻断并给出可执行补齐清单。
 
 ## 2026-05-28 TUI / Preview Starter Apply 复审
 

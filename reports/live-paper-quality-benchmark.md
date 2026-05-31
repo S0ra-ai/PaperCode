@@ -90,7 +90,7 @@ Covered checks include:
 - Preview tests.
 - Python research-tools tests.
 - Server and workspace typecheck.
-- Paper Fucker CLI/TUI smoke.
+- PaperCode CLI/TUI smoke.
 - DeepSeek live provider smoke.
 - Exa MCP live initialize.
 - `nature-paper` skill/profile smoke.

@@ -1,8 +1,8 @@
 ---
-description: "find Paper Fucker issue(s) on github"
+description: "find PaperCode issue(s) on github"
 ---
 
-Search through existing issues in S0ra-ai/paper_fucker using the gh cli to find issues matching this query:
+Search through existing issues in ZhuchenZhong/paper_fucker using the gh cli to find issues matching this query:
 
 $ARGUMENTS
 

@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test"
 import { readTuiJsonResponse } from "../../../src/cli/cmd/tui/util/http"
 import { submitPaperWorkbenchPrompt } from "../../../src/cli/cmd/tui/routes/paper/workbench"
 
-describe("Paper Fucker TUI JSON response handling", () => {
+describe("PaperCode TUI JSON response handling", () => {
   test("turns non-JSON service responses into Chinese diagnostics", async () => {
     await expect(
       readTuiJsonResponse(new Response("<html>not json</html>", { status: 200 }), "模型工作台读取失败"),

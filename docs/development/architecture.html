@@ -3,14 +3,14 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>架构 - Paper Fucker 开发手册</title>
+    <title>架构 - PaperCode 开发手册</title>
     <link rel="stylesheet" href="./assets/style.css" />
     <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml" />
   </head>
   <body>
     <div class="layout">
       <aside class="sidebar">
-        <div class="brand"><strong>Paper Fucker</strong><span>开发手册</span></div>
+        <div class="brand"><strong>PaperCode</strong><span>开发手册</span></div>
         <nav class="nav">
           <div class="nav-group">入门</div>
           <a href="./index.html">总览</a>
@@ -40,11 +40,11 @@
         <section class="hero">
           <div class="eyebrow">Architecture</div>
           <h1>架构边界</h1>
-          <p class="lead">Paper Fucker 是论文领域系统。模型、工具、会话、MCP、skills 和 TUI runtime 是底层能力；论文状态和真实性 gate 属于 Paper Fucker。</p>
+          <p class="lead">PaperCode 是论文领域系统。模型、工具、会话、MCP、skills 和 TUI runtime 是底层能力；论文状态和真实性 gate 属于 PaperCode。</p>
         </section>
 
         <div class="diagram">
-          <svg width="960" height="420" viewBox="0 0 960 420" role="img" aria-label="Paper Fucker architecture diagram">
+          <svg width="960" height="420" viewBox="0 0 960 420" role="img" aria-label="PaperCode architecture diagram">
             <defs>
               <style>
                 .box { fill: #10151d; stroke: #2d3b52; stroke-width: 1.5; rx: 8; }
@@ -113,7 +113,7 @@
           <li>PaperRun 是一等状态，不是普通聊天 session 的别名。</li>
           <li>论文领域 artifacts、gate、source ledger 和 export bundle 由 Paper Core 管。</li>
           <li>Provider/model 只能通过 Paper 模型库存、allowlist 和路由进入 Agent Team。</li>
-          <li>用户目录、运行历史和密钥状态均使用 Paper Fucker 自有路径。</li>
+          <li>用户目录、运行历史和密钥状态均使用 PaperCode 自有路径。</li>
         </ul>
       </main>
     </div>

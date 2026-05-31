@@ -1,8 +1,8 @@
-# Paper Fucker
+# PaperCode
 
-当前版本：<!-- version:start -->0.13.0.181-dev<!-- version:end --> ｜ 作者：k1d ([ZhuchenZhong](https://github.com/ZhuchenZhong)) ｜ 状态：开发态 ｜ 许可证：MPL-2.0
+当前版本：<!-- version:start -->0.13.0.182-dev<!-- version:end --> ｜ 作者：k1d ([ZhuchenZhong](https://github.com/ZhuchenZhong)) ｜ 状态：开发态 ｜ 许可证：MPL-2.0
 
-Paper Fucker 是一个中文优先、私有优先的论文研究工作台。你输入主题，或拖入论文、代码、数据和实验日志，它会把任务组织成可恢复、可审查的 `PaperRun`：研究规划、资料检索、代码理解、实验设计、复现记录、证据账本、真实性审查、实时预览和导出。
+PaperCode 是一个中文优先、私有优先的论文研究工作台。你输入主题，或拖入论文、代码、数据和实验日志，它会把任务组织成可恢复、可审查的 `PaperRun`：研究规划、资料检索、代码理解、实验设计、复现记录、证据账本、真实性审查、实时预览和导出。
 
 ## 能力图
 
@@ -33,7 +33,7 @@ git clone https://github.com/ZhuchenZhong/paper_fucker.git
 cd paper_fucker
 bun install
 bun run build
-.\paper_fucker.exe
+.\papercode.exe
 ```
 
 macOS / Linux：
@@ -43,16 +43,16 @@ git clone https://github.com/ZhuchenZhong/paper_fucker.git
 cd paper_fucker
 bun install
 bun run build
-./paper_fucker
+./papercode
 ```
 
 初始化与诊断：
 
 ```bash
-paper_fucker init
-paper_fucker init doctor
-paper_fucker runs list
-paper_fucker resume <run-id>
+papercode init
+papercode init doctor
+papercode runs list
+papercode resume <run-id>
 ```
 
 ## TUI 工作流
@@ -75,7 +75,7 @@ paper_fucker resume <run-id>
 
 ## 模型与订阅
 
-`/models` 是唯一的模型配置入口。Paper Fucker 中的 provider 指已经完成授权、实际可调用的模型入口。注册方式有两类：
+`/models` 是唯一的模型配置入口。PaperCode 中的 provider 指已经完成授权、实际可调用的模型入口。注册方式有两类：
 
 - 订阅登录：ChatGPT Plus/Pro、GitHub Copilot。
 - 自定义 endpoint：填写 provider id、base URL 和 API key，自动拉取 `/models`。
@@ -90,7 +90,7 @@ paper_fucker resume <run-id>
 - 论文脊梁：`PaperSpine` 在正文前检查中心论点、动机链、贡献链和证据链，避免无证据草稿伪装成终稿。
 - 全局图：`GlobalFigureSpec` 生成期刊适配 overview figure，panel 必须绑定 claim、source 或 artifact。
 - 图示能力：内置 `architecture-diagram` 和 `paper-framework-figure-studio-pro`，用于系统架构图、方法流程图和 framework figure。
-- 网页采集：`bb-browser` 作为 Paper Fucker 托管能力诊断和安装，不要求用户手工准备浏览器采集栈。
+- 网页采集：`bb-browser` 作为 PaperCode 托管能力诊断和安装，不要求用户手工准备浏览器采集栈。
 - 机器环境：侧边栏显示 OS、CPU、内存、磁盘、GPU/CUDA/ROCm、编译器、Python/uv/pip/conda、Node/Bun、Docker、WSL 和虚拟化工具状态。
 - 历史恢复：全局 run index 可列出 home/workspace 两类 run，CLI 和 TUI 都支持恢复。
 
@@ -104,10 +104,10 @@ paper_fucker resume <run-id>
 
 ## 隐私
 
-Paper Fucker 默认 private-first：
+PaperCode 默认 private-first：
 
-- 配置、密钥和运行记录保存在 Paper Fucker 本机状态目录。
-- 只使用 `~/.paper_fucker/`、项目 `.paper_fucker/` 和 `PAPER_FUCKER_*` 环境变量。
+- 配置、密钥和运行记录保存在 PaperCode 本机状态目录。
+- 运行状态写入 `~/.paper_fucker/` 或你显式选择的工作区 `.paper_fucker/`。
 - 本地代码、数据和论文材料不会默认全文发给外部模型或 MCP。
 - secrets、ignored files、大二进制和敏感配置会被排除。
 - 外部模型、MCP、Skill 和工具调用写入 audit/tool trace。
@@ -134,11 +134,11 @@ Paper Fucker 默认 private-first：
 不会。默认 run 存在用户 home 的 `~/.paper_fucker/runs`。只有你选择当前目录作为工作区，才会写入工作区 `.paper_fucker/runs`。
 
 **可以恢复历史任务吗？**  
-可以。TUI 使用 `/resume`，CLI 使用 `paper_fucker runs list` 和 `paper_fucker resume <run-id>`。
+可以。TUI 使用 `/resume`，CLI 使用 `papercode runs list` 和 `papercode resume <run-id>`。
 
 **第三方来源在哪里？**  
 第三方快照、skills 和托管能力边界记录在 `NOTICE.md`。内部维护说明放在 `docs/internal/`。
 
 ## License
 
-Paper Fucker 原创项目代码使用 Mozilla Public License 2.0（MPL-2.0）。第三方快照、skills 和工具链组件保留其各自许可证，详见 `NOTICE.md`。
+PaperCode 原创项目代码使用 Mozilla Public License 2.0（MPL-2.0）。第三方快照、skills 和工具链组件保留其各自许可证，详见 `NOTICE.md`。

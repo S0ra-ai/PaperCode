@@ -3,14 +3,14 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>实验执行链路 - Paper Fucker 开发手册</title>
+    <title>实验执行链路 - PaperCode 开发手册</title>
     <link rel="stylesheet" href="./assets/style.css" />
     <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml" />
   </head>
   <body>
     <div class="layout">
       <aside class="sidebar">
-        <div class="brand"><strong>Paper Fucker</strong><span>开发手册</span></div>
+        <div class="brand"><strong>PaperCode</strong><span>开发手册</span></div>
         <nav class="nav">
           <div class="nav-group">入门</div>
           <a href="./index.html">总览</a>
@@ -40,7 +40,7 @@
         <section class="hero">
           <div class="eyebrow">Experiment Runtime</div>
           <h1>代码实验、baseline、ablation 与复现</h1>
-          <p class="lead">计算机类论文必须面对代码和实验。这里说明 Paper Fucker 如何发现脚本、执行命令、记录输出，并决定是否允许 final export。</p>
+          <p class="lead">计算机类论文必须面对代码和实验。这里说明 PaperCode 如何发现脚本、执行命令、记录输出，并决定是否允许 final export。</p>
         </section>
 
         <h2>执行模型</h2>
@@ -67,7 +67,7 @@
         </table>
 
         <h2>协议发现规则</h2>
-        <p>Paper Fucker 当前优先识别仓库 <code>package.json</code> 中的实验脚本。</p>
+        <p>PaperCode 当前优先识别仓库 <code>package.json</code> 中的实验脚本。</p>
         <table class="table">
           <thead><tr><th>脚本类型</th><th>识别例子</th><th>语义</th></tr></thead>
           <tbody>

@@ -30,7 +30,7 @@
   installCodeCopy()
 
   if (!content.querySelector(".breadcrumbs")) {
-    const title = pages[currentIndex]?.[1] || document.title.replace(" - Paper Fucker 开发手册", "")
+    const title = pages[currentIndex]?.[1] || document.title.replace(" - PaperCode 开发手册", "")
     const breadcrumbs = document.createElement("div")
     breadcrumbs.className = "breadcrumbs"
     breadcrumbs.innerHTML = `<a href="./index.html">开发手册</a><span>${escapeHtml(title)}</span>`

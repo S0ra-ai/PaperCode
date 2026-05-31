@@ -81,7 +81,7 @@ const TIPS = [
   "使用 {highlight}/file{/highlight}、{highlight}/folder{/highlight}、{highlight}/data{/highlight} 或 {highlight}/log{/highlight} 补充材料",
   "使用 {highlight}/status{/highlight} 查看模型、工具链、MCP、Skill 和 Preview 健康状态",
   themeTip,
-  "使用 {highlight}Ctrl+P{/highlight} 打开 Paper Fucker 命令面板",
+  "使用 {highlight}Ctrl+P{/highlight} 打开 PaperCode 命令面板",
   "使用 {highlight}/models{/highlight} 管理允许模型池",
   "使用 {highlight}Ctrl+X B{/highlight} 显示或隐藏侧边栏",
   "使用 {highlight}Shift+Enter{/highlight} 或 {highlight}Ctrl+J{/highlight} 在输入框换行",

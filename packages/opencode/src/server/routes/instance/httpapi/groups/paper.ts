@@ -135,7 +135,7 @@ export const PaperApi = HttpApi.make("paper")
           OpenApi.annotations({
             identifier: "paper.runs.create",
             summary: "Create PaperRun",
-            description: "Create a first-class Paper Fucker PaperRun from topic, code, data, logs, or paper materials.",
+            description: "Create a first-class PaperCode PaperRun from topic, code, data, logs, or paper materials.",
           }),
         ),
         HttpApiEndpoint.get("listRuns", PaperPaths.runs, {
@@ -167,7 +167,7 @@ export const PaperApi = HttpApi.make("paper")
           OpenApi.annotations({
             identifier: "paper.runs.resume",
             summary: "Resume PaperRun",
-            description: "Resume a previous PaperRun from the Paper Fucker home/workspace run index.",
+            description: "Resume a previous PaperRun from the PaperCode home/workspace run index.",
           }),
         ),
         HttpApiEndpoint.get("events", PaperPaths.events, {
@@ -269,7 +269,7 @@ export const PaperApi = HttpApi.make("paper")
           OpenApi.annotations({
             identifier: "paper.doctor",
             summary: "Run paper doctor",
-            description: "Inspect Paper Fucker runtime health, defaults, storage, language, MCP, and skill readiness.",
+            description: "Inspect PaperCode runtime health, defaults, storage, language, MCP, and skill readiness.",
           }),
         ),
         HttpApiEndpoint.get("providersDiscover", PaperPaths.providersDiscover, {
@@ -319,7 +319,7 @@ export const PaperApi = HttpApi.make("paper")
           OpenApi.annotations({
             identifier: "paper.model_inventory.allowlist",
             summary: "Update model allowlist",
-            description: "Persist the models that the Paper Fucker decision model and agent team may use.",
+            description: "Persist the models that the PaperCode decision model and agent team may use.",
           }),
         ),
         HttpApiEndpoint.post("modelRoutingDecision", PaperPaths.modelRoutingDecision, {
@@ -330,7 +330,7 @@ export const PaperApi = HttpApi.make("paper")
           OpenApi.annotations({
             identifier: "paper.model_routing.decision",
             summary: "Preview model routing",
-            description: "Ask the Paper Fucker model router which allowlisted model would be used for a stage or role.",
+            description: "Ask the PaperCode model router which allowlisted model would be used for a stage or role.",
           }),
         ),
         HttpApiEndpoint.post("modelRolesAssign", PaperPaths.modelRoles, {
@@ -348,7 +348,7 @@ export const PaperApi = HttpApi.make("paper")
       .annotateMerge(
         OpenApi.annotations({
           title: "paper",
-          description: "First-class PaperRun routes for the Paper Fucker 论文工作台.",
+          description: "First-class PaperRun routes for the PaperCode 论文工作台.",
         }),
       )
       .middleware(InstanceContextMiddleware)
@@ -357,7 +357,7 @@ export const PaperApi = HttpApi.make("paper")
   )
   .annotateMerge(
     OpenApi.annotations({
-      title: "Paper Fucker PaperRun HttpApi",
+      title: "PaperCode PaperRun HttpApi",
       version: "0.2.2-dev",
       description:
         "PaperRun API for research intake, stage graph, ledgers, guidance, preview, export, and diagnostics.",

@@ -7,7 +7,7 @@ Date: `2026/05/10`
 
 ## Summary
 
-The Paper Fucker TUI home surface still had small user-visible copy that made the product feel like an OpenCode entrypoint:
+The PaperCode TUI home surface still had small user-visible copy that made the product feel like an OpenCode entrypoint:
 
 - The home placeholder example used `--code packages/opencode`.
 - A home tip said to add an "OpenCode provider".
@@ -39,4 +39,4 @@ Use {highlight}/themes
 --code packages/opencode
 ```
 
-The replacement copy scan confirmed the Paper Fucker wording is present.
+The replacement copy scan confirmed the PaperCode wording is present.

@@ -192,7 +192,7 @@ describe("strict live acceptance script", () => {
     expect(script).toContain('Add-AuditResult "report-governance" "pass"')
   })
 
-  test("autonomous audit locks Paper Fucker visible command surface", () => {
+  test("autonomous audit locks PaperCode visible command surface", () => {
     const script = readFileSync(autonomousAuditPath, "utf8")
     expect(script).toContain("Test-VisibleCommandSurface")
     expect(script).toContain("PaperVisibleCommandRegistry")

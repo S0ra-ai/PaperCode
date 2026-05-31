@@ -9,11 +9,11 @@ async function source(file: string) {
   return fs.readFile(path.join(root, "src", file), "utf8")
 }
 
-describe("public Paper Fucker surface", () => {
-  test("CLI logo exposes Paper Fucker wordmark", () => {
+describe("public PaperCode surface", () => {
+  test("CLI logo exposes PaperCode wordmark", () => {
     const rendered = UI.logo()
 
-    expect(rendered).toContain("Paper Fucker")
+    expect(rendered).toContain("PaperCode")
     expect(rendered).not.toMatch(/Open\s*Code|OpenCode/)
   })
 
@@ -48,7 +48,7 @@ describe("public Paper Fucker surface", () => {
 
     expect(index).toContain('ProductVersion')
     expect(index).toContain('.version("version", "show version number", ProductVersion)')
-    expect(debug).toContain("paper_fucker version: ${ProductVersion}")
+    expect(debug).toContain("papercode version: ${ProductVersion}")
     expect(sidebar).toContain("{ProductVersion}")
     expect(build).toContain("CHANGELOG")
     expect(build).toContain("PAPER_FUCKER_VERSION")
@@ -73,7 +73,7 @@ describe("public Paper Fucker surface", () => {
     expect(exportCommand).not.toContain("export session data as JSON")
     expect(exportCommand).not.toContain("session id to export")
     expect(initCommand).toContain('command: "init [action]"')
-    expect(initCommand).toContain("initialize, inspect, or reset local Paper Fucker state")
+    expect(initCommand).toContain("initialize, inspect, or reset local PaperCode state")
     expect(initCommand).toContain("reset")
     expect(initCommand).toContain("doctor")
   })
@@ -86,9 +86,9 @@ describe("public Paper Fucker surface", () => {
     expect(tips).toContain("submission_candidate")
     expect(tips).toContain("右侧栏")
     expect(tips).toContain("子 agent 深度由运行态条件停止")
-    expect(tips).not.toContain("paper_fucker export <run-id>")
-    expect(tips).not.toContain("paper_fucker preview <run-id>")
-    expect(tips).not.toContain("paper_fucker run --code")
+    expect(tips).not.toContain("papercode export <run-id>")
+    expect(tips).not.toContain("papercode preview <run-id>")
+    expect(tips).not.toContain("papercode run --code")
     expect(tips).not.toContain("resume the last session")
     expect(tips).not.toContain("conversation session")
     expect(tips).not.toContain("github install")
@@ -101,7 +101,7 @@ describe("public Paper Fucker surface", () => {
     const paperApi = await source("server/routes/instance/httpapi/groups/paper.ts")
 
     for (const text of [sessionSidebar, pluginSidebarFooter]) {
-      expect(text).toContain("Paper Fucker")
+      expect(text).toContain("PaperCode")
       expect(text).not.toContain("<b>Open</b>")
       expect(text).not.toContain("<b>Code</b>")
     }
@@ -119,13 +119,13 @@ describe("public Paper Fucker surface", () => {
     expect(providerDialog).toContain("isHiddenManagedProvider")
     expect(providerOrigin).toContain("HIDDEN_MANAGED_PROVIDERS")
     expect(providerDialog).not.toContain("Low cost subscription")
-    expect(providerDialog).not.toContain("paper_fucker Zen")
-    expect(providerDialog).not.toContain("paper_fucker Go")
+    expect(providerDialog).not.toContain("PaperCode Zen")
+    expect(providerDialog).not.toContain("PaperCode Go")
     expect(sessionRoute).not.toContain("DialogGoUpsell")
     expect(retry).not.toContain("subscribe to Go")
   })
 
-  test("TUI command and prompt surface is Paper Fucker workbench first", async () => {
+  test("TUI command and prompt surface is PaperCode workbench first", async () => {
     const app = await source("cli/cmd/tui/app.tsx")
     const prompt = await source("cli/cmd/tui/component/prompt/index.tsx")
     const local = await source("cli/cmd/tui/context/local.tsx")
@@ -141,7 +141,7 @@ describe("public Paper Fucker surface", () => {
     const systemSessionV2 = await source("cli/cmd/tui/feature-plugins/system/session-v2.tsx")
     const workspaceCreate = await source("cli/cmd/tui/component/dialog-workspace-create.tsx")
 
-    expect(app).toContain("Paper Fucker 模型工作台")
+    expect(app).toContain("PaperCode 模型工作台")
     expect(app).toContain("PaperRun 分支创建失败")
     expect(app).toContain("新建 PaperRun")
     expect(app).toContain("当前 PaperRun 已删除")
@@ -163,7 +163,7 @@ describe("public Paper Fucker surface", () => {
     expect(prompt).not.toContain('name: "skills"')
     expect(home).toContain("输入主题，或拖入论文、代码、数据")
     expect(home).not.toContain("--paper draft.pdf")
-    expect(error).toContain("Paper Fucker 遇到运行错误")
+    expect(error).toContain("PaperCode 遇到运行错误")
     expect(error).not.toContain("Please report an issue")
     expect(error).not.toContain("A fatal error occurred")
     expect(session).toContain("New PaperRun - ")

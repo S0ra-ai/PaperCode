@@ -5,7 +5,7 @@
   "generated_from_factory_version": "2.0.5",
   "asset_root": "assets/subtype-atlas",
   "display_markdown_template": "![{alt_text}]({image_path})",
-  "paper_fucker_display_rule": "Resolve image_path relative to the Paper Fucker skill root before embedding local images.",
+  "paper_fucker_display_rule": "Resolve image_path relative to the PaperCode skill root before embedding local images.",
   "chatgpt_sources_display_rule": "Use saved source asset display or package-relative Markdown image embeds; record attempted_host_blocked when rendering is blocked.",
   "plain_path_list_is_not_display": true,
   "required_abstract_decision_display_rule": "When a text turn explains or compares subtype, layout grammar, visual style, density, metaphor, modeling pattern, candidate scheme differences, or final content architecture, display a matching saved atlas/reference or non-target concept/modeling example image with Markdown syntax; if missing, record concept_example_required/status/role/trigger_reason and repair action.",

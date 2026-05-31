@@ -90,7 +90,7 @@ export function Sidebar(props: { sessionID: string; overlay?: boolean }) {
             <text fg={theme.textMuted}>
               <span style={{ fg: theme.success }}>•</span>{" "}
               <span style={{ fg: theme.text }}>
-                <b>Paper Fucker</b>
+                <b>PaperCode</b>
               </span>{" "}
               <span>{ProductVersion}</span>
             </text>

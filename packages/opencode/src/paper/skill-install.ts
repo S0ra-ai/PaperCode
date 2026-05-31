@@ -73,7 +73,7 @@ const MANAGED_SKILLS: ManagedSkillSpec[] = [
     required: false,
     install_policy: "built_in",
     impact: "系统架构、方法管线和平台拓扑图需要回退到普通文本或手工绘制。",
-    install_hint: "运行 paper_fucker init，安装 Paper Fucker 内置 architecture-diagram skill。",
+    install_hint: "运行 paper_fucker init，安装 PaperCode 内置 architecture-diagram skill。",
   },
   {
     id: "paper-framework-figure-studio-pro",
@@ -82,7 +82,7 @@ const MANAGED_SKILLS: ManagedSkillSpec[] = [
     required: false,
     install_policy: "built_in",
     impact: "论文 framework figure、method overview 和 reviewer-facing schematic 的生成与审稿循环会降级。",
-    install_hint: "运行 paper_fucker init，安装 Paper Fucker 内置 paper-framework-figure-studio-pro skill。",
+    install_hint: "运行 paper_fucker init，安装 PaperCode 内置 paper-framework-figure-studio-pro skill。",
   },
   {
     id: "bb-browser",
@@ -91,7 +91,7 @@ const MANAGED_SKILLS: ManagedSkillSpec[] = [
     required: false,
     install_policy: "paper_managed",
     impact: "需要浏览器登录态或网页数据采集的文献与数据任务会降级为普通远程检索。",
-    install_hint: "运行 paper_fucker init doctor 查看 Paper Fucker 托管浏览器能力修复建议。",
+    install_hint: "运行 papercode init doctor 查看 PaperCode 托管浏览器能力修复建议。",
   },
 ]
 

@@ -1,4 +1,4 @@
-# Paper Fucker 项目结构
+# PaperCode 项目结构
 
 > 内部维护文档。对外项目介绍见根目录 `README.md`；release 和 TaskFlow 细节见 `docs/internal/README.md`。
 
@@ -6,7 +6,7 @@
 
 ## 活跃产品运行时
 
-- `packages/opencode/`：硬分叉后的 Paper Fucker 产品核心。OpenCode provider/model、agent/session、MCP、skill、tool、permission、plugin 和 TUI substrate 仍在这里；Paper Fucker 论文领域代码位于 `packages/opencode/src/paper`。
+- `packages/opencode/`：硬分叉后的 PaperCode 产品核心。OpenCode provider/model、agent/session、MCP、skill、tool、permission、plugin 和 TUI substrate 仍在这里；PaperCode 论文领域代码位于 `packages/opencode/src/paper`。
 - `packages/preview/`：token-protected 只读网页 Preview，提供 PaperRun snapshot 和 SSE 更新，用于实时查看写作、渲染、annotation、cost 和 agent 诊断。
 - `research-tools/`：Python MCP/CLI bridge，负责文档转换、爬虫/数据辅助、外部工具发现和 Pydantic 侧校验。
 - `schemas/`：研究运行、事件、artifact、source、tool trace、claim、draft、review、export 和 checkpoint 的 JSON Schema。
@@ -34,7 +34,7 @@
 ## 上游与参考材料
 
 - `legacy/`：用于架构分析的参考项目、bundle 和旧实验材料，不是活跃 runtime。
-- `upstream/`：OpenCode 上游 README、来源和迁移参考，不是对外 Paper Fucker 文档。
+- `upstream/`：OpenCode 上游 README、来源和迁移参考，不是对外 PaperCode 文档。
 - `NOTICE.md`、`LICENSE`：上游许可证/来源说明和当前 MPL-2.0 项目许可边界。
 
 ## 根目录治理

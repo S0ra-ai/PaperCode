@@ -6,12 +6,12 @@ Generated: 2026-05-10
 
 ## Scope
 
-This report records the final acceptance pass for the OpenCode hard fork into the Paper Fucker paper workbench. The accepted product surface is PaperRun-first: users start from a Chinese research workbench, provide a topic, code path, data, logs, or paper materials, and the system coordinates provider/model roles, MCP, skills, agents, evidence ledgers, authenticity gates, preview, and export as a paper workflow rather than an ordinary chat session.
+This report records the final acceptance pass for the OpenCode hard fork into the PaperCode paper workbench. The accepted product surface is PaperRun-first: users start from a Chinese research workbench, provide a topic, code path, data, logs, or paper materials, and the system coordinates provider/model roles, MCP, skills, agents, evidence ledgers, authenticity gates, preview, and export as a paper workflow rather than an ordinary chat session.
 
 ## Accepted Checks
 
 - Paper core is authoritative under `packages/opencode/src/paper`; the former `packages/server` sidecar is absent.
-- Public CLI, startup logo, default help, TUI tips, and default command registry expose Paper Fucker and PaperRun semantics instead of legacy OpenCode chat product surfaces.
+- Public CLI, startup logo, default help, TUI tips, and default command registry expose PaperCode and PaperRun semantics instead of legacy OpenCode chat product surfaces.
 - `PaperRun` is the first-class API/TUI state and includes intake, stage graph, Source Ledger, Claim Ledger, experiment status, Agent Tree, diagnostics, pause questions, preview, and export state.
 - The TUI prompt parser accepts Chinese topic/code/material/data/log input and converts it to `PaperRunCreateRequest`.
 - Nested multi-model agents are represented with parent/child ids, depth, role, provider/model, capabilities, budgets, artifacts, tool traces, and status.

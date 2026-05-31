@@ -9,7 +9,7 @@ import {
 } from "../../../src/cli/cmd/tui/util/terminal-size"
 import { displayWidth, truncateDisplayMiddle } from "../../../src/cli/cmd/tui/util/text-width"
 
-describe("Paper Fucker terminal utilities", () => {
+describe("PaperCode terminal utilities", () => {
   test("blocks undersized terminals before rendering the full TUI", () => {
     const blocked = terminalCapabilityGuard({ columns: 80, rows: 24 })
 

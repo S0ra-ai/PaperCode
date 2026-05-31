@@ -63,14 +63,14 @@ describe("paper model role router", () => {
     })
   })
 
-  test("reports invalid Paper Fucker model identifiers with role context", () => {
+  test("reports invalid PaperCode model identifiers with role context", () => {
     expect(parsePaperModelId("deepseek/deepseek-v4-pro")).toEqual({
       provider_id: "deepseek",
       model_id: "deepseek-v4-pro",
     })
 
     expect(() => createModelRoleRouter({ default_model: "missing-provider" }).resolve("writer")).toThrow(
-      'Invalid Paper Fucker model id for role "writer": missing-provider',
+      'Invalid PaperCode model id for role "writer": missing-provider',
     )
   })
 })

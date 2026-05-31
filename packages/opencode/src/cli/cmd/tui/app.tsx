@@ -329,49 +329,49 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
     if (!terminalTitleEnabled() || Flag.OPENCODE_DISABLE_TERMINAL_TITLE) return
 
     if (route.data.type === "home") {
-      renderer.setTerminalTitle("paper_fucker")
+      renderer.setTerminalTitle("papercode")
       return
     }
 
     if (route.data.type === "session") {
       const session = sync.session.get(route.data.sessionID)
       if (!session || SessionApi.isDefaultTitle(session.title)) {
-        renderer.setTerminalTitle("paper_fucker")
+        renderer.setTerminalTitle("papercode")
         return
       }
 
       const title = session.title.length > 40 ? session.title.slice(0, 37) + "..." : session.title
-      renderer.setTerminalTitle(`paper_fucker | ${title}`)
+      renderer.setTerminalTitle(`papercode | ${title}`)
       return
     }
 
     if (route.data.type === "paper") {
-      renderer.setTerminalTitle(`paper_fucker | ${route.data.runID}`)
+      renderer.setTerminalTitle(`papercode | ${route.data.runID}`)
       return
     }
 
     if (route.data.type === "paper-models") {
-      renderer.setTerminalTitle("paper_fucker | models")
+      renderer.setTerminalTitle("papercode | models")
       return
     }
 
     if (route.data.type === "paper-folder") {
-      renderer.setTerminalTitle("paper_fucker | folder")
+      renderer.setTerminalTitle("papercode | folder")
       return
     }
 
     if (route.data.type === "paper-resume") {
-      renderer.setTerminalTitle("paper_fucker | resume")
+      renderer.setTerminalTitle("papercode | resume")
       return
     }
 
     if (route.data.type === "paper-journal") {
-      renderer.setTerminalTitle("paper_fucker | journal")
+      renderer.setTerminalTitle("papercode | journal")
       return
     }
 
     if (route.data.type === "plugin") {
-      renderer.setTerminalTitle(`paper_fucker | ${route.data.id}`)
+      renderer.setTerminalTitle(`papercode | ${route.data.id}`)
     }
   })
 
@@ -486,7 +486,7 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
       },
     },
     {
-      title: "Paper Fucker 模型工作台",
+      title: "PaperCode 模型工作台",
       value: "paper.model_workbench",
       category: "Paper",
       slash: {
@@ -525,7 +525,7 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
       },
     },
     {
-      title: "Paper Fucker 期刊工作台",
+      title: "PaperCode 期刊工作台",
       value: "paper.journal_workbench",
       category: "Paper",
       slash: {
@@ -546,7 +546,7 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
         aliases: ["paper"],
       },
       onSelect: async () => {
-        const result = await openPaperNativePicker({ mode: "file", title: "Paper Fucker 选择论文材料", initialPath: sdk.directory, multi: true })
+        const result = await openPaperNativePicker({ mode: "file", title: "PaperCode 选择论文材料", initialPath: sdk.directory, multi: true })
         if (result?.paths.length) appendMaterialPaths("--file", result.paths)
         dialog.clear()
       },
@@ -560,7 +560,7 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
         aliases: ["dataset"],
       },
       onSelect: async () => {
-        const result = await openPaperNativePicker({ mode: "file", title: "Paper Fucker 选择数据文件", initialPath: sdk.directory, multi: true })
+        const result = await openPaperNativePicker({ mode: "file", title: "PaperCode 选择数据文件", initialPath: sdk.directory, multi: true })
         if (result?.paths.length) appendMaterialPaths("--data", result.paths)
         dialog.clear()
       },
@@ -574,7 +574,7 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
         aliases: ["logs"],
       },
       onSelect: async () => {
-        const result = await openPaperNativePicker({ mode: "file", title: "Paper Fucker 选择实验日志", initialPath: sdk.directory, multi: true })
+        const result = await openPaperNativePicker({ mode: "file", title: "PaperCode 选择实验日志", initialPath: sdk.directory, multi: true })
         if (result?.paths.length) appendMaterialPaths("--log", result.paths)
         dialog.clear()
       },
@@ -977,7 +977,7 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
     await DialogAlert.show(
       dialog,
       "Update Complete",
-      `Successfully updated to paper_fucker v${result.data.version}. Please restart the application.`,
+      `Successfully updated to papercode v${result.data.version}. Please restart the application.`,
     )
 
     void exit()
@@ -1056,7 +1056,7 @@ function TerminalTooSmall(props: { state: ReturnType<typeof terminalCapabilityGu
         backgroundColor={theme.backgroundPanel}
         maxWidth={72}
       >
-        <text fg={theme.warning}>终端窗口过小，Paper Fucker 暂停渲染 TUI。</text>
+        <text fg={theme.warning}>终端窗口过小，PaperCode 暂停渲染 TUI。</text>
         <text fg={theme.text}>
           当前尺寸 {props.state.columns}x{props.state.rows}，最低需要 {props.state.min_columns}x{props.state.min_rows}。
         </text>

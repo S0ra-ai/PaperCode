@@ -40,7 +40,7 @@ describe("Hugging Face research loop", () => {
   test("maps HF papers and datasets into source ledger records", () => {
     const paper = createHFPaperRecord({
       paper_id: "2501.00001",
-      title: "Paper Fucker Systems",
+      title: "PaperCode Systems",
       url: "https://huggingface.co/papers/2501.00001",
       authors: ["S0ra"],
     })
