@@ -104,6 +104,7 @@ import type { NoveltyCheckpoint, ExperimentNoveltyGate } from "./novelty"
 import type { ResearchWikiDigest } from "./research-wiki"
 import type { PaperSpine } from "./paper-spine"
 import type { GlobalFigureSpec } from "./global-figure"
+import { formatDraftPaperForProfile } from "./authoring"
 
 import {
   applyPaperRunControl,
@@ -966,6 +967,15 @@ function finalGateStatus(value: unknown) {
   return status === "passed" || status === "blocked" ? status : "not_started"
 }
 
+function reproductionGateStatus(value: unknown, experimentRuns: ExperimentRun[]) {
+  const gate = finalGateStatus(value)
+  const blockers = finalGateBlockers(value)
+  if (blockers.includes("reproduction_failure")) return "blocked"
+  if (gate === "passed") return "passed"
+  if (experimentRuns.some((run) => run.environment.mode === "container" && run.status === "succeeded")) return "passed"
+  return "not_started"
+}
+
 function isFinalResearchExport(item: ResearchExport) {
   return item.export_id.startsWith("export:bundle-final-")
 }
@@ -1217,9 +1227,18 @@ async function refreshDraftPaperForFinalExport(input: {
     code_metadata: codeMetadata,
     now: input.options?.clock?.().toISOString(),
   })
+  const intake = intakeFromRun(input.run)
+  const markdown = formatDraftPaperForProfile(draft, {
+    target_profile: intake.target_profile,
+    ledger,
+    data_plan: dataPlan,
+    result_report: resultReport,
+    code_artifact_ids: input.existingSourceArtifactIDs,
+  })
   const refreshedDraft: DraftPaper = {
     ...draft,
     draft_id: `${draft.draft_id}:final-export-${randomUUID()}`,
+    markdown,
     version: draft.version + 1,
   }
   const draftArtifact = await writeResearchArtifact(
@@ -1795,6 +1814,91 @@ function previewAnnotations(snapshot: PaperRunSnapshot): PreviewAnnotation[] {
   return [...claimAnnotations, ...failedChecks, ...guidanceAnnotations, ...starterPackAnnotations]
 }
 
+type PreviewEnvironmentTool = {
+  id: string
+  label: string
+  status: string
+  version?: string
+  path?: string
+  impact?: string
+}
+
+const PREVIEW_ENVIRONMENT_STATUS_LABELS: Record<string, string> = {
+  available: "可用",
+  optional_missing: "可选缺失",
+  missing: "缺失",
+  blocked: "阻断",
+  unknown: "未知",
+}
+
+const PREVIEW_VIRTUALIZATION_TOOL_IDS = new Set(["docker", "wsl", "hyperv", "virtualbox", "vmware", "conda"])
+
+function previewEnvironmentToolState(tool: PreviewEnvironmentTool) {
+  return {
+    id: tool.id,
+    label: tool.label,
+    status: tool.status,
+    status_label: PREVIEW_ENVIRONMENT_STATUS_LABELS[tool.status] ?? tool.status,
+    version: tool.version,
+    path: tool.path,
+    impact: tool.impact,
+  }
+}
+
+function previewEnvironmentGroup(
+  id: "gpu" | "runtime" | "compiler" | "virtualization",
+  label: string,
+  tools: PreviewEnvironmentTool[],
+) {
+  const sorted = [...tools].sort((left, right) => `${left.id}/${left.label}`.localeCompare(`${right.id}/${right.label}`))
+  const mapped = sorted.map(previewEnvironmentToolState)
+  const count = (status: string) => mapped.filter((tool) => tool.status === status).length
+  const blocked = count("blocked")
+  const missing = count("missing")
+  const optionalMissing = count("optional_missing")
+  const available = count("available")
+  const status =
+    blocked > 0
+      ? "blocked"
+      : missing > 0
+        ? "missing"
+        : optionalMissing > 0
+          ? "optional_missing"
+          : available > 0
+            ? "available"
+            : "unknown"
+  return {
+    id,
+    label,
+    status,
+    status_label: PREVIEW_ENVIRONMENT_STATUS_LABELS[status] ?? status,
+    available,
+    optional_missing: optionalMissing,
+    blocked,
+    missing,
+    tools: mapped,
+  }
+}
+
+function previewLocator(input: {
+  uri?: string
+  path?: string
+  line_start?: number
+  line_end?: number
+  page?: number
+  selector?: string
+}) {
+  const base = input.uri ?? input.path ?? input.selector ?? "local"
+  const line =
+    input.line_start === undefined
+      ? ""
+      : input.line_end === undefined || input.line_end === input.line_start
+        ? `:${input.line_start}`
+        : `:${input.line_start}-${input.line_end}`
+  const page = input.page === undefined ? "" : `#page=${input.page}`
+  return `${base}${line}${page}`
+}
+
 function createPreviewMonitor(snapshot: PaperRunSnapshot): PreviewMonitorSummary {
   const noveltyStatus =
     snapshot.novelty.experiment_gate?.status ??
@@ -1810,6 +1914,32 @@ function createPreviewMonitor(snapshot: PaperRunSnapshot): PreviewMonitorSummary
   const experimentTerminalTraces = snapshot.diagnostics.experiment_terminal_traces ?? []
   const machine = snapshot.diagnostics.machine_profile
   const experimentEnvironment = snapshot.diagnostics.experiment_environment
+  const costRecord = jsonRecord(snapshot.diagnostics.cost)
+  const costBudget = jsonRecord(costRecord.budget)
+  const costAlerts = Array.isArray(costRecord.alerts) ? costRecord.alerts.map(jsonRecord) : []
+  const teamTasks = snapshot.agent_team.tasks ?? []
+  const teamMembers = snapshot.agent_team.members ?? []
+  const unreadMessages = (snapshot.agent_team.mailbox ?? []).filter((message) => message.read_by.length === 0).length
+  const runtimeTools = machine.runtimes.filter((item) => !PREVIEW_VIRTUALIZATION_TOOL_IDS.has(item.id))
+  const virtualizationTools = machine.runtimes.filter((item) => PREVIEW_VIRTUALIZATION_TOOL_IDS.has(item.id))
+  const gpuTools: PreviewEnvironmentTool[] = [
+    {
+      id: machine.gpu.cuda.id,
+      label: machine.gpu.cuda.label,
+      status: machine.gpu.cuda.status,
+      version: machine.gpu.cuda.version,
+      path: machine.gpu.cuda.path,
+      impact: machine.gpu.cuda.impact,
+    },
+    {
+      id: machine.gpu.rocm.id,
+      label: machine.gpu.rocm.label,
+      status: machine.gpu.rocm.status,
+      version: machine.gpu.rocm.version,
+      path: machine.gpu.rocm.path,
+      impact: machine.gpu.rocm.impact,
+    },
+  ]
   const toolPreview = (items: Array<{ id: string; label: string; status: string; version?: string; path?: string }>) =>
     items.map((item) => ({
       id: item.id,
@@ -1867,6 +1997,87 @@ function createPreviewMonitor(snapshot: PaperRunSnapshot): PreviewMonitorSummary
           })),
         }
       : undefined,
+    ledger: {
+      sources: snapshot.source_ledger.map((source) => ({
+        source_id: source.source_id,
+        kind: source.kind,
+        title: source.title,
+        locator: previewLocator(source.locator),
+        created_at: source.created_at,
+      })),
+      claims: snapshot.claim_ledger.map((claim) => ({
+        claim_id: claim.claim_id,
+        status: claim.status,
+        confidence: claim.confidence,
+        text: claim.text,
+        source_ids: claim.source_ids,
+        artifact_ids: claim.artifact_ids,
+        created_at: claim.created_at,
+      })),
+    },
+    cost_agent: {
+      costs: {
+        llm_usd: numberValue(costRecord.llm_usd),
+        api_usd: numberValue(costRecord.api_usd),
+        total_usd: numberValue(costRecord.total_usd),
+        budget_total_usd: typeof costBudget.total_soft_usd === "number" ? costBudget.total_soft_usd : undefined,
+        alerts: costAlerts.map((alert) => ({
+          id: typeof alert.id === "string" ? alert.id : "alert",
+          category: typeof alert.category === "string" ? alert.category : "total",
+          threshold_usd: numberValue(alert.threshold_usd),
+          observed_usd: numberValue(alert.observed_usd),
+        })),
+      },
+      tokens: {
+        input_tokens: snapshot.diagnostics.token_usage.input_tokens,
+        output_tokens: snapshot.diagnostics.token_usage.output_tokens,
+        total_tokens: snapshot.diagnostics.token_usage.total_tokens,
+        estimated: snapshot.diagnostics.token_usage.estimated,
+      },
+      agent_tree: {
+        total_agents: snapshot.agent_tree.nodes.length,
+        active_agents: snapshot.agent_tree.nodes.filter((agent) => agent.status === "running" || agent.status === "planned").length,
+        blocked_agents: snapshot.agent_tree.nodes.filter((agent) => agent.status === "blocked" || agent.status === "failed").length,
+        max_depth: snapshot.agent_tree.nodes.reduce((max, agent) => Math.max(max, agent.depth), 0),
+        max_parallel: snapshot.agent_tree.max_parallel,
+        recent: snapshot.agent_tree.nodes.slice(-12).map((agent) => ({
+          agent_id: agent.agent_id,
+          role: agent.role,
+          status: agent.status,
+          model: `${agent.provider_id}/${agent.model_id}`,
+          depth: agent.depth,
+        })),
+      },
+      agent_team: {
+        members: teamMembers.length,
+        active_members: teamMembers.filter((member) => member.status === "active" || member.status === "planned").length,
+        queued_tasks: teamTasks.filter((task) => task.status === "queued").length,
+        active_tasks: teamTasks.filter((task) => task.status === "assigned" || task.status === "running").length,
+        completed_tasks: teamTasks.filter((task) => task.status === "completed").length,
+        blocked_tasks: teamTasks.filter((task) => task.status === "blocked").length,
+        unread_messages: unreadMessages,
+        recent_tasks: teamTasks.slice(-8).map((task) => ({
+          task_id: task.task_id,
+          title: task.title,
+          status: task.status,
+        })),
+      },
+    },
+    model_routing: (snapshot.diagnostics.model_routing ?? []).slice(-24).map((decision) => ({
+      decision_id: decision.decision_id,
+      created_at: decision.created_at,
+      role: decision.role,
+      stage: decision.stage,
+      source: decision.source,
+      decision_model: decision.decision_model,
+      selected_model: decision.selected_model,
+      provider_id: decision.provider_id,
+      model_id: decision.model_id,
+      candidate_count: decision.candidate_count,
+      allowed_model_count: decision.allowed_models.length,
+      reason: decision.reason,
+      diagnostics: decision.diagnostics,
+    })),
     experiment_guidance:
       guidance?.status === "needs_protocol"
         ? {
@@ -1973,6 +2184,33 @@ function createPreviewMonitor(snapshot: PaperRunSnapshot): PreviewMonitorSummary
       optional_missing: experimentEnvironment.optional_missing.length,
       blocked: experimentEnvironment.blocked.length,
       notes: experimentEnvironment.notes,
+    },
+    experiment_environment: {
+      status: experimentEnvironment.status,
+      status_label: PREVIEW_ENVIRONMENT_STATUS_LABELS[experimentEnvironment.status] ?? experimentEnvironment.status,
+      workspace: machine.workspace,
+      default_run_root: machine.default_run_root,
+      os: `${machine.os.platform} ${machine.os.release} ${machine.os.arch}`,
+      cpu: `${machine.cpu.model} / ${machine.cpu.cores} cores`,
+      memory: {
+        total_bytes: machine.memory.total_bytes,
+        free_bytes: machine.memory.free_bytes,
+      },
+      disk: machine.disk
+        ? {
+            path: machine.disk.path,
+            total_bytes: machine.disk.total_bytes,
+            free_bytes: machine.disk.free_bytes,
+          }
+        : undefined,
+      gpu_mode: machine.gpu.mode,
+      notes: experimentEnvironment.notes,
+      groups: [
+        previewEnvironmentGroup("gpu", "GPU", gpuTools),
+        previewEnvironmentGroup("runtime", "运行时", runtimeTools),
+        previewEnvironmentGroup("compiler", "编译器", machine.compilers),
+        previewEnvironmentGroup("virtualization", "容器 / 虚拟化", virtualizationTools),
+      ],
     },
     gate: {
       status: typeof gateRecord.status === "string" ? gateRecord.status : "not_started",
@@ -2274,7 +2512,7 @@ export async function getPaperRunSnapshotFromDir(runDir: string): Promise<PaperR
     experiment_status: {
       planned: artifacts.some((artifact) => artifact.metadata?.artifact_schema === "ExperimentPlan.v1"),
       exploratory_runs: toolTraces.filter((trace) => trace.tool_name.includes("experiment")).length,
-      reproduction_gate: gate === "passed" ? "passed" : gate === "blocked" ? "blocked" : "not_started",
+      reproduction_gate: reproductionGateStatus(status.state.final_gate, experimentRuns),
     },
     novelty: {
       checkpoints: noveltyCheckpoints,

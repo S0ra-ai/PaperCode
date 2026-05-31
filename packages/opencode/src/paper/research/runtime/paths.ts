@@ -1,5 +1,6 @@
 import { existsSync } from "fs"
 import { access, mkdir, readdir, rm, writeFile } from "fs/promises"
+import { randomUUID } from "crypto"
 import os from "os"
 import path from "path"
 import { storageFacts } from "../contracts"
@@ -46,9 +47,37 @@ export function runDirectoryPath(root: string, runId: string) {
 
 async function ensureWritableDirectory(dir: string) {
   await mkdir(dir, { recursive: true })
-  const probe = path.join(dir, `.paper_fucker-write-${process.pid}-${Date.now()}`)
+  const probe = path.join(dir, `.paper_fucker-write-${process.pid}-${randomUUID()}`)
   await writeFile(probe, "")
-  await rm(probe, { force: true })
+  await removeProbeFile(probe)
+}
+
+function isTransientWindowsFileError(error: unknown) {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    (error.code === "EBUSY" ||
+      error.code === "EACCES" ||
+      error.code === "EPERM" ||
+      error.code === "ENOTEMPTY" ||
+      error.code === "EFAULT")
+  )
+}
+
+async function removeProbeFile(probe: string) {
+  let lastError: unknown
+  for (let attempt = 0; attempt < 5; attempt++) {
+    try {
+      await rm(probe, { force: true })
+      return
+    } catch (error) {
+      if (!isTransientWindowsFileError(error)) throw error
+      lastError = error
+      await new Promise((resolve) => setTimeout(resolve, 25 * (attempt + 1)))
+    }
+  }
+  throw lastError
 }
 
 export async function chooseRunRoot(options: ResearchPathOptions): Promise<ResearchRunRoot> {
