@@ -16,7 +16,11 @@ afterAll(async () => {
     typeof error === "object" &&
     error !== null &&
     "code" in error &&
-    (error.code === "EBUSY" || error.code === "EACCES" || error.code === "EPERM")
+    (error.code === "EBUSY" ||
+      error.code === "EACCES" ||
+      error.code === "EPERM" ||
+      error.code === "ENOTEMPTY" ||
+      error.code === "EFAULT")
   const rm = async (left: number): Promise<void> => {
     Bun.gc(true)
     await sleep(150)

@@ -4,6 +4,7 @@ import json
 import os
 import sys
 import tempfile
+import types
 import unittest
 from pathlib import Path
 
@@ -11,6 +12,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from paper_fucker_tools.external_tools import discover_external_tools, save_tool_link
 from paper_fucker_tools.mcp_tools import TOOL_REGISTRY, call_tool
+from paper_fucker_tools.models import ToolResult
 
 
 class ToolDiscoveryTest(unittest.TestCase):
@@ -71,6 +73,63 @@ class StructuredToolTest(unittest.TestCase):
             self.assertEqual(result.status, "succeeded")
             self.assertEqual(result.tool_name, "docx_generation")
             self.assertTrue(output.exists())
+
+
+class MCPServerAdapterTest(unittest.TestCase):
+    def test_mcp_server_registers_each_tool_with_its_own_handler(self) -> None:
+        import paper_fucker_tools.mcp_server as mcp_server
+
+        class FakeFastMCP:
+            def __init__(self, name: str) -> None:
+                self.name = name
+                self.registered = {}
+
+            def tool(self, *, name: str):
+                def decorator(func):
+                    self.registered[name] = func
+                    return func
+
+                return decorator
+
+        fake_fastmcp_module = types.ModuleType("mcp.server.fastmcp")
+        fake_fastmcp_module.FastMCP = FakeFastMCP
+        fake_server_module = types.ModuleType("mcp.server")
+        fake_mcp_module = types.ModuleType("mcp")
+
+        original_modules = {
+            key: sys.modules.get(key)
+            for key in ("mcp", "mcp.server", "mcp.server.fastmcp")
+        }
+        original_registry = mcp_server.TOOL_REGISTRY
+
+        def first_handler(input_data):
+            return ToolResult.ok("first_tool", metadata={"value": input_data.get("value")})
+
+        def second_handler(input_data):
+            return ToolResult.ok("second_tool", metadata={"value": input_data.get("value")})
+
+        try:
+            sys.modules["mcp"] = fake_mcp_module
+            sys.modules["mcp.server"] = fake_server_module
+            sys.modules["mcp.server.fastmcp"] = fake_fastmcp_module
+            mcp_server.TOOL_REGISTRY = {
+                "first_tool": first_handler,
+                "second_tool": second_handler,
+            }
+
+            server = mcp_server.create_server()
+
+            self.assertEqual(sorted(server.registered), ["first_tool", "second_tool"])
+            self.assertEqual(server.registered["first_tool"]({"value": 1})["tool_name"], "first_tool")
+            self.assertEqual(server.registered["second_tool"]({"value": 2})["tool_name"], "second_tool")
+            self.assertEqual(server.registered["first_tool"]({"value": 3})["metadata"]["value"], 3)
+        finally:
+            mcp_server.TOOL_REGISTRY = original_registry
+            for key, module in original_modules.items():
+                if module is None:
+                    sys.modules.pop(key, None)
+                else:
+                    sys.modules[key] = module
 
 
 if __name__ == "__main__":
