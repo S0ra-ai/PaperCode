@@ -2608,6 +2608,8 @@ describe("paper authoring loop", () => {
     expect(formatted).toContain("## 6 可复现性")
     expect(formatted).toContain("### 6.1 实验环境声明")
     expect(formatted).toContain("## 9 结论")
+    expect(formatted).toContain("## 附录 C：投稿准备度")
+    expect(formatted).not.toContain("## 附录 G：投稿准备度")
     expect(formatted).not.toContain("### 指标")
     expect(formatted).not.toContain("### 5.1 可复现性")
     expect(formatted).not.toContain("### 3.1 方法")
