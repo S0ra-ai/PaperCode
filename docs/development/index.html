@@ -109,6 +109,23 @@
           </div>
         </section>
 
+        <section id="developer-depth">
+          <h2>开发文档粒度</h2>
+          <p>
+            每个开发页都要能直接落到代码。只写“系统有某能力”不够；必须写清该能力的状态来源、调用链、关键函数、失败边界、测试命令和相邻页面。
+          </p>
+          <table class="table">
+            <thead><tr><th>必须回答的问题</th><th>页面中的写法</th><th>示例落点</th></tr></thead>
+            <tbody>
+              <tr><td>状态从哪里来</td><td>列出 run fact、artifact、model inventory、snapshot 或 diagnostics。</td><td><code>PaperRun</code>、<code>PaperModelInventory</code>、<code>PreviewSnapshot.v1</code></td></tr>
+              <tr><td>代码从哪里进</td><td>给出入口函数、handler、领域函数和渲染函数。</td><td><code>submitPaperWorkbenchPrompt</code> -> <code>createPaperRun</code> -> <code>composeDraftPaper</code></td></tr>
+              <tr><td>要改哪些文件</td><td>按 TUI、HTTP、Paper Core、artifact、Preview、测试、文档列清文件。</td><td><code>routes/paper-models.tsx</code>、<code>model-inventory.ts</code>、<code>paper/run.ts</code></td></tr>
+              <tr><td>失败怎么呈现</td><td>写明 blocked diagnostic、pause question、gate failure、tool diagnostic 或只读拒绝。</td><td>无模型、无真实来源、实验缺 baseline、PDF 头校验失败。</td></tr>
+              <tr><td>怎么验收</td><td>给出最小测试、typecheck、live benchmark、browser smoke 或文档检查命令。</td><td><code>check-development-docs.ps1</code>、<code>live-paper-quality-benchmark.ts</code></td></tr>
+            </tbody>
+          </table>
+        </section>
+
         <section id="manual-structure">
           <h2>手册结构</h2>
           <table class="table">
@@ -208,6 +225,7 @@
         <a href="#overview">总览</a>
         <a href="#quick-map">阅读路线</a>
         <a href="#doc-pattern">文档写法基准</a>
+        <a href="#developer-depth">开发文档粒度</a>
         <a href="#manual-structure">手册结构</a>
         <a href="#developer-tasks">维护者任务卡</a>
         <a href="#system-shape">系统形态</a>

@@ -179,7 +179,7 @@ foreach ($needle in @("installToolbar", "installCodeCopy", "data-action=`"theme`
 $indexPage = Join-Path $docsRoot "index.html"
 if (Test-Path -LiteralPath $indexPage) {
     $indexText = [System.IO.File]::ReadAllText($indexPage, $utf8)
-    foreach ($needle in @('id="doc-pattern"', 'class="pattern-grid"', 'href="#doc-pattern"')) {
+    foreach ($needle in @('id="doc-pattern"', 'class="pattern-grid"', 'href="#doc-pattern"', 'id="developer-depth"', 'href="#developer-depth"')) {
         if ($indexText -notmatch [regex]::Escape($needle)) {
             Add-Problem "docs/development/index.html missing development manual pattern '$needle'"
         }
@@ -191,7 +191,7 @@ if (Test-Path -LiteralPath $indexPage) {
 $developerGuide = Join-Path $docsRoot "development-guide.html"
 if (Test-Path -LiteralPath $developerGuide) {
     $guideText = [System.IO.File]::ReadAllText($developerGuide, $utf8)
-    foreach ($needle in @('id="page-template"', 'class="pattern-grid compact"', 'href="#page-template"')) {
+    foreach ($needle in @('id="page-template"', 'class="pattern-grid compact"', 'href="#page-template"', 'id="manual-page-scope"', 'href="#manual-page-scope"')) {
         if ($guideText -notmatch [regex]::Escape($needle)) {
             Add-Problem "docs/development/development-guide.html missing developer page template '$needle'"
         }
