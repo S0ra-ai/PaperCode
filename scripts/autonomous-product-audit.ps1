@@ -107,7 +107,7 @@ function Test-ChangelogShape {
 }
 
 function Test-DevelopmentDocs {
-    $result = Invoke-RepoCommand "powershell" @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\scripts\check-development-docs.ps1")
+    $result = Invoke-RepoCommand "powershell" @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\scripts\check-development-docs.ps1", "-Render")
     if ($result.exit -eq 0) {
         Add-AuditResult "development-docs" "pass" (($result.output | Select-Object -Last 1) -join " ")
     } else {
