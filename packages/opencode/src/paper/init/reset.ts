@@ -1,4 +1,3 @@
-import os from "os"
 import path from "path"
 import { cp, mkdir, rm } from "fs/promises"
 import { existsSync } from "fs"
@@ -130,5 +129,5 @@ export async function resetInitState(input: InitResetInput): Promise<InitResetRe
 }
 
 export function defaultResetHome() {
-  return process.env.PAPER_FUCKER_HOME ?? os.homedir()
+  return resolveInitHome()
 }

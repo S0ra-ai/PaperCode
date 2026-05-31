@@ -13,4 +13,15 @@ describe("global paths", () => {
   test("tmp path is created on module load", async () => {
     expect((await fs.stat(Global.Path.tmp)).isDirectory()).toBe(true)
   })
+
+  test("ignores stringified undefined test home", () => {
+    const previous = process.env.PAPER_FUCKER_TEST_HOME
+    process.env.PAPER_FUCKER_TEST_HOME = "undefined"
+    try {
+      expect(Global.Path.home).toBe(os.homedir())
+    } finally {
+      if (previous === undefined) delete process.env.PAPER_FUCKER_TEST_HOME
+      else process.env.PAPER_FUCKER_TEST_HOME = previous
+    }
+  })
 })

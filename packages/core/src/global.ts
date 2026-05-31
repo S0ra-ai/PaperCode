@@ -8,9 +8,17 @@ import { Flag } from "./flag/flag"
 const app = "paper_fucker"
 const homeDirName = ".paper_fucker"
 const overrides: Partial<Record<keyof Interface, string>> = {}
+const initialTestHome = envPath(process.env.PAPER_FUCKER_TEST_HOME)
+
+function envPath(value: string | undefined) {
+  if (!value) return undefined
+  const trimmed = value.trim()
+  if (!trimmed || trimmed === "undefined" || trimmed === "null") return undefined
+  return trimmed
+}
 
 function home() {
-  return overrides.home ?? process.env.PAPER_FUCKER_TEST_HOME ?? os.homedir()
+  return envPath(overrides.home) ?? envPath(process.env.PAPER_FUCKER_TEST_HOME) ?? initialTestHome ?? os.homedir()
 }
 
 function root() {

@@ -62,8 +62,17 @@ export type InitPaths = {
   secrets: string
 }
 
+function envHome(value: string | undefined) {
+  if (!value) return undefined
+  const trimmed = value.trim()
+  if (!trimmed || trimmed === "undefined" || trimmed === "null") return undefined
+  return trimmed
+}
+
 export function resolveInitHome(home?: string) {
-  return path.resolve(home ?? process.env.PAPER_FUCKER_TEST_HOME ?? process.env.PAPER_FUCKER_HOME ?? os.homedir())
+  return path.resolve(
+    envHome(home) ?? envHome(process.env.PAPER_FUCKER_TEST_HOME) ?? envHome(process.env.PAPER_FUCKER_HOME) ?? os.homedir(),
+  )
 }
 
 export function initPaths(home?: string): InitPaths {
