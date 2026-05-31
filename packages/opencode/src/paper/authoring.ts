@@ -350,6 +350,82 @@ function cjcNumberedChildMarkdown(markdown: string, parentHeading: string, paren
     .join("\n")
 }
 
+function splitMarkdownTableRow(line: string) {
+  const trimmed = line.trim()
+  if (!trimmed.startsWith("|") || !trimmed.endsWith("|")) return undefined
+  return trimmed
+    .slice(1, -1)
+    .split("|")
+    .map((cell) => cell.trim())
+}
+
+function isMarkdownTableSeparator(line: string, expectedCells: number) {
+  const cells = splitMarkdownTableRow(line)
+  return Boolean(cells && cells.length === expectedCells && cells.every((cell) => /^:?-{3,}:?$/.test(cell)))
+}
+
+function cjkDisplayWidth(value: string) {
+  const plain = value
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/\*([^*]+)\*/g, "$1")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+  return Array.from(plain).reduce((total, char) => total + (/[\u1100-\u11ff\u2e80-\u9fff\uf900-\ufaff\uff00-\uffef]/.test(char) ? 2 : 1), 0)
+}
+
+function cjcTableWidthHint(maxDisplayWidth: number) {
+  if (maxDisplayWidth <= 6) return 3
+  if (maxDisplayWidth <= 12) return 6
+  return Math.max(8, Math.min(36, Math.ceil(maxDisplayWidth / 2)))
+}
+
+function cjcTableSeparatorForRows(rows: string[][]) {
+  const columnCount = rows[0]?.length ?? 0
+  const widths = Array.from({ length: columnCount }, (_, column) =>
+    cjcTableWidthHint(Math.max(...rows.map((row) => cjkDisplayWidth(row[column] ?? "")))),
+  )
+  return `| ${widths.map((width) => "-".repeat(width)).join(" | ")} |`
+}
+
+function cjcTableWidthHintMarkdown(markdown: string) {
+  const lines = markdown.split(/\r?\n/)
+  const output: string[] = []
+  let inFence = false
+  for (let index = 0; index < lines.length; index++) {
+    const line = lines[index]
+    if (/^\s*```/.test(line)) {
+      inFence = !inFence
+      output.push(line)
+      continue
+    }
+    if (inFence) {
+      output.push(line)
+      continue
+    }
+
+    const header = splitMarkdownTableRow(line)
+    if (!header || !isMarkdownTableSeparator(lines[index + 1] ?? "", header.length)) {
+      output.push(line)
+      continue
+    }
+
+    const rows = [header]
+    let cursor = index + 2
+    while (cursor < lines.length) {
+      const row = splitMarkdownTableRow(lines[cursor])
+      if (!row || row.length !== header.length) break
+      rows.push(row)
+      cursor++
+    }
+
+    output.push(line)
+    output.push(cjcTableSeparatorForRows(rows))
+    for (let rowIndex = index + 2; rowIndex < cursor; rowIndex++) output.push(lines[rowIndex])
+    index = cursor - 1
+  }
+  return output.join("\n")
+}
+
 function cjcBodyMarkdown(draft: DraftPaper) {
   return cjcOrderedSections(draft).map(({ section, plan }) => {
     const effectivePlan = cjcEffectiveSectionPlan(draft, section.section_id) ?? plan
@@ -407,7 +483,8 @@ type ProfileFormattingInput = {
 export function formatDraftPaperForProfile(draft: DraftPaper, input: ProfileFormattingInput) {
   const profile = input.target_profile ?? "cjc-paper"
   const markdown = profile === "cjc-paper" ? cjcFrontMatterMarkdown(draft) : draft.markdown
-  return appendProfileAppendix(markdown, input)
+  const profiled = appendProfileAppendix(markdown, input)
+  return profile === "cjc-paper" ? cjcTableWidthHintMarkdown(profiled) : profiled
 }
 
 function appendProfileAppendix(markdown: string, input: ProfileFormattingInput) {

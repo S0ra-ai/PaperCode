@@ -17,6 +17,14 @@
 - PDF 视觉抽查：使用 `pdftoppm` 渲染前两页，首页摘要与英文摘要可读，第二页章节和研究问题表格可读。
 - 质量判断：当前已经能生成一篇结构完整、基础排版正确、final gate 通过的可审查论文包；距离中国计算机学报正式投稿模板仍需继续打磨表格宽度、作者/单位元数据、参考文献样式和 PDF 细节。
 
+## 2026-05-31 CJC 表格列宽复审
+
+- CJC profile formatting 已对 Markdown pipe table separator 写入 CJK-aware 列宽提示，长叙述列会在 Pandoc LaTeX 中获得更宽的 `p{...}` 比例。
+- 目标问题：研究问题、贡献、结果、效度威胁等表格中，短列不再与“问题/内容/威胁/说明”等长文本列均分宽度。
+- 回归覆盖：`adds CJC table width hints for long narrative columns` 断言长文本列的 separator 宽度明显大于短编号列。
+- 相关验证已通过：`npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/export-pipeline.test.ts --timeout 60000` 和 `npx --yes bun@1.3.13 run --cwd packages/opencode typecheck`。
+- 质量判断：这项改动直接改善 PDF 表格的可读性，但还需要后续继续做 CJC 参考文献样式、作者单位元数据和整页视觉验收。
+
 ## 2026-05-31 缺少模型审稿结果阻断复审
 
 - `runMultiModelReview` 已确认：`model_reviews` 为空时输出 `missing_model_review` blocker。
