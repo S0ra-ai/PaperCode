@@ -1,0 +1,22 @@
+:project       paper_fucker - 可验证论文研究自动化系统
+:author        k1d (https://github.com/ZhuchenZhong)
+:repo
+:desc          记录项目的重大变更和版本历史
+:version       0.13.0.175-dev
+:last_update   2026/05/31
+
+:history
+
+    0.13.0.175-dev - 2026/05/31 (3a902ee4) [fix/mcp-tool-binding-test-isolation]
+        :brief live benchmark 中断信号写入失败 attempt 诊断
+        :fix
+            - fix(benchmark): SIGINT 与 SIGTERM 接入失败 attempt 记录流程，错误码为 benchmark_interrupted
+            - fix(benchmark): 中断时仍写入 attempt-error.json 和 last-failed-attempt.txt，并清理 live preview
+            - fix(benchmark): 失败终结器增加 finalizing 重入保护，避免多信号重复写入或重复退出
+        :test
+            - test(benchmark): 覆盖 benchmark_interrupted、SIGINT/SIGTERM handler 和 finalizing 重入保护
+        :changelog
+            - docs(changelog): 0.13.0.174 开发历史移入 docs/changelog/v0/0.13.0.174.CHANGELOG
+        :checks
+            - targeted tests: npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/live-benchmark-quality.test.ts --timeout 60000 passed
+            - typecheck: npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
