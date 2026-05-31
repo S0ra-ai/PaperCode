@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test"
-import { readFileSync } from "fs"
+import { spawnSync } from "node:child_process"
+import { existsSync, readFileSync, rmSync } from "fs"
 import path from "path"
 
 const repoRoot = path.resolve(import.meta.dir, "..", "..", "..", "..")
@@ -59,6 +60,8 @@ describe("live paper quality benchmark script", () => {
     const benchmark = readFileSync(path.join(repoRoot, "scripts", "live-paper-quality-benchmark.ts"), "utf8")
 
     expect(benchmark).toContain("LivePaperQualityBenchmarkAttemptError.v1")
+    expect(benchmark).toContain("PAPER_FUCKER_BENCHMARK_OUTPUT_ROOT")
+    expect(benchmark).toContain("PAPER_FUCKER_BENCHMARK_SELF_TEST_FAILURE")
     expect(benchmark).toContain("attempt-error.json")
     expect(benchmark).toContain("last-failed-attempt.txt")
     expect(benchmark).toContain("installBenchmarkFailureRecorder")
@@ -79,5 +82,43 @@ describe("live paper quality benchmark script", () => {
     expect(benchmark).toContain("live benchmark terminated by SIGTERM")
     expect(benchmark).toContain("let finalizing = false")
     expect(benchmark).not.toContain("publishBenchmarkSummary(error")
+  })
+
+  test("writes a real attempt-error file for controlled self-test failures", () => {
+    const outputRoot = path.join(repoRoot, "tmp", "live-paper-quality-benchmark-self-test", `run-${process.pid}-${Date.now()}`)
+    rmSync(outputRoot, { recursive: true, force: true })
+
+    try {
+      const result = spawnSync(process.execPath, [path.join(repoRoot, "scripts", "live-paper-quality-benchmark.ts"), "--scenario", "topic"], {
+        cwd: repoRoot,
+        env: {
+          ...process.env,
+          PAPER_FUCKER_BENCHMARK_OUTPUT_ROOT: outputRoot,
+          PAPER_FUCKER_BENCHMARK_SELF_TEST_FAILURE: "1",
+        },
+        encoding: "utf8",
+        timeout: 20_000,
+      })
+
+      expect(result.status).toBe(1)
+      expect(result.stderr).toContain("attempt_error_path")
+
+      const scenarioRoot = path.join(outputRoot, "topic")
+      const lastFailedPath = path.join(scenarioRoot, "last-failed-attempt.txt")
+      expect(existsSync(lastFailedPath)).toBe(true)
+
+      const failedAttempt = readFileSync(lastFailedPath, "utf8").trim()
+      const attemptErrorPath = path.join(scenarioRoot, failedAttempt, "attempt-error.json")
+      expect(existsSync(attemptErrorPath)).toBe(true)
+      expect(existsSync(path.join(scenarioRoot, "paperrun-summary.json"))).toBe(false)
+
+      const attemptError = JSON.parse(readFileSync(attemptErrorPath, "utf8"))
+      expect(attemptError.schema_version).toBe("LivePaperQualityBenchmarkAttemptError.v1")
+      expect(attemptError.scenario).toBe("topic")
+      expect(attemptError.error.code).toBe("benchmark_failed")
+      expect(attemptError.error.message).toContain("live benchmark self-test failure recorder")
+    } finally {
+      rmSync(outputRoot, { recursive: true, force: true })
+    }
   })
 })
