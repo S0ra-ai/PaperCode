@@ -4,6 +4,7 @@ import path from "path"
 
 const repoRoot = path.resolve(import.meta.dir, "../../../..")
 const scriptPath = path.join(repoRoot, "scripts", "strict-acceptance.ps1")
+const autonomousAuditPath = path.join(repoRoot, "scripts", "autonomous-product-audit.ps1")
 
 const requiredChecks = [
   "taskflow-validate-all",
@@ -158,5 +159,17 @@ describe("strict live acceptance script", () => {
     const script = readFileSync(scriptPath, "utf8")
     expect(script).toContain("^(feature|fix)/[a-z0-9-]+$")
     expect(script).toContain("Git Flow feature/fix branch")
+  })
+
+  test("autonomous audit does not count stale strict reports as current evidence", () => {
+    const script = readFileSync(autonomousAuditPath, "utf8")
+    expect(script).toContain("Get-CurrentVersion")
+    expect(script).toContain("Get-ReportProjectVersions")
+    expect(script).toContain("Get-StaleReportVersions")
+    expect(script).toContain("reports/strict-live-acceptance.md")
+    expect(script).toContain("reports/strict-live-full-acceptance.md")
+    expect(script).toContain("No current strict live report is usable")
+    expect(script).toContain("Full workspace report is stale")
+    expect(script).toContain('Add-AuditResult "full-workspace-evidence" "warn"')
   })
 })

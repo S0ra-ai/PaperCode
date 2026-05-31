@@ -29,6 +29,28 @@ function Read-RepoText {
     return Get-Content -Raw -LiteralPath (Join-Path $RepoRoot $RelativePath)
 }
 
+function Get-CurrentVersion {
+    $changelog = Read-RepoText "CHANGELOG"
+    $versionMatch = [regex]::Match($changelog, '(?m)^:version\s+([0-9]+(?:\.[0-9]+){2,3}-dev)\s*$')
+    if (-not $versionMatch.Success) {
+        throw "CHANGELOG :version is missing; audit evidence cannot be matched to current build."
+    }
+    return $versionMatch.Groups[1].Value
+}
+
+function Get-ReportProjectVersions {
+    param([string]$Report)
+    return @([regex]::Matches($Report, '"project_version":\s*"([^"]+)"') | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique)
+}
+
+function Get-StaleReportVersions {
+    param(
+        [string[]]$Versions,
+        [string]$CurrentVersion
+    )
+    return @($Versions | Where-Object { $_ -ne $CurrentVersion })
+}
+
 function Get-IndexNumber {
     param(
         [string]$Text,
@@ -116,17 +138,14 @@ function Test-DevelopmentDocs {
 }
 
 function Test-StrictEvidence {
-    $report = Read-RepoText "reports/strict-live-acceptance.md"
-    $changelog = Read-RepoText "CHANGELOG"
-    $versionMatch = [regex]::Match($changelog, '(?m)^:version\s+([0-9]+(?:\.[0-9]+){2,3}-dev)\s*$')
-    if (-not $versionMatch.Success) {
-        Add-AuditResult "strict-live-evidence" "fail" "CHANGELOG :version is missing; strict live evidence cannot be matched to current build."
+    try {
+        $currentVersion = Get-CurrentVersion
+    } catch {
+        Add-AuditResult "strict-live-evidence" "fail" $_.Exception.Message
         return
     }
-    $currentVersion = $versionMatch.Groups[1].Value
-    $required = @(
+    $commonRequired = @(
         "- Status: passed",
-        "- Mode: strict-live-focused",
         "live-crawler-fetch",
         "hf-live-research-loop",
         "topic-to-paper-live-run",
@@ -134,18 +153,33 @@ function Test-StrictEvidence {
         "final-export-pass-run",
         '"final_export": "final"'
     )
-    $missing = @($required | Where-Object { -not $report.Contains($_) })
-    $versionMatches = @([regex]::Matches($report, '"project_version":\s*"([^"]+)"') | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique)
-    $staleVersions = @($versionMatches | Where-Object { $_ -ne $currentVersion })
-    if ($missing.Count -eq 0 -and $versionMatches.Count -gt 0 -and $staleVersions.Count -eq 0) {
-        Add-AuditResult "strict-live-evidence" "pass" "Latest strict live report proves focused live crawler, HF, topic/code, and final export pass scenarios for $currentVersion."
-    } else {
-        $details = @()
-        if ($missing.Count -gt 0) { $details += "missing=$($missing -join ', ')" }
-        if ($versionMatches.Count -eq 0) { $details += "project_version entries missing" }
-        if ($staleVersions.Count -gt 0) { $details += "stale_project_version=$($staleVersions -join ', ') current=$currentVersion" }
-        Add-AuditResult "strict-live-evidence" "fail" "Strict report is not current: $($details -join '; ')"
+    $candidates = @(
+        [pscustomobject]@{ path = "reports/strict-live-acceptance.md"; mode = "- Mode: strict-live-focused"; label = "focused" },
+        [pscustomobject]@{ path = "reports/strict-live-full-acceptance.md"; mode = "- Mode: strict-live-full"; label = "full" }
+    )
+    $details = New-Object "System.Collections.Generic.List[string]"
+    foreach ($candidate in $candidates) {
+        $path = Join-Path $RepoRoot $candidate.path
+        if (-not (Test-Path -LiteralPath $path)) {
+            $details.Add("$($candidate.label): missing report") | Out-Null
+            continue
+        }
+        $report = Get-Content -Raw -LiteralPath $path
+        $required = @($commonRequired + $candidate.mode)
+        $missing = @($required | Where-Object { -not $report.Contains($_) })
+        $versionMatches = @(Get-ReportProjectVersions $report)
+        $staleVersions = @(Get-StaleReportVersions -Versions $versionMatches -CurrentVersion $currentVersion)
+        if ($missing.Count -eq 0 -and $versionMatches.Count -gt 0 -and $staleVersions.Count -eq 0) {
+            Add-AuditResult "strict-live-evidence" "pass" "$($candidate.label) strict live report proves crawler, HF, topic/code, and final export scenarios for $currentVersion."
+            return
+        }
+        $candidateDetails = @()
+        if ($missing.Count -gt 0) { $candidateDetails += "missing=$($missing -join ', ')" }
+        if ($versionMatches.Count -eq 0) { $candidateDetails += "project_version entries missing" }
+        if ($staleVersions.Count -gt 0) { $candidateDetails += "stale_project_version=$($staleVersions -join ', ') current=$currentVersion" }
+        $details.Add("$($candidate.label): $($candidateDetails -join '; ')") | Out-Null
     }
+    Add-AuditResult "strict-live-evidence" "fail" "No current strict live report is usable: $($details -join ' / ')"
 }
 
 function Test-FullWorkspaceEvidence {
@@ -165,11 +199,27 @@ function Test-FullWorkspaceEvidence {
         "final-export-pass-run"
     )
     $missing = @($required | Where-Object { -not $report.Contains($_) })
-    if ($missing.Count -eq 0) {
-        Add-AuditResult "full-workspace-evidence" "pass" "Latest full workspace strict acceptance report is passed and includes server/full workspace coverage."
-    } else {
+    if ($missing.Count -gt 0) {
         Add-AuditResult "full-workspace-evidence" "fail" "Full workspace strict report missing: $($missing -join ', ')"
+        return
     }
+    try {
+        $currentVersion = Get-CurrentVersion
+    } catch {
+        Add-AuditResult "full-workspace-evidence" "fail" $_.Exception.Message
+        return
+    }
+    $versionMatches = @(Get-ReportProjectVersions $report)
+    $staleVersions = @(Get-StaleReportVersions -Versions $versionMatches -CurrentVersion $currentVersion)
+    if ($versionMatches.Count -eq 0) {
+        Add-AuditResult "full-workspace-evidence" "warn" "Full workspace report has no project_version entries; focused strict live report remains the current required evidence."
+        return
+    }
+    if ($staleVersions.Count -gt 0) {
+        Add-AuditResult "full-workspace-evidence" "warn" "Full workspace report is stale ($($staleVersions -join ', ')); focused strict live report remains the current required evidence for $currentVersion."
+        return
+    }
+    Add-AuditResult "full-workspace-evidence" "pass" "Full workspace strict acceptance report is current for $currentVersion and includes server/full workspace coverage."
 }
 
 function Test-DangerousResidue {
