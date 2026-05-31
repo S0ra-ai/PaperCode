@@ -1,4 +1,4 @@
-import { mkdir, readFile, rm, writeFile } from "node:fs/promises"
+import { mkdir, readFile, rename, rm, writeFile } from "node:fs/promises"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 import {
@@ -40,10 +40,43 @@ async function currentProjectVersion(): Promise<string> {
 }
 
 const scenario = scenarioFromArgs()
-const outputDir = path.join(repoRoot, "tmp", "live-paper-quality-benchmark", scenario)
+const scenarioOutputRoot = path.join(repoRoot, "tmp", "live-paper-quality-benchmark", scenario)
+const attemptId = `attempt-${new Date().toISOString().replace(/[:.]/g, "-")}-${process.pid}`
+const outputDir = path.join(scenarioOutputRoot, "attempts", attemptId)
 const summaryPath = path.join(outputDir, "paperrun-summary.json")
-await rm(outputDir, { recursive: true, force: true })
+const publishedSummaryPath = path.join(scenarioOutputRoot, "paperrun-summary.json")
 await mkdir(outputDir, { recursive: true })
+await writeFile(path.join(scenarioOutputRoot, "last-attempt.txt"), `${path.relative(scenarioOutputRoot, outputDir).replace(/\\/g, "/")}\n`, "utf8")
+
+async function publishBenchmarkSummary(summary: unknown) {
+  const content = `${JSON.stringify(summary, null, 2)}\n`
+  await writeFile(summaryPath, content, "utf8")
+  const tmpSummaryPath = `${publishedSummaryPath}.tmp-${process.pid}-${Date.now()}`
+  await writeFile(tmpSummaryPath, content, "utf8")
+  await rm(publishedSummaryPath, { force: true })
+  await rename(tmpSummaryPath, publishedSummaryPath)
+  await writeFile(
+    path.join(scenarioOutputRoot, "last-successful-attempt.txt"),
+    `${path.relative(scenarioOutputRoot, outputDir).replace(/\\/g, "/")}\n`,
+    "utf8",
+  )
+}
+
+function summaryOutput(summary: Record<string, unknown>, extra: Record<string, unknown>) {
+  return JSON.stringify(
+    {
+      summary_path: path.relative(repoRoot, publishedSummaryPath).replace(/\\/g, "/"),
+      attempt_summary_path: path.relative(repoRoot, summaryPath).replace(/\\/g, "/"),
+      scenario: summary.scenario,
+      project_version: summary.project_version,
+      run_id: summary.run_id,
+      status: summary.status,
+      ...extra,
+    },
+    null,
+    2,
+  )
+}
 
 const commonPolicy = {
   mode: "private_first" as const,
@@ -872,26 +905,17 @@ if (scenario === "starter-rerun") {
       audit: snapshot.diagnostics.audit.coverage,
     },
   }
-  await writeFile(summaryPath, `${JSON.stringify(summary, null, 2)}\n`, "utf8")
+  await publishBenchmarkSummary(summary)
   console.log(
-    JSON.stringify(
-      {
-        summary_path: path.relative(repoRoot, summaryPath).replace(/\\/g, "/"),
-        scenario: summary.scenario,
-        project_version: summary.project_version,
-        run_id: summary.run_id,
-        status: summary.status,
-        initial_status: summary.initial_status,
-        starter_apply: summary.starter_apply.status,
-        protocol_rerun: summary.protocol_rerun.status,
-        forced_export: summary.forced_export.status,
-        final_export: summary.final_export.status,
-        failed_checks: summary.final_export.failed_checks,
-        preview: summary.preview.status,
-      },
-      null,
-      2,
-    ),
+    summaryOutput(summary, {
+      initial_status: summary.initial_status,
+      starter_apply: summary.starter_apply.status,
+      protocol_rerun: summary.protocol_rerun.status,
+      forced_export: summary.forced_export.status,
+      final_export: summary.final_export.status,
+      failed_checks: summary.final_export.failed_checks,
+      preview: summary.preview.status,
+    }),
   )
   stopAllPaperRunLivePreviews()
   process.exit(0)
@@ -1093,27 +1117,18 @@ const summary = {
   },
 }
 
-await writeFile(summaryPath, `${JSON.stringify(summary, null, 2)}\n`, "utf8")
+await publishBenchmarkSummary(summary)
 
 console.log(
-  JSON.stringify(
-    {
-      summary_path: path.relative(repoRoot, summaryPath).replace(/\\/g, "/"),
-      scenario: summary.scenario,
-      project_version: summary.project_version,
-      run_id: summary.run_id,
-      status: summary.status,
-      stages: summary.stage_total,
-      artifacts: summary.artifact_count,
-      claims: summary.claim_count,
-      forced_export: summary.forced_export.status,
-      final_export: summary.final_export.status,
-      failed_checks: summary.forced_export.failed_checks,
-      preview: summary.preview.status,
-    },
-    null,
-    2,
-  ),
+  summaryOutput(summary, {
+    stages: summary.stage_total,
+    artifacts: summary.artifact_count,
+    claims: summary.claim_count,
+    forced_export: summary.forced_export.status,
+    final_export: summary.final_export.status,
+    failed_checks: summary.forced_export.failed_checks,
+    preview: summary.preview.status,
+  }),
 )
 
 stopAllPaperRunLivePreviews()

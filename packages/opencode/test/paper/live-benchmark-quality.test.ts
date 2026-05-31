@@ -26,4 +26,16 @@ describe("live paper quality benchmark script", () => {
     expect(benchmark).toContain("arxivRetryDelayMs")
     expect(benchmark).toContain("live arXiv source discovery blocked by rate limit")
   })
+
+  test("publishes summaries only after a successful benchmark attempt", () => {
+    const benchmark = readFileSync(path.join(repoRoot, "scripts", "live-paper-quality-benchmark.ts"), "utf8")
+
+    expect(benchmark).toContain("scenarioOutputRoot")
+    expect(benchmark).toContain("attempts")
+    expect(benchmark).toContain("publishedSummaryPath")
+    expect(benchmark).toContain("last-successful-attempt.txt")
+    expect(benchmark).toContain("attempt_summary_path")
+    expect(benchmark).not.toContain("await rm(outputDir")
+    expect(benchmark).not.toContain("await rm(scenarioOutputRoot")
+  })
 })
