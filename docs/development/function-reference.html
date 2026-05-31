@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>关键函数索引 - Paper Fucker 开发手册</title>
+    <link rel="stylesheet" href="./assets/style.css" />
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="brand"><strong>Paper Fucker</strong><span>开发手册</span></div>
+        <nav class="nav">
+          <div class="nav-group">Start</div>
+          <a href="./index.html">总览</a>
+          <a href="./usage-guide.html">使用入口</a>
+          <a href="./development-workflow.html">开发工作流</a>
+          <div class="nav-group">Architecture</div>
+          <a href="./architecture.html">架构</a>
+          <a href="./module-map.html">模块地图</a>
+          <a class="active" href="./function-reference.html">关键函数索引</a>
+          <div class="nav-group">Runtime</div>
+          <a href="./paperrun-flow.html">PaperRun 流程</a>
+          <a href="./paper-generation.html">论文生成链路</a>
+          <a href="./experiment-execution.html">实验执行链路</a>
+          <a href="./preview-export.html">Preview 与导出</a>
+          <div class="nav-group">Workbench</div>
+          <a href="./tui-models.html">TUI 与模型</a>
+          <a href="./agents-capabilities.html">Agent / MCP / Skills</a>
+          <a href="./testing-maintenance.html">测试与维护</a>
+          <a href="./developer-recipes.html">修改手册</a>
+        </nav>
+      </aside>
+      <main class="content">
+        <section class="hero">
+          <div class="eyebrow">Function Reference</div>
+          <h1>关键函数、数据流和修改入口</h1>
+          <p class="lead">本页按真实调用链列出关键函数。定位 bug 时先找“入口 -> 状态 -> artifact -> Preview/export -> 测试”的闭环。</p>
+        </section>
+
+        <h2>完整论文生成主链路</h2>
+        <table class="table">
+          <thead><tr><th>顺序</th><th>函数/模块</th><th>输入</th><th>输出</th><th>不变量</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td><code>submitPaperWorkbenchPrompt</code><br /><code>routes/paper/index.tsx</code></td><td>首页输入、研究深度、工作目录、材料入口。</td><td>调用 Paper HTTP API 创建或恢复 run。</td><td>首页只表达 PaperRun，不触发旧聊天/模式语义。</td></tr>
+            <tr><td>2</td><td><code>normalizeCreatePayload</code><br /><code>handlers/paper.ts</code></td><td>TUI/API payload。</td><td><code>ResearchIntakeRequest</code>。</td><td>错误必须转成中文结构化诊断，不能把裸 schema 错误直接给用户。</td></tr>
+            <tr><td>3</td><td><code>createPaperRun</code><br /><code>paper/run.ts</code></td><td>研究主题、workspace、code/data/log paths、profile、budget。</td><td>run 目录、初始 facts、stage graph、snapshot、controller。</td><td>无模型或无授权模型时阻断；不生成假运行。</td></tr>
+            <tr><td>4</td><td><code>startPaperResearchRun</code><br /><code>paper/orchestrator.ts</code></td><td>run store、request、默认 handlers。</td><td>逐 stage 写 source、artifact、claim、draft、review、export。</td><td>每个 stage 成功或失败都必须有事件和可恢复状态。</td></tr>
+            <tr><td>5</td><td><code>composeDraftPaper</code><br /><code>research/writing/draft.ts</code></td><td>ClaimLedger、LiteratureMap、ExperimentPlan、ExperimentRun、ResultReport、ReviewReport。</td><td><code>DraftPaper.v1</code> 和 Markdown 正文。</td><td>正文只能使用已登记证据；缺证据时写限制或阻断，不写占位结果。</td></tr>
+            <tr><td>6</td><td><code>exportPaperRun</code><br /><code>paper/run.ts</code></td><td>run id、export profile、forced 标记。</td><td>Markdown/LaTeX/PDF/DOCX、manifest、export facts。</td><td>final export 必须通过 final gate；forced draft 必须保留 failed checks。</td></tr>
+          </tbody>
+        </table>
+
+        <h2>文献与 Related Work 链路</h2>
+        <table class="table">
+          <thead><tr><th>函数/模块</th><th>位置</th><th>职责</th><th>不变量</th></tr></thead>
+          <tbody>
+            <tr><td><code>defaultLiteratureDiscovery</code></td><td><code>paper/orchestrator.ts</code></td><td>在 literature stage 生成或接收 <code>LiteratureMap.v1</code>，记录 source、cluster、verification 和 gap。</td><td>缺网络或缺授权时只能产生 blocked/candidate 诊断，不得伪造 verified source。</td></tr>
+            <tr><td><code>defaultClaimLedger</code></td><td><code>paper/orchestrator.ts</code></td><td>把 literature stage 的 <code>LiteratureMap.v1</code> 带入后续 claim/result/draft 阶段。</td><td>不能只把文献当作 loose text；必须保留 verification 状态和 locator。</td></tr>
+            <tr><td><code>runPaperAuthoringLoop</code></td><td><code>paper/authoring.ts</code></td><td>把 <code>LiteratureMap.v1</code> 传给 <code>composeDraftPaper</code>，让 Related Work 由结构化文献图生成。</td><td>verified source 可以写成 prior work；unverified seed 只能写成候选文献。</td></tr>
+            <tr><td><code>literatureEvidenceSummary</code></td><td><code>research/writing/draft.ts</code></td><td>渲染 Related Work 的文献表、verification、locator 和缺口说明。</td><td>未验证来源必须显式标注为候选；不能作为新颖性、领域共识或实验结论支撑。</td></tr>
+            <tr><td><code>referencesSummary</code></td><td><code>research/writing/draft.ts</code></td><td>生成 <code>References</code> 主文章节。</td><td>只列入 verified source；未验证 seed 不得进入正式 References。</td></tr>
+            <tr><td><code>checkReferences</code></td><td><code>research/verification/checks.ts</code></td><td>校验 citation 目标是否存在，并检查是否有 verified paper reference。</td><td>缺少 verified paper reference 时写入 <code>missing_verified_reference</code> warning；它不阻断 reviewable bundle，但提示尚未达到投稿级引用准备度。</td></tr>
+            <tr><td><code>citationText</code></td><td><code>research/writing/draft.ts</code></td><td>把正文引用标记渲染为可读标签。</td><td>主文不输出 <code>cite:*</code> 或 <code>material:code:*</code>，完整 source id 留在附录和 manifest。</td></tr>
+            <tr><td><code>paperProseText</code></td><td><code>research/writing/draft.ts</code></td><td>把底层 claim 文本中的实现词转换为论文正文表述。</td><td>正文不应出现 <code>source-range-grounded</code>、<code>source range</code>、<code>final gate</code>、<code>ClaimLedger</code> 等内部写法。</td></tr>
+            <tr><td><code>displayMetricName</code> / <code>displayExperimentLabel</code></td><td><code>research/writing/draft.ts</code></td><td>把 <code>typecheck_pass</code>、<code>baseline:*</code>、<code>ablation:*</code> 转成正文和表格可读名称。</td><td>协议 id 可以保留在 artifact/manifest，主文只能展示读者可理解的名称。</td></tr>
+            <tr><td><code>displayExperimentRole</code> / <code>displayRunStatus</code> / <code>displayEnvironment</code></td><td><code>research/writing/draft.ts</code></td><td>把实验角色、运行状态和环境名称转换成论文表格语言。</td><td>Results 与 Reproducibility 主文不得出现 <code>succeeded</code>、<code>typecheck_pass</code>、<code>baseline:*</code> 这类运行层标识。</td></tr>
+            <tr><td><code>refreshDraftPaperForFinalExport</code></td><td><code>paper/run.ts</code></td><td>final export 前重新读取最新 <code>LiteratureMap.v1</code>、claims、runs 和 ResultReport，刷新 DraftPaper。</td><td>用户修复文献或实验后，终稿必须使用最新结构化证据。</td></tr>
+          </tbody>
+        </table>
+
+        <h2>实验与代码论文链路</h2>
+        <table class="table">
+          <thead><tr><th>函数</th><th>位置</th><th>职责</th><th>修改时同步</th></tr></thead>
+          <tbody>
+            <tr><td><code>analyzeCodebaseForPaper</code></td><td><code>paper/code-to-paper.ts</code></td><td>扫描代码路径，抽取文件哈希、source range、导出函数、测试和 package scripts。</td><td>代码语言支持、路径过滤、source range 测试。</td></tr>
+            <tr><td><code>planExperiments</code></td><td><code>research/experiments/planning.ts</code></td><td>把代码入口和用户协议转成 proposed、baseline、ablation、container reproduction 计划。</td><td>实验角色、指标、GPU/容器资源预算、fallback 策略。</td></tr>
+            <tr><td><code>runHostExploration</code></td><td><code>research/experiments/runner.ts</code></td><td>受控执行 host 命令，记录 exit code、耗时、stdout/stderr 摘要和指标。</td><td>超时、环境变量白名单、输出截断、Windows 路径。</td></tr>
+            <tr><td><code>runPaperRunExperimentProtocol</code></td><td><code>paper/run.ts</code></td><td>从 run 中读取协议，执行 proposed/baseline/ablation/container，并写回 ResultReport。</td><td>HTTP endpoint、TUI 按钮、Preview snapshot、paperrun-execution test。</td></tr>
+            <tr><td><code>experimentProtocolFromWorkspacePackageJson</code></td><td><code>paper/run.ts</code></td><td>重跑前重新扫描当前 workspace 的 package scripts，支持用户补齐 starter 后升级为真实协议。</td><td>starter-rerun benchmark，避免继续跑旧 placeholder 协议。</td></tr>
+            <tr><td><code>analyzeExperimentResults</code></td><td><code>research/experiments/analysis.ts</code></td><td>比较主指标、baseline、ablation 和 host/container 一致性，决定 final claim 是否允许。</td><td>ResultReport schema、final gate、Results 文案。</td></tr>
+          </tbody>
+        </table>
+
+        <h2>Preview 与监控链路</h2>
+        <table class="table">
+          <thead><tr><th>函数/文件</th><th>职责</th><th>常见错误</th><th>验收</th></tr></thead>
+          <tbody>
+            <tr><td><code>createPaperRunLivePreviewSnapshot</code><br /><code>paper/run.ts</code></td><td>把 run facts 汇总为 <code>PreviewSnapshot.v1</code>。</td><td>新增 artifact 后忘记暴露到 monitor，Web 监控台看不到。</td><td>检查 snapshot JSON 与 Preview DOM。</td></tr>
+            <tr><td><code>PreviewRenderQueue.replaceSnapshot</code><br /><code>packages/preview/src/render-queue.ts</code></td><td>推送最新 snapshot，取消旧渲染任务。</td><td>只更新 HTTP snapshot，忘记 SSE。</td><td>preview test 的 SSE 用例。</td></tr>
+            <tr><td><code>renderGate</code><br /><code>packages/preview/src/client.js</code></td><td>展示 gate、机器环境、实验建议、实验运行和终端 trace。</td><td>模板字符串语法错误会导致整页只剩静态 shell。</td><td><code>node --check packages/preview/src/client.js</code> 与浏览器 smoke。</td></tr>
+            <tr><td><code>renderTraceExcerpt</code><br /><code>packages/preview/src/client.js</code></td><td>默认展开 stdout/stderr 摘要，让用户能直接判断实验为什么通过或失败。</td><td>只在 JSON 中有 trace，DOM 不显示，用户仍看不到终端证据。</td><td>浏览器 smoke 断言 DOM 包含 stdout 摘要。</td></tr>
+            <tr><td><code>startPreviewServer</code><br /><code>packages/preview/src/server.ts</code></td><td>提供 token-protected snapshot、SSE、静态资源和只读拦截。</td><td>写请求未拒绝、token 漏校验、长连接超时。</td><td><code>packages/preview test</code> 与 <code>live-preview-browser-smoke.ps1</code>。</td></tr>
+          </tbody>
+        </table>
+
+        <h2>模型与运行权限链路</h2>
+        <table class="table">
+          <thead><tr><th>函数/模块</th><th>职责</th><th>规则</th></tr></thead>
+          <tbody>
+            <tr><td><code>loadPaperModelInventory</code></td><td>读取本机模型库存、provider 注册、allowlist、主/备用决策模型。</td><td>候选模型不是可用模型；只有 allowlist 允许进入路由。</td></tr>
+            <tr><td><code>savePaperModelInventory</code></td><td>保存用户已注册 provider 和模型选择。</td><td>保存后 TUI 首页和 run 创建必须读同一份库存。</td></tr>
+            <tr><td><code>routePaperModel</code></td><td>根据 stage、预算、隐私、工具需求选择模型。</td><td>用户强制指定优先；不可用时返回 blocked/pause，不静默降级。</td></tr>
+            <tr><td><code>PaperModelWorkbenchPage</code></td><td>全屏模型工作台。</td><td>只展示已注册 provider；所有模型页多选进入候选池，主/备用模型只能从候选池选。</td></tr>
+          </tbody>
+        </table>
+
+        <h2>定位问题的最短路径</h2>
+        <div class="swimlane">
+          <div class="lane"><strong>论文不完整</strong><span>先看 <code>DraftPaper.v1</code>、<code>ResultReport.v1</code>、<code>BlockingReport.v1</code>，再看 <code>composeDraftPaper</code> 是否读到了最新 artifact。</span></div>
+          <div class="lane"><strong>实验没跑</strong><span>看 <code>ExperimentProtocol.v1</code>、package scripts、<code>runPaperRunExperimentProtocol</code> 返回的 <code>terminal_traces</code>。</span></div>
+          <div class="lane"><strong>Preview 空白</strong><span>先跑 <code>node --check packages/preview/src/client.js</code>，再看浏览器 smoke 的 DOM failure 文件。</span></div>
+          <div class="lane"><strong>final 不生成</strong><span>看 <code>BlockingReport.v1</code>、<code>final_gate</code>、<code>export_state.failed_checks</code>，不要直接改 export 绕过 gate。</span></div>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

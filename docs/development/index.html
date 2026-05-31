@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Paper Fucker 开发手册</title>
+    <link rel="stylesheet" href="./assets/style.css" />
+  </head>
+  <body>
+    <div class="layout with-toc">
+      <aside class="sidebar">
+        <div class="brand">
+          <strong>Paper Fucker</strong>
+          <span>开发手册</span>
+        </div>
+        <nav class="nav">
+          <div class="nav-group">Start</div>
+          <a class="active" href="./index.html">总览</a>
+          <a href="./usage-guide.html">使用入口</a>
+          <a href="./development-workflow.html">开发工作流</a>
+          <div class="nav-group">Architecture</div>
+          <a href="./architecture.html">架构</a>
+          <a href="./module-map.html">模块地图</a>
+          <a href="./function-reference.html">关键函数索引</a>
+          <div class="nav-group">Runtime</div>
+          <a href="./paperrun-flow.html">PaperRun 流程</a>
+          <a href="./paper-generation.html">论文生成链路</a>
+          <a href="./experiment-execution.html">实验执行链路</a>
+          <a href="./preview-export.html">Preview 与导出</a>
+          <div class="nav-group">Workbench</div>
+          <a href="./tui-models.html">TUI 与模型</a>
+          <a href="./agents-capabilities.html">Agent / MCP / Skills</a>
+          <a href="./testing-maintenance.html">测试与维护</a>
+          <a href="./developer-recipes.html">修改手册</a>
+        </nav>
+      </aside>
+
+      <main class="content">
+        <section class="hero" id="overview">
+          <div class="eyebrow">Developer Manual</div>
+          <h1>Paper Fucker 开发手册</h1>
+          <p class="lead">
+            这是一套面向维护者的多页 HTML 手册，说明产品入口、架构边界、PaperRun 状态机、模型工作台、实验执行、实时监控、导出 gate 和常见修改路径。
+          </p>
+          <div class="doc-meta">
+            <span class="pill">中文优先</span>
+            <span class="pill">PaperRun-first</span>
+            <span class="pill">开发态 0.13.x</span>
+            <span class="pill">MPL-2.0</span>
+          </div>
+        </section>
+
+        <section id="quick-map">
+          <h2>阅读路线</h2>
+          <div class="toc-list">
+            <a href="./usage-guide.html"><strong>使用入口</strong><span>给开发者快速跑通 TUI、模型、工作区、PaperRun、Preview、导出和恢复。</span></a>
+            <a href="./architecture.html"><strong>架构</strong><span>说明 TUI、Paper Core、HTTP API、Preview、research tools、schemas 和 run storage 的边界。</span></a>
+            <a href="./paperrun-flow.html"><strong>PaperRun 流程</strong><span>解释 intake、stage graph、artifact、ledger、diagnostics、controller 和 SSE 事件。</span></a>
+            <a href="./function-reference.html"><strong>关键函数索引</strong><span>按真实调用链定位 create、orchestrator、writing、experiment runner、Preview 和模型路由。</span></a>
+            <a href="./developer-recipes.html"><strong>修改手册</strong><span>新增 stage、artifact、TUI 页面、Preview 字段、模型策略和测试时的文件清单。</span></a>
+          </div>
+        </section>
+
+        <section id="system-shape">
+          <h2>系统形态</h2>
+          <div class="grid">
+            <article class="card">
+              <h3>主入口</h3>
+              <p>中文 TUI 是用户主入口。用户输入主题、代码、论文材料、数据或实验日志后，系统创建可恢复、可审查的 <code>PaperRun</code>。</p>
+            </article>
+            <article class="card">
+              <h3>核心状态</h3>
+              <p><code>PaperRun</code> 持有 intake、stage graph、events、source ledger、claim ledger、agent tree、diagnostics、preview/export 和 controller。</p>
+            </article>
+            <article class="card">
+              <h3>质量边界</h3>
+              <p>final export 只在 source、claim、citation、license 和 reproduction gate 通过后生成；forced draft 必须显式保留失败项。</p>
+            </article>
+            <article class="card">
+              <h3>运行目录</h3>
+              <p>默认写入 <code>~/.paper_fucker/runs/&lt;run-id&gt;</code>。用户选择工作区后，才使用工作区内的运行目录。</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="runtime-flow">
+          <h2>核心流程</h2>
+          <div class="flow">
+            <span>1. TUI 收集主题和材料</span>
+            <span>2. API 规范化 intake</span>
+            <span>3. Paper Core 创建 run</span>
+            <span>4. Agent Team 执行 stage</span>
+            <span>5. Preview SSE 实时更新</span>
+            <span>6. Gate 通过后导出</span>
+          </div>
+          <pre><code>home.tsx
+  -> createPaperRunFromPrompt()
+  -> POST /paper/runs
+  -> createPaperRun()
+  -> createResearchRun()
+  -> startPaperResearchRun()
+  -> publishPaperRunSnapshot()
+  -> previewPaperRun() / exportPaperRun()</code></pre>
+        </section>
+
+        <section id="maintenance-rules">
+          <h2>维护原则</h2>
+          <ul>
+            <li>用户可见体验以 Paper Fucker 和 PaperRun 为主语；底层包名只在开发文档、路径和代码引用中出现。</li>
+            <li>模型只能来自用户注册并允许的 provider/model 池；候选模型和可用模型必须分开。</li>
+            <li>代码型论文必须把本地代码 source range 写入 source ledger，并绑定到 ClaimLedger。</li>
+            <li>实验型论文必须写入 host/container reproduction 证据；缺失时 final export 阻断。</li>
+            <li>新增功能要同步 TUI、HTTP API、PaperRun artifact、Preview、测试、README 或开发手册。</li>
+          </ul>
+        </section>
+
+        <div class="footer">当前手册为开发维护资料。对外首页仍维护根目录 README。</div>
+      </main>
+
+      <aside class="page-toc">
+        <strong>本页目录</strong>
+        <a href="#overview">总览</a>
+        <a href="#quick-map">阅读路线</a>
+        <a href="#system-shape">系统形态</a>
+        <a href="#runtime-flow">核心流程</a>
+        <a href="#maintenance-rules">维护原则</a>
+      </aside>
+    </div>
+  </body>
+</html>

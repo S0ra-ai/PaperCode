@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Preview 与导出 - Paper Fucker 开发手册</title>
+    <link rel="stylesheet" href="./assets/style.css" />
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="brand"><strong>Paper Fucker</strong><span>开发手册</span></div>
+        <nav class="nav">
+          <div class="nav-group">Start</div>
+          <a href="./index.html">总览</a>
+          <a href="./usage-guide.html">使用入口</a>
+          <a href="./development-workflow.html">开发工作流</a>
+          <div class="nav-group">Architecture</div>
+          <a href="./architecture.html">架构</a>
+          <a href="./module-map.html">模块地图</a>
+          <a href="./function-reference.html">关键函数索引</a>
+          <div class="nav-group">Runtime</div>
+          <a href="./paperrun-flow.html">PaperRun 流程</a>
+          <a href="./paper-generation.html">论文生成链路</a>
+          <a href="./experiment-execution.html">实验执行链路</a>
+          <a class="active" href="./preview-export.html">Preview 与导出</a>
+          <div class="nav-group">Workbench</div>
+          <a href="./tui-models.html">TUI 与模型</a>
+          <a href="./agents-capabilities.html">Agent / MCP / Skills</a>
+          <a href="./testing-maintenance.html">测试与维护</a>
+          <a href="./developer-recipes.html">修改手册</a>
+        </nav>
+      </aside>
+      <main class="content">
+        <section class="hero">
+          <div class="eyebrow">Preview / Export</div>
+          <h1>实时监控与导出链路</h1>
+          <p class="lead">Preview 是 token-protected localhost 只读监控页。Export 负责 Markdown、LaTeX、PDF、DOCX 和 bundle manifest。</p>
+        </section>
+
+        <h2>实时 Monitor</h2>
+        <ul>
+          <li><code>packages/preview/src/client.js</code> 渲染 stage、draft、claim/source ledger、agent tree、cost、gate、export。</li>
+          <li><code>subscribePaperRunLiveMonitor</code> 通过 SSE 接收 <code>paper.run.snapshot</code>。</li>
+          <li>Preview 只读；缺 token 或错误 token 必须拒绝访问。</li>
+          <li>写作、引用、审稿、agent 调用、导出状态变化都应触发 snapshot 更新。</li>
+          <li><code>packages/preview/src/server.ts</code> 的 SSE 服务设置 <code>idleTimeout: 60</code>，避免浏览器 smoke 中长连接被 Bun 默认超时提前关闭。</li>
+        </ul>
+
+        <h2>浏览器级验收</h2>
+        <p><code>scripts/live-preview-browser-smoke.ps1</code> 会启动真实 Preview server，并用本机 Chrome/Edge headless 通过 DevTools Protocol 打开监控页。它不是只测 HTTP JSON，而是覆盖 token 拒绝、只读写请求拒绝、SSE snapshot refresh、浏览器 shell 渲染、浏览器上下文读取 snapshot，以及客户端 bundle 中的实验运行摘要、终端 trace 摘要和机器环境字段。</p>
+        <p>浏览器 smoke 还要求 DOM 中直接出现 <code>ExperimentTerminalTrace.v1</code> 的 stdout 摘要。这样可以防止“JSON 有证据但页面看不见”的回退，也能暴露 <code>client.js</code> 模板语法错误导致的静态空壳页面。</p>
+        <p>报告写入 <code>reports/live-preview-browser-smoke.md</code>。当新增 Preview 字段时，应同步 smoke 中的测试 snapshot、浏览器断言和该报告说明。</p>
+
+        <h2>机器与实验环境摘要</h2>
+        <p><code>createPreviewMonitor</code> 会把 <code>PaperMachineProfile.v1</code> 与 <code>PaperExperimentEnvironmentStatus.v1</code> 压缩成 <code>monitor.machine_environment</code>。该摘要包括工作区、默认 run root、OS/CPU/内存/磁盘、GPU 模式、runtime/compiler 列表、可选缺失数和阻断数。</p>
+        <p>Web 监控台只展示摘要，不展示完整 PATH 或环境变量。完整诊断仍保留在 PaperRun diagnostics，避免把本机细节过度暴露到只读 Preview 页面。</p>
+
+        <h2>导出流程</h2>
+        <div class="flow">
+          <span>DraftPaper</span><span>Verification Gate</span><span>ExportBundle</span><span>Markdown</span><span>LaTeX</span><span>PDF</span><span>DOCX</span><span>Manifest</span>
+        </div>
+
+        <h2>关键模块</h2>
+        <table class="table">
+          <thead><tr><th>模块</th><th>职责</th></tr></thead>
+          <tbody>
+            <tr><td><code>preview.ts</code></td><td>把 draft、claim、citation、review、cost、agent 诊断转成 Preview snapshot。</td></tr>
+            <tr><td><code>export-pipeline.ts</code></td><td>渲染 Markdown/LaTeX/PDF/DOCX，发现 Pandoc/LaTeX 工具。</td></tr>
+            <tr><td><code>research/export/recording.ts</code></td><td>记录 export facts、manifest 和 export.bundle.completed 事件。</td></tr>
+            <tr><td><code>run.ts</code></td><td>聚合 <code>export_state</code>，对格式、artifact_ids 和文件路径去重。</td></tr>
+          </tbody>
+        </table>
+
+        <h2>质量要求</h2>
+        <ul>
+          <li>final export 只能在 final gate passed 时生成。</li>
+          <li>final gate passed 但尚未重新导出时，<code>export_state</code> 必须保持 blocked，并报告 <code>final_export_missing</code>；旧 forced draft 不能冒充 final。</li>
+          <li>final export 前必须使用最新 <code>ClaimLedger.v1</code>、<code>ExperimentRun.v1[]</code> 和 <code>ResultReport.v1</code> 刷新 <code>DraftPaper.v1</code>；修复实验后不能把旧失败草稿导出为终稿。</li>
+          <li>final export 刷新只使用每个实验/环境的最新运行记录；旧失败记录可以留在 artifact 历史中，但不能污染 final 正文的 Results、Host/Container Consistency 或实验表格。</li>
+          <li>当最新 <code>ResultReport.v1</code> 已允许 final claims，终稿不能继续附带旧 <code>ExperimentProtocolGuidance.v1</code> 或 starter pack 修复清单。</li>
+          <li>forced draft 可以生成，但必须保留 failed checks。</li>
+          <li>final 正文应体现复现实验指标，例如 proposed 与 baseline 的主指标。</li>
+          <li>监控台展示的 artifact_ids 和 files 不能重复。</li>
+          <li>当存在实验 starter pack，监控台必须显示 starter 文件、建议 scripts、apply endpoint 和推荐 payload；写入动作仍走受控 API，不在 Preview 直接执行写操作。</li>
+          <li>当存在 <code>ExperimentRun.v1[]</code> artifact，监控台必须显示实验运行摘要，包括 host/container、命令、状态、退出码、耗时和指标。</li>
+          <li>当实验协议由 PaperRun 受控重跑时，必须存在 <code>ExperimentTerminalTrace.v1</code> artifact，并通过 <code>experiment.command.started</code> / <code>experiment.command.completed</code> 事件建立可审计执行边界。</li>
+          <li>Web 监控台必须默认展开终端 stdout/stderr 摘要；只显示字节数或 trace id 不足以支持用户判断实验失败原因。</li>
+          <li>监控台必须展示 <code>machine_environment</code> 摘要，让用户知道当前实验是 GPU 还是 CPU-only、哪些 runtime/compiler 可用、哪些能力只是可选缺失。</li>
+          <li>论文正文和 Preview 应使用同一份 ExperimentRun 来源；不能正文显示成功而 Preview 缺少运行摘要。</li>
+        </ul>
+      </main>
+    </div>
+  </body>
+</html>

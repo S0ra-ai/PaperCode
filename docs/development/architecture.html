@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>架构 - Paper Fucker 开发手册</title>
+    <link rel="stylesheet" href="./assets/style.css" />
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="brand"><strong>Paper Fucker</strong><span>开发手册</span></div>
+        <nav class="nav">
+          <div class="nav-group">Start</div>
+          <a href="./index.html">总览</a>
+          <a href="./usage-guide.html">使用入口</a>
+          <a href="./development-workflow.html">开发工作流</a>
+          <div class="nav-group">Architecture</div>
+          <a class="active" href="./architecture.html">架构</a>
+          <a href="./module-map.html">模块地图</a>
+          <a href="./function-reference.html">关键函数索引</a>
+          <div class="nav-group">Runtime</div>
+          <a href="./paperrun-flow.html">PaperRun 流程</a>
+          <a href="./paper-generation.html">论文生成链路</a>
+          <a href="./experiment-execution.html">实验执行链路</a>
+          <a href="./preview-export.html">Preview 与导出</a>
+          <div class="nav-group">Workbench</div>
+          <a href="./tui-models.html">TUI 与模型</a>
+          <a href="./agents-capabilities.html">Agent / MCP / Skills</a>
+          <a href="./testing-maintenance.html">测试与维护</a>
+          <a href="./developer-recipes.html">修改手册</a>
+        </nav>
+      </aside>
+      <main class="content">
+        <section class="hero">
+          <div class="eyebrow">Architecture</div>
+          <h1>架构边界</h1>
+          <p class="lead">Paper Fucker 是论文领域系统。模型、工具、会话、MCP、skills 和 TUI runtime 是底层能力；论文状态和真实性 gate 属于 Paper Fucker。</p>
+        </section>
+
+        <div class="diagram">
+          <svg width="960" height="420" viewBox="0 0 960 420" role="img" aria-label="Paper Fucker architecture diagram">
+            <defs>
+              <style>
+                .box { fill: #10151d; stroke: #2d3b52; stroke-width: 1.5; rx: 8; }
+                .core { fill: #102238; stroke: #58a6ff; }
+                .text { fill: #f3f6fb; font: 14px Segoe UI, sans-serif; }
+                .muted { fill: #9aa8bb; font: 12px Segoe UI, sans-serif; }
+                .arrow { stroke: #58a6ff; stroke-width: 1.5; marker-end: url(#arrow); }
+              </style>
+              <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#58a6ff" />
+              </marker>
+            </defs>
+            <rect class="box" x="40" y="40" width="220" height="110" />
+            <text class="text" x="62" y="76">中文 TUI 工作台</text>
+            <text class="muted" x="62" y="104">主题 / 代码 / 数据 / 材料</text>
+            <text class="muted" x="62" y="128">模型、环境、Preview、恢复</text>
+
+            <rect class="core" x="350" y="34" width="250" height="130" />
+            <text class="text" x="374" y="72">Paper Core</text>
+            <text class="muted" x="374" y="100">packages/opencode/src/paper</text>
+            <text class="muted" x="374" y="124">PaperRun / Gate / Export</text>
+            <text class="muted" x="374" y="146">Agent Fabric / Capability Bus</text>
+
+            <rect class="box" x="700" y="40" width="220" height="110" />
+            <text class="text" x="722" y="76">能力底座</text>
+            <text class="muted" x="722" y="104">providers / tools / MCP</text>
+            <text class="muted" x="722" y="128">skills / session / auth</text>
+
+            <rect class="box" x="80" y="250" width="220" height="110" />
+            <text class="text" x="102" y="286">Preview</text>
+            <text class="muted" x="102" y="314">packages/preview</text>
+            <text class="muted" x="102" y="338">只读实时 Monitor</text>
+
+            <rect class="box" x="370" y="250" width="220" height="110" />
+            <text class="text" x="392" y="286">Research Tools</text>
+            <text class="muted" x="392" y="314">research-tools</text>
+            <text class="muted" x="392" y="338">Python/MCP/tool bridge</text>
+
+            <rect class="box" x="660" y="250" width="220" height="110" />
+            <text class="text" x="682" y="286">Run Storage</text>
+            <text class="muted" x="682" y="314">~/.paper_fucker/runs</text>
+            <text class="muted" x="682" y="338">JSONL + SQLite index</text>
+
+            <line class="arrow" x1="260" y1="95" x2="350" y2="95" />
+            <line class="arrow" x1="600" y1="95" x2="700" y2="95" />
+            <line class="arrow" x1="475" y1="164" x2="205" y2="250" />
+            <line class="arrow" x1="480" y1="164" x2="480" y2="250" />
+            <line class="arrow" x1="520" y1="164" x2="750" y2="250" />
+          </svg>
+        </div>
+
+        <h2>主要目录</h2>
+        <table class="table">
+          <thead><tr><th>路径</th><th>职责</th><th>修改时注意</th></tr></thead>
+          <tbody>
+            <tr><td><code>packages/opencode/src/paper</code></td><td>论文领域内核：PaperRun、orchestrator、模型路由、Agent、capability、Preview/export 绑定。</td><td>新增领域行为优先放这里。</td></tr>
+            <tr><td><code>packages/opencode/src/cli/cmd/tui</code></td><td>中文 TUI 工作台、命令面、模型工作台、目录选择、PaperRun dashboard。</td><td>用户可见文案、快捷键和布局都要在这里验收。</td></tr>
+            <tr><td><code>packages/preview</code></td><td>只读实时 Web Monitor。</td><td>SSE snapshot 字段变更要同步协议和前端。</td></tr>
+            <tr><td><code>research-tools</code></td><td>Python 工具、MCP bridge、数据/实验辅助。</td><td>涉及外部依赖时必须有 blocked diagnostic。</td></tr>
+            <tr><td><code>schemas</code></td><td>研究事实契约。</td><td>schema 变更要同步 TypeScript/Pydantic 类型和测试。</td></tr>
+          </tbody>
+        </table>
+
+        <h2>实现边界</h2>
+        <ul>
+          <li>PaperRun 是一等状态，不是普通聊天 session 的别名。</li>
+          <li>论文领域 artifacts、gate、source ledger 和 export bundle 由 Paper Core 管。</li>
+          <li>Provider/model 只能通过 Paper 模型库存、allowlist 和路由进入 Agent Team。</li>
+          <li>用户目录、运行历史和密钥状态均使用 Paper Fucker 自有路径。</li>
+        </ul>
+      </main>
+    </div>
+  </body>
+</html>

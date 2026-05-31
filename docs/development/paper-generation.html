@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>论文生成链路 - Paper Fucker 开发手册</title>
+    <link rel="stylesheet" href="./assets/style.css" />
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="brand"><strong>Paper Fucker</strong><span>开发手册</span></div>
+        <nav class="nav">
+          <div class="nav-group">Start</div>
+          <a href="./index.html">总览</a>
+          <a href="./usage-guide.html">使用入口</a>
+          <a href="./development-workflow.html">开发工作流</a>
+          <div class="nav-group">Architecture</div>
+          <a href="./architecture.html">架构</a>
+          <a href="./module-map.html">模块地图</a>
+          <a href="./function-reference.html">关键函数索引</a>
+          <div class="nav-group">Runtime</div>
+          <a href="./paperrun-flow.html">PaperRun 流程</a>
+          <a class="active" href="./paper-generation.html">论文生成链路</a>
+          <a href="./experiment-execution.html">实验执行链路</a>
+          <a href="./preview-export.html">Preview 与导出</a>
+          <div class="nav-group">Workbench</div>
+          <a href="./tui-models.html">TUI 与模型</a>
+          <a href="./agents-capabilities.html">Agent / MCP / Skills</a>
+          <a href="./testing-maintenance.html">测试与维护</a>
+          <a href="./developer-recipes.html">修改手册</a>
+        </nav>
+      </aside>
+      <main class="content">
+        <section class="hero">
+          <div class="eyebrow">Paper Generation</div>
+          <h1>从输入到完整论文</h1>
+          <p class="lead">本页说明 PaperRun 如何把主题、代码、数据和实验日志变成 Markdown/LaTeX/PDF/DOCX，并指出每一步对应的关键函数。</p>
+        </section>
+
+        <h2>入口调用链</h2>
+        <div class="swimlane">
+          <div class="lane"><strong>用户输入</strong><span><code>parsePaperWorkbenchPrompt</code> 解析主题、材料路径和工作目录；<code>submitPaperWorkbenchPrompt</code> 调用 HTTP API 创建 PaperRun。</span></div>
+          <div class="lane"><strong>HTTP API</strong><span><code>handlers/paper.ts</code> 的 create handler 调用 <code>createPaperRun(normalizeCreatePayload(...))</code>，并把错误包装成中文结构化诊断。</span></div>
+          <div class="lane"><strong>核心创建</strong><span><code>run.ts:createPaperRun</code> 初始化 run 目录、事件、source/material index、stage graph、controller state 和 live snapshot。</span></div>
+          <div class="lane"><strong>研究执行</strong><span><code>orchestrator.ts:startPaperResearchRun</code> 逐阶段运行 intake、planning、literature、code_analysis、data、experiment、claim、draft、review、export。</span></div>
+          <div class="lane"><strong>写作导出</strong><span><code>composeDraftPaper</code> 生成论文式正文；<code>exportPaperRun</code> 根据 gate 写 final 或 blocked/forced draft bundle。</span></div>
+        </div>
+
+        <h2>关键函数职责</h2>
+        <table class="table">
+          <thead><tr><th>函数</th><th>位置</th><th>输入</th><th>输出/副作用</th><th>修改建议</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><code>createPaperRun</code></td>
+              <td><code>packages/opencode/src/paper/run.ts</code></td>
+              <td><code>ResearchIntakeRequest</code>、runtime options。</td>
+              <td>创建 run 目录、写初始 facts、启动 orchestrator、返回 snapshot。</td>
+              <td>新增 run 级字段、历史状态、导出状态时改这里。</td>
+            </tr>
+            <tr>
+              <td><code>startPaperResearchRun</code></td>
+              <td><code>packages/opencode/src/paper/orchestrator.ts</code></td>
+              <td>run_dir、request、handlers、runtime options。</td>
+              <td>驱动 stage graph，写 artifacts、claims、draft、review、export。</td>
+              <td>新增 stage 或改变阶段依赖时改这里和 stage id 常量。</td>
+            </tr>
+            <tr>
+              <td><code>defaultCodeAnalysis</code></td>
+              <td><code>orchestrator.ts</code></td>
+              <td>workspace、code_paths。</td>
+              <td>调用 <code>analyzeCodebaseForPaper</code>，记录 CodebaseMap、MethodExtraction、ExperimentSurface、ReproductionPlan。</td>
+              <td>新增语言识别、测试入口发现、source range 规则时改代码分析模块。</td>
+            </tr>
+            <tr>
+              <td><code>defaultExperimentLoop</code></td>
+              <td><code>orchestrator.ts</code></td>
+              <td>request、code analysis、experiment manifest、protocol。</td>
+              <td>生成 ExperimentPlan，执行 host/container runs，写 ResultReport 和 guidance。</td>
+              <td>新增实验策略、GPU 预算、容器执行器时从这里接入。</td>
+            </tr>
+            <tr>
+              <td><code>composeDraftPaper</code></td>
+              <td><code>research/writing/draft.ts</code></td>
+              <td>ClaimLedger、DataPlan、ExperimentPlan、ResultReport、runs、guidance。</td>
+              <td>生成 DraftPaper Markdown 和 section source ranges。</td>
+              <td>改论文结构、章节文案、表格、附录和 final/blocked 叙述时改这里。</td>
+            </tr>
+            <tr>
+              <td><code>exportPaperRun</code></td>
+              <td><code>run.ts</code></td>
+              <td>run id、forced 标记、runtime options。</td>
+              <td>根据 final gate 写 Markdown、LaTeX、PDF、DOCX、manifest。</td>
+              <td>新增导出格式、manifest 字段、forced draft 标记时改这里和测试。</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2>DraftPaper 章节策略</h2>
+        <p>当前写作器不是把 ledger 原样贴进正文，而是把审计信息分层放置：主文使用论文术语，内部索引进入附录。</p>
+        <table class="table">
+          <thead><tr><th>章节</th><th>来源</th><th>设计意图</th></tr></thead>
+          <tbody>
+            <tr><td>摘要 / 引言 / 相关工作</td><td><code>abstractSummary</code>、<code>introductionSummary</code>、<code>relatedWorkSummary</code>、<code>literatureEvidenceSummary</code>、<code>resultEvidenceText</code></td><td>简述主题、证据链和终稿检查状态；相关工作读取 <code>LiteratureMap.v1</code>，只展示真实题名和可核验 locator；没有 result claim 时回退到 <code>ResultReport</code> 的主指标与基线证据。</td></tr>
+            <tr><td>参考文献</td><td><code>referencesSummary</code>、<code>referenceEntry</code>、<code>referenceLocator</code></td><td>只列入 verified source；未验证候选文献不得进入正式参考文献，只能显示需要 DOI、arXiv 元数据或人工审查验证。</td></tr>
+            <tr><td>研究问题</td><td><code>researchQuestionsSummary</code></td><td>围绕方法证据、实验有效性和复现一致性提出可检验问题。</td></tr>
+            <tr><td>主要贡献</td><td><code>contributionsSummary</code></td><td>把贡献写成研究对象和实验结论本身，并引用核心 method/result claim。</td></tr>
+            <tr><td>研究设计与证据流</td><td><code>studyDesignSummary</code></td><td>生成图 1 和阶段表，把材料、代码证据、协议、本机/容器执行和终稿检查串起来。</td></tr>
+            <tr><td>方法</td><td>method claim、code analysis claim</td><td>只描述已绑定 source range 的代码/方法，避免暴露内部实现词。</td></tr>
+            <tr><td>证据与可追踪性</td><td><code>evidenceModelSummary</code></td><td>用来源、断言、结构化记录解释正文可追踪性；内部索引细节放附录。</td></tr>
+            <tr><td>数据与代码可用性</td><td><code>DataPlan</code>、code sources</td><td>说明数据、代码、许可和解释边界。</td></tr>
+            <tr><td>实验设置</td><td><code>ExperimentPlan</code>、<code>ExperimentProtocol</code></td><td>列出指标、基线、消融、预算和降级策略。</td></tr>
+            <tr><td>结果</td><td><code>ResultReport</code>、host/container runs</td><td>用论文式实验比较描述本文方法与基线，不输出运行日志口吻的“复现实验记录/综合建议”。</td></tr>
+            <tr><td>可复现性</td><td><code>reproducibilitySummary</code></td><td>逐实验比较本机与容器指标，并列出实际运行摘要。</td></tr>
+            <tr><td>讨论</td><td><code>discussionSummary</code></td><td>约束结论范围，避免把持平或失败写成提升。</td></tr>
+            <tr><td>效度威胁</td><td><code>threatsToValiditySummary</code></td><td>明确构念、内部、外部、复现和自动化效度限制。</td></tr>
+            <tr><td>附录</td><td>证据追踪、复现清单、断言证据表、证据记录索引、必要时的 starter pack</td><td>保留审查细节；当 final claim 已放行时，不再携带过期修复清单。</td></tr>
+          </tbody>
+        </table>
+
+        <h2>写作器内部函数</h2>
+        <table class="table">
+          <thead><tr><th>函数</th><th>职责</th><th>常见修改点</th></tr></thead>
+          <tbody>
+            <tr><td><code>scaffoldSections</code></td><td>决定 DraftPaper 的章节顺序。</td><td>新增/删除章节时先改这里，再补 authoring test。</td></tr>
+            <tr><td><code>render</code></td><td>把 section array 转成 Markdown。</td><td>只处理统一标题渲染，不应写业务逻辑。</td></tr>
+            <tr><td><code>markdownTable</code></td><td>把结构化 rows 渲染为 Markdown 表格。</td><td>表格字段新增时先在 summary 函数中准备 rows。</td></tr>
+            <tr><td><code>joinBlocks</code></td><td>过滤空段落并用稳定空行连接。</td><td>避免 TUI/Preview 中出现格式乱飘的多重空行。</td></tr>
+            <tr><td><code>normalizeCjkSpacing</code></td><td>清理中文句号、问号、叹号后的英文式空格。</td><td>claim 来自模型或脚本时可能混入 <code>。 系统</code> 这类格式，进入正文前统一规范。</td></tr>
+            <tr><td><code>paperProseText</code></td><td>把底层证据文本转换成论文可读表述。</td><td>将 <code>source-range-grounded</code>、<code>source range</code>、<code>final gate</code>、<code>ClaimLedger</code> 等实现词改成“基于源码范围的分析”“源码范围”“终稿检查”“证据台账”等正文表述。</td></tr>
+            <tr><td><code>displayMetricName</code> / <code>displayExperimentLabel</code></td><td>把指标和实验 id 转成读者可理解的名称。</td><td><code>typecheck_pass</code> 显示为“类型检查通过状态”；<code>container_reproduction_pass</code> 显示为“容器复现通过状态”；<code>baseline:baseline-toy</code> 在正文中显示为 <code>toy</code>，避免把协议 id 当成论文文字。</td></tr>
+            <tr><td><code>displayExperimentRole</code> / <code>displayRunStatus</code></td><td>把实验角色和运行状态转成正文表格语言。</td><td><code>proposed</code> 显示为“本文方法”，<code>succeeded</code> 显示为“通过”；Results 与 Reproducibility 表格不得回退成运行日志口吻。</td></tr>
+            <tr><td><code>resultEvidenceText</code></td><td>为引言和相关工作提供结果证据。</td><td>优先读取 result claim；没有 result claim 但有 <code>ResultReport</code> 时，用主指标、proposed 和最佳 baseline 构造可读结果句。</td></tr>
+            <tr><td><code>literatureEvidenceSummary</code></td><td>把 <code>LiteratureMap.v1</code> 转成相关工作的文献表和边界说明。</td><td>已验证来源显示为“相关工作”，并保留 DOI/arXiv/URL locator；英文摘要不直接塞进中文主文，而是显示“已核验英文摘要”和主题边界；只有未验证来源时显示为“候选文献”，明确不能作为领域共识或新颖性证明。</td></tr>
+            <tr><td><code>literatureDisplayTitle</code></td><td>清理来源展示标题。</td><td>只展示真实题名；外部检索尚未核验时只能形成缺口诊断，不能生成论文式候选题名。</td></tr>
+            <tr><td><code>referencesSummary</code></td><td>生成正式参考文献章节。</td><td>只输出 verified 文献的 title、DOI/arXiv/URL、published/retrieved 信息；未验证来源只写验证缺口，不列成正式引用。</td></tr>
+            <tr><td><code>citationText</code></td><td>渲染正文中的引用标记。</td><td>正文只显示 <code>[来源 1]</code> 这类可读标签，完整 <code>source_id</code> 只保留在附录、Preview annotation 和 manifest 中。</td></tr>
+            <tr><td><code>experimentRunSummary</code></td><td>把 <code>ExperimentRun.v1[]</code> 转成实验运行表。</td><td>新增 GPU、内存、数据集字段时从这里进入正文。</td></tr>
+            <tr><td><code>resultSummary</code></td><td>把 <code>ResultReport</code> 写成主指标比较、复现结论和结果表。</td><td>避免使用运行日志口吻；改 accept/revise/block 语义时同步 ResultReport 测试。</td></tr>
+          </tbody>
+        </table>
+
+        <h2>完整论文验收</h2>
+        <p>当前 authoring test 要求当输入包含 ClaimLedger、DataPlan、ExperimentPlan、ExperimentProtocol、host/container ExperimentRun 和 ResultReport 时，<code>composeDraftPaper</code> 必须生成不少于 8500 字符的完整论文骨架，并包含研究问题、主要贡献、研究设计与证据流、证据与可追踪性、实验设置、可复现性、效度威胁、证据追踪附录、复现清单和登记命令。</p>
+        <p>主文在附录前不得暴露 <code>ClaimLedger</code>、<code>artifact</code>、<code>final export</code>、<code>PaperRun</code>、<code>source-range-grounded</code>、<code>typecheck_pass</code>、<code>baseline:*</code>、<code>cite:*</code>、<code>material:code:*</code> 等内部产品词、实现词、协议 id 或 source id；这些内容只能进入附录、manifest 或开发文档。</p>
+        <p>相关工作必须区分已验证来源与未核验候选。已验证来源可以作为相关工作进入正文并进入参考文献；未核验候选只能作为待查缺口，不能作为贡献、新颖性、实验结论或正式参考文献的论据。没有真实来源时，文献图保持为空并记录缺口。</p>
+        <p>这个测试的目的不是追求固定字数，而是防止回退到短报告、诊断日志或不可读占位稿。真实生成质量仍以 live benchmark 和人工阅读为准。</p>
+
+        <h2>final 与 forced draft</h2>
+        <div class="callout">
+          final export 只能在 source、claim、citation、license、reproduction gate 全部通过时生成。缺 baseline、ablation、container 或 proposed 执行失败时，系统必须输出 blocked/forced draft，并把失败项写入 <code>failed_checks</code>。
+        </div>
+        <p>final export 前会调用 <code>refreshDraftPaperForFinalExport</code> 重新读取最新 <code>ClaimLedger.v1</code>、<code>ExperimentRun.v1[]</code> 和 <code>ResultReport.v1</code>。如果用户修复实验后重跑，同一 experiment/environment 只取最新运行记录；旧失败 run 保留在 artifact 历史中，但不会进入终稿 Results、Reproducibility 或实验表格。</p>
+        <p>当最新 <code>ResultReport.v1</code> 的 <code>final_claims_allowed</code> 为 true，<code>composeDraftPaper</code> 不接收旧 <code>ExperimentProtocolGuidance.v1</code> 和 <code>ExperimentProtocolStarterPack.v1</code>。这条规则防止终稿一边显示复现通过，一边附带已经修复的缺口清单。</p>
+        <p>导出器不能把占位二进制伪装成成功文件。<code>export-pipeline.ts</code> 会校验 PDF 的 <code>%PDF-</code> 文件头和 DOCX 的 ZIP/OpenXML <code>PK</code> 文件头；无效或空输出会进入 <code>tool_diagnostics</code>，对应格式状态为 <code>failed</code>，不会写入最终文件列表。</p>
+
+        <h2>最近验收样例</h2>
+        <table class="table">
+          <thead><tr><th>场景</th><th>Run ID</th><th>结果</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td>真实仓库代码论文</td><td><code>run-2c6cdc44-874e-4d00-b269-0edb29478a61</code></td><td><span class="warn">blocked</span></td><td>proposed typecheck 失败，缺真实 baseline/ablation/container，正确阻断 final。</td></tr>
+            <tr><td>显式协议代码论文</td><td><code>run-81e3d5dd-cdbc-4145-ad93-305bdefc029c</code></td><td><span class="ok">final</span></td><td>本机/容器的本文方法、基线、消融均通过；正文包含图 1、研究设计、证据与可追踪性、结果、可复现性、效度威胁、参考文献和附录。参考文献和评测候选集来自运行时 live arXiv search 发现并由 abs page 校验的真实来源，source manifest 记录 <code>live-arxiv-search+abs-page</code>、检索 query、abs URL、抓取时间和页面发布日期；数据集记录为 <code>LiveArxivRankingDataset.v1</code>，正文明确说明标签是确定性验证标签，不是人工相关性标注；方法 claim 绑定 <code>material:code:*</code> 来源，函数名和 <code>baseline:*</code> / <code>ablation:*</code> 脚本名保持原样，正文 citation 显示为 <code>[来源 1]</code>，主文不暴露内部实现词、协议 id、英文指标 id 或 source id；未传入真实容器镜像时不会生成伪 image/digest，Markdown/LaTeX/PDF/DOCX 均通过文件头校验。</td></tr>
+            <tr><td>最终导出论文</td><td><code>run-8e9f8c83-7e88-43c3-898f-1896a0ee0a41</code></td><td><span class="ok">final</span></td><td>final 场景同样使用 live arXiv search 与 abs page 校验来源；final bundle 写出 Markdown/LaTeX/PDF/DOCX，PDF 头为 <code>%PDF-1.5</code>，DOCX 头为 <code>PK</code>，未发现固定 arXiv locator、检索种子来源、mock/fake/fixture 或伪容器 digest。</td></tr>
+          </tbody>
+        </table>
+
+        <h2>修改检查清单</h2>
+        <ul>
+          <li>改正文结构后，跑 <code>test/paper/authoring.test.ts</code> 和 <code>test/paper/export-pipeline.test.ts</code>。</li>
+          <li>改 PaperRun 状态后，跑 <code>test/paper/paperrun-execution.test.ts</code>。</li>
+          <li>改 final/blocked 语义后，跑 <code>scripts/live-paper-quality-benchmark.ts --scenario code</code> 与 <code>--scenario protocol</code>。</li>
+          <li>输出变更要同步 <code>reports/live-paper-generation-review.md</code>。</li>
+        </ul>
+      </main>
+    </div>
+  </body>
+</html>
