@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>修改手册 - Paper Fucker 开发手册</title>
+    <link rel="stylesheet" href="./assets/style.css" />
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="brand"><strong>Paper Fucker</strong><span>开发手册</span></div>
+        <nav class="nav">
+          <div class="nav-group">Start</div>
+          <a href="./index.html">总览</a>
+          <a href="./usage-guide.html">使用入口</a>
+          <a href="./development-workflow.html">开发工作流</a>
+          <div class="nav-group">Architecture</div>
+          <a href="./architecture.html">架构</a>
+          <a href="./module-map.html">模块地图</a>
+          <a href="./function-reference.html">关键函数索引</a>
+          <div class="nav-group">Runtime</div>
+          <a href="./paperrun-flow.html">PaperRun 流程</a>
+          <a href="./paper-generation.html">论文生成链路</a>
+          <a href="./experiment-execution.html">实验执行链路</a>
+          <a href="./preview-export.html">Preview 与导出</a>
+          <div class="nav-group">Workbench</div>
+          <a href="./tui-models.html">TUI 与模型</a>
+          <a href="./agents-capabilities.html">Agent / MCP / Skills</a>
+          <a href="./testing-maintenance.html">测试与维护</a>
+          <a class="active" href="./developer-recipes.html">修改手册</a>
+        </nav>
+      </aside>
+      <main class="content">
+        <section class="hero">
+          <div class="eyebrow">Recipes</div>
+          <h1>常见修改怎么做</h1>
+          <p class="lead">这里按“我要改什么”给出文件清单、关键函数、测试和风险点。不要只改一个文件就结束。</p>
+        </section>
+
+        <h2>新增 PaperRun Stage</h2>
+        <ol>
+          <li>在 stage id/type 定义里加入新 stage，并更新 stage graph 顺序。</li>
+          <li>在 <code>orchestrator.ts:defaultHandlerFor</code> 和 <code>startPaperResearchRun</code> 接入 handler。</li>
+          <li>handler 输出必须写 artifact，metadata 带 <code>artifact_schema</code>。</li>
+          <li>在 <code>run.ts</code> snapshot 汇总新状态，必要时补 live event。</li>
+          <li>在 TUI dashboard 和 Preview 里显示 stage 状态。</li>
+          <li>测试：<code>test/paper/paperrun-execution.test.ts</code> 验证 stage 出现在 graph 且状态正确。</li>
+        </ol>
+
+        <h2>新增 Artifact Schema</h2>
+        <div class="codepath">packages/opencode/src/paper/research/**/schemas.ts</div>
+        <ol>
+          <li>定义 schema version，例如 <code>GpuEnvironmentReport.v1</code>。</li>
+          <li>写入 artifact store 时填 <code>metadata.artifact_schema</code>、logical path、source_ids。</li>
+          <li>snapshot 如果需要直接展示，增加 diagnostics/monitor 字段。</li>
+          <li>Preview/TUI 只读展示，不直接读取任意文件路径。</li>
+          <li>测试 artifact 出现、schema 名正确、路径在 run_dir 内。</li>
+        </ol>
+
+        <h2>新增 TUI 页面</h2>
+        <table class="table">
+          <thead><tr><th>步骤</th><th>文件</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td>路由类型</td><td><code>context/route.tsx</code></td><td>新增 route data type。</td></tr>
+            <tr><td>入口命令</td><td><code>app.tsx</code></td><td>绑定 slash command 或快捷键，只暴露 Paper Fucker 语义。</td></tr>
+            <tr><td>页面组件</td><td><code>routes/&lt;page&gt;.tsx</code></td><td>组件负责布局和键盘交互，状态读取放到 util/workbench 层。</td></tr>
+            <tr><td>业务状态</td><td><code>routes/paper/workbench.ts</code></td><td>把 API 返回转成 TUI 可渲染状态。</td></tr>
+            <tr><td>测试</td><td><code>test/cli/tui</code></td><td>覆盖文案、快捷键、过滤、空状态和窄屏。</td></tr>
+          </tbody>
+        </table>
+
+        <h2>修改模型工作台</h2>
+        <ol>
+          <li>模型库存语义在 <code>model-inventory.ts</code>：candidate 只是发现，allowlist 才是可用。</li>
+          <li>新增 provider 注册字段时，同步 <code>PaperModelInventory</code>、normalize、load/save、HTTP handler。</li>
+          <li>路由决策必须走 <code>routePaperModel</code>，用户强制指定优先级最高，不可用时返回 blocked/pause。</li>
+          <li><code>routes/paper-models.tsx</code> 只展示用户已注册 provider 和可用模型，不能把未授权候选混入可用列表。</li>
+          <li>测试重启持久化、未配置空状态、allowlist 多选、主/备用决策模型和阶段策略。</li>
+        </ol>
+
+        <h2>修改论文正文</h2>
+        <div class="codepath">packages/opencode/src/paper/research/writing/draft.ts</div>
+        <ol>
+          <li>正文结构在 <code>scaffoldSections</code>，新增章节要考虑 final 和 blocked 两种状态。</li>
+          <li>实验文案来自 <code>experimentProtocolSummary</code>、<code>experimentSummary</code>、<code>experimentRunSummary</code>、<code>discussionSummary</code>。</li>
+          <li>不要把长 artifact id、stdout/stderr、完整 claim ledger 放进正文；放附录或 artifact。</li>
+          <li>表格用 <code>markdownTable</code>，确保 Markdown、LaTeX、PDF、DOCX 都能稳定渲染。</li>
+          <li>测试 authoring/export，并实跑 <code>scripts/live-paper-quality-benchmark.ts --scenario protocol</code> 看真实输出。</li>
+        </ol>
+
+        <h2>修改 Preview/实时监控</h2>
+        <ol>
+          <li>新增 monitor 字段时，先在 <code>run.ts:createPaperRunLivePreviewSnapshot</code> 生成。</li>
+          <li>同步 <code>packages/preview/src/protocol.ts</code> 类型和 <code>src/client.js</code> 渲染。</li>
+          <li>TUI dashboard 使用 <code>subscribePaperRunLiveMonitor</code> 接收 SSE，不做独立事实计算。</li>
+          <li>只读约束必须保留：Preview 不允许写请求，不暴露 secret/path traversal。</li>
+          <li>跑 preview tests 和 browser smoke。</li>
+        </ol>
+
+        <h2>新增本机环境/GPU 页面</h2>
+        <ol>
+          <li>新增环境探测模块，使用 Node/Bun API 或受控命令采集 CPU、内存、GPU、CUDA、编译器、Python、Docker/Podman/Conda。</li>
+          <li>探测失败返回 <code>not_configured</code> 或 <code>optional_missing</code>，不要抛裸异常。</li>
+          <li>TUI 侧边栏增加“机器/实验环境”页，显示可用、未配置、阻断缺失、建议操作。</li>
+          <li>将结果写入 PaperRun diagnostics，实验 runner 可以读取 GPU/容器能力决定是否暂停。</li>
+          <li>测试 Windows 中文路径、无 NVIDIA、无 Docker、Python 不存在、命令超时。</li>
+        </ol>
+
+        <h2>提交前检查</h2>
+        <pre><code>npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/export-pipeline.test.ts --timeout 60000
+npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/paperrun-execution.test.ts --timeout 60000
+npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario code
+npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-changelog-format.ps1 -IncludeArchives</code></pre>
+      </main>
+    </div>
+  </body>
+</html>

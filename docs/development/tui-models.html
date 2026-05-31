@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TUI 与模型 - Paper Fucker 开发手册</title>
+    <link rel="stylesheet" href="./assets/style.css" />
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="brand"><strong>Paper Fucker</strong><span>开发手册</span></div>
+        <nav class="nav">
+          <div class="nav-group">Start</div>
+          <a href="./index.html">总览</a>
+          <a href="./usage-guide.html">使用入口</a>
+          <a href="./development-workflow.html">开发工作流</a>
+          <div class="nav-group">Architecture</div>
+          <a href="./architecture.html">架构</a>
+          <a href="./module-map.html">模块地图</a>
+          <a href="./function-reference.html">关键函数索引</a>
+          <div class="nav-group">Runtime</div>
+          <a href="./paperrun-flow.html">PaperRun 流程</a>
+          <a href="./paper-generation.html">论文生成链路</a>
+          <a href="./experiment-execution.html">实验执行链路</a>
+          <a href="./preview-export.html">Preview 与导出</a>
+          <div class="nav-group">Workbench</div>
+          <a class="active" href="./tui-models.html">TUI 与模型</a>
+          <a href="./agents-capabilities.html">Agent / MCP / Skills</a>
+          <a href="./testing-maintenance.html">测试与维护</a>
+          <a href="./developer-recipes.html">修改手册</a>
+        </nav>
+      </aside>
+      <main class="content">
+        <section class="hero">
+          <div class="eyebrow">TUI / Models</div>
+          <h1>中文 TUI 与模型工作台</h1>
+          <p class="lead">TUI 是主产品界面。模型工作台负责注册 provider、缓存模型、选择候选池、主/备用决策模型和阶段策略。</p>
+        </section>
+
+        <h2>TUI 修改入口</h2>
+        <table class="table">
+          <thead><tr><th>路径</th><th>职责</th></tr></thead>
+          <tbody>
+            <tr><td><code>routes/home.tsx</code></td><td>首页输入、PaperRun 创建、深度档位、目录展示。</td></tr>
+            <tr><td><code>routes/paper-models.tsx</code></td><td><code>/models</code> 全屏模型工作台。</td></tr>
+            <tr><td><code>routes/paper-folder.tsx</code></td><td>工作目录选择与回退 TUI picker。</td></tr>
+            <tr><td><code>routes/paper/index.tsx</code></td><td>PaperRun dashboard、右侧栏、Preview/Export 控制。</td></tr>
+            <tr><td><code>component/error-component.tsx</code></td><td>中文 fatal/error 诊断页。</td></tr>
+            <tr><td><code>paper-visible-commands.ts</code></td><td>用户可见命令白名单。</td></tr>
+          </tbody>
+        </table>
+
+        <h2>模型库存语义</h2>
+        <ul>
+          <li><code>provider_registrations</code>：用户真实注册的 provider。订阅型必须 auth 成功，自定义型必须保存 endpoint。</li>
+          <li><code>candidates</code>：已注册 provider 刷新得到的所有模型。</li>
+          <li><code>allowlist</code>：用户允许 PaperRun 和 Agent Team 使用的唯一模型池。</li>
+          <li><code>decision_model</code> / <code>backup_decision_model</code>：从 allowlist 中选择。</li>
+          <li><code>stage_model_policies</code>：每个阶段支持自动、动态、强制指定。</li>
+        </ul>
+
+        <h2>Provider 注册</h2>
+        <div class="grid">
+          <article class="card"><h3>ChatGPT 订阅</h3><p>通过 auth 登录，同步可用模型到 <code>openai/*</code>。</p></article>
+          <article class="card"><h3>GitHub Copilot</h3><p>通过 auth 登录，同步可用模型到 <code>github-copilot/*</code>。</p></article>
+          <article class="card"><h3>自定义 endpoint</h3><p>填写 base_url/api_key，调用 <code>/models</code>，默认启用发现到的全部模型。</p></article>
+        </div>
+
+        <h2>测试重点</h2>
+        <ul>
+          <li>无模型时首页不得显示默认模型，只引导进入 <code>/models</code>。</li>
+          <li>候选模型不等于可用模型；只有 allowlist 可路由。</li>
+          <li>刷新 provider 后首页必须立即反映主模型和可用模型数量。</li>
+          <li>新 provider 默认启用全部发现模型，但用户可以批量取消。</li>
+        </ul>
+      </main>
+    </div>
+  </body>
+</html>

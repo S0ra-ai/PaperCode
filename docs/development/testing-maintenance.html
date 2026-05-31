@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>测试与维护 - Paper Fucker 开发手册</title>
+    <link rel="stylesheet" href="./assets/style.css" />
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="brand"><strong>Paper Fucker</strong><span>开发手册</span></div>
+        <nav class="nav">
+          <div class="nav-group">Start</div>
+          <a href="./index.html">总览</a>
+          <a href="./usage-guide.html">使用入口</a>
+          <a href="./development-workflow.html">开发工作流</a>
+          <div class="nav-group">Architecture</div>
+          <a href="./architecture.html">架构</a>
+          <a href="./module-map.html">模块地图</a>
+          <a href="./function-reference.html">关键函数索引</a>
+          <div class="nav-group">Runtime</div>
+          <a href="./paperrun-flow.html">PaperRun 流程</a>
+          <a href="./paper-generation.html">论文生成链路</a>
+          <a href="./experiment-execution.html">实验执行链路</a>
+          <a href="./preview-export.html">Preview 与导出</a>
+          <div class="nav-group">Workbench</div>
+          <a href="./tui-models.html">TUI 与模型</a>
+          <a href="./agents-capabilities.html">Agent / MCP / Skills</a>
+          <a class="active" href="./testing-maintenance.html">测试与维护</a>
+          <a href="./developer-recipes.html">修改手册</a>
+        </nav>
+      </aside>
+      <main class="content">
+        <section class="hero">
+          <div class="eyebrow">Testing</div>
+          <h1>测试、审计与维护</h1>
+          <p class="lead">任何改动都应证明它让 Paper Fucker 更接近“可验证论文闭环”，而不是只让单个测试变绿。</p>
+        </section>
+
+        <h2>常用验证</h2>
+        <pre><code>npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/run-api.test.ts test/paper/model-discovery.test.ts
+npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/paperrun-execution.test.ts
+npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+npx --yes bun@1.3.13 --cwd packages/preview test
+python -m unittest discover -s research-tools/tests
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-changelog-format.ps1 -IncludeArchives</code></pre>
+
+        <h2>产品级验收</h2>
+        <pre><code>npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario code
+npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario final</code></pre>
+        <ul>
+          <li><code>code</code> 场景：无复现实验证据时 final export 应只因 reproduction gate 阻断；code claim 必须有 <code>material:code:*</code> source。</li>
+          <li><code>final</code> 场景：带 SourceEvidenceManifest 和 ExperimentEvidenceManifest 时必须生成 final Markdown/LaTeX/PDF/DOCX。</li>
+          <li>检查 summary 中 <code>failed_checks=[]</code>、<code>preview=ready</code>、artifact/file 去重。</li>
+        </ul>
+
+        <h2>维护清单</h2>
+        <table class="table">
+          <thead><tr><th>改动类型</th><th>必须同步</th></tr></thead>
+          <tbody>
+            <tr><td>新增 PaperRun artifact</td><td>schema、recording、snapshot、Preview、测试。</td></tr>
+            <tr><td>新增模型/provider 行为</td><td>model-inventory、TUI /models、API、secret scan、回归测试。</td></tr>
+            <tr><td>新增 TUI 页面</td><td>命令白名单、终端尺寸、中文文案、错误页、截图或 smoke。</td></tr>
+            <tr><td>新增导出格式</td><td>export schema、tool discovery、manifest、forced/final gate 测试。</td></tr>
+            <tr><td>新增能力包</td><td>capability-pack、doctor、skill/MCP 安装检查、NOTICE。</td></tr>
+          </tbody>
+        </table>
+
+        <h2>TaskFlow 与版本</h2>
+        <ul>
+          <li>新增工作要写入 TaskFlow confirmed task，执行后记录 step log。</li>
+          <li>开发版本使用 <code>-dev</code> 后缀；进入 RC/release 流程时再切换版本语义。</li>
+          <li>CHANGELOG 使用 colon DSL，README 当前版本必须跟随根 CHANGELOG。</li>
+          <li>Git Flow 使用功能分支，合回 develop；除非明确确认，不操作 main、不打 tag。</li>
+        </ul>
+      </main>
+    </div>
+  </body>
+</html>

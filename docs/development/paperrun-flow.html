@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PaperRun 流程 - Paper Fucker 开发手册</title>
+    <link rel="stylesheet" href="./assets/style.css" />
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="brand"><strong>Paper Fucker</strong><span>开发手册</span></div>
+        <nav class="nav">
+          <div class="nav-group">Start</div>
+          <a href="./index.html">总览</a>
+          <a href="./usage-guide.html">使用入口</a>
+          <a href="./development-workflow.html">开发工作流</a>
+          <div class="nav-group">Architecture</div>
+          <a href="./architecture.html">架构</a>
+          <a href="./module-map.html">模块地图</a>
+          <a href="./function-reference.html">关键函数索引</a>
+          <div class="nav-group">Runtime</div>
+          <a class="active" href="./paperrun-flow.html">PaperRun 流程</a>
+          <a href="./paper-generation.html">论文生成链路</a>
+          <a href="./experiment-execution.html">实验执行链路</a>
+          <a href="./preview-export.html">Preview 与导出</a>
+          <div class="nav-group">Workbench</div>
+          <a href="./tui-models.html">TUI 与模型</a>
+          <a href="./agents-capabilities.html">Agent / MCP / Skills</a>
+          <a href="./testing-maintenance.html">测试与维护</a>
+          <a href="./developer-recipes.html">修改手册</a>
+        </nav>
+      </aside>
+      <main class="content">
+        <section class="hero">
+          <div class="eyebrow">PaperRun</div>
+          <h1>运行流程与状态</h1>
+          <p class="lead">PaperRun 将输入、计划、证据、实验、写作、审查和导出串成可恢复、可审计的论文生产链。</p>
+        </section>
+
+        <h2>Stage Graph</h2>
+        <div class="flow">
+          <span>intake</span><span>planning</span><span>literature</span><span>code_analysis</span><span>data</span><span>experiment_design</span><span>experiment_execution</span><span>reproduction</span><span>claim_ledger</span><span>drafting</span><span>profile_formatting</span><span>verification</span><span>revision</span><span>export</span>
+        </div>
+
+        <h2>关键文件</h2>
+        <table class="table">
+          <thead><tr><th>模块</th><th>职责</th></tr></thead>
+          <tbody>
+            <tr><td><code>orchestrator.ts</code></td><td>默认 stage handler、查新、代码分析、实验、ClaimLedger、写作闭环。</td></tr>
+            <tr><td><code>run.ts</code></td><td>创建、恢复、控制、snapshot、history、export/preview 入口。</td></tr>
+            <tr><td><code>research/runtime/run-store.ts</code></td><td>JSONL facts、run 文件、global index、事件追加。</td></tr>
+            <tr><td><code>research/storage.ts</code></td><td>将 JSONL facts 重建为 SQLite index。</td></tr>
+            <tr><td><code>research/writing</code></td><td>ClaimLedger、DraftPaper、revision、recording。</td></tr>
+            <tr><td><code>research/verification</code></td><td>citation、source、claim、license、reproduction gate。</td></tr>
+          </tbody>
+        </table>
+
+        <h2>代码/实验型论文的证据链</h2>
+        <ol>
+          <li><code>intake</code> 通过 <code>material-index.ts</code> 扫描代码、论文材料、数据和实验日志，写入 <code>sources.jsonl</code>。</li>
+          <li><code>code_analysis</code> 通过 <code>code-to-paper.ts</code> 生成 <code>CodebaseMap</code>、<code>MethodExtraction</code>、<code>ExperimentSurface</code>、<code>ReproductionPlan</code>。</li>
+          <li><code>claim_ledger</code> 将本地代码 source range 转为可验证 <code>SourceRecord</code>，绑定到 method claim。</li>
+          <li><code>experiment_execution</code> 与 <code>reproduction</code> 读取 <code>ExperimentEvidenceManifest.v1</code> 或运行工具链。</li>
+          <li><code>verification</code> 检查 claim/source/citation/license/reproduction；失败时 final export 阻断。</li>
+        </ol>
+
+        <h2>常见修改入口</h2>
+        <div class="grid">
+          <article class="card"><h3>新增 stage</h3><p>扩展 <code>PAPER_RESEARCH_STAGE_IDS</code>、stage graph、handler、snapshot 和 Preview。</p></article>
+          <article class="card"><h3>新增 artifact</h3><p>定义 schema，写入 artifact store，补充 source_ids 和 metadata.artifact_schema。</p></article>
+          <article class="card"><h3>新增 gate</h3><p>在 <code>research/verification/checks.ts</code> 添加 finding，并更新 tests 和 Preview gate summary。</p></article>
+          <article class="card"><h3>新增运行控制</h3><p>修改 <code>run-controller.ts</code> 和 TUI dashboard controls。</p></article>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

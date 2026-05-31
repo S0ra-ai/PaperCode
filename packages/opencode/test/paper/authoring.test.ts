@@ -5,6 +5,7 @@ import os from "os"
 import path from "path"
 import {
   createRunBoundPreviewSnapshot,
+  formatDraftPaperForProfile,
   runPaperAuthoringLoop,
   type PaperAvailabilityBundle,
   type PaperSupplementaryBundle,
@@ -699,6 +700,206 @@ describe("paper authoring loop", () => {
     expect(abstract).not.toContain("实验入口包含")
     expect(abstract).not.toContain("测试文…")
     expect(abstract).not.toContain("package script（typecheck")
+  })
+
+  test("frames Text2Action code papers as method papers before evidence constraints", () => {
+    const ledger = composeClaimLedger({
+      topic: "面向端云协同服务机器人的 Text2Action 语义规划与安全执行闭环",
+      claims: [
+        {
+          text: "对研究代码的 8 个文件进行基于源码范围的分析，覆盖 src/sub/semantic_planner、src/sub/plan_executor、src/core/action_registry.py。分析阶段抽取到 SemanticPlanner.plan(src/sub/semantic_planner.py:14), PlanExecutor.execute(src/sub/plan_executor.py:20), ActionRegistry.register(src/core/action_registry.py:8)。实验入口包含 test:planner, baseline:bm25, ablation:no-safety, repro:container。",
+          section_id: "method",
+          confidence: 0.91,
+          source_ids: ["material:code:acfs32-text2action"],
+          artifact_ids: ["artifact-codebase-map"],
+        },
+        {
+          text: "Text2Action 语义规划与安全执行闭环在测试通过率上达到 1.0000，与 BM25 基线持平；安全执行消融暴露 2 个失败用例。",
+          section_id: "results",
+          confidence: 0.88,
+          source_ids: ["material:code:acfs32-text2action"],
+          artifact_ids: ["artifact-result-report"],
+        },
+      ],
+      now,
+    })
+    const draft = composeDraftPaper({
+      title: "面向端云协同服务机器人的 Text2Action 语义规划与安全执行闭环",
+      ledger,
+      result_report: {
+        ...resultReport(),
+        primary_metric: "test_pass_rate",
+        best_baseline: { experiment_id: "baseline:bm25", value: 1 },
+        proposed: { experiment_id: "proposed", value: 1 },
+      },
+      experiment_plan: {
+        objective: "Evaluate Text2Action semantic planning and safe execution.",
+        metrics: [{ name: "test_pass_rate", direction: "higher_better", primary: true }],
+        proposed: {
+          experiment_id: "proposed",
+          label: "Text2Action semantic planning with safe execution",
+          role: "proposed",
+          dataset_ids: [],
+          command: { argv: ["bun", "run", "test:planner"] },
+          expected_metric: "test_pass_rate",
+          rationale: "Evaluate the proposed Text2Action planner.",
+        },
+        baselines: [
+          {
+            experiment_id: "baseline:bm25",
+            label: "BM25 retrieval baseline",
+            role: "baseline",
+            dataset_ids: [],
+            command: { argv: ["bun", "run", "baseline:bm25"] },
+            expected_metric: "test_pass_rate",
+            rationale: "Compare against a lexical retrieval baseline.",
+          },
+        ],
+        ablations: [
+          {
+            experiment_id: "ablation:no-safety",
+            label: "without safety guard",
+            role: "ablation",
+            dataset_ids: [],
+            command: { argv: ["bun", "run", "ablation:no-safety"] },
+            expected_metric: "test_pass_rate",
+            rationale: "Remove the safe execution guard.",
+          },
+        ],
+        resource_budget: { max_wall_time_seconds: 3600, max_memory_mb: 8192, max_gpu_hours: 0 },
+        downgrade_policy: [],
+      },
+      experiment_runs: {
+        host_runs: [
+          {
+            experiment_id: "proposed",
+            role: "proposed",
+            status: "succeeded",
+            command: { argv: ["bun", "run", "test:planner"] },
+            environment: { mode: "host", platform: "win32" },
+            metrics: [{ name: "test_pass_rate", value: 1, direction: "higher_better", unit: "ratio" }],
+            stdout: "ok",
+            stderr: "",
+            exit_code: 0,
+            resource_usage: { wall_time_seconds: 0.1 },
+          },
+          {
+            experiment_id: "baseline:bm25",
+            role: "baseline",
+            status: "succeeded",
+            command: { argv: ["bun", "run", "baseline:bm25"] },
+            environment: { mode: "host", platform: "win32" },
+            metrics: [{ name: "test_pass_rate", value: 1, direction: "higher_better", unit: "ratio" }],
+            stdout: "ok",
+            stderr: "",
+            exit_code: 0,
+            resource_usage: { wall_time_seconds: 0.1 },
+          },
+          {
+            experiment_id: "ablation:no-safety",
+            role: "ablation",
+            status: "succeeded",
+            command: { argv: ["bun", "run", "ablation:no-safety"] },
+            environment: { mode: "host", platform: "win32" },
+            metrics: [{ name: "test_pass_rate", value: 0.75, direction: "higher_better", unit: "ratio" }],
+            stdout: "ok",
+            stderr: "",
+            exit_code: 0,
+            resource_usage: { wall_time_seconds: 0.1 },
+          },
+        ],
+        container_runs: [
+          {
+            experiment_id: "proposed",
+            role: "proposed",
+            status: "succeeded",
+            command: { argv: ["bun", "run", "repro:container"] },
+            environment: { mode: "container", platform: "container" },
+            metrics: [{ name: "test_pass_rate", value: 1, direction: "higher_better", unit: "ratio" }],
+            stdout: "ok",
+            stderr: "",
+            exit_code: 0,
+            resource_usage: { wall_time_seconds: 0.1 },
+          },
+        ],
+      },
+      now,
+    })
+    const abstract = markdownSection(draft.markdown, "摘要")
+    const introduction = markdownSection(draft.markdown, "引言")
+    const researchQuestions = markdownSection(draft.markdown, "研究问题")
+    const contributions = markdownSection(draft.markdown, "主要贡献")
+    const relatedWork = markdownSection(draft.markdown, "相关工作")
+    const studyDesign = markdownSection(draft.markdown, "研究设计与证据流")
+    const method = markdownSection(draft.markdown, "方法")
+    const dataAvailability = markdownSection(draft.markdown, "数据与代码可用性")
+    const experimentalSetup = markdownSection(draft.markdown, "实验设置")
+    const results = markdownSection(draft.markdown, "结果")
+
+    expect(abstract).toMatch(/^端云协同服务机器人/)
+    expect(abstract.indexOf("Text2Action")).toBeLessThan(abstract.indexOf("证据"))
+    expect(abstract).toContain("构建 Text2Action")
+    expect(abstract).not.toContain("构建Text2Action")
+    expect(abstract).toContain("语义规划")
+    expect(abstract).toContain("安全执行")
+    expect(abstract).toContain("测试通过率")
+    expect(abstract).not.toContain("计算机类论文若缺少")
+    expect(abstract).not.toContain("检验材料、实验协议和结果断言")
+    expect(abstract).not.toContain("证据链已满足本文的结果表述条件")
+    expect(introduction).toContain("自然语言任务")
+    expect(introduction).toContain("可执行动作序列")
+    expect(introduction).not.toContain("面向计算机类论文，正文完整性")
+    expect(introduction).not.toContain("结果部分需要解释的是")
+    expect(introduction).not.toContain("对研究代码的 8 个文件")
+    expect(researchQuestions).toContain("Text2Action 语义规划与安全执行闭环")
+    expect(researchQuestions).toContain("| RQ1 | 规划机制 |")
+    expect(researchQuestions).toContain("| RQ2 | 安全执行 |")
+    expect(researchQuestions).toContain("| RQ3 | 复现一致性 |")
+    expect(researchQuestions).not.toContain("证据是否足以支撑方法")
+    expect(researchQuestions).not.toContain("当前证据链")
+    expect(researchQuestions).not.toContain("闭环 提出")
+    expect(researchQuestions).not.toContain("围绕Text2Action")
+    expect(researchQuestions).not.toContain("测试通过率 与")
+    expect(contributions).toContain("Text2Action")
+    expect(contributions).toContain("语义规划")
+    expect(contributions).toContain("安全执行")
+    expect(contributions).not.toContain("三条可审查链路")
+    expect(relatedWork).toContain("语言推理与行动")
+    expect(relatedWork).toContain("语言条件机器人规划")
+    expect(relatedWork).toContain("程序化策略与真实控制")
+    expect(relatedWork).not.toContain("对研究代码的 8 个文件")
+    expect(relatedWork).not.toContain("结果断言限定")
+    expect(relatedWork).not.toContain("本研究使用 1 个可核验材料来源")
+    expect(studyDesign).toContain("任务输入")
+    expect(studyDesign).toContain("语义规划")
+    expect(studyDesign).toContain("动作注册")
+    expect(studyDesign).toContain("安全执行")
+    expect(studyDesign).toContain("实验评价")
+    expect(studyDesign).toContain("围绕 Text2Action")
+    expect(studyDesign).not.toContain("证据链完整性")
+    expect(studyDesign).not.toContain("论文结构完整性")
+    expect(studyDesign).not.toContain("正文可信度")
+    expect(studyDesign).not.toContain("闭环 的")
+    expect(method).toContain("### 架构与流程")
+    expect(method).toContain("| 模块 | 职责 | 代码定位 |")
+    expect(method).toContain("SemanticPlanner.plan")
+    expect(method).toContain("PlanExecutor.execute")
+    expect(method).toContain("ActionRegistry.register")
+    expect(method).not.toContain("代码理解阶段抽取")
+    expect(method).not.toContain("个 实验入口")
+    expect(method).not.toContain("semantic_planner,")
+    expect(method).not.toContain("plan_executor,")
+    expect(dataAvailability).toContain("方法实现包括 SemanticPlanner.plan(src/sub/semantic_planner.py:14)、PlanExecutor.execute(src/sub/plan_executor.py:20)、ActionRegistry.register(src/core/action_registry.py:8)")
+    expect(dataAvailability).not.toContain("方法实现入口尚未登记")
+    expect(dataAvailability).not.toContain("| 方法实现 | 未登记 |")
+    expect(dataAvailability).not.toContain("| 代码仓库地址 | 未登记 |")
+    expect(dataAvailability).not.toContain("| 代码许可证 | 未登记 |")
+    expect(experimentalSetup).toContain("本文方法的评价对象为“Text2Action 语义规划与安全执行闭环”")
+    expect(experimentalSetup).not.toContain("代码证据驱动工作流")
+    expect(experimentalSetup).not.toContain("证据驱动工作流")
+    expect(results).toContain("| Text2Action 语义规划与安全执行闭环 | 本文方法 | 1.0000 | 通过 | 是 |")
+    expect(results).not.toContain("证据驱动工作流")
+    expect(draft.markdown).not.toContain("## 证据与可追踪性")
   })
 
   test("uses result report evidence when no result claim is present", () => {
@@ -1965,7 +2166,7 @@ describe("paper authoring loop", () => {
     )
   })
 
-  test("runs ClaimLedger-first authoring through final export and supplementary bundles", async () => {
+  test("runs ClaimLedger-first authoring through final export with CJC front matter and supplementary bundles", async () => {
     const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-authoring-"))
     try {
       const workspace = path.join(dir, "workspace")
@@ -1991,16 +2192,45 @@ describe("paper authoring loop", () => {
       const result = await runPaperAuthoringLoop(
         handle.run_dir,
         {
-          title: "Claim-aware Retrieval",
+          title: "证据约束检索",
           ledger,
           data_plan: dataPlan(),
           result_report: resultReport(),
           available_source_ids: ["paper-a", "source-dataset-open-retrieval"],
+          source_records: [
+            {
+              schema_version: "SourceRecord.v1",
+              source_id: "paper-a",
+              kind: "paper",
+              title: "Toolformer: Language Models Can Teach Themselves to Use Tools",
+              url: "https://arxiv.org/abs/2302.04761",
+              provider: "arxiv",
+              license: { status: "clear", expression: "arXiv non-exclusive distribution" },
+              version: { value: "v1", retrieved_at: now, published_at: "2023-02-09" },
+              verification: { status: "verified", method: "unit-test-arxiv", checked_at: now },
+              topics: ["tool use", "language models"],
+              arxiv_id: "2302.04761",
+              retrieved_at: now,
+            },
+            {
+              schema_version: "SourceRecord.v1",
+              source_id: "source-dataset-open-retrieval",
+              kind: "dataset",
+              title: "Open Retrieval Dataset",
+              url: "https://huggingface.co/datasets/mteb/msmarco",
+              provider: "huggingface",
+              license: { status: "clear", expression: "CC-BY-4.0" },
+              version: { value: "v1", retrieved_at: now },
+              verification: { status: "verified", method: "unit-test-huggingface-record", checked_at: now },
+              topics: ["retrieval"],
+              retrieved_at: now,
+            },
+          ],
           model_reviews: [
             { model: "deepseek-v4-pro", verdict: "pass" },
             { model: "reviewer-model", verdict: "pass" },
           ],
-          target_profile: "nature-paper",
+          target_profile: "cjc-paper",
           code_artifact_ids: ["artifact-codebase-map"],
           renderers,
           now,
@@ -2011,8 +2241,20 @@ describe("paper authoring loop", () => {
       expect(result.final_export_blocked).toBe(false)
       expect(result.export.bundle.status).toBe("final")
       expect(result.preview.readonly).toBe(true)
+      expect(result.revision.next_markdown).toContain("# 证据约束检索")
+      expect(result.revision.next_markdown).toContain("作者待定")
+      expect(result.revision.next_markdown).toContain("## 摘要")
+      expect(result.revision.next_markdown).toContain("**关键词**：")
+      expect(result.revision.next_markdown).toContain("## 英文摘要")
+      expect(result.revision.next_markdown).toContain("**Title**: Evidence-Constrained Retrieval with Verifiable Baselines and Reproduction")
+      expect(result.revision.next_markdown).toContain("**Abstract**:")
+      expect(result.revision.next_markdown).toContain("**Keywords**:")
+      expect(result.revision.next_markdown).not.toContain("This paper presents An ")
+      expect(result.revision.next_markdown).toContain("## 1 引言")
+      expect(result.revision.next_markdown).toContain("## 2 相关工作")
+      expect(result.revision.next_markdown).toContain("## 3 研究设计与方法")
       expect(result.revision.next_markdown).toContain("## 附录 G：投稿准备度")
-      expect(result.revision.next_markdown).toContain("目标稿件配置：Nature 投稿配置。")
+      expect(result.revision.next_markdown).toContain("目标稿件配置：计算机学报投稿配置。")
       expect(result.revision.next_markdown).toContain("数据可用性：已登记 1 个数据集")
       expect(result.revision.next_markdown).toContain("代码可用性：已登记 1 个代码证据记录")
       expect(result.revision.next_markdown).toContain("导出条件：已满足当前导出条件。")
@@ -2024,6 +2266,19 @@ describe("paper authoring loop", () => {
       expect(result.revision.next_markdown).not.toContain("Final gate precheck")
       expect(result.revision.next_markdown).not.toContain("code artifact")
       expect(result.revision.next_markdown).not.toContain("run artifact ledger")
+      expect(result.revision.next_markdown).not.toContain("# A Verifiable Method Study for Computer-System Research")
+      expect(result.revision.next_markdown).not.toContain("## 作者信息")
+      expect(result.revision.next_markdown).not.toContain("## 关键词")
+      expect(result.revision.next_markdown).not.toContain("## Key words")
+      expect(result.revision.next_markdown.indexOf("## 摘要")).toBeLessThan(
+        result.revision.next_markdown.indexOf("**关键词**："),
+      )
+      expect(result.revision.next_markdown.indexOf("**关键词**：")).toBeLessThan(
+        result.revision.next_markdown.indexOf("## 英文摘要"),
+      )
+      expect(result.revision.next_markdown.indexOf("**Keywords**:")).toBeLessThan(
+        result.revision.next_markdown.indexOf("## 1 引言"),
+      )
       expect((result.supplementary_bundle satisfies PaperSupplementaryBundle).items.map((item) => item.kind)).toEqual([
         "claim_ledger",
         "review_report",
@@ -2079,6 +2334,170 @@ describe("paper authoring loop", () => {
     } finally {
       await clean(dir)
     }
+  })
+
+  test("formats ranking CJC drafts without a duplicate English H1 and promotes method to section 3", () => {
+    const ledger = composeClaimLedger({
+      topic: "Agent Team Paper Ranking",
+      claims: [
+        {
+          text: "The method scores candidate papers with relevance, claim coverage, and recency.",
+          section_id: "method",
+          confidence: 0.9,
+          source_ids: ["source-code"],
+          artifact_ids: ["artifact-code"],
+        },
+        {
+          text: "The ranking method outperforms the lexical baseline on nDCG@3.",
+          section_id: "results",
+          confidence: 0.9,
+          source_ids: ["source-result"],
+          artifact_ids: ["artifact-result"],
+        },
+      ],
+      now,
+    })
+    const rankingDataPlan: DataPlan = {
+      schema_version: "DataPlan.v1",
+      topic: "Agent Team Paper Ranking",
+      created_at: now,
+      datasets: [
+        {
+          schema_version: "DatasetCard.v1",
+          dataset_id: "dataset-ranking",
+          source_id: "source-dataset-ranking",
+          title: "agent-ranking-dataset.json",
+          url: "file://experiments/agent-ranking-dataset.json",
+          provider: "local",
+          license: { status: "clear", expression: "workspace-authorized" },
+          version: { value: "v1", retrieved_at: now },
+          verification: { status: "verified", method: "unit-test", checked_at: now, diagnostics: ["candidate_count:5"] },
+          topics: ["candidate paper ranking"],
+          access: "open",
+          task_fit: 1,
+          created_at: now,
+        },
+      ],
+      license_conflicts: [],
+      access_constraints: [],
+      diagnostics: { verification_failures: [], gaps: [] },
+      recommendation: "use",
+    }
+    const rankingPlan = {
+      schema_version: "ExperimentPlan.v1" as const,
+      plan_id: "plan-ranking",
+      topic: "Agent Team Paper Ranking",
+      method_name: "证据约束的论文排序方法",
+      objective: "Evaluate candidate paper ranking with explicit baselines and ablation.",
+      created_at: now,
+      proposed: {
+        experiment_id: "ranking-test",
+        label: "证据约束的论文排序方法",
+        role: "proposed" as const,
+        dataset_ids: ["dataset-ranking"],
+        command: { argv: ["bun", "test", "ranking"] },
+        expected_metric: "ranking_ndcg_at_3",
+        rationale: "Main ranking method.",
+      },
+      baselines: [
+        {
+          experiment_id: "baseline:lexical",
+          label: "词项匹配基线",
+          role: "baseline" as const,
+          dataset_ids: ["dataset-ranking"],
+          command: { argv: ["bun", "test", "baseline:lexical"] },
+          expected_metric: "ranking_ndcg_at_3",
+          rationale: "Lexical baseline.",
+        },
+      ],
+      ablations: [
+        {
+          experiment_id: "ablation:no-claim-coverage",
+          label: "无证据覆盖消融",
+          role: "ablation" as const,
+          dataset_ids: ["dataset-ranking"],
+          command: { argv: ["bun", "test", "ablation:no-claim-coverage"] },
+          expected_metric: "ranking_ndcg_at_3",
+          rationale: "Remove claim coverage.",
+        },
+      ],
+      metrics: [{ name: "ranking_ndcg_at_3", direction: "higher_better" as const, primary: true }],
+      resource_budget: { max_wall_time_seconds: 120, max_memory_mb: 1024 },
+      downgrade_policy: [],
+    }
+    const rankingResult: ResultReport = {
+      schema_version: "ResultReport.v1",
+      plan_id: "plan-ranking",
+      created_at: now,
+      primary_metric: "ranking_ndcg_at_3",
+      proposed: { experiment_id: "ranking-test", value: 1 },
+      best_baseline: { experiment_id: "baseline:lexical", value: 0.95 },
+      findings: [],
+      blockers: [],
+      reproduction: { status: "passed", container_run_ids: ["run-container"] },
+      final_claims_allowed: true,
+      recommendation: "accept",
+    }
+    const run = (experiment_id: string, role: "proposed" | "baseline" | "ablation", mode: "host" | "container", value: number) => ({
+      schema_version: "ExperimentRun.v1" as const,
+      experiment_run_id: `run-${mode}-${experiment_id}`,
+      plan_id: "plan-ranking",
+      experiment_id,
+      role,
+      status: "succeeded" as const,
+      environment:
+        mode === "container"
+          ? ({ mode: "container" as const, image: "paper-fucker/research-runner:test", platform: "container" as const })
+          : ({ mode: "host" as const, platform: process.platform }),
+      command: { argv: ["bun", "test", experiment_id] },
+      metrics: [{ name: "ranking_ndcg_at_3", value, direction: "higher_better" as const }],
+      stdout: "ok",
+      stderr: "",
+      exit_code: 0,
+      resource_usage: { wall_time_seconds: 0.2 },
+      started_at: now,
+      finished_at: now,
+      reproduction: { container_reproduced: mode === "container", image: mode === "container" ? "paper-fucker/research-runner:test" : undefined },
+    })
+    const draft = composeDraftPaper({
+      title: "证据约束的候选论文排序方法：显式基线、消融与容器复现",
+      ledger,
+      data_plan: rankingDataPlan,
+      experiment_plan: rankingPlan,
+      result_report: rankingResult,
+      experiment_runs: {
+        host_runs: [
+          run("ranking-test", "proposed", "host", 1),
+          run("baseline:lexical", "baseline", "host", 0.95),
+          run("ablation:no-claim-coverage", "ablation", "host", 0.91),
+        ],
+        container_runs: [
+          run("ranking-test", "proposed", "container", 1),
+          run("baseline:lexical", "baseline", "container", 0.95),
+          run("ablation:no-claim-coverage", "ablation", "container", 0.91),
+        ],
+      },
+      now,
+    })
+    const formatted = formatDraftPaperForProfile(draft, {
+      target_profile: "cjc-paper",
+      ledger,
+      data_plan: rankingDataPlan,
+      result_report: rankingResult,
+    })
+
+    expect(formatted).toContain("## 英文摘要")
+    expect(formatted).toContain(
+      "**Title**: An Evidence-Constrained Candidate Paper Ranking Method with Baselines, Ablation, and Container Reproduction",
+    )
+    expect(formatted).toContain("This paper presents an Evidence-Constrained Candidate Paper Ranking Method")
+    expect(formatted).toContain("**Keywords**: candidate paper ranking; evidence coverage; ranking nDCG@3; lexical matching baseline; container reproduction")
+    expect(formatted).toContain("## 3 方法")
+    expect(formatted).not.toContain("### 3.1 方法")
+    expect(formatted).not.toContain("# A Verifiable Method Study for Computer-System Research")
+    expect(formatted.indexOf("## 英文摘要")).toBeLessThan(formatted.indexOf("## 1 引言"))
+    expect(formatted.indexOf("## 2 相关工作")).toBeLessThan(formatted.indexOf("## 3 方法"))
+    expect(formatted.indexOf("## 3 方法")).toBeLessThan(formatted.indexOf("## 4 实验设置与材料"))
   })
 
   test("does not invent default literature candidates without verified sources", () => {

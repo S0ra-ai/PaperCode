@@ -6,6 +6,7 @@
 
 - `README.md`：对外首页。回答“这是什么、能做什么、怎么开始、是否可信”。
 - `docs/internal/README.md`：内部维护入口。记录架构边界、release 流程、TaskFlow 和验收策略。
+- `docs/development/index.html`：多文件 HTML 开发手册。采用左侧分组导航和右侧本页目录，说明使用入口、开发工作流、架构、PaperRun 流程、TUI/模型、Agent/MCP/Skills、Preview/export 和测试维护入口。
 - `docs/project-structure.md`：目录结构与 release artifact 边界。
 - `docs/changelog/README.md`：历史 changelog 归档策略。
 - `reports/`：审计、验收、benchmark 证据，不进入 release artifact。
@@ -26,7 +27,7 @@
 
 README 必须把 TUI 和内置能力作为主路径，而不是表现成 CLI-only 工具。当前内置 capability packs 来自 `packages/opencode/src/paper/capability-pack.ts`：
 
-- `paper-profile-skills`：Nature、IEEE、ACM 等投稿 profile skill。
+- `paper-profile-skills`：保留 Nature 等 first-party profile skill 作为能力底座；当前用户可见期刊入口只启用中国计算机学报。
 - `literature-mcp`：Exa、Crossref、Semantic Scholar、arXiv。
 - `crawler-data`：Scrapling-first crawler 与可选 Scrapling MCP。
 - `huggingface-research`：HF docs、papers、datasets、models、Spaces、Jobs、Trackio。

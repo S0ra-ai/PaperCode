@@ -1,6 +1,6 @@
 # Paper Fucker
 
-当前版本：<!-- version:start -->0.13.0.110-dev<!-- version:end --> ｜ 作者：k1d ([ZhuchenZhong](https://github.com/ZhuchenZhong)) ｜ 状态：开发态 ｜ 许可证：MPL-2.0
+当前版本：<!-- version:start -->0.13.0.133-dev<!-- version:end --> ｜ 作者：k1d ([ZhuchenZhong](https://github.com/ZhuchenZhong)) ｜ 状态：开发态 ｜ 许可证：MPL-2.0
 
 Paper Fucker 是一个中文优先、私有优先的论文研究工作台。你输入主题，或拖入论文、代码、数据和实验日志，它会把任务组织成可恢复、可审查的 `PaperRun`：研究规划、资料检索、代码理解、实验设计、复现记录、证据账本、真实性审查、实时预览和导出。
 
@@ -84,7 +84,7 @@ paper_fucker resume <run-id>
 
 ## 论文能力
 
-- 论文 profile：Nature、IEEE、ACM、Springer 等结构与材料检查。
+- 论文格式：当前启用中国计算机学报 profile；其他期刊格式与发现流程暂不作为用户入口开放。
 - 查新流程：从资料检索、实验设计到 ClaimLedger 前持续生成 `NoveltyCheckpoint`，发现重复研究时先改道或收窄贡献。
 - 论文脊梁：`PaperSpine` 在正文前检查中心论点、动机链、贡献链和证据链，避免无证据草稿伪装成终稿。
 - 全局图：`GlobalFigureSpec` 生成期刊适配 overview figure，panel 必须绑定 claim、source 或 artifact。
@@ -111,6 +111,10 @@ Paper Fucker 默认 private-first：
 - 可选：Python、uv、Pandoc、LaTeX、Docker、CUDA/ROCm、Node、编译器工具链
 
 缺少可选工具不会阻止基础论文工作台启动；doctor 和右侧栏会说明缺失项影响哪些实验、导出或复现能力。
+
+## 开发文档
+
+多页开发手册位于 `docs/development/index.html`，覆盖架构、PaperRun 流程、模型工作台、实验执行、Preview/export、关键函数和常见修改路径。
 
 ## FAQ
 

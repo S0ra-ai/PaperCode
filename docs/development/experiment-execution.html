@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>实验执行链路 - Paper Fucker 开发手册</title>
+    <link rel="stylesheet" href="./assets/style.css" />
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="brand"><strong>Paper Fucker</strong><span>开发手册</span></div>
+        <nav class="nav">
+          <div class="nav-group">Start</div>
+          <a href="./index.html">总览</a>
+          <a href="./usage-guide.html">使用入口</a>
+          <a href="./development-workflow.html">开发工作流</a>
+          <div class="nav-group">Architecture</div>
+          <a href="./architecture.html">架构</a>
+          <a href="./module-map.html">模块地图</a>
+          <a href="./function-reference.html">关键函数索引</a>
+          <div class="nav-group">Runtime</div>
+          <a href="./paperrun-flow.html">PaperRun 流程</a>
+          <a href="./paper-generation.html">论文生成链路</a>
+          <a class="active" href="./experiment-execution.html">实验执行链路</a>
+          <a href="./preview-export.html">Preview 与导出</a>
+          <div class="nav-group">Workbench</div>
+          <a href="./tui-models.html">TUI 与模型</a>
+          <a href="./agents-capabilities.html">Agent / MCP / Skills</a>
+          <a href="./testing-maintenance.html">测试与维护</a>
+          <a href="./developer-recipes.html">修改手册</a>
+        </nav>
+      </aside>
+      <main class="content">
+        <section class="hero">
+          <div class="eyebrow">Experiment Runtime</div>
+          <h1>代码实验、baseline、ablation 与复现</h1>
+          <p class="lead">计算机类论文必须面对代码和实验。这里说明 Paper Fucker 如何发现脚本、执行命令、记录输出，并决定是否允许 final export。</p>
+        </section>
+
+        <h2>执行模型</h2>
+        <pre><code>code_paths
+  -> analyzeCodebaseForPaper
+  -> ExperimentSurface / ReproductionPlan
+  -> ExperimentProtocol discovery
+  -> planExperiments
+  -> runHostExploration
+  -> runContainerReproduction
+  -> analyzeExperimentResults
+  -> ExperimentProtocolGuidance / StarterPack / final gate</code></pre>
+
+        <h2>关键文件</h2>
+        <table class="table">
+          <thead><tr><th>文件</th><th>职责</th><th>重点函数</th></tr></thead>
+          <tbody>
+            <tr><td><code>orchestrator.ts</code></td><td>把代码分析、协议发现、runner、ResultReport 串起来。</td><td><code>defaultExperimentLoop</code>、<code>localCodeExperimentRunner</code>、<code>automaticCodeExperimentRunner</code>、<code>experimentProtocolGuidance</code></td></tr>
+            <tr><td><code>research/experiments/planning.ts</code></td><td>根据 proposed、baseline、ablation 生成 <code>ExperimentPlan</code>。</td><td><code>planExperiments</code>、<code>plannedExperimentSpecs</code></td></tr>
+            <tr><td><code>research/experiments/runner.ts</code></td><td>执行 ExperimentSpec，生成 host/container <code>ExperimentRun</code>。</td><td><code>runHostExploration</code>、<code>runContainerReproduction</code></td></tr>
+            <tr><td><code>research/experiments/analysis.ts</code></td><td>分析指标、blocker、复现状态和最终结论权限。</td><td><code>analyzeExperimentResults</code></td></tr>
+            <tr><td><code>run.ts</code></td><td>把 starter pack 写入用户工作区，执行实验协议，记录终端 trace，并暴露 API。</td><td><code>applyPaperRunExperimentStarterPack</code>、<code>runPaperRunExperimentProtocol</code>、<code>runExperimentShellCommand</code></td></tr>
+          </tbody>
+        </table>
+
+        <h2>协议发现规则</h2>
+        <p>Paper Fucker 当前优先识别仓库 <code>package.json</code> 中的实验脚本。</p>
+        <table class="table">
+          <thead><tr><th>脚本类型</th><th>识别例子</th><th>语义</th></tr></thead>
+          <tbody>
+            <tr><td>proposed</td><td><code>typecheck</code>、<code>test</code>、<code>check</code>、<code>lint</code>、<code>bench</code></td><td>被评估主方法。失败时不能进入 final。</td></tr>
+            <tr><td>baseline</td><td><code>baseline:bm25</code>、<code>baseline:toy</code></td><td>对照组。缺失时生成 guidance，必要时阻断 final claim。</td></tr>
+            <tr><td>ablation</td><td><code>ablation:no-claim-ledger</code>、<code>ablation:toy</code></td><td>消融组。缺失时贡献表述必须保守。</td></tr>
+            <tr><td>container</td><td><code>repro:container</code>、<code>container:run</code></td><td>隔离复现入口。失败时 final export 阻断。</td></tr>
+          </tbody>
+        </table>
+
+        <h2>真实性规则</h2>
+        <div class="callout">
+          <code>automaticCodeExperimentRunner</code> 只包装本地受控 runner，不把缺失的 baseline、ablation 或 container 脚本合成为成功结果。没有真实 runner 或显式 evidence manifest 时，final export 必须保持 blocked。
+        </div>
+
+        <h2>ExperimentRun 内容</h2>
+        <table class="table">
+          <thead><tr><th>字段</th><th>来源</th><th>用途</th></tr></thead>
+          <tbody>
+            <tr><td><code>status</code></td><td>命令退出码、超时、环境错误。</td><td>进入 ResultReport blocker。</td></tr>
+            <tr><td><code>metrics</code></td><td>runner 解析结果或 pass/fail 转换。</td><td>生成 Results 表和 best baseline。</td></tr>
+            <tr><td><code>stdout/stderr</code></td><td>命令输出。</td><td>正文只摘要；终端输出摘要和字节数由 <code>ExperimentTerminalTrace.v1</code> 保存。</td></tr>
+            <tr><td><code>resource_usage</code></td><td>执行器采集。</td><td>用于预算、GPU/CPU/内存展示。</td></tr>
+            <tr><td><code>reproduction.container_reproduced</code></td><td>container mode 成功。</td><td>决定 reproduction gate 是否 passed。</td></tr>
+          </tbody>
+        </table>
+
+        <h2>Starter Pack</h2>
+        <p>当仓库缺 baseline、ablation 或 container runner，系统生成 <code>ExperimentProtocolStarterPack.v1</code>，但它不是实验结果。<code>applyPaperRunExperimentStarterPack</code> 可以受控写入模板文件；传入 <code>update_package_json=true</code> 时，会把建议 scripts 合并进工作区 <code>package.json</code>，已有不同命令默认视为冲突，只有 <code>overwrite=true</code> 才覆盖。</p>
+        <p>Starter pack 的 <code>package_json_scripts</code> 只写入可落地的 starter 命令：<code>baseline:starter</code>、<code>ablation:starter</code> 和 <code>repro:container:starter</code>。Guidance 中的示例脚本只作为人类参考，不会默认写进用户仓库，避免用户点击“写入实验模板”后得到一组不存在的命令。</p>
+        <p>TUI 运行工作台会在 gate 区显示“写入实验模板”，点击后调用 <code>/paper/runs/:runID/experiment-starter/apply</code>，默认 payload 为 <code>{ dry_run:false, overwrite:false, update_package_json:true }</code>。Preview 监控台的 <code>monitor.experiment_starter_pack</code> 同步暴露 <code>apply_endpoint</code> 和推荐 payload，便于前端把同一能力做成按钮。</p>
+        <ul>
+          <li><code>experiments/starter/baseline-starter.ts</code>：baseline 运行器骨架。</li>
+          <li><code>experiments/starter/ablation-starter.ts</code>：消融运行器骨架。</li>
+          <li><code>experiments/starter/Dockerfile.repro</code>：容器复现骨架。</li>
+          <li><code>experiments/starter/README.md</code>：如何替换模板并重新运行。</li>
+        </ul>
+
+        <h2>受控重跑实验协议</h2>
+        <p><code>runPaperRunExperimentProtocol</code> 提供 PaperRun 级实验重跑入口。它读取当前 run artifacts 中最新的 <code>ExperimentPlan.v1</code> 与 <code>ExperimentProtocol.v1</code>，同时在执行前重新扫描当前 workspace 的 <code>package.json</code>。如果用户已经写入并补全 starter 脚本，重跑会生成一份 refreshed <code>ExperimentProtocol.v1</code> artifact，并以新的 proposed、baseline、ablation、container 脚本重建本次执行计划。</p>
+        <p>HTTP 入口为 <code>POST /paper/runs/:runID/experiments/run</code>。默认可以 dry-run；TUI 工作台中的“运行实验协议”会发送 <code>{ dry_run:false, timeout_seconds:120 }</code>，执行后写回新的 <code>ExperimentRun.v1[]</code>、<code>ResultReport.v1</code> 和 <code>ExperimentTerminalTrace.v1</code> artifact，并发布 Preview snapshot。</p>
+        <table class="table">
+          <thead><tr><th>输入字段</th><th>作用</th></tr></thead>
+          <tbody>
+            <tr><td><code>workspace_path</code></td><td>指定执行工作区；缺省使用 PaperRun snapshot 的 workspace。</td></tr>
+            <tr><td><code>dry_run</code></td><td>为 true 时只返回 planned commands，不执行命令。</td></tr>
+            <tr><td><code>timeout_seconds</code></td><td>单条命令超时上限，当前限制在 1 到 900 秒。</td></tr>
+          </tbody>
+        </table>
+        <h2>终端 Trace</h2>
+        <p>每条协议命令都会生成一条 <code>ExperimentTerminalTrace.v1</code>。它记录命令、cwd、环境、退出码、超时状态、耗时、stdout/stderr 字节数、输出截断标记和 64 KiB 以内的输出摘要。</p>
+        <p>事件流同时写入 <code>experiment.command.started</code> 与 <code>experiment.command.completed</code>。Preview 和 TUI 后续做实时终端视图时，应以这些事件作为状态边界，以 trace artifact 作为可审计证据。</p>
+        <p>当重跑后的 <code>ResultReport.v1</code> 允许 final claims，系统只会清除 <code>reproduction_failure</code> blocker；其他来源、引用或 claim blocker 会保留。此时如果还没有新的 final export，<code>export_state</code> 会报告 <code>final_export_missing</code>，用户需要再执行一次 final export；旧 forced draft 不会被当成终稿。</p>
+        <p>用户执行 final export 时，系统会基于最新实验 run 和 result report 刷新 <code>DraftPaper.v1</code>，再渲染 Markdown/LaTeX/PDF/DOCX。这样修复容器脚本后的终稿会显示“容器复现已通过”，不会继续携带旧草稿中的失败脚本或 <code>reproduction_failure</code>。</p>
+        <p>如果同一个 PaperRun 曾经有失败实验，终稿刷新只保留每个 experiment/environment 的最新 <code>ExperimentRun</code>。当最新 <code>ResultReport.v1</code> 的 <code>final_claims_allowed</code> 为 true 时，旧的 <code>ExperimentProtocolGuidance.v1</code> 与 <code>ExperimentProtocolStarterPack.v1</code> 不再进入终稿正文，避免论文一边通过 final gate、一边附带过期修复清单。</p>
+
+        <h2>Preview 实验运行摘要</h2>
+        <p><code>recordExperimentLoop</code> 会写入 <code>experiments/host-runs.json</code> 与 <code>experiments/container-runs.json</code>，两者的 artifact schema 都是 <code>ExperimentRun.v1[]</code>。<code>run.ts</code> 读取这些 artifact 后放入 <code>snapshot.diagnostics.experiment_runs</code>，再由 <code>createPreviewMonitor</code> 压缩成 <code>monitor.experiment_runs</code>。</p>
+        <p>前端同时展示实验 run 摘要和终端 trace 摘要：环境、实验 id、角色、状态、命令、退出码、耗时、指标、stdout/stderr 字节数和截断标记。终端级输出以 <code>ExperimentTerminalTrace.v1</code> artifact 为准，避免监控页承载过大的终端输出。</p>
+
+        <h2>机器能力进入监控台</h2>
+        <p><code>inspectPaperMachineProfile</code> 在 PaperRun snapshot 中写入 <code>machine_profile</code> 与 <code>experiment_environment</code>。Preview 使用 <code>monitor.machine_environment</code> 展示 CPU/GPU 模式、runtime、compiler、虚拟化/容器工具和缺失能力统计。</p>
+        <p>这对代码论文很关键：当实验结果来自 CPU-only 环境、缺 Docker、缺 CUDA 或缺编译器时，用户能在监控台直接看到能力边界；论文正文也应保持对应限制，不能把未满足的环境写成已复现。</p>
+
+        <h2>如何新增交互式终端执行器</h2>
+        <ol>
+          <li>定义执行接口：command、cwd、env allowlist、timeout、max output bytes、kill token。</li>
+          <li>在现有 <code>ExperimentTerminalTrace.v1</code> 基础上增加流式 chunk artifact，不破坏最终 trace 摘要。</li>
+          <li>把命令状态映射到 <code>ExperimentRun.status</code>：<code>succeeded</code>、<code>failed</code>、<code>environment_failed</code>、<code>resource_exceeded</code>。</li>
+          <li>把文件产物注册进 artifact store，避免只靠终端文本判断结果。</li>
+          <li>TUI/Preview 订阅新增事件：command started、chunk、artifact written、command finished。</li>
+          <li>测试覆盖：成功、退出码失败、超时、中文路径、Windows shell、无权限、输出过长。</li>
+        </ol>
+
+        <h2>验收命令</h2>
+        <pre><code>npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/paperrun-execution.test.ts --timeout 60000
+npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario code
+npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
+npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario starter-rerun</code></pre>
+      </main>
+    </div>
+  </body>
+</html>

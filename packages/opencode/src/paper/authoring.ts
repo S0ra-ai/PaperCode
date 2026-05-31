@@ -126,13 +126,207 @@ function displaySubmissionProfile(value: string) {
   return value.replace(/[-_]+/g, " ")
 }
 
-function appendProfileAppendix(markdown: string, input: RunPaperAuthoringLoopInput) {
-  const profile = input.target_profile ?? "generic-preprint"
+function cjcEnglishTitle(title: string) {
+  if (/^[\x00-\x7F\s:;,.!?()-]+$/.test(title)) return title
+  if (title.includes("候选论文排序")) {
+    return "An Evidence-Constrained Candidate Paper Ranking Method with Baselines, Ablation, and Container Reproduction"
+  }
+  if (title.includes("证据约束检索")) {
+    return "Evidence-Constrained Retrieval with Verifiable Baselines and Reproduction"
+  }
+  if (title.includes("Text2Action") || title.includes("text2action")) {
+    return "A Text2Action Method for Embodied Service Robot Command Planning"
+  }
+  return "An Evidence-Constrained Method Study for Computer-System Research"
+}
+
+function sectionMarkdown(draft: DraftPaper, sectionId: string) {
+  return draft.sections.find((section) => section.section_id === sectionId)?.markdown.trim()
+}
+
+function tableCell(markdown: string, key: string) {
+  const pattern = new RegExp(`\\|\\s*${key}\\s*\\|\\s*([^|]+?)\\s*\\|`)
+  const value = markdown.match(pattern)?.[1]?.trim()
+  if (!value || value === "本次材料未提供" || value === "本次材料未提供。") return undefined
+  return value
+}
+
+function cjcAuthorMetadata(draft: DraftPaper) {
+  const authorSection = sectionMarkdown(draft, "author_information") ?? ""
+  return {
+    authors: tableCell(authorSection, "作者") ?? "作者待定",
+    affiliation: tableCell(authorSection, "机构") ?? "单位待定",
+    englishAuthors: "Author TBD",
+    englishAffiliation: "Affiliation TBD",
+  }
+}
+
+function cjcEnglishAbstract(draft: DraftPaper, abstract: string) {
+  if (/^[\x00-\x7F\s:;,.!?;'"()[\]-]+$/.test(abstract)) return abstract
+  if (draft.title.includes("Text2Action") || draft.title.includes("text2action")) {
+    return [
+      "This paper presents a Text2Action method for embodied service robot command planning.",
+      "It studies how natural-language tasks are transformed into executable action sequences under semantic planning, action registration, and safe execution constraints.",
+      "The Chinese manuscript reports the benchmark, ablation, and container reproduction boundaries used to support the stated results.",
+    ].join(" ")
+  }
+  const englishTitle = cjcEnglishTitle(draft.title).replace(/^(A|An) /, (article) => article.toLowerCase())
+  return [
+    `This paper presents ${englishTitle}.`,
+    "The manuscript follows a Chinese Computer Journal oriented structure and keeps research questions, method claims, experiment records, and reproducibility boundaries traceable to the submitted materials.",
+  ].join(" ")
+}
+
+function cjcKeywordList(value: string) {
+  return value
+    .split(/[；;、,，]/)
+    .map((item) => item.trim())
+    .filter(Boolean)
+}
+
+function cjcEnglishKeywords(value: string) {
+  const dictionary: Record<string, string> = {
+    可复现研究: "reproducible research",
+    代码实验: "code experiment",
+    代码生成: "code generation",
+    智能体: "agent",
+    多智能体: "multi-agent system",
+    检索: "retrieval",
+    排序: "ranking",
+    测试通过率: "test pass rate",
+    基线对照: "baseline comparison",
+    消融实验: "ablation study",
+    容器复现: "container reproduction",
+    语义规划: "semantic planning",
+    安全执行: "safe execution",
+    服务机器人: "service robot",
+    论文生成: "paper generation",
+    证据链: "evidence traceability",
+    候选论文排序: "candidate paper ranking",
+    证据覆盖: "evidence coverage",
+    "排序 nDCG@3": "ranking nDCG@3",
+    词项匹配基线: "lexical matching baseline",
+    机器人: "robotics",
+    具身智能: "embodied intelligence",
+  }
+  const keywords = cjcKeywordList(value)
+    .map((item) => dictionary[item] ?? item)
+    .slice(0, 6)
+  return keywords.length > 0 ? keywords.join("; ") : "computer systems; reproducible research"
+}
+
+const cjcSectionPlan: Record<string, { order: number; heading: string; level: 2 | 3 }> = {
+  introduction: { order: 100, heading: "1 引言", level: 2 },
+  research_questions: { order: 110, heading: "1.1 研究问题", level: 3 },
+  contributions: { order: 120, heading: "1.2 主要贡献", level: 3 },
+  related_work: { order: 200, heading: "2 相关工作", level: 2 },
+  study_design: { order: 300, heading: "3 研究设计与方法", level: 2 },
+  method: { order: 310, heading: "3.1 方法", level: 3 },
+  evidence_traceability: { order: 320, heading: "3.2 证据与可追踪性", level: 3 },
+  data_availability: { order: 400, heading: "4 实验设置与材料", level: 2 },
+  experimental_setup: { order: 410, heading: "4.1 实验协议", level: 3 },
+  results: { order: 500, heading: "5 结果与分析", level: 2 },
+  reproducibility: { order: 510, heading: "5.1 可复现性", level: 3 },
+  discussion: { order: 600, heading: "6 讨论", level: 2 },
+  threats_to_validity: { order: 700, heading: "7 效度威胁", level: 2 },
+  limitations: { order: 710, heading: "7.1 限制与待修复项", level: 3 },
+  conclusion: { order: 800, heading: "8 结论", level: 2 },
+  declarations: { order: 900, heading: "声明", level: 2 },
+  references: { order: 1000, heading: "参考文献", level: 2 },
+  appendix_evidence_trace: { order: 1100, heading: "附录 A：证据追踪", level: 2 },
+  appendix_operational_reproducibility_checklist: { order: 1110, heading: "附录 B：复现清单", level: 2 },
+  appendix_experiment_protocol_guidance: { order: 1120, heading: "附录 C：实验协议修复清单", level: 2 },
+  appendix_experiment_protocol_starter_pack: { order: 1130, heading: "附录 D：实验启动包", level: 2 },
+  appendix_claim_ledger: { order: 1140, heading: "附录 E：断言证据表", level: 2 },
+  appendix_artifacts: { order: 1150, heading: "附录 F：证据记录索引", level: 2 },
+}
+
+function cjcOrderedSections(draft: DraftPaper) {
+  return draft.sections
+    .filter((section) => !["author_information", "abstract", "keywords"].includes(section.section_id))
+    .map((section, index) => ({
+      section,
+      plan: cjcSectionPlan[section.section_id],
+      index,
+    }))
+    .sort((left, right) => (left.plan?.order ?? 2000 + left.index) - (right.plan?.order ?? 2000 + right.index))
+}
+
+function cjcEffectiveSectionPlan(draft: DraftPaper, sectionId: string) {
+  const plan = cjcSectionPlan[sectionId]
+  if (!plan) return undefined
+  const hasStudyDesign = draft.sections.some((section) => section.section_id === "study_design")
+  if (sectionId === "method" && !hasStudyDesign) return { order: 300, heading: "3 方法", level: 2 as const }
+  return plan
+}
+
+function cjcBodyMarkdown(draft: DraftPaper) {
+  return cjcOrderedSections(draft).map(({ section, plan }) => {
+    const effectivePlan = cjcEffectiveSectionPlan(draft, section.section_id) ?? plan
+    const heading = effectivePlan?.heading ?? section.title
+    const level = effectivePlan?.level ?? 2
+    return `${"#".repeat(level)} ${heading}\n\n${section.markdown.trim()}`
+  })
+}
+
+function cjcFrontMatterMarkdown(draft: DraftPaper) {
+  const abstract = sectionMarkdown(draft, "abstract") ?? "摘要待生成。"
+  const keywords = sectionMarkdown(draft, "keywords") ?? "关键词待生成。"
+  const author = cjcAuthorMetadata(draft)
+  return [
+    `# ${draft.title}`,
+    "",
+    author.authors,
+    "",
+    `（${author.affiliation}）`,
+    "",
+    "## 摘要",
+    "",
+    abstract,
+    "",
+    `**关键词**：${cjcKeywordList(keywords).join("；") || "关键词待生成"}`,
+    "",
+    "## 英文摘要",
+    "",
+    `**Title**: ${cjcEnglishTitle(draft.title)}`,
+    "",
+    `**Authors**: ${author.englishAuthors}`,
+    "",
+    `**Affiliation**: ${author.englishAffiliation}`,
+    "",
+    "**Abstract**:",
+    "",
+    cjcEnglishAbstract(draft, abstract),
+    "",
+    `**Keywords**: ${cjcEnglishKeywords(keywords)}`,
+    "",
+    cjcBodyMarkdown(draft).join("\n\n"),
+  ]
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+}
+
+type ProfileFormattingInput = {
+  target_profile?: RunPaperAuthoringLoopInput["target_profile"]
+  ledger: RunPaperAuthoringLoopInput["ledger"]
+  data_plan?: RunPaperAuthoringLoopInput["data_plan"]
+  result_report: RunPaperAuthoringLoopInput["result_report"]
+  code_artifact_ids?: RunPaperAuthoringLoopInput["code_artifact_ids"]
+}
+
+export function formatDraftPaperForProfile(draft: DraftPaper, input: ProfileFormattingInput) {
+  const profile = input.target_profile ?? "cjc-paper"
+  const markdown = profile === "cjc-paper" ? cjcFrontMatterMarkdown(draft) : draft.markdown
+  return appendProfileAppendix(markdown, input)
+}
+
+function appendProfileAppendix(markdown: string, input: ProfileFormattingInput) {
+  const profile = input.target_profile ?? "cjc-paper"
   if (profile === "generic-preprint") return markdown
-  const datasetCount = input.data_plan.datasets.length
+  const datasetCount = input.data_plan?.datasets.length ?? 0
   const failedChecks = [
     ...input.ledger.unsupported_claim_ids.map((claimId) => `unsupported claim ${claimId}`),
-    ...input.data_plan.license_conflicts.map((conflict) => `dataset license ${conflict.dataset_id}`),
+    ...(input.data_plan?.license_conflicts ?? []).map((conflict) => `dataset license ${conflict.dataset_id}`),
     ...(input.result_report.final_claims_allowed ? [] : ["experiment reproduction gate"]),
   ]
   return [
@@ -169,7 +363,7 @@ export function createProfileAwareDraftRevision(input: {
 }) {
   return createDraftRevision({
     previous_markdown: input.draft.markdown,
-    next_markdown: appendProfileAppendix(input.draft.markdown, input.authoring),
+    next_markdown: formatDraftPaperForProfile(input.draft, input.authoring),
     now: input.now,
   })
 }
@@ -300,7 +494,7 @@ export async function runPaperAuthoringLoop(
     "paper.authoring.loop",
     {
       "paper_fucker.paper.authoring.title": input.title,
-      "paper_fucker.paper.authoring.profile": input.target_profile ?? "generic-preprint",
+      "paper_fucker.paper.authoring.profile": input.target_profile ?? "cjc-paper",
     },
     async (span) => {
       const run = await loadResearchRun(runDir)

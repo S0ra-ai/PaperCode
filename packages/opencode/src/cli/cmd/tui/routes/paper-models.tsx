@@ -2,6 +2,7 @@ import { TextAttributes } from "@opentui/core"
 import { useKeyboard, useTerminalDimensions } from "@opentui/solid"
 import { createEffect, createMemo, createResource, createSignal, For, Match, Show, Switch, on } from "solid-js"
 import { PAPER_MODEL_ROLES, type PaperModelRole } from "@/paper/model-router"
+import { isConfiguredPaperProviderRegistration } from "@/paper/model-inventory"
 import { useRoute } from "@tui/context/route"
 import { useSDK } from "@tui/context/sdk"
 import { useSync } from "@tui/context/sync"
@@ -11,6 +12,11 @@ import { DialogPrompt } from "@tui/ui/dialog-prompt"
 import { useToast } from "@tui/ui/toast"
 import { readTuiJsonResponse } from "@tui/util/http"
 import { notifyPaperModelInventoryChanged } from "@tui/util/paper-model-inventory-events"
+import {
+  PAPER_MODEL_FOOTER_COMPACT,
+  PAPER_MODEL_FOOTER_FULL,
+  paperModelWorkbenchLayout,
+} from "@tui/util/paper-models-layout"
 import { truncateDisplayMiddle } from "@tui/util/text-width"
 import { DialogProvider } from "../component/dialog-provider"
 
@@ -135,13 +141,13 @@ function registeredProviderIDs(registrations: Record<string, ProviderRegistratio
 function providerCategory(registration: ProviderRegistration) {
   if (registration.kind === "chatgpt_subscription" || registration.provider_id === "openai") return "ChatGPT 订阅"
   if (registration.kind === "copilot_subscription" || registration.provider_id === "github-copilot") return "Copilot CLI 订阅"
-  return "其他 provider"
+  return "其他"
 }
 
 function providerKindFor(providerID: string): ProviderRegistration["kind"] {
   if (providerID === "openai") return "chatgpt_subscription"
   if (providerID === "github-copilot") return "copilot_subscription"
-  return "builtin"
+  return "manual"
 }
 
 function connectionLabel(registration: ProviderRegistration, connected: boolean) {
@@ -195,11 +201,12 @@ export function PaperModelWorkbenchPage() {
   const configuredRegistrations = createMemo(() => {
     return Object.fromEntries(
       Object.entries(registrations()).filter(([, registration]) => {
-        if (registration.status !== "registered") return false
-        if (registration.kind === "openai_compatible" || registration.kind === "manual") {
-          return registration.model_count > 0 || rawCandidates().some((candidate) => candidate.provider_id === registration.provider_id)
-        }
-        return connectedProviders().has(registration.provider_id)
+        return isConfiguredPaperProviderRegistration(
+          registration.provider_id,
+          registration,
+          rawCandidates(),
+          connectedProviders(),
+        )
       }),
     ) as Record<string, ProviderRegistration>
   })
@@ -254,12 +261,13 @@ export function PaperModelWorkbenchPage() {
     return []
   })
 
+  const layout = createMemo(() => paperModelWorkbenchLayout({ columns: dimensions().width, rows: dimensions().height }))
   const rowCount = createMemo(() => {
     if (currentSection() === "registered") return providerRows().length
     if (currentSection() === "stage" && !editingRole()) return PAPER_MODEL_ROLES.length
     return visibleCandidates().length
   })
-  const listHeight = createMemo(() => Math.max(8, dimensions().height - 18))
+  const listHeight = createMemo(() => layout().listHeight)
   const visibleStart = createMemo(() => scrollOffset())
   const visibleEnd = createMemo(() => Math.min(scrollOffset() + listHeight(), rowCount()))
 
@@ -398,10 +406,13 @@ export function PaperModelWorkbenchPage() {
     }
     registerBuiltin(provider)
     if (!connectedProviders().has(providerID)) {
-      dialog.replace(() => <DialogProvider />)
+      dialog.replace(() => <DialogProvider providerID={providerID} />)
       toast.show({
         variant: "info",
-        message: providerID === "openai" ? "请在登录面板完成 ChatGPT / OpenAI 授权。" : "请在登录面板完成 GitHub Copilot 授权。",
+        message:
+          providerID === "openai"
+            ? "请完成 ChatGPT / OpenAI 授权，授权后会缓存可用模型。"
+            : "请完成 GitHub Copilot 授权，授权后会缓存可用模型。",
       })
     }
   }
@@ -563,11 +574,6 @@ export function PaperModelWorkbenchPage() {
       evt.preventDefault()
       return
     }
-    if (!evt.ctrl && evt.name === "l" && currentSection() === "registered") {
-      dialog.replace(() => <DialogProvider />)
-      evt.preventDefault()
-      return
-    }
     const number = Number(evt.name)
     if (Number.isInteger(number) && number >= 1 && number <= SECTIONS.length) {
       setSectionIndex(number - 1)
@@ -586,14 +592,24 @@ export function PaperModelWorkbenchPage() {
   const activeCandidateRows = createMemo(() => visibleCandidates().slice(visibleStart(), visibleEnd()))
   const activeProviderRows = createMemo(() => providerRows().slice(visibleStart(), visibleEnd()))
   const activeRoles = createMemo(() => PAPER_MODEL_ROLES.slice(visibleStart(), visibleEnd()))
-  const compact = createMemo(() => dimensions().width < 120)
-  const showDetail = createMemo(() => dimensions().width >= 140)
-  const navWidth = createMemo(() => (compact() ? 22 : 30))
-  const detailWidth = createMemo(() => (showDetail() ? 42 : 0))
-  const rowTextWidth = createMemo(() => Math.max(28, dimensions().width - navWidth() - detailWidth() - 64))
+  const navWidth = createMemo(() => layout().navWidth)
+  const detailWidth = createMemo(() => layout().detailWidth)
+  const rowTextWidth = createMemo(() => layout().rowTextWidth)
+  const footerItems = createMemo(() =>
+    layout().footerMode === "full" ? PAPER_MODEL_FOOTER_FULL : PAPER_MODEL_FOOTER_COMPACT,
+  )
 
   return (
-    <box width="100%" height="100%" paddingLeft={3} paddingRight={3} paddingTop={1} paddingBottom={1} flexDirection="column" gap={1}>
+    <box
+      width="100%"
+      height="100%"
+      paddingLeft={layout().outerPaddingX}
+      paddingRight={layout().outerPaddingX}
+      paddingTop={1}
+      paddingBottom={1}
+      flexDirection="column"
+      gap={1}
+    >
       <box flexDirection="row" justifyContent="space-between" alignItems="center">
         <box flexDirection="column">
           <text fg={theme.text} attributes={TextAttributes.BOLD}>Paper Fucker 模型工作台</text>
@@ -633,7 +649,7 @@ export function PaperModelWorkbenchPage() {
           <box paddingTop={1} flexDirection="column">
             <text fg={theme.textMuted}>g ChatGPT 订阅</text>
             <text fg={theme.textMuted}>p Copilot CLI 订阅</text>
-            <text fg={theme.textMuted}>c 其他 provider</text>
+            <text fg={theme.textMuted}>c 自定义 endpoint</text>
             <text fg={theme.textMuted}>d 删除已注册</text>
             <text fg={theme.warning}>x 清空全部</text>
             <text fg={theme.textMuted}>Ctrl+S 保存</text>
@@ -710,7 +726,7 @@ export function PaperModelWorkbenchPage() {
                 <Show when={providerRows().length === 0}>
                   <box flexDirection="column" gap={1}>
                     <text fg={theme.warning}>还没有注册 provider。</text>
-                    <text fg={theme.textMuted}>按 g 添加 ChatGPT 订阅，按 p 添加 Copilot CLI 订阅，按 c 添加其他 OpenAI-compatible provider。</text>
+                    <text fg={theme.textMuted}>按 g 登录 ChatGPT，按 p 登录 Copilot，按 c 添加自定义 endpoint。</text>
                   </box>
                 </Show>
               </Match>
@@ -747,7 +763,7 @@ export function PaperModelWorkbenchPage() {
                   <text fg={theme.warning}>
                     {editingRole()
                       ? "还没有可用模型。先在“所有模型”中勾选候选模型并保存。"
-                      : "没有模型。先在“已注册”中添加 provider 并刷新模型列表。"}
+                      : "没有模型。先注册可用 provider，再从所有模型中勾选候选。"}
                   </text>
                 </Show>
               </Match>
@@ -781,19 +797,13 @@ export function PaperModelWorkbenchPage() {
 
           <box border={["top"]} borderColor={theme.border} />
           <box flexDirection="row" gap={2}>
-            <text fg={theme.text}>Tab 切换</text>
-            <text fg={theme.text}>Enter/Space 选择</text>
-            <text fg={theme.text}>A 全选</text>
-            <text fg={theme.text}>N 清空</text>
-            <text fg={theme.text}>M 主模型</text>
-            <text fg={theme.text}>B 设备用</text>
-            <text fg={theme.text}>D 删除 provider</text>
-            <text fg={theme.text}>X 清空全部</text>
-            <text fg={theme.text}>Ctrl+S 保存</text>
+            <For each={footerItems()}>
+              {(item) => <text fg={theme.text}>{item}</text>}
+            </For>
           </box>
         </box>
 
-        <Show when={showDetail()}>
+        <Show when={layout().showDetail}>
           <box width={detailWidth()} flexShrink={0} flexDirection="column" gap={1} paddingLeft={1} border={["left"]} borderColor={theme.borderSubtle}>
             <text fg={theme.accent} attributes={TextAttributes.BOLD}>说明</text>
             <text fg={theme.textMuted}>{SECTION_DESCRIPTIONS[currentSection()]}</text>

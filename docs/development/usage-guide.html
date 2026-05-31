@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>使用入口 - Paper Fucker 开发手册</title>
+    <link rel="stylesheet" href="./assets/style.css" />
+  </head>
+  <body>
+    <div class="layout with-toc">
+      <aside class="sidebar">
+        <div class="brand"><strong>Paper Fucker</strong><span>开发手册</span></div>
+        <nav class="nav">
+          <div class="nav-group">Start</div>
+          <a href="./index.html">总览</a>
+          <a class="active" href="./usage-guide.html">使用入口</a>
+          <a href="./development-workflow.html">开发工作流</a>
+          <div class="nav-group">Architecture</div>
+          <a href="./architecture.html">架构</a>
+          <a href="./module-map.html">模块地图</a>
+          <a href="./function-reference.html">关键函数索引</a>
+          <div class="nav-group">Runtime</div>
+          <a href="./paperrun-flow.html">PaperRun 流程</a>
+          <a href="./paper-generation.html">论文生成链路</a>
+          <a href="./experiment-execution.html">实验执行链路</a>
+          <a href="./preview-export.html">Preview 与导出</a>
+          <div class="nav-group">Workbench</div>
+          <a href="./tui-models.html">TUI 与模型</a>
+          <a href="./agents-capabilities.html">Agent / MCP / Skills</a>
+          <a href="./testing-maintenance.html">测试与维护</a>
+          <a href="./developer-recipes.html">修改手册</a>
+        </nav>
+      </aside>
+
+      <main class="content">
+        <section class="hero" id="purpose">
+          <div class="eyebrow">Usage for Maintainers</div>
+          <h1>从源码跑通一条 PaperRun</h1>
+          <p class="lead">本页用于开发者本机验收：启动 TUI、配置模型、选择工作区、创建 PaperRun、查看实时 Monitor、导出和恢复历史任务。</p>
+        </section>
+
+        <h2 id="install">源码启动</h2>
+        <pre><code>git clone https://github.com/ZhuchenZhong/paper_fucker.git
+cd paper_fucker
+bun install
+bun run build
+.\paper_fucker.exe</code></pre>
+        <p>终端最低尺寸为 <code>96x28</code>，推荐 <code>120x34</code>。低于最低尺寸时 TUI 会显示中文阻断页，恢复尺寸后回到原页面。</p>
+
+        <h2 id="models">配置模型</h2>
+        <table class="table">
+          <thead><tr><th>入口</th><th>用途</th><th>验收点</th></tr></thead>
+          <tbody>
+            <tr><td><code>/models</code></td><td>打开全屏模型工作台。</td><td>只显示用户已注册 provider；未注册 provider 不进入候选池。</td></tr>
+            <tr><td>已注册</td><td>管理 ChatGPT 订阅、Copilot CLI 订阅、自定义 endpoint。</td><td>支持删除 provider、清空全部、刷新模型和保存。</td></tr>
+            <tr><td>所有模型</td><td>从已注册 provider 的模型中多选候选池。</td><td>主决策模型和备用模型只能从候选池选。</td></tr>
+            <tr><td>全流程模型</td><td>为 planner、writer、reviewer 等阶段设置自动、动态或强制模型。</td><td>强制模型不可用时必须阻断，不静默降级。</td></tr>
+          </tbody>
+        </table>
+
+        <h2 id="workspace">选择工作区</h2>
+        <p><code>/folder</code> 优先打开原生文件夹选择器。Windows 需要支持驱动器选择；原生选择器不可用时回退中文 TUI 选择器。</p>
+        <div class="callout">默认 run 写入 <code>~/.paper_fucker/runs</code>。只有用户明确选择工作区后，才写入 <code>&lt;workspace&gt;/.paper_fucker/runs</code>。</div>
+
+        <h2 id="run">创建 PaperRun</h2>
+        <pre><code>输入示例：
+我想研究 agent team 在代码实验论文生成中的应用，要求包含可复现实验设计</code></pre>
+        <p>TUI 会把输入、当前工作区、期刊 profile、研究深度和材料入口传给 <code>POST /paper/runs</code>。创建失败必须返回中文结构化诊断。</p>
+
+        <h2 id="monitor">实时 Monitor</h2>
+        <p>运行中可以通过 TUI 或 <code>/preview</code> 打开只读 Web Monitor。它显示 stage graph、draft、source ledger、claim ledger、agent tree、cost/token、gate、export 和实验终端摘要。</p>
+        <ul>
+          <li>Preview 使用 token-protected localhost URL。</li>
+          <li>SSE 持续接收 <code>paper.run.snapshot</code> 更新。</li>
+          <li>写请求必须被只读阻断。</li>
+        </ul>
+
+        <h2 id="resume">恢复与退出</h2>
+        <p>TUI 使用 <code>/resume</code> 选择历史 run。CLI 可使用：</p>
+        <pre><code>paper_fucker runs list
+paper_fucker resume &lt;run-id&gt;</code></pre>
+        <p>退出时展示 run id、状态、token/cost 摘要和恢复命令，方便继续任务。</p>
+      </main>
+
+      <aside class="page-toc">
+        <strong>本页目录</strong>
+        <a href="#purpose">用途</a>
+        <a href="#install">源码启动</a>
+        <a href="#models">配置模型</a>
+        <a href="#workspace">选择工作区</a>
+        <a href="#run">创建 PaperRun</a>
+        <a href="#monitor">实时 Monitor</a>
+        <a href="#resume">恢复与退出</a>
+      </aside>
+    </div>
+  </body>
+</html>

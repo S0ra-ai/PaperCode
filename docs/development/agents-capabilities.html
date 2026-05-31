@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Agent / MCP / Skills - Paper Fucker 开发手册</title>
+    <link rel="stylesheet" href="./assets/style.css" />
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="brand"><strong>Paper Fucker</strong><span>开发手册</span></div>
+        <nav class="nav">
+          <div class="nav-group">Start</div>
+          <a href="./index.html">总览</a>
+          <a href="./usage-guide.html">使用入口</a>
+          <a href="./development-workflow.html">开发工作流</a>
+          <div class="nav-group">Architecture</div>
+          <a href="./architecture.html">架构</a>
+          <a href="./module-map.html">模块地图</a>
+          <a href="./function-reference.html">关键函数索引</a>
+          <div class="nav-group">Runtime</div>
+          <a href="./paperrun-flow.html">PaperRun 流程</a>
+          <a href="./paper-generation.html">论文生成链路</a>
+          <a href="./experiment-execution.html">实验执行链路</a>
+          <a href="./preview-export.html">Preview 与导出</a>
+          <div class="nav-group">Workbench</div>
+          <a href="./tui-models.html">TUI 与模型</a>
+          <a class="active" href="./agents-capabilities.html">Agent / MCP / Skills</a>
+          <a href="./testing-maintenance.html">测试与维护</a>
+          <a href="./developer-recipes.html">修改手册</a>
+        </nav>
+      </aside>
+      <main class="content">
+        <section class="hero">
+          <div class="eyebrow">Agent Fabric</div>
+          <h1>递归 Agent 与能力总线</h1>
+          <p class="lead">Agent Team 没有产品硬上限。扩展由预算、时间、并发、权限、上下文、完成度和真实性 gate 共同约束。</p>
+        </section>
+
+        <h2>模块入口</h2>
+        <table class="table">
+          <thead><tr><th>模块</th><th>职责</th></tr></thead>
+          <tbody>
+            <tr><td><code>agent-team.ts</code></td><td>Agent Team 角色、子 agent、深度、预算、状态和证据合并。</td></tr>
+            <tr><td><code>agents.ts</code></td><td>Agent node、tree、状态事件。</td></tr>
+            <tr><td><code>model-router.ts</code></td><td>根据角色、预算、能力、隐私策略选择模型。</td></tr>
+            <tr><td><code>capability-pack.ts</code></td><td>内置能力包：论文 profile、文献、crawler、HF、代码实验、写作审查导出。</td></tr>
+            <tr><td><code>capability-registry.ts</code></td><td>统一注册 skill、MCP、builtin tool、Python tool。</td></tr>
+          </tbody>
+        </table>
+
+        <h2>权限与证据规则</h2>
+        <ul>
+          <li>子 agent 的权限只能比父 agent 更窄。</li>
+          <li>模型必须从 allowlist 经路由选择，不能直接绕过。</li>
+          <li>数据外传要写入 audit/tool trace；敏感路径默认阻断。</li>
+          <li>代码结论必须带 source range；无来源内容不能进入 ClaimLedger。</li>
+          <li>实验 claim 只能引用复现通过或明确标记 exploratory 的结果。</li>
+          <li>未授权网络访问时，crawler、Hugging Face、provider 和 benchmark 都必须返回 blocked diagnostic，不能合成来源、模型、数据或实验记录。</li>
+          <li>测试记录必须走显式测试开关，例如 <code>test_records</code> + <code>allow_test_records</code>；真实产物不得携带测试来源、伪容器镜像或伪 digest。</li>
+        </ul>
+
+        <h2>内置能力</h2>
+        <div class="grid">
+          <article class="card"><h3>Profile Skills</h3><p>Nature 等 first-party skill 作为能力底座保留；当前用户可见期刊入口只启用中国计算机学报。</p></article>
+          <article class="card"><h3>Architecture Diagram</h3><p>架构图生成能力，用于论文系统图和开发手册图示。</p></article>
+          <article class="card"><h3>Figure Studio</h3><p>论文 framework figure、graphical abstract、panel 规划。</p></article>
+          <article class="card"><h3>Crawler / Data</h3><p>网页采集、数据集发现、license/source verification。</p></article>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
