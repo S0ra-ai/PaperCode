@@ -1,0 +1,23 @@
+:project       paper_fucker - 可验证论文研究自动化系统
+:author        k1d (https://github.com/ZhuchenZhong)
+:repo
+:desc          记录项目的重大变更和版本历史
+:version       0.13.0.169-dev
+:last_update   2026/05/31
+
+:history
+
+    0.13.0.169-dev - 2026/05/31 (bb73aef1) [fix/mcp-tool-binding-test-isolation]
+        :brief 投稿准备度附录文案去运行态措辞
+        :fix
+            - fix(authoring): 投稿准备度附录的数据可用性从“已登记”改为“已纳入”，降低运行状态口吻
+            - fix(authoring): 代码可用性从“代码证据记录”改为“代码证据条目”，与论文附录语境一致
+            - fix(authoring): “导出条件”改为“成稿条件”，避免把投稿准备度写成工具导出状态
+        :test
+            - test(authoring): 覆盖投稿准备度附录输出已纳入数据集、已纳入代码证据条目和成稿条件
+            - test(authoring): 覆盖投稿准备度附录不再出现已登记数据可用性、已登记代码可用性和导出条件
+        :changelog
+            - docs(changelog): 0.13.0.168 开发历史移入 docs/changelog/v0/0.13.0.168.CHANGELOG
+        :checks
+            - targeted tests: npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --timeout 180000 passed
+            - typecheck: npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
