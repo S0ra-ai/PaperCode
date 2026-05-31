@@ -2,24 +2,25 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.138-dev
+:version       0.13.0.139-dev
 :last_update   2026/05/31
 
 :history
 
-    0.13.0.138-dev - 2026/05/31 (fbec350f) [fix/mcp-tool-binding-test-isolation]
-        :brief 初始化、reset、skill 安装与全局路径解析忽略字符串化空 home 环境变量
-        :init
-            - fix(init): resolveInitHome 忽略空字符串、"undefined" 和 "null"，避免写入错误本机状态目录
-            - fix(reset): defaultResetHome 复用 resolveInitHome，reset 默认 home 与 init 路径语义保持一致
-            - fix(skill): managed skill 安装 home 解析忽略字符串化空值，避免安装到 undefined/.paper_fucker
-        :runtime
-            - fix(global): Global.Path.home 对 PAPER_FUCKER_TEST_HOME 做同样规范化，并保留模块加载时的有效测试 home
+    0.13.0.139-dev - 2026/05/31 (665b4ade) [fix/mcp-tool-binding-test-isolation]
+        :brief App/Desktop 用户可见表面统一到 PaperRun，开发手册导航拆分为使用与开发主线
+        :app
+            - fix(app): App 主语言包将高频导航、toast、Prompt 示例和上下文统计收口为 PaperRun 与论文研究表达
+            - fix(app): 桌面菜单、通知图标、错误页、设置链接和项目头像统一指向 ZhuchenZhong/paper_fucker
+            - fix(app): 默认 PaperRun 标题识别支持 New PaperRun/Child PaperRun，同时保留旧本机数据可读性
+        :docs
+            - docs(development): 参考 ReadTheDocs 结构，将开发手册左侧导航拆为入门、使用、开发、架构、运行时与工作台
+            - docs(development): 保留使用入口页用于本机验收，开发指南、模块地图和关键函数索引作为维护主线
         :test
-            - test(init): 覆盖字符串化 PAPER_FUCKER_TEST_HOME/PAPER_FUCKER_HOME 和显式 home 优先级
-            - test(core): 覆盖 Global.Path.home 忽略字符串化 undefined
+            - test(app): 新增 paper-surface 测试阻断主语言包回退到旧聊天、session 或订阅品牌表达
+            - test(app): 新增 session-title 测试覆盖 PaperRun 默认标题与旧本机数据兼容
         :changelog
-            - docs(changelog): 0.13.0.137 开发历史移入 docs/changelog/v0/0.13.0.137.CHANGELOG
+            - docs(changelog): 0.13.0.138 开发历史移入 docs/changelog/v0/0.13.0.138.CHANGELOG
         :checks
-            - targeted tests: packages/core global.test、packages/opencode init.test
-            - static checks: packages/core typecheck、packages/opencode typecheck 与 git diff --check
+            - targeted tests: packages/app 全量单测
+            - static checks: packages/app typecheck、packages/desktop typecheck、docs manual.js syntax 与 git diff --check
