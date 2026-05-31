@@ -1,0 +1,20 @@
+:project       paper_fucker - 可验证论文研究自动化系统
+:author        k1d (https://github.com/ZhuchenZhong)
+:repo
+:desc          0.13.0.145 开发历史归档
+:version       0.13.0.145-dev
+:last_update   2026/05/31
+
+:history
+
+    0.13.0.145-dev - 2026/05/31 (53486a36) [fix/mcp-tool-binding-test-isolation]
+        :brief 自主产品审计支持 Git Flow 活跃分支，并纳入开发手册检查证据
+        :audit
+            - fix(audit): changelog-shape 改为校验 root :version 与唯一活跃 history entry 一致，并允许 develop、feature/*、fix/* Git Flow 分支
+            - test(audit): autonomous-product-audit 新增 development-docs 检查，调用 check-development-docs.ps1 防止开发手册导航和链接退化
+            - report(audit): 刷新 reports/autonomous-product-audit.md，TaskFlow、版本、changelog、开发手册、strict live、品牌和 Git Flow 均通过
+        :changelog
+            - docs(changelog): 0.13.0.144 开发历史移入 docs/changelog/v0/0.13.0.144.CHANGELOG
+        :checks
+            - audit: scripts/autonomous-product-audit.ps1 -AllowActiveTask
+            - static checks: autonomous-product-audit.ps1 ASCII safety
