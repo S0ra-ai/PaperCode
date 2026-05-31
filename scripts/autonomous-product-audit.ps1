@@ -87,12 +87,31 @@ function Test-VersionSync {
 function Test-ChangelogShape {
     $text = Read-RepoText "CHANGELOG"
     $hasHeader = $text.Contains(":project") -and $text.Contains(":history")
-    $hasEntry = $text.Contains("[develop]") -and ($text -match '\([0-9a-f]{7,40}\)')
+    $versionMatch = [regex]::Match($text, '(?m)^:version\s+([0-9]+(?:\.[0-9]+){2,3}-dev)\s*$')
+    $entryMatches = [regex]::Matches(
+        $text,
+        '(?m)^\s{4}([0-9]+(?:\.[0-9]+){2,3}-dev)\s+-\s+\d{4}/\d{2}/\d{2}\s+\(([0-9a-f]{7,40})\)\s+\[(develop|feature/[^\]]+|fix/[^\]]+)\]\s*$'
+    )
     $badMarkdown = $text -match '(?m)^#{1,6}\s'
-    if ($hasHeader -and $hasEntry -and -not $badMarkdown) {
-        Add-AuditResult "changelog-shape" "pass" "CHANGELOG keeps colon DSL header/history and real commit ids."
+    if (
+        $hasHeader -and
+        $versionMatch.Success -and
+        $entryMatches.Count -eq 1 -and
+        $entryMatches[0].Groups[1].Value -eq $versionMatch.Groups[1].Value -and
+        -not $badMarkdown
+    ) {
+        Add-AuditResult "changelog-shape" "pass" "CHANGELOG keeps one active colon DSL entry with matching :version, Git Flow branch, and real commit id."
     } else {
-        Add-AuditResult "changelog-shape" "fail" "CHANGELOG colon DSL shape check failed."
+        Add-AuditResult "changelog-shape" "fail" "CHANGELOG colon DSL shape check failed: header=$hasHeader version=$($versionMatch.Success) active_entries=$($entryMatches.Count) markdown=$badMarkdown."
+    }
+}
+
+function Test-DevelopmentDocs {
+    $result = Invoke-RepoCommand "powershell" @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\scripts\check-development-docs.ps1")
+    if ($result.exit -eq 0) {
+        Add-AuditResult "development-docs" "pass" (($result.output | Select-Object -Last 1) -join " ")
+    } else {
+        Add-AuditResult "development-docs" "fail" ($result.output -join " ")
     }
 }
 
@@ -176,12 +195,11 @@ function Test-BrandSurface {
 
 function Test-GitFlow {
     $branch = (Invoke-RepoCommand "git" @("rev-parse", "--abbrev-ref", "HEAD")).output[-1].Trim()
-    $status = Invoke-RepoCommand "git" @("status", "--short")
     $forbidden = Invoke-RepoCommand "git" @("branch", "--format", "%(refname:short)")
     $forbiddenBranches = @($forbidden.output | Where-Object { $_ -match "^(codex/|task-)" })
     $branchOk = $branch -eq "develop" -or $branch -match "^(feature|fix)/[a-z0-9-]+$"
     if ($branchOk -and $forbiddenBranches.Count -eq 0) {
-        Add-AuditResult "git-flow" "pass" "Branch $branch follows Git Flow; forbidden local branches absent; working entries=$($status.output.Count)."
+        Add-AuditResult "git-flow" "pass" "Branch $branch follows Git Flow; forbidden local branches absent."
     } else {
         Add-AuditResult "git-flow" "fail" "branch=$branch forbidden=$($forbiddenBranches -join ', ')"
     }
@@ -211,6 +229,7 @@ function Write-AuditReport {
 Test-TaskFlowQueue
 Test-VersionSync
 Test-ChangelogShape
+Test-DevelopmentDocs
 Test-StrictEvidence
 Test-FullWorkspaceEvidence
 Test-DangerousResidue
