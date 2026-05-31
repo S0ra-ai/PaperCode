@@ -77,6 +77,20 @@
           <article><strong>6. 排障/下一步</strong><span>给出常见错误、日志路径、测试命令和相邻页面。</span></article>
         </div>
 
+        <h2 id="manual-writing-standard">手册写作规范</h2>
+        <p>开发手册采用文档站式组织：左侧是稳定分组导航，右侧是本页目录，中间正文按开发任务展开。使用指南可以保留完整用户路径，但开发页必须以维护者视角说明代码、状态、契约和验证。</p>
+        <table class="table">
+          <thead><tr><th>文档站元素</th><th>开发手册中的含义</th><th>维护要求</th></tr></thead>
+          <tbody>
+            <tr><td>入门 / 使用 / 开发 / 架构 / 运行时 / 工作台</td><td>左侧导航分组，帮助读者按任务进入页面。</td><td>新增页面必须加入 <code>assets/manual.js</code> 页面清单，并同步所有页面侧栏。</td></tr>
+            <tr><td>本页目录</td><td>每页的 h2/h3 结构必须可扫描。</td><td>标题使用稳定 id；长页优先拆成“参数、模式、输入、输出、调优、排障、下一步”。</td></tr>
+            <tr><td>参数表</td><td>说明功能受哪些配置、状态、schema、环境和模型策略影响。</td><td>表格中至少给出状态来源和代码落点，不能只写产品描述。</td></tr>
+            <tr><td>模式章节</td><td>区分主题、材料、代码、实验、恢复、导出等不同运行链路。</td><td>不同模式要写出调用链差异和测试边界。</td></tr>
+            <tr><td>代码示例</td><td>给维护者可复制的检索、测试、验收命令。</td><td>示例命令必须在仓库根目录可执行，路径和脚本名要真实。</td></tr>
+            <tr><td>What's Next</td><td>把读者导向相邻开发页面。</td><td>每个长页末尾都要有下一步，不让读者回到目录重新猜。</td></tr>
+          </tbody>
+        </table>
+
         <h2 id="manual-page-scope">页面粒度要求</h2>
         <p>开发手册不是宣传页，也不是泛泛的架构摘要。每个页面必须把“设计意图”和“代码修改点”放在同一条链路里。</p>
         <table class="table">
@@ -230,6 +244,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-changelog-fo
         <a href="#purpose">用途</a>
         <a href="#workflow">开发参数</a>
         <a href="#page-template">开发页模板</a>
+        <a href="#manual-writing-standard">手册写作规范</a>
         <a href="#manual-page-scope">页面粒度要求</a>
         <a href="#modes">开发模式</a>
         <a href="#runtime-modes">运行模式</a>
