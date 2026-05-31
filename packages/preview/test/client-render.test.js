@@ -145,6 +145,8 @@ describe("preview client render helpers", () => {
           command: "python experiments/baseline.py",
           exit_code: 0,
           wall_time_seconds: 1.25,
+          peak_memory_mb: 512,
+          gpu_hours: 0,
           metrics: [{ name: "accuracy", value: 0.91 }],
         },
       ],
@@ -170,6 +172,8 @@ describe("preview client render helpers", () => {
 
     expect(html).toContain("实验运行证据")
     expect(html).toContain("baseline")
+    expect(html).toContain("mem 512MB")
+    expect(html).toContain("gpu 0 GPU h")
     expect(html).toContain("accuracy=0.91")
     expect(html).toContain("stdout")
     expect(html).toContain("ok")
