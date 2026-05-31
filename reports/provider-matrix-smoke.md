@@ -1,10 +1,10 @@
 ﻿# Provider Matrix Smoke
 
-- Generated: 2026-05-11
-- Home: <empty test home>
-- Status: pending_config
+- Generated: 2026-05-31T11:57:24.1972158+08:00
+- Home: C:\Users\13750
+- Status: completed
 - Chat smoke skipped: False
 
 | Provider | Status | Models | Chat | Detail |
 | --- | --- | --- | --- | --- |
-| `none` | pending_config | not_run | not_run | No provider configs found under the configured Paper Fucker home. |
+| `deep` | passed | passed:2 | passed | First model: deepseek-v4-flash. |
