@@ -64,6 +64,10 @@ describe("strict live acceptance script", () => {
     expect(script).toContain("[switch]$FixtureMode")
     expect(script).toContain("Assert-StrictLive")
     expect(script).toContain("Invoke-DeepSeekSmoke")
+    expect(script).toContain("Invoke-LiveProviderRequest")
+    expect(script).toContain("live provider request failed after")
+    expect(script).toContain("Start-Sleep -Seconds")
+    expect(script).toContain("-Attempts 3")
     expect(script).toContain("Invoke-ExaSmoke")
   })
 
