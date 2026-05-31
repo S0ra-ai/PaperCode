@@ -1,0 +1,615 @@
+:project       paper_fucker - 可验证论文研究自动化系统
+:author        k1d (https://github.com/ZhuchenZhong)
+:repo
+:desc          0.13.0.051-100 历史变更归档，主 CHANGELOG 仅保留当前活跃版本线
+:version       0.13.0.100-dev
+:last_update   2026/05/31
+
+:history
+
+    0.13.0.100-dev - 2026/05/30 (168909e2) [fix/mcp-tool-binding-test-isolation]
+        :brief code metadata 清理稳定化
+        :test
+            - test(cleanup): code metadata 临时目录清理增加 EBUSY/EACCES/EPERM/ENOTEMPTY/EFAULT 可控重试断言
+            - test(cleanup): PaperRun code metadata 集成用例显式断言清理阶段不输出临时目录警告
+            - fix(test): 清理前触发 GC、增加重试次数和等待间隔，降低 Windows 文件句柄释放竞态
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/code-metadata-version.test.ts --test-name-pattern "retries retryable temporary directory cleanup"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/code-metadata-version.test.ts --test-name-pattern "prefers product README version|retries retryable temporary directory cleanup"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version|retries retryable temporary directory cleanup"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+
+    0.13.0.99-dev - 2026/05/30 (c90ecaef) [fix/mcp-tool-binding-test-isolation]
+        :brief 占位参考文献过滤
+        :authoring
+            - fix(references): DOI/arXiv 缺失且 URL 为 example、localhost、file 等占位来源时不进入正式参考文献
+            - fix(references): 参考文献章节输出中文诊断，提示占位来源已排除并要求补齐 DOI、arXiv 或出版社页面核验
+            - test(authoring): ranking 成稿断言 example.org 不再作为正式参考文献输出
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - note: protocol live 复审未重复触发，避免 arXiv HTTP 429 限流扩大
+
+    0.13.0.98-dev - 2026/05/30 (443f6f65) [fix/mcp-tool-binding-test-isolation]
+        :brief ranking 结论章节表格化
+        :authoring
+            - fix(markdown): ranking 结论改为结论项/证据/边界表格
+            - fix(markdown): 主结果、排序接口和 claim_coverage 观察分别绑定证据边界
+            - test(authoring): ranking 成稿断言结论表存在并保留保守外推边界
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - note: protocol live 复审未重复触发，避免 arXiv HTTP 429 限流扩大
+
+    0.13.0.97-dev - 2026/05/30 (9bf20c5e) [fix/mcp-tool-binding-test-isolation]
+        :brief ranking 效度威胁表格化
+        :authoring
+            - fix(markdown): ranking 效度威胁改为效度类型/威胁/缓解方式表格
+            - fix(markdown): 标注、指标、基线、消融和外部效度分别绑定缓解方式
+            - test(authoring): ranking 成稿断言效度威胁表存在并拒绝旧冒号段落
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - note: protocol live 复审未重复触发，避免 arXiv HTTP 429 限流扩大
+
+    0.13.0.96-dev - 2026/05/30 (791d8370) [fix/mcp-tool-binding-test-isolation]
+        :brief ranking 限制章节表格化
+        :authoring
+            - fix(markdown): ranking 限制章节改为限制/影响/后续处理表格
+            - fix(markdown): 评测集规模、基线强度和外部推广限制分别绑定明确后续处理
+            - test(authoring): ranking 成稿断言限制表存在并拒绝旧散文开头
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - note: protocol live 复审未重复触发，避免 arXiv HTTP 429 限流扩大
+
+    0.13.0.95-dev - 2026/05/30 (87dc0361) [fix/mcp-tool-binding-test-isolation]
+        :brief ranking 结果章节小节化
+        :authoring
+            - fix(markdown): ranking 结果章节拆为主结果、结果表、消融分析和统计解释小节
+            - fix(markdown): 消融分析与统计解释小节去除重复前缀，避免标题后再次输出“消融分析显示”或“统计解释：”
+            - test(authoring): ranking 成稿断言结果小节顺序和重复前缀清理
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - note: protocol live 复审未重复触发，避免 arXiv HTTP 429 限流扩大
+
+    0.13.0.94-dev - 2026/05/30 (fe334224) [fix/mcp-tool-binding-test-isolation]
+        :brief ranking 主要贡献表格化
+        :authoring
+            - fix(markdown): ranking 主要贡献改为贡献/内容/证据位置表格
+            - fix(markdown): 贡献条目显式绑定方法、实验设置、结果、可复现性和附录证据位置
+            - test(authoring): ranking 成稿断言贡献表格存在并拒绝旧编号段落
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - note: protocol live 复审未重复触发，避免 arXiv HTTP 429 限流扩大
+
+    0.13.0.93-dev - 2026/05/30 (014f864e) [fix/mcp-tool-binding-test-isolation]
+        :brief ranking 研究问题表格化
+        :authoring
+            - fix(markdown): ranking 研究问题改为编号/关注点/问题/回答章节表格
+            - fix(markdown): RQ1/RQ2/RQ3 不再以长段落散文形式堆叠
+            - test(authoring): ranking 成稿断言研究问题表格存在并拒绝旧 RQ 冒号行
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - note: protocol live 复审未重复触发，避免 arXiv HTTP 429 限流扩大
+
+    0.13.0.92-dev - 2026/05/30 (9d3d0aa6) [fix/mcp-tool-binding-test-isolation]
+        :brief 参考文献时间戳日期化
+        :authoring
+            - fix(references): 参考文献发表时间和检索时间将 ISO 时间戳收敛为日期格式
+            - test(authoring): ranking 成稿断言参考文献检索时间为日期，并拒绝裸 ISO 时间戳
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - note: protocol live 复审未重复触发，避免 arXiv HTTP 429 限流扩大
+
+    0.13.0.91-dev - 2026/05/30 (10c0a60b) [fix/mcp-tool-binding-test-isolation]
+        :brief ranking 复现实验入口补齐执行状态
+        :authoring
+            - fix(appendix): ranking 附录 B 的复现实验入口表新增执行状态与结果位置列
+            - fix(appendix): 本文方法、基线和消融显示本机/容器执行状态，容器复现入口显示容器状态
+            - test(authoring): ranking 成稿断言复现实验入口表包含状态和结果定位
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - note: protocol live 复审未重复触发，避免 arXiv HTTP 429 限流扩大
+
+    0.13.0.90-dev - 2026/05/30 (fae878e9) [fix/mcp-tool-binding-test-isolation]
+        :brief ranking 附录补齐实现定位表
+        :authoring
+            - fix(appendix): ranking 附录 A 新增实现定位表，列出 rankAgentTeamPapers、scorePaper 与 claimLedgerCoverage 的源码定位和复核用途
+            - fix(appendix): 方法材料总览不再只输出粗粒度代码材料/复核材料计数
+            - test(authoring): ranking 成稿断言附录实现定位表存在，并拒绝旧粗粒度材料计数
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - note: protocol live 复审未重复触发，避免 arXiv HTTP 429 限流扩大
+
+    0.13.0.89-dev - 2026/05/30 (3fa3b977) [fix/mcp-tool-binding-test-isolation]
+        :brief ranking 方法章节结构化
+        :authoring
+            - fix(method): ranking 方法正文拆为“排序接口”“评分函数”“对照与复现”三级小节
+            - fix(method): 对照与复现说明移到流程框之后，避免公式、流程和实验入口挤在同一长段落
+            - test(authoring): ranking 成稿断言方法小节顺序和公式/流程/复现结构
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - note: protocol live 复审未重复触发，避免 arXiv HTTP 429 限流扩大
+
+    0.13.0.88-dev - 2026/05/30 (e876880a) [fix/mcp-tool-binding-test-isolation]
+        :brief 方法公式去除重复特征解释
+        :authoring
+            - fix(method): 评分公式权重表存在时不再追加重复的 relevance、claim_coverage 与 recency 散文解释
+            - test(authoring): ranking 成稿断言权重表保留，同时拒绝重复散文解释
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - note: protocol live 复审未重复触发，避免 arXiv HTTP 429 限流扩大
+
+    0.13.0.87-dev - 2026/05/30 (33114fc5) [fix/mcp-tool-binding-test-isolation]
+        :brief 排名评分公式独立成块
+        :authoring
+            - fix(method): 候选论文排序评分公式从方法长段落中拆出为独立公式块
+            - fix(method): relevance、claim_coverage 和 recency 权重改为特征/权重/含义表格
+            - test(authoring): ranking 成稿断言公式块和权重表存在，并拒绝旧内联公式长句
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol (blocked: live arXiv HTTP 429 rate limit)
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario code (ran; final export blocked by reproduction_failure)
+
+    0.13.0.86-dev - 2026/05/30 (941d4b52) [fix/mcp-tool-binding-test-isolation]
+        :brief 资源预算与降级策略表格化
+        :authoring
+            - fix(markdown): 实验设置章节新增资源预算表，展示运行时间、内存和 GPU 预算
+            - fix(markdown): 降级策略改为条件/处理表格，避免资源预算和策略压成一长句
+            - test(authoring): ranking 成稿断言资源预算和降级策略表格存在，并拒绝旧长段落
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
+
+    0.13.0.85-dev - 2026/05/30 (d45899ea) [fix/mcp-tool-binding-test-isolation]
+        :brief 实验设置表格补齐标题间距
+        :authoring
+            - fix(markdown): 实验设置章节的指标、基线和消融三级标题后补齐空行
+            - test(authoring): ranking 成稿断言三级标题与表格之间存在空行，并拒绝标题紧贴表格
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
+
+    0.13.0.84-dev - 2026/05/30 (b7b23103) [fix/mcp-tool-binding-test-isolation]
+        :brief 实验环境声明改为表格
+        :authoring
+            - fix(markdown): 可复现性章节中的实验环境声明改为三级小节和表格
+            - fix(markdown): Node.js、容器镜像和容器摘要拆成独立环境声明行
+            - test(authoring): ranking 与 code-paper 成稿断言环境声明表格存在，并拒绝冒号式列表
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
+
+    0.13.0.83-dev - 2026/05/30 (ab5a3d1e) [fix/mcp-tool-binding-test-isolation]
+        :brief 声明章节改为表格
+        :authoring
+            - fix(markdown): 声明章节用表格展示基金项目、作者贡献、利益冲突和伦理审批
+            - test(authoring): ranking 成稿断言声明表格存在，并拒绝冒号式声明行
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
+
+    0.13.0.82-dev - 2026/05/30 (1f4e00b8) [fix/mcp-tool-binding-test-isolation]
+        :brief 作者信息改为表格
+        :authoring
+            - fix(markdown): 作者信息章节用表格展示作者、机构和通信作者缺省项
+            - test(authoring): ranking 成稿断言作者信息表格存在，并拒绝三行冒号式元数据
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
+
+    0.13.0.81-dev - 2026/05/30 (22160ff8) [fix/mcp-tool-binding-test-isolation]
+        :brief 代码可用性小节格式正式化
+        :authoring
+            - fix(markdown): 数据与代码可用性章节中的代码可用性改为三级小节
+            - fix(markdown): 代码可用性表格前后补齐空行，避免 Markdown 渲染时被并入段落
+            - test(authoring): ranking 成稿断言代码可用性小节、表格边界和 dirty 工作区说明间距
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
+
+    0.13.0.80-dev - 2026/05/30 (1e8ea41b) [fix/mcp-tool-binding-test-isolation]
+        :brief 代码可用性改为表格
+        :authoring
+            - fix(availability): 代码可用性章节用表格展示方法实现、复现实验入口、代码包、仓库、版本、修订、工作区状态和许可证
+            - test(authoring): ranking 成稿断言代码可用性表存在并拒绝散文式代码元数据
+            - test(metadata): 代码版本元数据集成测试改为检查代码可用性表格行
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
+
+    0.13.0.79-dev - 2026/05/30 (d6ad9b37) [fix/mcp-tool-binding-test-isolation]
+        :brief Markdown 导出压缩多余空行
+        :authoring
+            - fix(markdown): DraftPaper 渲染时压缩三连及以上空行，避免数据与代码可用性等段落出现拼接草稿感
+            - test(authoring): ranking 成稿断言不再出现三连空行
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
+
+    0.13.0.78-dev - 2026/05/30 (9eadc40d) [fix/mcp-tool-binding-test-isolation]
+        :brief 结果与复现表格统一论文顺序
+        :authoring
+            - fix(results): 结果表按本文方法、基线、消融输出，不再沿用运行记录原始顺序
+            - fix(reproducibility): 本机/容器一致性表按本文方法、基线、消融输出
+            - fix(reproducibility): 实验执行摘要在本机和容器分组内按本文方法、基线、消融输出
+            - test(authoring): ranking 成稿使用乱序运行记录断言表格仍保持论文阅读顺序
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
+
+    0.13.0.77-dev - 2026/05/30 (98da67ea) [fix/mcp-tool-binding-test-isolation]
+        :brief 作者与声明缺省项去除模板占位
+        :authoring
+            - fix(metadata): 作者、机构和通信作者缺省项改为本次材料未提供
+            - fix(declarations): 基金、贡献、利益冲突和伦理审批缺省声明去除待补充占位
+            - test(authoring): ranking 成稿断言作者信息和声明不再出现待补充
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
+
+    0.13.0.76-dev - 2026/05/30 (c201e490) [fix/mcp-tool-binding-test-isolation]
+        :brief 消融比较补齐指标口径
+        :authoring
+            - fix(abstract): 无证据覆盖消融改为排序 nDCG@3 数值低于本文方法
+            - fix(result): 消融分析改为排序 nDCG@3 数值低于本文方法
+            - fix(discussion): 讨论章节改为移除 claim_coverage 后排序 nDCG@3 数值低于完整排序
+            - test(authoring): ranking 成稿断言不再出现裸消融低于本文方法或排名下降
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
+
+    0.13.0.75-dev - 2026/05/30 (4d1bacc4) [fix/mcp-tool-binding-test-isolation]
+        :brief 结果段基线比较补齐指标口径
+        :authoring
+            - fix(result): 结果章节将本文方法高于基线改为本文方法的排序 nDCG@3 数值高于最佳基线
+            - test(authoring): ranking 成稿断言结果段不再出现裸本文方法高于基线
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
+
+    0.13.0.74-dev - 2026/05/30 (3ef630a3) [fix/mcp-tool-binding-test-isolation]
+        :brief dirty 工作区补齐复现边界
+        :authoring
+            - fix(availability): 代码工作区含未提交或未跟踪变更时，数据与代码可用性章节补充复现边界
+            - fix(availability): dirty 工作区说明要求复现以导出包、代码修订和已登记实验材料为准
+            - test(authoring): ranking 成稿断言 dirty 工作区不再只输出状态标签
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
+
+    0.13.0.73-dev - 2026/05/30 (364199fb) [fix/mcp-tool-binding-test-isolation]
+        :brief 基线解释改为差异口径
+        :authoring
+            - fix(setup): 词项匹配基线理由改为检验完整排序与简单词项排序在当前候选集上的差异
+            - fix(discussion): 移除缺少实际意义、优于词项匹配基线和查询词之外排序信号等偏强解释
+            - fix(threats): 基线效度改为检验查询词重合是否能解释当前排序差异
+            - fix(limitations): 限制章节改为当前完整排序在 nDCG@3 上高于简单查询词重合
+            - test(authoring): ranking 成稿断言不再出现代码证据排序、排序收益或强基线胜出表述
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
+
+    0.13.0.72-dev - 2026/05/30 (ba8e87b1) [fix/mcp-tool-binding-test-isolation]
+        :brief GPU 预算改为显式启用
+        :experiments
+            - fix(plan): ExperimentPlan 默认不再分配 GPU 预算，只有显式 resource_budget 才记录 GPU 小时
+            - fix(plan): 实验计划支持传入主指标、命令、基线、消融和资源预算，便于真实代码论文协议收口
+            - fix(claims): 无基线的代码实验协议即使容器复现通过，也会阻断 final claims
+        :authoring
+            - fix(setup): max_gpu_hours 为 0 时成稿写为 GPU 未纳入当前资源预算，不再输出 GPU<=0 小时或默认 GPU<=4 小时
+            - test(authoring): ranking 成稿断言默认资源预算不会伪装成 GPU 预算
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/experiment-loop.test.ts test/paper/authoring.test.ts --test-name-pattern "GPU budget|renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/experiment-loop.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|GPU budget|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
+
+    0.13.0.71-dev - 2026/05/30 (c7e9fe29) [fix/mcp-tool-binding-test-isolation]
+        :brief 研究问题与引言统一为相关性口径
+        :authoring
+            - fix(introduction): ranking 引言改为检查 claim_coverage 项是否与排序差异相关
+            - fix(rq): RQ2 改为移除 claim_coverage 后是否出现前三位排序差异
+            - fix(method): 方法入口说明使用证据覆盖相关性，不再写成贡献口径
+            - fix(setup): 无证据覆盖消融理由改为检验证据覆盖项与候选排序差异相关
+            - test(authoring): ranking 成稿断言不再出现特征贡献、改善前三位排序、证据覆盖贡献或带来排序收益
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
+
+    0.13.0.70-dev - 2026/05/30 (b48dedd9) [fix/mcp-tool-binding-test-isolation]
+        :brief 证据覆盖表述改为相关性口径
+        :authoring
+            - fix(result): ranking 消融解释将 claim_coverage 可观测贡献改为与排序差异相关
+            - fix(discussion): 去除 claim_coverage 对前三位排序产生直接影响的因果化表述
+            - fix(conclusion): 结论改为 claim_coverage 项与当前候选集排序差异相关
+            - test(authoring): ranking 成稿断言不再出现可观测贡献、直接影响或改善当前候选集
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
+
+    0.13.0.69-dev - 2026/05/30 (d397cff1) [fix/mcp-tool-binding-test-isolation]
+        :brief 消融差异补齐方向
+        :authoring
+            - fix(result): ranking 摘要和结果明确无证据覆盖消融低于本文方法
+            - fix(result): 消融差异保留绝对差值，同时补齐方向说明
+            - test(authoring): ranking 成稿断言不再出现无证据覆盖消融与本文方法的无方向差值
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
+
+    0.13.0.68-dev - 2026/05/30 (ad26e34c) [fix/mcp-tool-binding-test-isolation]
+        :brief 排序指标差异改为绝对差值口径
+        :authoring
+            - fix(result): ranking 摘要、结果、讨论和结论使用绝对差值表述 nDCG@3 差异
+            - fix(result): 消融差异不再写成低于本文方法的裸数值
+            - test(authoring): ranking 成稿断言不再出现提升 0.1341 或相对提升口径
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
+
+    0.13.0.67-dev - 2026/05/30 (4d51b64a) [fix/mcp-tool-binding-test-isolation]
+        :brief 方法框分支说明去重
+        :authoring
+            - fix(method): ranking 方法框只保留一条分支检查说明
+            - fix(method): 移除对照分支包括的重复句，避免方法章节同义重复
+            - test(authoring): ranking 成稿断言方法章节不再出现对照分支包括
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
+
+    0.13.0.66-dev - 2026/05/30 (b4a6ae45) [fix/mcp-tool-binding-test-isolation]
+        :brief 数据缺失降级策略改为替代数据边界
+        :authoring
+            - fix(protocol): 数据集不可用时要求使用明确标注为替代数据的可核验评测集
+            - fix(protocol): 替代数据场景的结论明确降级为探索性观察
+            - test(authoring): ranking 成稿断言不再出现最近的开放可验证评测集
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
+
+    0.13.0.65-dev - 2026/05/30 (baebd58b) [fix/mcp-tool-binding-test-isolation]
+        :brief 工作区数据访问列改为本地可核验
+        :authoring
+            - fix(availability): file:// 或 workspace 数据集在数据可用性表格中显示为本地可核验
+            - fix(availability): 保留工作区授权本地数据集许可，避免把本地评测集误写成外部开放数据
+            - test(authoring): ranking 成稿断言 agent-ranking-dataset 不再显示为开放访问
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "complete code-paper"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
+
+    0.13.0.64-dev - 2026/05/30 (8d9d13bd) [fix/mcp-tool-binding-test-isolation]
+        :brief 实验协议入口说明改为覆盖口径
+        :authoring
+            - fix(protocol): ranking 实验设置说明 4 个入口覆盖本文方法、词项匹配基线、无证据覆盖消融和容器复现
+            - fix(protocol): 移除来源为复现实验入口的生硬表述
+            - test(authoring): ranking 成稿断言实验设置不再出现来源为复现实验入口
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
+
+    0.13.0.63-dev - 2026/05/30 (6d5bb56f) [fix/mcp-tool-binding-test-isolation]
+        :brief 复现实验数量口径改为实验记录
+        :authoring
+            - fix(contribution): ranking 主要贡献将本机/容器运行改为本机/容器实验记录
+            - fix(interpretation): 贡献句避免把三类实验条件误读为重复随机试验次数
+            - test(authoring): ranking 成稿断言贡献章节不再出现 3 个本机运行和 3 个容器运行
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
+
+    0.13.0.62-dev - 2026/05/30 (f224b98e) [fix/mcp-tool-binding-test-isolation]
+        :brief 方法结构表改为框编号
+        :authoring
+            - fix(figure): ranking 方法结构表标题从图 1 改为框 1
+            - fix(figure): 保留后续结果表为表 1，避免图表编号和导出形态冲突
+            - test(authoring): ranking 成稿断言方法章节不再把结构表称为图 1
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
+
+    0.13.0.61-dev - 2026/05/30 (c8a9e6ba) [fix/mcp-tool-binding-test-isolation]
+        :brief 数据可用性避免夸大开放性
+        :authoring
+            - fix(availability): 数据与代码可用性章节将开放数据集总称改为可核验数据集
+            - fix(availability): 开放访问和本地授权许可分别由表格列说明，避免许可语义混淆
+            - test(authoring): complete code-paper 成稿断言不再出现开放数据集总称
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "complete code-paper"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
+
+    0.13.0.60-dev - 2026/05/30 (b60949ce) [fix/mcp-tool-binding-test-isolation]
+        :brief 方法图改为导出友好结构表
+        :authoring
+            - fix(figure): ranking 方法图从 Mermaid 代码块改为 Markdown 结构表
+            - fix(export): 方法图表格前后增加空行，确保 Pandoc LaTeX 导出为 longtable
+            - test(authoring): ranking 成稿断言图表不包含 Mermaid 或纯文本箭头流程
+            - test(paper): code metadata 集成测试清理临时目录时容忍 Windows EBUSY 锁
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
+
+    0.13.0.59-dev - 2026/05/30 (a76a6503) [fix/mcp-tool-binding-test-isolation]
+        :brief 方法流程图改为可渲染结构图
+        :authoring
+            - fix(figure): ranking 方法章节输出 Mermaid flowchart
+            - fix(figure): 图 1 保留主排序链路并显式标出基线、消融和容器复现分支
+            - test(authoring): ranking 成稿断言方法图不再使用纯文本箭头流程
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
+
+    0.13.0.58-dev - 2026/05/30 (a6c6071b) [fix/mcp-tool-binding-test-isolation]
+        :brief 作者与声明缺失信息改为论文模板口吻
+        :authoring
+            - fix(manuscript): 作者信息缺失时输出待补充而不是未登记
+            - fix(manuscript): 基金、贡献、利益冲突和伦理审批声明缺失时输出待补充
+            - test(authoring): ranking 论文成稿覆盖作者信息和声明占位文案
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
+
+    0.13.0.57-dev - 2026/05/30 (c8fe4431) [fix/mcp-tool-binding-test-isolation]
+        :brief 代码可用性补充代码包名
+        :authoring
+            - fix(availability): 代码可用性章节增加 workspace package 名称
+            - fix(runtime): PaperRun authoring 从 package.json 读取代码包名
+            - fix(export): final export 刷新草稿时保留代码包名元数据
+            - test(authoring): code-metadata-version 覆盖代码包名、产品版本和 package 版本边界
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
+
+    0.13.0.56-dev - 2026/05/30 (31f522b1) [fix/mcp-tool-binding-test-isolation]
+        :brief 代码可用性优先使用产品版本
+        :authoring
+            - fix(availability): 代码可用性章节优先输出 README/CHANGELOG 中的产品版本
+            - fix(runtime): PaperRun authoring 从论文工作区向上查找产品 README 与 CHANGELOG
+            - fix(export): final export 刷新草稿时使用同一产品版本解析逻辑
+            - fix(availability): 无外部数据集但存在代码证据时仍输出代码可用性信息
+            - test(authoring): 新增 code-metadata-version 集成测试，覆盖产品版本优先于 workspace package 版本
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
+
+    0.13.0.55-dev - 2026/05/30 (b903eb4d) [fix/mcp-tool-binding-test-isolation]
+        :brief 代码可用性补充工作区状态
+        :authoring
+            - fix(availability): 代码可用性章节支持输出 git 工作区状态
+            - fix(runtime): PaperRun authoring 从当前工作区 git status 判断未提交或未跟踪变更
+            - fix(export): final export 刷新草稿时保留工作区状态元数据
+            - test(authoring): 增加代码工作区状态断言
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
+
+    0.13.0.54-dev - 2026/05/30 (b4c2d644) [fix/mcp-tool-binding-test-isolation]
+        :brief 代码可用性补充 git 修订号
+        :authoring
+            - fix(availability): 代码可用性章节支持输出代码修订短 hash
+            - fix(runtime): PaperRun authoring 从当前工作区 git 读取 HEAD 短 hash
+            - fix(export): final export 刷新草稿时保留 git 修订元数据
+            - test(authoring): 增加代码修订断言
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
+
+    0.13.0.53-dev - 2026/05/30 (e890853c) [fix/mcp-tool-binding-test-isolation]
+        :brief 可复现性章节补充资源记录边界
+        :authoring
+            - fix(reproducibility): 可复现性章节增加资源记录边界
+            - fix(reproducibility): 明确当前实验记录包含耗时
+            - fix(reproducibility): 峰值内存和 GPU 用量缺失时明确不能外推资源结论
+            - test(authoring): 增加资源记录边界、耗时记录和内存/GPU 缺失断言
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
+
+    0.13.0.52-dev - 2026/05/30 (fd74c37a) [fix/mcp-tool-binding-test-isolation]
+        :brief 代码可用性补充仓库版本许可证
+        :authoring
+            - fix(availability): 代码可用性章节支持代码仓库地址、代码版本和代码许可证元数据
+            - fix(runtime): PaperRun authoring 从工作区 package.json 读取 repository、version 和 license
+            - fix(export): final export 刷新草稿时保留 package.json 代码可用性元数据
+            - test(authoring): 增加代码仓库地址、版本和许可证断言
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
+
+    0.13.0.51-dev - 2026/05/30 (25f8171e) [fix/mcp-tool-binding-test-isolation]
+        :brief 摘要补充 ranking 评测边界
+        :authoring
+            - fix(abstract): ranking 摘要写出评测集候选数
+            - fix(abstract): ranking 摘要写出标签由实时 arXiv 检索排序、主题匹配、元数据完整度和发表时间派生
+            - fix(abstract): ranking 摘要明确标签不是人工相关性标注
+            - test(authoring): 增加摘要候选数和非人工标注断言
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol

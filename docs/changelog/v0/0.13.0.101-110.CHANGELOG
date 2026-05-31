@@ -1,0 +1,123 @@
+:project       paper_fucker - 可验证论文研究自动化系统
+:author        k1d (https://github.com/ZhuchenZhong)
+:repo
+:desc          0.13.0.101-110 历史变更归档，主 CHANGELOG 仅保留当前活跃版本线
+:version       0.13.0.110-dev
+:last_update   2026/05/31
+
+:history
+
+    0.13.0.110-dev - 2026/05/31 (717087a3) [fix/mcp-tool-binding-test-isolation]
+        :brief 缺少模型审稿结果阻断 final export
+        :verification
+            - fix(review): runMultiModelReview 在 model_reviews 为空时输出 missing_model_review blocker
+            - fix(review): final gate 不再把没有任何模型审稿结果的稿件视为 review pass
+            - test(authoring): 新增 evaluateVerificationGate 用例，确认无模型审稿时 blocking_report.status=blocked
+        :checks
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "no model review|verified paper reference|formal References"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/datasets.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "no model review|verified paper reference|formal References|source records|source record manifest|complete code-paper|placeholder datasets|blocks final data checks|dataset discovery|renders ranking benchmark|renders ranking related work|placeholder literature|distinct representatives|live paper quality|prefers product README version|retries retryable temporary directory cleanup"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+
+    0.13.0.109-dev - 2026/05/31 (def399cf) [fix/mcp-tool-binding-test-isolation]
+        :brief 缺少正式论文参考文献阻断 final export
+        :verification
+            - fix(reference): missing_verified_reference 从 warning 收紧为 blocker，缺少 verified clear paper source record 时不得通过 final export
+            - fix(reference): final gate 覆盖只有代码/材料证据但没有正式论文参考文献的阻断路径
+            - test(authoring): 新增 evaluateVerificationGate 用例，确认无正式论文来源时 blocking_report.status=blocked
+        :checks
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "verified paper reference|formal References"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/datasets.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "verified paper reference|formal References|source records|source record manifest|complete code-paper|placeholder datasets|blocks final data checks|dataset discovery|renders ranking benchmark|renders ranking related work|placeholder literature|distinct representatives|live paper quality|prefers product README version|retries retryable temporary directory cleanup"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+
+    0.13.0.108-dev - 2026/05/31 (7a9df2bb) [fix/mcp-tool-binding-test-isolation]
+        :brief source record manifest 缺失阻断
+        :verification
+            - fix(source): checkSourceAuthenticity 在 source_records manifest 未传入时也按缺失 SourceRecord.v1 阻断 claim source
+            - fix(source): source_records undefined 与空数组使用同一 missing_source_record blocker，避免 final gate 只因 manifest 缺失而跳过真实性检查
+            - test(authoring): 覆盖 source_id 存在但 source record manifest 缺失的阻断路径
+        :checks
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "source records|source record manifest|formal References"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/datasets.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "source records|source record manifest|formal References|complete code-paper|placeholder datasets|blocks final data checks|dataset discovery|renders ranking benchmark|renders ranking related work|placeholder literature|distinct representatives|live paper quality|prefers product README version|retries retryable temporary directory cleanup"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+
+    0.13.0.107-dev - 2026/05/31 (43a0d469) [fix/mcp-tool-binding-test-isolation]
+        :brief claim source record 强制校验
+        :verification
+            - fix(source): checkSourceAuthenticity 在 claim source_id 缺少 SourceRecord.v1 时输出 missing_source_record blocker
+            - fix(source): final gate 不再只凭 available_source_ids 接受 claim 证据，必须能回查来源记录
+            - test(authoring): 覆盖 source_id 已声明但 source_records 缺失的阻断路径
+        :checks
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "missing source records|formal References"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/datasets.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "missing source records|formal References|complete code-paper|placeholder datasets|blocks final data checks|dataset discovery|renders ranking benchmark|renders ranking related work|placeholder literature|distinct representatives|live paper quality|prefers product README version|retries retryable temporary directory cleanup"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+
+    0.13.0.106-dev - 2026/05/31 (78d83dc5) [fix/mcp-tool-binding-test-isolation]
+        :brief 正式参考文献 readiness 提示
+        :verification
+            - fix(reference): checkReferences 在没有 verified clear paper source record 时输出 missing_verified_reference warning
+            - fix(reference): 已存在 verified paper reference 时不触发 readiness warning，避免误报正式引用已齐的稿件
+            - test(authoring): 覆盖缺少正式论文引用和已有正式论文引用两条 reference readiness 边界
+        :checks
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "formal References"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/datasets.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "formal References|complete code-paper|placeholder datasets|blocks final data checks|dataset discovery|renders ranking benchmark|renders ranking related work|placeholder literature|distinct representatives|live paper quality|prefers product README version|retries retryable temporary directory cleanup"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+
+    0.13.0.105-dev - 2026/05/31 (4a8901e8) [fix/mcp-tool-binding-test-isolation]
+        :brief final gate 占位数据集阻断
+        :verification
+            - fix(gate): final data/experiment check 在存在数据集候选但没有 open verified 或 workspace-authorized 数据集时输出 missing_open_dataset blocker
+            - fix(gate): 纯代码元数据论文没有数据集候选时不被 missing_open_dataset 误阻断
+            - test(dataset): 覆盖 verified/open 占位数据集即使复现通过也不能通过 final data check
+        :checks
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/datasets.test.ts
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "complete code-paper|placeholder datasets|renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/datasets.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|placeholder datasets|blocks final data checks|dataset discovery|renders ranking benchmark|renders ranking related work|placeholder literature|distinct representatives|live paper quality|prefers product README version|retries retryable temporary directory cleanup"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+
+    0.13.0.104-dev - 2026/05/31 (6d70b8e1) [fix/mcp-tool-binding-test-isolation]
+        :brief dataset discovery 占位来源过滤
+        :sources
+            - fix(dataset): discoverDatasets/openVerifiedDatasets 不再把 example、localhost、缺失 URL 等占位定位计入 open verified 数据集
+            - fix(dataset): 占位数据集写入 verification diagnostic，并在无正式开放数据集时保留 no_open_verified_dataset 缺口
+            - test(dataset): 覆盖 verified/open 占位数据集被排除，防止伪数据进入可行性和成稿链路
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/datasets.test.ts
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "complete code-paper|placeholder datasets|renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/datasets.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|placeholder datasets|dataset discovery|renders ranking benchmark|renders ranking related work|placeholder literature|distinct representatives|live paper quality|prefers product README version|retries retryable temporary directory cleanup"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+
+    0.13.0.103-dev - 2026/05/31 (79951912) [fix/mcp-tool-binding-test-isolation]
+        :brief 占位数据集过滤
+        :authoring
+            - fix(data): 数据可用性和材料来源统计只使用已验证且非占位 URL 的正式数据集
+            - fix(data): example、localhost、缺失 URL 等占位数据源改为中文诊断，不再输出为可核验数据集表格
+            - test(authoring): 新增占位数据集用例，并将完整成稿数据集 fixture 改为正式 Hugging Face 定位
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "placeholder datasets|complete code-paper"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "complete code-paper|placeholder datasets|renders ranking benchmark|placeholder literature|distinct representatives"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|placeholder datasets|renders ranking benchmark|renders ranking related work|placeholder literature|distinct representatives|live paper quality|prefers product README version|retries retryable temporary directory cleanup"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+
+    0.13.0.102-dev - 2026/05/31 (16e11251) [fix/mcp-tool-binding-test-isolation]
+        :brief 通用相关工作占位来源过滤
+        :authoring
+            - fix(related-work): 通用相关工作与材料来源统计只使用已验证且非占位 URL 的正式文献来源
+            - fix(related-work): 占位来源改为待补检索边界，不再输出为相关工作表格、代表文献或已验证论文来源
+            - test(authoring): 新增通用相关工作占位来源用例，并将代表分组测试改用正式 arXiv 定位
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "placeholder literature|distinct representatives"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|renders ranking related work|placeholder literature|distinct representatives"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|renders ranking related work|placeholder literature|distinct representatives|live paper quality|prefers product README version|retries retryable temporary directory cleanup"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+
+    0.13.0.101-dev - 2026/05/31 (29d68727) [fix/mcp-tool-binding-test-isolation]
+        :brief 占位相关工作过滤
+        :authoring
+            - fix(related-work): ranking 相关工作只使用已验证且非占位 URL 的正式文献来源
+            - fix(citation): 相关工作引用编号与正式参考文献来源保持一致，不再给占位来源编号
+            - test(authoring): ranking 成稿断言 example.org 来源不再作为代表相关工作输出
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "renders ranking related work|renders ranking benchmark"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|renders ranking related work|live paper quality|prefers product README version|retries retryable temporary directory cleanup"
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
