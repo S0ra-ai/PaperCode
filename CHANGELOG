@@ -2,25 +2,24 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.139-dev
+:version       0.13.0.140-dev
 :last_update   2026/05/31
 
 :history
 
-    0.13.0.139-dev - 2026/05/31 (665b4ade) [fix/mcp-tool-binding-test-isolation]
-        :brief App/Desktop 用户可见表面统一到 PaperRun，开发手册导航拆分为使用与开发主线
-        :app
-            - fix(app): App 主语言包将高频导航、toast、Prompt 示例和上下文统计收口为 PaperRun 与论文研究表达
-            - fix(app): 桌面菜单、通知图标、错误页、设置链接和项目头像统一指向 ZhuchenZhong/paper_fucker
-            - fix(app): 默认 PaperRun 标题识别支持 New PaperRun/Child PaperRun，同时保留旧本机数据可读性
-        :docs
-            - docs(development): 参考 ReadTheDocs 结构，将开发手册左侧导航拆为入门、使用、开发、架构、运行时与工作台
-            - docs(development): 保留使用入口页用于本机验收，开发指南、模块地图和关键函数索引作为维护主线
+    0.13.0.140-dev - 2026/05/31 (dee367d4) [fix/mcp-tool-binding-test-isolation]
+        :brief Provider 授权入口按订阅类型收口，公开安装、发布和 Nix 元数据迁移到 ZhuchenZhong 与 MPL-2.0
+        :tui
+            - fix(models): 从模型工作台注册 ChatGPT 或 GitHub Copilot 订阅时，只展示对应 provider 的授权入口
+            - fix(models): 指定 provider 授权不再暴露 Other/custom 入口，避免订阅登录流程混杂
+        :release
+            - chore(install): 安装脚本、GitHub Action 示例、更新检查和 MCP OAuth client_uri 指向 ZhuchenZhong/paper_fucker
+            - chore(publish): Arch/Homebrew 发布元数据使用 Paper Fucker 研究工作台描述，并改为 MPL-2.0 许可证
+            - chore(nix): Nix 包 homepage 指向 ZhuchenZhong/paper_fucker，license 改为 lib.licenses.mpl20
         :test
-            - test(app): 新增 paper-surface 测试阻断主语言包回退到旧聊天、session 或订阅品牌表达
-            - test(app): 新增 session-title 测试覆盖 PaperRun 默认标题与旧本机数据兼容
+            - test(tui): provider-options 覆盖指定 provider 过滤，不暴露 Other/custom 入口
         :changelog
-            - docs(changelog): 0.13.0.138 开发历史移入 docs/changelog/v0/0.13.0.138.CHANGELOG
+            - docs(changelog): 0.13.0.139 开发历史移入 docs/changelog/v0/0.13.0.139.CHANGELOG
         :checks
-            - targeted tests: packages/app 全量单测
-            - static checks: packages/app typecheck、packages/desktop typecheck、docs manual.js syntax 与 git diff --check
+            - targeted tests: packages/opencode provider-options
+            - static checks: packages/opencode typecheck、install bash syntax after CRLF normalization 与 git diff --check
