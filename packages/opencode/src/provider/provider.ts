@@ -412,7 +412,7 @@ function custom(dep: CustomDep): Record<string, CustomLoader> {
         autoload: false,
         options: {
           headers: {
-            "HTTP-Referer": "https://github.com/S0ra-ai/paper_fucker",
+            "HTTP-Referer": "https://github.com/ZhuchenZhong/paper_fucker",
             "X-Title": "paper_fucker",
             "X-Source": "paper_fucker",
           },
@@ -423,7 +423,7 @@ function custom(dep: CustomDep): Record<string, CustomLoader> {
         autoload: false,
         options: {
           headers: {
-            "HTTP-Referer": "https://github.com/S0ra-ai/paper_fucker",
+            "HTTP-Referer": "https://github.com/ZhuchenZhong/paper_fucker",
             "X-Title": "paper_fucker",
           },
         },
@@ -433,7 +433,7 @@ function custom(dep: CustomDep): Record<string, CustomLoader> {
         autoload: false,
         options: {
           headers: {
-            "HTTP-Referer": "https://github.com/S0ra-ai/paper_fucker",
+            "HTTP-Referer": "https://github.com/ZhuchenZhong/paper_fucker",
             "X-Title": "paper_fucker",
           },
         },
@@ -443,7 +443,7 @@ function custom(dep: CustomDep): Record<string, CustomLoader> {
         autoload: false,
         options: {
           headers: {
-            "http-referer": "https://github.com/S0ra-ai/paper_fucker",
+            "http-referer": "https://github.com/ZhuchenZhong/paper_fucker",
             "x-title": "paper_fucker",
           },
         },
@@ -541,7 +541,7 @@ function custom(dep: CustomDep): Record<string, CustomLoader> {
         autoload: false,
         options: {
           headers: {
-            "HTTP-Referer": "https://github.com/S0ra-ai/paper_fucker",
+            "HTTP-Referer": "https://github.com/ZhuchenZhong/paper_fucker",
             "X-Title": "paper_fucker",
           },
         },
@@ -826,7 +826,7 @@ function custom(dep: CustomDep): Record<string, CustomLoader> {
         autoload: false,
         options: {
           headers: {
-            "HTTP-Referer": "https://github.com/S0ra-ai/paper_fucker",
+            "HTTP-Referer": "https://github.com/ZhuchenZhong/paper_fucker",
             "X-Title": "paper_fucker",
           },
         },

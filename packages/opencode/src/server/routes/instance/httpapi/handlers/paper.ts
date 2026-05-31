@@ -25,6 +25,7 @@ import {
 import { discoverOpenAICompatibleModels, saveProviderEndpointConfig } from "@/paper/model-discovery"
 import {
   candidatesFromBuiltinProviders,
+  isConfiguredPaperProviderRegistration,
   loadPaperModelInventory,
   mergeModelCandidates,
   modelRolesFromInventory,
@@ -356,11 +357,14 @@ export const paperHandlers = HttpApiBuilder.group(InstanceHttpApi, "paper", (han
         const connectedProviderIDs = new Set(Object.keys(connected))
         const registeredProviders = new Set(
           Object.entries(state.inventory.provider_registrations ?? {})
-            .filter(([providerID, registration]) => {
-              if (registration.status !== "registered") return false
-              if (registration.kind === "openai_compatible" || registration.kind === "manual") return true
-              return (providerID === "openai" || providerID === "github-copilot") && connectedProviderIDs.has(providerID)
-            })
+            .filter(([providerID, registration]) =>
+              isConfiguredPaperProviderRegistration(
+                providerID,
+                registration,
+                state.inventory.candidates,
+                connectedProviderIDs,
+              ),
+            )
             .map(([providerID]) => providerID),
         )
         const builtinCandidates = candidatesFromBuiltinProviders(providers)
@@ -397,6 +401,7 @@ export const paperHandlers = HttpApiBuilder.group(InstanceHttpApi, "paper", (han
       )
       return yield* Effect.tryPromise({
         try: async () => {
+          const storedInventory = await loadPaperModelInventory(paperGlobalOptions())
           const connectedProviderIDs = new Set(Object.keys(connected))
           const subscriptionProviderIDs = new Set(
             (ctx.payload.registered_provider_ids ?? []).filter(
@@ -430,12 +435,16 @@ export const paperHandlers = HttpApiBuilder.group(InstanceHttpApi, "paper", (han
           const payloadRegistrations = Object.fromEntries(
             Object.entries((ctx.payload.provider_registrations as Record<string, PaperProviderRegistration> | undefined) ?? {}).filter(
               ([providerID, registration]) => {
-                if (registration.status !== "registered") return false
-                if (registration.kind === "openai_compatible" || registration.kind === "manual") return true
-                return (
-                  (providerID === "openai" || providerID === "github-copilot") &&
-                  subscriptionProviderIDs.has(providerID)
-                )
+                if (registration.kind === "openai_compatible") return registration.status === "registered"
+                if (registration.kind === "manual") {
+                  return isConfiguredPaperProviderRegistration(
+                    providerID,
+                    registration,
+                    storedInventory.candidates,
+                    connectedProviderIDs,
+                  )
+                }
+                return subscriptionProviderIDs.has(providerID)
               },
             ),
           ) as Record<string, PaperProviderRegistration>

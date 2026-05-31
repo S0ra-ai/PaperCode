@@ -7,7 +7,9 @@ import { AppFileSystem } from "@opencode-ai/core/filesystem"
 
 export const OAUTH_DUMMY_KEY = "paper_fucker-oauth-dummy-key"
 
-const file = path.join(Global.Path.data, "auth.json")
+function file() {
+  return path.join(Global.Path.data, "auth.json")
+}
 
 const fail = (message: string) => (cause: unknown) => new AuthError({ message, cause })
 
@@ -64,7 +66,7 @@ export const layer = Layer.effect(
         } catch (err) {}
       }
 
-      const data = (yield* fsys.readJson(file).pipe(Effect.orElseSucceed(() => ({})))) as Record<string, unknown>
+      const data = (yield* fsys.readJson(file()).pipe(Effect.orElseSucceed(() => ({})))) as Record<string, unknown>
       return Record.filterMap(data, (value) => Result.fromOption(decode(value), () => undefined))
     })
 
@@ -78,7 +80,7 @@ export const layer = Layer.effect(
       if (norm !== key) delete data[key]
       delete data[norm + "/"]
       yield* fsys
-        .writeJson(file, { ...data, [norm]: info }, 0o600)
+        .writeJson(file(), { ...data, [norm]: info }, 0o600)
         .pipe(Effect.mapError(fail("Failed to write auth data")))
     })
 
@@ -87,7 +89,7 @@ export const layer = Layer.effect(
       const data = yield* all()
       delete data[key]
       delete data[norm]
-      yield* fsys.writeJson(file, data, 0o600).pipe(Effect.mapError(fail("Failed to write auth data")))
+      yield* fsys.writeJson(file(), data, 0o600).pipe(Effect.mapError(fail("Failed to write auth data")))
     })
 
     return Service.of({ get, all, set, remove })

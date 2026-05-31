@@ -13,6 +13,7 @@ import {
   candidatesFromDiscovery,
   candidatesFromBuiltinProviders,
   loadPaperModelInventory,
+  mergeModelCandidates,
   modelInventoryPath,
   routePaperModel,
   updatePaperModelAllowlist,
@@ -81,8 +82,134 @@ describe("paper provider model discovery", () => {
     const inventory = await loadPaperModelInventory({ home })
     expect(inventory.decision_model).toBeUndefined()
     expect(inventory.allowlist).toEqual([])
+    expect(inventory.provider_registrations.lab).toBeUndefined()
     expect(inventory.candidates[0]?.allowed).toBe(false)
     expect(routePaperModel(inventory, { role: "planner" }).diagnostics).toContain("model_allowlist_empty")
+  })
+
+  test("does not promote stale unregistered candidates into registered providers", async () => {
+    const inventory = await loadPaperModelInventory({ home: await tmpHome() })
+    const merged = mergeModelCandidates(inventory, [
+      {
+        provider_id: "openai",
+        provider_name: "ChatGPT 订阅",
+        model_id: "gpt-5.2",
+        model_ref: "openai/gpt-5.2",
+        display_name: "gpt-5.2",
+        source: "paper_builtin",
+        capabilities: ["general"],
+        cost_hint: "unknown",
+        context_hint: "long",
+        smoke_status: "untested",
+        allowed: false,
+        discovered_at: "2026-05-12T00:00:00Z",
+      },
+    ])
+
+    expect(merged.provider_registrations.openai).toBeUndefined()
+    expect(merged.candidates.map((candidate) => candidate.model_ref)).toEqual(["openai/gpt-5.2"])
+
+    const normalized = await updatePaperModelAllowlist([], {
+      home: await tmpHome(),
+      candidates: merged.candidates,
+      provider_registrations: {},
+    })
+
+    expect(normalized.provider_registrations).toEqual({})
+    expect(normalized.candidates).toEqual([])
+    expect(routePaperModel(normalized, { role: "writer" }).diagnostics).toContain("model_allowlist_empty")
+  })
+
+  test("drops legacy manual registrations that only came from builtin provider catalogs", async () => {
+    const home = await tmpHome()
+    const file = modelInventoryPath(home)
+    await mkdir(path.dirname(file), { recursive: true })
+    await writeFile(
+      file,
+      JSON.stringify({
+        schema_version: "PaperModelInventory.v1",
+        updated_at: "2026-05-12T00:00:00Z",
+        allowlist: [],
+        role_overrides: {},
+        provider_registrations: {
+          anthropic: {
+            provider_id: "anthropic",
+            provider_name: "Anthropic",
+            kind: "manual",
+            status: "registered",
+            model_count: 525,
+            allowed_count: 0,
+          },
+        },
+        candidates: [
+          {
+            provider_id: "anthropic",
+            provider_name: "Anthropic",
+            model_id: "claude-opus-4.5",
+            model_ref: "anthropic/claude-opus-4.5",
+            display_name: "Claude Opus 4.5",
+            source: "paper_builtin",
+            capabilities: ["general"],
+            cost_hint: "unknown",
+            context_hint: "long",
+            smoke_status: "untested",
+            allowed: false,
+            discovered_at: "2026-05-12T00:00:00Z",
+          },
+        ],
+      }),
+      "utf8",
+    )
+
+    const inventory = await loadPaperModelInventory({ home })
+    expect(inventory.provider_registrations.anthropic).toBeUndefined()
+    expect(inventory.candidates.map((candidate) => candidate.model_ref)).toEqual(["anthropic/claude-opus-4.5"])
+    expect(routePaperModel(inventory, { role: "planner" }).diagnostics).toContain("model_allowlist_empty")
+  })
+
+  test("filters registered providers to subscription auth and custom endpoint registrations", async () => {
+    const home = await tmpHome()
+    const file = modelInventoryPath(home)
+    await mkdir(path.dirname(file), { recursive: true })
+    await writeFile(
+      file,
+      JSON.stringify({
+        schema_version: "PaperModelInventory.v1",
+        updated_at: "2026-05-12T00:00:00Z",
+        allowlist: [],
+        role_overrides: {},
+        provider_registrations: {
+          anthropic: {
+            provider_id: "anthropic",
+            provider_name: "Anthropic",
+            kind: "builtin",
+            status: "registered",
+            model_count: 1,
+            allowed_count: 0,
+          },
+          openai: {
+            provider_id: "openai",
+            provider_name: "ChatGPT 订阅",
+            kind: "chatgpt_subscription",
+            status: "registered",
+            model_count: 1,
+            allowed_count: 0,
+          },
+          lab: {
+            provider_id: "lab",
+            provider_name: "Lab",
+            kind: "openai_compatible",
+            status: "registered",
+            model_count: 1,
+            allowed_count: 0,
+          },
+        },
+      }),
+      "utf8",
+    )
+
+    const inventory = await loadPaperModelInventory({ home })
+    expect(Object.keys(inventory.provider_registrations).sort()).toEqual(["lab", "openai"])
   })
 
   test("can route a historical allowlisted decision model even when candidate metadata is unavailable", async () => {
@@ -276,6 +403,84 @@ describe("paper provider model discovery", () => {
     expect(routePaperModel(inventory, { role: "reviewer" }).allowed_models).toEqual([
       "github-copilot/claude-opus-4.7",
     ])
+  })
+
+  test("treats ChatGPT and GitHub Copilot subscriptions as first-class paper providers", async () => {
+    const home = await tmpHome()
+    const candidates = candidatesFromBuiltinProviders({
+      openai: {
+        name: "ChatGPT Plus/Pro",
+        models: {
+          "gpt-5.2": { name: "GPT 5.2" },
+          "gpt-5.2-mini": { name: "GPT 5.2 Mini" },
+        },
+      },
+      "github-copilot": {
+        name: "GitHub Copilot",
+        models: {
+          "claude-opus-4.7": { name: "Claude Opus 4.7" },
+          "gpt-5-mini": { name: "GPT 5 Mini" },
+        },
+      },
+    })
+    const inventory = await updatePaperModelAllowlist(
+      ["openai/gpt-5.2", "github-copilot/claude-opus-4.7"],
+      {
+        home,
+        decision_model: "openai/gpt-5.2",
+        backup_decision_model: "github-copilot/claude-opus-4.7",
+        candidates,
+        provider_registrations: {
+          openai: {
+            provider_id: "openai",
+            provider_name: "ChatGPT Plus/Pro",
+            kind: "chatgpt_subscription",
+            status: "registered",
+            model_count: 2,
+            allowed_count: 1,
+          },
+          "github-copilot": {
+            provider_id: "github-copilot",
+            provider_name: "GitHub Copilot",
+            kind: "copilot_subscription",
+            status: "registered",
+            model_count: 2,
+            allowed_count: 1,
+          },
+        },
+        stage_model_policies: {
+          writer: { role: "writer", mode: "dynamic" },
+          reviewer: { role: "reviewer", mode: "forced", model_ref: "github-copilot/claude-opus-4.7" },
+        },
+      },
+    )
+
+    expect(inventory.provider_registrations.openai).toMatchObject({
+      kind: "chatgpt_subscription",
+      status: "registered",
+      model_count: 2,
+      allowed_count: 1,
+    })
+    expect(inventory.provider_registrations["github-copilot"]).toMatchObject({
+      kind: "copilot_subscription",
+      status: "registered",
+      model_count: 2,
+      allowed_count: 1,
+    })
+    expect(inventory.allowlist.sort()).toEqual([
+      "github-copilot/claude-opus-4.7",
+      "openai/gpt-5.2",
+    ])
+    expect(inventory.decision_model).toBe("openai/gpt-5.2")
+    expect(inventory.backup_decision_model).toBe("github-copilot/claude-opus-4.7")
+    expect(routePaperModel(inventory, { role: "writer", difficulty: "high" })).toMatchObject({
+      source: "decision_model",
+      decision_model: "openai/gpt-5.2",
+    })
+    expect(routePaperModel(inventory, { role: "reviewer" })).toMatchObject({
+      source: "user_override",
+      selected_model: "github-copilot/claude-opus-4.7",
+    })
   })
 
   test("removing a provider purges its candidates, allowlist, decisions, and forced stage policies", async () => {
