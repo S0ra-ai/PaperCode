@@ -2584,7 +2584,13 @@ describe("paper authoring loop", () => {
     expect(formatted).toContain(
       "**Title**: An Evidence-Constrained Candidate Paper Ranking Method with Baselines, Ablation, and Container Reproduction",
     )
-    expect(formatted).toContain("This paper presents an Evidence-Constrained Candidate Paper Ranking Method")
+    expect(formatted).toContain("This study addresses candidate paper ranking under an evidence-constrained setting.")
+    expect(formatted).toContain("The proposed method reaches 1.0000 on ranking nDCG@3, compared with 0.9500 for the lexical matching baseline")
+    expect(formatted).toContain("The no-claim-coverage ablation is lower than the proposed method by 0.0900")
+    expect(formatted).toContain("The benchmark contains 5 candidate papers.")
+    expect(formatted).toContain("Container reproduction passes")
+    expect(formatted).not.toContain("The manuscript follows a Chinese Computer Journal oriented structure")
+    expect(formatted).not.toContain("This paper presents an Evidence-Constrained Candidate Paper Ranking Method")
     expect(formatted).toContain("**Keywords**: candidate paper ranking; evidence coverage; ranking nDCG@3; lexical matching baseline; container reproduction")
     expect(formatted).toContain("## 3 方法")
     expect(formatted).toContain("### 4.1 代码可用性")
