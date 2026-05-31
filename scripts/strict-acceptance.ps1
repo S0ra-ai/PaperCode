@@ -227,12 +227,43 @@ function Get-DeepSeekConfig {
     }
 }
 
+function Invoke-LiveProviderRequest {
+    param(
+        [string]$Uri,
+        [hashtable]$Headers,
+        [string]$Method = "GET",
+        [object]$Body = $null,
+        [string]$ContentType = $null,
+        [int]$TimeoutSec = 30,
+        [int]$Attempts = 3
+    )
+    $lastError = $null
+    for ($attempt = 1; $attempt -le $Attempts; $attempt++) {
+        try {
+            $params = @{
+                Uri = $Uri
+                Headers = $Headers
+                Method = $Method
+                TimeoutSec = $TimeoutSec
+            }
+            if ($null -ne $Body) { $params.Body = $Body }
+            if (-not [string]::IsNullOrWhiteSpace($ContentType)) { $params.ContentType = $ContentType }
+            return Invoke-RestMethod @params
+        } catch {
+            $lastError = $_.Exception.Message
+            if ($attempt -ge $Attempts) { break }
+            Start-Sleep -Seconds ([Math]::Min(8, 2 * $attempt))
+        }
+    }
+    throw "live provider request failed after $Attempts attempt(s): $lastError"
+}
+
 function Invoke-DeepSeekSmoke {
     if ($FixtureMode) { return "fixture live-provider-call: deepseek/deepseek-v4-pro" }
     $config = Get-DeepSeekConfig
     Assert-StrictLive (-not [string]::IsNullOrWhiteSpace($config.api_key)) "DeepSeek API key is missing. Expected DEEPSEEK_API_KEY or .paper_fucker/local/deepseek.env." | Out-Null
     $headers = @{ Authorization = "Bearer $($config.api_key)" }
-    $models = Invoke-RestMethod -Uri "$($config.base_url)/models" -Headers $headers -TimeoutSec 30
+    $models = Invoke-LiveProviderRequest -Uri "$($config.base_url)/models" -Headers $headers -TimeoutSec 30 -Attempts 3
     $ids = @($models.data | ForEach-Object { $_.id })
     Assert-StrictLive ($ids -contains $config.model) "DeepSeek model '$($config.model)' was not returned by /models." | Out-Null
     $body = @{
@@ -241,7 +272,7 @@ function Invoke-DeepSeekSmoke {
         max_tokens = 8
         temperature = 0
     } | ConvertTo-Json -Depth 8
-    $response = Invoke-RestMethod -Uri "$($config.base_url)/chat/completions" -Method Post -ContentType "application/json" -Headers $headers -Body $body -TimeoutSec 60
+    $response = Invoke-LiveProviderRequest -Uri "$($config.base_url)/chat/completions" -Method Post -ContentType "application/json" -Headers $headers -Body $body -TimeoutSec 60 -Attempts 3
     Assert-StrictLive ($null -ne $response.choices -and @($response.choices).Count -gt 0) "DeepSeek chat completion returned no choices." | Out-Null
     return "provider deepseek model $($config.model) responded"
 }
