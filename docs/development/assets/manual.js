@@ -25,7 +25,9 @@
   if (!layout || !content) return
 
   layout.classList.add("with-toc")
+  installToolbar()
   installSearch()
+  installCodeCopy()
 
   if (!content.querySelector(".breadcrumbs")) {
     const title = pages[currentIndex]?.[1] || document.title.replace(" - Paper Fucker 开发手册", "")
@@ -122,6 +124,89 @@
         ? matches.map(([href, title]) => `<a href="./${href}">${escapeHtml(title)}</a>`).join("")
         : '<span>未找到匹配页面</span>'
       results.hidden = false
+    })
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "/" || event.ctrlKey || event.metaKey || event.altKey) return
+      const active = document.activeElement
+      if (active && ["INPUT", "TEXTAREA", "SELECT"].includes(active.tagName)) return
+      event.preventDefault()
+      input.focus()
+    })
+  }
+
+  function installToolbar() {
+    if (document.querySelector(".doc-toolbar")) return
+
+    const title = pages[currentIndex]?.[1] || "开发手册"
+    const sourceHref = `https://github.com/ZhuchenZhong/paper_fucker/blob/develop/docs/development/${encodeURIComponent(current)}`
+    const toolbar = document.createElement("div")
+    toolbar.className = "doc-toolbar"
+    toolbar.innerHTML = [
+      '<button type="button" data-action="nav">目录</button>',
+      '<button type="button" data-action="wide">展开正文</button>',
+      '<button type="button" data-action="theme">浅色</button>',
+      `<a href="${sourceHref}" target="_blank" rel="noreferrer">查看本页源码</a>`,
+      `<span>${escapeHtml(title)}</span>`,
+    ].join("")
+    document.body.insertBefore(toolbar, document.body.firstChild)
+
+    const savedTheme = localStorage.getItem("paper-dev-doc-theme")
+    if (savedTheme === "light") {
+      document.body.classList.add("theme-light")
+      toolbar.querySelector('[data-action="theme"]').textContent = "深色"
+    }
+
+    toolbar.addEventListener("click", (event) => {
+      const target = event.target
+      if (!(target instanceof HTMLButtonElement)) return
+      const action = target.dataset.action
+      if (action === "nav") {
+        layout.classList.toggle("nav-hidden")
+        target.textContent = layout.classList.contains("nav-hidden") ? "显示目录" : "目录"
+      }
+      if (action === "wide") {
+        layout.classList.toggle("reading-wide")
+        target.textContent = layout.classList.contains("reading-wide") ? "标准宽度" : "展开正文"
+      }
+      if (action === "theme") {
+        const light = document.body.classList.toggle("theme-light")
+        localStorage.setItem("paper-dev-doc-theme", light ? "light" : "dark")
+        target.textContent = light ? "深色" : "浅色"
+      }
+    })
+  }
+
+  function installCodeCopy() {
+    content.querySelectorAll("pre").forEach((pre, index) => {
+      if (pre.parentElement?.classList.contains("code-block")) return
+      const wrapper = document.createElement("div")
+      wrapper.className = "code-block"
+      pre.parentNode.insertBefore(wrapper, pre)
+      wrapper.appendChild(pre)
+
+      const button = document.createElement("button")
+      button.type = "button"
+      button.className = "copy-code"
+      button.textContent = "复制"
+      button.setAttribute("aria-label", `复制代码块 ${index + 1}`)
+      wrapper.appendChild(button)
+
+      button.addEventListener("click", async () => {
+        const text = pre.textContent || ""
+        try {
+          await navigator.clipboard.writeText(text)
+          button.textContent = "已复制"
+          setTimeout(() => {
+            button.textContent = "复制"
+          }, 1200)
+        } catch {
+          button.textContent = "复制失败"
+          setTimeout(() => {
+            button.textContent = "复制"
+          }, 1200)
+        }
+      })
     })
   }
 })()
