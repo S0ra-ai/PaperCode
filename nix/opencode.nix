@@ -96,8 +96,8 @@ stdenvNoCC.mkDerivation (finalAttrs: {
 
   meta = {
     description = "Private-first verifiable research automation agent";
-    homepage = "https://github.com/S0ra-ai/paper_fucker";
-    license = lib.licenses.mit;
+    homepage = "https://github.com/ZhuchenZhong/paper_fucker";
+    license = lib.licenses.mpl20;
     mainProgram = "paper_fucker";
     inherit (node_modules.meta) platforms;
   };

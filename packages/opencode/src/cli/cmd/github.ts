@@ -249,7 +249,7 @@ export const GithubInstallCommand = effectCmd({
               "",
               "    3. Go to a GitHub issue and comment `/pf summarize` to see the agent in action",
               "",
-              "   Learn more about the GitHub agent - https://github.com/S0ra-ai/paper_fucker",
+              "   Learn more about the GitHub agent - https://github.com/ZhuchenZhong/paper_fucker",
             ].join("\n"),
           )
         }
@@ -413,7 +413,7 @@ jobs:
           persist-credentials: false
 
       - name: Run paper_fucker
-        uses: S0ra-ai/paper_fucker/github@latest${envStr}
+        uses: ZhuchenZhong/paper_fucker/github@latest${envStr}
         with:
           model: ${provider}/${model}`,
           )

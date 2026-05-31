@@ -1209,7 +1209,7 @@ export type Config = {
     diff_style?: "auto" | "stacked"
   }
   /**
-   * Command configuration, see https://github.com/S0ra-ai/paper_fucker
+   * Command configuration, see https://github.com/ZhuchenZhong/paper_fucker
    */
   command?: {
     [key: string]: {
@@ -1266,7 +1266,7 @@ export type Config = {
     [key: string]: AgentConfig | undefined
   }
   /**
-   * Agent configuration, see https://github.com/S0ra-ai/paper_fucker
+   * Agent configuration, see https://github.com/ZhuchenZhong/paper_fucker
    */
   agent?: {
     plan?: AgentConfig
