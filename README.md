@@ -85,6 +85,7 @@ paper_fucker resume <run-id>
 ## 论文能力
 
 - 论文格式：当前启用中国计算机学报 profile；其他期刊格式与发现流程暂不作为用户入口开放。
+- 导出质量：final benchmark 已能生成 Markdown、LaTeX、PDF、DOCX 四类可审查论文包；当前重点继续打磨中国计算机学报模板细节。
 - 查新流程：从资料检索、实验设计到 ClaimLedger 前持续生成 `NoveltyCheckpoint`，发现重复研究时先改道或收窄贡献。
 - 论文脊梁：`PaperSpine` 在正文前检查中心论点、动机链、贡献链和证据链，避免无证据草稿伪装成终稿。
 - 全局图：`GlobalFigureSpec` 生成期刊适配 overview figure，panel 必须绑定 claim、source 或 artifact。
@@ -92,6 +93,14 @@ paper_fucker resume <run-id>
 - 网页采集：`bb-browser` 作为 Paper Fucker 托管能力诊断和安装，不要求用户手工准备浏览器采集栈。
 - 机器环境：侧边栏显示 OS、CPU、内存、磁盘、GPU/CUDA/ROCm、编译器、Python/uv/pip/conda、Node/Bun、Docker、WSL 和虚拟化工具状态。
 - 历史恢复：全局 run index 可列出 home/workspace 两类 run，CLI 和 TUI 都支持恢复。
+
+## 当前验收状态
+
+- 最新 final benchmark 使用中国计算机学报目标 profile，14 个 PaperRun 阶段全部成功，final gate 通过，`failed_checks=[]`。
+- 生成稿包含中文摘要、关键词、英文摘要、引言、研究问题、贡献、相关工作、方法、实验设置、结果、可复现性、讨论、效度威胁、结论、声明、参考文献和附录。
+- CJC 表格已加入 CJK-aware 列宽提示，长文本列在 PDF 中不会再和短编号列均分宽度。
+- CJC 参考文献已改为正式条目样式：`[序号] 作者. 题名[文献类型/OL]. 日期[引用日期]. DOI/arXiv/URL.`。
+- 仍处于开发态：作者/单位元数据、参考文献细节、整页 PDF 视觉验收和官方模板完全对齐还会继续迭代。
 
 ## 隐私
 
