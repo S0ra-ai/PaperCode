@@ -7,12 +7,15 @@
 
 :history
 
-    0.13.0.150-dev - 2026/05/31 (ecf75aa7) [fix/mcp-tool-binding-test-isolation]
-        :brief 自主审计要求 strict live 证据必须匹配当前版本
+    0.13.0.150-dev - 2026/05/31 (87d031c1) [fix/mcp-tool-binding-test-isolation]
+        :brief 自主审计要求 strict live 与 full workspace 证据显式区分当前性
         :audit
             - test(audit): strict-live-evidence 从 CHANGELOG :version 读取当前版本，并拒绝 project_version 缺失或指向旧版本的 strict live 报告
-            - report(strict): 重新运行 focused strict acceptance，刷新 crawler、HF、Preview browser、topic/code/final PaperRun benchmark 证据到 0.13.0.149-dev
-            - report(audit): autonomous product audit 显示 strict live 证据覆盖当前版本，避免旧通过报告继续被当作当前验收
+            - test(audit): strict-live-evidence 可使用当前版本 focused 或 full 报告证明 crawler、HF、topic/code 与 final export 场景
+            - test(audit): full workspace 报告若存在但 project_version 陈旧则标为 warn，不再把 0.8.1-dev full suite 当作当前通过证据
+            - test(audit): strict-acceptance 单测覆盖 autonomous audit 的 stale strict report guard
+            - report(strict): 重新运行 focused strict acceptance，刷新 crawler、HF、Preview browser、topic/code/final PaperRun benchmark 证据到 0.13.0.150-dev
+            - report(audit): autonomous product audit 显示 focused strict live 覆盖当前版本，full workspace 陈旧证据降级为 warn
         :changelog
             - docs(changelog): 0.13.0.149 开发历史移入 docs/changelog/v0/0.13.0.149.CHANGELOG
         :checks
