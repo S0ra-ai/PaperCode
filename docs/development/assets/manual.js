@@ -1,7 +1,7 @@
 (function () {
   const pages = [
     ["index.html", "总览", "readthedocs furo manual overview"],
-    ["usage-guide.html", "使用入口", "tui models workspace preview export resume"],
+    ["usage-guide.html", "使用指南", "usage parameters modes materials models workspace preview export resume"],
     ["development-guide.html", "开发指南", "developer workflow state artifact tests"],
     ["development-workflow.html", "开发工作流", "git flow version changelog verification"],
     ["architecture.html", "架构", "system layers paper core preview research tools storage"],

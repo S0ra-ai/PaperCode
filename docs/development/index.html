@@ -18,7 +18,7 @@
           <div class="nav-group">入门</div>
           <a class="active" href="./index.html">总览</a>
           <div class="nav-group">使用</div>
-          <a href="./usage-guide.html">使用入口</a>
+          <a href="./usage-guide.html">使用指南</a>
           <div class="nav-group">开发</div>
           <a href="./development-guide.html">开发指南</a>
           <a href="./development-workflow.html">开发工作流</a>
@@ -49,7 +49,7 @@
             这是一套面向维护者的多页 HTML 手册。结构参考成熟 ReadTheDocs 文档站：左侧分组导航、正文按任务链路展开、右侧提供本页目录。
           </p>
           <p>
-            手册主线是开发，而不是普通使用说明；使用入口只作为本机验收和复现路径保留。维护者应先按产品链路定位模块，再同步状态、接口、TUI、Preview、导出和测试。
+            手册主线是开发，同时保留一条完整使用指南。维护者应先用真实 TUI 跑通产品路径，再按产品链路定位模块，同步状态、接口、TUI、Preview、导出和测试。
           </p>
           <div class="doc-meta">
             <span class="pill">中文优先</span>
@@ -68,7 +68,7 @@
             <a href="./function-reference.html"><strong>4. 关键函数索引</strong><span>按真实调用链定位 create、orchestrator、writing、experiment runner、Preview 和模型路由。</span></a>
             <a href="./api-contracts.html"><strong>5. 接口与数据契约</strong><span>集中说明 HTTP API、事件、artifact schema、Preview snapshot 和 export manifest 的稳定边界。</span></a>
             <a href="./developer-recipes.html"><strong>6. 修改手册</strong><span>新增 stage、artifact、TUI 页面、Preview 字段、模型策略和测试时的文件清单。</span></a>
-            <a href="./usage-guide.html"><strong>使用入口</strong><span>给维护者快速跑通 TUI、模型、工作区、PaperRun、Preview、导出和恢复。</span></a>
+            <a href="./usage-guide.html"><strong>使用指南</strong><span>按使用参数、运行模式、输入材料、质量调优、实时监控和恢复导出组织完整产品路径。</span></a>
           </div>
         </section>
 
@@ -77,7 +77,7 @@
           <table class="table">
             <thead><tr><th>分组</th><th>页面</th><th>用途</th></tr></thead>
             <tbody>
-              <tr><td>入门</td><td>总览、使用入口、开发指南、开发工作流</td><td>让维护者先跑通产品，再明确分支、版本、验证和提交约束。</td></tr>
+              <tr><td>入门</td><td>总览、使用指南、开发指南、开发工作流</td><td>让维护者先跑通产品，再明确分支、版本、验证和提交约束。</td></tr>
               <tr><td>架构</td><td>架构、模块地图、关键函数索引、接口与数据契约</td><td>说明代码如何分层、关键函数在哪里、跨模块修改从哪里开始，以及运行数据如何在模块间传递。</td></tr>
               <tr><td>运行时</td><td>PaperRun、论文生成、实验执行、Preview 与导出</td><td>解释状态机、写作链路、代码实验、实时监控和 final gate。</td></tr>
               <tr><td>工作台</td><td>TUI 与模型、Agent / MCP / Skills、测试与维护、修改手册</td><td>覆盖用户界面、模型路由、能力包、回归测试和常见改动配方。</td></tr>
@@ -148,10 +148,10 @@
         </section>
 
         <div class="prev-next">
-          <a href="./usage-guide.html"><span>开始阅读</span>使用入口</a>
+          <a href="./usage-guide.html"><span>开始阅读</span>使用指南</a>
           <a href="./development-guide.html"><span>开发主线</span>开发指南</a>
         </div>
-        <div class="footer">当前手册为开发维护资料。对外首页仍维护根目录 README。</div>
+        <div class="footer">当前手册为开发维护资料，也保留可执行的使用路径。对外首页仍维护根目录 README。</div>
       </main>
 
       <aside class="page-toc">

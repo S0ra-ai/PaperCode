@@ -568,6 +568,31 @@ body.theme-light .lane strong {
   color: var(--muted);
 }
 
+.mode-list {
+  display: grid;
+  gap: 14px;
+  margin: 18px 0;
+}
+
+.mode-list article {
+  display: grid;
+  grid-template-columns: minmax(140px, 220px) 1fr;
+  gap: 16px;
+  align-items: start;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  padding: 14px 16px;
+}
+
+.mode-list strong {
+  color: var(--text);
+}
+
+.mode-list span {
+  color: var(--muted);
+}
+
 .callout {
   border: 1px solid #3b4c66;
   border-left: 4px solid var(--amber);
@@ -727,6 +752,7 @@ body.theme-light .lane span {
   }
 
   .toc-list a,
+  .mode-list article,
   .lane,
   .prev-next {
     grid-template-columns: 1fr;

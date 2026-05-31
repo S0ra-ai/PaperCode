@@ -152,6 +152,24 @@ foreach ($selector in @(".doc-toolbar", ".doc-search", ".page-toc", ".prev-next"
     }
 }
 
+foreach ($selector in @(".mode-list", ".kbd")) {
+    if ($styleText -notmatch [regex]::Escape($selector)) {
+        Add-Problem "docs/development/assets/style.css missing usage-guide selector '$selector'"
+    }
+}
+
+$usageGuide = Join-Path $docsRoot "usage-guide.html"
+if (Test-Path -LiteralPath $usageGuide) {
+    $usageText = [System.IO.File]::ReadAllText($usageGuide, $utf8)
+    foreach ($needle in @('id="parameters"', 'id="modes"', 'id="materials"', 'id="quality"', 'id="monitor"')) {
+        if ($usageText -notmatch [regex]::Escape($needle)) {
+            Add-Problem "docs/development/usage-guide.html missing section '$needle'"
+        }
+    }
+} else {
+    Add-Problem "docs/development/usage-guide.html is missing"
+}
+
 foreach ($needle in @("installToolbar", "installCodeCopy", "data-action=`"theme`"", "data-action=`"wide`"", "data-action=`"nav`"", "sourceHref", "copy-code")) {
     if ($manualText -notmatch [regex]::Escape($needle)) {
         Add-Problem "docs/development/assets/manual.js missing '$needle'"
