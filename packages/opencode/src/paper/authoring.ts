@@ -413,6 +413,7 @@ export function formatDraftPaperForProfile(draft: DraftPaper, input: ProfileForm
 function appendProfileAppendix(markdown: string, input: ProfileFormattingInput) {
   const profile = input.target_profile ?? "cjc-paper"
   if (profile === "generic-preprint") return markdown
+  const appendixLabel = nextAppendixLabel(markdown)
   const datasetCount = input.data_plan?.datasets.length ?? 0
   const failedChecks = [
     ...input.ledger.unsupported_claim_ids.map((claimId) => `unsupported claim ${claimId}`),
@@ -422,7 +423,7 @@ function appendProfileAppendix(markdown: string, input: ProfileFormattingInput) 
   return [
     markdown,
     "",
-    "## 附录 G：投稿准备度",
+    `## 附录 ${appendixLabel}：投稿准备度`,
     "",
     `目标稿件配置：${displaySubmissionProfile(profile)}。`,
     datasetCount > 0
@@ -435,6 +436,14 @@ function appendProfileAppendix(markdown: string, input: ProfileFormattingInput) 
       ? "导出条件：已满足当前导出条件。"
       : `导出条件：仍需处理 ${failedChecks.map(finalGateIssueText).join("；")}。`,
   ].join("\n")
+}
+
+function nextAppendixLabel(markdown: string) {
+  const labels = Array.from(markdown.matchAll(/^##\s+附录\s+([A-Z])(?=[:：\s])/gim)).map((match) =>
+    match[1].toUpperCase().charCodeAt(0),
+  )
+  const maxLabel = labels.length > 0 ? Math.max(...labels) : "A".charCodeAt(0) - 1
+  return String.fromCharCode(Math.min(maxLabel + 1, "Z".charCodeAt(0)))
 }
 
 function applyRevision(draft: DraftPaper, revision: DraftRevision): DraftPaper {
