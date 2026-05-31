@@ -2,19 +2,23 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.143-dev
+:version       0.13.0.144-dev
 :last_update   2026/05/31
 
 :history
 
-    0.13.0.143-dev - 2026/05/31 (9c431d9f) [fix/mcp-tool-binding-test-isolation]
-        :brief 开发手册补齐接口与数据契约页面，并增加文档搜索与导航
+    0.13.0.144-dev - 2026/05/31 (6da21ac0) [fix/mcp-tool-binding-test-isolation]
+        :brief 开发手册检查脚本固化导航、链接、客户端脚本和可选渲染验收
+        :test
+            - test(docs): 新增 scripts/check-development-docs.ps1，校验 docs/development 页面清单、共享脚本、样式、active 导航和内部链接
+            - test(docs): check-development-docs 支持 -Render 与 -RequireChrome，使用 Chrome/Edge headless 验证文档搜索和本页目录已渲染
+            - test(strict): strict acceptance 新增 development-docs-check，防止开发手册导航或链接回退
+            - test(strict): strict-acceptance 单测同步检查 development-docs-check 和 check-development-docs.ps1 接入
         :docs
-            - docs(development): 新增 api-contracts.html，集中说明 PaperRun HTTP API、结构化错误、事实日志、artifact schema、事件、Preview snapshot 与 export manifest 契约
-            - docs(development): 手册左侧导航新增“接口与数据契约”，总览阅读路线和手册结构同步该开发主线
-            - docs(development): manual.js 增加本地文档搜索，覆盖模块、函数、流程和测试关键词，不依赖远程索引
-            - docs(readme/internal): README 与内部维护入口同步开发手册的接口契约和搜索说明
+            - docs(development): 测试与维护、开发工作流补充 check-development-docs 命令和渲染检查说明
+            - docs(development): function-reference 导航补齐接口与数据契约链接
         :changelog
-            - docs(changelog): 0.13.0.142 开发历史移入 docs/changelog/v0/0.13.0.142.CHANGELOG
+            - docs(changelog): 0.13.0.143 开发历史移入 docs/changelog/v0/0.13.0.143.CHANGELOG
         :checks
-            - static docs: node --check manual.js、development docs link audit、Chrome headless dump-dom/screenshot 与 git diff --check
+            - static docs: check-development-docs.ps1、check-development-docs.ps1 -Render -RequireChrome 与 PowerShell ASCII safety
+            - targeted tests: packages/opencode strict-acceptance.test
