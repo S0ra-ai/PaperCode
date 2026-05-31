@@ -43,6 +43,13 @@ function Get-ReportProjectVersions {
     return @([regex]::Matches($Report, '"project_version":\s*"([^"]+)"') | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique)
 }
 
+function Get-ReportHeaderVersion {
+    param([string]$Report)
+    $match = [regex]::Match($Report, '(?m)^-\s+Project version:\s+([0-9]+(?:\.[0-9]+){2,3}-dev)\s*$')
+    if ($match.Success) { return $match.Groups[1].Value }
+    return $null
+}
+
 function Get-StaleReportVersions {
     param(
         [string[]]$Versions,
@@ -167,14 +174,18 @@ function Test-StrictEvidence {
         $report = Get-Content -Raw -LiteralPath $path
         $required = @($commonRequired + $candidate.mode)
         $missing = @($required | Where-Object { -not $report.Contains($_) })
+        $headerVersion = Get-ReportHeaderVersion $report
         $versionMatches = @(Get-ReportProjectVersions $report)
         $staleVersions = @(Get-StaleReportVersions -Versions $versionMatches -CurrentVersion $currentVersion)
-        if ($missing.Count -eq 0 -and $versionMatches.Count -gt 0 -and $staleVersions.Count -eq 0) {
+        $headerCurrent = $null -ne $headerVersion -and $headerVersion -eq $currentVersion
+        if ($missing.Count -eq 0 -and $headerCurrent -and $versionMatches.Count -gt 0 -and $staleVersions.Count -eq 0) {
             Add-AuditResult "strict-live-evidence" "pass" "$($candidate.label) strict live report proves crawler, HF, topic/code, and final export scenarios for $currentVersion."
             return
         }
         $candidateDetails = @()
         if ($missing.Count -gt 0) { $candidateDetails += "missing=$($missing -join ', ')" }
+        if ($null -eq $headerVersion) { $candidateDetails += "project version header missing" }
+        elseif ($headerVersion -ne $currentVersion) { $candidateDetails += "stale_header_version=$headerVersion current=$currentVersion" }
         if ($versionMatches.Count -eq 0) { $candidateDetails += "project_version entries missing" }
         if ($staleVersions.Count -gt 0) { $candidateDetails += "stale_project_version=$($staleVersions -join ', ') current=$currentVersion" }
         $details.Add("$($candidate.label): $($candidateDetails -join '; ')") | Out-Null
@@ -209,8 +220,17 @@ function Test-FullWorkspaceEvidence {
         Add-AuditResult "full-workspace-evidence" "fail" $_.Exception.Message
         return
     }
+    $headerVersion = Get-ReportHeaderVersion $report
     $versionMatches = @(Get-ReportProjectVersions $report)
     $staleVersions = @(Get-StaleReportVersions -Versions $versionMatches -CurrentVersion $currentVersion)
+    if ($null -eq $headerVersion) {
+        Add-AuditResult "full-workspace-evidence" "warn" "Full workspace report has no project version header; focused strict live report remains the current required evidence."
+        return
+    }
+    if ($headerVersion -ne $currentVersion) {
+        Add-AuditResult "full-workspace-evidence" "warn" "Full workspace report header is stale ($headerVersion); focused strict live report remains the current required evidence for $currentVersion."
+        return
+    }
     if ($versionMatches.Count -eq 0) {
         Add-AuditResult "full-workspace-evidence" "warn" "Full workspace report has no project_version entries; focused strict live report remains the current required evidence."
         return

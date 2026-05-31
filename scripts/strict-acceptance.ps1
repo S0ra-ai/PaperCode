@@ -188,6 +188,13 @@ function Assert-StrictLive {
     throw $Message
 }
 
+function Get-CurrentProjectVersion {
+    $changelog = Read-RepoText "CHANGELOG"
+    $versionMatch = [regex]::Match($changelog, "(?m)^:version\s+([0-9]+(?:\.[0-9]+){2,3}-dev)\s*$")
+    if ($versionMatch.Success) { return $versionMatch.Groups[1].Value }
+    throw "CHANGELOG :version is missing."
+}
+
 function Get-DeepSeekConfig {
     $defaultsPath = Join-Path $RepoRoot ".paper_fucker/local/model-defaults.json"
     $baseUrl = "https://api.deepseek.com/v1"
@@ -599,6 +606,7 @@ function Write-Report {
         "- Generated: $(Get-Date -Format o)",
         "- Mode: $AcceptanceMode",
         "- Full workspace suite: $([bool]$FullWorkspaceSuite)",
+        "- Project version: $(Get-CurrentProjectVersion)",
         "- Check timeout seconds: $CheckTimeoutSeconds",
         "- Status: $status",
         "",
