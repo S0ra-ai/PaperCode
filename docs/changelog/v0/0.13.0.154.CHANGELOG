@@ -1,0 +1,19 @@
+:project       paper_fucker - 可验证论文研究自动化系统
+:author        k1d (https://github.com/ZhuchenZhong)
+:repo
+:desc          0.13.0.154 开发历史归档
+:version       0.13.0.154-dev
+:last_update   2026/05/31
+
+:history
+
+    0.13.0.154-dev - 2026/05/31 (de87597e) [fix/mcp-tool-binding-test-isolation]
+        :brief 过期 full workspace 验收报告移入归档并补齐 reports 治理说明
+        :reports
+            - chore(reports): 将 0.8.1-dev 的 strict-live-full-acceptance 从活跃报告位移到 reports/archive/strict-live-full-acceptance-0.8.1-dev.md，避免当前审计误读旧证据
+            - docs(reports): 新增 reports/README.md，说明 active reports、historical reports 与 full workspace 报告生成边界
+            - report(audit): autonomous product audit 的 full-workspace-evidence 从 warn 变为 pass，当前 focused strict live evidence 继续作为必需里程碑证据
+        :changelog
+            - docs(changelog): 0.13.0.153 开发历史移入 docs/changelog/v0/0.13.0.153.CHANGELOG
+        :checks
+            - audit: scripts/autonomous-product-audit.ps1 -AllowActiveTask
