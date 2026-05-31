@@ -51,18 +51,34 @@ await writeFile(path.join(scenarioOutputRoot, "last-attempt.txt"), `${path.relat
 let benchmarkErrorRecorded = false
 
 function errorDetails(error: unknown) {
+  const code = benchmarkErrorCode(error)
   if (error instanceof Error) {
     return {
+      code,
       name: error.name,
       message: error.message,
       stack: error.stack,
     }
   }
   return {
+    code,
     name: "NonError",
     message: String(error),
     stack: undefined,
   }
+}
+
+function benchmarkErrorCode(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error)
+  if (/live arXiv source discovery timed out|Timeout|timed out/i.test(message)) return "source_discovery_timeout"
+  if (/live arXiv source discovery blocked by rate limit|HTTP 429|Too Many Requests/i.test(message)) return "source_discovery_rate_limited"
+  if (/No verified arXiv sources|source candidates|metadata missing|arXiv metadata mismatch/i.test(message)) {
+    return "source_verification_failed"
+  }
+  if (/schema|AJV|validation|validate/i.test(message)) return "schema_validation_failed"
+  if (/export|final export|forced draft|PDF|DOCX|manifest/i.test(message)) return "export_failed"
+  if (/model|provider|allowlist|decision model/i.test(message)) return "model_configuration_failed"
+  return "benchmark_failed"
 }
 
 async function recordBenchmarkAttemptError(error: unknown) {
@@ -89,6 +105,7 @@ async function recordBenchmarkAttemptError(error: unknown) {
         attempt_error_path: path.relative(repoRoot, attemptErrorPath).replace(/\\/g, "/"),
         scenario: payload.scenario,
         project_version: payload.project_version,
+        code: payload.error.code,
         error: payload.error.message,
       },
       null,
@@ -99,10 +116,14 @@ async function recordBenchmarkAttemptError(error: unknown) {
 
 function installBenchmarkFailureRecorder() {
   const finalizeFailure = (error: unknown) => {
-    void recordBenchmarkAttemptError(error).finally(() => {
-      stopAllPaperRunLivePreviews()
-      process.exit(1)
-    })
+    void recordBenchmarkAttemptError(error)
+      .catch((recordError) => {
+        console.error(`Failed to record live benchmark attempt error: ${recordError instanceof Error ? recordError.message : String(recordError)}`)
+      })
+      .finally(() => {
+        stopAllPaperRunLivePreviews()
+        process.exit(1)
+      })
   }
   process.on("uncaughtException", finalizeFailure)
   process.on("unhandledRejection", finalizeFailure)
