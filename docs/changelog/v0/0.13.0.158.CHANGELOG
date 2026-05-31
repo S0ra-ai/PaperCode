@@ -1,0 +1,25 @@
+:project       paper_fucker - 可验证论文研究自动化系统
+:author        k1d (https://github.com/ZhuchenZhong)
+:repo
+:desc          记录项目的重大变更和版本历史
+:version       0.13.0.158-dev
+:last_update   2026/05/31
+
+:history
+
+    0.13.0.158-dev - 2026/05/31 (8b1082ef) [fix/mcp-tool-binding-test-isolation]
+        :brief PaperRun 模型路由强制只使用用户 allowlist
+        :fix
+            - fix(paper): createPaperRun 不再把请求中的 model_roles 合并进 allowlist，阶段强制模型只作为路由请求处理
+            - fix(paper): PaperRun diagnostics 的 model_roles 改为来自实际路由决策，未授权模型不会进入 agent root 或子阶段模型
+            - fix(paper): 未授权阶段模型返回 forced_model_not_allowed，保持 PaperRun blocked，不静默降级或临时授权
+        :test
+            - test(run-api): 新增 request model_roles 不得绕过用户 allowlist 的回归测试
+            - test(paper): 需要真实路由的 PaperRun 测试显式 seed 测试 allowlist，避免通过请求模型配置隐式授权
+            - test(audit): autonomous-product-audit 新增 model-routing-boundary，锁定 allowlist、forced model 与 PaperRun 集成边界
+            - test(acceptance): strict-acceptance 单测覆盖 model-routing-boundary 审计项
+        :changelog
+            - docs(changelog): 0.13.0.157 开发历史移入 docs/changelog/v0/0.13.0.157.CHANGELOG
+        :checks
+            - targeted tests: packages/opencode model-discovery, run-api, strict-acceptance, hard-fork, controller, observability, material-index and code-metadata tests
+            - audit: scripts/autonomous-product-audit.ps1 -AllowActiveTask
