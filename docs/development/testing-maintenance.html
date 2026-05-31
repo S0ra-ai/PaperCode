@@ -49,6 +49,7 @@ npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
 npx --yes bun@1.3.13 --cwd packages/preview test
 python -m unittest discover -s research-tools/tests
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-development-docs.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-changelog-format.ps1 -IncludeArchives</code></pre>
 
         <h2>产品级验收</h2>
@@ -69,6 +70,7 @@ npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario final</c
             <tr><td>新增 TUI 页面</td><td>命令白名单、终端尺寸、中文文案、错误页、截图或 smoke。</td></tr>
             <tr><td>新增导出格式</td><td>export schema、tool discovery、manifest、forced/final gate 测试。</td></tr>
             <tr><td>新增能力包</td><td>capability-pack、doctor、skill/MCP 安装检查、NOTICE。</td></tr>
+            <tr><td>新增开发手册页面</td><td><code>manual.js</code> 页面清单、所有页面导航、内部链接、可选 Chrome render 检查。</td></tr>
           </tbody>
         </table>
 

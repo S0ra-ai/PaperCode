@@ -8,6 +8,7 @@ const scriptPath = path.join(repoRoot, "scripts", "strict-acceptance.ps1")
 const requiredChecks = [
   "taskflow-validate-all",
   "readme-changelog-version",
+  "development-docs-check",
   "tracked-secret-scan",
   "server-tests",
   "preview-tests",
@@ -70,6 +71,7 @@ describe("strict live acceptance script", () => {
     expect(script).toContain("git grep")
     expect(script).toContain("sk-[A-Za-z0-9]")
     expect(script).toContain("reports/strict-live-acceptance.md")
+    expect(script).toContain("check-development-docs.ps1")
   })
 
   test("bounds each check and writes partial reports during execution", () => {

@@ -83,12 +83,14 @@ npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
 npx --yes bun@1.3.13 --cwd packages/preview test
 python -m unittest discover -s research-tools/tests
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-development-docs.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-changelog-format.ps1 -IncludeArchives</code></pre>
 
         <h2 id="docs">文档同步</h2>
         <ul>
           <li>用户入口、命令、模型配置或安装流程变更时，同步根目录 <code>README.md</code>。</li>
           <li>架构、流程、关键函数、测试策略或修改路径变更时，同步 <code>docs/development/</code>。</li>
+          <li>开发手册页面或导航变更时，运行 <code>scripts/check-development-docs.ps1</code>；本机有 Chrome 时可追加 <code>-Render</code> 验证渲染后的搜索和本页目录。</li>
           <li>内部维护和 release 规则变更时，同步 <code>docs/internal/README.md</code>。</li>
           <li>每个版本只在 root <code>CHANGELOG</code> 保留当前活跃条目，正文按 colon DSL 分组。</li>
         </ul>

@@ -23,6 +23,7 @@ $AcceptanceMode = if ($FixtureMode) {
 $RequiredChecks = @(
     "taskflow-validate-all",
     "readme-changelog-version",
+    "development-docs-check",
     "tracked-secret-scan",
     "server-tests",
     "preview-tests",
@@ -623,6 +624,9 @@ Invoke-Check "taskflow-validate-all" "TaskFlow validates all tasks" {
 }
 Invoke-Check "readme-changelog-version" "README version matches latest CHANGELOG version" {
     Invoke-CheckedCommand "powershell" @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\scripts\check-readme-version.ps1")
+}
+Invoke-Check "development-docs-check" "Development manual links, navigation, and client script are valid" {
+    Invoke-CheckedCommand "powershell" @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\scripts\check-development-docs.ps1")
 }
 Invoke-Check "tracked-secret-scan" "Tracked secret scan" {
     Invoke-TrackedSecretScan
