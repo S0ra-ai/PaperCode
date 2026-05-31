@@ -96,7 +96,7 @@ function getConfig() {
         appId: "ai.paperfucker.desktop.beta",
         productName: "paper_fucker Beta",
         protocols: { name: "paper_fucker Beta", schemes: ["paper-fucker"] },
-        publish: { provider: "github", owner: "S0ra-ai", repo: "paper_fucker", channel: "beta" },
+        publish: { provider: "github", owner: "ZhuchenZhong", repo: "paper_fucker", channel: "beta" },
         rpm: { packageName: "paper_fucker-beta" },
       }
     }
@@ -106,7 +106,7 @@ function getConfig() {
         appId: "ai.paperfucker.desktop",
         productName: "paper_fucker",
         protocols: { name: "paper_fucker", schemes: ["paper-fucker"] },
-        publish: { provider: "github", owner: "S0ra-ai", repo: "paper_fucker", channel: "latest" },
+        publish: { provider: "github", owner: "ZhuchenZhong", repo: "paper_fucker", channel: "latest" },
         rpm: { packageName: "paper_fucker" },
       }
     }
