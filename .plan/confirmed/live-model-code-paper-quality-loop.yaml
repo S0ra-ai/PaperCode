@@ -1,0 +1,129 @@
+id: live-model-code-paper-quality-loop
+title: 真实模型参与的代码实验论文质量闭环
+status: done
+priority: high
+owner: paper-fucker-dev-agent
+tags:
+- paper-run
+- quality
+- live-model
+- code-experiment
+- acceptance
+depends_on:
+- html-development-documentation
+description: 将 PaperRun 自测从结构验收推进到论文质量验收：使用已配置模型/真实 provider 路径评估代码实验论文输出，补强代码证据、实验结果叙述、论文草稿章节质量与自评报告。版本线建议
+  0.14.0-dev。
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: run-current-paperfucker-benchmarks
+  title: 运行当前 PaperRun topic/code/final 论文生成基准
+  status: done
+  owner: paper-fucker-dev-agent
+  depends_on: []
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-27T02:11:27.280437'
+      level: info
+      message: 开始运行 PaperRun topic/code/final 基准，并读取生成的 markdown/export summary。
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-27T02:11:40.033999'
+      level: info
+      message: 已运行并读取 code/final PaperRun 基准输出。final 场景通过 14 阶段、final export、PDF/DOCX/LaTeX/Markdown；code
+        场景正确阻断 reproduction_failure 并保留 forced draft。
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-27T02:11:40.033999'
+    attempt_count: 2
+  meta: {}
+- id: review-generated-paper-quality
+  title: 审查生成论文包质量并定位薄弱点
+  status: done
+  owner: paper-fucker-dev-agent
+  depends_on:
+  - run-current-paperfucker-benchmarks
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-27T02:11:51.085371'
+      level: info
+      message: 开始审查生成论文质量，重点检查正文可读性、代码证据绑定、实验指标呈现、final/forced 边界。
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-27T02:12:10.120044'
+      level: info
+      message: 审查结论：质量 gate 和导出链路可用，但草稿仍偏工程骨架；Method 只列单句，Abstract 缺少指标摘要，Experiments
+        没有明确 claim/metric 关系。需要补强代码实验写作质量。
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-27T02:12:10.120044'
+    attempt_count: 2
+  meta: {}
+- id: harden-code-experiment-drafting
+  title: 补强代码实验论文的证据绑定与写作质量
+  status: done
+  owner: paper-fucker-dev-agent
+  depends_on:
+  - review-generated-paper-quality
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-27T02:12:32.039000'
+      level: info
+      message: 开始补强代码实验论文写作：把代码分析结果、导出方法/类、测试入口、baseline 差异和复现状态写入 DraftPaper。
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-27T02:15:09.009291'
+      level: info
+      message: 已补强 DraftPaper 生成：代码路径 claim 现在包含文件数量、导出方法/类、测试/脚本入口和 source range；Abstract/Experiments
+        增加 proposed/baseline 指标差值、claim 数和复现状态。相关 paper tests 与 typecheck 已通过。
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-27T02:15:09.009291'
+    attempt_count: 2
+  meta: {}
+- id: rerun-and-record-acceptance
+  title: 重新运行验收并记录报告
+  status: done
+  owner: paper-fucker-dev-agent
+  depends_on:
+  - harden-code-experiment-drafting
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-27T02:15:17.410018'
+      level: info
+      message: 开始重新运行 code/final PaperRun 生成基准，并生成新的自评报告。
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-27T02:35:02.927339'
+      level: info
+      message: 已重新运行 code/final PaperRun：final run-b2bb289d-72a3-4852-88b4-5c31d8b8cb4a
+        通过 final export；code run-27dcda77-d871-4abb-8bb8-2cddadd03cbb 正确阻断 reproduction_failure。使用
+        DeepSeek API 完成复评并刷新 reports/live-paper-generation-review.md。并发 benchmark
+        暴露的 SQLite global index lock/unique 问题已用 busy_timeout 与事务化 rebuild 修复。
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-27T02:35:02.927339'
+    attempt_count: 2
+  meta: {}
+outputs:
+- type: file
+  path: reports/live-paper-generation-review.md
+  description: 真实/本地 PaperRun 论文生成与自评报告
+- type: file
+  path: tmp/live-paper-quality-benchmark/final/paperrun-summary.json
+  description: final 场景 PaperRun summary
+- type: file
+  path: tmp/live-paper-quality-benchmark/code/paperrun-summary.json
+  description: code 场景 PaperRun summary
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-27T02:08:13.043827'
+  updated_at: '2026-05-27T02:35:59.797685'
+  version: '1'

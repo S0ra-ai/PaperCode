@@ -1,0 +1,130 @@
+id: experiment-starter-workspace-apply
+title: 实验 starter 文件受控写入工作区
+status: done
+priority: medium
+owner: paper-fucker-dev-agent
+tags:
+- paper-run
+- experiments
+- workspace
+- api
+depends_on: []
+description: 为 ExperimentProtocolStarterPack.v1 增加受控 apply 能力：从 run artifacts 将 starter
+  files 写入当前工作区，默认不覆盖已有文件，返回中文结构化结果，并记录 audit artifact/event，供 TUI 后续接入。
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: design-apply-contract
+  title: 设计 apply 结果契约
+  status: done
+  owner: paper-fucker-dev-agent
+  depends_on: []
+  description: 定义 starter apply 请求/结果类型，包含 dry_run、overwrite、workspace_path、written/skipped/conflicts/audit_artifact_id。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-27T10:14:51.398955'
+      level: info
+      message: 开始设计 starter apply 请求/结果契约和路径安全语义。
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-27T10:26:10.455725'
+      level: info
+      message: 已定义 PaperExperimentStarterApplyRequest/Result：支持 dry_run、overwrite、workspace_path、file_paths，返回
+        written/conflict/skipped/audit_artifact_id。
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-27T10:26:10.455725'
+    attempt_count: 2
+  meta: {}
+- id: implement-apply-runtime
+  title: 实现受控写入 runtime
+  status: done
+  owner: paper-fucker-dev-agent
+  depends_on:
+  - design-apply-contract
+  description: 从最新 PaperRun snapshot 读取 starter pack，校验路径不越界，按 dry-run/overwrite 写入
+    workspace，并写入 audit artifact/event。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-27T10:26:12.062802'
+      level: info
+      message: 已开始实现从 starter pack 到 workspace 的安全写入和 audit 记录。
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-27T10:28:09.329293'
+      level: info
+      message: 已实现 applyPaperRunExperimentStarterPack：路径越界保护、dry-run 默认、默认不覆盖、overwrite
+        显式写入、audit artifact/event 与 snapshot 发布。
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-27T10:28:09.329293'
+    attempt_count: 2
+  meta: {}
+- id: expose-api-tests
+  title: 接入 API 并补测试
+  status: done
+  owner: paper-fucker-dev-agent
+  depends_on:
+  - implement-apply-runtime
+  description: 通过 Paper HTTP API 暴露 apply 能力，覆盖 dry-run、写入、重复写不覆盖和路径安全。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-27T10:29:47.087926'
+      level: info
+      message: 已接入 /paper/runs/:runID/experiment-starter/apply，并补充 API 测试覆盖 dry-run、写入、冲突、覆盖与
+        audit。
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-28T00:02:05.970229'
+      level: info
+      message: 修复 event type 为 experiment.starterpack.applied；run-api targeted 测试通过：6
+        pass, 0 fail, 87 expect。
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-28T00:02:05.970229'
+    attempt_count: 2
+  meta: {}
+- id: validate-apply-flow
+  title: 运行验证
+  status: done
+  owner: paper-fucker-dev-agent
+  depends_on:
+  - expose-api-tests
+  description: 运行相关单测、typecheck 与 changelog/readme 格式检查。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-28T00:02:14.525792'
+      level: info
+      message: 开始登记验证结果。
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-28T00:02:22.863908'
+      level: info
+      message: 验证通过：run-api targeted 6 pass/0 fail/87 expect；TaskFlow validate_task
+        与 CHANGELOG format 均通过。
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-28T00:02:22.863908'
+    attempt_count: 2
+  meta: {}
+outputs:
+- type: file
+  path: packages/opencode/src/paper/run.ts
+- type: file
+  path: packages/opencode/src/server/routes/instance/httpapi/handlers/paper.ts
+- type: file
+  path: packages/opencode/test/paper/run-api.test.ts
+- type: report
+  path: reports/live-paper-generation-review.md
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-27T10:14:15.774230'
+  updated_at: '2026-05-28T00:02:29.643379'
+  version: '1'
