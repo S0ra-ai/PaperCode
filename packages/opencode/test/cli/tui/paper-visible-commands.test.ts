@@ -3,7 +3,7 @@ import { ConfigKeybinds } from "../../../src/config/keybinds"
 import { isPaperVisibleCommandOption } from "../../../src/cli/cmd/tui/component/dialog-command"
 import { isPaperVisibleSlashCommand, PaperVisibleCommandRegistry } from "../../../src/cli/cmd/tui/paper-visible-commands"
 
-describe("Paper Fucker visible command surface", () => {
+describe("PaperCode visible command surface", () => {
   test("keeps only the PaperRun command set plus basic TUI support commands visible", () => {
     for (const command of PaperVisibleCommandRegistry) {
       expect(isPaperVisibleSlashCommand(command)).toBe(true)
@@ -19,7 +19,7 @@ describe("Paper Fucker visible command surface", () => {
   test("filters legacy chat/session/provider commands from the palette", () => {
     expect(
       isPaperVisibleCommandOption({
-        title: "Paper Fucker 模型工作台",
+        title: "PaperCode 模型工作台",
         value: "paper.model_workbench",
         category: "Paper",
         slash: { name: "models" },

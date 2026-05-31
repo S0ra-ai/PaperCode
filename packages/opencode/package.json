@@ -29,6 +29,7 @@
     "db": "bun drizzle-kit"
   },
   "bin": {
+    "papercode": "./bin/papercode",
     "paper_fucker": "./bin/paper_fucker"
   },
   "exports": {

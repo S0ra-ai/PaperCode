@@ -79,12 +79,12 @@ export function resolveThreadDirectory(project?: string, envPWD = process.env.PW
 
 export const TuiThreadCommand = cmd({
   command: "$0 [project]",
-  describe: "start the Paper Fucker paper workbench",
+  describe: "start the PaperCode paper workbench",
   builder: (yargs) =>
     withNetworkOptions(yargs)
       .positional("project", {
         type: "string",
-        describe: "path to start paper_fucker in",
+        describe: "path to start papercode in",
       })
       .option("model", {
         type: "string",

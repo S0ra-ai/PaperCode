@@ -546,15 +546,15 @@ function Invoke-HardForkPublicBranding {
     $sessionSidebar = Read-RepoText "packages/opencode/src/cli/cmd/tui/routes/session/sidebar.tsx"
     $pluginSidebarFooter = Read-RepoText "packages/opencode/src/cli/cmd/tui/feature-plugins/sidebar/footer.tsx"
     $paperApi = Read-RepoText "packages/opencode/src/server/routes/instance/httpapi/groups/paper.ts"
-    Assert-HardFork ($logo -match "Paper Fucker") "CLI logo does not expose Paper Fucker."
+    Assert-HardFork ($logo -match "PaperCode") "CLI logo does not expose PaperCode."
     Assert-HardFork (-not ($index -match "\.command\(SessionCommand\)" -or $index -match "\.command\(GithubCommand\)" -or $index -match "\.command\(AcpCommand\)" -or $index -match "\.command\(PrCommand\)")) "Legacy OpenCode product commands are still registered publicly."
     Assert-HardFork ($tips -match "PaperRun" -and $tips -match "Claim Ledger" -and $tips -match "Source Ledger" -and $tips -match "submission_candidate") "TUI home guidance is not PaperRun-ledger oriented."
     Assert-HardFork ($homeRoute -match "PaperRun" -and $homeRoute -match "submitPaperWorkbenchPrompt") "TUI home route is not PaperRun workbench oriented."
     Assert-HardFork ($dashboard -match "PaperRunDashboard" -and $dashboard -match "Agent Tree" -and $dashboard -match "PaperRunSidebar") "PaperRun dashboard sidebar is missing diagnostic sections."
-    Assert-HardFork ($sessionSidebar -match "Paper Fucker" -and -not ($sessionSidebar -match "<b>Open</b>" -or $sessionSidebar -match "<b>Code</b>")) "Session sidebar footer still exposes legacy OpenCode branding."
-    Assert-HardFork ($pluginSidebarFooter -match "Paper Fucker" -and -not ($pluginSidebarFooter -match "<b>Open</b>" -or $pluginSidebarFooter -match "<b>Code</b>")) "Plugin sidebar footer still exposes legacy OpenCode branding."
+    Assert-HardFork ($sessionSidebar -match "PaperCode" -and -not ($sessionSidebar -match "<b>Open</b>" -or $sessionSidebar -match "<b>Code</b>")) "Session sidebar footer still exposes legacy OpenCode branding."
+    Assert-HardFork ($pluginSidebarFooter -match "PaperCode" -and -not ($pluginSidebarFooter -match "<b>Open</b>" -or $pluginSidebarFooter -match "<b>Code</b>")) "Plugin sidebar footer still exposes legacy OpenCode branding."
     Assert-HardFork (-not ($paperApi -match "OpenCode provider/model discovery data")) "Paper provider discovery API still exposes legacy OpenCode product wording."
-    return "public logo, command registry, TUI home, sidebars, dashboard, and paper API expose Paper Fucker/PaperRun surfaces"
+    return "public logo, command registry, TUI home, sidebars, dashboard, and paper API expose PaperCode/PaperRun surfaces"
 }
 
 function Invoke-ObservabilityAuditCoverage {
@@ -702,9 +702,9 @@ Invoke-Check "server-typecheck" "Server typecheck" {
 Invoke-Check "workspace-typecheck" "Workspace typecheck" {
     Invoke-CheckedCommand "npx" @("--yes", "bun@1.3.13", "run", "typecheck")
 }
-Invoke-Check "opencode-tui-smoke" "Paper Fucker TUI smoke" {
+Invoke-Check "opencode-tui-smoke" "PaperCode TUI smoke" {
     $help = Invoke-CheckedCommand "npx" @("--yes", "bun@1.3.13", "--cwd", "packages/opencode", "src/index.ts", "--help")
-    Assert-HardFork ($help -match "Paper Fucker" -or (Read-RepoText "packages/opencode/src/cli/logo.ts") -match "Paper Fucker") "Local Paper Fucker CLI help did not expose the product branding."
+    Assert-HardFork ($help -match "PaperCode" -or (Read-RepoText "packages/opencode/src/cli/logo.ts") -match "PaperCode") "Local PaperCode CLI help did not expose the product branding."
     return "local paper_fucker CLI help responded"
 }
 Invoke-Check "live-provider-call" "At least one live OpenCode-compatible provider call" {
@@ -761,7 +761,7 @@ Invoke-Check "hard-fork-agent-tree" "Multi-layer multi-model Agent Tree" {
 Invoke-Check "hard-fork-quality-egress" "Quality modes, egress, and authoring bundles" {
     Invoke-HardForkQualityEgress
 }
-Invoke-Check "hard-fork-public-branding" "Paper Fucker public branding and command cleanup" {
+Invoke-Check "hard-fork-public-branding" "PaperCode public branding and command cleanup" {
     Invoke-HardForkPublicBranding
 }
 Invoke-Check "observability-audit-coverage" "PaperRun observability audit coverage" {

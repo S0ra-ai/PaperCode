@@ -367,7 +367,7 @@ try {
   const browserDom = await browserDomSession(`${base}/preview?token=browser-smoke-token`)
   try {
     await waitForBrowserText(browserDom, [
-      "PAPER FUCKER LOCALHOST READ-ONLY MONITOR",
+      "PAPERCODE LOCALHOST READ-ONLY MONITOR",
       "STAGE GRAPH",
       "GATE",
       "\u7ec8\u7aef\u8bc1\u636e",

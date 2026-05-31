@@ -17,7 +17,7 @@ function run(target) {
   process.exit(code)
 }
 
-const envPath = process.env.PAPER_FUCKER_BIN_PATH || process.env.OPENCODE_BIN_PATH
+const envPath = process.env.PAPERCODE_BIN_PATH || process.env.PAPER_FUCKER_BIN_PATH || process.env.OPENCODE_BIN_PATH
 if (envPath) {
   run(envPath)
 }

@@ -5,7 +5,7 @@ import {
   paperModelWorkbenchLayout,
 } from "../../../src/cli/cmd/tui/util/paper-models-layout"
 
-describe("Paper Fucker model workbench layout", () => {
+describe("PaperCode model workbench layout", () => {
   test("keeps the minimum supported terminal usable", () => {
     const layout = paperModelWorkbenchLayout({ columns: 96, rows: 28 })
 

@@ -102,8 +102,8 @@ function paperRunCreateError(error: unknown) {
       code: schemaFailure ? "paper_schema_runtime_failed" : modelFailure ? "paper_model_config_blocked" : "paper_run_create_failed",
       message: `PaperRun 创建失败：${message}`,
       action: schemaFailure
-        ? "这是 Paper Fucker 运行时 schema 加载问题，请保留日志并重新构建；当前 PaperRun 未创建。"
-        : "请检查 /models 主决策模型、可用模型和 /folder 当前工作目录；详细堆栈见 Paper Fucker 日志。",
+        ? "这是 PaperCode 运行时 schema 加载问题，请保留日志并重新构建；当前 PaperRun 未创建。"
+        : "请检查 /models 主决策模型、可用模型和 /folder 当前工作目录；详细堆栈见 PaperCode 日志。",
       log_path: paperLogDirectory(),
     },
   }

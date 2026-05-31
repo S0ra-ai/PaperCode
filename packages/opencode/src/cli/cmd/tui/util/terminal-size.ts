@@ -37,10 +37,10 @@ export function currentTerminalCapability(): TerminalCapabilityGuard {
 
 export function terminalTooSmallMessage(state: TerminalCapabilityGuard) {
   return [
-    "Paper Fucker 需要更大的终端窗口才能启动 TUI。",
+    "PaperCode 需要更大的终端窗口才能启动 TUI。",
     `当前尺寸：${state.columns}x${state.rows}`,
     `最低尺寸：${state.min_columns}x${state.min_rows}`,
     `推荐尺寸：${state.recommended_columns}x${state.recommended_rows}`,
-    "请放大终端窗口后重新运行 paper_fucker。",
+    "请放大终端窗口后重新运行 papercode。",
   ].join("\n")
 }

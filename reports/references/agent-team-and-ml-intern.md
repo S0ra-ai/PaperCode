@@ -1,4 +1,4 @@
-# Paper Fucker Agent Team Reference Synthesis
+# PaperCode Agent Team Reference Synthesis
 
 ## Sources Checked
 
@@ -10,7 +10,7 @@
 
 ## Borrowed Mechanisms
 
-Paper Fucker should borrow mechanisms, not product shape:
+PaperCode should borrow mechanisms, not product shape:
 
 - Agent Team: a PaperRun owns a team with a lead and specialist teammates. Teammates map onto recursive AgentTree nodes but share a run-level task board and mailbox.
 - Multi-model assignment: every teammate can use a different provider/model through OpenCode model roles and subagent overrides.
@@ -22,10 +22,10 @@ Paper Fucker should borrow mechanisms, not product shape:
 - Doom-loop prevention: repeated identical searches, failed crawls, or child-agent expansion without new evidence should trigger `agent.expansion_skipped` and a harness diagnostic.
 - Trace replay: PaperRun events, tool traces, and ledgers must be sufficient to replay why an artifact exists and which agent produced it.
 
-## Paper Fucker Design Rules
+## PaperCode Design Rules
 
 - User-facing workflow remains Chinese TUI first. Users ask for a paper; they do not manually install paper skills, MCP servers, crawlers, or Hugging Face helpers.
-- OpenCode remains substrate for provider/model/session/tool/MCP/skill/TUI runtime. Paper Fucker owns PaperRun state, team state, ledgers, gates, and export policy.
+- OpenCode remains substrate for provider/model/session/tool/MCP/skill/TUI runtime. PaperCode owns PaperRun state, team state, ledgers, gates, and export policy.
 - Agent Team has no product hard limit on children or depth. Runtime stopping conditions are budget, time, concurrency, context, permissions, data-egress policy, license/source gates, authenticity gates, user cancellation, coverage completion, and low-value expansion.
 - Child permissions can only be equal to or stricter than the parent. A teammate cannot bypass source, license, data egress, or authenticity gates.
 - Bottom-up evidence merge is mandatory. Teammates may only merge claims with artifact ids, source ranges, or tool traces; unsupported summaries stay diagnostics, not ClaimLedger facts.

@@ -24,7 +24,7 @@ export function FormatError(input: unknown) {
 
   // MCPFailed: { name: string }
   if (NamedError.hasName(input, "MCPFailed")) {
-    return `MCP server "${(input as ErrorLike).data?.name}" failed. Note, paper_fucker does not support MCP authentication yet.`
+    return `MCP server "${(input as ErrorLike).data?.name}" failed. Note, papercode does not support MCP authentication yet.`
   }
 
   // AccountServiceError, AccountTransportError: TaggedErrorClass
@@ -39,8 +39,8 @@ export function FormatError(input: unknown) {
     return [
       `Model not found: ${data?.providerID}/${data?.modelID}`,
       ...(suggestions.length ? ["Did you mean: " + suggestions.join(", ")] : []),
-      `Try: \`paper_fucker models\` to list available models`,
-      `Or check your config (paper_fucker.json) provider/model names`,
+      `Try: \`papercode models\` to list available models`,
+      `Or check your config (papercode.json) provider/model names`,
     ].join("\n")
   }
 

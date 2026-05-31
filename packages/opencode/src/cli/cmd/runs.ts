@@ -36,7 +36,7 @@ function formatRuns(runs: PaperRunHistoryEntry[], cwd = process.cwd()) {
       `${run.run_id}  ${statusLabel(run.status)}  ${run.updated_at}`,
       `  主题: ${run.topic}`,
       `  存储: ${run.storage_scope}  工作区: ${workspace}`,
-      `  恢复: paper_fucker resume ${run.run_id}`,
+      `  恢复: papercode resume ${run.run_id}`,
     )
   }
   return lines.join("\n")
@@ -52,7 +52,7 @@ function formatResume(run: PaperRunSnapshot) {
     `工作区: ${run.workspace}`,
     `存储根目录: ${run.diagnostics.runtime_root}`,
     "",
-    `继续查看: paper_fucker resume ${run.run_id} --json`,
+    `继续查看: papercode resume ${run.run_id} --json`,
   ].join("\n")
 }
 
@@ -72,7 +72,7 @@ export const RunsCommand = effectCmd({
         type: "boolean",
       })
       .option("home", {
-        describe: "override Paper Fucker home",
+        describe: "override PaperCode home",
         type: "string",
       })
       .option("workspace", {
@@ -122,7 +122,7 @@ export const ResumeCommand = effectCmd({
         type: "boolean",
       })
       .option("home", {
-        describe: "override Paper Fucker home",
+        describe: "override PaperCode home",
         type: "string",
       })
       .option("workspace", {

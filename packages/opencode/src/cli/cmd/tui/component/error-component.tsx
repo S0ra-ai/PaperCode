@@ -65,7 +65,7 @@ export function ErrorComponent(props: {
     <box flexDirection="column" gap={1} backgroundColor={colors.bg}>
       <box flexDirection="row" gap={1} alignItems="center">
         <text attributes={TextAttributes.BOLD} fg={colors.text}>
-          Paper Fucker 遇到运行错误
+          PaperCode 遇到运行错误
         </text>
         <box onMouseUp={copyIssueURL} backgroundColor={colors.primary} padding={1}>
           <text attributes={TextAttributes.BOLD} fg={colors.bg}>

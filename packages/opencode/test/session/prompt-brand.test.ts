@@ -11,10 +11,10 @@ const brandedPrompts = [
 
 describe("session prompt branding", () => {
   for (const prompt of brandedPrompts) {
-    test(`${prompt} uses Paper Fucker product identity`, async () => {
+    test(`${prompt} uses PaperCode product identity`, async () => {
       const text = await Bun.file(new URL(`../../src/session/prompt/${prompt}`, import.meta.url)).text()
 
-      expect(text).toContain("Paper Fucker")
+      expect(text).toContain("PaperCode")
       expect(text).not.toMatch(/\bopencode\b/i)
       expect(text).not.toContain("anomalyco/opencode")
       expect(text).not.toContain("github.com/anomalyco")

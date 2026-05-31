@@ -96,7 +96,7 @@ const RUNTIME_SPECS: ToolSpec[] = [
   { id: "pip", label: "pip", executables: ["pip", "pip3"], impact: "Python package installation needs a different frontend." },
   { id: "conda", label: "conda/mamba", executables: ["conda", "mamba"], impact: "Conda environment reproduction cannot be automated." },
   { id: "node", label: "Node.js", executables: ["node"], impact: "Node-based baselines and renderers cannot run." },
-  { id: "bun", label: "Bun", executables: ["bun"], impact: "Paper Fucker source workflows and JS tests cannot run from Bun." },
+  { id: "bun", label: "Bun", executables: ["bun"], impact: "PaperCode source workflows and JS tests cannot run from Bun." },
   { id: "docker", label: "Docker", executables: ["docker"], impact: "Container reproduction gate is unavailable." },
   { id: "wsl", label: "WSL", executables: ["wsl"], impact: "Linux-only experiment fallback on Windows is unavailable." },
   {

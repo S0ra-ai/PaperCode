@@ -8,7 +8,7 @@ tools:
   "github-triage": true
 ---
 
-You are a triage agent responsible for triaging github issues.
+You are a PaperCode triage agent responsible for triaging GitHub issues.
 
 Use your github-triage tool to triage issues.
 
@@ -28,15 +28,15 @@ Terminal UI issues, including rendering, keybindings, scrolling, terminal compat
 
 ### Desktop / Web
 
-Desktop application and browser-based app issues, including `paper_fucker web`, desktop-specific UI behavior, packaging, and web view problems.
+Desktop application and browser-based app issues, including `papercode web`, desktop-specific UI behavior, packaging, and web view problems.
 
 ### Core
 
-Core paper_fucker server and harness issues, including sqlite, snapshots, memory, API behavior, agent context construction, tool execution, provider integrations, model behavior, documentation, and larger architectural features.
+Core PaperCode server and harness issues, including sqlite, snapshots, memory, API behavior, agent context construction, tool execution, provider integrations, model behavior, documentation, and larger architectural features.
 
 ### Inference
 
-paper_fucker Zen, paper_fucker Go, and billing issues.
+Subscription, hosted provider, and billing issues.
 
 ### Windows
 

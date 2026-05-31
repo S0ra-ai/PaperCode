@@ -53,7 +53,7 @@ export function describePaperSystem(): PaperSystemDescription {
   return {
     product: "paper_fucker",
     purpose:
-      "A closed-loop academic paper system with Paper Fucker managed providers, agents, tools, MCP servers, skills, and TUI for verifiable topic/code/data/materials-to-paper workflows.",
+      "A closed-loop academic paper system with PaperCode managed providers, agents, tools, MCP servers, skills, and TUI for verifiable topic/code/data/materials-to-paper workflows.",
     model_strategy: "paper_provider_agnostic",
     supports_all_configured_models: true,
     default_model_sample: {

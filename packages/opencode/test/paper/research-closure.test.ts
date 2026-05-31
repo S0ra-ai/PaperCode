@@ -36,7 +36,7 @@ function source(input: Partial<SourceRecord> & Pick<SourceRecord, "source_id" | 
   }
 }
 
-describe("Paper Fucker research closure contracts", () => {
+describe("PaperCode research closure contracts", () => {
   test("novelty checkpoint only blocks exact duplicate or explicit duplicate diagnostics", () => {
     const related = createNoveltyCheckpoint({
       request,

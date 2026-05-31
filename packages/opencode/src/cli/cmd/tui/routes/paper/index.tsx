@@ -36,7 +36,7 @@ function formatExitSummary(snapshot: PaperRunSnapshot) {
     `存储路径: ${snapshot.diagnostics.runtime_root}`,
     `token/cost: ${tokens.toLocaleString()} tokens / $${total.toFixed(4)}`,
     `Preview: ${snapshot.preview_state.status}`,
-    `恢复命令: paper_fucker resume ${snapshot.run_id}`,
+    `恢复命令: papercode resume ${snapshot.run_id}`,
   ].join("\n")
 }
 

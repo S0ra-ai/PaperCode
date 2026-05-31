@@ -1,4 +1,4 @@
-﻿# Strict Live Acceptance Report
+# Strict Live Acceptance Report
 
 - Generated: 2026-05-11T09:52:17.5356687+08:00
 - Mode: strict-live-full
@@ -32,7 +32,7 @@
 | `hard-fork-paperrun-api-tui` | pass | 0.008 | PaperRun API and TUI workbench are first-class paper surfaces |
 | `hard-fork-agent-tree` | pass | 0.005 | Agent Tree supports nested multi-model agents with budget limits |
 | `hard-fork-quality-egress` | pass | 0.006 | quality modes, private-first egress, forced draft, supplementary, and availability bundles are present |
-| `hard-fork-public-branding` | pass | 0.014 | public logo, command registry, TUI home, sidebars, dashboard, and paper API expose Paper Fucker/PaperRun surfaces |
+| `hard-fork-public-branding` | pass | 0.014 | public logo, command registry, TUI home, sidebars, dashboard, and paper API expose PaperCode/PaperRun surfaces |
 | `observability-audit-coverage` | pass | 0.011 | PaperRun diagnostics expose observability audit coverage for stage/capability/model/subagent/tool/egress/export/cost |
 | `agent-team-capability-fusion` | pass | 0.012 | Agent Team, built-in capability packs, harness, memory, code understanding, crawler, and HF loop are fused |
 | `paper-workbench-ux-sidebar` | pass | 0.011 | PaperRun workbench keeps cost/token/context/outline and PaperRun diagnostics visible |

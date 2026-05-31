@@ -1,4 +1,4 @@
-# Paper Fucker 内部维护文档
+# PaperCode 内部维护文档
 
 这个文档面向维护者和 release 执行者。对外 GitHub 首页只保留用户理解和试用所需内容；架构边界、TaskFlow、release 文件面和验收细节放在这里。
 

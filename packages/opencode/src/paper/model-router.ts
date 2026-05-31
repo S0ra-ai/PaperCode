@@ -48,7 +48,7 @@ export class InvalidPaperModelIdError extends Error {
     readonly value: string,
     readonly role?: PaperModelRole,
   ) {
-    super(role ? `Invalid Paper Fucker model id for role "${role}": ${value}` : `Invalid Paper Fucker model id: ${value}`)
+    super(role ? `Invalid PaperCode model id for role "${role}": ${value}` : `Invalid PaperCode model id: ${value}`)
     this.name = "InvalidPaperModelIdError"
   }
 }

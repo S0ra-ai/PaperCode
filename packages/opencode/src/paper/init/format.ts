@@ -48,7 +48,7 @@ export function formatInitResult(result: InitWizardResult) {
   const available = availableTools(result.tools)
   const missing = missingTools(result.tools)
   return [
-    "Paper Fucker 初始化完成",
+    "PaperCode 初始化完成",
     "",
     `配置目录: ${result.paths.root}`,
     `默认语言: ${result.config.language.default}`,
@@ -56,14 +56,14 @@ export function formatInitResult(result: InitWizardResult) {
     `实时预览: ${result.config.preview.auto_open ? "已启用" : "已关闭"}`,
     `默认模型: ${modelSummary(result.config)}`,
     `Provider: ${providerSummary(result.config)}`,
-    `Nature Skill: ${result.skills.restart_required ? "已安装，重启 Paper Fucker 后生效" : "已就绪"}`,
+    `Nature Skill: ${result.skills.restart_required ? "已安装，重启 PaperCode 后生效" : "已就绪"}`,
     `外部工具: ${available.length} 个可用${missing.length > 0 ? `，${missing.length} 个缺失` : ""}`,
     `可用工具: ${preview(available.map((tool) => tool.name))}`,
     `本地密钥: ${result.wrote_secrets ? "已写入加密密钥文件" : "未写入；可稍后添加 provider key"}`,
     "",
     "下一步:",
     "  1. 运行 paper_fucker 打开中文论文工作台",
-    "  2. 运行 paper_fucker init doctor 查看配置健康状态",
+    "  2. 运行 papercode init doctor 查看配置健康状态",
     "  3. 需要自动化脚本读取完整结果时，加 --json",
   ].join("\n")
 }
@@ -117,7 +117,7 @@ export function formatDoctorResult(result: DoctorResult) {
   nextSteps.push("需要完整机器可读诊断时，加 --json")
 
   const lines = [
-    "Paper Fucker Doctor",
+    "PaperCode Doctor",
     "",
     ...groupedLine("已配置", configured),
     "",
@@ -137,7 +137,7 @@ export function formatResetResult(result: InitResetResult) {
   const removed = result.targets.filter((target) => target.removed)
   const untouched = result.targets.filter((target) => !target.removed)
   const lines = [
-    "Paper Fucker 本地状态重置完成",
+    "PaperCode 本地状态重置完成",
     "",
     `范围: ${result.scope}`,
     `备份: ${result.backup ? result.backup_dir ?? "已启用" : "未启用"}`,

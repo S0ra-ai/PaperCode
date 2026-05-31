@@ -23,6 +23,8 @@ Session.vim
 a.out
 /paper_fucker
 /paper_fucker.exe
+/papercode
+/papercode.exe
 target
 .scripts
 .direnv/

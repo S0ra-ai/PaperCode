@@ -2,12 +2,12 @@
 
 Version: 0.2.6-dev
 
-This task cleans the user-facing OpenCode remnants from the Paper Fucker hard fork without removing the internal substrate that paper_fucker still uses for providers, agents, sessions, tools, MCP, skills, permissions, and plugins.
+This task cleans the user-facing OpenCode remnants from the PaperCode hard fork without removing the internal substrate that paper_fucker still uses for providers, agents, sessions, tools, MCP, skills, permissions, and plugins.
 
 ## Implemented
 
-- Replaced the startup ASCII wordmark with `Paper Fucker`.
-- Routed `UI.logo()` and the TUI logo source through the Paper Fucker logo module.
+- Replaced the startup ASCII wordmark with `PaperCode`.
+- Routed `UI.logo()` and the TUI logo source through the PaperCode logo module.
 - Removed legacy OpenCode product commands from the default CLI registry:
   - `acp`
   - `agent`
@@ -30,7 +30,7 @@ This task cleans the user-facing OpenCode remnants from the Paper Fucker hard fo
 ## Verification
 
 - `npx --yes bun@1.3.13 --cwd packages/opencode src/index.ts --help`
-  - Startup banner shows `Paper Fucker`.
+  - Startup banner shows `PaperCode`.
   - Default command list exposes the paper workbench, MCP, providers, models, run, preview-related server surfaces, and PaperRun export.
   - Default help no longer exposes legacy `session`, `github`, `pr`, `acp`, `agent`, `console`, `db`, `generate`, `stats`, `upgrade`, or `uninstall` commands.
 - `npx --yes bun@1.3.13 --cwd packages/opencode test`

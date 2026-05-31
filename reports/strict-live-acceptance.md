@@ -1,4 +1,4 @@
-﻿# Strict Live Acceptance Report
+# Strict Live Acceptance Report
 
 - Generated: 2026-05-31T18:39:27.9867150+08:00
 - Mode: strict-live-focused
@@ -13,7 +13,7 @@
 | `readme-changelog-version` | pass | 0.576 | README version 0.13.0.160-dev matches CHANGELOG latest version. |
 | `development-docs-check` | pass | 2.288 | Development docs check passed for 16 HTML page(s) with render check. |
 | `tracked-secret-scan` | pass | 0.938 | no tracked sk-* API keys found |
-| `server-tests` | pass | 402.546 | (pass) strict live acceptance script > experiment runner does not invent container image or digest metadata (pass) strict live acceptance script > allows Git Flow feature and fix branches during active task work (pass) strict live acceptance script > autonomous audit does not count stale strict reports as current evidence (pass) strict live acceptance script > autonomous audit locks active and archived report governance (pass) strict live acceptance script > autonomous audit locks Paper Fucker visible command surface (pass) strict live acceptance script > autonomous audit locks PaperRun model routing boundaries (pass) strict live acceptance script > autonomous audit locks CJC heading format boundaries   40 pass  0 fail  377 expect() calls Ran 40 tests across 7 files. [393.48s] |
+| `server-tests` | pass | 402.546 | (pass) strict live acceptance script > experiment runner does not invent container image or digest metadata (pass) strict live acceptance script > allows Git Flow feature and fix branches during active task work (pass) strict live acceptance script > autonomous audit does not count stale strict reports as current evidence (pass) strict live acceptance script > autonomous audit locks active and archived report governance (pass) strict live acceptance script > autonomous audit locks PaperCode visible command surface (pass) strict live acceptance script > autonomous audit locks PaperRun model routing boundaries (pass) strict live acceptance script > autonomous audit locks CJC heading format boundaries   40 pass  0 fail  377 expect() calls Ran 40 tests across 7 files. [393.48s] |
 | `preview-tests` | pass | 9.145 | (pass) preview client render helpers > renders detailed cost, token, agent tree, and team state (pass) preview client render helpers > renders model routing decisions and blocked diagnostics  test\preview.test.ts: (pass) preview server > serves token-protected read-only preview endpoints [16.00ms] (pass) preview server > cancels stale render jobs and keeps the newest markdown [31.00ms] (pass) preview server > pushes replacement snapshots to live preview subscribers   10 pass  0 fail  58 expect() calls Ran 10 tests across 2 files. [100.00ms] |
 | `python-tests` | pass | 1.87 | ................... ---------------------------------------------------------------------- Ran 19 tests in 1.110s  OK |
 | `server-typecheck` | pass | 15.021 | $ tsgo --noEmit |
@@ -35,7 +35,7 @@
 | `hard-fork-paperrun-api-tui` | pass | 0.004 | PaperRun API and TUI workbench are first-class paper surfaces |
 | `hard-fork-agent-tree` | pass | 0.004 | Agent Tree supports nested multi-model agents with budget limits |
 | `hard-fork-quality-egress` | pass | 0.004 | quality modes, private-first egress, forced draft, supplementary, and availability bundles are present |
-| `hard-fork-public-branding` | pass | 0.008 | public logo, command registry, TUI home, sidebars, dashboard, and paper API expose Paper Fucker/PaperRun surfaces |
+| `hard-fork-public-branding` | pass | 0.008 | public logo, command registry, TUI home, sidebars, dashboard, and paper API expose PaperCode/PaperRun surfaces |
 | `observability-audit-coverage` | pass | 0.004 | PaperRun diagnostics expose observability audit coverage for stage/capability/model/subagent/tool/egress/export/cost |
 | `agent-team-capability-fusion` | pass | 0.007 | Agent Team, built-in capability packs, harness, memory, code understanding, crawler, and HF loop are fused |
 | `paper-workbench-ux-sidebar` | pass | 0.005 | PaperRun workbench keeps cost/token/context/outline and PaperRun diagnostics visible |

@@ -53,7 +53,7 @@ function ensureGlobalTarget(home: string, target: string) {
   const resolved = normalize(target)
   const expected = normalize(path.join(home, PAPER_FUCKER_DIR))
   if (resolved !== expected || path.basename(resolved) !== PAPER_FUCKER_DIR) {
-    throw new Error(`Refusing to reset unexpected global Paper Fucker path: ${resolved}`)
+    throw new Error(`Refusing to reset unexpected global PaperCode path: ${resolved}`)
   }
   return resolved
 }
@@ -86,7 +86,7 @@ export async function resetInitState(input: InitResetInput): Promise<InitResetRe
   const globalRoot = ensureGlobalTarget(home, initPaths(home).root)
   const workspacePaper = normalize(path.join(workspace, PAPER_FUCKER_DIR))
   if (globalRoot === workspacePaper) {
-    throw new Error("Global Paper Fucker home resolves to the workspace .paper_fucker directory; refusing reset.")
+    throw new Error("Global PaperCode home resolves to the workspace .paper_fucker directory; refusing reset.")
   }
 
   const candidates: InitResetTarget[] = [

@@ -94,7 +94,7 @@ describe("preview server", () => {
       const html = await fetch(preview.url)
       expect(html.status).toBe(200)
       const page = await html.text()
-      expect(page).toContain("Paper Fucker Monitor")
+      expect(page).toContain("PaperCode Monitor")
       expect(page).toContain('data-tab="environment"')
       expect(page).toContain('data-tab="experiments"')
       expect(page).toContain('data-tab="models"')

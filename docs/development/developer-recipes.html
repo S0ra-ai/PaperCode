@@ -3,14 +3,14 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>修改手册 - Paper Fucker 开发手册</title>
+    <title>修改手册 - PaperCode 开发手册</title>
     <link rel="stylesheet" href="./assets/style.css" />
     <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml" />
   </head>
   <body>
     <div class="layout">
       <aside class="sidebar">
-        <div class="brand"><strong>Paper Fucker</strong><span>开发手册</span></div>
+        <div class="brand"><strong>PaperCode</strong><span>开发手册</span></div>
         <nav class="nav">
           <div class="nav-group">入门</div>
           <a href="./index.html">总览</a>
@@ -68,7 +68,7 @@
           <thead><tr><th>步骤</th><th>文件</th><th>说明</th></tr></thead>
           <tbody>
             <tr><td>路由类型</td><td><code>context/route.tsx</code></td><td>新增 route data type。</td></tr>
-            <tr><td>入口命令</td><td><code>app.tsx</code></td><td>绑定 slash command 或快捷键，只暴露 Paper Fucker 语义。</td></tr>
+            <tr><td>入口命令</td><td><code>app.tsx</code></td><td>绑定 slash command 或快捷键，只暴露 PaperCode 语义。</td></tr>
             <tr><td>页面组件</td><td><code>routes/&lt;page&gt;.tsx</code></td><td>组件负责布局和键盘交互，状态读取放到 util/workbench 层。</td></tr>
             <tr><td>业务状态</td><td><code>routes/paper/workbench.ts</code></td><td>把 API 返回转成 TUI 可渲染状态。</td></tr>
             <tr><td>测试</td><td><code>test/cli/tui</code></td><td>覆盖文案、快捷键、过滤、空状态和窄屏。</td></tr>

@@ -9,7 +9,7 @@ const dictionaries = {
   zht,
 }
 
-describe("Paper Fucker app i18n surface", () => {
+describe("PaperCode app i18n surface", () => {
   test("primary prompt copy is PaperRun and research oriented", () => {
     expect(en["prompt.mode.normal"]).toBe("PaperRun")
     expect(zh["prompt.mode.normal"]).toBe("PaperRun")

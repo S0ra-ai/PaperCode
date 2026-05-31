@@ -1033,7 +1033,7 @@ function experimentProtocolStarterPack(input: {
   const readmeContent = [
     `# Experiment Protocol Starter: ${input.topic}`,
     "",
-    "Paper Fucker blocked final export because the repository does not yet expose a complete experiment protocol.",
+    "PaperCode blocked final export because the repository does not yet expose a complete experiment protocol.",
     "",
     "Required fixes:",
     ...input.guidance.suggestions.map((item) => `- ${item.recommended_script}: ${item.next_action}`),
