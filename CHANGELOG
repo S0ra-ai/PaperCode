@@ -2,24 +2,23 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.167-dev
+:version       0.13.0.168-dev
 :last_update   2026/05/31
 
 :history
 
-    0.13.0.167-dev - 2026/05/31 (ffc46aea) [fix/mcp-tool-binding-test-isolation]
-        :brief CJC 投稿准备度附录按现有附录连续编号
+    0.13.0.168-dev - 2026/05/31 (2b067431) [fix/mcp-tool-binding-test-isolation]
+        :brief ranking 成稿引言与资源边界口吻论文语体化
         :fix
-            - fix(authoring): 投稿准备度附录不再硬编码为附录 G，改为扫描当前 Markdown 中已有附录并自动续号
-            - fix(authoring): ranking final 场景已有附录 A/B 时，投稿准备度输出为附录 C，避免读者误以为缺少 C-F
-            - fix(authoring): 保留完整 CJC authoring 场景中的附录 E/F 后续号语义，已有 E/F 时仍输出附录 G
+            - fix(authoring): ranking 引言从“系统需要在有限候选集内判断”改为“研究者需要在有限候选集内判断”，减少产品口吻残留
+            - fix(authoring): 资源记录边界从“未登记峰值内存和 GPU 用量”改为“峰值内存和 GPU 用量未采集”，贴近实验记录语义
         :test
-            - test(authoring): 覆盖 ranking CJC draft 投稿准备度为附录 C 且不出现附录 G
-            - test(authoring): 覆盖完整 CJC authoring 流程仍按已有附录继续编号
+            - test(authoring): 覆盖 ranking 引言不再出现系统需要表述
+            - test(authoring): 覆盖资源边界不再出现未登记峰值内存和 GPU 用量
         :changelog
-            - docs(changelog): 0.13.0.166 开发历史移入 docs/changelog/v0/0.13.0.166.CHANGELOG
+            - docs(changelog): 0.13.0.167 开发历史移入 docs/changelog/v0/0.13.0.167.CHANGELOG
         :checks
             - targeted tests: npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --timeout 180000 passed
             - typecheck: npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
-            - final benchmark: scripts/live-paper-quality-benchmark.ts --scenario final passed, run-842e8469-3313-49dc-90b8-674aad04ad26 final export passed
-            - final audit: latest final Markdown contains 附录 A、附录 B、附录 C：投稿准备度 and no longer jumps to 附录 G
+            - final benchmark: scripts/live-paper-quality-benchmark.ts --scenario final passed, run-4a781cbe-ed95-4ca2-af6e-6052e12150e2 final export passed
+            - final audit: latest final Markdown contains 研究者需要在有限候选集内判断 and 峰值内存和 GPU 用量未采集, with no 系统需要 or 未登记峰值内存 residual
