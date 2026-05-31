@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>接口与数据契约 - Paper Fucker 开发手册</title>
+    <link rel="stylesheet" href="./assets/style.css" />
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="brand"><strong>Paper Fucker</strong><span>开发手册</span></div>
+        <nav class="nav">
+          <div class="nav-group">入门</div>
+          <a href="./index.html">总览</a>
+          <div class="nav-group">使用</div>
+          <a href="./usage-guide.html">使用入口</a>
+          <div class="nav-group">开发</div>
+          <a href="./development-guide.html">开发指南</a>
+          <a href="./development-workflow.html">开发工作流</a>
+          <div class="nav-group">架构</div>
+          <a href="./architecture.html">架构</a>
+          <a href="./module-map.html">模块地图</a>
+          <a href="./function-reference.html">关键函数索引</a>
+          <a class="active" href="./api-contracts.html">接口与数据契约</a>
+          <div class="nav-group">运行时</div>
+          <a href="./paperrun-flow.html">PaperRun 流程</a>
+          <a href="./paper-generation.html">论文生成链路</a>
+          <a href="./experiment-execution.html">实验执行链路</a>
+          <a href="./preview-export.html">Preview 与导出</a>
+          <div class="nav-group">工作台</div>
+          <a href="./tui-models.html">TUI 与模型</a>
+          <a href="./agents-capabilities.html">Agent / MCP / Skills</a>
+          <a href="./testing-maintenance.html">测试与维护</a>
+          <a href="./developer-recipes.html">修改手册</a>
+        </nav>
+      </aside>
+      <main class="content">
+        <section class="hero">
+          <div class="eyebrow">Contracts</div>
+          <h1>接口、事件和数据契约</h1>
+          <p class="lead">本页记录 TUI、HTTP API、Paper Core、Preview 和 export 之间的稳定边界。改运行链路时先改契约，再改实现和测试。</p>
+        </section>
+
+        <h2>契约分层</h2>
+        <div class="flow">
+          <span>TUI Intent</span>
+          <span>HTTP Payload</span>
+          <span>PaperRun Fact</span>
+          <span>Artifact Schema</span>
+          <span>Snapshot</span>
+          <span>Export Manifest</span>
+        </div>
+        <p>每层只承担自己的责任。TUI 不直接拼 artifact；Preview 不读取任意本机文件；export 不绕过 final gate；Agent 和实验 runner 只写结构化事实。</p>
+
+        <h2>HTTP API 入口</h2>
+        <table class="table">
+          <thead><tr><th>接口</th><th>输入</th><th>输出</th><th>维护规则</th></tr></thead>
+          <tbody>
+            <tr><td><code>POST /paper/runs</code></td><td>主题、工作区、材料路径、研究深度、期刊 profile、模型策略。</td><td><code>PaperRunCreated</code> 或结构化错误。</td><td>必须携带当前工作区；无可用模型时返回中文 blocked diagnostic。</td></tr>
+            <tr><td><code>GET /paper/runs/:id</code></td><td>run id。</td><td>run 摘要、stage graph、diagnostics、export state。</td><td>用于恢复和 TUI dashboard；不能要求重新执行。</td></tr>
+            <tr><td><code>GET /paper/runs/:id/events</code></td><td>run id 和 SSE token。</td><td><code>paper.run.snapshot</code> 与增量事件。</td><td>新增事件必须可被老客户端忽略；snapshot 是权威 UI 数据面。</td></tr>
+            <tr><td><code>POST /paper/runs/:id/control</code></td><td><code>pause</code>、<code>resume</code>、<code>stop</code>、<code>rerun_experiment</code>。</td><td>控制结果和最新 snapshot。</td><td>控制动作必须写入事件流，便于恢复和审计。</td></tr>
+            <tr><td><code>POST /paper/runs/:id/export</code></td><td>格式、profile、是否 forced draft。</td><td>bundle id、文件清单、manifest。</td><td>final export 必须先通过 gate；forced draft 不能伪装成 final。</td></tr>
+            <tr><td><code>GET /paper/providers/discover</code></td><td>provider 注册状态。</td><td>已注册 provider、候选模型、allowlist、smoke 状态。</td><td>只返回用户已注册 provider 的模型；未注册 provider 只能作为注册模板。</td></tr>
+            <tr><td><code>GET/PUT /paper/model-roles</code></td><td>主/备用决策模型、候选池、阶段策略。</td><td><code>PaperModelInventory</code>。</td><td>主/备用模型只能来自候选池；阶段模型支持自动、动态和强制指定。</td></tr>
+          </tbody>
+        </table>
+
+        <h2>结构化错误</h2>
+        <p>所有用户可见错误都应返回可操作结构，而不是裸异常、schema 栈或内部 tag。</p>
+        <pre><code>{
+  "code": "paper_run_creation_failed",
+  "message": "PaperRun 创建失败：缺少可用模型。",
+  "action": "打开 /models 注册 provider，并选择候选模型和主决策模型。",
+  "log_path": "C:\\Users\\...\\.paper_fucker\\data\\log"
+}</code></pre>
+        <ul>
+          <li><code>code</code> 用于测试和日志检索，保持英文稳定。</li>
+          <li><code>message</code> 面向用户，必须是中文。</li>
+          <li><code>action</code> 给出下一步，不重复堆栈。</li>
+          <li><code>log_path</code> 只给目录或相对 run 路径，不暴露 secret。</li>
+        </ul>
+
+        <h2>PaperRun 事实日志</h2>
+        <table class="table">
+          <thead><tr><th>文件</th><th>内容</th><th>写入者</th><th>读者</th></tr></thead>
+          <tbody>
+            <tr><td><code>run.json</code></td><td>run 元信息、工作区、状态、创建时间、profile。</td><td><code>createPaperRun</code></td><td>TUI、history、resume。</td></tr>
+            <tr><td><code>events.jsonl</code></td><td>stage、model、agent、preview、export、control 事件。</td><td>orchestrator、controller、export。</td><td>SSE、diagnostics、reports。</td></tr>
+            <tr><td><code>sources.jsonl</code></td><td>论文材料、代码 source range、数据、日志、文献来源。</td><td>intake、code analysis、literature。</td><td>ClaimLedger、draft、verification。</td></tr>
+            <tr><td><code>claims.jsonl</code></td><td>方法、结果、限制、引用绑定。</td><td>claim ledger、writing、review。</td><td>draft、gate、export manifest。</td></tr>
+            <tr><td><code>artifacts.jsonl</code></td><td>每个 artifact 的 schema、路径、source_ids、stage。</td><td>所有 stage handler。</td><td>Preview、export、strict acceptance。</td></tr>
+          </tbody>
+        </table>
+
+        <h2>Artifact Schema 命名</h2>
+        <p>artifact schema 使用 <code>Name.vN</code>。新增 schema 时同步 TypeScript 类型、Preview 显示、export manifest 和测试断言。</p>
+        <div class="grid">
+          <article class="card"><h3>研究事实</h3><p><code>LiteratureMap.v1</code>、<code>ClaimLedger.v1</code>、<code>SourceEvidenceManifest.v1</code>。</p></article>
+          <article class="card"><h3>实验事实</h3><p><code>ExperimentProtocol.v1</code>、<code>ExperimentRun.v1</code>、<code>ExperimentTerminalTrace.v1</code>、<code>ResultReport.v1</code>。</p></article>
+          <article class="card"><h3>写作事实</h3><p><code>DraftPaper.v1</code>、<code>ReviewReport.v1</code>、<code>RevisionPlan.v1</code>。</p></article>
+          <article class="card"><h3>运行诊断</h3><p><code>PaperMachineProfile.v1</code>、<code>BlockingReport.v1</code>、<code>ModelRoutingDecision.v1</code>。</p></article>
+        </div>
+
+        <h2>事件命名</h2>
+        <table class="table">
+          <thead><tr><th>事件</th><th>触发时机</th><th>必须携带</th></tr></thead>
+          <tbody>
+            <tr><td><code>paper.run.snapshot</code></td><td>run 创建、stage 更新、draft/export/diagnostic 变化。</td><td>snapshot version、run id、stage summary、gate summary。</td></tr>
+            <tr><td><code>stage.updated</code></td><td>stage queued/running/blocked/completed。</td><td>stage id、status、started/completed timestamp。</td></tr>
+            <tr><td><code>model.routing_decision</code></td><td>Agent 或 stage 选择模型。</td><td>stage、candidate set、selected model、reason、override source。</td></tr>
+            <tr><td><code>experiment.command.started</code></td><td>受控命令执行前。</td><td>command id、role、environment、cwd、timeout。</td></tr>
+            <tr><td><code>experiment.command.completed</code></td><td>受控命令结束。</td><td>exit code、duration、stdout/stderr artifact id、metrics。</td></tr>
+            <tr><td><code>gate.summary_updated</code></td><td>verification 或 export 前后。</td><td>passed、failed checks、warnings、action。</td></tr>
+            <tr><td><code>preview.updated</code></td><td>snapshot 进入 Preview render queue。</td><td>preview URL、token scope、snapshot revision。</td></tr>
+          </tbody>
+        </table>
+
+        <h2>Preview Snapshot</h2>
+        <p><code>PreviewSnapshot.v1</code> 是 TUI dashboard 和 Web Monitor 的共同数据面。新增字段先在 snapshot 中稳定，再由前端渲染。</p>
+        <table class="table">
+          <thead><tr><th>字段</th><th>来源</th><th>约束</th></tr></thead>
+          <tbody>
+            <tr><td><code>stages</code></td><td>stage graph 和 events。</td><td>顺序稳定，状态可枚举。</td></tr>
+            <tr><td><code>draft</code></td><td><code>DraftPaper.v1</code>。</td><td>无真实草稿时显示空状态，不渲染占位正文。</td></tr>
+            <tr><td><code>sources</code> / <code>claims</code></td><td>source/claim ledger。</td><td>只展示摘要，完整证据留在 bundle manifest。</td></tr>
+            <tr><td><code>experiments</code></td><td>protocol、runs、terminal traces、result report。</td><td>必须能看见命令、状态、指标和 stdout/stderr 摘要。</td></tr>
+            <tr><td><code>machine_environment</code></td><td>机器环境探测 artifact。</td><td>展示 GPU/CPU、runtime/compiler、容器能力和阻断缺失。</td></tr>
+            <tr><td><code>export_state</code></td><td>export facts 和 gate。</td><td>final、forced、blocked 三种语义不能混用。</td></tr>
+          </tbody>
+        </table>
+
+        <h2>修改检查清单</h2>
+        <ul>
+          <li>改 payload：同步 HTTP handler、TUI 调用、schema 测试和结构化错误。</li>
+          <li>改 artifact：同步 schema 名、artifact store、snapshot、export manifest 和 strict acceptance。</li>
+          <li>改 event：同步 SSE、Preview render queue、TUI subscription 和 browser smoke。</li>
+          <li>改 export：同步 final gate、forced draft 语义、manifest 和 PDF/DOCX 验收。</li>
+          <li>改模型：同步 provider 注册、allowlist、主/备用模型、阶段策略和 routing diagnostics。</li>
+        </ul>
+      </main>
+    </div>
+    <script src="./assets/manual.js" defer></script>
+  </body>
+</html>
