@@ -2,24 +2,23 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.140-dev
+:version       0.13.0.141-dev
 :last_update   2026/05/31
 
 :history
 
-    0.13.0.140-dev - 2026/05/31 (dee367d4) [fix/mcp-tool-binding-test-isolation]
-        :brief Provider 授权入口按订阅类型收口，公开安装、发布和 Nix 元数据迁移到 ZhuchenZhong 与 MPL-2.0
-        :tui
-            - fix(models): 从模型工作台注册 ChatGPT 或 GitHub Copilot 订阅时，只展示对应 provider 的授权入口
-            - fix(models): 指定 provider 授权不再暴露 Other/custom 入口，避免订阅登录流程混杂
-        :release
-            - chore(install): 安装脚本、GitHub Action 示例、更新检查和 MCP OAuth client_uri 指向 ZhuchenZhong/paper_fucker
-            - chore(publish): Arch/Homebrew 发布元数据使用 Paper Fucker 研究工作台描述，并改为 MPL-2.0 许可证
-            - chore(nix): Nix 包 homepage 指向 ZhuchenZhong/paper_fucker，license 改为 lib.licenses.mpl20
+    0.13.0.141-dev - 2026/05/31 (a974e709) [fix/mcp-tool-binding-test-isolation]
+        :brief TaskFlow 计划状态同步到 137 个完成任务，并归档测试隔离审计报告
+        :taskflow
+            - docs(taskflow): 新增并固化 16 个已完成 confirmed 任务，覆盖论文生成、实验协议、容器/本地执行、订阅 provider、MPL-2.0 与开发手册
+            - docs(taskflow): .plan/index.yaml 计数同步为 done 137、completed 137、无 confirmed/ideas/in_progress 队列
+            - docs(taskflow): taskflow validate --plan-dir .plan 全量通过，确认新增任务语义与依赖图有效
+        :report
+            - docs(report): 新增 reports/test-isolation-audit.md，记录 MCP 工具绑定、provider/model 测试隔离和订阅 provider 路由风险边界
         :test
-            - test(tui): provider-options 覆盖指定 provider 过滤，不暴露 Other/custom 入口
+            - test(secret): 新增计划文件与测试隔离报告未命中 sk-*、GitHub token 或 Google API key 模式
         :changelog
-            - docs(changelog): 0.13.0.139 开发历史移入 docs/changelog/v0/0.13.0.139.CHANGELOG
+            - docs(changelog): 0.13.0.140 开发历史移入 docs/changelog/v0/0.13.0.140.CHANGELOG
         :checks
-            - targeted tests: packages/opencode provider-options
-            - static checks: packages/opencode typecheck、install bash syntax after CRLF normalization 与 git diff --check
+            - taskflow validate --plan-dir .plan
+            - static checks: sensitive token rg scan 与 git diff --check
