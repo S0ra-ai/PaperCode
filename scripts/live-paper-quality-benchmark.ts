@@ -396,42 +396,81 @@ function licenseExpressionFromUrl(url: string | undefined) {
 
 const arxivUserAgent = "paper-fucker-live-benchmark/1.0 (+https://github.com/ZhuchenZhong/paper_fucker)"
 
+function benchmarkPositiveIntEnv(name: string, fallback: number) {
+  const raw = process.env[name]
+  if (raw === undefined) return fallback
+  const value = Number(raw)
+  return Number.isFinite(value) && value > 0 ? Math.floor(value) : fallback
+}
+
+const arxivFetchTimeoutMs = benchmarkPositiveIntEnv("PAPER_FUCKER_BENCHMARK_ARXIV_FETCH_TIMEOUT_MS", 15_000)
+const arxivMaxAttempts = benchmarkPositiveIntEnv("PAPER_FUCKER_BENCHMARK_ARXIV_MAX_ATTEMPTS", 3)
+const arxivQueryBudgetMs = benchmarkPositiveIntEnv("PAPER_FUCKER_BENCHMARK_ARXIV_QUERY_BUDGET_MS", 90_000)
+const arxivVerificationCandidateLimit = benchmarkPositiveIntEnv("PAPER_FUCKER_BENCHMARK_ARXIV_VERIFY_LIMIT", 6)
+const protocolBenchmarkBudgetMs = benchmarkPositiveIntEnv("PAPER_FUCKER_BENCHMARK_SOURCE_BUDGET_MS", 240_000)
+
 function arxivRetryDelayMs(message: string, attempt: number) {
   if (/HTTP 429|Too Many Requests/i.test(message)) return 15_000 * attempt
   if (/Timeout/i.test(message)) return 5_000 * attempt
   return 1_000 * attempt
 }
 
-async function fetchArxivText(url: string) {
+function ensureBeforeDeadline(deadlineMs: number | undefined, context: string) {
+  if (deadlineMs !== undefined && Date.now() >= deadlineMs) {
+    throw new Error(`live arXiv source discovery timed out: ${context}`)
+  }
+}
+
+function deadlineSignal(deadlineMs: number | undefined, context: string) {
+  ensureBeforeDeadline(deadlineMs, context)
+  const remaining = deadlineMs === undefined ? arxivFetchTimeoutMs : deadlineMs - Date.now()
+  return AbortSignal.timeout(Math.max(1, Math.min(arxivFetchTimeoutMs, Math.floor(remaining))))
+}
+
+function childDeadline(parentDeadlineMs: number, budgetMs: number) {
+  return Math.min(parentDeadlineMs, Date.now() + budgetMs)
+}
+
+async function fetchArxivText(url: string, options: { deadlineMs?: number; context?: string } = {}) {
   const failures: string[] = []
-  const maxAttempts = 5
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+  const context = options.context ?? url
+  for (let attempt = 1; attempt <= arxivMaxAttempts; attempt++) {
     try {
+      ensureBeforeDeadline(options.deadlineMs, context)
       const response = await fetch(url, {
         headers: {
           "user-agent": arxivUserAgent,
         },
-        signal: AbortSignal.timeout(30_000),
+        signal: deadlineSignal(options.deadlineMs, context),
       })
       if (!response.ok) throw new Error(`HTTP ${response.status} ${response.statusText}`)
       return await response.text()
     } catch (error) {
       const message = error instanceof Error ? `${error.name}: ${error.message}` : String(error)
       failures.push(`attempt ${attempt}: ${message}`)
-      if (attempt < maxAttempts) await Bun.sleep(arxivRetryDelayMs(message, attempt))
+      if (attempt < arxivMaxAttempts) {
+        const retryDelay = arxivRetryDelayMs(message, attempt)
+        const remaining = options.deadlineMs === undefined ? retryDelay : Math.max(0, options.deadlineMs - Date.now())
+        if (remaining > 0) await Bun.sleep(Math.min(retryDelay, remaining))
+      }
     }
   }
   const rateLimited = failures.some((failure) => /HTTP 429|Too Many Requests/i.test(failure))
-  const prefix = rateLimited ? "live arXiv source discovery blocked by rate limit" : "arXiv fetch failed"
+  const timedOut = failures.some((failure) => /Timeout|timed out/i.test(failure))
+  const prefix = rateLimited
+    ? "live arXiv source discovery blocked by rate limit"
+    : timedOut
+      ? "live arXiv source discovery timed out"
+      : "arXiv fetch failed"
   throw new Error(`${prefix} after retries: ${url}; ${failures.join("; ")}`)
 }
 
-async function discoverArxivIds(query: string) {
+async function discoverArxivIds(query: string, deadlineMs: number) {
   const url = `https://arxiv.org/search/?query=${encodeURIComponent(query)}&searchtype=all&abstracts=show&size=25`
   let html = ""
   let searchFailure: string | undefined
   try {
-    html = await fetchArxivText(url)
+    html = await fetchArxivText(url, { deadlineMs, context: `arXiv HTML search for query: ${query}` })
   } catch (error) {
     searchFailure = error instanceof Error ? error.message : String(error)
   }
@@ -448,7 +487,7 @@ async function discoverArxivIds(query: string) {
     .map((term) => `all:${term}`)
     .join(" AND ")
   const apiUrl = `https://export.arxiv.org/api/query?search_query=${encodeURIComponent(apiQuery)}&start=0&max_results=25`
-  const atom = await fetchArxivText(apiUrl)
+  const atom = await fetchArxivText(apiUrl, { deadlineMs, context: `arXiv Atom fallback for query: ${query}` })
   const ids = [...atom.matchAll(/<id>https?:\/\/arxiv\.org\/abs\/(\d{4}\.\d{4,5})(?:v\d+)?<\/id>/g)].map((match) => match[1])
   assertBenchmark(ids.length > 0, `arXiv HTML search failed and Atom API returned no candidates. HTML failure: ${searchFailure}`)
   return {
@@ -463,11 +502,12 @@ async function fetchVerifiedArxivSource(
   options: {
     discovery_query?: string
     discovery_url?: string
+    deadlineMs?: number
     topics: string[]
   },
 ) {
   const url = `https://arxiv.org/abs/${encodeURIComponent(arxivID)}`
-  const html = await fetchArxivText(url)
+  const html = await fetchArxivText(url, { deadlineMs: options.deadlineMs, context: `arXiv abs verification for ${arxivID}` })
   const pageArxivID = htmlMetaContent(html, "citation_arxiv_id")
   const title = htmlMetaContent(html, "citation_title")
   const authors = htmlMetaContents(html, "citation_author")
@@ -559,16 +599,18 @@ function assertAuthenticVerifiedArxivSources(sources: VerifiedArxivSource[], con
   assertNoBenchmarkSourceResidue(sources, context)
 }
 
-async function discoverVerifiedArxivSources(query: string, checkedAt: string, topics: string[]) {
-  const discovered = await discoverArxivIds(query)
+async function discoverVerifiedArxivSources(query: string, checkedAt: string, topics: string[], deadlineMs: number) {
+  const discovered = await discoverArxivIds(query, deadlineMs)
   assertBenchmark(discovered.ids.length > 0, `arXiv live search returned no source candidates for query: ${query}`)
   const failures: string[] = []
   const sources: VerifiedArxivSource[] = []
-  for (const arxivID of discovered.ids.slice(0, 8)) {
+  for (const arxivID of discovered.ids.slice(0, arxivVerificationCandidateLimit)) {
+    ensureBeforeDeadline(deadlineMs, `verifying arXiv sources for query: ${query}`)
     try {
       sources.push(await fetchVerifiedArxivSource(arxivID, checkedAt, {
         discovery_query: query,
         discovery_url: discovered.url,
+        deadlineMs,
         topics,
       }))
     } catch (error) {
@@ -606,9 +648,11 @@ const protocolBenchmarkQueries = [
 
 async function protocolBenchmarkDataset(createdAt: string, topics: string[]) {
   const failures: string[] = []
+  const deadlineMs = Date.now() + protocolBenchmarkBudgetMs
   for (const query of protocolBenchmarkQueries) {
+    ensureBeforeDeadline(deadlineMs, "building protocol benchmark live arXiv sources")
     try {
-      const sources = await discoverVerifiedArxivSources(query, createdAt, topics)
+      const sources = await discoverVerifiedArxivSources(query, createdAt, topics, childDeadline(deadlineMs, arxivQueryBudgetMs))
       const dataset = liveArxivRankingDataset(sources, query, createdAt)
       assertNoBenchmarkSourceResidue(dataset, "LiveArxivRankingDataset.v1")
       return { query, sources, dataset }

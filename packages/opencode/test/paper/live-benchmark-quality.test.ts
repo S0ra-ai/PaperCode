@@ -27,6 +27,20 @@ describe("live paper quality benchmark script", () => {
     expect(benchmark).toContain("live arXiv source discovery blocked by rate limit")
   })
 
+  test("bounds live arXiv discovery with explicit deadlines", () => {
+    const benchmark = readFileSync(path.join(repoRoot, "scripts", "live-paper-quality-benchmark.ts"), "utf8")
+
+    expect(benchmark).toContain("PAPER_FUCKER_BENCHMARK_SOURCE_BUDGET_MS")
+    expect(benchmark).toContain("PAPER_FUCKER_BENCHMARK_ARXIV_QUERY_BUDGET_MS")
+    expect(benchmark).toContain("benchmarkPositiveIntEnv")
+    expect(benchmark).toContain("ensureBeforeDeadline")
+    expect(benchmark).toContain("deadlineSignal")
+    expect(benchmark).toContain("live arXiv source discovery timed out")
+    expect(benchmark).toContain("arxivVerificationCandidateLimit")
+    expect(benchmark).not.toContain("const maxAttempts = 5")
+    expect(benchmark).not.toContain("discovered.ids.slice(0, 8)")
+  })
+
   test("publishes summaries only after a successful benchmark attempt", () => {
     const benchmark = readFileSync(path.join(repoRoot, "scripts", "live-paper-quality-benchmark.ts"), "utf8")
 
