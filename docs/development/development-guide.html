@@ -93,6 +93,18 @@
           </article>
         </div>
 
+        <h2 id="runtime-modes">产品运行模式和开发含义</h2>
+        <p>同一个 PaperRun 会因为输入不同走不同分支。开发时要先判断当前问题属于哪种运行模式，再决定测试范围。</p>
+        <table class="table">
+          <thead><tr><th>运行模式</th><th>触发输入</th><th>关键模块</th><th>必须验收</th></tr></thead>
+          <tbody>
+            <tr><td>主题到论文</td><td>只有自然语言研究主题。</td><td><code>paper/orchestrator.ts</code>、<code>research/literature</code>、<code>research/writing/draft.ts</code></td><td>真实检索来源、Related Work、References、查新边界、无伪引用。</td></tr>
+            <tr><td>材料到论文</td><td>论文、数据、实验日志或补充材料。</td><td><code>paper/materials</code>、source ledger、claim ledger、draft composer。</td><td>材料进入 source ledger，正文引用能追溯，不把未验证材料写成事实。</td></tr>
+            <tr><td>代码到论文</td><td>工作区、代码路径或可执行实验协议。</td><td><code>paper/code-to-paper.ts</code>、<code>research/experiments</code>、<code>paper/run.ts</code></td><td>source range、baseline、ablation、host/container trace、ResultReport、final gate。</td></tr>
+            <tr><td>恢复运行</td><td><code>/resume</code> 或历史 run id。</td><td>run storage、controller state、Preview snapshot。</td><td>stage 状态、token/cost、导出状态和恢复命令不丢。</td></tr>
+          </tbody>
+        </table>
+
         <h2 id="state-input">状态输入</h2>
         <p>新增能力前先明确它读哪些状态。状态必须从持久化事实进入界面，不能只在前端临时拼装。</p>
         <table class="table">
@@ -124,6 +136,19 @@
             <p>错误返回 <code>code</code>、中文 <code>message</code>、可执行 <code>action</code> 和日志路径。</p>
           </article>
         </div>
+
+        <h2 id="code-reading">代码阅读顺序</h2>
+        <p>不要从组件深处直接改。先沿着产品调用链读一遍，再在最小责任模块下手。</p>
+        <div class="flow">
+          <span>1. TUI route / command</span>
+          <span>2. HTTP handler / payload normalize</span>
+          <span>3. PaperRun state / schema</span>
+          <span>4. Orchestrator stage handler</span>
+          <span>5. Artifact / ledger writer</span>
+          <span>6. Preview / export renderer</span>
+        </div>
+        <pre><code>rg "createPaperRun|startPaperResearchRun|composeDraftPaper|exportPaperRun" packages/opencode/src/paper
+rg "paper.run.snapshot|PreviewSnapshot|renderGate" packages/preview packages/opencode/src</code></pre>
 
         <h2 id="entry-files">入口文件</h2>
         <table class="table">
@@ -192,8 +217,10 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-changelog-fo
         <a href="#workflow">开发参数</a>
         <a href="#page-template">开发页模板</a>
         <a href="#modes">开发模式</a>
+        <a href="#runtime-modes">运行模式</a>
         <a href="#state-input">状态输入</a>
         <a href="#output-contract">输出契约</a>
+        <a href="#code-reading">代码阅读顺序</a>
         <a href="#entry-files">入口文件</a>
         <a href="#quality">质量调优</a>
         <a href="#troubleshooting">故障定位</a>
