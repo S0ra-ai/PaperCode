@@ -6,7 +6,7 @@
 
 - `README.md`：对外首页。回答“这是什么、能做什么、怎么开始、是否可信”。
 - `docs/internal/README.md`：内部维护入口。记录架构边界、release 流程、TaskFlow 和验收策略。
-- `docs/development/index.html`：多文件 HTML 开发手册。采用左侧分组导航和右侧本页目录，说明使用入口、开发工作流、架构、PaperRun 流程、TUI/模型、Agent/MCP/Skills、Preview/export 和测试维护入口。
+- `docs/development/index.html`：多文件 HTML 开发手册。采用 ReadTheDocs 风格的左侧分组导航和右侧本页目录；主线是开发指南、架构、PaperRun 流程、关键函数、模型工作台、实验执行、Preview/export 和常见修改路径，使用入口作为维护者验收页保留。
 - `docs/project-structure.md`：目录结构与 release artifact 边界。
 - `docs/changelog/README.md`：历史 changelog 归档策略。
 - `reports/`：审计、验收、benchmark 证据，不进入 release artifact。
