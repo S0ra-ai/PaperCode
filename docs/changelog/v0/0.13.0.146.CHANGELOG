@@ -1,0 +1,20 @@
+:project       paper_fucker - 可验证论文研究自动化系统
+:author        k1d (https://github.com/ZhuchenZhong)
+:repo
+:desc          0.13.0.146 开发历史归档
+:version       0.13.0.146-dev
+:last_update   2026/05/31
+
+:history
+
+    0.13.0.146-dev - 2026/05/31 (dd6f60b1) [fix/mcp-tool-binding-test-isolation]
+        :brief 自主产品审计新增用户可见旧品牌反向检查
+        :audit
+            - test(audit): autonomous-product-audit 新增 public-surface-no-legacy-branding，反向扫描 README、TUI 首页、模型页、PaperRun dashboard、paper API 和 Preview
+            - test(audit): 旧产品文案、Ask anything、Please report an issue、OpenCode/Open Code、opencode.ai 与登录残留命中即失败
+            - report(audit): 刷新 reports/autonomous-product-audit.md，确认用户可见 README、TUI、paper API 和 Preview 未包含旧产品文案
+        :changelog
+            - docs(changelog): 0.13.0.145 开发历史移入 docs/changelog/v0/0.13.0.145.CHANGELOG
+        :checks
+            - audit: scripts/autonomous-product-audit.ps1 -AllowActiveTask
+            - static checks: autonomous-product-audit.ps1 ASCII safety

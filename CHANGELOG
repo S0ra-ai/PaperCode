@@ -2,19 +2,22 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.146-dev
+:version       0.13.0.147-dev
 :last_update   2026/05/31
 
 :history
 
-    0.13.0.146-dev - 2026/05/31 (dd6f60b1) [fix/mcp-tool-binding-test-isolation]
-        :brief 自主产品审计新增用户可见旧品牌反向检查
+    0.13.0.147-dev - 2026/05/31 (117b6d73) [fix/mcp-tool-binding-test-isolation]
+        :brief 禁止 disabled 或 needs_auth provider 的历史 allowlist 继续进入模型路由
+        :model
+            - fix(models): model inventory 归一化时按 provider 注册状态过滤 allowlist，disabled、needs_auth 或不支持的旧注册不能继续被 routePaperModel 使用
+            - fix(models): provider 不可用后同步清理 decision model、backup decision model、role overrides 和 forced stage policy，candidate.allowed 也回落为 false
+            - test(models): model-discovery 增加 disabled/auth-pending provider 回归，确认历史无注册 allowlist 仍可作为兼容恢复路径保留
         :audit
-            - test(audit): autonomous-product-audit 新增 public-surface-no-legacy-branding，反向扫描 README、TUI 首页、模型页、PaperRun dashboard、paper API 和 Preview
-            - test(audit): 旧产品文案、Ask anything、Please report an issue、OpenCode/Open Code、opencode.ai 与登录残留命中即失败
-            - report(audit): 刷新 reports/autonomous-product-audit.md，确认用户可见 README、TUI、paper API 和 Preview 未包含旧产品文案
+            - report(audit): 刷新 autonomous product audit，确认版本同步、changelog 形态、开发手册、live evidence、public surface 和 Git Flow 均通过
         :changelog
-            - docs(changelog): 0.13.0.145 开发历史移入 docs/changelog/v0/0.13.0.145.CHANGELOG
+            - docs(changelog): 0.13.0.146 开发历史移入 docs/changelog/v0/0.13.0.146.CHANGELOG
         :checks
+            - targeted tests: packages/opencode model-discovery.test
+            - typecheck: packages/opencode typecheck
             - audit: scripts/autonomous-product-audit.ps1 -AllowActiveTask
-            - static checks: autonomous-product-audit.ps1 ASCII safety
