@@ -5,6 +5,18 @@
 - live_provider_smoke: passed (`deep`, 2 models, chat passed)
 - strict_acceptance: passed (`reports/strict-live-acceptance.md`)
 
+## 2026-05-31 final benchmark 完整论文包复审
+
+- 真实运行命令：`npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario final`。
+- 运行结果：`run-e25cc5ad-42fe-44c2-b569-006a94d44a84`，`status=succeeded`，14 个 PaperRun 阶段全部 succeeded。
+- 目标期刊配置：`target_profile=cjc-paper`，`target_journal=中国计算机学报`，语言 `zh-CN`。
+- 导出状态：`final_export.status=final`，`failed_checks=[]`，Markdown、LaTeX、PDF、DOCX 均写出。
+- 产物位置：`C:\Users\13750\.paper_fucker\runs\run-e25cc5ad-42fe-44c2-b569-006a94d44a84\exports\bundle-final-draft-paper\`。
+- 发布 summary：`tmp/live-paper-quality-benchmark/final/paperrun-summary.json`；attempt summary：`tmp/live-paper-quality-benchmark/final/attempts/attempt-2026-05-31T12-49-08-749Z-153284/paperrun-summary.json`。
+- 论文结构抽查：标题、作者占位、中文摘要、关键词、英文摘要、引言、研究问题、贡献、相关工作、方法、实验设置、结果、可复现性、讨论、效度威胁、结论、声明、参考文献和附录均存在。
+- PDF 视觉抽查：使用 `pdftoppm` 渲染前两页，首页摘要与英文摘要可读，第二页章节和研究问题表格可读。
+- 质量判断：当前已经能生成一篇结构完整、基础排版正确、final gate 通过的可审查论文包；距离中国计算机学报正式投稿模板仍需继续打磨表格宽度、作者/单位元数据、参考文献样式和 PDF 细节。
+
 ## 2026-05-31 缺少模型审稿结果阻断复审
 
 - `runMultiModelReview` 已确认：`model_reviews` 为空时输出 `missing_model_review` blocker。
