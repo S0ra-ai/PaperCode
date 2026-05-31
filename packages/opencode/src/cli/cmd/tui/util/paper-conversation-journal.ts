@@ -1,5 +1,4 @@
 import {
-  createGeneratedJournalProfileDraft,
   resolvePaperProfileSelection,
   type PaperGeneratedJournalProfile,
   type PaperProfileId,
@@ -17,9 +16,9 @@ export interface PaperConversationJournal {
 }
 
 let currentJournal: PaperConversationJournal = {
-  profile_id: "generic-preprint",
-  journal_name: "通用预印本",
-  source: "generic",
+  profile_id: "cjc-paper",
+  journal_name: "中国计算机学报",
+  source: "builtin",
   updated_at: new Date().toISOString(),
 }
 
@@ -37,22 +36,10 @@ export function setPaperConversationJournal(input: {
   const selection = resolvePaperProfileSelection(input)
   currentJournal = {
     profile_id: selection.profile_id,
-    journal_name: selection.journal_name,
+    journal_name: selection.journal_name ?? "中国计算机学报",
     official_url: input.target_journal_url,
-    source:
-      selection.profile_id === "generic-preprint"
-        ? "generic"
-        : selection.profile_id === "custom-journal"
-          ? "generated"
-          : "builtin",
-    generated_profile:
-      selection.generated_profile ??
-      (selection.profile_id === "custom-journal" && selection.journal_name
-        ? createGeneratedJournalProfileDraft({
-            journal_name: selection.journal_name,
-            official_url: input.target_journal_url,
-          })
-        : undefined),
+    source: "builtin",
+    generated_profile: selection.generated_profile,
     updated_at: new Date().toISOString(),
   }
   journalTarget.dispatchEvent(new Event("paper-conversation-journal.changed"))

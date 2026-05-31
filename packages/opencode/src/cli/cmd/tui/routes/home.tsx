@@ -125,8 +125,7 @@ export function Home() {
                       workspace_path: conversationWorkspace ?? prompt.workspace_path ?? sdk.directory,
                       storage_scope: conversationWorkspace ? "workspace" : "home",
                       target_profile: conversationJournal.profile_id,
-                      target_journal:
-                        conversationJournal.profile_id === "generic-preprint" ? undefined : conversationJournal.journal_name,
+                      target_journal: conversationJournal.journal_name,
                       target_journal_url: conversationJournal.official_url,
                     },
                   })

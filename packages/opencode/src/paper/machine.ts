@@ -1,5 +1,6 @@
 import { existsSync } from "fs"
 import { statfs } from "fs/promises"
+import { spawnSync } from "node:child_process"
 import os from "os"
 import path from "path"
 import { homeRunRoot } from "./research/runtime/paths"
@@ -73,10 +74,11 @@ type ToolSpec = {
   label: string
   executables: string[]
   impact: string
+  version_args?: string[][]
 }
 
 const COMPILER_SPECS: ToolSpec[] = [
-  { id: "cl", label: "MSVC cl", executables: ["cl"], impact: "C/C++ Windows extension builds and native baselines may be unavailable." },
+  { id: "cl", label: "MSVC cl", executables: ["cl"], impact: "C/C++ Windows extension builds and native baselines may be unavailable.", version_args: [[]] },
   { id: "gcc", label: "gcc", executables: ["gcc"], impact: "C/C++ baselines that expect GCC cannot be compiled locally." },
   { id: "clang", label: "clang", executables: ["clang"], impact: "LLVM/Clang experiment builds cannot run locally." },
   { id: "nvcc", label: "nvcc", executables: ["nvcc"], impact: "CUDA kernels and GPU extension builds cannot be compiled." },
@@ -85,7 +87,7 @@ const COMPILER_SPECS: ToolSpec[] = [
   { id: "make", label: "make", executables: ["make", "mingw32-make", "nmake"], impact: "Makefile-based experiments cannot run directly." },
   { id: "rust", label: "rustc/cargo", executables: ["rustc", "cargo"], impact: "Rust experiment baselines cannot be built." },
   { id: "go", label: "Go", executables: ["go"], impact: "Go baselines and tooling cannot run locally." },
-  { id: "java", label: "Java", executables: ["java"], impact: "Java/JVM evaluation harnesses cannot run locally." },
+  { id: "java", label: "Java", executables: ["java"], impact: "Java/JVM evaluation harnesses cannot run locally.", version_args: [["-version"]] },
 ]
 
 const RUNTIME_SPECS: ToolSpec[] = [
@@ -97,7 +99,13 @@ const RUNTIME_SPECS: ToolSpec[] = [
   { id: "bun", label: "Bun", executables: ["bun"], impact: "Paper Fucker source workflows and JS tests cannot run from Bun." },
   { id: "docker", label: "Docker", executables: ["docker"], impact: "Container reproduction gate is unavailable." },
   { id: "wsl", label: "WSL", executables: ["wsl"], impact: "Linux-only experiment fallback on Windows is unavailable." },
-  { id: "hyperv", label: "Hyper-V", executables: ["powershell", "pwsh"], impact: "Hyper-V status could not be inspected automatically." },
+  {
+    id: "hyperv",
+    label: "Hyper-V",
+    executables: ["powershell", "pwsh"],
+    impact: "Hyper-V status could not be inspected automatically.",
+    version_args: [["-NoProfile", "-Command", "$PSVersionTable.PSVersion.ToString()"]],
+  },
   { id: "virtualbox", label: "VirtualBox", executables: ["VBoxManage"], impact: "VirtualBox-backed reproduction VMs cannot be managed." },
   { id: "vmware", label: "VMware", executables: ["vmrun"], impact: "VMware-backed reproduction VMs cannot be managed." },
 ]
@@ -138,6 +146,29 @@ function findOnPath(executables: string[]) {
   return undefined
 }
 
+function compactVersionOutput(value: string) {
+  return value
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .join(" | ")
+    .slice(0, 180)
+}
+
+function inspectVersion(executable: string, versionArgs: string[][] = [["--version"]]) {
+  for (const args of versionArgs) {
+    const result = spawnSync(executable, args, {
+      encoding: "utf8",
+      timeout: 1500,
+      windowsHide: true,
+      maxBuffer: 64 * 1024,
+    })
+    const text = compactVersionOutput(`${result.stdout ?? ""}\n${result.stderr ?? ""}`)
+    if (text) return text
+  }
+  return undefined
+}
+
 function inspectTool(spec: ToolSpec): PaperEnvironmentCapability {
   const hit = findOnPath(spec.executables)
   return {
@@ -145,6 +176,7 @@ function inspectTool(spec: ToolSpec): PaperEnvironmentCapability {
     label: spec.label,
     status: hit ? "available" : "optional_missing",
     path: hit,
+    version: hit ? inspectVersion(hit, spec.version_args) : undefined,
     impact: hit ? "已可用" : spec.impact,
   }
 }

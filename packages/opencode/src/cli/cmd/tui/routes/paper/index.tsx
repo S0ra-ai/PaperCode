@@ -11,6 +11,8 @@ import {
   fetchPaperRunSnapshot,
   fetchPaperWorkbenchCapabilities,
   fetchPaperWorkbenchDoctor,
+  requestPaperWorkbenchExperimentProtocolRun,
+  requestPaperWorkbenchExperimentStarterApply,
   requestPaperWorkbenchPreview,
   paperWorkbenchHealthFromDoctor,
   subscribePaperRunLiveMonitor,
@@ -148,12 +150,38 @@ function PaperRunSidebar(props: { sidebar: PaperRunSidebarState }) {
               {(disk) => <text fg={theme.textMuted}>磁盘 {disk()}</text>}
             </Show>
             <text fg={props.sidebar.machine.gpu_mode === "CPU-only" ? theme.warning : theme.text}>
-              {props.sidebar.machine.gpu_mode}
+              GPU {props.sidebar.machine.gpu_mode}
             </text>
             <Show when={props.sidebar.machine.gpu_devices.length > 0}>
               {props.sidebar.machine.gpu_devices.slice(0, 3).map((device) => (
                 <text fg={theme.textMuted}>{device}</text>
               ))}
+            </Show>
+            <Show when={props.sidebar.machine.gpu_tools.length > 0}>
+              {props.sidebar.machine.gpu_tools.slice(0, 2).map((tool) => (
+                <text fg={tool.includes("缺失") ? theme.warning : theme.textMuted}>{tool}</text>
+              ))}
+            </Show>
+            <Show when={props.sidebar.machine.runtime_tools.length > 0}>
+              <text fg={theme.textMuted}>运行时</text>
+              {props.sidebar.machine.runtime_tools.slice(0, 4).map((tool) => (
+                <text fg={theme.textMuted}>{tool}</text>
+              ))}
+            </Show>
+            <Show when={props.sidebar.machine.compiler_tools.length > 0}>
+              <text fg={theme.textMuted}>编译器</text>
+              {props.sidebar.machine.compiler_tools.slice(0, 4).map((tool) => (
+                <text fg={theme.textMuted}>{tool}</text>
+              ))}
+            </Show>
+            <Show when={props.sidebar.machine.virtualization_tools.length > 0}>
+              <text fg={theme.textMuted}>容器 / 虚拟化</text>
+              {props.sidebar.machine.virtualization_tools.slice(0, 4).map((tool) => (
+                <text fg={tool.includes("缺失") ? theme.warning : theme.textMuted}>{tool}</text>
+              ))}
+            </Show>
+            <Show when={props.sidebar.machine.optional_missing_tools.length > 0}>
+              <text fg={theme.warning}>可选缺失 {props.sidebar.machine.optional_missing_tools.slice(0, 5).join(", ")}</text>
             </Show>
             <text fg={theme.textMuted}>run root {props.sidebar.machine.run_root}</text>
             <text fg={theme.textMuted}>
@@ -170,6 +198,34 @@ function PaperRunSidebar(props: { sidebar: PaperRunSidebarState }) {
             {props.sidebar.gate.failed_checks.slice(0, 4).map((check) => (
               <text fg={theme.warning}>{check}</text>
             ))}
+            <Show when={props.sidebar.gate.experiment_guidance}>
+              {(guidance) => (
+                <box flexDirection="column" gap={0}>
+                  <text fg={theme.warning}>实验协议待补齐</text>
+                  <text fg={theme.textMuted}>{guidance().summary}</text>
+                  {guidance()
+                    .suggestions.slice(0, 3)
+                    .map((item) => (
+                      <text fg={item.severity === "blocking" ? theme.error : theme.warning}>
+                        {item.recommended_script || item.gap}
+                      </text>
+                    ))}
+                </box>
+              )}
+            </Show>
+            <Show when={props.sidebar.gate.experiment_starter_pack}>
+              {(starter) => (
+                <box flexDirection="column" gap={0}>
+                  <text fg={theme.primary}>Starter Pack</text>
+                  <text fg={theme.textMuted}>{starter().summary}</text>
+                  {starter()
+                    .files.slice(0, 3)
+                    .map((file) => (
+                      <text fg={theme.textMuted}>{file}</text>
+                    ))}
+                </box>
+              )}
+            </Show>
           </SidebarSection>
 
           <SidebarSection title="调用诊断">
@@ -199,6 +255,7 @@ export function PaperRunDashboard() {
   const [capabilities, setCapabilities] = createSignal<ResearchCapability[]>([])
   const [health, setHealth] = createSignal<PaperWorkbenchHealthInput>({})
   const [error, setError] = createSignal<string>()
+  const [notice, setNotice] = createSignal<string>()
   const [previewOpened, setPreviewOpened] = createSignal(false)
   let monitor: PaperRunLiveMonitor | undefined
 
@@ -290,6 +347,7 @@ export function PaperRunDashboard() {
       </box>
 
       <Show when={error()}>{(message) => <text fg={theme.error}>{message()}</text>}</Show>
+      <Show when={notice()}>{(message) => <text fg={theme.accent}>{message()}</text>}</Show>
 
       <Show when={state()} fallback={<text fg={theme.textMuted}>正在读取 PaperRun...</text>}>
         {(view) => (
@@ -306,7 +364,38 @@ export function PaperRunDashboard() {
                 </box>
                 <box flexDirection="row" gap={2} flexWrap="wrap">
                   {view().controls.map((control) => (
-                    <text fg={control.enabled ? (control.danger ? theme.error : theme.accent) : theme.textMuted}>
+                    <text
+                      fg={control.enabled ? (control.danger ? theme.error : theme.accent) : theme.textMuted}
+                      onMouseUp={() => {
+                        if (!control.enabled) return
+                        const action =
+                          control.kind === "experiment_starter"
+                            ? requestPaperWorkbenchExperimentStarterApply({
+                                baseUrl: sdk.url,
+                                directory: sdk.directory,
+                                fetch: sdk.fetch,
+                                runID: route.runID,
+                              })
+                            : control.kind === "experiment_run"
+                              ? requestPaperWorkbenchExperimentProtocolRun({
+                                  baseUrl: sdk.url,
+                                  directory: sdk.directory,
+                                  fetch: sdk.fetch,
+                                  runID: route.runID,
+                                })
+                              : undefined
+                        if (!action) return
+                        void action
+                          .then((result) => {
+                            setError(undefined)
+                            setNotice(result.message)
+                          })
+                          .catch((cause) => {
+                            setNotice(undefined)
+                            setError(cause instanceof Error ? cause.message : "PaperRun 操作失败")
+                          })
+                      }}
+                    >
                       {control.label}
                     </text>
                   ))}
@@ -393,6 +482,25 @@ export function PaperRunDashboard() {
                     <text fg={theme.textMuted}>{item.message}</text>
                   </box>
                 ))}
+              </box>
+
+              <box flexDirection="column" gap={0}>
+                <text fg={theme.textMuted}>实验环境</text>
+                <box flexDirection="row" gap={2} flexWrap="wrap">
+                  <text fg={view().experiment_environment.status === "blocked" ? theme.error : theme.accent}>
+                    {view().experiment_environment.status_label}
+                  </text>
+                  <text fg={theme.textMuted}>{view().experiment_environment.gpu_mode}</text>
+                  <text fg={theme.textMuted}>{view().experiment_environment.cpu}</text>
+                </box>
+                <text fg={theme.textMuted}>工作区 {view().experiment_environment.workspace}</text>
+                <box flexDirection="row" gap={2} flexWrap="wrap">
+                  {view().experiment_environment.groups.map((group) => (
+                    <text fg={group.status === "blocked" || group.status === "missing" ? theme.error : group.status === "optional_missing" ? theme.warning : theme.textMuted}>
+                      {group.label} {group.status_label} {group.available}/{group.tools.length}
+                    </text>
+                  ))}
+                </box>
               </box>
 
               <Show when={view().capability_health.length > 0}>

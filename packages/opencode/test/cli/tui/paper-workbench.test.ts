@@ -20,7 +20,8 @@ describe("TUI PaperRun workbench", () => {
     expect(request.paper_files).toEqual(["notes/draft.pdf"])
     expect(request.dataset_paths).toEqual(["data/results.csv"])
     expect(request.experiment_logs).toEqual(["logs/run.log"])
-    expect(request.target_profile).toBe("nature-paper")
+    expect(request.target_profile).toBe("cjc-paper")
+    expect(request.target_journal).toBe("中国计算机学报")
     expect(request.language).toBe("en-US")
     expect(request.quality_mode).toBe("reviewable_bundle")
     expect(request.storage_scope).toBe("home")
@@ -30,7 +31,8 @@ describe("TUI PaperRun workbench", () => {
     const request = parsePaperWorkbenchPrompt("--profile nature-paper --submission 基于仓库生成投稿候选论文")
 
     expect(request.topic).toBe("基于仓库生成投稿候选论文")
-    expect(request.target_profile).toBe("nature-paper")
+    expect(request.target_profile).toBe("cjc-paper")
+    expect(request.target_journal).toBe("中国计算机学报")
     expect(request.budget_tier).toBe("submission")
     expect(request.quality_mode).toBe("submission_candidate")
     expect(request.language).toBe("zh-CN")
@@ -96,7 +98,7 @@ describe("TUI PaperRun workbench", () => {
     expect(request.target_journal_url).toBe("https://cjc.ict.ac.cn/")
   })
 
-  test("keeps unknown journal selection as custom-journal for runtime profile generation", () => {
+  test("keeps unknown journal selection on the CJC-only active profile", () => {
     const request = parsePaperWorkbenchPrompt({
       input: "为新期刊准备投稿草稿",
       parts: [],
@@ -104,8 +106,8 @@ describe("TUI PaperRun workbench", () => {
       target_journal_url: "https://example.org/authors",
     })
 
-    expect(request.target_profile).toBe("custom-journal")
-    expect(request.target_journal).toBe("Journal of Unknown Systems")
+    expect(request.target_profile).toBe("cjc-paper")
+    expect(request.target_journal).toBe("中国计算机学报")
   })
 
   test("classifies attached files into PaperRun material inputs", () => {
@@ -317,6 +319,7 @@ describe("TUI PaperRun workbench", () => {
           runtimes: [
             { id: "python", label: "Python", status: "available", version: "Python 3.12.0" },
             { id: "bun", label: "Bun", status: "available", version: "1.3.13" },
+            { id: "docker", label: "Docker", status: "optional_missing", impact: "Container reproduction gate is unavailable." },
           ],
         },
         experiment_environment: {
@@ -382,6 +385,7 @@ describe("TUI PaperRun workbench", () => {
     expect(state.panels.map((panel) => panel.label)).toContain("Agent Tree")
     expect(state.panels.map((panel) => panel.label)).toContain("Agent Team")
     expect(state.panels.map((panel) => panel.label)).toContain("Source Ledger")
+    expect(state.panels.map((panel) => panel.label)).toContain("实验环境")
     expect(state.sidebar.cost.formatted_total).toBe("$0.42")
     expect(state.sidebar.cost.last_call_tokens).toBe(1500)
     expect(state.sidebar.outline.source).toBe("draft")
@@ -416,7 +420,23 @@ describe("TUI PaperRun workbench", () => {
     expect(state.sidebar.diagnostics.recent_calls[0]!.name).toBe("model.writer")
     expect(state.sidebar.machine.gpu_mode).toBe("CPU-only")
     expect(state.sidebar.machine.tool_versions).toContain("Python: Python 3.12.0")
+    expect(state.sidebar.machine.runtime_tools).toContain("Python: Python 3.12.0")
+    expect(state.sidebar.machine.compiler_tools).toContain("gcc: gcc 13.2.0")
+    expect(state.sidebar.machine.virtualization_tools).toContain("Docker: 可选缺失")
+    expect(state.sidebar.machine.optional_missing_tools).toContain("Docker")
     expect(state.sidebar.machine.optional_missing).toBe(1)
+    expect(state.experiment_environment).toMatchObject({
+      status: "available",
+      status_label: "可用",
+      gpu_mode: "CPU-only",
+      workspace: "E:/Project/paper_fucker",
+    })
+    expect(state.experiment_environment.groups.map((group) => group.label)).toEqual(["GPU", "运行时", "编译器", "容器 / 虚拟化"])
+    expect(state.experiment_environment.groups.find((group) => group.id === "virtualization")).toMatchObject({
+      status: "optional_missing",
+      available: 0,
+      optional_missing: 1,
+    })
     expect(state.controls.map((control) => control.label)).toEqual([
       "发送指导",
       "继续运行",

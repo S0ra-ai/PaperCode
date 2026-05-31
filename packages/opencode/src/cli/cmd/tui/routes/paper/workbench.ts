@@ -258,10 +258,52 @@ export interface PaperRunSidebarState {
     gpu_mode: string
     gpu_devices: string[]
     tool_versions: string[]
+    gpu_tools: string[]
+    compiler_tools: string[]
+    runtime_tools: string[]
+    virtualization_tools: string[]
+    optional_missing_tools: string[]
     available: number
     optional_missing: number
     blocked: number
   }
+}
+
+export interface PaperExperimentEnvironmentToolState {
+  id: string
+  label: string
+  status: string
+  status_label: string
+  version?: string
+  path?: string
+  impact?: string
+}
+
+export interface PaperExperimentEnvironmentGroupState {
+  id: "gpu" | "runtime" | "compiler" | "virtualization"
+  label: string
+  status: string
+  status_label: string
+  available: number
+  optional_missing: number
+  blocked: number
+  missing: number
+  tools: PaperExperimentEnvironmentToolState[]
+}
+
+export interface PaperExperimentEnvironmentPanelState {
+  status: string
+  status_label: string
+  captured_at?: string
+  workspace: string
+  run_root: string
+  os: string
+  cpu: string
+  memory: string
+  disk?: string
+  gpu_mode: string
+  notes: string[]
+  groups: PaperExperimentEnvironmentGroupState[]
 }
 
 export interface PaperDashboardState {
@@ -288,6 +330,7 @@ export interface PaperDashboardState {
   controls: PaperWorkbenchControl[]
   model_roles: PaperWorkbenchModelRoleState[]
   model_workbench: PaperWorkbenchModelWorkbenchState
+  experiment_environment: PaperExperimentEnvironmentPanelState
   environment_status: PaperEnvironmentStatus[]
   capability_health: PaperWorkbenchCapabilityHealthState[]
   pause_questions: Array<{
@@ -356,8 +399,18 @@ const HEALTH_STATUS_LABELS: Record<string, string> = {
   ok: "正常",
   ready: "就绪",
   missing: "缺失",
+  optional_missing: "可选缺失",
+  blocked: "阻断",
   disabled: "未启用",
   unavailable: "不可用",
+  unknown: "未知",
+}
+
+const ENVIRONMENT_STATUS_LABELS: Record<string, string> = {
+  available: "可用",
+  optional_missing: "可选缺失",
+  missing: "缺失",
+  blocked: "阻断",
   unknown: "未知",
 }
 
@@ -940,7 +993,7 @@ function createPaperEnvironmentStatus(
         : "optional_missing",
       message: ["installed", "enabled", "ok"].includes(skill["nature-paper"] ?? skill["skill.nature-paper"] ?? "")
         ? "已安装"
-        : "未检测到本机 skill；generic-preprint 仍可运行。",
+        : "未检测到本机 skill；中国计算机学报主流程仍可运行。",
       next_action: "运行模型/环境工作台的 skill 检查，或重新执行 init 安装内置 skill。",
     },
     optionalTool("pandoc", "Pandoc", "缺失时 Markdown/LaTeX/DOCX 互转会降级。"),
@@ -1013,6 +1066,196 @@ function formatBytes(value: unknown) {
     index++
   }
   return `${amount.toFixed(index === 0 ? 0 : 1)} ${units[index]}`
+}
+
+type MachineCapability = {
+  id?: string
+  label?: string
+  status: string
+  version?: string
+  path?: string
+  impact?: string
+}
+
+const VIRTUALIZATION_TOOL_IDS = new Set(["docker", "wsl", "hyperv", "virtualbox", "vmware", "conda"])
+const MACHINE_TOOL_PRIORITY = [
+  "python",
+  "bun",
+  "node",
+  "docker",
+  "wsl",
+  "conda",
+  "uv",
+  "pip",
+  "nvcc",
+  "cuda",
+  "rocm",
+  "cmake",
+  "gcc",
+  "clang",
+  "cl",
+  "ninja",
+  "make",
+  "rust",
+  "go",
+  "java",
+  "hyperv",
+  "virtualbox",
+  "vmware",
+]
+
+function machineToolSort(left: MachineCapability, right: MachineCapability) {
+  const leftId = left.id ?? ""
+  const rightId = right.id ?? ""
+  const leftIndex = MACHINE_TOOL_PRIORITY.indexOf(leftId)
+  const rightIndex = MACHINE_TOOL_PRIORITY.indexOf(rightId)
+  if (leftIndex !== rightIndex) return (leftIndex === -1 ? 999 : leftIndex) - (rightIndex === -1 ? 999 : rightIndex)
+  return machineToolName(left).localeCompare(machineToolName(right))
+}
+
+function compactMachineVersion(value?: string) {
+  if (!value) return undefined
+  const first = value
+    .split("|")
+    .map((item) => item.trim())
+    .find(Boolean)
+  return first ? first.slice(0, 72) : undefined
+}
+
+function machineToolLine(tool: MachineCapability) {
+  const label = machineToolName(tool)
+  const version = compactMachineVersion(tool.version)
+  if (tool.status === "available") return `${label}: ${version ?? "可用"}`
+  if (tool.status === "blocked") return `${label}: 阻断`
+  if (tool.status === "missing") return `${label}: 缺失`
+  return `${label}: 可选缺失`
+}
+
+function machineToolName(tool: MachineCapability) {
+  return tool.label ?? tool.id ?? "unknown"
+}
+
+function availableMachineToolLine(tool: MachineCapability) {
+  return tool.status === "available" ? machineToolLine(tool) : undefined
+}
+
+function machineToolState(tool: MachineCapability): PaperExperimentEnvironmentToolState {
+  const id = tool.id ?? machineToolName(tool)
+  return {
+    id,
+    label: machineToolName(tool),
+    status: tool.status,
+    status_label: ENVIRONMENT_STATUS_LABELS[tool.status] ?? tool.status,
+    version: compactMachineVersion(tool.version),
+    path: tool.path,
+    impact: tool.impact,
+  }
+}
+
+function machineToolGroup(
+  id: PaperExperimentEnvironmentGroupState["id"],
+  label: string,
+  tools: MachineCapability[],
+): PaperExperimentEnvironmentGroupState {
+  const sortedTools = [...tools].sort(machineToolSort).map(machineToolState)
+  const count = (status: string) => sortedTools.filter((tool) => tool.status === status).length
+  const blocked = count("blocked")
+  const missing = count("missing")
+  const optionalMissing = count("optional_missing")
+  const available = count("available")
+  const status =
+    blocked > 0
+      ? "blocked"
+      : missing > 0
+        ? "missing"
+        : optionalMissing > 0
+          ? "optional_missing"
+          : available > 0
+            ? "available"
+            : "unknown"
+  return {
+    id,
+    label,
+    status,
+    status_label: ENVIRONMENT_STATUS_LABELS[status] ?? status,
+    available,
+    optional_missing: optionalMissing,
+    blocked,
+    missing,
+    tools: sortedTools,
+  }
+}
+
+function machineToolSets(machine: PaperRunSnapshot["diagnostics"]["machine_profile"] | undefined) {
+  const runtimes = (machine?.runtimes ?? []) as MachineCapability[]
+  const compilers = (machine?.compilers ?? []) as MachineCapability[]
+  const gpuTools = machine
+    ? ([
+        { ...machine.gpu.cuda, id: machine.gpu.cuda.id ?? "cuda", label: machine.gpu.cuda.label ?? "CUDA" },
+        { ...machine.gpu.rocm, id: machine.gpu.rocm.id ?? "rocm", label: machine.gpu.rocm.label ?? "ROCm" },
+      ] as MachineCapability[])
+    : []
+  const virtualizationTools = runtimes.filter((tool) => VIRTUALIZATION_TOOL_IDS.has(tool.id ?? ""))
+  const runtimeTools = runtimes.filter((tool) => !VIRTUALIZATION_TOOL_IDS.has(tool.id ?? ""))
+  return {
+    runtimeTools,
+    compilers,
+    gpuTools,
+    virtualizationTools,
+    allTools: [...runtimeTools, ...compilers, ...virtualizationTools, ...gpuTools],
+  }
+}
+
+function environmentOverallStatus(environment: PaperRunSnapshot["diagnostics"]["experiment_environment"] | undefined) {
+  if (!environment) return "unknown"
+  if (environment.status) return environment.status
+  if (environment.blocked?.length) return "blocked"
+  if (environment.missing?.length) return "missing"
+  return "available"
+}
+
+function createExperimentEnvironmentPanel(snapshot: PaperRunSnapshot): PaperExperimentEnvironmentPanelState {
+  const machine = snapshot.diagnostics.machine_profile
+  const environment = snapshot.diagnostics.experiment_environment
+  const tools = machineToolSets(machine)
+  if (!machine || !environment) {
+    return {
+      status: "unknown",
+      status_label: "未知",
+      workspace: snapshot.workspace,
+      run_root: String(snapshot.diagnostics.runtime_root ?? ""),
+      os: "未检测",
+      cpu: "未检测",
+      memory: "未检测",
+      gpu_mode: "未检测",
+      notes: ["尚未采集本机实验环境。"],
+      groups: [
+        machineToolGroup("gpu", "GPU", []),
+        machineToolGroup("runtime", "运行时", []),
+        machineToolGroup("compiler", "编译器", []),
+        machineToolGroup("virtualization", "容器 / 虚拟化", []),
+      ],
+    }
+  }
+  return {
+    status: environmentOverallStatus(environment),
+    status_label: ENVIRONMENT_STATUS_LABELS[environmentOverallStatus(environment)] ?? environmentOverallStatus(environment),
+    captured_at: machine.captured_at,
+    workspace: machine.workspace,
+    run_root: machine.default_run_root,
+    os: `${machine.os.platform} ${machine.os.release} ${machine.os.arch}`,
+    cpu: `${machine.cpu.model} / ${machine.cpu.cores} cores`,
+    memory: `${formatBytes(machine.memory.free_bytes)} free / ${formatBytes(machine.memory.total_bytes)} total`,
+    disk: machine.disk ? `${formatBytes(machine.disk.free_bytes)} free / ${formatBytes(machine.disk.total_bytes)} total` : undefined,
+    gpu_mode: machine.gpu.mode === "gpu" ? "GPU" : "CPU-only",
+    notes: environment.notes ?? [],
+    groups: [
+      machineToolGroup("gpu", "GPU", tools.gpuTools),
+      machineToolGroup("runtime", "运行时", tools.runtimeTools),
+      machineToolGroup("compiler", "编译器", tools.compilers),
+      machineToolGroup("virtualization", "容器 / 虚拟化", tools.virtualizationTools),
+    ],
+  }
 }
 
 function arrayValue(value: unknown) {
@@ -1213,7 +1456,7 @@ export function createPaperRunSidebarState(snapshot: PaperRunSnapshot): PaperRun
   const code = objectValue(snapshot.diagnostics.code_understanding)
   const machine = snapshot.diagnostics.machine_profile
   const environment = snapshot.diagnostics.experiment_environment
-  const toolPriority = ["python", "bun", "node", "docker", "nvcc", "cuda", "cmake", "gcc", "clang"]
+  const machineTools = machineToolSets(machine)
   const recentAgents = nodes.slice(-4).map((agent) => ({
     id: agent.agent_id,
     role: agent.role,
@@ -1272,20 +1515,26 @@ export function createPaperRunSidebarState(snapshot: PaperRunSnapshot): PaperRun
             run_root: machine.default_run_root,
             gpu_mode: machine.gpu.mode === "gpu" ? "GPU" : "CPU-only",
             gpu_devices: machine.gpu.devices.map((device) => `${device.vendor} ${device.name}`),
-            tool_versions: [
-              ...(machine.runtimes ?? []),
-              ...(machine.compilers ?? []),
-              machine.gpu.cuda,
-              machine.gpu.rocm,
-            ]
+            tool_versions: machineTools.allTools
               .filter((tool) => tool.status === "available" && tool.version)
-              .sort((left, right) => {
-                const leftIndex = toolPriority.indexOf(left.id)
-                const rightIndex = toolPriority.indexOf(right.id)
-                return (leftIndex === -1 ? 999 : leftIndex) - (rightIndex === -1 ? 999 : rightIndex)
-              })
+              .sort(machineToolSort)
               .slice(0, 6)
-              .map((tool) => `${tool.label}: ${tool.version}`),
+              .map(machineToolLine),
+            gpu_tools: machineTools.gpuTools.sort(machineToolSort).map(machineToolLine),
+            compiler_tools: machineTools.compilers
+              .map(availableMachineToolLine)
+              .filter((item): item is string => Boolean(item))
+              .slice(0, 6),
+            runtime_tools: machineTools.runtimeTools
+              .map(availableMachineToolLine)
+              .filter((item): item is string => Boolean(item))
+              .slice(0, 6),
+            virtualization_tools: machineTools.virtualizationTools.sort(machineToolSort).map(machineToolLine),
+            optional_missing_tools: machineTools.allTools
+              .filter((tool) => tool.status === "optional_missing")
+              .sort(machineToolSort)
+              .slice(0, 8)
+              .map(machineToolName),
             available: environment.available.length,
             optional_missing: environment.optional_missing.length,
             blocked: environment.blocked.length,
@@ -1299,6 +1548,11 @@ export function createPaperRunSidebarState(snapshot: PaperRunSnapshot): PaperRun
             gpu_mode: "未检测",
             gpu_devices: [],
             tool_versions: [],
+            gpu_tools: [],
+            compiler_tools: [],
+            runtime_tools: [],
+            virtualization_tools: [],
+            optional_missing_tools: [],
             available: 0,
             optional_missing: 0,
             blocked: 0,
@@ -1338,6 +1592,7 @@ export function createPaperRunDashboardState(
       { id: "sources", label: "Source Ledger", count: snapshot.source_ledger.length },
       { id: "claims", label: "Claim Ledger", count: snapshot.claim_ledger.length },
       { id: "experiments", label: "实验复现" },
+      { id: "experiment_environment", label: "实验环境", count: snapshot.diagnostics.experiment_environment?.available.length ?? 0 },
       { id: "diagnostics", label: "模型/工具/成本诊断", count: snapshot.diagnostics.counts?.artifacts },
       { id: "preview", label: "Preview" },
       { id: "export", label: "Export" },
@@ -1345,6 +1600,7 @@ export function createPaperRunDashboardState(
     controls: createLiveControls(snapshot, controller),
     model_roles: modelRoleState(snapshot.diagnostics.model_roles ?? {}),
     model_workbench: modelWorkbenchState(snapshot),
+    experiment_environment: createExperimentEnvironmentPanel(snapshot),
     environment_status: createPaperEnvironmentStatus(snapshot, options.health),
     capability_health: capabilityHealthState(options.capabilities, options.health),
     pause_questions: snapshot.pause_questions.map((question) => ({
