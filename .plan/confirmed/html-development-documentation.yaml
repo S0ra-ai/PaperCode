@@ -1,0 +1,132 @@
+id: html-development-documentation
+title: 编写 HTML 版开发文档
+status: done
+priority: medium
+owner: paper-fucker-dev-agent
+tags:
+- docs
+- architecture
+- developer-guide
+depends_on:
+- mcp-tool-binding-test-isolation
+- subscription-provider-paper-acceptance
+- license-mpl-2-0
+description: 在当前 0.13.1-dev 收尾完成后，新增 docs/development/ 多文件 HTML 手册，作为 Paper Fucker
+  内部开发文档。文档需用 HTML 编写，清晰说明架构、设计、代码关联、模块边界、PaperRun 流程、TUI/模型/agent/MCP/skills/preview/export
+  修改入口、测试与维护方法。
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: audit-code-architecture
+  title: 审计当前代码架构与模块入口
+  status: done
+  owner: paper-fucker-dev-agent
+  depends_on: []
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-27T02:04:36.052109'
+      level: info
+      message: 开始审计 Paper Core、TUI、模型、Agent/MCP/Skills、Preview/export 与测试维护入口。
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-27T02:04:56.712063'
+      level: info
+      message: 已审计并写入手册：packages/opencode/src/paper 为论文领域内核；TUI 位于 packages/opencode/src/cli/cmd/tui；Preview
+        位于 packages/preview；research-tools 为 Python/MCP/tool bridge；运行事实为 JSONL +
+        SQLite。
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-27T02:04:56.712063'
+    attempt_count: 2
+  meta: {}
+- id: design-html-doc-structure
+  title: 设计 HTML 文档结构与导航
+  status: done
+  owner: paper-fucker-dev-agent
+  depends_on: []
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-27T00:09:24.576126'
+      level: info
+      message: 用户补充要求：开发文档应是多文件手册，而不是单个 HTML。任务输出需调整为 docs/development/ 目录，包括 index.html
+        与架构、模块、流程、TUI、模型、Agent/MCP/Skill、Preview/Export、测试维护等分章节页面。
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-27T02:04:37.371417'
+      level: info
+      message: 开始设计 docs/development/ 多文件 HTML 手册结构。
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-27T02:04:58.048798'
+      level: info
+      message: 手册设计为 docs/development/ 多文件静态 HTML：index、architecture、paperrun-flow、tui-models、agents-capabilities、preview-export、testing-maintenance，以及
+        assets/style.css 统一样式。
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-27T02:04:58.048798'
+    attempt_count: 2
+  meta: {}
+- id: write-development-html
+  title: 编写 docs/development/ 多文件 HTML 手册
+  status: done
+  owner: paper-fucker-dev-agent
+  depends_on: []
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-27T02:04:38.709369'
+      level: info
+      message: 开始编写 HTML 手册页面与样式。
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-27T02:04:59.378058'
+      level: info
+      message: 已创建 docs/development/ 手册页面，覆盖架构图、PaperRun stage graph、模型库存语义、provider
+        注册、递归 Agent、能力包、Preview/export、测试与维护清单。
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-27T02:04:59.378058'
+    attempt_count: 2
+  meta: {}
+- id: link-and-validate-doc
+  title: 补充内部文档入口并验证链接/版本/格式
+  status: done
+  owner: paper-fucker-dev-agent
+  depends_on: []
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-27T02:04:40.043114'
+      level: info
+      message: 开始补充内部文档入口并验证链接、版本和格式。
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-27T02:05:00.716161'
+      level: info
+      message: 已在 docs/internal/README.md 增加开发手册入口；链接检查 development html links ok；scripts/check-readme-version.ps1
+        通过；scripts/check-changelog-format.ps1 -IncludeArchives 通过；git diff --check
+        通过。
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-27T02:05:00.716161'
+    attempt_count: 2
+  meta: {}
+outputs:
+- type: file
+  path: docs/development/index.html
+  description: HTML development documentation index
+- type: file
+  path: docs/development/assets/style.css
+  description: HTML development documentation stylesheet
+- type: file
+  path: docs/internal/README.md
+  description: internal documentation index update
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-27T00:05:43.225264'
+  updated_at: '2026-05-27T02:07:03.184139'
+  version: '1'

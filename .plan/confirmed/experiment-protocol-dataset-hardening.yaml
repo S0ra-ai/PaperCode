@@ -1,0 +1,131 @@
+id: experiment-protocol-dataset-hardening
+title: 代码实验论文的数据集与实验协议硬化
+status: done
+priority: high
+owner: paper-fucker-dev-agent
+tags:
+- paper-run
+- experiment
+- dataset
+- reproduction
+- quality
+depends_on:
+- live-model-code-paper-quality-loop
+description: 基于 Paper Fucker 自生成论文与 DeepSeek 复评结果，补强计算机类论文必需的数据集说明、实验协议、metric definition、baseline/ablation
+  配置、运行环境与复现诊断，避免 final draft 只报告数值而缺少可复现实验上下文。版本线建议 0.14.1-dev。
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: audit-protocol-gaps
+  title: 审计当前 DataPlan、ExperimentPlan、ResultReport 与 DraftPaper 的协议缺口
+  status: done
+  owner: paper-fucker-dev-agent
+  depends_on: []
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-27T02:43:42.552849'
+      level: info
+      message: 开始审计 DataPlan、ExperimentPlan、ResultReport、DraftPaper 与 live benchmark
+        的数据集/实验协议表达。
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-27T02:46:53.123007'
+      level: info
+      message: 审计完成：DataPlan 未从 dataset_paths 或实验 manifest 形成 dataset candidate；DraftPaper
+        未渲染 ExperimentPlan 的指标定义、baseline/ablation、资源预算和降级策略。
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-27T02:46:53.123007'
+    attempt_count: 2
+  meta: {}
+- id: extend-benchmark-evidence
+  title: 扩展 benchmark 实验证据，记录数据集和协议信息
+  status: done
+  owner: paper-fucker-dev-agent
+  depends_on:
+  - audit-protocol-gaps
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-27T02:47:04.146769'
+      level: info
+      message: 开始扩展 benchmark evidence，使 final 场景包含本地 benchmark dataset 和 ExperimentEvidenceManifest
+        datasets。
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-27T02:47:14.199611'
+      level: info
+      message: 已扩展 scripts/live-paper-quality-benchmark.ts：final 场景写入 benchmark-dataset.jsonl，并在
+        ExperimentEvidenceManifest.v1 中登记 verified open dataset candidate。
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-27T02:47:14.199611'
+    attempt_count: 2
+  meta: {}
+- id: render-dataset-protocol-sections
+  title: 在 DraftPaper 中渲染数据集、指标定义、baseline/ablation 和环境信息
+  status: done
+  owner: paper-fucker-dev-agent
+  depends_on:
+  - extend-benchmark-evidence
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-27T02:47:24.111981'
+      level: info
+      message: 开始扩展 DraftPaper 渲染：数据集可用性、指标定义、baseline/ablation、资源预算和 downgrade policy。
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-27T02:47:33.441687'
+      level: info
+      message: 已扩展 DraftPaper：新增 Data And Availability 与 Evaluation Protocol 章节；authoring
+        loop 传入 data_plan 和 experiment_plan；orchestrator 从 dataset_paths/ExperimentEvidenceManifest
+        构造 verified dataset candidates。
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-27T02:47:33.441687'
+    attempt_count: 2
+  meta: {}
+- id: rerun-paperfucker-review
+  title: 重新运行 PaperRun 与真实模型复评
+  status: done
+  owner: paper-fucker-dev-agent
+  depends_on:
+  - render-dataset-protocol-sections
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-27T02:49:54.609280'
+      level: info
+      message: 开始重新运行 final/code PaperRun，并用 DeepSeek API 复评生成论文包。
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-27T02:53:03.885523'
+      level: info
+      message: 已重新运行 PaperRun：final run-9641e15c-80f0-4968-86dc-56f6e3370ec8 成功 final
+        export，code run-6f2b4efe-f349-46cd-9ae3-54b4bad0facb 正确阻断 reproduction_failure。DeepSeek
+        API 已复评并更新 reports/live-paper-generation-review.md。
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-27T02:53:03.885523'
+    attempt_count: 2
+  meta: {}
+outputs:
+- type: file
+  path: packages/opencode/src/paper/research/writing/draft.ts
+  description: DraftPaper data/protocol sections enhanced
+- type: file
+  path: scripts/live-paper-quality-benchmark.ts
+  description: Benchmark includes dataset/protocol evidence
+- type: file
+  path: reports/live-paper-generation-review.md
+  description: Updated self-review after dataset/protocol hardening
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-27T02:43:25.302202'
+  updated_at: '2026-05-27T02:53:43.748228'
+  version: '1'

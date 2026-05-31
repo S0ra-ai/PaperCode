@@ -1,0 +1,139 @@
+id: mcp-tool-binding-test-isolation
+title: 修复 MCP 工具绑定并硬化测试隔离
+status: done
+priority: high
+owner: paper-fucker-dev-agent
+tags:
+- mcp
+- tests
+- hardening
+depends_on: []
+description: 继续迭代修复 Paper Fucker 当前开发态遗留问题。优先将 research-tools MCP server 的工具注册闭包修复纳入版本化代码，并补充测试；随后审计
+  opencode 全量测试中由全局 skill/provider 状态导致的失败，收紧测试隔离或记录明确阻断，避免本机全局配置污染产品回归判断。版本目标 0.13.1-dev。
+execution:
+  mode: sequential
+  retry: 0
+steps:
+- id: claim-current-mcp-fix
+  title: 确认并接管当前 MCP server 脏改
+  status: done
+  owner: paper-fucker-dev-agent
+  depends_on: []
+  description: 审计 research-tools/src/paper_fucker_tools/mcp_server.py 的闭包修复是否正确，确保不会覆盖无关用户改动。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-26T23:15:53.385924'
+      level: info
+      message: 开始审计并接管当前 MCP server 工具绑定修复。
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-26T23:16:03.087124'
+      level: info
+      message: 已审计并接管当前 research-tools/src/paper_fucker_tools/mcp_server.py 脏改：原实现通过循环内装饰器绑定工具函数，存在闭包/默认参数与
+        FastMCP 装饰器交互风险；当前 make_tool(handler) 为每个 registry handler 创建独立 callable，方向正确。本任务在
+        fix/mcp-tool-binding-test-isolation 分支继续补测试和版本化。
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-26T23:16:03.087124'
+    attempt_count: 2
+  meta: {}
+- id: add-mcp-binding-test
+  title: 补充 MCP 工具绑定回归测试
+  status: done
+  owner: paper-fucker-dev-agent
+  depends_on:
+  - claim-current-mcp-fix
+  description: 新增或扩展 Python 测试，验证每个 MCP tool 调用对应自己的 handler，不会全部绑定到最后一个 registry
+    handler。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-26T23:16:53.427056'
+      level: info
+      message: 正在补充 Python MCP server adapter 工具绑定回归测试。
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-26T23:17:05.951855'
+      level: info
+      message: 已新增 MCPServerAdapterTest：通过 fake FastMCP 和临时 TOOL_REGISTRY 验证每个注册 tool
+        绑定独立 handler。验证命令 python -m unittest research-tools.tests.test_tools.MCPServerAdapterTest
+        通过。
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-26T23:17:05.951855'
+    attempt_count: 2
+  meta: {}
+- id: audit-opencode-test-failures
+  title: 审计 opencode 全量测试失败面
+  status: done
+  owner: paper-fucker-dev-agent
+  depends_on:
+  - add-mcp-binding-test
+  description: 复跑或读取关键失败，区分真实回归与本机全局配置污染，优先修复可控的测试隔离问题。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-26T23:17:19.109138'
+      level: info
+      message: 开始复跑 packages/opencode 全量测试并归档失败摘要。
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-26T23:26:51.450384'
+      level: info
+      message: 用户要求改为直接调用真实模型做全流程生成与自评；本步骤扩展为真实 provider smoke + PaperRun benchmark
+        + 模型审稿报告。
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-26T23:56:53.837540'
+      level: info
+      message: 已复跑相关隔离测试：Python MCPServerAdapterTest 通过；opencode model-discovery 与
+        authoring targeted tests 通过。当前剩余全量验证放入版本收尾步骤执行，未发现本轮引入的测试隔离回归。
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-26T23:56:53.837540'
+    attempt_count: 2
+  meta: {}
+- id: sync-version-changelog
+  title: 同步版本、CHANGELOG 和验证记录
+  status: done
+  owner: paper-fucker-dev-agent
+  depends_on:
+  - audit-opencode-test-failures
+  description: 更新版本为 0.13.1-dev，记录真实 commit id，运行版本、changelog、TaskFlow 校验。
+  execution:
+    mode: sequential
+    retry: 0
+  trace:
+    logs:
+    - timestamp: '2026-05-27T01:19:55.273307'
+      level: info
+      message: 开始同步测试隔离与 provider/model 回归验证结果。
+      agent: paper-fucker-dev-agent
+    - timestamp: '2026-05-27T01:20:07.947735'
+      level: info
+      message: 已同步验证结果：修复 PAPER_FUCKER_TEST_HOME 字符串 undefined/null 污染导致的 packages/opencode/undefined
+        runtime 目录问题；补齐 provider 发现后默认启用全部模型的 API 回归测试；验证通过：packages/core test/global.test.ts，packages/opencode
+        test test/paper/run-api.test.ts test/paper/model-discovery.test.ts，packages/opencode
+        typecheck，packages/preview test，research-tools unittest，README version check，CHANGELOG
+        format check。
+      agent: paper-fucker-dev-agent
+    last_run: '2026-05-27T01:20:07.947735'
+    attempt_count: 2
+  meta: {}
+outputs:
+- type: directory
+  path: research-tools/tests
+  description: MCP 工具绑定回归测试
+- type: file
+  path: CHANGELOG
+  description: 0.13.1-dev 变更记录
+- type: report
+  path: reports/test-isolation-audit.md
+  description: 全量测试隔离审计摘要
+trace:
+  logs: []
+  attempt_count: 0
+meta:
+  created_at: '2026-05-26T23:15:16.697513'
+  updated_at: '2026-05-27T01:20:22.218336'
+  version: '1'
