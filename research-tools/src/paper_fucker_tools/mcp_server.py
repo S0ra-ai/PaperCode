@@ -13,11 +13,14 @@ def create_server():
 
     server = FastMCP("paper_fucker_research_tools")
 
-    for name, handler in TOOL_REGISTRY.items():
+    def make_tool(handler):
+        def tool(input_data: dict | None = None):
+            return handler(input_data or {}).model_dump()
 
-        @server.tool(name=name)
-        def _tool(input_data: dict | None = None, _handler=handler):
-            return _handler(input_data or {}).model_dump()
+        return tool
+
+    for name, handler in TOOL_REGISTRY.items():
+        server.tool(name=name)(make_tool(handler))
 
     return server
 
