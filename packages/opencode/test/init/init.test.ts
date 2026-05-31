@@ -4,7 +4,7 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from "fs/promises"
 import { setTimeout as sleep } from "node:timers/promises"
 import os from "os"
 import path from "path"
-import { diagnoseInit, initPaths, readSecrets, resetInitState, runInitWizard } from "@/paper/init"
+import { defaultResetHome, diagnoseInit, initPaths, readSecrets, resetInitState, resolveInitHome, runInitWizard } from "@/paper/init"
 import { formatDoctorResult, formatInitResult } from "@/paper/init/format"
 
 async function clean(dir: string, attempts = 30): Promise<void> {
@@ -17,6 +17,40 @@ async function clean(dir: string, attempts = 30): Promise<void> {
 }
 
 describe("init wizard", () => {
+  test("ignores stringified empty home environment values", () => {
+    const previousTestHome = process.env.PAPER_FUCKER_TEST_HOME
+    const previousHome = process.env.PAPER_FUCKER_HOME
+    process.env.PAPER_FUCKER_TEST_HOME = "undefined"
+    process.env.PAPER_FUCKER_HOME = "null"
+    try {
+      expect(resolveInitHome()).toBe(path.resolve(os.homedir()))
+      expect(defaultResetHome()).toBe(path.resolve(os.homedir()))
+    } finally {
+      if (previousTestHome === undefined) delete process.env.PAPER_FUCKER_TEST_HOME
+      else process.env.PAPER_FUCKER_TEST_HOME = previousTestHome
+      if (previousHome === undefined) delete process.env.PAPER_FUCKER_HOME
+      else process.env.PAPER_FUCKER_HOME = previousHome
+    }
+  })
+
+  test("prefers explicit valid home over stringified environment values", async () => {
+    const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-init-home-"))
+    const previousTestHome = process.env.PAPER_FUCKER_TEST_HOME
+    const previousHome = process.env.PAPER_FUCKER_HOME
+    process.env.PAPER_FUCKER_TEST_HOME = "undefined"
+    process.env.PAPER_FUCKER_HOME = "null"
+    try {
+      expect(resolveInitHome(dir)).toBe(path.resolve(dir))
+      expect(initPaths(dir).root).toBe(path.join(path.resolve(dir), ".paper_fucker"))
+    } finally {
+      if (previousTestHome === undefined) delete process.env.PAPER_FUCKER_TEST_HOME
+      else process.env.PAPER_FUCKER_TEST_HOME = previousTestHome
+      if (previousHome === undefined) delete process.env.PAPER_FUCKER_HOME
+      else process.env.PAPER_FUCKER_HOME = previousHome
+      await clean(dir)
+    }
+  })
+
   test("uses bounded access by default so first-run init works without Full Access acknowledgement", async () => {
     const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-init-default-"))
     try {

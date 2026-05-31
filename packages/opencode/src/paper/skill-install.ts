@@ -96,7 +96,15 @@ const MANAGED_SKILLS: ManagedSkillSpec[] = [
 ]
 
 function userHome(home?: string) {
-  return path.resolve(home ?? process.env.PAPER_FUCKER_TEST_HOME ?? process.env.PAPER_FUCKER_HOME ?? os.homedir())
+  const normalize = (value: string | undefined) => {
+    if (!value) return undefined
+    const trimmed = value.trim()
+    if (!trimmed || trimmed === "undefined" || trimmed === "null") return undefined
+    return trimmed
+  }
+  return path.resolve(
+    normalize(home) ?? normalize(process.env.PAPER_FUCKER_TEST_HOME) ?? normalize(process.env.PAPER_FUCKER_HOME) ?? os.homedir(),
+  )
 }
 
 export function firstPartySkillPath(skillID: ManagedPaperSkillID, workspace?: string) {
