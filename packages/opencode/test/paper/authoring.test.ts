@@ -2675,6 +2675,52 @@ describe("paper authoring loop", () => {
     expect(formatted).not.toContain("### 实现定位")
   })
 
+  test("adds CJC table width hints for long narrative columns", () => {
+    const draft = {
+      schema_version: "DraftPaper.v1" as const,
+      draft_id: "draft-cjc-table-widths",
+      title: "CJC Table Width Check",
+      created_at: now,
+      version: 1,
+      sections: [
+        buildPlainTestSection("author_information", "作者信息", ""),
+        buildPlainTestSection("abstract", "摘要", "摘要。"),
+        buildPlainTestSection("keywords", "关键词", "排序；复现"),
+        buildPlainTestSection(
+          "research_questions",
+          "研究问题",
+          [
+            "| 编号 | 关注点 | 问题 | 回答章节 |",
+            "| --- | --- | --- | --- |",
+            "| RQ1 | 排序机制 | relevance、claim_coverage 和 recency 的组合能否形成明确的候选论文排序规则？ | 方法 |",
+            "| RQ2 | 特征关联 | 移除 claim_coverage 后，相比完整排序，在排序 nDCG@3 上是否出现前三位排序差异？ | 结果 |",
+          ].join("\n"),
+        ),
+      ],
+      markdown: "",
+      claim_ids: [],
+      applied_guidance_ids: [],
+    }
+    const formatted = formatDraftPaperForProfile(draft, {
+      target_profile: "cjc-paper",
+      ledger: composeClaimLedger({ topic: "CJC Table Width Check", claims: [], now }),
+      data_plan: dataPlan(),
+      result_report: resultReport(),
+    })
+    const lines = formatted.split("\n")
+    const headerIndex = lines.findIndex((line) => line === "| 编号 | 关注点 | 问题 | 回答章节 |")
+    expect(headerIndex).toBeGreaterThanOrEqual(0)
+    const separatorCells = lines[headerIndex + 1]!
+      .slice(1, -1)
+      .split("|")
+      .map((cell) => cell.trim().length)
+
+    expect(lines[headerIndex + 1]).not.toBe("| --- | --- | --- | --- |")
+    expect(separatorCells[2]).toBeGreaterThan(separatorCells[0] * 4)
+    expect(separatorCells[2]).toBeGreaterThan(separatorCells[1] * 4)
+    expect(separatorCells[3]).toBeGreaterThan(separatorCells[0])
+  })
+
   test("does not invent default literature candidates without verified sources", () => {
     const literature = discoverLiterature({
       topic: "Agent team paper generation",
