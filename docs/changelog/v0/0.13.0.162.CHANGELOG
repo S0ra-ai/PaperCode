@@ -1,0 +1,23 @@
+:project       paper_fucker - 可验证论文研究自动化系统
+:author        k1d (https://github.com/ZhuchenZhong)
+:repo
+:desc          记录 0.13.0.162-dev 开发历史归档
+:version       0.13.0.162-dev
+:last_update   2026/05/31
+
+:history
+
+    0.13.0.162-dev - 2026/05/31 (f6240567) [fix/mcp-tool-binding-test-isolation]
+        :brief 修复排序论文附录复现状态与主文结果不一致
+        :fix
+            - fix(authoring): ranking appendix 执行状态先按 experiment id 精确匹配，匹配不到且同角色运行唯一时按角色回退，避免 protocol_id 与 ExperimentRun.experiment_id 不一致时误报缺失
+            - fix(authoring): 本文方法、基线、消融附录状态继续保留多实验保护；只有唯一同角色运行才允许回退，避免多个 baseline 或 ablation 被错配
+        :test
+            - test(authoring): 新增 protocol row id 与 host/container run id 不一致的排序论文回归，断言附录 B 显示本机通过、容器通过
+        :changelog
+            - docs(changelog): 0.13.0.161 开发历史移入 docs/changelog/v0/0.13.0.161.CHANGELOG
+        :checks
+            - targeted tests: npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --timeout 180000 passed
+            - typecheck: npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+            - readme version: scripts/check-readme-version.ps1 passed
+            - changelog format: scripts/check-changelog-format.ps1 -IncludeArchives passed
