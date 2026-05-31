@@ -1,16 +1,16 @@
 ﻿# Autonomous Product Audit
 
-- Generated: 2026-05-31T14:40:02.9249959+08:00
+- Generated: 2026-05-31T15:02:58.5799166+08:00
 - Status: passed
 - Allow active task: True
 
 | Check | Status | Detail |
 | --- | --- | --- |
 | `taskflow-queue` | pass | TaskFlow queue is empty; done=137. |
-| `version-sync` | pass | README version 0.13.0.152-dev matches CHANGELOG latest version. |
+| `version-sync` | pass | README version 0.13.0.153-dev matches CHANGELOG latest version. |
 | `changelog-shape` | pass | CHANGELOG keeps one active colon DSL entry with matching :version, Git Flow branch, and real commit id. |
 | `development-docs` | pass | Development docs check passed for 16 HTML page(s) with render check. |
-| `strict-live-evidence` | pass | focused strict live report proves crawler, HF, topic/code, and final export scenarios for 0.13.0.152-dev. |
+| `strict-live-evidence` | pass | focused strict live report proves crawler, HF, topic/code, and final export scenarios for 0.13.0.153-dev. |
 | `full-workspace-evidence` | warn | Full workspace report has no project version header; focused strict live report remains the current required evidence. |
 | `dangerous-residue` | pass | No dangerous TODO/FIXME/not-implemented/mock residue found in product paper paths. |
 | `brand-surface` | pass | Paper Fucker and PaperRun remain the documented user-visible product surface. |
