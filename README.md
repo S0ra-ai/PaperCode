@@ -114,7 +114,7 @@ Paper Fucker 默认 private-first：
 
 ## 开发文档
 
-多页开发手册位于 `docs/development/index.html`，覆盖架构、PaperRun 流程、模型工作台、实验执行、Preview/export、关键函数和常见修改路径。
+多页开发手册位于 `docs/development/index.html`，包含使用入口、开发指南、架构、PaperRun 流程、模型工作台、实验执行、Preview/export、关键函数和常见修改路径。
 
 ## FAQ
 

@@ -14,20 +14,21 @@
           <span>开发手册</span>
         </div>
         <nav class="nav">
-          <div class="nav-group">Start</div>
+          <div class="nav-group">入门</div>
           <a class="active" href="./index.html">总览</a>
           <a href="./usage-guide.html">使用入口</a>
+          <a href="./development-guide.html">开发指南</a>
           <a href="./development-workflow.html">开发工作流</a>
-          <div class="nav-group">Architecture</div>
+          <div class="nav-group">架构</div>
           <a href="./architecture.html">架构</a>
           <a href="./module-map.html">模块地图</a>
           <a href="./function-reference.html">关键函数索引</a>
-          <div class="nav-group">Runtime</div>
+          <div class="nav-group">运行时</div>
           <a href="./paperrun-flow.html">PaperRun 流程</a>
           <a href="./paper-generation.html">论文生成链路</a>
           <a href="./experiment-execution.html">实验执行链路</a>
           <a href="./preview-export.html">Preview 与导出</a>
-          <div class="nav-group">Workbench</div>
+          <div class="nav-group">工作台</div>
           <a href="./tui-models.html">TUI 与模型</a>
           <a href="./agents-capabilities.html">Agent / MCP / Skills</a>
           <a href="./testing-maintenance.html">测试与维护</a>
@@ -36,6 +37,7 @@
       </aside>
 
       <main class="content">
+        <div class="breadcrumbs"><a href="./index.html">开发手册</a><span>总览</span></div>
         <section class="hero" id="overview">
           <div class="eyebrow">Developer Manual</div>
           <h1>Paper Fucker 开发手册</h1>
@@ -54,6 +56,7 @@
           <h2>阅读路线</h2>
           <div class="toc-list">
             <a href="./usage-guide.html"><strong>使用入口</strong><span>给开发者快速跑通 TUI、模型、工作区、PaperRun、Preview、导出和恢复。</span></a>
+            <a href="./development-guide.html"><strong>开发指南</strong><span>按产品链路定位模块、状态事实、入口层、验证层和质量调优点。</span></a>
             <a href="./architecture.html"><strong>架构</strong><span>说明 TUI、Paper Core、HTTP API、Preview、research tools、schemas 和 run storage 的边界。</span></a>
             <a href="./paperrun-flow.html"><strong>PaperRun 流程</strong><span>解释 intake、stage graph、artifact、ledger、diagnostics、controller 和 SSE 事件。</span></a>
             <a href="./function-reference.html"><strong>关键函数索引</strong><span>按真实调用链定位 create、orchestrator、writing、experiment runner、Preview 和模型路由。</span></a>
@@ -114,6 +117,10 @@
           </ul>
         </section>
 
+        <div class="prev-next">
+          <a href="./usage-guide.html"><span>开始阅读</span>使用入口</a>
+          <a href="./development-guide.html"><span>开发主线</span>开发指南</a>
+        </div>
         <div class="footer">当前手册为开发维护资料。对外首页仍维护根目录 README。</div>
       </main>
 

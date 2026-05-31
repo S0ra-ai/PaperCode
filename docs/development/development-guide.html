@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>开发指南 - Paper Fucker 开发手册</title>
+    <link rel="stylesheet" href="./assets/style.css" />
+  </head>
+  <body>
+    <div class="layout with-toc">
+      <aside class="sidebar">
+        <div class="brand"><strong>Paper Fucker</strong><span>开发手册</span></div>
+        <nav class="nav">
+          <div class="nav-group">入门</div>
+          <a href="./index.html">总览</a>
+          <a href="./usage-guide.html">使用入口</a>
+          <a class="active" href="./development-guide.html">开发指南</a>
+          <a href="./development-workflow.html">开发工作流</a>
+          <div class="nav-group">架构</div>
+          <a href="./architecture.html">架构</a>
+          <a href="./module-map.html">模块地图</a>
+          <a href="./function-reference.html">关键函数索引</a>
+          <div class="nav-group">运行时</div>
+          <a href="./paperrun-flow.html">PaperRun 流程</a>
+          <a href="./paper-generation.html">论文生成链路</a>
+          <a href="./experiment-execution.html">实验执行链路</a>
+          <a href="./preview-export.html">Preview 与导出</a>
+          <div class="nav-group">工作台</div>
+          <a href="./tui-models.html">TUI 与模型</a>
+          <a href="./agents-capabilities.html">Agent / MCP / Skills</a>
+          <a href="./testing-maintenance.html">测试与维护</a>
+          <a href="./developer-recipes.html">修改手册</a>
+        </nav>
+      </aside>
+
+      <main class="content">
+        <div class="breadcrumbs"><a href="./index.html">开发手册</a><span>开发指南</span></div>
+        <section class="hero" id="purpose">
+          <div class="eyebrow">Developer Guide</div>
+          <h1>按产品链路修改 Paper Fucker</h1>
+          <p class="lead">
+            本页给维护者提供一条类似 ReadTheDocs 的开发入口：先判断变更属于哪条链路，再定位模块、状态事实、UI 展示、测试和文档同步点。
+          </p>
+        </section>
+
+        <h2 id="workflow">开发参数</h2>
+        <table class="table">
+          <thead><tr><th>参数</th><th>含义</th><th>落点</th></tr></thead>
+          <tbody>
+            <tr><td>目标链路</td><td>TUI、模型、PaperRun、实验、Preview、导出、文档或 release readiness。</td><td>先在 <code>docs/development/module-map.html</code> 找模块边界。</td></tr>
+            <tr><td>状态事实</td><td>用户可见状态必须来自 run、inventory、diagnostics、event 或 snapshot。</td><td>避免只在 UI 中临时拼状态。</td></tr>
+            <tr><td>入口层</td><td>TUI 命令、HTTP API、CLI 自动化、Preview 或 research-tools。</td><td>入口只做编排，领域规则下沉到 Paper Core。</td></tr>
+            <tr><td>验证层</td><td>单测、typecheck、Preview smoke、live benchmark、changelog/readme 检查。</td><td>按风险选择最小但真实的验证集合。</td></tr>
+          </tbody>
+        </table>
+
+        <div class="admonition">
+          <strong>维护原则</strong>
+          Paper Fucker 是 TUI-first 的论文工作台。新增能力应先回答：用户在哪里看到它、状态在哪里持久化、失败时怎么诊断、Preview 是否能实时看到、导出 gate 如何处理。
+        </div>
+
+        <h2 id="modes">三类常见开发模式</h2>
+        <div class="grid">
+          <article class="card">
+            <h3>TUI 表面</h3>
+            <p>修改首页、模型工作台、环境页、目录选择器或命令面时，先更新 route，再补布局 util 和 TUI 快照/行为测试。</p>
+          </article>
+          <article class="card">
+            <h3>PaperRun 核心</h3>
+            <p>新增 stage、artifact、diagnostic 或事件时，先改 schema/run-store，再让 TUI 与 Preview 读取同一份 snapshot。</p>
+          </article>
+          <article class="card">
+            <h3>论文质量</h3>
+            <p>涉及中国计算机学报格式、实验执行、证据 ledger 或 final gate 时，需要用 live benchmark 生成真实导出再人工检查。</p>
+          </article>
+        </div>
+
+        <h2 id="entry-files">入口文件</h2>
+        <table class="table">
+          <thead><tr><th>改动类型</th><th>先看</th><th>再看</th></tr></thead>
+          <tbody>
+            <tr><td>首页与命令</td><td><code>packages/opencode/src/cli/cmd/tui/routes/home.tsx</code></td><td><code>packages/opencode/src/cli/cmd/tui/paper-command-registry.ts</code></td></tr>
+            <tr><td>模型工作台</td><td><code>routes/paper-models.tsx</code></td><td><code>paper/model-inventory.ts</code>、<code>paper/model-router.ts</code></td></tr>
+            <tr><td>PaperRun 创建</td><td><code>paper/run.ts</code></td><td><code>research/runtime/run-store.ts</code>、<code>schemas/research/v1.schema.json</code></td></tr>
+            <tr><td>论文正文</td><td><code>paper/authoring.ts</code></td><td><code>research/writing/draft.ts</code>、<code>research/writing/cjc-profile.ts</code></td></tr>
+            <tr><td>实验执行</td><td><code>research/experiments/</code></td><td><code>research-tools/</code>、<code>paper/machine.ts</code></td></tr>
+            <tr><td>实时监控</td><td><code>packages/preview/src/server.ts</code></td><td><code>packages/preview/src/client.js</code>、TUI live monitor route</td></tr>
+          </tbody>
+        </table>
+
+        <h2 id="quality">质量调优</h2>
+        <div class="swimlane">
+          <div class="lane"><strong>格式</strong><span>中国计算机学报默认输出应包含中文题名、摘要、英文摘要、关键词、引言、相关工作、方法、实验、结论和参考文献。</span></div>
+          <div class="lane"><strong>真实性</strong><span>产品路径不能用伪 locator、mock paper、占位实验或无来源结论。缺网络、密钥、baseline、ablation 或复现材料时必须诊断阻断。</span></div>
+          <div class="lane"><strong>可读性</strong><span>TUI、Preview、导出 Markdown 和 PDF 必须避免文字遮挡、逐字换行、表格溢出和中英文乱码。</span></div>
+          <div class="lane"><strong>可恢复</strong><span>所有长任务要能从 run id 恢复；退出时展示 run id、状态、token/cost 摘要和恢复命令。</span></div>
+        </div>
+
+        <h2 id="long-change">长链路修改顺序</h2>
+        <ol>
+          <li>先写一条最小端到端路径，保证真实 PaperRun 能创建、更新、预览和导出。</li>
+          <li>再补异常路径：无模型、无工作区、provider 失败、schema 失败、实验失败、final gate 失败。</li>
+          <li>然后做界面收口：TUI 文案、滚动、终端尺寸、路径截断、Preview 只读和 SSE 更新。</li>
+          <li>最后更新 README、开发手册、CHANGELOG，并运行对应检查。</li>
+        </ol>
+
+        <h2 id="validation">推荐验证组合</h2>
+        <pre><code>npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts
+npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario final
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-changelog-format.ps1 -IncludeArchives</code></pre>
+
+        <div class="prev-next">
+          <a href="./usage-guide.html"><span>上一页</span>使用入口</a>
+          <a href="./development-workflow.html"><span>下一页</span>开发工作流</a>
+        </div>
+      </main>
+
+      <aside class="page-toc">
+        <strong>本页目录</strong>
+        <a href="#purpose">用途</a>
+        <a href="#workflow">开发参数</a>
+        <a href="#modes">开发模式</a>
+        <a href="#entry-files">入口文件</a>
+        <a href="#quality">质量调优</a>
+        <a href="#long-change">长链路修改</a>
+        <a href="#validation">验证组合</a>
+      </aside>
+    </div>
+  </body>
+</html>
