@@ -1,0 +1,25 @@
+:project       paper_fucker - 可验证论文研究自动化系统
+:author        k1d (https://github.com/ZhuchenZhong)
+:repo
+:desc          记录项目的重大变更和版本历史
+:version       0.13.0.166-dev
+:last_update   2026/05/31
+
+:history
+
+    0.13.0.166-dev - 2026/05/31 (7e0edc81) [fix/mcp-tool-binding-test-isolation]
+        :brief CJC 成稿默认作者与声明表述去半成品化
+        :fix
+            - fix(authoring): DraftPaper 默认作者信息从“本次材料未提供”改为匿名作者、匿名单位和匿名通信作者
+            - fix(authoring): CJC front matter 默认作者从“作者待定 / Author TBD”改为“匿名作者 / Anonymous author”
+            - fix(authoring): 声明表中基金项目、作者贡献和利益冲突从“本次材料未提供”改为“未声明”
+        :test
+            - test(authoring): 覆盖默认作者信息不再输出待定、TBD 或本次材料未提供
+            - test(authoring): 覆盖声明表默认使用未声明语义
+        :changelog
+            - docs(changelog): 0.13.0.165 开发历史移入 docs/changelog/v0/0.13.0.165.CHANGELOG
+        :checks
+            - targeted tests: npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --timeout 180000 passed
+            - typecheck: npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+            - final benchmark: scripts/live-paper-quality-benchmark.ts --scenario final passed, run-bb73f5fd-4bc5-485f-b2e4-f70091ddb8fa final export passed
+            - final audit: latest final Markdown contains 匿名作者, 匿名单位, Anonymous author and 未声明, and no longer contains 作者待定, Author TBD or 本次材料未提供
