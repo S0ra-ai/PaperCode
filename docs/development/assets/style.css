@@ -27,6 +27,10 @@ body {
   line-height: 1.65;
 }
 
+::selection {
+  background: rgba(88, 166, 255, 0.28);
+}
+
 a {
   color: var(--blue);
   text-decoration: none;
@@ -103,6 +107,25 @@ a:hover {
 .content {
   width: 100%;
   padding: 46px 48px 80px;
+}
+
+.breadcrumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.breadcrumbs a {
+  color: var(--muted);
+}
+
+.breadcrumbs span::before {
+  content: "/";
+  margin-right: 8px;
+  color: #53647c;
 }
 
 .page-toc {
@@ -342,6 +365,55 @@ pre code {
   color: #d5deea;
 }
 
+.admonition {
+  margin: 18px 0;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--blue);
+  border-radius: 8px;
+  background: #0d131c;
+  padding: 14px 16px;
+}
+
+.admonition strong {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+
+.admonition.warning {
+  border-left-color: var(--amber);
+}
+
+.admonition.danger {
+  border-left-color: var(--red);
+}
+
+.prev-next {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 48px;
+}
+
+.prev-next a {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  padding: 14px 16px;
+  color: var(--text);
+}
+
+.prev-next a:hover {
+  border-color: #49617f;
+  text-decoration: none;
+}
+
+.prev-next span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .codepath {
   display: block;
   margin: 8px 0;
@@ -428,7 +500,8 @@ pre code {
   }
 
   .toc-list a,
-  .lane {
+  .lane,
+  .prev-next {
     grid-template-columns: 1fr;
   }
 }
