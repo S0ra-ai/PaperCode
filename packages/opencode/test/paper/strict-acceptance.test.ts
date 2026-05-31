@@ -102,6 +102,8 @@ describe("strict live acceptance script", () => {
     expect(script).toContain("Invoke-HFNoMockBoundary")
     expect(script).toContain("network_not_authorized")
     expect(script).toContain("Invoke-ChangelogSplitArchives")
+    expect(script).toContain("Root CHANGELOG should keep exactly one active history entry.")
+    expect(script).not.toContain('0\\.8\\.')
   })
 
   test("uses real PaperRun benchmark evidence for live topic and code checks", () => {

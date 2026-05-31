@@ -10,7 +10,7 @@ Date: `2026/05/10`
 A final tracked secret scan found a secret-like example token in `github/README.md`:
 
 ```text
-ANTHROPIC_API_KEY=sk-ant-api03-1234567890
+ANTHROPIC_API_KEY=<provider-api-key>
 ```
 
 Although it was example documentation, it matched the shape of a provider key and should not remain tracked.

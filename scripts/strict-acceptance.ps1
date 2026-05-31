@@ -573,14 +573,18 @@ function Invoke-ChangelogSplitArchives {
     $preferences = Read-RepoText ".plan/preferences.yaml"
     Assert-HardFork ($preferences -match "archive_dir: docs/changelog" -and $preferences -match "minor_split_line_threshold") "TaskFlow changelog split preferences are missing."
     $rootChangelog = Read-RepoText "CHANGELOG"
-    Assert-HardFork ($rootChangelog -match "0\.8\." -and -not ($rootChangelog -match "0\.7\.0-dev")) "Root CHANGELOG should keep the active line and archive older history."
+    $versionMatch = [regex]::Match($rootChangelog, "(?m)^:version\s+([0-9]+(?:\.[0-9]+){2,3}-dev)")
+    Assert-HardFork ($versionMatch.Success) "Root CHANGELOG :version is missing."
+    $historyHeaders = [regex]::Matches($rootChangelog, "(?m)^\s{4}([0-9]+(?:\.[0-9]+){2,3}-dev)\s+-\s+")
+    Assert-HardFork ($historyHeaders.Count -eq 1) "Root CHANGELOG should keep exactly one active history entry."
+    Assert-HardFork ($historyHeaders[0].Groups[1].Value -eq $versionMatch.Groups[1].Value) "Root CHANGELOG active history entry must match :version."
     foreach ($minor in @("0.1", "0.2", "0.3", "0.4", "0.5", "0.6", "0.7")) {
         $archive = Join-Path $RepoRoot "docs/changelog/v0/$minor.x.CHANGELOG"
         Assert-HardFork (Test-Path -LiteralPath $archive) "$minor.x changelog archive is missing."
         $archiveText = Get-Content -Raw -LiteralPath $archive
         Assert-HardFork ($archiveText -match ":history" -and $archiveText -match [regex]::Escape($minor + ".")) "$minor.x changelog archive does not contain colon history entries."
     }
-    return "TaskFlow changelog split preferences and 0.1.x-0.7.x archives are present"
+    return "TaskFlow changelog split preferences, one active root entry, and 0.1.x-0.7.x archives are present"
 }
 
 function Write-Report {
