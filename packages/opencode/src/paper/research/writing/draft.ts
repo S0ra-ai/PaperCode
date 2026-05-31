@@ -806,8 +806,8 @@ function placeholderVerifiedLiteratureSources(map: LiteratureMap) {
 function referenceAuthors(source: LiteratureMap["sources"][number]) {
   const authors = source.authors?.map((author) => author.trim()).filter(Boolean) ?? []
   if (authors.length === 0) return undefined
-  if (authors.length <= 6) return authors.join("; ")
-  return `${authors.slice(0, 6).join("; ")} et al.`
+  if (authors.length <= 6) return authors.join(", ")
+  return `${authors.slice(0, 6).join(", ")} et al.`
 }
 
 function referenceDate(value?: string) {
@@ -820,12 +820,12 @@ function referenceDate(value?: string) {
 function referenceEntry(source: LiteratureMap["sources"][number], index: number) {
   const publishedDate = referenceDate(source.version.published_at)
   const retrievedDate = referenceDate(source.version.retrieved_at)
-  const published = publishedDate ? ` 发表时间：${publishedDate}。` : ""
-  const retrieved = retrievedDate ? ` 检索时间：${retrievedDate}。` : ""
   const title = literatureDisplayTitle(source)
   const authors = referenceAuthors(source)
   const head = authors ? `${authors}. ${title}` : title
-  return `${index + 1}. ${head}. ${referenceLocator(source)}.${published}${retrieved}`
+  const documentType = source.doi ? "J/OL" : "EB/OL"
+  const date = publishedDate ? `${publishedDate}${retrievedDate ? `[${retrievedDate}]` : ""}. ` : retrievedDate ? `[${retrievedDate}]. ` : ""
+  return `[${index + 1}] ${head}[${documentType}]. ${date}${referenceLocator(source)}.`
 }
 
 function referencesSummary(input: ComposeDraftPaperInput) {
