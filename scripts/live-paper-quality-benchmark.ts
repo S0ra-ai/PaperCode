@@ -15,6 +15,9 @@ type BenchmarkScenario = "topic" | "code" | "final" | "protocol" | "starter-reru
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url))
 const repoRoot = path.resolve(scriptDir, "..")
+const benchmarkOutputRoot = process.env.PAPER_FUCKER_BENCHMARK_OUTPUT_ROOT
+  ? path.resolve(process.env.PAPER_FUCKER_BENCHMARK_OUTPUT_ROOT)
+  : path.join(repoRoot, "tmp", "live-paper-quality-benchmark")
 
 function argValue(name: string): string | undefined {
   const equals = process.argv.find((item) => item.startsWith(`${name}=`))
@@ -40,7 +43,7 @@ async function currentProjectVersion(): Promise<string> {
 }
 
 const scenario = scenarioFromArgs()
-const scenarioOutputRoot = path.join(repoRoot, "tmp", "live-paper-quality-benchmark", scenario)
+const scenarioOutputRoot = path.join(benchmarkOutputRoot, scenario)
 const attemptId = `attempt-${new Date().toISOString().replace(/[:.]/g, "-")}-${process.pid}`
 const outputDir = path.join(scenarioOutputRoot, "attempts", attemptId)
 const summaryPath = path.join(outputDir, "paperrun-summary.json")
@@ -136,6 +139,10 @@ function installBenchmarkFailureRecorder() {
 }
 
 installBenchmarkFailureRecorder()
+
+if (process.env.PAPER_FUCKER_BENCHMARK_SELF_TEST_FAILURE === "1") {
+  throw new Error("live benchmark self-test failure recorder")
+}
 
 async function publishBenchmarkSummary(summary: unknown) {
   const content = `${JSON.stringify(summary, null, 2)}\n`
