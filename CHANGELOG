@@ -2,26 +2,20 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.164-dev
+:version       0.13.0.165-dev
 :last_update   2026/05/31
 
 :history
 
-    0.13.0.164-dev - 2026/05/31 (811b8327) [fix/mcp-tool-binding-test-isolation]
-        :brief CJC ranking 英文摘要同步真实结果证据
-        :fix
-            - fix(authoring): CJC ranking 英文摘要不再使用 This paper presents 与结构追踪模板句，改为写入候选论文排序任务、排序接口、主指标、基线差值、消融差值、候选数、标签边界和容器复现结果
-            - fix(authoring): 从中文摘要抽取 proposed、lexical baseline、no-claim-coverage ablation、candidate count 和 reproduction status，保持中英文摘要结果一致
-            - fix(authoring): 消融差值抽取限定到“无证据覆盖消融的...”句子，避免误取基线差值
+    0.13.0.165-dev - 2026/05/31 (ac0480a4) [fix/mcp-tool-binding-test-isolation]
+        :brief 开发手册按 ReadTheDocs 式开发粒度加深
+        :docs
+            - docs(development): 总览页新增开发文档粒度，要求每页回答状态来源、代码入口、修改文件、失败呈现和验收命令
+            - docs(development): 开发指南新增页面粒度要求，区分架构页、流程页、模块页、工作台页、质量页和使用页的内容边界
+            - docs(development): 修改手册新增开发文档页面新增或重写清单，覆盖导航、代码关联、修改路径、排障路径和文档校验
         :test
-            - test(authoring): 覆盖 ranking CJC 英文摘要包含 proposed/baseline/ablation/candidate/reproduction 证据，并不再出现旧模板句
+            - test(docs): check-development-docs 增加 developer-depth 与 manual-page-scope 断言，防止开发手册退回泛化概览
         :changelog
-            - docs(changelog): 0.13.0.163 开发历史移入 docs/changelog/v0/0.13.0.163.CHANGELOG
+            - docs(changelog): 0.13.0.164 开发历史移入 docs/changelog/v0/0.13.0.164.CHANGELOG
         :checks
-            - final benchmark: scripts/live-paper-quality-benchmark.ts --scenario final passed, run-9e99a684-f191-4854-ba13-8385486e0a03 final export passed
-            - final audit: latest final Markdown English abstract includes proposed=1.0000, baseline=0.9629, baseline delta=0.0371, ablation delta=0.0684, candidate count=5 and container reproduction passed
-            - final audit: latest final Markdown no longer contains This paper presents or manuscript follows in the CJC English abstract
-            - targeted tests: npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --timeout 180000 passed
-            - typecheck: npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
-            - readme version: scripts/check-readme-version.ps1 passed
-            - changelog format: scripts/check-changelog-format.ps1 -IncludeArchives passed
+            - development docs: scripts/check-development-docs.ps1 passed
