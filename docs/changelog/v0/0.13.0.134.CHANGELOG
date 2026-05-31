@@ -1,0 +1,21 @@
+:project       paper_fucker - 可验证论文研究自动化系统
+:author        k1d (https://github.com/ZhuchenZhong)
+:repo
+:desc          0.13.0.134 开发历史归档
+:version       0.13.0.134-dev
+:last_update   2026/05/31
+
+:history
+
+    0.13.0.134-dev - 2026/05/31 (5c6c49ce) [fix/mcp-tool-binding-test-isolation]
+        :brief 开发手册按 ReadTheDocs 风格收口，并将 root CHANGELOG 当前线拆为活跃摘要与归档历史
+        :docs
+            - docs(development): 总览页明确开发手册主线，使用入口仅作为维护者本机验收路径
+            - docs(development): 开发指南补齐状态输入、输出契约、故障定位和 What's Next，便于按产品链路查修改点
+            - docs(readme/internal): README 与内部维护入口同步 ReadTheDocs 风格开发手册说明
+        :changelog
+            - docs(changelog): 0.13.0.133 详细历史移入 docs/changelog/v0/0.13.0.123-133.CHANGELOG
+            - docs(changelog): root CHANGELOG 仅保留当前活跃小批次摘要，避免巨型聚合条目继续膨胀
+            - docs(changelog): changelog 归档索引补齐 0.8.x、0.9.x、0.10.x、0.11.x 与 0.13.0 分段文件
+        :checks
+            - static docs: development HTML links、README version、CHANGELOG IncludeArchives 与 git diff --check
