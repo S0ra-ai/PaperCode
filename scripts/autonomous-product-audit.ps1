@@ -242,6 +242,64 @@ function Test-FullWorkspaceEvidence {
     Add-AuditResult "full-workspace-evidence" "pass" "Full workspace strict acceptance report is current for $currentVersion and includes server/full workspace coverage."
 }
 
+function Test-ReportGovernance {
+    $readmePath = Join-Path $RepoRoot "reports/README.md"
+    if (-not (Test-Path -LiteralPath $readmePath)) {
+        Add-AuditResult "report-governance" "fail" "reports/README.md is missing; active and archived report policy is not documented."
+        return
+    }
+    $readme = Get-Content -Raw -LiteralPath $readmePath
+    $required = @(
+        "Active Reports",
+        "Historical Reports",
+        "reports/archive/",
+        "strict-live-full-acceptance.md"
+    )
+    $missing = @($required | Where-Object { -not $readme.Contains($_) })
+    if ($missing.Count -gt 0) {
+        Add-AuditResult "report-governance" "fail" "reports/README.md missing report governance terms: $($missing -join ', ')"
+        return
+    }
+
+    try {
+        $currentVersion = Get-CurrentVersion
+    } catch {
+        Add-AuditResult "report-governance" "fail" $_.Exception.Message
+        return
+    }
+
+    $activeFull = Join-Path $RepoRoot "reports/strict-live-full-acceptance.md"
+    if (Test-Path -LiteralPath $activeFull) {
+        $activeReport = Get-Content -Raw -LiteralPath $activeFull
+        $headerVersion = Get-ReportHeaderVersion $activeReport
+        if ($headerVersion -ne $currentVersion) {
+            Add-AuditResult "report-governance" "fail" "Active full workspace report is not current; move stale evidence to reports/archive/ or rerun full workspace acceptance."
+            return
+        }
+    }
+
+    $archiveRoot = Join-Path $RepoRoot "reports/archive"
+    if (Test-Path -LiteralPath $archiveRoot) {
+        $badArchives = New-Object "System.Collections.Generic.List[string]"
+        Get-ChildItem -LiteralPath $archiveRoot -Filter "strict-live-full-acceptance-*.md" | ForEach-Object {
+            if ($_.Name -notmatch '^strict-live-full-acceptance-[0-9]+(?:\.[0-9]+){2,3}-dev\.md$') {
+                $badArchives.Add("$($_.Name): filename should include the proven -dev version") | Out-Null
+                return
+            }
+            $archiveReport = Get-Content -Raw -LiteralPath $_.FullName
+            if (-not $archiveReport.Contains("- Mode: strict-live-full")) {
+                $badArchives.Add("$($_.Name): missing strict-live-full mode") | Out-Null
+            }
+        }
+        if ($badArchives.Count -gt 0) {
+            Add-AuditResult "report-governance" "fail" ($badArchives -join "; ")
+            return
+        }
+    }
+
+    Add-AuditResult "report-governance" "pass" "Active reports are documented, and archived full workspace evidence is versioned outside the active report slot."
+}
+
 function Test-DangerousResidue {
     $paths = @("packages/opencode/src/paper", "research-tools/src", "README.md")
     $patterns = @("scrapling_live_fetch_not_implemented", "network_not_authorized_mock_used", "TODO", "FIXME")
@@ -363,6 +421,7 @@ Test-ChangelogShape
 Test-DevelopmentDocs
 Test-StrictEvidence
 Test-FullWorkspaceEvidence
+Test-ReportGovernance
 Test-DangerousResidue
 Test-BrandSurface
 Test-PublicSurfaceNoLegacyBranding
