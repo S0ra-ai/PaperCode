@@ -25,6 +25,14 @@
 - 相关验证已通过：`npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/export-pipeline.test.ts --timeout 60000` 和 `npx --yes bun@1.3.13 run --cwd packages/opencode typecheck`。
 - 质量判断：这项改动直接改善 PDF 表格的可读性，但还需要后续继续做 CJC 参考文献样式、作者单位元数据和整页视觉验收。
 
+## 2026-05-31 CJC 参考文献样式复审
+
+- 正式参考文献条目已从 `1. 题名. arXiv... 发表时间... 检索时间...` 调整为 `[1] 作者. 题名[文献类型/OL]. 发表日期[引用日期]. DOI/arXiv/URL.`。
+- arXiv 来源输出为 `[EB/OL]`，DOI 来源输出为 `[J/OL]`；相关工作章节仍保留原始 DOI/arXiv 定位，方便正文说明来源类型。
+- 回归覆盖：authoring 测试断言正式参考文献包含 `[1] ...[EB/OL]`、`[2] ...[J/OL]`，且不再出现“发表时间：”和“检索时间：”运行式字段。
+- 相关验证已通过：`npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --timeout 60000` 和 `npx --yes bun@1.3.13 run --cwd packages/opencode typecheck`。
+- 质量判断：参考文献章节更接近投稿论文条目，但后续仍需补齐中国计算机学报官方模板的标点、英文作者缩写和期刊/会议字段细节。
+
 ## 2026-05-31 缺少模型审稿结果阻断复审
 
 - `runMultiModelReview` 已确认：`model_reviews` 为空时输出 `missing_model_review` blocker。
