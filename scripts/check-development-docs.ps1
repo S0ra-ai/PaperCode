@@ -146,7 +146,7 @@ foreach ($file in $htmlFiles) {
 }
 
 $styleText = [System.IO.File]::ReadAllText($styleCss, $utf8)
-foreach ($selector in @(".doc-toolbar", ".doc-search", ".page-toc", ".prev-next", ".code-block", ".copy-code", "body.theme-light", "@media (max-width: 860px)")) {
+foreach ($selector in @(".doc-toolbar", ".doc-search", ".page-toc", ".prev-next", ".code-block", ".copy-code", ".pattern-grid", "body.theme-light", "@media (max-width: 860px)")) {
     if ($styleText -notmatch [regex]::Escape($selector)) {
         Add-Problem "docs/development/assets/style.css missing selector '$selector'"
     }
@@ -174,6 +174,30 @@ foreach ($needle in @("installToolbar", "installCodeCopy", "data-action=`"theme`
     if ($manualText -notmatch [regex]::Escape($needle)) {
         Add-Problem "docs/development/assets/manual.js missing '$needle'"
     }
+}
+
+$indexPage = Join-Path $docsRoot "index.html"
+if (Test-Path -LiteralPath $indexPage) {
+    $indexText = [System.IO.File]::ReadAllText($indexPage, $utf8)
+    foreach ($needle in @('id="doc-pattern"', 'class="pattern-grid"', 'href="#doc-pattern"')) {
+        if ($indexText -notmatch [regex]::Escape($needle)) {
+            Add-Problem "docs/development/index.html missing development manual pattern '$needle'"
+        }
+    }
+} else {
+    Add-Problem "docs/development/index.html is missing"
+}
+
+$developerGuide = Join-Path $docsRoot "development-guide.html"
+if (Test-Path -LiteralPath $developerGuide) {
+    $guideText = [System.IO.File]::ReadAllText($developerGuide, $utf8)
+    foreach ($needle in @('id="page-template"', 'class="pattern-grid compact"', 'href="#page-template"')) {
+        if ($guideText -notmatch [regex]::Escape($needle)) {
+            Add-Problem "docs/development/development-guide.html missing developer page template '$needle'"
+        }
+    }
+} else {
+    Add-Problem "docs/development/development-guide.html is missing"
 }
 
 if ($Render) {

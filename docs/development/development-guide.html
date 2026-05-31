@@ -66,6 +66,17 @@
           Paper Fucker 是 TUI-first 的论文工作台。新增能力应先回答：用户在哪里看到它、状态在哪里持久化、失败时怎么诊断、Preview 是否能实时看到、导出 gate 如何处理。
         </div>
 
+        <h2 id="page-template">开发页模板</h2>
+        <p>新增或重写开发文档页面时，优先沿用下面的信息顺序。这样手册既能像产品教程一样快速阅读，也能像维护文档一样直接落到代码。</p>
+        <div class="pattern-grid compact">
+          <article><strong>1. 用途</strong><span>说明页面解决哪个维护问题，属于哪条产品链路。</span></article>
+          <article><strong>2. 参数</strong><span>列出配置、状态、schema、环境、模型和外部工具依赖。</span></article>
+          <article><strong>3. 模式</strong><span>区分主题、材料、代码、实验、导出、恢复等运行路径。</span></article>
+          <article><strong>4. 输入/输出</strong><span>把入口文件、HTTP payload、artifact、event 和 snapshot 写清楚。</span></article>
+          <article><strong>5. 调优</strong><span>说明质量、格式、复现、性能和可诊断性的调整点。</span></article>
+          <article><strong>6. 排障/下一步</strong><span>给出常见错误、日志路径、测试命令和相邻页面。</span></article>
+        </div>
+
         <h2 id="modes">三类常见开发模式</h2>
         <div class="grid">
           <article class="card">
@@ -179,6 +190,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-changelog-fo
         <strong>本页目录</strong>
         <a href="#purpose">用途</a>
         <a href="#workflow">开发参数</a>
+        <a href="#page-template">开发页模板</a>
         <a href="#modes">开发模式</a>
         <a href="#state-input">状态输入</a>
         <a href="#output-contract">输出契约</a>

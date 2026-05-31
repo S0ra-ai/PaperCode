@@ -53,6 +53,10 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-versi
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-development-docs.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-changelog-format.ps1 -IncludeArchives</code></pre>
 
+        <h2>文档质量</h2>
+        <p>开发手册页面应按“用途、参数、模式、输入、输出、调优、排障、下一步”组织；使用页可以保留用户路径，但开发页必须能直接定位代码、状态、接口和测试。</p>
+        <pre><code>powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-development-docs.ps1 -Render</code></pre>
+
         <h2>产品级验收</h2>
         <pre><code>npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario code
 npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario final</code></pre>
