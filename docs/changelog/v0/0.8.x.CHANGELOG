@@ -1,0 +1,167 @@
+:project       paper_fucker - 可验证论文研究自动化系统
+:author        k1d (https://github.com/ZhuchenZhong)
+:repo
+:desc          0.8.x 历史变更归档，主 CHANGELOG 仅保留当前活跃版本线
+:version       0.8.5-dev
+:last_update   2026/05/31
+
+:history
+
+    0.8.5-dev - 2026/05/11 (9db955a) [develop]
+        :brief release 前 readiness、中文文档、文件发布面和初始化入口收口
+        :docs
+            - README 改为中文 GitHub 首页，保留 TUI-first、内置 capability packs、多 provider、Preview/export、隐私和 Windows 源码运行路径
+            - 内部维护说明移入 docs/internal/README.md，README 不再暴露 TaskFlow、release 测试脚本、审计目录和维护者命令
+            - docs/project-structure、docs/changelog/README 与 specs/project 统一为 PaperRun、release 文件面和 changelog 归档语义
+            - root CHANGELOG 与 docs/changelog/v0 归档 changelog 作者统一为 k1d (https://github.com/ZhuchenZhong)
+        :build
+            - 根目录新增 build/link 脚本，源码编译后在仓库根目录生成 paper_fucker.exe 或 paper_fucker
+            - packages/opencode build 的 optional dependency 安装改为 --no-save，避免污染 package.json 或 bun.lock
+            - root package.json、packages/opencode/package.json 增加 author 元数据，仓库 URL 后续统一为 ZhuchenZhong/paper_fucker 远端
+        :release
+            - .gitattributes 增加 export-ignore，GitHub source archive 排除 TaskFlow、reports、legacy、upstream、本地 runtime、测试树和上游营销素材
+            - packages/opencode 与 packages/preview 增加 npm files 白名单，避免 test/spec/fixture/历史证据进入 pack
+            - scripts/check-release-files.ps1 生成 release-file-audit 报告并校验 source archive、npm pack 与二进制发布面
+        :init
+            - 顶层 CLI 增加 paper_fucker init/doctor/reset，reset 只清理全局和 ignored runtime/local 状态并先备份
+            - Windows 源码预览流程改为 bun run build 后直接运行 .\paper_fucker.exe
+            - provider matrix smoke 支持逐 provider 调用 /models 和最小 chat completion，并在无配置时生成 pending_config 报告
+        :preview
+            - PaperRun preview endpoint 启动 token-protected localhost 预览服务
+            - TUI dashboard 在 Preview ready 时自动打开只读实时预览 URL
+        :src
+            - README.md - 中文对外首页和 Windows 源码运行说明
+            - docs/internal/README.md - 内部维护和 README 边界规则
+            - docs/project-structure.md - 仓库目录、tracked/ignored state 和 release artifact 边界
+            - docs/changelog/v0/*.CHANGELOG - 0.1.x-0.7.x 历史归档
+            - scripts/link-root-executable.ts - 根目录可执行文件链接器
+            - scripts/check-release-files.ps1 - release 文件面审计
+            - scripts/provider-matrix-smoke.ps1 - provider matrix smoke 报告
+            - packages/opencode/src/paper/run.ts - live preview server response 和 PaperRun preview lifecycle
+            - packages/opencode/src/cli/cmd/init.ts - init/doctor/reset 入口
+        :verification
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-changelog-format.ps1 passed for root and archives
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-release-files.ps1 passed
+            - bun run build passed and generated .\paper_fucker.exe
+            - npx --yes bun@1.3.13 --cwd packages/opencode test targeted readiness suite passed: 26 pass, 0 fail
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+            - npx --yes bun@1.3.13 --cwd packages/preview test passed: 2 pass, 0 fail
+            - PYTHONPATH=research-tools/src python -m unittest discover -s research-tools/tests passed: 18 tests
+            - git grep tracked secret scan for provider-shaped API keys found no matches
+        :reports
+            - reports/release-file-audit.md - passed release file audit
+            - reports/pre-release-readiness.md - release readiness summary and no-tag boundary
+            - reports/live-preview-acceptance.md - live preview acceptance evidence
+            - reports/provider-matrix-smoke.md - pending_config provider matrix report
+
+    0.8.4-dev - 2026/05/11 (e96072c) [develop]
+        :brief strict acceptance 锁定 verified source final gate
+        - test(acceptance): final-export-pass-run 读取 live benchmark summary，断言 final_export=final、failed_checks empty、SourceEvidenceManifest.v1 存在、final gate passed
+        - fix(runtime): PaperRun JSON 原子写入使用唯一 tmp 文件名，并对 Windows EPERM/EBUSY/EACCES/ENOTEMPTY replace 失败做短退避重试
+        - fix(acceptance): benchmark summary 使用 UTF-8 显式读取，避免中文默认语言在 Windows PowerShell 5.1 下被 ANSI 解码破坏
+        - test(runtime): 新增真实文件系统并发 writeJsonAtomic 测试，防止 PaperRun 状态写入在 live run 中竞态失败
+        - test(strict): focused strict server tests 纳入 runtime-state，并锁定完整 stdout 解析与 source evidence assertions
+        :src
+            - scripts/strict-acceptance.ps1 - live benchmark summary helper, source evidence final gate assertions, full stdout capture, UTF-8 summary parsing
+            - packages/opencode/src/paper/research/runtime/state.ts - unique tmp atomic writes and retrying replace for Windows file locks
+            - packages/opencode/test/paper/runtime-state.test.ts - real filesystem concurrent writeJsonAtomic regression
+            - packages/opencode/test/paper/strict-acceptance.test.ts - strict acceptance source-gate and UTF-8 parser coverage
+        :reports
+            - reports/strict-live-acceptance.md - focused strict live acceptance passed with topic/code/final PaperRun benchmark checks
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/runtime-state.test.ts test/paper/paperrun-execution.test.ts passed: 4 pass, 0 fail
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/strict-acceptance.test.ts passed: 10 pass, 0 fail
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\strict-acceptance.ps1 -CheckTimeoutSeconds 300 passed
+
+    0.8.3-dev - 2026/05/11 (bec3df2) [develop]
+        :brief 最终导出 source authenticity gate 硬化
+        - feat(verification): final export 现在要求引用来源必须 clear license 且 verification.status=verified
+        - feat(orchestrator): 新增 SourceEvidenceManifest.v1 ingestion，从 paper_files/experiment_logs 读取用户或工具提供的验证来源清单
+        - feat(claim-ledger): 默认 ClaimLedger 只绑定 clear+verified source，未验证 seed 不能支撑 final claims
+        - test(paperrun): final export pass 场景同时提供 SourceEvidenceManifest 与 ExperimentEvidenceManifest
+        - test(verification): reproduction pass 但 source 未验证时 final export 被阻断
+        - chore(benchmark): live final benchmark 生成 verified source evidence，避免把未验证 search seed 当作最终论文证据
+        :src
+            - packages/opencode/src/paper/orchestrator.ts - SourceEvidenceManifest.v1 loading, verified source binding, final benchmark support
+            - packages/opencode/src/paper/research/verification/checks.ts - unverified_source/source_license_failure blockers
+            - packages/opencode/src/paper/research/verification/gate.ts - source authenticity checks in final gate
+            - packages/opencode/src/paper/research/verification/schemas.ts - source_records and new finding categories
+            - packages/opencode/src/paper/authoring.ts - passes source records into final authenticity gate
+            - scripts/live-paper-quality-benchmark.ts - final scenario includes verified source manifest
+        :verification
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/paperrun-execution.test.ts passed: 3 pass, 0 fail
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/research/verification.test.ts passed: 7 pass, 0 fail
+            - npx --yes bun@1.3.13 --cwd packages/opencode test focused paper-critical suite passed: 30 pass, 0 fail
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario final passed with final_export=final and SourceEvidenceManifest.v1
+
+    0.8.2-dev - 2026/05/11 (54bee71) [develop]
+        :brief 全仓 strict acceptance 验收硬化
+        - test(acceptance): 全量 packages/opencode test 纳入 strict-live-full 正式验收并通过 2586 pass / 0 fail
+        - fix(test): paper/research 临时目录清理加入 Windows EBUSY/EACCES/EPERM 重试与警告降级，避免清理句柄竞争污染产品断言
+        - fix(export): export diagnostics 测试改为注入失败 renderer，避免依赖本机 pandoc/LaTeX 可用性产生漂移
+        - test(httpapi): 同步 PaperRun control route 到 Effect HttpApi parity 白名单
+        - chore(strict): strict acceptance 失败详情保留更长尾部日志，便于后续定位 full suite 失败
+        - chore(audit): autonomous product audit 纳入 strict-live-full evidence 检查
+        :src
+            - scripts/strict-acceptance.ps1 - 扩大失败详情截断上限并记录失败命令末尾日志
+            - scripts/autonomous-product-audit.ps1 - 新增 full-workspace-evidence 检查，要求 reports/strict-live-full-acceptance.md 通过
+            - packages/opencode/test/research/*.test.ts - 临时目录 cleanup 加 maxRetries/retryDelay 并在最终失败时警告降级
+            - packages/opencode/test/paper/*.test.ts - 同步 cleanup 重试，降低 Windows 句柄释放竞态
+            - packages/opencode/test/research/export.test.ts - 使用 failedRenderers 固化 PDF/DOCX 诊断路径
+            - packages/opencode/test/server/httpapi-bridge.test.ts - 加入 POST /paper/runs/{runID}/control parity 期望
+        :reports
+            - reports/strict-live-full-acceptance.md - strict-live-full 全仓验收通过，包含 full packages/opencode test、preview、Python、typecheck、live provider、Exa、Nature、pandoc、LaTeX、DOCX、crawler、HF、topic/code/final PaperRun smoke
+            - reports/autonomous-product-audit.md - 自主审计通过并确认 full-workspace-evidence
+        :verification
+            - npx --yes bun@1.3.13 --cwd packages/opencode test --bail passed: 2586 pass, 38 skip, 2 todo, 0 fail
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\strict-acceptance.ps1 -FullWorkspaceSuite -CheckTimeoutSeconds 600 -FullWorkspaceTimeoutSeconds 2700 -ReportPath reports/strict-live-full-acceptance.md passed
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\autonomous-product-audit.ps1 -AllowActiveTask passed
+
+    0.8.1-dev - 2026/05/11 (1c6692d) [develop]
+        :brief 自驱产品审计与持续推进流程
+        - feat(audit): 新增 autonomous product audit 脚本，TaskFlow 空队列后可自动审计并寻找下一轮工作
+        - feat(report): 生成 reports/autonomous-product-audit.md，记录 TaskFlow、版本、strict live evidence、no-mock residue、品牌和 Git Flow 状态
+        - docs(readme): 新增 Autonomous Continuation Protocol，明确无任务时自动审计、创建 TaskFlow、执行、验证和同步文档
+        - test(audit): 审计脚本覆盖 strict live focused evidence、final_export=final 证据和危险残留扫描
+        :src
+            - scripts/autonomous-product-audit.ps1 - self-driven product audit checks and report generation
+        :doc
+            - README.md - autonomous continuation protocol
+            - reports/autonomous-product-audit.md - generated audit result
+        :taskflow
+            - .plan/confirmed/autonomous-product-audit-loop.yaml - tracked autonomous audit task
+        :verification
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\autonomous-product-audit.ps1 -AllowActiveTask passed
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
+            - TaskFlow validate_task autonomous-product-audit-loop passed
+            - TaskFlow validate_changelog_format passed
+            - git diff --check passed
+
+    0.8.0-dev - 2026/05/11 (c6499a2) [develop]
+        :brief 真实产品闭环补齐
+        - feat(crawler): 实现授权 live web crawl，Scrapling-first 并提供 stdlib HTTP fallback，不再返回未实现诊断
+        - feat(huggingface): HF papers 使用官方 Hub API live 记录，jobs 需要 token，Trackio 支持显式导出 metrics 作为产品证据
+        - feat(experiments): 新增 ExperimentEvidenceManifest.v1 ingestion，复现实验证据通过时允许 final export
+        - feat(acceptance): strict acceptance 增加 live crawler、HF live/no-mock boundary、final export pass checks
+        - test(paper): 新增 PaperRun final export pass 场景并扩展 crawler/HF bridge 测试
+        - chore(test): PaperRun 长耗时 focused 测试超时提升到 60s
+        :src
+            - research-tools/src/paper_fucker_tools/crawler.py - authorized live crawl with Scrapling adapter and urllib fallback
+            - research-tools/src/paper_fucker_tools/huggingface_loop.py - live papers, token-gated jobs, explicit Trackio export boundary
+            - packages/opencode/src/paper/orchestrator.ts - ExperimentEvidenceManifest.v1 evidence ingestion for reproduction-passed final export
+            - packages/opencode/src/paper/research/storage.ts - idempotent global index rebuild for concurrent PaperRun benchmarks
+            - scripts/live-paper-quality-benchmark.ts - added final scenario with final_export=final
+            - scripts/strict-acceptance.ps1 - added live-crawler-fetch, hf-live-research-loop, final-export-pass-run checks
+        :test
+            - research-tools/tests/test_crawler.py - local HTTP live crawl test
+            - research-tools/tests/test_huggingface_loop.py - HF papers/jobs/Trackio boundary tests
+            - packages/opencode/test/paper/paperrun-execution.test.ts - final export pass PaperRun test
+            - packages/opencode/test/paper/strict-acceptance.test.ts - strict check inventory updated
+        :verification
+            - python -m unittest discover -s research-tools/tests passed
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/paperrun-execution.test.ts test/paper/strict-acceptance.test.ts test/paper/huggingface-loop.test.ts test/paper/crawler.test.ts passed
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario final passed with final_export=final

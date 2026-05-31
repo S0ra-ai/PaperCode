@@ -1,0 +1,47 @@
+:project       paper_fucker - 可验证论文研究自动化系统
+:author        k1d (https://github.com/ZhuchenZhong)
+:repo
+:desc          0.13.0.111-122 历史变更归档，主 CHANGELOG 仅保留当前活跃版本线
+:version       0.13.0.122-dev
+:last_update   2026/05/31
+
+:history
+
+    0.13.0.122-dev - 2026/05/31 (b5f0bec4) [fix/mcp-tool-binding-test-isolation]
+        :brief Text2Action 成稿质量、实验环境面板、Web 监控台验收与 CJC 期刊入口收口
+        :authoring
+            - fix(writing): Text2Action 论文优先按语义规划、安全执行和服务机器人方法论文成稿，不再落回通用证据工作流叙述
+            - fix(writing): 数据与代码可用性在无外部数据集时仍输出源码接口和复现实验入口，避免方法实现被误写为未登记
+            - fix(writing): 实验协议、结果表和复现实验摘要统一使用 Text2Action 主方法名，去除通用工作流标签
+            - fix(writing): 代码元数据缺失时不输出未登记仓库、许可证等空字段
+        :changelog
+            - docs(changelog): root CHANGELOG 只保留当前活跃开发条目
+            - docs(changelog): 0.8.x、0.9.x、0.10.x、0.11.x 和 0.13.x 详细历史移入 docs/changelog/v0 归档
+            - docs(changelog): 0.13.x 归档拆为 0.13.0.000-050、0.13.0.051-100、0.13.0.101-110 和 0.13.0.111-122 多段
+        :tui
+            - fix(journal): /journal 收口为中国计算机学报唯一当前入口，暂时关闭未知期刊抓取和其他内置期刊选择
+            - fix(journal): 期刊工作台只展示 active profile，避免用户误以为 Nature、IEEE、ACM、generic preprint 已开放
+            - feat(workbench): PaperRun 侧栏按 GPU、运行时、编译器、容器/虚拟化分组展示当前实验环境
+            - feat(workbench): 机器环境状态保留可用版本、CPU-only/GPU 状态和可选缺失工具，方便判断代码实验能否本机复现
+            - feat(workbench): 新增 experiment_environment 面板状态，供 TUI 和 Web 监控复用实验环境分组、状态计数和工作区信息
+            - test(workbench): TUI prompt 测试收敛到当前中国计算机学报唯一活跃格式，不再期待旧期刊发现路径
+        :preview
+            - feat(preview): Preview monitor 协议新增 model_routing 字段，暴露角色、来源、候选数、允许模型数、选择原因和诊断
+            - feat(preview): Web 监控台新增模型路由页签，展示模型选择和 blocked routing 诊断
+            - feat(preview): Preview monitor 协议新增 cost_agent 字段，携带 token、预算告警、Agent Tree 和 Agent Team 摘要
+            - feat(preview): Web 监控台 Cost / Agent 面板展示详细成本、token、agent 深度、模型、团队任务和未读消息
+            - feat(preview): Preview monitor 协议新增 ledger 字段，直接携带 Source Ledger 与 Claim Ledger
+            - feat(preview): Web 监控台账本页优先展示 source/claim 双栏，annotation 仅作为旧快照 fallback
+            - feat(preview): Preview monitor 协议新增 experiment_environment 分组字段，保留旧 machine_environment 兼容
+            - feat(preview): Web 监控台新增实验环境与实验运行页签，集中展示 GPU、工具链、host/container runs、指标和 stdout/stderr trace
+        :checks
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts --test-name-pattern "Text2Action code papers"
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/cli/tui/paper-workbench.test.ts test/paper/profiles.test.ts
+            - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/machine.test.ts test/paper/run-api.test.ts
+            - npx --yes bun@1.3.13 --cwd packages/preview test
+            - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - npx --yes bun@1.3.13 run --cwd packages/preview typecheck
+            - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario final
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-changelog-format.ps1 -IncludeArchives
