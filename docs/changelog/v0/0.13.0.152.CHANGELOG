@@ -1,0 +1,23 @@
+:project       paper_fucker - 可验证论文研究自动化系统
+:author        k1d (https://github.com/ZhuchenZhong)
+:repo
+:desc          0.13.0.152 开发历史归档
+:version       0.13.0.152-dev
+:last_update   2026/05/31
+
+:history
+
+    0.13.0.152-dev - 2026/05/31 (069ae6cf) [fix/mcp-tool-binding-test-isolation]
+        :brief strict acceptance 报告写入顶层项目版本并纳入当前性校验
+        :test
+            - test(acceptance): strict-acceptance Write-Report 增加 Project version 头，报告打开后即可判断证据所属版本
+            - test(audit): autonomous-product-audit 优先校验 strict 报告 Project version 头，并继续校验 benchmark project_version 明细
+            - test(audit): full workspace 报告缺 Project version 头或头版本陈旧时降级为 warn，不再作为当前 full evidence
+            - report(strict): 重新运行 focused strict acceptance，刷新 crawler、HF、Preview browser、topic/code/final PaperRun benchmark 证据到 0.13.0.152-dev
+            - report(audit): autonomous product audit 确认 strict live header 与 benchmark 明细均匹配当前版本
+        :changelog
+            - docs(changelog): 0.13.0.151 开发历史移入 docs/changelog/v0/0.13.0.151.CHANGELOG
+        :checks
+            - targeted tests: packages/opencode strict-acceptance.test
+            - strict acceptance: scripts/strict-acceptance.ps1 -CheckTimeoutSeconds 900
+            - audit: scripts/autonomous-product-audit.ps1 -AllowActiveTask
