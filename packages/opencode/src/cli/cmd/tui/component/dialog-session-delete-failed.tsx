@@ -21,14 +21,14 @@ export function DialogSessionDeleteFailed(props: {
   const options = [
     {
       id: "delete" as const,
-      title: "Delete workspace",
-      description: "Delete the workspace and all sessions attached to it.",
+      title: "删除工作区",
+      description: "删除该工作区以及关联的 PaperRun。",
       run: props.onDelete,
     },
     {
       id: "restore" as const,
-      title: "Restore to new workspace",
-      description: "Try to restore this session into a new workspace.",
+      title: "恢复到新工作区",
+      description: "尝试将这个 PaperRun 恢复到新工作区。",
       run: props.onRestore,
     },
   ]
@@ -58,17 +58,17 @@ export function DialogSessionDeleteFailed(props: {
     <box paddingLeft={2} paddingRight={2} gap={1}>
       <box flexDirection="row" justifyContent="space-between">
         <text attributes={TextAttributes.BOLD} fg={theme.text}>
-          Failed to Delete Session
+          PaperRun 删除失败
         </text>
         <text fg={theme.textMuted} onMouseUp={() => dialog.clear()}>
           esc
         </text>
       </box>
       <text fg={theme.textMuted} wrapMode="word">
-        {`The session "${props.session}" could not be deleted because the workspace "${props.workspace}" is not available.`}
+        {`PaperRun "${props.session}" 无法删除，因为工作区 "${props.workspace}" 当前不可用。`}
       </text>
       <text fg={theme.textMuted} wrapMode="word">
-        Choose how you want to recover this broken workspace session.
+        选择如何处理这个工作区恢复问题。
       </text>
       <box flexDirection="column" paddingBottom={1} gap={1}>
         <For each={options}>

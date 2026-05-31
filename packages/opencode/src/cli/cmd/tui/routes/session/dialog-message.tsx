@@ -19,12 +19,12 @@ export function DialogMessage(props: {
 
   return (
     <DialogSelect
-      title="Message Actions"
+      title="消息操作"
       options={[
         {
-          title: "Revert",
+          title: "回退到此消息",
           value: "session.revert",
-          description: "undo messages and file changes",
+          description: "撤销此消息之后的消息和文件改动",
           onSelect: (dialog) => {
             const msg = message()
             if (!msg) return
@@ -53,9 +53,9 @@ export function DialogMessage(props: {
           },
         },
         {
-          title: "Copy",
+          title: "复制消息",
           value: "message.copy",
-          description: "message text to clipboard",
+          description: "复制消息文本到剪贴板",
           onSelect: async (dialog) => {
             const msg = message()
             if (!msg) return
@@ -73,9 +73,9 @@ export function DialogMessage(props: {
           },
         },
         {
-          title: "Fork",
+          title: "创建分支",
           value: "session.fork",
-          description: "create a new session",
+          description: "创建 PaperRun 分支",
           onSelect: async (dialog) => {
             const result = await sdk.client.session.fork({
               sessionID: props.sessionID,

@@ -272,7 +272,7 @@ export function Prompt(props: PromptProps) {
   }
 
   function showWarpNotice(name: string) {
-    setWarpNotice(`Warped to ${name}`)
+    setWarpNotice(`已切换到 ${name}`)
     setTimeout(() => setWarpNotice(undefined), 4000)
   }
 
@@ -285,7 +285,7 @@ export function Prompt(props: PromptProps) {
       selectWorkspace(undefined)
       setCreatingWorkspace(false)
       toast.show({
-        message: "Creating workspace failed",
+        message: "工作区创建失败",
         variant: "error",
       })
       return
@@ -477,9 +477,9 @@ export function Prompt(props: PromptProps) {
   command.register(() => {
     return [
       {
-        title: "Clear prompt",
+        title: "清空输入",
         value: "prompt.clear",
-        category: "Prompt",
+        category: "PaperRun",
         hidden: true,
         onSelect: (dialog) => {
           input.extmarks.clear()
@@ -488,10 +488,10 @@ export function Prompt(props: PromptProps) {
         },
       },
       {
-        title: "Submit prompt",
+        title: "提交输入",
         value: "prompt.submit",
         keybind: "input_submit",
-        category: "Prompt",
+        category: "PaperRun",
         hidden: true,
         onSelect: async (dialog) => {
           if (!input.focused) return
@@ -502,9 +502,9 @@ export function Prompt(props: PromptProps) {
         },
       },
       {
-        title: "Remove editor context",
+        title: "移除编辑器上下文",
         value: "prompt.editor_context.clear",
-        category: "Prompt",
+        category: "PaperRun",
         enabled: Boolean(editorContext()),
         onSelect: (dialog) => {
           dismissEditorContext()
@@ -512,10 +512,10 @@ export function Prompt(props: PromptProps) {
         },
       },
       {
-        title: "Paste",
+        title: "粘贴",
         value: "prompt.paste",
         keybind: "input_paste",
-        category: "Prompt",
+        category: "PaperRun",
         hidden: true,
         onSelect: async () => {
           const content = await Clipboard.read()
@@ -529,10 +529,10 @@ export function Prompt(props: PromptProps) {
         },
       },
       {
-        title: "Interrupt session",
+        title: "中断 PaperRun",
         value: "session.interrupt",
         keybind: "session_interrupt",
-        category: "Session",
+        category: "PaperRun",
         hidden: true,
         enabled: status().type !== "idle",
         onSelect: (dialog) => {
@@ -561,8 +561,8 @@ export function Prompt(props: PromptProps) {
         },
       },
       {
-        title: "Open editor",
-        category: "Session",
+        title: "打开编辑器",
+        category: "PaperRun",
         keybind: "editor_open",
         value: "prompt.editor",
         slash: {
@@ -670,10 +670,10 @@ export function Prompt(props: PromptProps) {
         },
       },
       {
-        title: "Warp",
-        description: "Change the workspace for the session",
+        title: "切换工作区",
+        description: "切换当前 PaperRun 的工作区",
         value: "workspace.set",
-        category: "Session",
+        category: "PaperRun",
         enabled: Flag.OPENCODE_EXPERIMENTAL_WORKSPACES,
         slash: {
           name: "warp",
@@ -843,9 +843,9 @@ export function Prompt(props: PromptProps) {
 
   command.register(() => [
     {
-      title: "Stash prompt",
+      title: "暂存输入",
       value: "prompt.stash",
-      category: "Prompt",
+      category: "PaperRun",
       enabled: !!store.prompt.input,
       onSelect: (dialog) => {
         if (!store.prompt.input) return
@@ -862,9 +862,9 @@ export function Prompt(props: PromptProps) {
       },
     },
     {
-      title: "Stash pop",
+      title: "取回暂存输入",
       value: "prompt.stash.pop",
-      category: "Prompt",
+      category: "PaperRun",
       enabled: stash.list().length > 0,
       onSelect: (dialog) => {
         const entry = stash.pop()
@@ -878,9 +878,9 @@ export function Prompt(props: PromptProps) {
       },
     },
     {
-      title: "Stash list",
+      title: "查看暂存输入",
       value: "prompt.stash.list",
-      category: "Prompt",
+      category: "PaperRun",
       enabled: stash.list().length > 0,
       onSelect: (dialog) => {
         dialog.replace(() => (
@@ -987,10 +987,10 @@ export function Prompt(props: PromptProps) {
       })
 
       if (res.error) {
-        console.log("Creating a session failed:", res.error)
+        console.log("Creating a PaperRun failed:", res.error)
 
         toast.show({
-          message: "Creating a session failed. Open console for more details.",
+          message: "PaperRun 创建失败，请查看控制台日志。",
           variant: "error",
         })
 

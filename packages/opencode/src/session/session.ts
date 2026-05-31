@@ -42,8 +42,8 @@ import { NonNegativeInt, optionalOmitUndefined, withStatics } from "@/util/schem
 
 const log = Log.create({ service: "session" })
 
-const parentTitlePrefix = "New session - "
-const childTitlePrefix = "Child session - "
+const parentTitlePrefix = "New PaperRun - "
+const childTitlePrefix = "Child PaperRun - "
 
 function createDefaultTitle(isChild = false) {
   return (isChild ? childTitlePrefix : parentTitlePrefix) + new Date().toISOString()
