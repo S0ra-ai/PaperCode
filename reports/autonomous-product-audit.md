@@ -1,6 +1,6 @@
 ﻿# Autonomous Product Audit
 
-- Generated: 2026-05-31T15:44:11.2249997+08:00
+- Generated: 2026-05-31T15:47:36.8025114+08:00
 - Status: passed
 - Allow active task: True
 
@@ -13,6 +13,7 @@
 | `strict-live-evidence` | pass | focused strict live report proves crawler, HF, topic/code, and final export scenarios for 0.13.0.155-dev. |
 | `full-workspace-evidence` | pass | No full workspace report is present; focused strict live report remains the required milestone evidence. |
 | `report-governance` | pass | Active reports are documented, and archived full workspace evidence is versioned outside the active report slot. |
+| `visible-command-surface` | pass | Visible slash command registry is exact, and palette/autocomplete use the Paper Fucker filter. |
 | `dangerous-residue` | pass | No dangerous TODO/FIXME/not-implemented/mock residue found in product paper paths. |
 | `brand-surface` | pass | Paper Fucker and PaperRun remain the documented user-visible product surface. |
 | `public-surface-no-legacy-branding` | pass | User-visible README, TUI, paper API, and Preview surfaces do not contain legacy product wording. |

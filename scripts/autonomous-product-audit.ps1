@@ -58,6 +58,18 @@ function Get-StaleReportVersions {
     return @($Versions | Where-Object { $_ -ne $CurrentVersion })
 }
 
+function Get-ConstStringArray {
+    param(
+        [string]$Text,
+        [string]$Name
+    )
+    $match = [regex]::Match($Text, "export const ${Name}\s*=\s*\[(?<body>.*?)\]\s+as const", [System.Text.RegularExpressions.RegexOptions]::Singleline)
+    if (-not $match.Success) {
+        throw "Could not read exported const array: $Name"
+    }
+    return @([regex]::Matches($match.Groups["body"].Value, '"([^"]+)"') | ForEach-Object { $_.Groups[1].Value })
+}
+
 function Get-IndexNumber {
     param(
         [string]$Text,
@@ -300,6 +312,63 @@ function Test-ReportGovernance {
     Add-AuditResult "report-governance" "pass" "Active reports are documented, and archived full workspace evidence is versioned outside the active report slot."
 }
 
+function Test-VisibleCommandSurface {
+    $registryPath = "packages/opencode/src/cli/cmd/tui/paper-visible-commands.ts"
+    $dialogPath = "packages/opencode/src/cli/cmd/tui/component/dialog-command.tsx"
+    $autocompletePath = "packages/opencode/src/cli/cmd/tui/component/prompt/autocomplete.tsx"
+    try {
+        $registry = Read-RepoText $registryPath
+        $visible = @(Get-ConstStringArray -Text $registry -Name "PaperVisibleCommandRegistry")
+        $support = @(Get-ConstStringArray -Text $registry -Name "PaperSupportCommandRegistry")
+    } catch {
+        Add-AuditResult "visible-command-surface" "fail" $_.Exception.Message
+        return
+    }
+
+    $expectedVisible = @("models", "status", "file", "folder", "data", "log", "preview", "export", "stop", "resume")
+    $expectedSupport = @("help", "themes", "exit")
+    $legacyCommands = @("connect", "agents", "variants", "session", "sessions", "provider", "providers")
+
+    $visibleText = $visible -join ","
+    $expectedVisibleText = $expectedVisible -join ","
+    $supportText = $support -join ","
+    $expectedSupportText = $expectedSupport -join ","
+    if ($visibleText -ne $expectedVisibleText) {
+        Add-AuditResult "visible-command-surface" "fail" "PaperVisibleCommandRegistry changed: expected=$expectedVisibleText actual=$visibleText"
+        return
+    }
+    if ($supportText -ne $expectedSupportText) {
+        Add-AuditResult "visible-command-surface" "fail" "PaperSupportCommandRegistry changed: expected=$expectedSupportText actual=$supportText"
+        return
+    }
+    $legacyVisible = @($legacyCommands | Where-Object { $visible -contains $_ -or $support -contains $_ })
+    if ($legacyVisible.Count -gt 0) {
+        Add-AuditResult "visible-command-surface" "fail" "Legacy command(s) are visible: $($legacyVisible -join ', ')"
+        return
+    }
+
+    $dialog = Read-RepoText $dialogPath
+    $autocomplete = Read-RepoText $autocompletePath
+    $requiredSnippets = @(
+        "isPaperVisibleCommandOption",
+        "isPaperVisibleSlashCommand",
+        "option.category === `"Agent`"",
+        "option.category === `"Provider`"",
+        "option.category === `"Session`"",
+        "option.value.startsWith(`"session.`")",
+        "if (!isPaperVisibleSlashCommand(serverCommand.name)) continue",
+        "command.slashes()"
+    )
+    $joined = "$dialog`n$autocomplete"
+    $missing = @($requiredSnippets | Where-Object { -not $joined.Contains($_) })
+    if ($missing.Count -gt 0) {
+        Add-AuditResult "visible-command-surface" "fail" "Command palette/autocomplete filter missing: $($missing -join ', ')"
+        return
+    }
+
+    Add-AuditResult "visible-command-surface" "pass" "Visible slash command registry is exact, and palette/autocomplete use the Paper Fucker filter."
+}
+
 function Test-DangerousResidue {
     $paths = @("packages/opencode/src/paper", "research-tools/src", "README.md")
     $patterns = @("scrapling_live_fetch_not_implemented", "network_not_authorized_mock_used", "TODO", "FIXME")
@@ -422,6 +491,7 @@ Test-DevelopmentDocs
 Test-StrictEvidence
 Test-FullWorkspaceEvidence
 Test-ReportGovernance
+Test-VisibleCommandSurface
 Test-DangerousResidue
 Test-BrandSurface
 Test-PublicSurfaceNoLegacyBranding
