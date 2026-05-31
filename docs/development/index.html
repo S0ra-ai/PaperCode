@@ -77,6 +77,10 @@
           <p>
             开发手册参考 ReadTheDocs 的信息组织方式：先给入口和参数，再解释模式、输入、输出、调优、实时状态和排障。区别是本文档主线不是用户教程，而是维护者如何改代码、验证链路和判断质量边界。
           </p>
+          <div class="admonition">
+            <strong>定位</strong>
+            <span>使用指南保留完整产品路径，方便维护者复现用户行为；开发手册负责拆代码、拆状态、拆接口、拆测试。任何页面都应该能回答“改哪里、为什么、怎么验收”。</span>
+          </div>
           <div class="pattern-grid">
             <article>
               <strong>参数</strong>
@@ -116,6 +120,18 @@
               <tr><td>工作台</td><td>TUI 与模型、Agent / MCP / Skills、测试与维护、修改手册</td><td>覆盖用户界面、模型路由、能力包、回归测试和常见改动配方。</td></tr>
             </tbody>
           </table>
+        </section>
+
+        <section id="developer-tasks">
+          <h2>维护者任务卡</h2>
+          <p>遇到问题时不要从文件名猜起，先按任务卡进入对应页面，再回到代码。</p>
+          <div class="toc-list">
+            <a href="./paper-generation.html"><strong>论文质量不够</strong><span>看 DraftPaper 章节策略、References 规则、中国计算机学报格式、final/forced draft 边界。</span></a>
+            <a href="./experiment-execution.html"><strong>代码实验没跑通</strong><span>看协议生成、host/container 执行、GPU/编译器探测、terminal trace 和 ResultReport。</span></a>
+            <a href="./tui-models.html"><strong>模型工作台问题</strong><span>看 provider 注册、候选池、可用模型、主/备用决策模型和阶段路由。</span></a>
+            <a href="./preview-export.html"><strong>Web Monitor 或导出异常</strong><span>看 SSE snapshot、只读保护、gate、manifest、PDF/DOCX 文件头和浏览器 smoke。</span></a>
+            <a href="./function-reference.html"><strong>不知道从哪个函数改</strong><span>按入口、状态、artifact、Preview/export、测试的顺序定位真实调用链。</span></a>
+          </div>
         </section>
 
         <section id="system-shape">
@@ -193,6 +209,7 @@
         <a href="#quick-map">阅读路线</a>
         <a href="#doc-pattern">文档写法基准</a>
         <a href="#manual-structure">手册结构</a>
+        <a href="#developer-tasks">维护者任务卡</a>
         <a href="#system-shape">系统形态</a>
         <a href="#runtime-flow">核心流程</a>
         <a href="#maintenance-rules">维护原则</a>

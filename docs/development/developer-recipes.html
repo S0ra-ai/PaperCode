@@ -94,6 +94,18 @@
           <li>测试 authoring/export，并实跑 <code>scripts/live-paper-quality-benchmark.ts --scenario protocol</code> 看真实输出。</li>
         </ol>
 
+        <h2>让论文达到可读终稿</h2>
+        <table class="table">
+          <thead><tr><th>问题</th><th>先改</th><th>再验收</th></tr></thead>
+          <tbody>
+            <tr><td>章节像报告而不是论文</td><td><code>scaffoldSections</code>、摘要/引言/相关工作/方法/实验/结论 summary 函数。</td><td>生成 Markdown 后人工读主文，不只看测试通过。</td></tr>
+            <tr><td>格式乱、标题层级飘</td><td><code>cjc-profile.ts</code>、标题编号、表格渲染和导出 profile。</td><td>Markdown、LaTeX、PDF、DOCX 都要检查；中国计算机学报 profile 是默认目标。</td></tr>
+            <tr><td>引用不可信</td><td><code>LiteratureMap.v1</code>、<code>referencesSummary</code>、<code>checkReferences</code>。</td><td>只有 verified source 进入 References；没有真实来源时保持缺口诊断。</td></tr>
+            <tr><td>实验结果不能支撑结论</td><td><code>ResultReport.v1</code>、baseline/ablation/container 协议、terminal trace。</td><td>缺实验时 final 阻断；有实验时正文要写本文方法、基线、消融和资源摘要。</td></tr>
+            <tr><td>正文暴露内部词</td><td><code>paperProseText</code>、<code>displayMetricName</code>、<code>displayExperimentLabel</code>。</td><td>主文不出现 artifact、ClaimLedger、source id、baseline:*、typecheck_pass 这类实现词。</td></tr>
+          </tbody>
+        </table>
+
         <h2>修改 Preview/实时监控</h2>
         <ol>
           <li>新增 monitor 字段时，先在 <code>run.ts:createPaperRunLivePreviewSnapshot</code> 生成。</li>
@@ -101,6 +113,15 @@
           <li>TUI dashboard 使用 <code>subscribePaperRunLiveMonitor</code> 接收 SSE，不做独立事实计算。</li>
           <li>只读约束必须保留：Preview 不允许写请求，不暴露 secret/path traversal。</li>
           <li>跑 preview tests 和 browser smoke。</li>
+        </ol>
+
+        <h2>维护开发手册</h2>
+        <ol>
+          <li>新增模块或流程时，先在 <code>module-map.html</code> 标出目录边界。</li>
+          <li>新增关键函数时，同步 <code>function-reference.html</code>，写清输入、输出和不变量。</li>
+          <li>新增 HTTP API、event、artifact 或 snapshot 字段时，同步 <code>api-contracts.html</code>、<code>paperrun-flow.html</code> 或 <code>preview-export.html</code>。</li>
+          <li>新增用户可见工作流时，同步 <code>usage-guide.html</code>，但开发细节保留在开发页。</li>
+          <li>文档页面按“用途、参数、模式、输入/输出、调优、排障、下一步”组织，保持左侧导航和本页目录可用。</li>
         </ol>
 
         <h2>新增本机环境/GPU 页面</h2>

@@ -15,7 +15,7 @@
     ["tui-models.html", "TUI 与模型", "provider allowlist decision model stage policy"],
     ["agents-capabilities.html", "Agent / MCP / Skills", "agent team mcp skill capability bus"],
     ["testing-maintenance.html", "测试与维护", "strict acceptance browser smoke typecheck"],
-    ["developer-recipes.html", "修改手册", "recipes add stage artifact tui preview model"],
+    ["developer-recipes.html", "修改手册", "recipes add stage artifact tui preview model cjc paper quality documentation"],
   ]
 
   const current = (window.location.pathname.split("/").pop() || "index.html").toLowerCase()
