@@ -54,4 +54,17 @@ describe("live paper quality benchmark script", () => {
     expect(benchmark).not.toContain("await rm(outputDir")
     expect(benchmark).not.toContain("await rm(scenarioOutputRoot")
   })
+
+  test("records failed benchmark attempts without publishing them as successful summaries", () => {
+    const benchmark = readFileSync(path.join(repoRoot, "scripts", "live-paper-quality-benchmark.ts"), "utf8")
+
+    expect(benchmark).toContain("LivePaperQualityBenchmarkAttemptError.v1")
+    expect(benchmark).toContain("attempt-error.json")
+    expect(benchmark).toContain("last-failed-attempt.txt")
+    expect(benchmark).toContain("installBenchmarkFailureRecorder")
+    expect(benchmark).toContain('process.on("uncaughtException"')
+    expect(benchmark).toContain('process.on("unhandledRejection"')
+    expect(benchmark).toContain("published_summary_path")
+    expect(benchmark).not.toContain("publishBenchmarkSummary(error")
+  })
 })

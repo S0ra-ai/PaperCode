@@ -45,8 +45,70 @@ const attemptId = `attempt-${new Date().toISOString().replace(/[:.]/g, "-")}-${p
 const outputDir = path.join(scenarioOutputRoot, "attempts", attemptId)
 const summaryPath = path.join(outputDir, "paperrun-summary.json")
 const publishedSummaryPath = path.join(scenarioOutputRoot, "paperrun-summary.json")
+const attemptErrorPath = path.join(outputDir, "attempt-error.json")
 await mkdir(outputDir, { recursive: true })
 await writeFile(path.join(scenarioOutputRoot, "last-attempt.txt"), `${path.relative(scenarioOutputRoot, outputDir).replace(/\\/g, "/")}\n`, "utf8")
+let benchmarkErrorRecorded = false
+
+function errorDetails(error: unknown) {
+  if (error instanceof Error) {
+    return {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+    }
+  }
+  return {
+    name: "NonError",
+    message: String(error),
+    stack: undefined,
+  }
+}
+
+async function recordBenchmarkAttemptError(error: unknown) {
+  if (benchmarkErrorRecorded) return
+  benchmarkErrorRecorded = true
+  const payload = {
+    schema_version: "LivePaperQualityBenchmarkAttemptError.v1",
+    project_version: await currentProjectVersion(),
+    scenario,
+    generated_at: new Date().toISOString(),
+    attempt_dir: path.relative(repoRoot, outputDir).replace(/\\/g, "/"),
+    published_summary_path: path.relative(repoRoot, publishedSummaryPath).replace(/\\/g, "/"),
+    error: errorDetails(error),
+  }
+  await writeFile(attemptErrorPath, `${JSON.stringify(payload, null, 2)}\n`, "utf8")
+  await writeFile(
+    path.join(scenarioOutputRoot, "last-failed-attempt.txt"),
+    `${path.relative(scenarioOutputRoot, outputDir).replace(/\\/g, "/")}\n`,
+    "utf8",
+  )
+  console.error(
+    JSON.stringify(
+      {
+        attempt_error_path: path.relative(repoRoot, attemptErrorPath).replace(/\\/g, "/"),
+        scenario: payload.scenario,
+        project_version: payload.project_version,
+        error: payload.error.message,
+      },
+      null,
+      2,
+    ),
+  )
+}
+
+function installBenchmarkFailureRecorder() {
+  const finalizeFailure = (error: unknown) => {
+    void recordBenchmarkAttemptError(error).finally(() => {
+      stopAllPaperRunLivePreviews()
+      process.exit(1)
+    })
+  }
+  process.on("uncaughtException", finalizeFailure)
+  process.on("unhandledRejection", finalizeFailure)
+}
+
+installBenchmarkFailureRecorder()
 
 async function publishBenchmarkSummary(summary: unknown) {
   const content = `${JSON.stringify(summary, null, 2)}\n`
