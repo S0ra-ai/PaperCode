@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test"
 import {
   BUILTIN_PAPER_PROFILE_IDS,
+  ACTIVE_PAPER_PROFILE_IDS,
   createPaperProfileRegistry,
   defaultPaperProfiles,
   resolvePaperProfileSelection,
@@ -97,21 +98,22 @@ describe("paper profile registry", () => {
     )
   })
 
-  test("generates a blocked draft profile for unknown journals without guessed format rules", () => {
+  test("uses CJC as the only active journal profile while discovery is disabled", () => {
+    expect(ACTIVE_PAPER_PROFILE_IDS).toEqual(["cjc-paper"])
+
+    expect(resolvePaperProfileSelection({})).toMatchObject({
+      profile_id: "cjc-paper",
+      journal_name: "中国计算机学报",
+    })
+
     const selection = resolvePaperProfileSelection({
       target_journal: "Journal of Unknown Systems",
       target_journal_url: "https://example.org/authors",
     })
 
-    expect(selection.profile_id).toBe("custom-journal")
-    expect(selection.journal_name).toBe("Journal of Unknown Systems")
-    expect(selection.generated_profile).toMatchObject({
-      schema_version: "PaperGeneratedJournalProfile.v1",
-      profile_id: "custom-journal",
-      status: "needs_official_guidance",
-      official_url: "https://example.org/authors",
-    })
-    expect(selection.generated_profile?.notes.join("\n")).toContain("不会使用猜测规则")
+    expect(selection.profile_id).toBe("cjc-paper")
+    expect(selection.journal_name).toBe("中国计算机学报")
+    expect(selection.generated_profile).toBeUndefined()
   })
 
   test("installs a first-party nature-paper skill with runtime official-source refresh instructions", async () => {

@@ -10,6 +10,8 @@ export const BUILTIN_PAPER_PROFILE_IDS = [
 
 export type PaperProfileId = (typeof BUILTIN_PAPER_PROFILE_IDS)[number]
 
+export const ACTIVE_PAPER_PROFILE_IDS = ["cjc-paper"] as const
+
 export interface PaperProfileGuidanceSource {
   name: string
   url: string
@@ -169,23 +171,9 @@ export function resolvePaperProfileSelection(input?: {
   journal_name?: string
   generated_profile?: PaperGeneratedJournalProfile
 } {
-  const rawProfile = input?.target_profile?.trim()
   const rawJournal = input?.target_journal?.trim()
+  const rawProfile = input?.target_profile?.trim()
   const key = normalizeJournalKey(rawJournal || rawProfile)
-
-  if (isPaperProfileId(rawProfile)) {
-    return {
-      profile_id: rawProfile,
-      journal_name: rawJournal,
-      generated_profile:
-        rawProfile === "custom-journal" && rawJournal
-          ? createGeneratedJournalProfileDraft({
-              journal_name: rawJournal,
-              official_url: input?.target_journal_url,
-            })
-          : undefined,
-    }
-  }
 
   if (
     key === "中国计算机学报" ||
@@ -196,19 +184,7 @@ export function resolvePaperProfileSelection(input?: {
     return { profile_id: "cjc-paper", journal_name: rawJournal || "中国计算机学报" }
   }
 
-  if (rawJournal || rawProfile) {
-    const journalName = rawJournal || rawProfile!
-    return {
-      profile_id: "custom-journal",
-      journal_name: journalName,
-      generated_profile: createGeneratedJournalProfileDraft({
-        journal_name: journalName,
-        official_url: input?.target_journal_url,
-      }),
-    }
-  }
-
-  return { profile_id: "generic-preprint" }
+  return { profile_id: "cjc-paper", journal_name: "中国计算机学报" }
 }
 
 export function createGeneratedJournalProfileDraft(input: {
