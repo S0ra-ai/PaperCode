@@ -2,25 +2,30 @@
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.158-dev
+:version       0.13.0.159-dev
 :last_update   2026/05/31
 
 :history
 
-    0.13.0.158-dev - 2026/05/31 (8b1082ef) [fix/mcp-tool-binding-test-isolation]
-        :brief PaperRun 模型路由强制只使用用户 allowlist
+    0.13.0.159-dev - 2026/05/31 (06a12b57) [fix/mcp-tool-binding-test-isolation]
+        :brief 中国计算机学报正文小标题编号与开发手册风格确认
         :fix
-            - fix(paper): createPaperRun 不再把请求中的 model_roles 合并进 allowlist，阶段强制模型只作为路由请求处理
-            - fix(paper): PaperRun diagnostics 的 model_roles 改为来自实际路由决策，未授权模型不会进入 agent root 或子阶段模型
-            - fix(paper): 未授权阶段模型返回 forced_model_not_allowed，保持 PaperRun blocked，不静默降级或临时授权
+            - fix(authoring): CJC profile 对未编号的小标题按父章节补齐层级编号，避免 PDF/目录出现裸小标题
+            - fix(authoring): 实验协议调整为 4.2，可复现性调整为第 6 节，避免 4.1 与 5.1 重复编号
+            - fix(authoring): 代码块内 Markdown 标题保持原样，不参与 CJC 小标题编号
+        :docs
+            - docs(development): 开发手册继续按 ReadTheDocs 风格维护，主线是开发指南、架构、接口契约、PaperRun 流程、关键函数和使用指南
+            - docs(readme): README 版本同步到 0.13.0.159-dev，保留开发手册入口
         :test
-            - test(run-api): 新增 request model_roles 不得绕过用户 allowlist 的回归测试
-            - test(paper): 需要真实路由的 PaperRun 测试显式 seed 测试 allowlist，避免通过请求模型配置隐式授权
-            - test(audit): autonomous-product-audit 新增 model-routing-boundary，锁定 allowlist、forced model 与 PaperRun 集成边界
-            - test(acceptance): strict-acceptance 单测覆盖 model-routing-boundary 审计项
+            - test(authoring): 覆盖 CJC 4.1/4.2、5.x、6.x 与 9 结论的单调编号
+            - test(authoring): 覆盖原始小标题自动编号，并确认 fenced code 内标题不被改写
+            - test(strict): live provider smoke 对瞬时网络发送失败增加 3 次退避重试
+            - test(audit): autonomous-product-audit 新增 cjc-format-boundary，防止 CJC 章节编号回退
+            - test(acceptance): strict-acceptance 单测覆盖 cjc-format-boundary 审计项
         :changelog
-            - docs(changelog): 0.13.0.157 开发历史移入 docs/changelog/v0/0.13.0.157.CHANGELOG
+            - docs(changelog): 0.13.0.158 开发历史移入 docs/changelog/v0/0.13.0.158.CHANGELOG
         :checks
-            - targeted tests: packages/opencode model-discovery, run-api, strict-acceptance, hard-fork, controller, observability, material-index and code-metadata tests
+            - targeted tests: packages/opencode authoring and strict-acceptance tests
+            - typecheck: npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
+            - provider: scripts/provider-matrix-smoke.ps1
             - audit: scripts/autonomous-product-audit.ps1 -AllowActiveTask
-
