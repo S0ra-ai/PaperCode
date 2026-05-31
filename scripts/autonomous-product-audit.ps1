@@ -117,6 +117,13 @@ function Test-DevelopmentDocs {
 
 function Test-StrictEvidence {
     $report = Read-RepoText "reports/strict-live-acceptance.md"
+    $changelog = Read-RepoText "CHANGELOG"
+    $versionMatch = [regex]::Match($changelog, '(?m)^:version\s+([0-9]+(?:\.[0-9]+){2,3}-dev)\s*$')
+    if (-not $versionMatch.Success) {
+        Add-AuditResult "strict-live-evidence" "fail" "CHANGELOG :version is missing; strict live evidence cannot be matched to current build."
+        return
+    }
+    $currentVersion = $versionMatch.Groups[1].Value
     $required = @(
         "- Status: passed",
         "- Mode: strict-live-focused",
@@ -128,10 +135,16 @@ function Test-StrictEvidence {
         '"final_export": "final"'
     )
     $missing = @($required | Where-Object { -not $report.Contains($_) })
-    if ($missing.Count -eq 0) {
-        Add-AuditResult "strict-live-evidence" "pass" "Latest strict live report proves focused live crawler, HF, topic/code, and final export pass scenarios."
+    $versionMatches = @([regex]::Matches($report, '"project_version":\s*"([^"]+)"') | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique)
+    $staleVersions = @($versionMatches | Where-Object { $_ -ne $currentVersion })
+    if ($missing.Count -eq 0 -and $versionMatches.Count -gt 0 -and $staleVersions.Count -eq 0) {
+        Add-AuditResult "strict-live-evidence" "pass" "Latest strict live report proves focused live crawler, HF, topic/code, and final export pass scenarios for $currentVersion."
     } else {
-        Add-AuditResult "strict-live-evidence" "fail" "Strict report missing: $($missing -join ', ')"
+        $details = @()
+        if ($missing.Count -gt 0) { $details += "missing=$($missing -join ', ')" }
+        if ($versionMatches.Count -eq 0) { $details += "project_version entries missing" }
+        if ($staleVersions.Count -gt 0) { $details += "stale_project_version=$($staleVersions -join ', ') current=$currentVersion" }
+        Add-AuditResult "strict-live-evidence" "fail" "Strict report is not current: $($details -join '; ')"
     }
 }
 
