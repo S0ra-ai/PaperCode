@@ -215,27 +215,51 @@ function normalizeInventory(input: unknown): PaperModelInventory {
   const allowlist = Array.isArray(record.allowlist)
     ? record.allowlist.filter((item): item is string => typeof item === "string" && item.includes("/"))
     : []
+  const mergedCandidates = candidates
+  const storedRegistrations =
+    record.provider_registrations && typeof record.provider_registrations === "object"
+      ? (record.provider_registrations as Record<string, PaperProviderRegistration>)
+      : {}
+  const rawRegistrations = Object.fromEntries(
+    Object.entries(storedRegistrations).filter(([providerID, registration]) =>
+      isSupportedUserProviderRegistration(providerID, registration, mergedCandidates),
+    ),
+  ) as Record<string, PaperProviderRegistration>
+  const canUseStoredProviderRef = (ref: string) => {
+    const providerID = ref.split("/")[0] ?? ""
+    const storedRegistration = storedRegistrations[providerID]
+    if (!storedRegistration) return true
+    const supportedRegistration = rawRegistrations[providerID]
+    return Boolean(supportedRegistration && supportedRegistration.status === "registered")
+  }
+  const mergedAllowlist = new Set(allowlist.filter(canUseStoredProviderRef))
   const role_overrides =
     record.role_overrides && typeof record.role_overrides === "object"
       ? Object.fromEntries(
           Object.entries(record.role_overrides).filter(([role, value]) => {
-            return PAPER_MODEL_ROLES.includes(role as PaperModelRole) && typeof value === "string"
+            return PAPER_MODEL_ROLES.includes(role as PaperModelRole) && typeof value === "string" && mergedAllowlist.has(value)
           }),
         )
       : {}
   const stage_model_policies =
     record.stage_model_policies && typeof record.stage_model_policies === "object"
       ? Object.fromEntries(
-          Object.entries(record.stage_model_policies).filter(([role, value]) => {
-            if (!PAPER_MODEL_ROLES.includes(role as PaperModelRole)) return false
-            if (!value || typeof value !== "object") return false
-            const mode = (value as Partial<PaperStageModelPolicy>).mode
-            return mode === "auto" || mode === "dynamic" || mode === "forced"
-          }),
+          Object.entries(record.stage_model_policies)
+            .filter(([role, value]) => {
+              if (!PAPER_MODEL_ROLES.includes(role as PaperModelRole)) return false
+              if (!value || typeof value !== "object") return false
+              const mode = (value as Partial<PaperStageModelPolicy>).mode
+              return mode === "auto" || mode === "dynamic" || mode === "forced"
+            })
+            .map(([role, value]) => {
+              const policy = value as PaperStageModelPolicy
+              if (policy.mode === "forced" && (!policy.model_ref || !mergedAllowlist.has(policy.model_ref))) {
+                return [role, { role: role as PaperModelRole, mode: "auto" }]
+              }
+              return [role, policy]
+            }),
         )
       : {}
-  const mergedCandidates = candidates
-  const mergedAllowlist = new Set(allowlist)
   const decisionModel =
     typeof record.decision_model === "string" && record.decision_model.includes("/")
       ? record.decision_model
@@ -245,14 +269,6 @@ function normalizeInventory(input: unknown): PaperModelInventory {
     typeof record.backup_decision_model === "string" && mergedAllowlist.has(record.backup_decision_model)
       ? record.backup_decision_model
       : undefined
-  const rawRegistrations =
-    record.provider_registrations && typeof record.provider_registrations === "object"
-      ? (Object.fromEntries(
-          Object.entries(record.provider_registrations as Record<string, PaperProviderRegistration>).filter(
-            ([providerID, registration]) => isSupportedUserProviderRegistration(providerID, registration, mergedCandidates),
-          ),
-        ) as Record<string, PaperProviderRegistration>)
-      : {}
   const providerRegistrations = Object.fromEntries(
     Object.keys(rawRegistrations)
       .sort()

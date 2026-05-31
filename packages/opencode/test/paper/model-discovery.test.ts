@@ -212,6 +212,98 @@ describe("paper provider model discovery", () => {
     expect(Object.keys(inventory.provider_registrations).sort()).toEqual(["lab", "openai"])
   })
 
+  test("does not route allowlisted models from disabled or auth-pending providers", async () => {
+    const home = await tmpHome()
+    const file = modelInventoryPath(home)
+    await mkdir(path.dirname(file), { recursive: true })
+    await writeFile(
+      file,
+      JSON.stringify({
+        schema_version: "PaperModelInventory.v1",
+        updated_at: "2026-05-12T00:00:00Z",
+        decision_model: "lab/paper-pro",
+        backup_decision_model: "openai/gpt-5.2",
+        allowlist: ["lab/paper-pro", "openai/gpt-5.2", "historical/kept"],
+        role_overrides: { writer: "lab/paper-pro", reviewer: "historical/kept" },
+        provider_registrations: {
+          lab: {
+            provider_id: "lab",
+            provider_name: "Local Lab",
+            kind: "openai_compatible",
+            status: "disabled",
+            model_count: 1,
+            allowed_count: 1,
+          },
+          openai: {
+            provider_id: "openai",
+            provider_name: "ChatGPT 订阅",
+            kind: "chatgpt_subscription",
+            status: "needs_auth",
+            model_count: 1,
+            allowed_count: 1,
+          },
+        },
+        stage_model_policies: {
+          writer: { role: "writer", mode: "forced", model_ref: "lab/paper-pro" },
+          reviewer: { role: "reviewer", mode: "forced", model_ref: "historical/kept" },
+        },
+        candidates: [
+          {
+            provider_id: "lab",
+            provider_name: "Local Lab",
+            model_id: "paper-pro",
+            model_ref: "lab/paper-pro",
+            display_name: "Paper Pro",
+            source: "openai_compatible",
+            capabilities: ["general"],
+            cost_hint: "standard",
+            context_hint: "long",
+            smoke_status: "passed",
+            allowed: true,
+            discovered_at: "2026-05-12T00:00:00Z",
+          },
+          {
+            provider_id: "openai",
+            provider_name: "ChatGPT 订阅",
+            model_id: "gpt-5.2",
+            model_ref: "openai/gpt-5.2",
+            display_name: "GPT 5.2",
+            source: "paper_builtin",
+            capabilities: ["general"],
+            cost_hint: "unknown",
+            context_hint: "long",
+            smoke_status: "untested",
+            allowed: true,
+            discovered_at: "2026-05-12T00:00:00Z",
+          },
+        ],
+      }),
+      "utf8",
+    )
+
+    const inventory = await loadPaperModelInventory({ home })
+    expect(inventory.allowlist).toEqual(["historical/kept"])
+    expect(inventory.decision_model).toBeUndefined()
+    expect(inventory.backup_decision_model).toBeUndefined()
+    expect(inventory.role_overrides).toEqual({ reviewer: "historical/kept" })
+    expect(inventory.stage_model_policies.writer).toEqual({ role: "writer", mode: "auto" })
+    expect(inventory.stage_model_policies.reviewer).toEqual({
+      role: "reviewer",
+      mode: "forced",
+      model_ref: "historical/kept",
+    })
+    expect(inventory.provider_registrations.lab).toMatchObject({ status: "disabled", allowed_count: 0 })
+    expect(inventory.provider_registrations.openai).toMatchObject({ status: "needs_auth", allowed_count: 0 })
+    expect(inventory.candidates.map((candidate) => [candidate.model_ref, candidate.allowed])).toEqual([
+      ["lab/paper-pro", false],
+      ["openai/gpt-5.2", false],
+    ])
+    expect(routePaperModel(inventory, { role: "writer" })).toMatchObject({
+      source: "blocked",
+      diagnostics: ["decision_model_missing"],
+    })
+  })
+
   test("can route a historical allowlisted decision model even when candidate metadata is unavailable", async () => {
     const inventory = await updatePaperModelAllowlist(["lab/paper-pro"], {
       home: await tmpHome(),
