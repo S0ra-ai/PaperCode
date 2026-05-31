@@ -120,18 +120,18 @@ export function createMenu(deps: Deps) {
     {
       label: "Help",
       submenu: [
-        { label: "paper_fucker Documentation", click: () => shell.openExternal("https://github.com/S0ra-ai/paper_fucker") },
-        { label: "Repository", click: () => shell.openExternal("https://github.com/S0ra-ai/paper_fucker") },
+        { label: "paper_fucker Documentation", click: () => shell.openExternal("https://github.com/ZhuchenZhong/paper_fucker") },
+        { label: "Repository", click: () => shell.openExternal("https://github.com/ZhuchenZhong/paper_fucker") },
         { type: "separator" },
         { type: "separator" },
         {
           label: "Share Feedback",
           click: () =>
-            shell.openExternal("https://github.com/S0ra-ai/paper_fucker/issues/new"),
+            shell.openExternal("https://github.com/ZhuchenZhong/paper_fucker/issues/new"),
         },
         {
           label: "Report a Bug",
-          click: () => shell.openExternal("https://github.com/S0ra-ai/paper_fucker/issues/new"),
+          click: () => shell.openExternal("https://github.com/ZhuchenZhong/paper_fucker/issues/new"),
         },
       ],
     },
