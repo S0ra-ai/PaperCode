@@ -2,7 +2,7 @@
 description: "find PaperCode issue(s) on github"
 ---
 
-Search through existing issues in ZhuchenZhong/paper_fucker using the gh cli to find issues matching this query:
+Search through existing issues using the gh cli to find issues matching this query:
 
 $ARGUMENTS
 

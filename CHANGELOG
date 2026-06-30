@@ -1,5 +1,4 @@
 :project       PaperCode - 可验证论文研究自动化系统
-:author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
 :version       0.13.0.183-dev
