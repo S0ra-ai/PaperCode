@@ -326,6 +326,7 @@
       "name": "paper_fucker",
       "version": "1.14.41",
       "bin": {
+        "papercode": "./bin/papercode",
         "paper_fucker": "./bin/paper_fucker",
       },
       "dependencies": {
