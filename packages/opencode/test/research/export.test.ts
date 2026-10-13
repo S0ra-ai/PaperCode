@@ -3,13 +3,14 @@ import { mkdir, mkdtemp, rm } from "fs/promises"
 import { setTimeout as sleep } from "node:timers/promises"
 import os from "os"
 import path from "path"
-import { createResearchRun, getResearchRunStatus, type ResearchFinalGateState, type ResearchRuntimeOptions } from "@/paper/research/runtime"
-import { composeClaimLedger, composeDraftPaper } from "@/paper/research/writing"
 import {
-  FinalExportBlockedError,
-  recordExportBundle,
-  type ExportRenderer,
-} from "@/paper/research/export"
+  createResearchRun,
+  getResearchRunStatus,
+  type ResearchFinalGateState,
+  type ResearchRuntimeOptions,
+} from "@/paper/research/runtime"
+import { composeClaimLedger, composeDraftPaper } from "@/paper/research/writing"
+import { FinalExportBlockedError, recordExportBundle, type ExportRenderer } from "@/paper/research/export"
 
 const now = "2026-05-09T00:00:00Z"
 
@@ -56,9 +57,40 @@ function gate(status: ResearchFinalGateState["status"], blockers: string[] = [])
   return { status, blockers, updated_at: now }
 }
 
+function fixturePdf() {
+  const objects = [
+    "<< /Type /Catalog /Pages 2 0 R >>",
+    "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+    "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>",
+    "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+  ]
+  const stream = "BT /F1 12 Tf 72 720 Td (Export fixture) Tj ET\n"
+  objects.push(`<< /Length ${stream.length} >>\nstream\n${stream}endstream`)
+  let pdf = "%PDF-1.4\n"
+  const offsets = [0]
+  for (const [index, object] of objects.entries()) {
+    offsets.push(pdf.length)
+    pdf += `${index + 1} 0 obj\n${object}\nendobj\n`
+  }
+  const start = pdf.length
+  pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`
+  pdf += offsets
+    .slice(1)
+    .map((offset) => `${String(offset).padStart(10, "0")} 00000 n \n`)
+    .join("")
+  pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${start}\n%%EOF\n`
+  return new TextEncoder().encode(pdf)
+}
+
+// Minimal valid OOXML package: content types, root relationship, and a one-paragraph document.
+const fixtureDocx = Buffer.from(
+  "UEsDBBQAAAAIALiDTV3MVIwQ4AAAAJwBAAATAAAAW0NvbnRlbnRfVHlwZXNdLnhtbH2Qy07DMBBFf8XyFsUTukAIJekCyhJYlA+w7Eli4Zc8bil/z6QtXaDC0r6PM7rd+hC82GMhl2Ivb1UrBUaTrItTL9+3z829XA/d9isjCbZG6uVca34AIDNj0KRSxsjKmErQlZ9lgqzNh54QVm17BybFirE2demQQ/eEo975KjYH/j5hC3qS4vFkXFi91Dl7Z3RlHfbR/qI0Z4Li5NFDs8t0wwYJVwmL8jfgnHvlHYqzKN50qS86sAs+U7Fgk9kFTqr/a67cmcbRGbzkl7ZckkEiHjh4dVGCdvHnfjjOPXwDUEsDBBQAAAAIALiDTV02V97cogAAABgBAAALAAAAX3JlbHMvLnJlbHONzzsOwjAMBuCrRN6pCwNCqGkXhNQVlQNEiZtGNA8l4XV7MjBQxMBo+/dnuekedmY3isl4x2Fd1cDISa+M0xzOw3G1g65tTjSLXBJpMiGxsuIShynnsEdMciIrUuUDuTIZfbQilzJqDEJehCbc1PUW46cBS5P1ikPs1RrY8Az0j+3H0Ug6eHm15PKPE1+JIouoKXO4+6hQvdtVYQHbBhcvti9QSwMEFAAAAAgAuINNXSANskycAAAA0QAAABEAAAB3b3JkL2RvY3VtZW50LnhtbEWOuw7CMAxFfyXKTl0YEKr6mGBmgA8oidtGauLISWn5e5IysBzL11dHrrvNzuKNHAy5Rh6LUgp0irRxYyOfj9vhIru2XitNarHookh9F6q1kVOMvgIIakLbh4I8unQbiG0f08ojrMTaMykMIensDKeyPIPtjZNZ+SL9ydNncEZsr5snjmIwW1wYa8hZJu/cmwFVvDPswU8B//faL1BLAQIUABQAAAAIALiDTV3MVIwQ4AAAAJwBAAATAAAAAAAAAAAAAACAAQAAAABbQ29udGVudF9UeXBlc10ueG1sUEsBAhQAFAAAAAgAuINNXTZX3tyiAAAAGAEAAAsAAAAAAAAAAAAAAIABEQEAAF9yZWxzLy5yZWxzUEsBAhQAFAAAAAgAuINNXSANskycAAAA0QAAABEAAAAAAAAAAAAAAIAB3AEAAHdvcmQvZG9jdW1lbnQueG1sUEsFBgAAAAADAAMAuQAAAKcCAAAAAA==",
+  "base64",
+)
+
 const successfulRenderers: ExportRenderer = {
-  pdf: async () => ({ status: "written", bytes: new TextEncoder().encode("%PDF fixture"), diagnostics: [] }),
-  docx: async () => ({ status: "written", bytes: new TextEncoder().encode("DOCX fixture"), diagnostics: [] }),
+  pdf: async () => ({ status: "written", bytes: fixturePdf(), diagnostics: [] }),
+  docx: async () => ({ status: "written", bytes: fixtureDocx, diagnostics: [] }),
 }
 
 const failedRenderers: ExportRenderer = {
@@ -174,8 +206,12 @@ describe("export bundles", () => {
         options,
       )
 
-      expect(recorded.bundle.files.find((file) => file.format === "pdf")?.diagnostics).toContain("missing external renderer: pdf")
-      expect(recorded.bundle.files.find((file) => file.format === "docx")?.diagnostics).toContain("missing external renderer: docx")
+      expect(recorded.bundle.files.find((file) => file.format === "pdf")?.diagnostics).toContain(
+        "missing external renderer: pdf",
+      )
+      expect(recorded.bundle.files.find((file) => file.format === "docx")?.diagnostics).toContain(
+        "missing external renderer: docx",
+      )
     } finally {
       await clean(dir)
     }
@@ -203,7 +239,11 @@ describe("export bundles", () => {
         options,
       )
 
-      expect(recorded.bundle.manifest.source_artifact_ids).toEqual(["artifact-draft", "artifact-ledger", "artifact-review"])
+      expect(recorded.bundle.manifest.source_artifact_ids).toEqual([
+        "artifact-draft",
+        "artifact-ledger",
+        "artifact-review",
+      ])
       expect(recorded.bundle.manifest.files).toHaveLength(4)
       expect(recorded.bundle.manifest.files.every((file) => file.sha256.length === 64)).toBe(true)
     } finally {

@@ -57,6 +57,7 @@ import {
   type PaperResearchStageStatus,
 } from "./orchestrator"
 import { budgetTierPolicy } from "./budget"
+import { executeContainerExperiment, executeHostExperiment, loadExperimentProtocol, parseExperimentMetrics, selectContainerCommand } from "./research/experiments/execution"
 import { recordExportBundle, type ExportBundle } from "./research/export"
 import { composeDraftPaper, streamMarkdownDraft, type ClaimLedger, type CodeAvailabilityMetadata, type DraftPaper } from "./research/writing"
 import type { DataPlan, LiteratureMap } from "./research/sources"
@@ -87,6 +88,7 @@ import {
   type PaperMachineProfile,
 } from "./machine"
 import {
+  analyzeExperimentResults,
   planExperiments,
   plannedExperimentSpecs,
   recordExperimentLoop,
@@ -1461,7 +1463,7 @@ function commandForProtocolRun(
   protocol: ExperimentProtocol | undefined,
 ) {
   if (environment.mode === "container") {
-    return protocol?.entries.find((entry) => entry.role === "container_reproduction")?.command ?? spec.command
+    return selectContainerCommand(protocol, spec) ?? { argv: [] }
   }
   return protocol?.entries.find((entry) => commandMatchesSpec(entry, spec))?.command ?? spec.command
 }
@@ -1553,6 +1555,8 @@ function packageScriptSortKey(scriptName: string) {
 }
 
 async function experimentProtocolFromWorkspacePackageJson(workspace: string): Promise<ExperimentProtocol | undefined> {
+  const explicit = await loadExperimentProtocol(workspace)
+  if (explicit) return explicit
   const packagePath = path.join(workspace, "package.json")
   let source: string
   try {
@@ -1595,7 +1599,8 @@ async function experimentProtocolFromWorkspacePackageJson(workspace: string): Pr
 
 function shouldUseWorkspaceProtocol(current: ExperimentProtocol | undefined, refreshed: ExperimentProtocol | undefined) {
   if (!refreshed) return false
-  if (!current) return true
+  if (!current || refreshed.discovered_from === "manifest") return true
+  if (current.discovered_from === "package_scripts" && refreshed.discovered_from === "package_scripts") return true
   const currentRoles = new Set(current.entries.map((entry) => entry.role))
   const refreshedRoles = new Set(refreshed.entries.map((entry) => entry.role))
   const gainedRole = [...refreshedRoles].some((role) => !currentRoles.has(role))
@@ -1619,7 +1624,11 @@ function planForProtocolRerun(input: {
     method_name: input.plan.method_name,
     dataset_ids: input.plan.proposed.dataset_ids,
     objective: input.plan.objective,
-    primary_metric: primaryMetric,
+    primary_metric: proposed?.expected_metric ?? primaryMetric,
+    metric_direction: protocol.metric_direction ?? input.plan.metrics.find((metric) => metric.primary)?.direction,
+    proposed_id: proposed?.protocol_id ?? input.plan.proposed.experiment_id,
+    resource_budget: input.plan.resource_budget,
+    reproduction_tolerance: input.plan.reproduction_tolerance,
     proposed_command: proposed?.command ?? input.plan.proposed.command,
     baseline_specs: baselines.map((entry) => ({
       experiment_id: entry.protocol_id,
@@ -1666,7 +1675,7 @@ function safeExperimentTraceSegment(value: string) {
   return value.replace(/[^A-Za-z0-9._-]+/g, "-").replace(/^-+|-+$/g, "") || "trace"
 }
 
-async function runExperimentShellCommand(command: string, cwd: string, timeoutMs: number) {
+async function runExperimentShellCommand(command: string, cwd: string, timeoutMs: number, env?: Record<string, string>) {
   return new Promise<{
     stdout: string
     stderr: string
@@ -1685,7 +1694,7 @@ async function runExperimentShellCommand(command: string, cwd: string, timeoutMs
       cwd,
       shell: true,
       windowsHide: true,
-      env: process.env,
+      env: { ...process.env, ...env },
       stdio: ["ignore", "pipe", "pipe"],
     })
     let stdout = ""
@@ -3052,6 +3061,7 @@ export async function runPaperRunExperimentProtocol(
     )
   }
 
+  const reproduce = budgetTierPolicy(snapshot.budget_tier).container_reproduction
   const plannedCommands = plannedExperimentSpecs(effectivePlan).flatMap((spec) => {
     const hostCommand = commandForProtocolRun(spec, { mode: "host", platform: process.platform }, effectiveProtocol)
     const containerCommand = commandForProtocolRun(spec, { mode: "container", platform: "container" }, effectiveProtocol)
@@ -3062,12 +3072,12 @@ export async function runPaperRunExperimentProtocol(
         environment: "host" as const,
         command: experimentCommandText(hostCommand),
       },
-      {
+      ...(reproduce ? [{
         experiment_id: spec.experiment_id,
         role: "container_reproduction" as const,
         environment: "container" as const,
         command: experimentCommandText(containerCommand),
-      },
+      }] : []),
     ]
   })
 
@@ -3094,7 +3104,8 @@ export async function runPaperRunExperimentProtocol(
     const command = commandForProtocolRun(spec, environment, effectiveProtocol)
     const shellCommand = experimentCommandText(command)
     const traceID = `terminal-trace-${++terminalTraceIndex}`
-    const timeoutMs = (command.timeout_seconds ?? timeoutSeconds) * 1000
+    const timeoutMs = Math.min(command.timeout_seconds ?? timeoutSeconds, effectivePlan.resource_budget.max_wall_time_seconds) * 1000
+    const executionWorkspace = path.resolve(workspace, command.cwd ?? ".")
     await appendResearchEvent(
       runDir,
       {
@@ -3106,13 +3117,25 @@ export async function runPaperRunExperimentProtocol(
           role: spec.role,
           environment: environment.mode,
           command: shellCommand,
-          cwd: workspace,
+          cwd: executionWorkspace,
           timeout_seconds: Math.round(timeoutMs / 1000),
         },
       },
       normalized,
     )
-    const result = await runExperimentShellCommand(shellCommand, workspace, timeoutMs)
+    const startedAt = new Date().toISOString()
+    const containerResult = environment.mode === "container"
+      ? await executeContainerExperiment(command, executionWorkspace, timeoutMs)
+      : undefined
+    const executed = containerResult ?? await executeHostExperiment(command, workspace, timeoutMs)
+    const result = {
+      ...executed,
+      stdoutBytes: executed.stdoutBytes ?? Buffer.byteLength(executed.stdout),
+      stderrBytes: executed.stderrBytes ?? Buffer.byteLength(executed.stderr),
+      outputTruncated: executed.outputTruncated ?? false,
+      startedAt: executed.startedAt ?? startedAt,
+      finishedAt: executed.finishedAt ?? new Date().toISOString(),
+    }
     const status = result.exitCode === 0 ? "succeeded" : result.timedOut ? "resource_exceeded" : "failed"
     const traceData = {
       schema_version: "ExperimentTerminalTrace.v1",
@@ -3123,7 +3146,7 @@ export async function runPaperRunExperimentProtocol(
       environment: environment.mode,
       platform: environment.platform,
       command: shellCommand,
-      cwd: workspace,
+      cwd: executionWorkspace,
       timeout_seconds: Math.round(timeoutMs / 1000),
       status,
       exit_code: result.exitCode,
@@ -3161,7 +3184,7 @@ export async function runPaperRunExperimentProtocol(
       role: spec.role,
       environment: environment.mode,
       command: shellCommand,
-      cwd: workspace,
+      cwd: executionWorkspace,
       status,
       exit_code: result.exitCode,
       wall_time_seconds: result.wallTimeSeconds,
@@ -3196,14 +3219,15 @@ export async function runPaperRunExperimentProtocol(
     return {
       status,
       command,
-      metrics: [
-        {
-          name: spec.expected_metric,
-          value: result.exitCode === 0 ? 1 : 0,
-          direction: "higher_better",
-          unit: "ratio",
-        },
-      ],
+      metrics: (() => {
+        const metrics = parseExperimentMetrics(result.stdout, spec, spec.expected_metric)
+        const direction = effectivePlan.metrics.find((metric) => metric.name === spec.expected_metric)?.direction ?? "higher_better"
+        if (metrics.length > 0) return metrics
+        return /^(typecheck_pass|lint_pass|container_reproduction_pass)$/.test(spec.expected_metric)
+          ? [{ name: spec.expected_metric, value: result.exitCode === 0 ? 1 : 0, direction, unit: "ratio" }]
+          : []
+      })(),
+      execution: containerResult?.execution ?? (environment.mode === "host" ? { kind: "process", command, exit_code: result.exitCode } : undefined),
       stdout: result.stdout,
       stderr: result.timedOut ? `Command timed out after ${result.wallTimeSeconds.toFixed(1)}s.\n${result.stderr}`.trim() : result.stderr,
       exit_code: result.exitCode,
@@ -3214,6 +3238,7 @@ export async function runPaperRunExperimentProtocol(
     runDir,
     {
       plan: effectivePlan,
+      container_reproduction: reproduce,
       host_runner: runner,
       container_runner: runner,
       run_options: { now: normalized.clock?.().toISOString() },
@@ -3285,7 +3310,21 @@ export async function exportPaperRun(
 ): Promise<PaperExportBundle> {
   const runDir = await findPaperRunDir(runID, options)
   const status = await getResearchRunStatus(runDir)
-  const finalGate = normalizeFinalGateState(status.state.final_gate, status.run.updated_at)
+  let finalGate = normalizeFinalGateState(status.state.final_gate, status.run.updated_at)
+  if (finalGate.status === "passed" && !input.forced) {
+    // Historical gate flags predate execution provenance; revalidate before issuing a new final export.
+    const artifacts = await readJsonlFacts(runDir, "artifact")
+    const plan = await readLatestArtifactBySchema<ExperimentPlan>(runDir, artifacts, "ExperimentPlan.v1")
+    const host = await readArtifactJson<ExperimentRun[]>(runDir, artifacts.filter((artifact) => artifact.path.includes("host-runs")).at(-1))
+    const container = await readArtifactJson<ExperimentRun[]>(runDir, artifacts.filter((artifact) => artifact.path.includes("container-runs")).at(-1))
+    const report = plan && Array.isArray(host) && Array.isArray(container)
+      ? analyzeExperimentResults({ plan, host_runs: host, container_runs: container })
+      : undefined
+    if (!report?.final_claims_allowed) {
+      finalGate = await setResearchFinalGate(runDir, { status: "blocked", blockers: [...new Set([...finalGate.blockers, "reproduction_failure"])] }, options)
+      if (report) await writeResearchArtifact(runDir, { kind: "table", logical_path: "experiments/result-report.json", data: report, metadata: { artifact_schema: "ResultReport.v1" } }, options)
+    }
+  }
   if (finalGate.status !== "passed" && !input.forced) {
     const snapshot = await getPaperRunSnapshotFromDir(runDir)
     await publishPaperRunSnapshot(snapshot, runDir)

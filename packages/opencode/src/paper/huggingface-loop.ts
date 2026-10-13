@@ -242,7 +242,10 @@ export function createHFResearchLoopPlan(input: {
   }
 }
 
-export function createHFPaperRecord(input: Omit<HFPaperRecord, "schema_version" | "trust" | "source_verified"> & Partial<Pick<HFPaperRecord, "trust" | "source_verified">>): HFPaperRecord {
+export function createHFPaperRecord(
+  input: Omit<HFPaperRecord, "schema_version" | "trust" | "source_verified"> &
+    Partial<Pick<HFPaperRecord, "trust" | "source_verified">>,
+): HFPaperRecord {
   return {
     schema_version: "HFPaperRecord.v1",
     trust: input.trust ?? "hf_official",
@@ -251,7 +254,10 @@ export function createHFPaperRecord(input: Omit<HFPaperRecord, "schema_version" 
   }
 }
 
-export function createHFDatasetRecord(input: Omit<HFDatasetRecord, "schema_version" | "trust" | "source_verified"> & Partial<Pick<HFDatasetRecord, "trust" | "source_verified">>): HFDatasetRecord {
+export function createHFDatasetRecord(
+  input: Omit<HFDatasetRecord, "schema_version" | "trust" | "source_verified"> &
+    Partial<Pick<HFDatasetRecord, "trust" | "source_verified">>,
+): HFDatasetRecord {
   return {
     schema_version: "HFDatasetRecord.v1",
     trust: input.trust ?? "hf_official",
@@ -260,7 +266,10 @@ export function createHFDatasetRecord(input: Omit<HFDatasetRecord, "schema_versi
   }
 }
 
-export function createHFJobRecord(input: Omit<HFJobRecord, "schema_version" | "trust" | "source_verified"> & Partial<Pick<HFJobRecord, "trust" | "source_verified">>): HFJobRecord {
+export function createHFJobRecord(
+  input: Omit<HFJobRecord, "schema_version" | "trust" | "source_verified"> &
+    Partial<Pick<HFJobRecord, "trust" | "source_verified">>,
+): HFJobRecord {
   return {
     schema_version: "HFJobRecord.v1",
     trust: input.trust ?? "hf_official",
@@ -326,7 +335,8 @@ export function hfJobToExperimentRun(input: {
   started_at?: string
   finished_at?: string
 }): ExperimentRun {
-  const status = input.job.status === "succeeded" ? "succeeded" : input.job.status === "failed" ? "failed" : "environment_failed"
+  const status =
+    input.job.status === "succeeded" ? "succeeded" : input.job.status === "failed" ? "failed" : "environment_failed"
   return {
     schema_version: "ExperimentRun.v1",
     experiment_run_id: `hf-job:${input.job.job_id}`,
@@ -343,6 +353,7 @@ export function hfJobToExperimentRun(input: {
     command: {
       argv: input.job.command,
     },
+    execution: { kind: "imported" },
     metrics: input.job.metrics,
     stdout: input.job.logs_uri ?? "",
     stderr: status === "succeeded" ? "" : "HF job did not complete successfully.",
@@ -355,7 +366,7 @@ export function hfJobToExperimentRun(input: {
     started_at: nowIso(input.started_at),
     finished_at: nowIso(input.finished_at ?? input.started_at),
     reproduction: {
-      container_reproduced: status === "succeeded",
+      container_reproduced: false,
       image: input.job.runtime_image,
       digest: input.job.runtime_digest,
     },
@@ -404,7 +415,9 @@ export function hfLoopDiagnostics(input: { sources: ResearchSource[] }): HFLoopD
     jobs: records.filter((source) => source.metadata?.artifact_schema === "HFJobRecord.v1").length,
     jobs_requiring_approval: records.filter((source) => {
       const record = source.metadata?.record
-      return Boolean(record && typeof record === "object" && "status" in record && record.status === "approval_required")
+      return Boolean(
+        record && typeof record === "object" && "status" in record && record.status === "approval_required",
+      )
     }).length,
     failed_jobs: records.filter((source) => {
       const record = source.metadata?.record

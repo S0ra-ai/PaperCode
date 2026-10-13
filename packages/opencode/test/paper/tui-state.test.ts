@@ -23,7 +23,7 @@ describe("paper TUI workbench state", () => {
     expect(state).toMatchObject({
       schema_version: "TuiPaperWorkbenchState.v1",
       language: "zh-CN",
-      title: "paper_fucker 论文工作台",
+      title: "PaperCode 论文工作台",
       primary_input_modes: ["主题", "代码路径", "论文材料", "数据集", "实验日志"],
     })
     expect(state.model_roles.writer).toBe("deepseek/deepseek-v4-pro")

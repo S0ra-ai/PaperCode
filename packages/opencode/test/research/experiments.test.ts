@@ -15,6 +15,24 @@ import {
 
 const now = "2026-05-09T00:00:00Z"
 
+const protocols = {
+  proposed_command: { argv: ["python", "fixture.py", "proposed"] },
+  baseline_specs: ["bm25", "dense", "rag"].map((name) => ({
+    experiment_id: `baseline-${name}`,
+    label: name,
+    command: { argv: ["python", "fixture.py", name] },
+    rationale: "Explicit test fixture baseline",
+  })),
+  ablation_specs: [
+    {
+      experiment_id: "ablation-no-claim-ledger",
+      label: "fixture ablation",
+      command: { argv: ["python", "fixture.py", "ablation"] },
+      rationale: "Explicit test fixture ablation",
+    },
+  ],
+}
+
 async function clean(dir: string, attempts = 30): Promise<void> {
   Bun.gc(true)
   await sleep(100)
@@ -38,9 +56,27 @@ function runtimeOptions(workspace: string, home: string): ResearchRuntimeOptions
 }
 
 function metricRunner(scores: Record<string, number>, status: "succeeded" | "failed" = "succeeded"): ExperimentRunner {
+  // Simulated process/isolation records exercise the gate; no container is launched by this fixture.
   return async (spec, environment) => ({
     status,
-    metrics: status === "succeeded" ? [{ name: "accuracy", value: scores[spec.experiment_id] ?? 0.7, direction: "higher_better" }] : [],
+    execution: {
+      kind: "process",
+      command: spec.command,
+      exit_code: status === "succeeded" ? 0 : 1,
+      container:
+        environment.mode === "container"
+          ? {
+              runtime: "docker",
+              container_id: `fixture-${spec.experiment_id}`,
+              image_digest: `sha256:${"a".repeat(64)}`,
+              isolated: true,
+            }
+          : undefined,
+    },
+    metrics:
+      status === "succeeded"
+        ? [{ name: "accuracy", value: scores[spec.experiment_id] ?? 0.7, direction: "higher_better" }]
+        : [],
     stdout: `${environment.mode}:${spec.experiment_id}`,
     stderr: status === "failed" ? "fixture failure" : "",
     exit_code: status === "succeeded" ? 0 : 1,
@@ -62,6 +98,7 @@ describe("experiment loop", () => {
         topic: "LLM retrieval evaluation",
         method_name: "claim-aware reranker",
         dataset_ids: ["ms-marco-fixture"],
+        ...protocols,
         now,
       })
       expect(plan.baselines.length).toBeGreaterThanOrEqual(3)
@@ -79,11 +116,11 @@ describe("experiment loop", () => {
             "ablation-no-claim-ledger": 0.79,
           }),
           container_runner: metricRunner({
-            proposed: 0.83,
-            "baseline-bm25": 0.65,
-            "baseline-dense": 0.73,
-            "baseline-rag": 0.77,
-            "ablation-no-claim-ledger": 0.78,
+            proposed: 0.84,
+            "baseline-bm25": 0.66,
+            "baseline-dense": 0.74,
+            "baseline-rag": 0.78,
+            "ablation-no-claim-ledger": 0.79,
           }),
         },
         options,
@@ -96,13 +133,37 @@ describe("experiment loop", () => {
       const status = await getResearchRunStatus(handle.run_dir)
       expect(status.counts.artifacts).toBeGreaterThanOrEqual(3)
       expect(status.artifact_versions.map((item) => item.logical_path)).toContain("experiments/result-report.json")
+
+      let containerCalls = 0
+      const skipped = await recordExperimentLoop(
+        handle.run_dir,
+        {
+          plan,
+          host_runner: metricRunner({ proposed: 0.84 }),
+          container_runner: async (...args) => {
+            containerCalls++
+            return metricRunner({})(...args)
+          },
+          container_reproduction: false,
+        },
+        options,
+      )
+      expect(containerCalls).toBe(0)
+      expect(skipped.container_runs).toEqual([])
+      expect(skipped.report).toMatchObject({ reproduction: { status: "not_run" }, final_claims_allowed: false })
     } finally {
       await clean(dir)
     }
   })
 
   test("flags an underperforming proposed method against baselines", async () => {
-    const plan = planExperiments({ topic: "retrieval", method_name: "weak reranker", dataset_ids: ["fixture"], now })
+    const plan = planExperiments({
+      topic: "retrieval",
+      method_name: "weak reranker",
+      dataset_ids: ["fixture"],
+      ...protocols,
+      now,
+    })
     const runs = await runHostExploration(
       plan,
       metricRunner({
@@ -115,13 +176,31 @@ describe("experiment loop", () => {
       { now },
     )
 
-    const report = analyzeExperimentResults({ plan, host_runs: runs, container_runs: [], now })
+    const containerRuns = await runContainerReproduction(
+      plan,
+      runs,
+      metricRunner({
+        proposed: 0.6,
+        "baseline-bm25": 0.68,
+        "baseline-dense": 0.7,
+        "baseline-rag": 0.72,
+        "ablation-no-claim-ledger": 0.59,
+      }),
+      { now },
+    )
+    const report = analyzeExperimentResults({ plan, host_runs: runs, container_runs: containerRuns, now })
     expect(report.recommendation).toBe("revise")
     expect(report.findings.map((item) => item.category)).toContain("underperforming_method")
   })
 
   test("classifies environment failures separately from method failures", async () => {
-    const plan = planExperiments({ topic: "retrieval", method_name: "reranker", dataset_ids: ["fixture"], now })
+    const plan = planExperiments({
+      topic: "retrieval",
+      method_name: "reranker",
+      dataset_ids: ["fixture"],
+      ...protocols,
+      now,
+    })
     const runs = await runHostExploration(
       plan,
       async (spec, environment) => ({
@@ -138,7 +217,13 @@ describe("experiment loop", () => {
   })
 
   test("blocks on resource exceeded failures", async () => {
-    const plan = planExperiments({ topic: "retrieval", method_name: "reranker", dataset_ids: ["fixture"], now })
+    const plan = planExperiments({
+      topic: "retrieval",
+      method_name: "reranker",
+      dataset_ids: ["fixture"],
+      ...protocols,
+      now,
+    })
     const runs = await runHostExploration(
       plan,
       async () => ({
@@ -156,7 +241,13 @@ describe("experiment loop", () => {
   })
 
   test("failed container reproduction blocks final claims", async () => {
-    const plan = planExperiments({ topic: "retrieval", method_name: "reranker", dataset_ids: ["fixture"], now })
+    const plan = planExperiments({
+      topic: "retrieval",
+      method_name: "reranker",
+      dataset_ids: ["fixture"],
+      ...protocols,
+      now,
+    })
     const hostRuns = await runHostExploration(plan, metricRunner({ proposed: 0.8, "baseline-bm25": 0.7 }), { now })
     const containerRuns = await runContainerReproduction(plan, hostRuns, metricRunner({}, "failed"), { now })
     const report = analyzeExperimentResults({ plan, host_runs: hostRuns, container_runs: containerRuns, now })

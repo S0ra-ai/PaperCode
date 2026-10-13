@@ -13,11 +13,34 @@ import {
 import { type ExportRenderer } from "@/paper/research/export"
 import { createResearchRun, type ResearchRuntimeOptions } from "@/paper/research/runtime"
 import { discoverLiterature, type DataPlan } from "@/paper/research/sources"
-import { type ResultReport } from "@/paper/research/experiments"
+import {
+  planExperiments,
+  type ExperimentExecutionEvidence,
+  type ExperimentRun,
+  type ResultReport,
+} from "@/paper/research/experiments"
 import { checkReferences, checkSourceAuthenticity, evaluateVerificationGate } from "@/paper/research/verification"
 import { composeClaimLedger, composeDraftPaper } from "@/paper/research/writing"
 
 const now = "2026-05-09T00:00:00Z"
+
+// Explicit simulated runtime evidence for prose tests, not a real container execution.
+function fixtureExecution(mode: "host" | "container", experimentId: string): ExperimentExecutionEvidence {
+  return {
+    kind: "process",
+    command: { argv: ["bun", "test", experimentId] },
+    exit_code: 0,
+    container:
+      mode === "container"
+        ? {
+            runtime: "docker",
+            container_id: `fixture-${experimentId}`,
+            image_digest: `sha256:${"a".repeat(64)}`,
+            isolated: true,
+          }
+        : undefined,
+  }
+}
 
 async function clean(dir: string, attempts = 80): Promise<void> {
   Bun.gc(true)
@@ -117,6 +140,109 @@ const renderers: ExportRenderer = {
 }
 
 describe("paper authoring loop", () => {
+  test("requires execution evidence and passed report before prose claims container reproduction", () => {
+    const plan = planExperiments({
+      topic: "verified measurement",
+      method_name: "fixture method",
+      dataset_ids: [],
+      proposed_command: { argv: ["bun", "test", "proposed"] },
+      baseline_specs: [
+        {
+          experiment_id: "baseline",
+          label: "fixture baseline",
+          command: { argv: ["bun", "test", "baseline"] },
+          rationale: "explicit control",
+        },
+      ],
+      ablation_specs: [],
+      now,
+    })
+    plan.reproduction_tolerance = { absolute: 0.001, relative: 0 }
+    const ledger = composeClaimLedger({ topic: "verified measurement", claims: [], now })
+    const run = (id: string, role: "proposed" | "baseline", mode: "host" | "container"): ExperimentRun => ({
+      schema_version: "ExperimentRun.v1",
+      experiment_run_id: `${mode}:${id}`,
+      plan_id: plan.plan_id,
+      experiment_id: id,
+      role,
+      status: "succeeded",
+      command: { argv: ["bun", "test", id] },
+      environment: { mode, platform: mode === "container" ? "container" : process.platform },
+      execution: fixtureExecution(mode, id),
+      metrics: [{ name: "accuracy", value: 0.8, direction: "higher_better" }],
+      stdout: "fixture",
+      stderr: "",
+      exit_code: 0,
+      resource_usage: { wall_time_seconds: 0 },
+      started_at: now,
+      finished_at: now,
+      reproduction: { container_reproduced: mode === "container" },
+    })
+    const fixture = () => ({
+      host_runs: [run("proposed", "proposed", "host"), run("baseline", "baseline", "host")],
+      container_runs: [run("proposed", "proposed", "container"), run("baseline", "baseline", "container")],
+    })
+    const compose = (experiment_runs: ReturnType<typeof fixture>, report = resultReport()) =>
+      composeDraftPaper({
+        title: "Verified measurement",
+        ledger,
+        experiment_plan: plan,
+        experiment_runs,
+        result_report: report,
+        now,
+      })
+    const valid = fixture()
+    // A nonzero difference within the declared tolerance is a verified reproduction.
+    valid.container_runs[0].metrics[0].value = 0.8005
+    const validDraft = compose(valid)
+    expect(markdownSection(validDraft.markdown, "结果")).toContain("容器复现已通过")
+    expect(markdownSection(validDraft.markdown, "可复现性")).toContain("复现检查可以把这些实验作为结论性表述的支撑证据")
+
+    const mutations: Array<(runs: ReturnType<typeof fixture>) => void> = [
+      (runs) => {
+        runs.container_runs[0].execution = undefined
+      },
+      (runs) => {
+        runs.container_runs[0].execution!.container = undefined
+      },
+      (runs) => {
+        runs.container_runs[0].execution!.container!.isolated = false
+      },
+      (runs) => {
+        runs.container_runs[0].metrics[0].value = 0.81
+      },
+      (runs) => {
+        runs.container_runs.pop()
+      },
+      (runs) => {
+        runs.host_runs[0].status = "failed"
+      },
+    ]
+    for (const mutate of mutations) {
+      const invalid = fixture()
+      mutate(invalid)
+      const draft = compose(invalid)
+      expect(draft.markdown).not.toContain("容器复现已通过")
+      expect(draft.markdown).not.toContain("复现检查可以把这些实验作为结论性表述的支撑证据")
+      expect(markdownSection(draft.markdown, "结果")).toContain("复现检查未通过")
+    }
+    const failedReport = {
+      ...resultReport(),
+      reproduction: { status: "failed" as const, container_run_ids: [] },
+      final_claims_allowed: false,
+    }
+    expect(compose(fixture(), failedReport).markdown).not.toContain("复现检查可以把这些实验作为结论性表述的支撑证据")
+
+    const imported = fixture()
+    for (const item of [...imported.host_runs, ...imported.container_runs]) item.execution = { kind: "imported" }
+    const importedDraft = compose(imported)
+    const importedSummary = markdownSection(importedDraft.markdown, "可复现性")
+    expect(importedSummary).toContain("已导入（未执行）")
+    expect(importedSummary).toContain("未采集")
+    expect(importedSummary).not.toContain("| 0s |")
+    expect(importedDraft.markdown).not.toContain("容器复现已通过")
+    expect(markdownSection(importedDraft.markdown, "结果")).toContain("未执行） | 否 |")
+  })
   test("creates a run-bound preview snapshot with claim, citation, reviewer, cost, and agent annotations", () => {
     const ledger = composeClaimLedger({
       topic: "Claim-aware retrieval",
@@ -222,6 +348,7 @@ describe("paper authoring loop", () => {
 
     const run = (experiment_id: string, role: "proposed" | "baseline" | "ablation", mode: "host" | "container") => ({
       experiment_id,
+      execution: fixtureExecution(mode, experiment_id),
       role,
       status: "succeeded" as const,
       command: { argv: ["bun", "run", mode === "container" ? "repro:container" : experiment_id === "proposed" ? "typecheck" : experiment_id] },
@@ -913,7 +1040,8 @@ describe("paper authoring loop", () => {
     expect(experimentalSetup).toContain("本文方法的评价对象为“Text2Action 语义规划与安全执行闭环”")
     expect(experimentalSetup).not.toContain("代码证据驱动工作流")
     expect(experimentalSetup).not.toContain("证据驱动工作流")
-    expect(results).toContain("| Text2Action 语义规划与安全执行闭环 | 本文方法 | 1.0000 | 通过 | 是 |")
+    expect(results).toContain("| Text2Action 语义规划与安全执行闭环 | 本文方法 | 1.0000 | 未验证执行 | 否 |")
+    expect(results).toContain("复现检查未通过")
     expect(results).not.toContain("证据驱动工作流")
     expect(draft.markdown).not.toContain("## 证据与可追踪性")
   })
@@ -1147,6 +1275,7 @@ describe("paper authoring loop", () => {
     })
     const run = (experiment_id: string, role: "proposed" | "baseline" | "ablation", mode: "host" | "container") => ({
       experiment_id,
+      execution: fixtureExecution(mode, experiment_id),
       role,
       status: "succeeded" as const,
       command: { argv: ["bun", "run", mode === "container" ? "repro:container" : experiment_id.replaceAll(" ", "-")] },
@@ -1598,7 +1727,7 @@ describe("paper authoring loop", () => {
     expect(reproducibility).toContain("### 实验环境声明")
     expect(reproducibility).toContain("| 项目 | 内容 |")
     expect(reproducibility).toContain("| 本机平台 | Windows |")
-    expect(reproducibility).toContain("| 容器环境 | 已登记隔离复现环境 |")
+    expect(reproducibility).toContain("| 容器环境 | 已验证隔离复现环境 |")
     expect(reproducibility).not.toContain("实验环境声明：")
     expect(reproducibility).not.toContain("本机平台：Windows")
     expect(reproducibility).not.toContain("容器环境：已登记隔离复现环境")
@@ -1849,7 +1978,7 @@ describe("paper authoring loop", () => {
     const appendixReproduction =
       markdownSection(draft.markdown, "附录 B：复现实验入口") || markdownSection(draft.markdown, "附录 B：复现清单")
     expect(appendixReproduction).toContain(
-      "| 本文方法 | 证据约束的论文排序方法 | bun run test:ranking | 排序 nDCG@3 | 本机通过；容器通过 | 结果；可复现性 |",
+      "| 本文方法 | 证据约束的论文排序方法 | bun run test:ranking | 排序 nDCG@3 | 本机未验证执行；容器复现未通过验证 | 结果；可复现性 |",
     )
     expect(appendixReproduction).not.toContain("本机缺失；容器缺失")
   })
@@ -2549,6 +2678,7 @@ describe("paper authoring loop", () => {
     }
     const run = (experiment_id: string, role: "proposed" | "baseline" | "ablation", mode: "host" | "container", value: number) => ({
       schema_version: "ExperimentRun.v1" as const,
+      execution: fixtureExecution(mode, experiment_id),
       experiment_run_id: `run-${mode}-${experiment_id}`,
       plan_id: "plan-ranking",
       experiment_id,

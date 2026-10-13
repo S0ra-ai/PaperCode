@@ -1,4 +1,5 @@
 import { withSpan } from "../telemetry"
+import { hasIsolatedContainerExecution, hasProcessExecution } from "../experiments/runner"
 import type {
   ExperimentPlan,
   ExperimentProtocol,
@@ -24,7 +25,7 @@ export type ComposeDraftPaperInput = {
   ledger: ClaimLedger
   data_plan?: Pick<DataPlan, "datasets" | "license_conflicts" | "access_constraints" | "diagnostics" | "recommendation">
   literature_map?: LiteratureMap
-  experiment_plan?: Pick<ExperimentPlan, "objective" | "metrics" | "proposed" | "baselines" | "ablations" | "resource_budget" | "downgrade_policy">
+  experiment_plan?: Pick<ExperimentPlan, "objective" | "metrics" | "proposed" | "baselines" | "ablations" | "resource_budget" | "downgrade_policy" | "reproduction_tolerance">
   experiment_protocol?: Pick<ExperimentProtocol, "entries" | "gaps" | "discovered_from">
   experiment_guidance?: Pick<ExperimentProtocolGuidance, "status" | "summary" | "suggestions" | "final_export_blocked">
   experiment_starter_pack?: Pick<
@@ -32,8 +33,8 @@ export type ComposeDraftPaperInput = {
     "status" | "summary" | "package_json_scripts" | "files" | "next_steps"
   >
   experiment_runs?: {
-    host_runs: Pick<ExperimentRun, "experiment_id" | "role" | "status" | "command" | "environment" | "metrics" | "stdout" | "stderr" | "exit_code" | "resource_usage">[]
-    container_runs: Pick<ExperimentRun, "experiment_id" | "role" | "status" | "command" | "environment" | "metrics" | "stdout" | "stderr" | "exit_code" | "resource_usage">[]
+    host_runs: Pick<ExperimentRun, "experiment_id" | "role" | "status" | "command" | "environment" | "metrics" | "stdout" | "stderr" | "exit_code" | "resource_usage" | "execution">[]
+    container_runs: Pick<ExperimentRun, "experiment_id" | "role" | "status" | "command" | "environment" | "metrics" | "stdout" | "stderr" | "exit_code" | "resource_usage" | "execution">[]
   }
   result_report?: Pick<ResultReport, "best_baseline" | "blockers" | "final_claims_allowed" | "primary_metric" | "proposed" | "recommendation" | "reproduction">
   code_metadata?: CodeAvailabilityMetadata
@@ -177,7 +178,80 @@ function claimStatusSummary(ledger: ClaimLedger) {
 }
 
 function finalReady(input: ComposeDraftPaperInput) {
-  return input.ledger.unsupported_claim_ids.length === 0 && input.result_report?.final_claims_allowed === true
+  return (
+    input.ledger.unsupported_claim_ids.length === 0 && input.result_report?.final_claims_allowed === true &&
+    reproductionVerified(input)
+  )
+}
+
+type DisplayExperimentRun = NonNullable<ComposeDraftPaperInput["experiment_runs"]>["host_runs"][number]
+
+function displayExecutionVerified(run: DisplayExperimentRun, mode: "host" | "container") {
+  return (
+    run.environment.mode === mode &&
+    run.status === "succeeded" &&
+    run.exit_code === 0 &&
+    (mode === "container" ? hasIsolatedContainerExecution(run.execution) : hasProcessExecution(run.execution))
+  )
+}
+
+function reproductionPairVerified(
+  input: ComposeDraftPaperInput,
+  host?: DisplayExperimentRun,
+  container?: DisplayExperimentRun,
+) {
+  if (
+    !host ||
+    !container ||
+    host.role !== container.role ||
+    !displayExecutionVerified(host, "host") ||
+    !displayExecutionVerified(container, "container")
+  )
+    return false
+  const metric = input.result_report?.primary_metric ?? input.experiment_plan?.proposed.expected_metric ?? "primary_metric"
+  const direction = input.experiment_plan?.metrics.find((item) => item.name === metric)?.direction
+  const hostMetrics = host.metrics.filter((item) => item.name === metric)
+  const containerMetrics = container.metrics.filter((item) => item.name === metric)
+  if (
+    hostMetrics.length !== 1 ||
+    containerMetrics.length !== 1 ||
+    !Number.isFinite(hostMetrics[0].value) ||
+    !Number.isFinite(containerMetrics[0].value) ||
+    hostMetrics[0].direction !== containerMetrics[0].direction ||
+    (direction && hostMetrics[0].direction !== direction)
+  )
+    return false
+  const tolerance = input.experiment_plan?.reproduction_tolerance ?? { absolute: 1e-6, relative: 1e-6 }
+  return (
+    Number.isFinite(tolerance.absolute) &&
+    tolerance.absolute >= 0 &&
+    Number.isFinite(tolerance.relative) &&
+    tolerance.relative >= 0 &&
+    Math.abs(hostMetrics[0].value - containerMetrics[0].value) <=
+      tolerance.absolute + tolerance.relative * Math.abs(hostMetrics[0].value)
+  )
+}
+
+function reproductionVerified(input: ComposeDraftPaperInput) {
+  if (input.result_report?.reproduction.status !== "passed") return false
+  const runs = input.experiment_runs
+  // Report-only consumers retain compatibility; supplied run records must support the report.
+  if (!runs) return true
+  const specs = input.experiment_plan
+    ? [input.experiment_plan.proposed, ...input.experiment_plan.baselines, ...input.experiment_plan.ablations]
+    : runs.host_runs
+  if (
+    specs.length === 0 ||
+    runs.host_runs.length !== specs.length ||
+    runs.container_runs.length !== specs.length ||
+    new Set(specs.map((item) => item.experiment_id)).size !== specs.length
+  )
+    return false
+  return specs.every((spec) => {
+    const hosts = runs.host_runs.filter((run) => runMatchesExperiment(run, spec.experiment_id, spec.role))
+    const containers = runs.container_runs.filter((run) => runMatchesExperiment(run, spec.experiment_id, spec.role))
+    return hosts.length === 1 && containers.length === 1 && reproductionPairVerified(input, hosts[0], containers[0])
+  })
 }
 
 function formatMetricValue(value: number) {
@@ -272,8 +346,9 @@ function displayExperimentRole(value: string) {
   return value.replace(/_/g, " ")
 }
 
-function displayRunStatus(value: string) {
-  if (value === "succeeded") return "通过"
+function displayRunStatus(value: string, executionKind?: string) {
+  if (executionKind === "imported") return "已导入（未执行）"
+  if (value === "succeeded") return executionKind === "process" ? "通过" : "未验证执行"
   if (value === "failed") return "失败"
   if (value === "environment_failed") return "环境失败"
   if (value === "resource_exceeded") return "超出资源"
@@ -1187,9 +1262,9 @@ function experimentRunSummary(input: ComposeDraftPaperInput) {
       displayEnvironment(environment),
       contextualExperimentLabel(input, run.experiment_id, run.role),
       displayExperimentRole(run.role),
-      displayRunStatus(run.status),
+      displayRunStatus(run.status, run.execution?.kind),
       metrics,
-      `${run.resource_usage.wall_time_seconds}s`,
+      run.execution?.kind !== "process" ? "未采集" : `${run.resource_usage.wall_time_seconds}s`,
       displayMemoryUsage(run.resource_usage.peak_memory_mb),
       displayGpuUsage(run.resource_usage.gpu_hours),
     ]
@@ -1219,7 +1294,7 @@ function displayGpuUsage(value: number | undefined) {
 function experimentResourceBoundarySummary(input: ComposeDraftPaperInput) {
   const runs = input.experiment_runs
   if (!runs) return undefined
-  const allRuns = [...runs.host_runs, ...runs.container_runs]
+  const allRuns = [...runs.host_runs, ...runs.container_runs].filter((run) => run.execution?.kind === "process")
   if (allRuns.length === 0) return undefined
   const hasWallTime = allRuns.some((run) => typeof run.resource_usage.wall_time_seconds === "number")
   const hasMemory = allRuns.some((run) => typeof run.resource_usage.peak_memory_mb === "number")
@@ -1265,7 +1340,7 @@ function experimentEnvironmentDeclaration(input: ComposeDraftPaperInput) {
       rows.push(["容器镜像", container.image])
       if (container.digest) rows.push(["容器摘要", container.digest])
     } else {
-      rows.push(["容器环境", "已登记隔离复现环境"])
+      rows.push(["容器环境", reproductionVerified(input) ? "已验证隔离复现环境" : "隔离执行尚未验证"])
     }
   }
   if (rows.length === 0) return undefined
@@ -1330,13 +1405,17 @@ function rankingAppendixExecutionStatus(input: ComposeDraftPaperInput, experimen
   if (role === "container_reproduction") {
     const statuses = runs.container_runs.map((run) => run.status)
     if (statuses.length === 0) return "容器缺失"
-    return statuses.every((status) => status === "succeeded") ? "容器通过" : `容器${displayRunStatus(statuses.find((status) => status !== "succeeded") ?? statuses[0] ?? "missing")}`
+    return reproductionVerified(input) ? "容器通过" : "容器复现未通过验证"
   }
   const host = findRunForExperiment(runs.host_runs, experimentId, role)
   const container = findRunForExperiment(runs.container_runs, experimentId, role)
   const parts = [
-    host ? `本机${displayRunStatus(host.status)}` : "本机缺失",
-    container ? `容器${displayRunStatus(container.status)}` : "容器缺失",
+    host ? `本机${displayRunStatus(host.status, host.execution?.kind)}` : "本机缺失",
+    container
+      ? reproductionVerified(input) && reproductionPairVerified(input, host, container)
+        ? "容器通过"
+        : "容器复现未通过验证"
+      : "容器缺失",
   ]
   return parts.join("；")
 }
@@ -1479,10 +1558,9 @@ function methodPaperAbstractSummary(input: ComposeDraftPaperInput, frame: Method
       : `实现上，${frame.methodName}由规划、动作注册和安全执行三个环节组成。`
   const metric = resultMetricSummary(input)
   const resultClaim = firstClaimText(input, "results")
-  const reproduction =
-    input.result_report?.reproduction.status === "passed" || (input.experiment_runs?.container_runs.length ?? 0) > 0
-      ? "容器复现记录用于确认同一实验协议可以在受控环境中重复。"
-      : "容器复现尚未通过时，相关结果应保持为探索性观察。"
+  const reproduction = reproductionVerified(input)
+    ? "容器复现记录用于确认同一实验协议可以在受控环境中重复。"
+    : "容器复现尚未通过时，相关结果应保持为探索性观察。"
   return [
     frame.domainOpening,
     `本文围绕“${input.title}”构建 ${frame.methodName}。`,
@@ -2079,18 +2157,16 @@ function hostContainerConsistencySummary(input: ComposeDraftPaperInput) {
     const hostValue = host ? metricLookup(host, metric) : undefined
     const containerValue = container ? metricLookup(container, metric) : undefined
     const delta = typeof hostValue === "number" && typeof containerValue === "number" ? containerValue - hostValue : undefined
-    const mismatch =
-      host?.status !== container?.status ||
-      typeof hostValue !== "number" ||
-      typeof containerValue !== "number" ||
-      Math.abs(delta ?? Number.POSITIVE_INFINITY) > 1e-9
+    const mismatch = !reproductionPairVerified(input, host, container)
     return {
       mismatch,
       row: [
         contextualExperimentLabel(input, id, host?.role ?? container?.role),
-        displayRunStatus(host?.status ?? "missing"),
+        displayRunStatus(host?.status ?? "missing", host?.execution?.kind),
         typeof hostValue === "number" ? displayMetricValue(metric, hostValue) : "无",
-        displayRunStatus(container?.status ?? "missing"),
+        container && !displayExecutionVerified(container, "container") && container.execution?.kind !== "imported"
+          ? "隔离执行未验证"
+          : displayRunStatus(container?.status ?? "missing", container?.execution?.kind),
         typeof containerValue === "number" ? displayMetricValue(metric, containerValue) : "无",
         typeof delta === "number" ? formatMetricValue(delta) : "无",
       ],
@@ -2104,12 +2180,15 @@ function hostContainerConsistencySummary(input: ComposeDraftPaperInput) {
       : `可复现性分析比较本机与容器结果，${primaryMetricPhrase(metricLabel)}。只有当本文方法、基线和消融在可复现环境中有一致记录时，相关结果才有资格进入结论性表述。`,
     "表 2 汇总本机与容器主指标差异，用于检查复现一致性。",
     markdownTable(["实验", "本机状态", `本机 ${metricLabel}`, "容器状态", `容器 ${metricLabel}`, "差值"], rows),
-    mismatches.length === 0
+    comparisons.length > 0 &&
+    mismatches.length === 0 &&
+    reproductionVerified(input) &&
+    input.result_report?.final_claims_allowed === true
       ? isRankingContext(input)
         ? "本机与容器比较没有发现状态或主指标差异，说明当前排序协议在两个环境中保持一致。"
         : "本机与容器比较没有发现状态或主指标差异，复现检查可以把这些实验作为结论性表述的支撑证据。"
-      : `本机与容器比较发现 ${mismatches.length} 个状态或主指标差异，相关断言应降级为探索性观察，直到复现脚本或环境被修复。`,
-    "该检查不等价于证明方法泛化有效；它只证明当前工作区、当前协议和当前环境声明可以复现同一组观测结果。泛化结论仍需要更多数据集、更多随机种子和领域基线。",
+      : `本机与容器比较中有 ${mismatches.length} 项缺少可验证执行或不满足主指标容差；复现报告与结论表述条件尚未全部通过，相关断言应保持为探索性观察。`,
+    "该比较只评价当前工作区和协议的复现证据。泛化结论仍需要更多数据集、更多随机种子和领域基线。",
   ])
 }
 
@@ -2117,8 +2196,11 @@ function reproducibilityChecklistSummary(input: ComposeDraftPaperInput) {
   if (isRankingContext(input)) return rankingReproducibilityAppendixSummary(input)
   const hasPlan = Boolean(input.experiment_plan)
   const hasProtocol = Boolean(input.experiment_protocol && input.experiment_protocol.entries.length > 0)
-  const hasHostRuns = Boolean(input.experiment_runs?.host_runs.length)
-  const hasContainerRuns = Boolean(input.experiment_runs?.container_runs.length)
+  const hasHostRuns = Boolean(
+    input.experiment_runs?.host_runs.length &&
+      input.experiment_runs.host_runs.every((run) => displayExecutionVerified(run, "host")),
+  )
+  const hasContainerRuns = reproductionVerified(input)
   const hasResultReport = Boolean(input.result_report)
   const hasDataBoundary = Boolean(input.data_plan)
   const finalGateLabel = isRankingContext(input) ? "结论表述条件" : "证据链完整性"
@@ -2261,12 +2343,16 @@ function experimentResultTable(input: ComposeDraftPaperInput) {
     .filter((run) => run.metrics.some((item) => item.name === metric))
     .map((run) => {
       const value = run.metrics.find((item) => item.name === metric)?.value
-      const reproduced = runs.container_runs.some((item) => item.experiment_id === run.experiment_id && item.status === "succeeded")
+      const reproduced =
+        reproductionVerified(input) &&
+        runs.container_runs.some(
+          (item) => item.experiment_id === run.experiment_id && reproductionPairVerified(input, run, item),
+        )
       return [
         contextualExperimentLabel(input, run.experiment_id, run.role),
         displayExperimentRole(run.role),
         typeof value === "number" ? displayMetricValue(metric, value) : "无",
-        displayRunStatus(run.status),
+        displayRunStatus(run.status, run.execution?.kind),
         reproduced ? "是" : "否",
       ]
     })
@@ -2294,6 +2380,9 @@ function resultStatisticalScopeSummary(input: ComposeDraftPaperInput) {
   const runs = input.experiment_runs
   if (!runs) return undefined
   const orderedRoles: Array<ExperimentRun["role"]> = ["proposed", "baseline", "ablation"]
+  if ([...runs.host_runs, ...runs.container_runs].some((run) => !displayExecutionVerified(run, run.environment.mode))) {
+    return "统计解释：当前记录包含导入观测或未验证执行，不能据此确定本机、容器执行次数；这些数值保留为探索性观察。"
+  }
   const roles = orderedRoles.filter((role) => runs.host_runs.some((run) => run.role === role) || runs.container_runs.some((run) => run.role === role))
   if (roles.length === 0) return undefined
   const roleText = chineseList(roles.map(displayExperimentRole))
@@ -2337,7 +2426,7 @@ function experimentSummary(input: ComposeDraftPaperInput) {
   } else if (report.proposed) {
     metrics = `${primaryMetricLocus(displayMetricName(report.primary_metric))}，本文方法为 ${displayMetricValue(report.primary_metric, report.proposed.value)}；由于缺少基线，对比性结论仍需保守。`
   }
-  if (report.reproduction.status === "passed" && report.final_claims_allowed) {
+  if (reproductionVerified(input) && report.final_claims_allowed) {
     if (isRankingContext(input)) return `${metrics}\n\n容器复现已通过，本机与容器结果一致。`
     return `${metrics}\n\n容器复现已通过，本机与容器结果可以支撑当前结论性表述。`
   }
@@ -2370,7 +2459,7 @@ function discussionSummary(input: ComposeDraftPaperInput) {
   if (isRankingContext(input)) {
     rows.push("词项匹配基线和无证据覆盖消融分别约束词项匹配与证据覆盖特征，使结果解释能够区分简单词项排序、证据覆盖特征和完整排序接口的影响。")
   }
-  if (report.reproduction.status === "passed") {
+  if (reproductionVerified(input)) {
     rows.push("代码证据、显式对照和容器复现共同说明，当前结果不是孤立脚本输出，而是可以沿材料、命令和指标回溯的观察。")
   } else {
     rows.push("复现检查尚未通过时，所有实验结果只能作为探索性证据；正文应保留限制说明，并把缺失环节转化为可执行修复清单。")
@@ -2380,7 +2469,10 @@ function discussionSummary(input: ComposeDraftPaperInput) {
   return rows.join("\n\n")
 }
 
-function rankingDiscussionSummary(input: ComposeDraftPaperInput, report: NonNullable<ComposeDraftPaperInput["result_report"]>) {
+function rankingDiscussionSummary(
+  input: ComposeDraftPaperInput,
+  report: NonNullable<ComposeDraftPaperInput["result_report"]>,
+) {
   const metric = report.primary_metric
   const metricLabel = displayMetricName(metric)
   const candidateCount = rankingCandidateCount(input)
@@ -2399,7 +2491,7 @@ function rankingDiscussionSummary(input: ComposeDraftPaperInput, report: NonNull
   rows.push("词项匹配基线提供了一个低成本检索对照：当前结果显示，完整排序与词项匹配基线存在可观测差异；该差异提示 relevance、claim_coverage 和 recency 的组合需要在更强基线和更大候选集上继续验证。")
   rows.push(`无证据覆盖消融移除 claim_coverage 后，${metricLabel} 数值低于完整排序，说明 claim_coverage 项与当前前三位排序差异相关。这一结果与任务设定一致：候选论文不仅要与主题相关，还需要覆盖当前研究问题中的关键断言。`)
   rows.push(`结果仍需要保守解释。${candidateText}，且标签不是人工相关性标注，而是由实时 arXiv 检索排序、主题匹配、元数据完整度和发表时间派生；因此当前结论更适合作为自动筛选协议的证据，而不是人工文献综述质量的最终证明。`)
-  if (report.reproduction.status === "passed") {
+  if (reproductionVerified(input)) {
     rows.push("本机和容器结果一致，说明上述比较不是由当前宿主环境偶然触发；但复现一致性只验证同一协议可重复，不证明该评分函数已覆盖更多主题、更多候选规模或人工标注场景。")
   } else {
     rows.push("容器复现尚未通过时，排序差异只能作为探索性观察；需要先修复复现环境，再讨论性能差异。")
@@ -2468,7 +2560,7 @@ function rankingAbstractSummary(input: ComposeDraftPaperInput) {
       : resultMetricSummary(input),
     ablation ? ablation.replace(/消融分析显示，/, "") : undefined,
     rankingDatasetScopeSummary(input),
-    input.result_report?.reproduction.status === "passed"
+    reproductionVerified(input)
       ? "容器复现通过，说明当前实验协议在受控环境中可以重复。"
       : "容器复现尚未通过，因此相关结果应保持为探索性观察。",
   ]
@@ -2510,7 +2602,7 @@ function rankingIntroductionSummary(input: ComposeDraftPaperInput) {
     "候选论文排序常用于文献检索、综述准备和研究选题：研究者需要在有限候选集内判断哪些论文最能支持当前研究问题。仅依赖词项匹配的排序容易忽略候选论文是否覆盖关键断言，单独报告排序结果又难以解释差异来自何处。",
     "本文研究由 rankAgentTeamPapers 和 scorePaper 构成的候选论文排序接口。scorePaper 将 relevance、claim_coverage 和 recency 合成为排序分数，rankAgentTeamPapers 根据该分数生成候选顺序。",
     `为检查 claim_coverage 项是否与排序差异相关，本文设置排名测试、词项匹配基线和无证据覆盖消融，并以${metric} 作为主指标。${resultEvidence ?? ""}`,
-    input.result_report?.reproduction.status === "passed"
+    reproductionVerified(input)
       ? "容器复现用于确认同一协议在受控环境中能重复得到相同观察；因此本文只讨论当前候选集、标注策略和复现条件能够支持的结论。"
       : "容器复现尚未通过时，本文只把排序结果作为探索性观察，并把缺失环节转化为后续实验任务。",
   ].join("\n\n")

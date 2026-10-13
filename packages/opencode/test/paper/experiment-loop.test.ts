@@ -24,7 +24,9 @@ const passedReport: ResultReport = {
 
 describe("paper experiment MCP loop", () => {
   test("resolves notebook, shell, and Python experiment capabilities", () => {
-    const capabilities = resolveExperimentLoopCapabilities(createResearchCapabilityRegistry(defaultResearchCapabilities()))
+    const capabilities = resolveExperimentLoopCapabilities(
+      createResearchCapabilityRegistry(defaultResearchCapabilities()),
+    )
 
     expect(capabilities.map((capability) => capability.name)).toEqual(
       expect.arrayContaining([
@@ -136,7 +138,7 @@ describe("paper experiment MCP loop", () => {
       ],
     })
 
-    expect(report.reproduction.status).toBe("passed")
+    expect(report.reproduction.status).toBe("failed")
     expect(report.final_claims_allowed).toBe(false)
     expect(report.blockers).toContain("experiment_protocol_incomplete")
   })

@@ -28,6 +28,32 @@ async function tempContext() {
 }
 
 describe("Paper machine profile", () => {
+  test("scopes cached disk and run roots to resolved workspace and home", async () => {
+    const first = await tempContext()
+    const second = await tempContext()
+    process.env.PATH = ""
+    process.env.PATHEXT = ""
+
+    const original = await inspectPaperMachineProfile({ workspace: first.workspace, home: first.home, refresh: true })
+    const same = await inspectPaperMachineProfile({ workspace: path.join(first.workspace, "."), home: path.join(first.home, ".") })
+    expect(same).toBe(original)
+
+    const changedWorkspace = await inspectPaperMachineProfile({ workspace: second.workspace, home: first.home })
+    expect(changedWorkspace).not.toBe(original)
+    expect(changedWorkspace.profile.workspace).toBe(second.workspace)
+    expect(changedWorkspace.profile.disk?.path).toBe(second.workspace)
+    expect(changedWorkspace.profile.default_run_root).toBe(path.join(first.home, ".paper_fucker", "runs"))
+
+    const changedHome = await inspectPaperMachineProfile({ workspace: second.workspace, home: second.home })
+    expect(changedHome).not.toBe(changedWorkspace)
+    expect(changedHome.profile.default_run_root).toBe(path.join(second.home, ".paper_fucker", "runs"))
+    expect(changedHome.profile.disk?.path).toBe(second.workspace)
+
+    const refreshed = await inspectPaperMachineProfile({ workspace: second.workspace, home: second.home, refresh: true })
+    expect(refreshed).not.toBe(changedHome)
+    expect(refreshed.profile.workspace).toBe(second.workspace)
+  })
+
   test("reports CPU-only optional environment when no tools are on PATH", async () => {
     const { workspace, home } = await tempContext()
     process.env.PATH = ""
