@@ -1,4 +1,6 @@
 import { withSpan } from "../telemetry"
+import { plannedExperimentSpecs } from "./planning"
+import { hasIsolatedContainerExecution, hasProcessExecution } from "./runner"
 import type { ExperimentFinding, ExperimentPlan, ExperimentRun, ResultReport } from "./schemas"
 
 export type ExperimentAnalysisInput = {
@@ -13,11 +15,15 @@ function nowIso(override?: string) {
 }
 
 function primaryMetric(plan: ExperimentPlan) {
-  return plan.metrics.find((metric) => metric.primary) ?? plan.metrics[0] ?? { name: "accuracy", direction: "higher_better" as const }
+  return (
+    plan.metrics.find((metric) => metric.primary) ??
+    plan.metrics[0] ?? { name: "accuracy", direction: "higher_better" as const }
+  )
 }
 
 function metricValue(run: ExperimentRun, metricName: string) {
-  return run.metrics.find((metric) => metric.name === metricName)?.value
+  const metrics = run.metrics.filter((metric) => metric.name === metricName)
+  return metrics.length === 1 && Number.isFinite(metrics[0].value) ? metrics[0].value : undefined
 }
 
 function better(left: number, right: number, direction: "higher_better" | "lower_better") {
@@ -46,6 +52,16 @@ function blockingRunFindings(runs: ExperimentRun[]): ExperimentFinding[] {
         },
       ]
     }
+    if (run.status === "failed" || run.exit_code !== 0) {
+      return [
+        {
+          category: "experiment_failed",
+          severity: "blocking",
+          message: `Experiment ${run.experiment_id} failed; its measurements cannot support final claims.`,
+          experiment_ids: [run.experiment_id],
+        },
+      ]
+    }
     return []
   })
 }
@@ -59,10 +75,19 @@ export function analyzeExperimentResults(input: ExperimentAnalysisInput): Result
     },
     (span) => {
       const metric = primaryMetric(input.plan)
-      const proposedRun = input.host_runs.find((run) => run.experiment_id === input.plan.proposed.experiment_id)
+      const specs = plannedExperimentSpecs(input.plan)
+      const proposedRun = input.host_runs.find(
+        (run) => run.experiment_id === input.plan.proposed.experiment_id && run.status === "succeeded",
+      )
       const proposedValue = proposedRun ? metricValue(proposedRun, metric.name) : undefined
       const baselineValues = input.host_runs
-        .filter((run) => run.role === "baseline")
+        .filter(
+          (run) =>
+            run.role === "baseline" &&
+            run.status === "succeeded" &&
+            run.plan_id === input.plan.plan_id &&
+            input.plan.baselines.some((spec) => spec.experiment_id === run.experiment_id),
+        )
         .map((run) => ({ experiment_id: run.experiment_id, value: metricValue(run, metric.name) }))
         .filter((item): item is { experiment_id: string; value: number } => typeof item.value === "number")
       const bestBaseline = baselineValues.reduce<{ experiment_id: string; value: number } | undefined>((best, item) => {
@@ -70,12 +95,70 @@ export function analyzeExperimentResults(input: ExperimentAnalysisInput): Result
         return better(item.value, best.value, metric.direction) ? item : best
       }, undefined)
 
-      const findings: ExperimentFinding[] = [...blockingRunFindings(input.host_runs), ...blockingRunFindings(input.container_runs)]
+      const findings: ExperimentFinding[] = [
+        ...blockingRunFindings(input.host_runs),
+        ...blockingRunFindings(input.container_runs),
+      ]
+      if (new Set(specs.map((spec) => spec.experiment_id)).size !== specs.length) {
+        findings.push({
+          category: "experiment_protocol_incomplete",
+          severity: "blocking",
+          message: "Experiment plan contains duplicate experiment IDs.",
+          experiment_ids: specs.map((spec) => spec.experiment_id),
+        })
+      }
+      for (const spec of specs) {
+        const runs = input.host_runs.filter((run) => run.experiment_id === spec.experiment_id)
+        if (
+          runs.length !== 1 ||
+          runs[0].plan_id !== input.plan.plan_id ||
+          runs[0].role !== spec.role ||
+          runs[0].environment.mode !== "host"
+        ) {
+          findings.push({
+            category: "experiment_protocol_incomplete",
+            severity: "blocking",
+            message: `Host evidence must contain exactly one matching run for ${spec.experiment_id}.`,
+            experiment_ids: [spec.experiment_id],
+          })
+        }
+      }
+      for (const run of [...input.host_runs, ...input.container_runs]) {
+        if (!hasProcessExecution(run.execution)) {
+          findings.push({
+            category: "execution_unverified",
+            severity: "blocking",
+            message: `Experiment ${run.experiment_id} has no verified process execution; imported or legacy observations are not executions.`,
+            experiment_ids: [run.experiment_id],
+          })
+        }
+        const measurement = run.metrics.filter((item) => item.name === metric.name)
+        if (metricValue(run, metric.name) === undefined || measurement[0]?.direction !== metric.direction) {
+          findings.push({
+            category: "metric_missing",
+            severity: "blocking",
+            message: `Experiment ${run.experiment_id} requires one finite primary metric ${metric.name} with the planned direction.`,
+            experiment_ids: [run.experiment_id],
+          })
+        }
+        if (
+          run.plan_id !== input.plan.plan_id ||
+          !specs.some((spec) => spec.experiment_id === run.experiment_id && spec.role === run.role)
+        ) {
+          findings.push({
+            category: "experiment_protocol_incomplete",
+            severity: "blocking",
+            message: `Run ${run.experiment_run_id} does not match the declared experiment plan.`,
+            experiment_ids: [run.experiment_id],
+          })
+        }
+      }
       if (input.plan.baselines.length === 0) {
         findings.push({
           category: "experiment_protocol_incomplete",
           severity: "blocking",
-          message: "No baseline runner is declared; final research claims require at least one explicit baseline protocol.",
+          message:
+            "No baseline runner is declared; final research claims require at least one explicit baseline protocol.",
           experiment_ids: [input.plan.proposed.experiment_id],
         })
       }
@@ -103,27 +186,66 @@ export function analyzeExperimentResults(input: ExperimentAnalysisInput): Result
         })
       }
 
+      const tolerance = input.plan.reproduction_tolerance ?? { absolute: 1e-6, relative: 1e-6 }
+      const validTolerance =
+        Number.isFinite(tolerance.absolute) &&
+        tolerance.absolute >= 0 &&
+        Number.isFinite(tolerance.relative) &&
+        tolerance.relative >= 0
+      const reproductionPassed =
+        validTolerance &&
+        input.host_runs.length === specs.length &&
+        input.container_runs.length === specs.length &&
+        new Set(specs.map((spec) => spec.experiment_id)).size === specs.length &&
+        specs.every((spec) => {
+          const host = input.host_runs.filter((run) => run.experiment_id === spec.experiment_id)
+          const container = input.container_runs.filter((run) => run.experiment_id === spec.experiment_id)
+          if (host.length !== 1 || container.length !== 1) return false
+          const runs = [host[0], container[0]]
+          if (
+            runs.some(
+              (run) =>
+                run.plan_id !== input.plan.plan_id ||
+                run.role !== spec.role ||
+                run.status !== "succeeded" ||
+                run.exit_code !== 0 ||
+                !hasProcessExecution(run.execution) ||
+                run.metrics.filter((item) => item.name === metric.name).length !== 1 ||
+                run.metrics.find((item) => item.name === metric.name)?.direction !== metric.direction,
+            )
+          )
+            return false
+          if (
+            host[0].environment.mode !== "host" ||
+            container[0].environment.mode !== "container" ||
+            !container[0].reproduction.container_reproduced ||
+            !hasIsolatedContainerExecution(container[0].execution)
+          )
+            return false
+          const hostValue = metricValue(host[0], metric.name)
+          const containerValue = metricValue(container[0], metric.name)
+          return (
+            hostValue !== undefined &&
+            containerValue !== undefined &&
+            Math.abs(hostValue - containerValue) <= tolerance.absolute + tolerance.relative * Math.abs(hostValue)
+          )
+        })
       const reproductionStatus =
-        input.container_runs.length === 0
-          ? "not_run"
-          : input.container_runs.every((run) => run.status === "succeeded" && run.reproduction.container_reproduced)
-            ? "passed"
-            : "failed"
-      if (reproductionStatus === "failed") {
+        input.container_runs.length === 0 ? "not_run" : reproductionPassed ? "passed" : "failed"
+      if (reproductionStatus !== "passed") {
         findings.push({
           category: "container_reproduction_failed",
           severity: "blocking",
-          message: "Container reproduction failed; final paper claims are blocked.",
-          experiment_ids: input.container_runs.filter((run) => run.status !== "succeeded").map((run) => run.experiment_id),
+          message:
+            reproductionStatus === "not_run"
+              ? "Container reproduction was not run; final paper claims are blocked."
+              : "Container reproduction requires complete successful process runs, isolated container evidence, and matching primary metrics.",
+          experiment_ids: specs.map((spec) => spec.experiment_id),
         })
       }
 
       const blockers = Array.from(
-        new Set(
-          findings
-            .filter((finding) => finding.severity === "blocking")
-            .map((finding) => finding.category),
-        ),
+        new Set(findings.filter((finding) => finding.severity === "blocking").map((finding) => finding.category)),
       )
       const hasUnderperforming = findings.some((finding) => finding.category === "underperforming_method")
       const recommendation = blockers.length > 0 ? "block" : hasUnderperforming ? "revise" : "accept"

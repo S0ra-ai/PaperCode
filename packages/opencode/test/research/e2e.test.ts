@@ -70,15 +70,30 @@ function dataset(): DatasetCandidate {
 }
 
 const runner: ExperimentRunner = async (spec, environment) => {
+  // Simulated evidence validates pipeline contracts without invoking Docker.
   const scores: Record<string, number> = {
-    proposed: environment.mode === "container" ? 0.83 : 0.84,
-    "baseline-bm25": environment.mode === "container" ? 0.65 : 0.66,
-    "baseline-dense": environment.mode === "container" ? 0.73 : 0.74,
-    "baseline-rag": environment.mode === "container" ? 0.77 : 0.78,
-    "ablation-no-claim-ledger": environment.mode === "container" ? 0.78 : 0.79,
+    proposed: 0.84,
+    "baseline-bm25": 0.66,
+    "baseline-dense": 0.74,
+    "baseline-rag": 0.78,
+    "ablation-no-claim-ledger": 0.79,
   }
   return {
     status: "succeeded",
+    execution: {
+      kind: "process",
+      command: spec.command,
+      exit_code: 0,
+      container:
+        environment.mode === "container"
+          ? {
+              runtime: "docker",
+              container_id: `fixture-${spec.experiment_id}`,
+              image_digest: `sha256:${"a".repeat(64)}`,
+              isolated: true,
+            }
+          : undefined,
+    },
     metrics: [{ name: "accuracy", value: scores[spec.experiment_id] ?? 0.7, direction: "higher_better" }],
     stdout: `${environment.mode}:${spec.experiment_id}`,
     stderr: "",
@@ -130,6 +145,21 @@ describe("research pipeline end-to-end acceptance", () => {
         topic: "Claim-aware LLM retrieval evaluation",
         method_name: "claim-aware reranker",
         dataset_ids: discovery.data_plan.datasets.map((item) => item.dataset_id),
+        proposed_command: { argv: ["python", "fixture.py", "proposed"] },
+        baseline_specs: ["bm25", "dense", "rag"].map((name) => ({
+          experiment_id: `baseline-${name}`,
+          label: name,
+          command: { argv: ["python", "fixture.py", name] },
+          rationale: "Explicit test fixture baseline",
+        })),
+        ablation_specs: [
+          {
+            experiment_id: "ablation-no-claim-ledger",
+            label: "fixture ablation",
+            command: { argv: ["python", "fixture.py", "ablation"] },
+            rationale: "Explicit test fixture ablation",
+          },
+        ],
         now,
       })
       const experiments = await recordExperimentLoop(
@@ -171,6 +201,15 @@ describe("research pipeline end-to-end acceptance", () => {
             ...discovery.literature.sources.map((item) => item.source_id),
             ...discovery.data_plan.datasets.map((item) => item.source_id),
           ],
+          source_records: [
+            ...discovery.literature.sources,
+            ...discovery.data_plan.datasets.map((dataset) => ({
+              ...dataset,
+              schema_version: "SourceRecord.v1" as const,
+              kind: "dataset" as const,
+              retrieved_at: now,
+            })),
+          ],
           model_reviews: [
             { model: "deepseek-v4-pro", verdict: "pass" },
             { model: "deepseek-v4-pro-review", verdict: "pass" },
@@ -209,7 +248,10 @@ describe("research pipeline end-to-end acceptance", () => {
       expect(status.counts.claims).toBe(1)
       expect(status.counts.drafts).toBe(1)
       expect(status.counts.reviews).toBe(1)
-      expect(status.counts.exports).toBe(4)
+      // Synthetic binary headers above are intentionally not valid PDF/DOCX files.
+      // Only the generated Markdown and LaTeX count as written exports.
+      expect(status.counts.exports).toBe(2)
+      expect(exported.bundle.files.filter((file) => file.status === "written").map((file) => file.format).sort()).toEqual(["latex", "markdown"])
       expect(status.artifact_versions.map((item) => item.logical_path)).toContain("exports/export-bundle.json")
     } finally {
       await clean(dir)

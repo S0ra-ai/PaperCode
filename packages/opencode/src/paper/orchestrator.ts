@@ -1,5 +1,6 @@
 import {
   appendResearchEvent,
+  loadResearchRun,
   readJsonlFacts,
   writeResearchArtifact,
   type ResearchRuntimeOptions,
@@ -12,6 +13,8 @@ import { createResearchCapabilityRegistry, defaultResearchCapabilities, type Res
 import { normalizeResearchIntake, recordResearchIntake, type ResearchIntakeRequest } from "./intake"
 import { analyzeCodebaseForPaper, recordCodeToPaperArtifacts, type CodeToPaperAnalysis } from "./code-to-paper"
 import { runPaperAuthoringLoop } from "./authoring"
+import { budgetTierPolicy, type BudgetTier } from "./budget"
+import { executeContainerExperiment, executeHostExperiment, loadExperimentProtocol, parseExperimentMetrics, selectContainerCommand } from "./research/experiments/execution"
 import {
   createGeneratedJournalProfileDraft,
   createPaperProfileRegistry,
@@ -321,6 +324,12 @@ type ExperimentEvidenceManifest = {
   primary_metric?: string
   metric_direction?: ExperimentMetricDirection
   metric_values?: Record<string, number>
+  experiments?: Array<{
+    experiment_id: string
+    role: "baseline" | "ablation"
+    label: string
+    rationale: string
+  }>
   stdout?: string
   container_image?: string
   container_digest?: string
@@ -737,94 +746,6 @@ function metricNameForLocalScript(scriptName: string) {
   return "test_pass_rate"
 }
 
-function metricDirectionFromValue(value: unknown): ExperimentMetricDirection {
-  return value === "lower_better" ? "lower_better" : "higher_better"
-}
-
-function metricNumber(value: unknown) {
-  if (typeof value === "number" && Number.isFinite(value)) return value
-  if (typeof value === "string" && value.trim() !== "") {
-    const parsed = Number(value)
-    if (Number.isFinite(parsed)) return parsed
-  }
-  return undefined
-}
-
-function metricFromObject(value: unknown, fallbackName: string): ExperimentMetric[] {
-  if (!value || typeof value !== "object") return []
-  const candidate = value as {
-    name?: unknown
-    metric?: unknown
-    value?: unknown
-    direction?: unknown
-    unit?: unknown
-  }
-  const metricValue = metricNumber(candidate.value)
-  if (typeof metricValue !== "number") return []
-  const name = typeof candidate.name === "string" ? candidate.name : typeof candidate.metric === "string" ? candidate.metric : fallbackName
-  return [
-    {
-      name,
-      value: metricValue,
-      direction: metricDirectionFromValue(candidate.direction),
-      unit: typeof candidate.unit === "string" ? candidate.unit : undefined,
-    },
-  ]
-}
-
-function metricsFromPayload(value: unknown, spec: { experiment_id: string; role: string; label: string }, fallbackName: string): ExperimentMetric[] {
-  if (Array.isArray(value)) {
-    const matchedEntry = value.find((item) => {
-      if (!item || typeof item !== "object") return false
-      const candidate = item as { experiment_id?: unknown; role?: unknown; label?: unknown }
-      return candidate.experiment_id === spec.experiment_id || candidate.role === spec.role || candidate.label === spec.label
-    })
-    if (matchedEntry) return metricsFromPayload(matchedEntry, spec, fallbackName)
-    return value.flatMap((item) => metricFromObject(item, fallbackName))
-  }
-  if (!value || typeof value !== "object") return []
-  const candidate = value as {
-    experiment_id?: unknown
-    role?: unknown
-    label?: unknown
-    metrics?: unknown
-    metric?: unknown
-  }
-  if (Array.isArray(candidate.metrics)) return candidate.metrics.flatMap((item) => metricFromObject(item, fallbackName))
-  if (candidate.metrics && typeof candidate.metrics === "object") return metricsFromPayload(candidate.metrics, spec, fallbackName)
-  const keyed = value as Record<string, unknown>
-  const keyedValue = keyed[spec.experiment_id] ?? keyed[spec.role] ?? keyed[spec.label]
-  if (keyedValue) return metricsFromPayload(keyedValue, spec, fallbackName)
-  return metricFromObject(candidate.metric ?? candidate, fallbackName)
-}
-
-function parseExperimentMetrics(stdout: string, spec: { experiment_id: string; role: string; label: string }, fallbackName: string): ExperimentMetric[] {
-  const metrics: ExperimentMetric[] = []
-  for (const line of stdout.split(/\r?\n/)) {
-    const tagged = line.match(/^PAPER_FUCKER_METRICS?\s+(.+)$/)
-    if (!tagged) continue
-    try {
-      const parsed = JSON.parse(tagged[1]!)
-      metrics.push(...metricsFromPayload(parsed, spec, fallbackName))
-    } catch {
-      // Keep raw stdout available in the terminal trace; unparsable metric hints should not hide the run itself.
-    }
-  }
-  if (metrics.length > 0) return metrics
-  const simple = stdout.match(new RegExp(`(?:^|\\s)${fallbackName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*=\\s*([0-9]+(?:\\.[0-9]+)?)`))
-  const value = simple ? metricNumber(simple[1]) : undefined
-  return typeof value === "number"
-    ? [
-        {
-          name: fallbackName,
-          value,
-          direction: "higher_better",
-          unit: "ratio",
-        },
-      ]
-    : []
-}
-
 function experimentCommandFromShell(command: string, timeoutSeconds = 120): ExperimentCommand {
   return {
     argv: [command],
@@ -955,7 +876,7 @@ function experimentProtocolGuidance(input: {
           recommended_script: "repro:container",
           package_json_example: { "repro:container": "docker build -t paper-fucker-repro . && docker run --rm paper-fucker-repro" },
           rationale: "final export 需要隔离环境复现通过，host-only 结果只能作为 exploratory。",
-          next_action: "添加容器复现脚本，或提供 ExperimentEvidenceManifest.v1 中的 container 证据。",
+          next_action: "构建真实评价镜像，在 experiments/protocol.json 登记绑定实验 ID 的结构化 docker/podman run 命令，并使用启用容器复现的预算档位执行。导入指标不能证明隔离复现。",
         },
       ]
     }
@@ -1079,7 +1000,7 @@ function experimentProtocolStarterPack(input: {
     next_steps: [
       "将 starter files 复制到目标仓库或用同等脚本替换。",
       "让 proposed、baseline、ablation 输出同名主指标。",
-      "运行容器复现并将结果写入 ExperimentEvidenceManifest.v1 或保留可执行脚本。",
+      "构建镜像后，在 experiments/protocol.json 登记绑定实验 ID 的 docker/podman run 命令；deep/submission/custom 档位才执行容器复现。",
       "重新启动 PaperRun，让 final gate 基于真实实验结果重新判断。",
     ],
   }
@@ -1134,7 +1055,7 @@ async function materializeExperimentProtocolStarterFiles(
   }
 }
 
-function runShellCommand(command: string, cwd: string, timeoutMs: number) {
+function runShellCommand(command: string, cwd: string, timeoutMs: number, env?: Record<string, string>) {
   return new Promise<{ stdout: string; stderr: string; exitCode: number; timedOut: boolean; wallTimeSeconds: number }>((resolve) => {
     const started = Date.now()
     const child = spawn(command, {
@@ -1143,6 +1064,7 @@ function runShellCommand(command: string, cwd: string, timeoutMs: number) {
       windowsHide: true,
       env: {
         ...process.env,
+        ...env,
         CI: process.env.CI ?? "1",
         NO_COLOR: process.env.NO_COLOR ?? "1",
       },
@@ -1275,21 +1197,21 @@ function localCodeExperimentRunner(input: {
   if (!entry || !command) return undefined
   const workspace = workspacePath(input.request)
   return async (spec, environment) => {
-    const protocolEntry =
-      environment.mode === "container"
-        ? protocol.entries.find((item) => item.role === "container_reproduction")
-        : protocol.entries.find((item) => item.role === spec.role && (item.protocol_id.endsWith(spec.experiment_id) || item.label === spec.label))
-    if (environment.mode === "container" && !protocolEntry) {
+    const containerCommand = environment.mode === "container" ? selectContainerCommand(protocol, spec) : undefined
+    const protocolEntry = environment.mode === "host"
+      ? protocol.entries.find((item) => item.role === spec.role && (item.protocol_id === spec.experiment_id || item.label === spec.label))
+      : undefined
+    if (environment.mode === "container" && !containerCommand) {
       return {
         status: "environment_failed",
         metrics: [],
         stdout: "",
-        stderr: "No explicit container reproduction runner is configured; add a container:/repro: package script or provide ExperimentEvidenceManifest.v1.",
+        stderr: "No experiment-bound container command is configured in experiments/protocol.json.",
         exit_code: 127,
         resource_usage: { wall_time_seconds: 0 },
       }
     }
-    const shellCommand = protocolEntry ? experimentCommandToShell(protocolEntry.command) : spec.role === "proposed" ? command : undefined
+    const shellCommand = containerCommand ? experimentCommandToShell(containerCommand) : protocolEntry ? experimentCommandToShell(protocolEntry.command) : spec.role === "proposed" ? command : undefined
     if (!shellCommand) {
       return {
         status: "environment_failed",
@@ -1301,26 +1223,27 @@ function localCodeExperimentRunner(input: {
       }
     }
     const metricName = spec.expected_metric
+    const actualCommand = containerCommand ?? protocolEntry?.command ?? spec.command
     const timeoutSeconds =
       environment.mode === "container"
-        ? Math.min(protocolEntry?.command.timeout_seconds ?? spec.command.timeout_seconds ?? 600, 600)
-        : Math.min(spec.command.timeout_seconds ?? 120, 120)
-    const result = await runShellCommand(shellCommand, workspace, timeoutSeconds * 1000)
+        ? Math.min(actualCommand.timeout_seconds ?? 600, 600)
+        : Math.min(actualCommand.timeout_seconds ?? 120, 120)
+    const executionWorkspace = path.resolve(workspace, actualCommand.cwd ?? ".")
+    const containerResult = environment.mode === "container"
+      ? await executeContainerExperiment(actualCommand, executionWorkspace, timeoutSeconds * 1000)
+      : undefined
+    const result = containerResult ?? await executeHostExperiment(actualCommand, workspace, timeoutSeconds * 1000)
     const parsedMetrics = parseExperimentMetrics(result.stdout, spec, metricName)
+    const metrics = parsedMetrics.length > 0 ? parsedMetrics : /^(typecheck_pass|lint_pass|container_reproduction_pass)$/.test(metricName)
+      ? [{ name: metricName, value: result.exitCode === 0 ? 1 : 0, direction: "higher_better" as const, unit: "ratio" }]
+      : []
     return {
       status: result.exitCode === 0 ? "succeeded" : result.timedOut ? "resource_exceeded" : "failed",
-      command: protocolEntry?.command ?? spec.command,
-      metrics:
-        parsedMetrics.length > 0
-          ? parsedMetrics
-          : [
-              {
-                name: metricName,
-                value: result.exitCode === 0 ? 1 : 0,
-                direction: "higher_better",
-                unit: "ratio",
-              },
-            ],
+      command: actualCommand,
+      metrics,
+      execution: environment.mode === "container"
+        ? containerResult?.execution
+        : { kind: "process", command: actualCommand, exit_code: result.exitCode },
       stdout: `Local ${environment.mode} script ${protocolEntry?.label ?? entry.label}: ${shellCommand}\n${result.stdout}`.trim(),
       stderr: result.timedOut ? `Command timed out after ${result.wallTimeSeconds.toFixed(1)}s.\n${result.stderr}`.trim() : result.stderr,
       exit_code: result.exitCode,
@@ -1528,19 +1451,21 @@ function metricDirection(plan: ExperimentPlan, metricName: string, evidence: Exp
 
 function evidenceMetricValue(evidence: ExperimentEvidenceManifest, spec: Parameters<ExperimentRunner>[0], mode: "host" | "container") {
   const values = evidence.metric_values ?? {}
-  return values[`${mode}:${spec.experiment_id}`] ?? values[spec.experiment_id] ?? values[`${mode}:${spec.role}`] ?? values[spec.role]
+  return values[`${mode}:${spec.experiment_id}`] ?? (mode === "host" ? values[spec.experiment_id] : undefined)
 }
 
 function experimentEvidenceRunner(plan: ExperimentPlan, evidence: ExperimentEvidenceManifest, mode: "host" | "container"): ExperimentRunner {
   return (spec) => {
     const metricName = evidence.primary_metric ?? plan.metrics.find((metric) => metric.primary)?.name ?? spec.expected_metric
     const value = evidenceMetricValue(evidence, spec, mode)
-    if (typeof value !== "number" || !Number.isFinite(value)) {
+    if (mode === "container" || typeof value !== "number" || !Number.isFinite(value)) {
       return {
         status: "environment_failed",
         metrics: [],
         stdout: "",
-        stderr: `Experiment evidence manifest is missing ${mode} metric value for ${spec.experiment_id}.`,
+        stderr: mode === "container"
+          ? "Imported metrics are observations, not verified container executions."
+          : `Experiment evidence manifest is missing ${mode} metric value for ${spec.experiment_id}.`,
         exit_code: 2,
         resource_usage: { wall_time_seconds: 0 },
       }
@@ -1548,7 +1473,8 @@ function experimentEvidenceRunner(plan: ExperimentPlan, evidence: ExperimentEvid
     return {
       status: "succeeded",
       metrics: [{ name: metricName, value, direction: metricDirection(plan, metricName, evidence) }],
-      stdout: evidence.stdout ?? `Loaded ${mode} reproduction evidence from ExperimentEvidenceManifest.v1.`,
+      stdout: evidence.stdout ?? `Imported ${mode} observation from ExperimentEvidenceManifest.v1.`,
+      execution: { kind: "imported" },
       stderr: "",
       exit_code: 0,
       resource_usage: { wall_time_seconds: 0 },
@@ -1566,7 +1492,7 @@ async function defaultExperimentLoop(
   const sources = await defaultSourceDiscovery(runDir, request, options)
   const evidence = await loadExperimentEvidenceManifest(runDir, request, options)
   const code = !evidence && (request.code_paths ?? []).length > 0 ? await defaultCodeAnalysis(runDir, request, options) : undefined
-  const protocol = code ? experimentProtocolFromCode(code) : undefined
+  const protocol = code ? await loadExperimentProtocol(workspacePath(request)) ?? experimentProtocolFromCode(code) : undefined
   const proposedProtocol = protocol?.entries.find((entry) => entry.role === "proposed")
   const baselines = protocol?.entries.filter((entry) => entry.role === "baseline") ?? []
   const ablations = protocol?.entries.filter((entry) => entry.role === "ablation") ?? []
@@ -1576,6 +1502,8 @@ async function defaultExperimentLoop(
     dataset_ids: sources.data_plan.datasets.map((dataset) => dataset.dataset_id),
     objective: "Create a reproducible evaluation plan before allowing final paper claims.",
     primary_metric: primaryExperimentMetric(request, evidence, proposedProtocol?.expected_metric),
+    metric_direction: evidence?.metric_direction ?? protocol?.metric_direction,
+    proposed_id: proposedProtocol?.protocol_id,
     proposed_command: proposedProtocol?.command,
     baseline_specs: protocol && baselines.length > 0
       ? baselines.map((entry) => ({
@@ -1584,7 +1512,7 @@ async function defaultExperimentLoop(
           command: entry.command,
           rationale: entry.rationale,
         }))
-      : undefined,
+      : evidence?.experiments?.filter((item) => item.role === "baseline").map((item) => ({ ...item, command: { argv: [] } })) ?? [],
     ablation_specs: protocol && ablations.length > 0
       ? ablations.map((entry) => ({
           experiment_id: entry.protocol_id,
@@ -1592,8 +1520,8 @@ async function defaultExperimentLoop(
           command: entry.command,
           rationale: entry.rationale,
         }))
-      : undefined,
-    include_default_baselines: true,
+      : evidence?.experiments?.filter((item) => item.role === "ablation").map((item) => ({ ...item, command: { argv: [] } })) ?? [],
+    include_default_baselines: false,
     now: nowIso(options),
   })
   if (protocol) {
@@ -1619,6 +1547,7 @@ async function defaultExperimentLoop(
       container_runner: evidence
         ? experimentEvidenceRunner(plan, evidence, "container")
         : localRunner ?? defaultExperimentRunner("host exploration did not produce runnable successful experiments"),
+      container_reproduction: budgetTierPolicy((await loadResearchRun(runDir)).metadata?.paper_budget_tier as BudgetTier || "standard").container_reproduction,
       run_options: {
         now: nowIso(options),
         container_image: evidence?.container_image,

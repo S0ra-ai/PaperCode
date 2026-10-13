@@ -6,12 +6,13 @@ import path from "path"
 import { createResearchRun, getResearchRunStatus, type ResearchRuntimeOptions } from "@/paper/research/runtime"
 import { composeClaimLedger, composeDraftPaper } from "@/paper/research/writing"
 import { discoverDatasets } from "@/paper/research/sources"
-import { analyzeExperimentResults, planExperiments, runContainerReproduction, runHostExploration } from "@/paper/research/experiments"
 import {
-  evaluateVerificationGate,
-  recordVerificationGate,
-  type ModelReviewInput,
-} from "@/paper/research/verification"
+  analyzeExperimentResults,
+  planExperiments,
+  runContainerReproduction,
+  runHostExploration,
+} from "@/paper/research/experiments"
+import { evaluateVerificationGate, recordVerificationGate, type ModelReviewInput } from "@/paper/research/verification"
 
 const now = "2026-05-09T00:00:00Z"
 
@@ -54,6 +55,7 @@ function supportedFixture() {
   return {
     ledger,
     draft: composeDraftPaper({ title: "Draft", ledger, now }),
+    source_records: sourceRecords(),
   }
 }
 
@@ -64,9 +66,13 @@ function dataPlan(status: "clear" | "restricted" = "clear") {
       {
         dataset_id: "dataset-a",
         title: "Dataset A",
-        url: "https://example.org/dataset-a",
-        provider: "fixture",
-        license: { status, expression: status === "clear" ? "apache-2.0" : "research-only-no-redistribution" },
+        // Simulated workspace-authorized data, rather than a placeholder remote benchmark.
+        url: "file:///fixture/dataset-a.json",
+        provider: "workspace",
+        license: {
+          status,
+          expression: status === "clear" ? "workspace-authorized local dataset" : "research-only-no-redistribution",
+        },
         version: { value: "v1", retrieved_at: now },
         verification: { status: "verified", method: "fixture", checked_at: now },
         access: "open",
@@ -77,7 +83,10 @@ function dataPlan(status: "clear" | "restricted" = "clear") {
   })
 }
 
-function sourceRecords(status: "verified" | "unverified" | "failed" = "verified", license: "clear" | "restricted" = "clear") {
+function sourceRecords(
+  status: "verified" | "unverified" | "failed" = "verified",
+  license: "clear" | "restricted" = "clear",
+) {
   return [
     {
       schema_version: "SourceRecord.v1" as const,
@@ -91,15 +100,44 @@ function sourceRecords(status: "verified" | "unverified" | "failed" = "verified"
       verification: { status, method: "fixture", checked_at: now },
       retrieved_at: now,
     },
+    {
+      schema_version: "SourceRecord.v1" as const,
+      source_id: "dataset-a",
+      kind: "dataset" as const,
+      title: "Dataset A",
+      url: "file:///fixture/dataset-a.json",
+      provider: "workspace",
+      license: { status: "clear" as const, expression: "workspace-authorized local dataset" },
+      version: { value: "v1", retrieved_at: now },
+      verification: { status: "verified" as const, method: "fixture", checked_at: now },
+      retrieved_at: now,
+    },
   ]
 }
 
 async function resultReport(reproduced = true) {
-  const plan = planExperiments({ topic: "retrieval", method_name: "reranker", dataset_ids: ["dataset-a"], now })
+  const plan = planExperiments({
+    topic: "retrieval",
+    method_name: "reranker",
+    dataset_ids: ["dataset-a"],
+    now,
+    proposed_command: { argv: ["python", "fixture.py", "proposed"] },
+    baseline_specs: [
+      {
+        experiment_id: "baseline",
+        label: "baseline",
+        command: { argv: ["python", "fixture.py", "baseline"] },
+        rationale: "Explicit fixture control",
+      },
+    ],
+    ablation_specs: [],
+  })
+  // Explicit simulated process/isolation evidence tests the gate without executing containers.
   const hostRuns = await runHostExploration(
     plan,
-    async () => ({
+    async (spec) => ({
       status: "succeeded",
+      execution: { kind: "process", command: spec.command, exit_code: 0 },
       metrics: [{ name: "accuracy", value: 0.8, direction: "higher_better" }],
       stdout: "",
       stderr: "",
@@ -110,16 +148,30 @@ async function resultReport(reproduced = true) {
   const containerRuns = await runContainerReproduction(
     plan,
     hostRuns,
-    async () => ({
+    async (spec) => ({
       status: reproduced ? "succeeded" : "failed",
-      metrics: reproduced ? [{ name: "accuracy", value: 0.79, direction: "higher_better" }] : [],
+      execution: {
+        kind: "process",
+        command: spec.command,
+        exit_code: reproduced ? 0 : 1,
+        container: {
+          runtime: "docker",
+          container_id: `fixture-${spec.experiment_id}`,
+          image_digest: `sha256:${"a".repeat(64)}`,
+          isolated: true,
+        },
+      },
+      metrics: reproduced ? [{ name: "accuracy", value: 0.8, direction: "higher_better" }] : [],
       stdout: "",
       stderr: reproduced ? "" : "container failed",
       exit_code: reproduced ? 0 : 1,
     }),
     { now },
   )
-  return analyzeExperimentResults({ plan, host_runs: hostRuns, container_runs: containerRuns, now })
+  const report = analyzeExperimentResults({ plan, host_runs: hostRuns, container_runs: containerRuns, now })
+  expect(report.reproduction.status).toBe(reproduced ? "passed" : "failed")
+  expect(report.final_claims_allowed).toBe(reproduced)
+  return report
 }
 
 function reviews(...items: ModelReviewInput[]): ModelReviewInput[] {
@@ -135,7 +187,10 @@ describe("verification final gate", () => {
       data_plan: dataPlan("clear"),
       result_report: report,
       available_source_ids: ["paper-a"],
-      model_reviews: reviews({ model: "deepseek-v4-pro", verdict: "pass" }, { model: "deepseek-v4-pro-review", verdict: "pass" }),
+      model_reviews: reviews(
+        { model: "deepseek-v4-pro", verdict: "pass" },
+        { model: "deepseek-v4-pro-review", verdict: "pass" },
+      ),
       now,
     })
 
@@ -146,16 +201,28 @@ describe("verification final gate", () => {
   test("blocks unsupported claims", async () => {
     const ledger = composeClaimLedger({
       topic: "LLM retrieval evaluation",
-      claims: [{ text: "Unsupported universal claim.", section_id: "discussion", confidence: 0.2, source_ids: [], artifact_ids: [] }],
+      claims: [
+        {
+          text: "Unsupported universal claim.",
+          section_id: "discussion",
+          confidence: 0.2,
+          source_ids: [],
+          artifact_ids: [],
+        },
+      ],
       now,
     })
     const gate = evaluateVerificationGate({
       ledger,
       draft: composeDraftPaper({ title: "Draft", ledger, now }),
+      source_records: sourceRecords(),
       data_plan: dataPlan("clear"),
       result_report: await resultReport(true),
       available_source_ids: ["paper-a", "dataset-a"],
-      model_reviews: reviews({ model: "deepseek-v4-pro", verdict: "pass" }, { model: "deepseek-v4-pro-review", verdict: "pass" }),
+      model_reviews: reviews(
+        { model: "deepseek-v4-pro", verdict: "pass" },
+        { model: "deepseek-v4-pro-review", verdict: "pass" },
+      ),
       now,
     })
     expect(gate.blocking_report.blockers.map((item) => item.category)).toContain("unsupported_claim")
@@ -168,7 +235,10 @@ describe("verification final gate", () => {
       data_plan: dataPlan("restricted"),
       result_report: await resultReport(true),
       available_source_ids: ["paper-a", "dataset-a"],
-      model_reviews: reviews({ model: "deepseek-v4-pro", verdict: "pass" }, { model: "deepseek-v4-pro-review", verdict: "pass" }),
+      model_reviews: reviews(
+        { model: "deepseek-v4-pro", verdict: "pass" },
+        { model: "deepseek-v4-pro-review", verdict: "pass" },
+      ),
       now,
     })
     expect(gate.blocking_report.blockers.map((item) => item.category)).toContain("dataset_license_failure")
@@ -181,7 +251,10 @@ describe("verification final gate", () => {
       data_plan: dataPlan("clear"),
       result_report: await resultReport(false),
       available_source_ids: ["paper-a", "dataset-a"],
-      model_reviews: reviews({ model: "deepseek-v4-pro", verdict: "pass" }, { model: "deepseek-v4-pro-review", verdict: "pass" }),
+      model_reviews: reviews(
+        { model: "deepseek-v4-pro", verdict: "pass" },
+        { model: "deepseek-v4-pro-review", verdict: "pass" },
+      ),
       now,
     })
     expect(gate.blocking_report.blockers.map((item) => item.category)).toContain("reproduction_failure")
@@ -195,7 +268,10 @@ describe("verification final gate", () => {
       result_report: await resultReport(true),
       available_source_ids: ["paper-a", "dataset-a"],
       source_records: sourceRecords("unverified"),
-      model_reviews: reviews({ model: "deepseek-v4-pro", verdict: "pass" }, { model: "deepseek-v4-pro-review", verdict: "pass" }),
+      model_reviews: reviews(
+        { model: "deepseek-v4-pro", verdict: "pass" },
+        { model: "deepseek-v4-pro-review", verdict: "pass" },
+      ),
       now,
     })
     expect(gate.blocking_report.blockers.map((item) => item.category)).toContain("unverified_source")
@@ -236,7 +312,10 @@ describe("verification final gate", () => {
           data_plan: dataPlan("clear"),
           result_report: await resultReport(true),
           available_source_ids: ["paper-a", "dataset-a"],
-          model_reviews: reviews({ model: "deepseek-v4-pro", verdict: "pass" }, { model: "deepseek-v4-pro-review", verdict: "pass" }),
+          model_reviews: reviews(
+            { model: "deepseek-v4-pro", verdict: "pass" },
+            { model: "deepseek-v4-pro-review", verdict: "pass" },
+          ),
           now,
         },
         options,

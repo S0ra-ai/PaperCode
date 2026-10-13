@@ -1,5 +1,5 @@
 import { withSpan } from "../telemetry"
-import type { ExperimentCommand, ExperimentPlan, ExperimentSpec } from "./schemas"
+import type { ExperimentCommand, ExperimentMetricDirection, ExperimentPlan, ExperimentSpec } from "./schemas"
 
 export type ExperimentPlanningInput = {
   topic: string
@@ -7,11 +7,15 @@ export type ExperimentPlanningInput = {
   dataset_ids: string[]
   objective?: string
   primary_metric?: string
+  metric_direction?: ExperimentMetricDirection
+  proposed_id?: string
   proposed_command?: ExperimentCommand
   baseline_specs?: Array<{ experiment_id: string; label: string; command: ExperimentCommand; rationale: string }>
   ablation_specs?: Array<{ experiment_id: string; label: string; command: ExperimentCommand; rationale: string }>
+  /** Legacy input retained for compatibility; experiment specs must always be explicit. */
   include_default_baselines?: boolean
   resource_budget?: ExperimentPlan["resource_budget"]
+  reproduction_tolerance?: ExperimentPlan["reproduction_tolerance"]
   now?: string
 }
 
@@ -27,13 +31,6 @@ function slug(value: string) {
     .slice(0, 56)
 }
 
-function command(experimentId: string) {
-  return {
-    argv: ["paper-fucker-experiment", "run", experimentId],
-    timeout_seconds: 3600,
-  }
-}
-
 function spec(input: {
   experiment_id: string
   label: string
@@ -45,7 +42,7 @@ function spec(input: {
 }): ExperimentSpec {
   return {
     ...input,
-    command: input.command ?? command(input.experiment_id),
+    command: input.command ?? { argv: [] },
   }
 }
 
@@ -59,64 +56,13 @@ export function planExperiments(input: ExperimentPlanningInput): ExperimentPlan 
     },
     (span) => {
       const primaryMetric = input.primary_metric ?? "accuracy"
-      const baselineSpecs =
-        input.baseline_specs?.map((item) =>
-          spec({
-            ...item,
-            role: "baseline",
-            dataset_ids: input.dataset_ids,
-            expected_metric: primaryMetric,
-          }),
-        ) ??
-        (input.include_default_baselines === false
-          ? []
-          : [
-              spec({
-                experiment_id: "baseline-bm25",
-                label: "BM25 lexical retrieval",
-                role: "baseline",
-                dataset_ids: input.dataset_ids,
-                rationale: "Strong sparse retrieval baseline for retrieval-style CS/AI papers.",
-                expected_metric: primaryMetric,
-              }),
-              spec({
-                experiment_id: "baseline-dense",
-                label: "Dense bi-encoder retrieval",
-                role: "baseline",
-                dataset_ids: input.dataset_ids,
-                rationale: "Common neural retrieval baseline for embedding-based methods.",
-                expected_metric: primaryMetric,
-              }),
-              spec({
-                experiment_id: "baseline-rag",
-                label: "Standard RAG pipeline",
-                role: "baseline",
-                dataset_ids: input.dataset_ids,
-                rationale: "End-to-end retrieval augmented generation baseline.",
-                expected_metric: primaryMetric,
-              }),
-            ])
-      const ablationSpecs =
-        input.ablation_specs?.map((item) =>
-          spec({
-            ...item,
-            role: "ablation",
-            dataset_ids: input.dataset_ids,
-            expected_metric: primaryMetric,
-          }),
-        ) ??
-        (input.include_default_baselines === false
-          ? []
-          : [
-              spec({
-                experiment_id: "ablation-no-claim-ledger",
-                label: "Ablation without claim ledger",
-                role: "ablation",
-                dataset_ids: input.dataset_ids,
-                rationale: "Tests whether claim-ledger evidence tracking contributes to the result.",
-                expected_metric: primaryMetric,
-              }),
-            ])
+      // Experiment identities must come from an explicit protocol, never from a generic topic.
+      const baselineSpecs = (input.baseline_specs ?? []).map((item) =>
+        spec({ ...item, role: "baseline", dataset_ids: input.dataset_ids, expected_metric: primaryMetric }),
+      )
+      const ablationSpecs = (input.ablation_specs ?? []).map((item) =>
+        spec({ ...item, role: "ablation", dataset_ids: input.dataset_ids, expected_metric: primaryMetric }),
+      )
       const plan: ExperimentPlan = {
         schema_version: "ExperimentPlan.v1",
         plan_id: `experiment-plan:${slug(input.topic) || "topic"}`,
@@ -124,9 +70,9 @@ export function planExperiments(input: ExperimentPlanningInput): ExperimentPlan 
         method_name: input.method_name,
         objective: input.objective ?? `Evaluate ${input.method_name} against reproducible baselines.`,
         created_at: createdAt,
-        metrics: [{ name: primaryMetric, direction: "higher_better", primary: true }],
+        metrics: [{ name: primaryMetric, direction: input.metric_direction ?? "higher_better", primary: true }],
         proposed: spec({
-          experiment_id: "proposed",
+          experiment_id: input.proposed_id ?? "proposed",
           label: input.method_name,
           role: "proposed",
           dataset_ids: input.dataset_ids,
@@ -141,6 +87,7 @@ export function planExperiments(input: ExperimentPlanningInput): ExperimentPlan 
           max_memory_mb: 24576,
           max_gpu_hours: 0,
         },
+        reproduction_tolerance: input.reproduction_tolerance,
         downgrade_policy: [
           "If fewer than two baselines can run, downgrade to an engineering report.",
           "If datasets are unavailable, turn to the nearest open verified benchmark.",

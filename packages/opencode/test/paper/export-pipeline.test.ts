@@ -4,6 +4,7 @@ import { setTimeout as sleep } from "node:timers/promises"
 import os from "os"
 import path from "path"
 import { renderPaperExportPipeline, type PaperExportCommandRunner } from "@/paper/export-pipeline"
+import { initPaths, writeToolLinks } from "@/paper/init/config"
 import { createResearchRun, type ResearchFinalGateState, type ResearchRuntimeOptions } from "@/paper/research/runtime"
 import { composeClaimLedger, composeDraftPaper } from "@/paper/research/writing"
 
@@ -104,6 +105,52 @@ afterEach(async () => {
 })
 
 describe("PaperRun export renderer pipeline", () => {
+  test("uses persisted tool links from runtime home for default export", async () => {
+    const run = await newRun()
+    const pandoc = path.join(run.options.home!, "pandoc.exe")
+    const xelatex = path.join(run.options.home!, "xelatex.exe")
+    await Bun.write(pandoc, "fixture executable")
+    await Bun.write(xelatex, "fixture executable")
+    await writeToolLinks(initPaths(run.options.home), { pandoc, xelatex })
+    const calls: string[] = []
+    const result = await renderPaperExportPipeline(run.run_dir, {
+      mode: "final",
+      bundle_id: "bundle-final",
+      draft: run.draft,
+      final_gate: passedGate,
+      source_artifact_ids: [],
+      command: async (input) => {
+        calls.push(input.tool)
+        return stubCommand({ ...input, tool: input.tool === pandoc ? "pandoc" : input.tool === xelatex ? "xelatex" : input.tool })
+      },
+    }, run.options)
+    expect(calls).toContain(pandoc)
+    expect(calls).toContain(xelatex)
+    expect(result.bundle.files.every((file) => file.status === "written")).toBe(true)
+  })
+
+  test("explicit export tools override saved tool links", async () => {
+    const run = await newRun()
+    const savedPandoc = path.join(run.options.home!, "saved-pandoc.exe")
+    await Bun.write(savedPandoc, "fixture executable")
+    await writeToolLinks(initPaths(run.options.home), { pandoc: savedPandoc })
+    const calls: string[] = []
+    await renderPaperExportPipeline(run.run_dir, {
+      mode: "final",
+      bundle_id: "bundle-final",
+      draft: run.draft,
+      final_gate: passedGate,
+      source_artifact_ids: [],
+      tools: { pandoc: "pandoc", xelatex: "xelatex" },
+      command: async (input) => {
+        calls.push(input.tool)
+        return stubCommand(input)
+      },
+    }, run.options)
+    expect(calls).toContain("pandoc")
+    expect(calls).not.toContain(savedPandoc)
+  })
+
   test("renders final Markdown, LaTeX, PDF, DOCX, and manifest files when gates pass", async () => {
     const run = await newRun()
 

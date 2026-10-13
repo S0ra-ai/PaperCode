@@ -2,6 +2,7 @@ import { createHash } from "crypto"
 import { mkdir, readFile, writeFile } from "fs/promises"
 import path from "path"
 import { discoverInitTools, type InitToolName } from "./init/discovery"
+import { initPaths, loadToolLinks } from "./init/config"
 import type { ResearchFinalGateState, ResearchRuntimeOptions } from "./research/runtime"
 import type { DraftPaper } from "./research/writing"
 import { exportMarkdown } from "./research/export/bundle"
@@ -115,9 +116,9 @@ async function defaultCommand(input: PaperExportCommandInput): Promise<PaperExpo
   }
 }
 
-function discoveredTools(explicit?: PaperExportToolPaths): PaperExportToolPaths {
+async function discoveredTools(explicit?: PaperExportToolPaths, home?: string): Promise<PaperExportToolPaths> {
   if (explicit) return explicit
-  const report = discoverInitTools()
+  const report = discoverInitTools(await loadToolLinks(initPaths(home)))
   return Object.fromEntries(
     (["pandoc", "latexmk", "xelatex", "pdflatex", "lualatex", "tectonic"] as PaperExportToolName[])
       .map((name) => [name, report.tools[name].status === "available" ? report.tools[name].path : undefined])
@@ -429,7 +430,7 @@ export async function renderPaperExportPipeline(
 ): Promise<RenderPaperExportPipelineResult> {
   const createdAt = nowIso(options, input.now)
   const failedChecks = input.final_gate.status === "passed" ? [] : input.final_gate.blockers
-  const tools = discoveredTools(input.tools)
+  const tools = await discoveredTools(input.tools, options?.home)
   const command = input.command ?? defaultCommand
   const markdown = exportMarkdown(input.draft, input.mode === "forced_draft" ? failedChecks : [])
   const outputName = input.bundle_id

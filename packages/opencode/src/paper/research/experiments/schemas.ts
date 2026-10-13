@@ -31,8 +31,22 @@ export type ExperimentCommand = {
   env?: Record<string, string>
 }
 
+// Optional for legacy artifacts. Absence of this evidence never proves execution.
+export type ExperimentExecutionEvidence = {
+  kind: "process" | "imported"
+  command?: ExperimentCommand
+  exit_code?: number
+  container?: {
+    runtime: "docker" | "podman"
+    container_id: string
+    image_digest: string
+    isolated: boolean
+  }
+}
+
 export type ExperimentProtocolEntry = {
   protocol_id: string
+  target_experiment_id?: string
   role: "proposed" | "baseline" | "ablation" | "container_reproduction"
   label: string
   command: ExperimentCommand
@@ -48,6 +62,7 @@ export type ExperimentProtocolEntry = {
 export type ExperimentProtocol = {
   schema_version: "ExperimentProtocol.v1"
   discovered_from: "package_scripts" | "manifest" | "manual"
+  metric_direction?: ExperimentMetricDirection
   entries: ExperimentProtocolEntry[]
   gaps: string[]
 }
@@ -117,6 +132,10 @@ export type ExperimentPlan = {
     max_gpu_hours?: number
   }
   downgrade_policy: string[]
+  reproduction_tolerance?: {
+    absolute: number
+    relative: number
+  }
 }
 
 export type ExperimentRunStatus = "succeeded" | "failed" | "environment_failed" | "resource_exceeded"
@@ -130,6 +149,7 @@ export type ExperimentRun = {
   status: ExperimentRunStatus
   environment: ExperimentEnvironment
   command: ExperimentCommand
+  execution?: ExperimentExecutionEvidence
   metrics: ExperimentMetric[]
   stdout: string
   stderr: string
@@ -153,6 +173,8 @@ export type ExperimentFinding = {
     | "container_reproduction_failed"
     | "metric_missing"
     | "experiment_protocol_incomplete"
+    | "experiment_failed"
+    | "execution_unverified"
   severity: "info" | "warning" | "blocking"
   message: string
   experiment_ids: string[]
@@ -184,6 +206,7 @@ export type ResultReport = {
 export type ExperimentRunnerResult = {
   status: ExperimentRunStatus
   command?: ExperimentCommand
+  execution?: ExperimentExecutionEvidence
   metrics: ExperimentMetric[]
   stdout: string
   stderr: string

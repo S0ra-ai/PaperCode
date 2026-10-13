@@ -1,4 +1,5 @@
 import { existsSync } from "fs"
+import os from "os"
 import path from "path"
 
 export type InitToolName =
@@ -115,6 +116,31 @@ const SPECS: ToolSpec[] = [
   },
 ]
 
+function commonInstallPaths(spec: ToolSpec) {
+  if (process.platform !== "win32") return spec.common
+  const userProfile = process.env.USERPROFILE || os.homedir()
+  const local = process.env.LOCALAPPDATA || path.join(userProfile, "AppData", "Local")
+  const roaming = process.env.APPDATA || path.join(userProfile, "AppData", "Roaming")
+  const programFiles = process.env.ProgramFiles || "C:/Program Files"
+  if (spec.name === "pandoc") {
+    return [
+      path.join(local, "Pandoc", "pandoc.exe"),
+      path.join(local, "Programs", "Pandoc", "pandoc.exe"),
+      path.join(programFiles, "Pandoc", "pandoc.exe"),
+      ...spec.common,
+    ]
+  }
+  if (["latexmk", "xelatex", "pdflatex", "lualatex"].includes(spec.name)) {
+    return [
+      ...[path.join(local, "Programs", "MiKTeX"), path.join(roaming, "MiKTeX"), path.join(programFiles, "MiKTeX")].flatMap(
+        (root) => [path.join(root, "miktex", "bin", "x64", `${spec.name}.exe`), path.join(root, "miktex", "bin", `${spec.name}.exe`)],
+      ),
+      ...spec.common,
+    ]
+  }
+  return spec.common
+}
+
 function pathEntries() {
   return (process.env.PATH ?? "").split(path.delimiter).filter(Boolean)
 }
@@ -151,7 +177,7 @@ export function discoverInitTools(configLinks: Record<string, string> = {}): Too
     const fromConfig = linked ? resolveExisting(linked) : undefined
     const fromEnv = env ? resolveExisting(env) : undefined
     const fromPath = findOnPath(spec.executables)
-    const fromCommon = spec.common.map(resolveExisting).find(Boolean)
+    const fromCommon = commonInstallPaths(spec).map(resolveExisting).find(Boolean)
     const candidate = fromConfig ?? fromEnv ?? fromPath ?? fromCommon
     if (candidate) {
       tools[spec.name] = {

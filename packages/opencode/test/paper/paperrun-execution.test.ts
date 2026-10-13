@@ -341,7 +341,7 @@ describe("PaperRun default execution engine", () => {
     expect(blockedDiagnostics.length).toBe(0)
   }, PAPER_RUN_INTEGRATION_TIMEOUT)
 
-  test("experiment evidence manifest allows final export when reproduction passes", async () => {
+  test("imported experiment evidence cannot fabricate baselines or container reproduction", async () => {
     const { workspace, home } = await fixtureWorkspace()
     await writeFile(path.join(workspace, "source-evidence.json"), JSON.stringify(verifiedSourceEvidence("带复现实验证据的最终论文导出"), null, 2))
     await writeFile(
@@ -383,35 +383,20 @@ describe("PaperRun default execution engine", () => {
       runtimeOptions(workspace, home),
     )
 
-    expect(run.snapshot.status).toBe("succeeded")
-    expect(run.snapshot.export_state.status).toBe("final")
-    expect(run.snapshot.export_state.failed_checks).toEqual([])
-    expect(run.snapshot.export_state.artifact_ids).toEqual([...new Set(run.snapshot.export_state.artifact_ids)])
-    expect(run.snapshot.export_state.files?.map((file) => file.path)).toEqual([
-      ...new Set(run.snapshot.export_state.files?.map((file) => file.path)),
-    ])
-    expect(run.snapshot.experiment_status.reproduction_gate).toBe("passed")
-    expect(run.snapshot.novelty.experiment_gate?.status).toBe("passed")
-    expect(run.snapshot.paper_spine?.readiness).toBe("ready")
-    expect(run.snapshot.global_figure?.status).toBe("ready")
-    expect(run.snapshot.claim_ledger.every((claim) => claim.source_ids.some((sourceID) => sourceID.startsWith("material:code:")))).toBe(true)
-    expect(run.snapshot.stage_graph.stages.find((stage) => stage.id === "reproduction")?.status).toBe("succeeded")
+    expect(run.snapshot.export_state.status).toBe("blocked")
+    expect(run.snapshot.export_state.failed_checks).toContain("reproduction_failure")
+    expect(run.snapshot.experiment_status.reproduction_gate).not.toBe("passed")
     expect(run.snapshot.artifacts.some((artifact) => artifact.metadata?.artifact_schema === "ExperimentEvidenceManifest.v1")).toBe(true)
-    expect(run.snapshot.artifacts.some((artifact) => artifact.metadata?.artifact_schema === "SourceEvidenceManifest.v1")).toBe(true)
-    const markdownFile = run.snapshot.export_state.files?.find((file) => file.format === "markdown" && file.status === "written")
-    expect(markdownFile).toBeDefined()
-    const finalMarkdown = await readFile(path.join(run.run_dir, markdownFile!.path), "utf8")
-    expect(finalMarkdown).toContain("## 摘要")
-    expect(finalMarkdown).toContain("**关键词**：")
-    expect(finalMarkdown).toContain("## 英文摘要")
-    expect(finalMarkdown).toContain("**Abstract**:")
-    expect(finalMarkdown).toContain("**Keywords**:")
-    expect(finalMarkdown).toContain("## 1 引言")
-    expect(finalMarkdown).not.toContain("## 作者信息")
-    expect(finalMarkdown).not.toContain("## Key words")
+    const hostArtifact = run.snapshot.artifacts.find((artifact) => artifact.path.includes("host-runs"))!
+    const runs = JSON.parse(await readFile(path.join(run.run_dir, hostArtifact.path), "utf8"))
+    expect(runs.map((item: { experiment_id: string }) => item.experiment_id)).toEqual(["proposed"])
+    expect(runs[0].metrics[0].value).toBe(0.94)
+    expect(runs[0].execution.kind).toBe("imported")
+    const forced = await exportPaperRun(run.run_id, { forced: true }, runtimeOptions(workspace, home))
+    expect(forced.status).toBe("forced_draft")
   }, PAPER_RUN_INTEGRATION_TIMEOUT)
 
-  test("explicit repository experiment protocol can drive container reproduction", async () => {
+  test("a script named repro container is not isolated container evidence", async () => {
     const { workspace, home } = await fixtureProtocolWorkspace()
     await writeFile(
       path.join(workspace, "source-evidence.json"),
@@ -426,37 +411,19 @@ describe("PaperRun default execution engine", () => {
         target_profile: "cjc-paper",
         target_journal: "中国计算机学报",
         language: "zh-CN",
-        budget_tier: "standard",
+        budget_tier: "deep",
         model_roles: testModelRoles(),
       },
       runtimeOptions(workspace, home),
     )
 
     expect(run.snapshot.artifacts.some((artifact) => artifact.metadata?.artifact_schema === "ExperimentProtocol.v1")).toBe(true)
-    expect(run.snapshot.artifacts.some((artifact) => artifact.metadata?.artifact_schema === "ExperimentProtocolGuidance.v1")).toBe(false)
-    expect(run.snapshot.artifacts.some((artifact) => artifact.metadata?.artifact_schema === "ExperimentProtocolStarterPack.v1")).toBe(false)
-    expect(run.snapshot.artifacts.some((artifact) => artifact.metadata?.artifact_schema === "ExperimentProtocolStarterFile.v1")).toBe(false)
-    expect(run.snapshot.diagnostics.experiment_guidance).toBeUndefined()
-    expect(run.snapshot.diagnostics.experiment_starter_pack).toBeUndefined()
-    expect(run.snapshot.experiment_status.reproduction_gate).toBe("passed")
-    expect(run.snapshot.export_state.status).toBe("final")
-    expect(run.snapshot.export_state.failed_checks).toEqual([])
-    const preview = await previewPaperRun(run.run_id, runtimeOptions(workspace, home))
-    expect(preview.snapshot.monitor?.experiment_runs?.some((item) => item.environment === "container" && item.status === "succeeded")).toBe(true)
-    const containerArtifact = run.snapshot.artifacts.find(
-      (artifact) => artifact.metadata?.artifact_schema === "ExperimentRun.v1[]" && artifact.path.includes("container-runs"),
-    )
-    expect(containerArtifact).toBeDefined()
-    const containerRuns = JSON.parse(await readFile(path.join(run.run_dir, containerArtifact!.path), "utf8"))
-    expect(
-      containerRuns.every(
-        (item: { environment?: { image?: string; digest?: string }; reproduction?: { image?: string; digest?: string } }) =>
-          item.environment?.image === undefined &&
-          item.environment?.digest === undefined &&
-          item.reproduction?.image === undefined &&
-          item.reproduction?.digest === undefined,
-      ),
-    ).toBe(true)
+    expect(run.snapshot.experiment_status.reproduction_gate).not.toBe("passed")
+    expect(run.snapshot.export_state.status).toBe("blocked")
+    const artifact = run.snapshot.artifacts.find((item) => item.path.includes("container-runs"))!
+    const runs = JSON.parse(await readFile(path.join(run.run_dir, artifact.path), "utf8"))
+    expect(runs.length).toBeGreaterThan(0)
+    expect(runs.every((item: { reproduction: { container_reproduced: boolean } }) => !item.reproduction.container_reproduced)).toBe(true)
   }, PAPER_RUN_INTEGRATION_TIMEOUT)
 
   test("can rerun the current experiment protocol as a controlled PaperRun action", async () => {
@@ -480,17 +447,17 @@ describe("PaperRun default execution engine", () => {
       runtimeOptions(workspace, home),
     )
 
-    expect(result.status).toBe("succeeded")
+    expect(result.status).toBe("blocked")
     expect(result.dry_run).toBe(false)
     expect(result.host_runs.some((item) => item.command === "bun run typecheck" && item.status === "succeeded")).toBe(true)
-    expect(result.container_runs.some((item) => item.command === "bun run repro:container" && item.status === "succeeded")).toBe(true)
+    expect(result.container_runs).toEqual([])
     expect(result.host_runs.every((item) => "peak_memory_mb" in item && "gpu_hours" in item)).toBe(true)
     expect(result.container_runs.every((item) => "peak_memory_mb" in item && "gpu_hours" in item)).toBe(true)
-    expect(result.report?.final_claims_allowed).toBe(true)
+    expect(result.report?.final_claims_allowed).toBe(false)
     expect(result.artifact_ids.length).toBeGreaterThanOrEqual(4)
     const updated = await previewPaperRun(run.run_id, runtimeOptions(workspace, home))
     const updatedRun = await getPaperRunSnapshot(run.run_id, runtimeOptions(workspace, home))
-    expect(updated.snapshot.monitor?.experiment_runs?.some((item) => item.command === "bun run repro:container")).toBe(true)
+    expect(updated.snapshot.monitor?.experiment_runs?.some((item) => item.environment === "container")).toBe(false)
     expect(updated.snapshot.monitor?.experiment_runs?.every((item) => "peak_memory_mb" in item && "gpu_hours" in item)).toBe(true)
     expect(
       updated.snapshot.monitor?.experiment_terminal_traces?.some(
@@ -513,11 +480,7 @@ describe("PaperRun default execution engine", () => {
         (event) => event.type === "experiment.command.started" && event.payload.command === "bun run typecheck",
       ),
     ).toBe(true)
-    expect(
-      updatedRun.events.some(
-        (event) => event.type === "experiment.command.completed" && event.payload.command === "bun run repro:container",
-      ),
-    ).toBe(true)
+    expect(updatedRun.events.some((event) => event.type === "experiment.command.completed" && event.payload.environment === "container")).toBe(false)
     const traceArtifact = updatedRun.artifacts.find(
       (artifact) => artifact.metadata?.artifact_schema === "ExperimentTerminalTrace.v1",
     )
@@ -528,7 +491,7 @@ describe("PaperRun default execution engine", () => {
     expect(traceData.stdout_excerpt.length).toBeLessThanOrEqual(64 * 1024)
   }, PAPER_RUN_INTEGRATION_TIMEOUT)
 
-  test("successful protocol rerun clears the reproduction gate blocker", async () => {
+  test("successful host scripts cannot clear an unverified reproduction blocker", async () => {
     const { workspace, home } = await fixtureRecoverableProtocolWorkspace()
     await writeFile(path.join(workspace, "source-evidence.json"), JSON.stringify(verifiedSourceEvidence("修复容器复现后的代码论文"), null, 2))
     const run = await createPaperRun(
@@ -571,29 +534,11 @@ describe("PaperRun default execution engine", () => {
     )
     const updatedRun = await getPaperRunSnapshot(run.run_id, runtimeOptions(workspace, home))
 
-    expect(result.status).toBe("succeeded")
-    expect(updatedRun.experiment_status.reproduction_gate).toBe("passed")
-    expect(updatedRun.export_state.failed_checks).not.toContain("reproduction_failure")
-    expect(updatedRun.export_state.status).toBe("blocked")
-    expect(updatedRun.export_state.failed_checks).toContain("final_export_missing")
-
+    expect(result.status).toBe("blocked")
+    expect(updatedRun.experiment_status.reproduction_gate).not.toBe("passed")
+    expect(updatedRun.export_state.failed_checks).toContain("reproduction_failure")
     const exported = await exportPaperRun(run.run_id, { forced: false }, runtimeOptions(workspace, home))
-    const exportedRun = await getPaperRunSnapshot(run.run_id, runtimeOptions(workspace, home))
-    expect(exported.status).toBe("final")
-    expect(exportedRun.export_state.status).toBe("final")
-    expect(exportedRun.export_state.failed_checks).toEqual([])
-    const exportedMarkdown = exported.files?.find((file) => file.format === "markdown" && file.status === "written")
-    expect(exportedMarkdown).toBeDefined()
-    const finalMarkdown = await readFile(path.join(run.run_dir, exportedMarkdown!.path), "utf8")
-    expect(finalMarkdown).not.toContain("missing-container-script")
-    expect(finalMarkdown).not.toContain("reproduction_failure")
-    expect(finalMarkdown).not.toContain("实验协议修复清单")
-    expect(finalMarkdown).not.toContain("实验启动包")
-    expect(finalMarkdown).not.toContain("missing_container_reproduction_runner")
-    expect(finalMarkdown).toContain("| 证据驱动工作流 | 本文方法 |")
-    expect(finalMarkdown).not.toContain("| proposed | 通过 | 1 | 失败 | 0 | -1 |")
-    expect(finalMarkdown).not.toContain("| container:paper-fucker/research-runner:fixture | proposed | 本文方法 | 失败 |")
-    expect(finalMarkdown).toContain("容器复现已通过")
+    expect(exported.status).toBe("blocked")
   }, PAPER_RUN_INTEGRATION_TIMEOUT)
 
   test("applied starter scripts can become the rerun protocol after user completes them", async () => {
@@ -649,27 +594,20 @@ describe("PaperRun default execution engine", () => {
       options,
     )
 
-    expect(result.status).toBe("succeeded")
+    expect(result.status).toBe("blocked")
     expect(result.planned_commands.map((item) => item.command)).toContain("bun run baseline:starter")
     expect(result.planned_commands.map((item) => item.command)).toContain("bun run ablation:starter")
-    expect(result.planned_commands.map((item) => item.command)).toContain("bun run repro:container:starter")
+    expect(result.planned_commands.every((item) => item.environment === "host")).toBe(true)
     expect(result.host_runs.some((item) => item.command === "bun run baseline:starter" && item.status === "succeeded")).toBe(true)
     expect(result.host_runs.some((item) => item.command === "bun run ablation:starter" && item.status === "succeeded")).toBe(true)
-    expect(result.container_runs.some((item) => item.command === "bun run repro:container:starter" && item.status === "succeeded")).toBe(true)
-    expect(result.report?.final_claims_allowed).toBe(true)
+    expect(result.container_runs).toEqual([])
+    expect(result.report?.final_claims_allowed).toBe(false)
 
     const exported = await exportPaperRun(run.run_id, { forced: false }, options)
-    expect(exported.status).toBe("final")
-    const exportedMarkdown = exported.files?.find((file) => file.format === "markdown" && file.status === "written")
-    expect(exportedMarkdown).toBeDefined()
-    const finalMarkdown = await readFile(path.join(run.run_dir, exportedMarkdown!.path), "utf8")
-    expect(finalMarkdown).toContain("baseline:starter")
-    expect(finalMarkdown).toContain("ablation:starter")
-    expect(finalMarkdown).toContain("容器复现已通过")
-    expect(finalMarkdown).not.toContain("Experiment Protocol Starter Pack")
+    expect(exported.status).toBe("blocked")
   }, PAPER_RUN_INTEGRATION_TIMEOUT)
 
-  test("code source ranges plus reproduction evidence can support a code-grounded final export", async () => {
+  test("code provenance and imported metrics do not imply a verified final experiment", async () => {
     const { workspace, home } = await fixtureWorkspace()
     await writeFile(
       path.join(workspace, "experiment-evidence.json"),
@@ -717,9 +655,9 @@ describe("PaperRun default execution engine", () => {
 
     expect(run.snapshot.source_ledger.some((source) => source.kind === "code")).toBe(true)
     expect(run.snapshot.claim_ledger.every((claim) => claim.source_ids.some((sourceID) => sourceID.startsWith("material:code:")))).toBe(true)
-    expect(run.snapshot.experiment_status.reproduction_gate).toBe("passed")
-    expect(run.snapshot.export_state.status).toBe("final")
-    expect(run.snapshot.export_state.failed_checks).toEqual([])
+    expect(run.snapshot.experiment_status.reproduction_gate).not.toBe("passed")
+    expect(run.snapshot.export_state.status).toBe("blocked")
+    expect(run.snapshot.export_state.failed_checks).toContain("reproduction_failure")
     expect(run.snapshot.export_state.artifact_ids).toEqual([...new Set(run.snapshot.export_state.artifact_ids)])
   }, PAPER_RUN_INTEGRATION_TIMEOUT)
 })

@@ -1,4 +1,4 @@
-import { readdir, readFile, stat } from "fs/promises"
+import { readdir, readFile, realpath, stat } from "fs/promises"
 import path from "path"
 import { appendResearchEvent, writeResearchArtifact, type ResearchRuntimeOptions } from "./research/runtime"
 import type { ResearchArtifact } from "./research/contracts"
@@ -69,6 +69,21 @@ function toPosix(input: string) {
   return input.replace(/\\/g, "/")
 }
 
+function workspaceRelative(root: string, input: string) {
+  const relative = path.relative(root, path.resolve(root, input))
+  if (relative === ".." || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) {
+    throw new Error(`Code path is outside the workspace: ${input}`)
+  }
+  return toPosix(relative || ".")
+}
+
+async function checkedCodePath(root: string, input: string) {
+  const relative = workspaceRelative(root, input)
+  // Resolve links as well as lexical traversal before reading any source.
+  workspaceRelative(await realpath(root), await realpath(path.resolve(root, relative)))
+  return relative
+}
+
 function languageFor(file: string) {
   const ext = path.extname(file).toLowerCase()
   if (ext === ".ts" || ext === ".tsx") return "typescript"
@@ -87,6 +102,7 @@ function roleFor(file: string): "source" | "test" | "config" {
 }
 
 async function collectFiles(root: string, relativeInput: string): Promise<string[]> {
+  relativeInput = await checkedCodePath(root, relativeInput)
   const absolute = path.join(root, relativeInput)
   const item = await stat(absolute)
   if (item.isFile()) return [toPosix(relativeInput)]
@@ -96,7 +112,7 @@ async function collectFiles(root: string, relativeInput: string): Promise<string
     if (entry.name.startsWith(".") || entry.name === "node_modules" || entry.name === "dist") continue
     const child = toPosix(path.posix.join(toPosix(relativeInput), entry.name))
     if (entry.isDirectory()) files.push(...(await collectFiles(root, child)))
-    else if (entry.isFile()) files.push(child)
+    else if (entry.isFile()) files.push(await checkedCodePath(root, child))
   }
   return files
 }
@@ -104,7 +120,7 @@ async function collectFiles(root: string, relativeInput: string): Promise<string
 async function existingPath(root: string, relativeInput: string) {
   const normalized = toPosix(relativeInput)
   const item = await stat(path.join(root, normalized)).catch(() => undefined)
-  return item ? normalized : undefined
+  return item ? checkedCodePath(root, normalized) : undefined
 }
 
 async function associatedTestInputs(root: string, codePaths: string[]) {
@@ -131,9 +147,9 @@ async function nearestPackageJsons(root: string, codePaths: string[]) {
     const item = await stat(absolute).catch(() => undefined)
     if (item?.isFile()) absolute = path.dirname(absolute)
     let current = item ? absolute : path.join(root, path.dirname(input))
-    while (current.startsWith(root)) {
+    while (true) {
       const packagePath = path.join(current, "package.json")
-      if (await stat(packagePath).then((entry) => entry.isFile(), () => false)) packages.add(toPosix(path.relative(root, packagePath)))
+      if (await stat(packagePath).then((entry) => entry.isFile(), () => false)) packages.add(await checkedCodePath(root, packagePath))
       if (current === root) break
       current = path.dirname(current)
     }
@@ -280,8 +296,9 @@ async function packageScripts(root: string, codePaths: string[]): Promise<Experi
 
 export async function analyzeCodebaseForPaper(input: AnalyzeCodebaseForPaperInput): Promise<CodeToPaperAnalysis> {
   const workspace = path.resolve(input.workspace_path)
-  const analysisInputs = [...new Set([...input.code_paths.map(toPosix), ...(await associatedTestInputs(workspace, input.code_paths))])]
-  const files = (await Promise.all(analysisInputs.map((codePath) => collectFiles(workspace, codePath)))).flat().sort()
+  const codePaths = await Promise.all(input.code_paths.map((codePath) => checkedCodePath(workspace, codePath)))
+  const analysisInputs = [...new Set([...codePaths, ...(await associatedTestInputs(workspace, codePaths))])]
+  const files = [...new Set((await Promise.all(analysisInputs.map((codePath) => collectFiles(workspace, codePath)))).flat())].sort()
   const readable = await Promise.all(
     files.map(async (file) => ({
       path: file,
@@ -302,7 +319,7 @@ export async function analyzeCodebaseForPaper(input: AnalyzeCodebaseForPaperInpu
       }
     }),
   }
-  const runnableEntries = await packageScripts(workspace, input.code_paths)
+  const runnableEntries = await packageScripts(workspace, codePaths)
   const experiment_surface: ExperimentSurface = {
     schema_version: "ExperimentSurface.v1",
     tests: codebase_map.files

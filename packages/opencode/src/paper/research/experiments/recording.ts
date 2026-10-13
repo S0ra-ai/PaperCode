@@ -9,6 +9,7 @@ export type RecordExperimentLoopInput = {
   host_runner: ExperimentRunner
   container_runner: ExperimentRunner
   run_options?: ExperimentRunOptions
+  container_reproduction?: boolean
 }
 
 export async function recordExperimentLoop(
@@ -25,7 +26,10 @@ export async function recordExperimentLoop(
       const now = options?.clock?.().toISOString()
       const runOptions = { now, ...(input.run_options ?? {}) }
       const hostRuns = await runHostExploration(input.plan, input.host_runner, runOptions)
-      const containerRuns = await runContainerReproduction(input.plan, hostRuns, input.container_runner, runOptions)
+      const containerRuns =
+        input.container_reproduction === false
+          ? []
+          : await runContainerReproduction(input.plan, hostRuns, input.container_runner, runOptions)
       const report = analyzeExperimentResults({
         plan: input.plan,
         host_runs: hostRuns,

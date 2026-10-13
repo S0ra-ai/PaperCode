@@ -134,7 +134,7 @@ async function fixtureWorkspace() {
       {
         schema_version: "ExperimentEvidenceManifest.v1",
         created_at: now,
-        provenance: "unit-test-local-reproduction",
+        provenance: "unit-test-imported-metrics-without-execution",
         primary_metric: "accuracy",
         metric_direction: "higher_better",
         metric_values: {
@@ -145,8 +145,6 @@ async function fixtureWorkspace() {
           "host:ablation": 0.89,
           "container:ablation": 0.89,
         },
-        container_image: "paper-fucker/local-reproduction",
-        container_digest: "sha256:unit-test",
       },
       null,
       2,
@@ -190,7 +188,7 @@ describe("PaperRun code availability metadata", () => {
     expect(warnings).toEqual([])
   })
 
-  test("prefers product README version over workspace package version in final paper", async () => {
+  test("prefers product README version in the draft while imported metrics block final export", async () => {
     const cleanupWarnings: string[] = []
     const originalWarn = console.warn
     console.warn = (...args: unknown[]) => {
@@ -215,15 +213,15 @@ describe("PaperRun code availability metadata", () => {
         runtimeOptions(root, home),
       )
 
-      expect(run.snapshot.export_state.status).toBe("final")
-      expect(run.snapshot.export_state.failed_checks).toEqual([])
-      const markdownFile = run.snapshot.export_state.files?.find((file) => file.format === "markdown" && file.status === "written")
-      expect(markdownFile).toBeDefined()
-      const finalMarkdown = await readFile(path.join(run.run_dir, markdownFile!.path), "utf8")
-      expect(finalMarkdown).toContain("| 代码包 | fixture-code-paper |")
-      expect(finalMarkdown).toContain("| 代码版本 | 9.8.7-dev |")
-      expect(finalMarkdown).not.toContain("代码版本：0.1.0")
-      expect(finalMarkdown).not.toContain("| 代码版本 | 0.1.0 |")
+      expect(run.snapshot.export_state.status).toBe("blocked")
+      expect(run.snapshot.export_state.failed_checks).toContain("reproduction_failure")
+      const draft = run.snapshot.drafts.at(-1)
+      expect(draft).toBeDefined()
+      const draftMarkdown = await readFile(path.join(run.run_dir, draft!.path), "utf8")
+      expect(draftMarkdown).toContain("| 代码包 | fixture-code-paper |")
+      expect(draftMarkdown).toContain("| 代码版本 | 9.8.7-dev |")
+      expect(draftMarkdown).not.toContain("代码版本：0.1.0")
+      expect(draftMarkdown).not.toContain("| 代码版本 | 0.1.0 |")
       await drainCleanup()
     } finally {
       console.warn = originalWarn

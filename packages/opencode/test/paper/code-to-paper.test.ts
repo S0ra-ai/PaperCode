@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test"
-import { mkdir, mkdtemp, rm, writeFile } from "fs/promises"
+import { mkdir, mkdtemp, rm, symlink, writeFile } from "fs/promises"
 import { setTimeout as sleep } from "node:timers/promises"
 import os from "os"
 import path from "path"
@@ -92,6 +92,46 @@ async function fixtureProtocolCodebase() {
 }
 
 describe("code-to-paper analysis", () => {
+  test("accepts workspace absolute files and directories with relative artifact paths", async () => {
+    const workspace = await fixtureCodebase()
+    try {
+      const analysis = await analyzeCodebaseForPaper({
+        workspace_path: workspace,
+        code_paths: [path.join(workspace, "src"), path.join(workspace, "src", "ranker.ts")],
+      })
+      expect(analysis.codebase_map.files.map((file) => file.path)).toEqual(["src/ranker.ts"])
+      expect(analysis.method_extraction.methods[0]?.source_range.path).toBe("src/ranker.ts")
+      expect(analysis.reproduction_plan.steps[0]?.command).toBe("bun run test")
+    } finally {
+      await clean(workspace)
+    }
+  })
+
+  test("rejects absolute and relative code paths outside the workspace", async () => {
+    const workspace = await fixtureCodebase()
+    const outside = await fixtureCodebase()
+    try {
+      for (const codePath of [path.join(outside, "src"), path.relative(workspace, path.join(outside, "src"))]) {
+        await expect(analyzeCodebaseForPaper({ workspace_path: workspace, code_paths: [codePath] })).rejects.toThrow("outside the workspace")
+      }
+    } finally {
+      await clean(workspace)
+      await clean(outside)
+    }
+  })
+
+  test("rejects a code directory link escaping the workspace", async () => {
+    const workspace = await fixtureCodebase()
+    const outside = await fixtureCodebase()
+    try {
+      await symlink(path.join(outside, "src"), path.join(workspace, "linked"), process.platform === "win32" ? "junction" : "dir")
+      await expect(analyzeCodebaseForPaper({ workspace_path: workspace, code_paths: ["linked"] })).rejects.toThrow("outside the workspace")
+    } finally {
+      await clean(workspace)
+      await clean(outside)
+    }
+  })
+
   test("produces code-grounded artifacts with source ranges", async () => {
     const workspace = await fixtureCodebase()
     try {

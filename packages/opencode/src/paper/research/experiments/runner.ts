@@ -2,6 +2,7 @@ import { withSpan } from "../telemetry"
 import { plannedExperimentSpecs } from "./planning"
 import type {
   ExperimentEnvironment,
+  ExperimentExecutionEvidence,
   ExperimentPlan,
   ExperimentRun,
   ExperimentRunStatus,
@@ -43,6 +44,26 @@ function failureCategory(status: ExperimentRunStatus): ExperimentRun["failure_ca
   return undefined
 }
 
+export function hasProcessExecution(execution?: ExperimentExecutionEvidence) {
+  return (
+    execution?.kind === "process" &&
+    execution.exit_code === 0 &&
+    !!execution.command?.argv.length &&
+    execution.command.argv.every((arg) => typeof arg === "string" && arg.length > 0)
+  )
+}
+
+export function hasIsolatedContainerExecution(execution?: ExperimentExecutionEvidence) {
+  const container = execution?.container
+  return (
+    hasProcessExecution(execution) &&
+    container?.isolated === true &&
+    (container.runtime === "docker" || container.runtime === "podman") &&
+    !!container.container_id?.trim() &&
+    /^sha256:[a-f0-9]{64}$/i.test(container.image_digest ?? "")
+  )
+}
+
 async function executeSpec(
   plan: ExperimentPlan,
   spec: ExperimentSpec,
@@ -54,6 +75,9 @@ async function executeSpec(
   const env = environment(mode, options)
   const result = await runner(spec, env)
   const finishedAt = nowIso(options?.now)
+  if (mode === "container" && hasIsolatedContainerExecution(result.execution)) {
+    env.digest = result.execution!.container!.image_digest
+  }
   return {
     schema_version: "ExperimentRun.v1",
     experiment_run_id: `${mode}:${spec.experiment_id}`,
@@ -63,6 +87,7 @@ async function executeSpec(
     status: result.status,
     environment: env,
     command: result.command ?? spec.command,
+    execution: result.execution,
     metrics: result.metrics,
     stdout: result.stdout,
     stderr: result.stderr,
@@ -77,14 +102,22 @@ async function executeSpec(
     started_at: startedAt,
     finished_at: finishedAt,
     reproduction: {
-      container_reproduced: mode === "container" && result.status === "succeeded",
+      container_reproduced:
+        mode === "container" &&
+        result.status === "succeeded" &&
+        result.exit_code === 0 &&
+        hasIsolatedContainerExecution(result.execution),
       image: mode === "container" ? env.image : undefined,
       digest: mode === "container" ? env.digest : undefined,
     },
   }
 }
 
-export async function runHostExploration(plan: ExperimentPlan, runner: ExperimentRunner, options?: ExperimentRunOptions) {
+export async function runHostExploration(
+  plan: ExperimentPlan,
+  runner: ExperimentRunner,
+  options?: ExperimentRunOptions,
+) {
   return withSpan(
     "research.experiments.host_exploration",
     {

@@ -123,6 +123,7 @@ let cached:
       expires_at: number
     }
   | undefined
+let cachedKey: string | undefined
 
 function pathEntries() {
   return (process.env.PATH ?? "").split(path.delimiter).filter(Boolean)
@@ -240,8 +241,10 @@ function createEnvironmentStatus(profile: PaperMachineProfile): PaperExperimentE
 }
 
 export async function inspectPaperMachineProfile(options: { home?: string; workspace?: string; refresh?: boolean } = {}) {
-  if (!options.refresh && cached && cached.expires_at > Date.now()) return cached
   const workspace = path.resolve(options.workspace ?? process.cwd())
+  const defaultRunRoot = homeRunRoot(options.home)
+  const cacheKey = JSON.stringify([workspace, defaultRunRoot])
+  if (!options.refresh && cachedKey === cacheKey && cached && cached.expires_at > Date.now()) return cached
   const captured = new Date().toISOString()
   const gpu = inspectGpu()
   const profile: PaperMachineProfile = {
@@ -263,7 +266,7 @@ export async function inspectPaperMachineProfile(options: { home?: string; works
     },
     disk: await inspectDisk(workspace),
     workspace,
-    default_run_root: homeRunRoot(options.home),
+    default_run_root: defaultRunRoot,
     gpu: {
       mode: gpu.devices.length > 0 ? "gpu" : "cpu-only",
       devices: gpu.devices,
@@ -278,6 +281,7 @@ export async function inspectPaperMachineProfile(options: { home?: string; works
     environment: createEnvironmentStatus(profile),
     expires_at: Date.now() + 30_000,
   }
+  cachedKey = cacheKey
   return cached
 }
 

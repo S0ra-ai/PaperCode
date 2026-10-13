@@ -103,7 +103,8 @@ describe("Hugging Face research loop", () => {
       schema_version: "ExperimentRun.v1",
       experiment_run_id: "hf-job:job-001",
       status: "succeeded",
-      reproduction: { container_reproduced: true },
+      execution: { kind: "imported" },
+      reproduction: { container_reproduced: false },
     })
     expect(run.environment.image).toBeUndefined()
     expect(run.environment.digest).toBeUndefined()
