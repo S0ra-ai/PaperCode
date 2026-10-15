@@ -24,6 +24,11 @@ import { composeClaimLedger, composeDraftPaper } from "@/paper/research/writing"
 
 const now = "2026-05-09T00:00:00Z"
 
+const HOST_PLATFORM_LABELS: Record<string, string> = { win32: "Windows", darwin: "macOS", linux: "Linux" }
+// Host runs in this file are built with `platform: process.platform`, so the manuscript renders the
+// host platform rather than a fixed Windows label.
+const hostPlatformLabel = HOST_PLATFORM_LABELS[process.platform] ?? process.platform
+
 // Explicit simulated runtime evidence for prose tests, not a real container execution.
 function fixtureExecution(mode: "host" | "container", experimentId: string): ExperimentExecutionEvidence {
   return {
@@ -768,10 +773,10 @@ describe("paper authoring loop", () => {
     expect(reproducibility).not.toContain("本机 win32")
     expect(reproducibility).toContain("### 实验环境声明")
     expect(reproducibility).toContain("| 项目 | 内容 |")
-    expect(reproducibility).toContain("| 本机平台 | Windows |")
+    expect(reproducibility).toContain(`| 本机平台 | ${hostPlatformLabel} |`)
     expect(reproducibility).toContain("| 容器镜像 | paper-fucker/research-runner:test |")
     expect(reproducibility).not.toContain("实验环境声明：")
-    expect(reproducibility).not.toContain("本机平台：Windows")
+    expect(reproducibility).not.toContain(`本机平台：${hostPlatformLabel}`)
     expect(reproducibility).not.toContain("容器镜像：paper-fucker/research-runner:test")
     expect(reproducibility).toContain("类型检查通过状态=通过")
     expect(reproducibility).toContain("可复现性分析比较本机与容器结果")
@@ -784,7 +789,7 @@ describe("paper authoring loop", () => {
     expect(reproducibility).toContain("当前实验记录包含耗时")
     expect(reproducibility).toContain("峰值内存和 GPU 用量未采集")
     expect(reproducibility).not.toContain("未登记峰值内存和 GPU 用量")
-    expect(reproducibility).toContain("| 本机 Windows | 证据驱动工作流 | 本文方法 | 通过 | 类型检查通过状态=通过 | 0.2s | 未采集 | 未采集 |")
+    expect(reproducibility).toContain(`| 本机 ${hostPlatformLabel} | 证据驱动工作流 | 本文方法 | 通过 | 类型检查通过状态=通过 | 0.2s | 未采集 | 未采集 |`)
     expect(reproducibility).not.toContain("表 1 汇总本机与容器实验")
     expect(reproducibility).toContain("本机与容器比较没有发现状态或主指标差异")
     expect(reproducibility).not.toContain("本节比较")
@@ -1726,10 +1731,10 @@ describe("paper authoring loop", () => {
     expect(reproducibility).toContain("| 环境 | 实验 | 角色 | 状态 | 指标 | 耗时 | 峰值内存 | GPU 用量 |")
     expect(reproducibility).toContain("### 实验环境声明")
     expect(reproducibility).toContain("| 项目 | 内容 |")
-    expect(reproducibility).toContain("| 本机平台 | Windows |")
+    expect(reproducibility).toContain(`| 本机平台 | ${hostPlatformLabel} |`)
     expect(reproducibility).toContain("| 容器环境 | 已验证隔离复现环境 |")
     expect(reproducibility).not.toContain("实验环境声明：")
-    expect(reproducibility).not.toContain("本机平台：Windows")
+    expect(reproducibility).not.toContain(`本机平台：${hostPlatformLabel}`)
     expect(reproducibility).not.toContain("容器环境：已登记隔离复现环境")
     expect(reproducibility).toContain("表 2 汇总本机与容器主指标差异，用于检查复现一致性。")
     expect(reproducibility).toContain("表 3 汇总本机与容器实验的状态、主指标、耗时和资源记录")
@@ -1739,9 +1744,9 @@ describe("paper authoring loop", () => {
     expect(reproducibilityMethodRow).toBeGreaterThan(-1)
     expect(reproducibilityBaselineRow).toBeGreaterThan(reproducibilityMethodRow)
     expect(reproducibilityAblationRow).toBeGreaterThan(reproducibilityBaselineRow)
-    const executionMethodRow = reproducibility.indexOf("| 本机 Windows | 证据约束的论文排序方法 | 本文方法 | 通过 | 排序 nDCG@3=1.0000 |")
-    const executionBaselineRow = reproducibility.indexOf("| 本机 Windows | 词项匹配基线 | 基线 | 通过 | 排序 nDCG@3=0.8659 |")
-    const executionAblationRow = reproducibility.indexOf("| 本机 Windows | 无证据覆盖消融 | 消融 | 通过 | 排序 nDCG@3=0.7318 |")
+    const executionMethodRow = reproducibility.indexOf(`| 本机 ${hostPlatformLabel} | 证据约束的论文排序方法 | 本文方法 | 通过 | 排序 nDCG@3=1.0000 |`)
+    const executionBaselineRow = reproducibility.indexOf(`| 本机 ${hostPlatformLabel} | 词项匹配基线 | 基线 | 通过 | 排序 nDCG@3=0.8659 |`)
+    const executionAblationRow = reproducibility.indexOf(`| 本机 ${hostPlatformLabel} | 无证据覆盖消融 | 消融 | 通过 | 排序 nDCG@3=0.7318 |`)
     expect(executionMethodRow).toBeGreaterThan(-1)
     expect(executionBaselineRow).toBeGreaterThan(executionMethodRow)
     expect(executionAblationRow).toBeGreaterThan(executionBaselineRow)
