@@ -9,6 +9,7 @@
 - `docs/development/index.html`：多文件 HTML 开发手册。采用 ReadTheDocs 风格的左侧分组导航、文档搜索和右侧本页目录；主线是开发指南、架构、接口契约、PaperRun 流程、关键函数、模型工作台、实验执行、Preview/export 和常见修改路径，使用指南保留完整产品路径，便于用户和维护者按同一条流程验收。
 - `docs/project-structure.md`：目录结构与 release artifact 边界。
 - [实验执行与复现证据](experiment-execution.md)：显式实验协议、指标输出、隔离执行与正式导出验收。
+- [模型 provider 配置](model-providers.md)：`providers` 手写方言、密钥来源、论文管线的模型选择与验收命令。
 - `docs/changelog/README.md`：历史 changelog 归档策略。
 - `reports/`：审计、验收、benchmark 证据，不进入 release artifact。
 

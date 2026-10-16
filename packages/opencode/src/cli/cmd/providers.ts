@@ -9,6 +9,7 @@ import { map, pipe, sortBy, values } from "remeda"
 import path from "path"
 import os from "os"
 import { Config } from "@/config/config"
+import { ConfigProvider } from "@/config/provider"
 import { Global } from "@opencode-ai/core/global"
 import { Plugin } from "../../plugin"
 import type { Hooks } from "@opencode-ai/plugin"
@@ -268,14 +269,34 @@ export const ProvidersListCommand = effectCmd({
 
     const activeEnvVars: Array<{ provider: string; envVar: string }> = []
 
-    for (const [providerID, provider] of Object.entries(database)) {
-      for (const envVar of provider.env) {
-        if (process.env[envVar]) {
-          activeEnvVars.push({
-            provider: provider.name || providerID,
-            envVar,
-          })
-        }
+    // Providers declared in config (`providers`, or `provider` overrides) need not exist in the
+    // models.dev database, so their env vars are collected from the global config as well.
+    const globalConfig = yield* Config.Service.use((cfg) => cfg.getGlobal())
+    const envSources = [
+      ...Object.entries(database).map(([providerID, provider]) => ({
+        providerID,
+        name: provider.name || providerID,
+        env: provider.env as readonly string[],
+      })),
+      ...Object.entries(ConfigProvider.normalizeUserProviders(globalConfig.providers)).map(
+        ([providerID, provider]) => ({
+          providerID,
+          name: provider.name || providerID,
+          env: (provider.env ?? []) as readonly string[],
+        }),
+      ),
+    ]
+    const seenEnvVars = new Set<string>()
+    for (const source of envSources) {
+      for (const envVar of source.env) {
+        if (!process.env[envVar]) continue
+        const identity = `${source.providerID}:${envVar}`
+        if (seenEnvVars.has(identity)) continue
+        seenEnvVars.add(identity)
+        activeEnvVars.push({
+          provider: source.name,
+          envVar,
+        })
       }
     }
 
@@ -376,7 +397,10 @@ export const ProvidersLoginCommand = effectCmd({
       existingProviders: providers,
       disabled,
       enabled,
-      providerNames: Object.fromEntries(Object.entries(config.provider ?? {}).map(([id, p]) => [id, p.name])),
+      providerNames: Object.fromEntries([
+        ...Object.entries(config.provider ?? {}).map(([id, p]) => [id, p.name]),
+        ...Object.entries(ConfigProvider.normalizeUserProviders(config.providers)).map(([id, p]) => [id, p.name]),
+      ]),
     })
     const options = [
       ...pipe(
