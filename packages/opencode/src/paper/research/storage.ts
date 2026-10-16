@@ -1,4 +1,4 @@
-import { Database } from "bun:sqlite"
+import { createRequire } from "node:module"
 import { mkdir, readFile } from "fs/promises"
 import { existsSync } from "fs"
 import os from "os"
@@ -25,6 +25,22 @@ export const RUN_INDEX_FILENAME = "index.sqlite"
 export const GLOBAL_INDEX_FILENAME = "index.sqlite"
 
 type JsonlKind = Exclude<ResearchContractKind, "run">
+type SqliteDatabase = {
+  exec(sql: string): unknown
+  prepare(sql: string): { run(...values: unknown[]): unknown }
+  close(): unknown
+}
+
+const require = createRequire(import.meta.url)
+
+function openDatabase(filename: string): SqliteDatabase {
+  if (typeof (globalThis as { Bun?: unknown }).Bun !== "undefined") {
+    const { Database } = require("bun:sqlite") as { Database: new (path: string, options?: { create?: boolean }) => SqliteDatabase }
+    return new Database(filename, { create: true })
+  }
+  const { DatabaseSync } = require("node:sqlite") as { DatabaseSync: new (path: string) => SqliteDatabase }
+  return new DatabaseSync(filename)
+}
 
 const JSONL_KIND_TO_FILE: Record<JsonlKind, string> = {
   event: storageFacts.events,
@@ -62,11 +78,11 @@ export function runIndexPath(runDir: string) {
 }
 
 function defaultHome() {
-  return process.env.PAPER_FUCKER_TEST_HOME ?? process.env.PAPER_FUCKER_HOME ?? os.homedir()
+  return process.env.PAPERCODE_TEST_HOME ?? process.env.PAPERCODE_HOME ?? os.homedir()
 }
 
 export function globalIndexPath(home = defaultHome()) {
-  return path.join(home, ".paper_fucker", GLOBAL_INDEX_FILENAME)
+  return path.join(home, ".papercode", GLOBAL_INDEX_FILENAME)
 }
 
 async function readJson(file: string) {
@@ -104,7 +120,7 @@ async function loadRunFacts(runDir: string): Promise<IndexedFacts> {
   return { run, events, artifacts, sources, tool_traces, claims, drafts, reviews, exports, checkpoints }
 }
 
-function createRunSchema(db: Database) {
+function createRunSchema(db: SqliteDatabase) {
   db.exec(`
     PRAGMA journal_mode = WAL;
     DROP TABLE IF EXISTS meta;
@@ -132,17 +148,17 @@ function createRunSchema(db: Database) {
 
 type SqlBinding = string | number | bigint | boolean | null | Uint8Array
 
-function insertJson<T>(db: Database, table: string, columns: string[], rows: T[], values: (row: T) => SqlBinding[]) {
+function insertJson<T>(db: SqliteDatabase, table: string, columns: string[], rows: T[], values: (row: T) => SqlBinding[]) {
   const placeholders = columns.map(() => "?").join(", ")
   const statement = db.prepare(`INSERT INTO ${table} (${columns.join(", ")}) VALUES (${placeholders})`)
   for (const row of rows) statement.run(...values(row), JSON.stringify(row))
 }
 
 export async function rebuildRunIndex(runDir: string): Promise<ResearchIndexSummary> {
-  return withSpan("research.index.rebuild_run", { "paper_fucker.research.run_dir": runDir }, async (span) => {
+  return withSpan("research.index.rebuild_run", { "papercode.research.run_dir": runDir }, async (span) => {
     const facts = await loadRunFacts(runDir)
     const indexPath = runIndexPath(runDir)
-    const db = new Database(indexPath, { create: true })
+    const db = openDatabase(indexPath)
     try {
       db.exec("PRAGMA busy_timeout = 30000;")
       createRunSchema(db)
@@ -199,10 +215,10 @@ export async function rebuildRunIndex(runDir: string): Promise<ResearchIndexSumm
       db.close()
     }
 
-    span.setAttribute("paper_fucker.research.run_id", facts.run.run_id)
-    span.setAttribute("paper_fucker.research.index.path", indexPath)
-    span.setAttribute("paper_fucker.research.events.count", facts.events.length)
-    span.setAttribute("paper_fucker.research.artifacts.count", facts.artifacts.length)
+    span.setAttribute("papercode.research.run_id", facts.run.run_id)
+    span.setAttribute("papercode.research.index.path", indexPath)
+    span.setAttribute("papercode.research.events.count", facts.events.length)
+    span.setAttribute("papercode.research.artifacts.count", facts.artifacts.length)
     return {
       run_id: facts.run.run_id,
       run_index_path: indexPath,
@@ -222,7 +238,7 @@ export async function rebuildRunIndex(runDir: string): Promise<ResearchIndexSumm
 }
 
 export async function rebuildGlobalIndex(runDirs: string[], options?: { home?: string }) {
-  return withSpan("research.index.rebuild_global", { "paper_fucker.research.runs.count": runDirs.length }, async (span) => {
+  return withSpan("research.index.rebuild_global", { "papercode.research.runs.count": runDirs.length }, async (span) => {
     const indexPath = globalIndexPath(options?.home)
     await mkdir(path.dirname(indexPath), { recursive: true })
     const runs: Array<{ run: ResearchRun; runDir: string }> = []
@@ -233,7 +249,7 @@ export async function rebuildGlobalIndex(runDirs: string[], options?: { home?: s
       seenRunIds.add(run.run_id)
       runs.push({ run, runDir })
     }
-    const db = new Database(indexPath, { create: true })
+    const db = openDatabase(indexPath)
     try {
       db.exec("PRAGMA busy_timeout = 30000;")
       db.exec(`
@@ -263,7 +279,7 @@ export async function rebuildGlobalIndex(runDirs: string[], options?: { home?: s
     } finally {
       db.close()
     }
-    span.setAttribute("paper_fucker.research.global_index.path", indexPath)
+    span.setAttribute("papercode.research.global_index.path", indexPath)
     return indexPath
   })
 }
