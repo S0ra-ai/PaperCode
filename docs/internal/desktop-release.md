@@ -1,6 +1,6 @@
 # 桌面端发布与自动更新
 
-桌面端是 `packages/desktop` 的 Electron 应用，与 CLI 走不同的发布通道：CLI 由 `publish.yml` / `script/publish.ts` 发布，桌面端由 `.github/workflows/desktop.yml` 打包并（可选）上传到 GitHub Release。
+桌面端是 `packages/desktop` 的 Electron 应用，与 CLI 走不同的发布通道：CLI 由 `publish.yml` 与 `script/publish.ts` 负责（`publish.yml` 目前只做构建验证与产物上传，npm/Homebrew/Release 上传还等凭据），桌面端由 `.github/workflows/desktop.yml` 打包并（可选）上传到 GitHub Release。
 
 ## 渠道与产物命名
 
@@ -18,10 +18,11 @@
 
 ```bash
 cd packages/desktop
+bun run build                      # prebuild 生成渠道图标与 sidecar（../opencode/dist/node），再打包渲染层
 ELECTRON_DIST="$PWD/node_modules/electron/dist" bun run package:mac   # 或 package:win / package:linux
 ```
 
-`ELECTRON_DIST` 让打包复用已解包的 Electron，避免在受限网络下重新下载。首次构建 dmg 会从 GitHub 拉 `dmgbuild` 工具包（约 20 MB），慢速网络下可能长时间停在 0% CPU，属正常现象；中断会丢弃已下载进度。产物在 `packages/desktop/dist/`。
+`package:mac` 只调用 electron-builder，**不会**先构建：`out/` 不存在时它会因为找不到 `out/main/index.js` 直接失败（`dist/` 与 `out/` 都不入库），所以顺序是先 `bun run build`。`ELECTRON_DIST` 让打包复用已解包的 Electron，避免在受限网络下重新下载。首次构建 dmg 会从 GitHub 拉 `dmgbuild` 工具包（约 20 MB），慢速网络下可能长时间停在 0% CPU，属正常现象；中断会丢弃已下载进度。产物在 `packages/desktop/dist/`。
 
 ## 签名与公证
 
@@ -43,3 +44,5 @@ ELECTRON_DIST="$PWD/node_modules/electron/dist" bun run package:mac   # 或 pack
 2. `gh workflow run desktop.yml -f channel=prod -f platform=all -f publish=true`。
 3. 检查 electron-builder 创建的 draft Release：安装包、`.blockmap`、`latest*.yml` 是否齐全。
 4. 发布该 Release —— 更新器只认已发布的 Release。
+
+工作流里每一步都显式写了 `--publish never` 或 `--publish always`：在 CI 上（检测到 `GITHUB_ACTIONS`）不带参数的 electron-builder 默认是 `onTagOrDraft`，即使只想构建也会去建 draft Release。发布步骤对已存在的同名非 draft Release 会记录一条警告后跳过上传并正常退出，因此重跑之前要先确认 Release 的状态。
