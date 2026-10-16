@@ -1188,6 +1188,10 @@ export function providerOptions(model: Provider.Model, options: { [x: string]: a
 }
 
 export function maxOutputTokens(model: Provider.Model): number {
+  // A limit declared by the user in config (`maxTokens`, or `limit.output` under the legacy key) is
+  // a deliberate statement about the model, so it is honored as-is. The clamp only guards values
+  // inherited from the registry, where a missing or stale limit would otherwise be sent verbatim.
+  if (model.limit.source === "config" && model.limit.output > 0) return model.limit.output
   return Math.min(model.limit.output, OUTPUT_TOKEN_MAX) || OUTPUT_TOKEN_MAX
 }
 

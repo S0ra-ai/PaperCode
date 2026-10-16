@@ -33,6 +33,7 @@ import { ConfigManaged } from "./managed"
 import { ConfigMCP } from "./mcp"
 import { ConfigModelID } from "./model-id"
 import { ConfigParse } from "./parse"
+import { InvalidError } from "./error"
 import { ConfigPaths } from "./paths"
 import { ConfigPermission } from "./permission"
 import { ConfigPlugin } from "./plugin"
@@ -56,6 +57,36 @@ function mergeConfigConcatArrays(target: Info, source: Info): Info {
     merged.instructions = Array.from(new Set([...target.instructions, ...source.instructions]))
   }
   return merged
+}
+
+/**
+ * The `providers` dialect is validated strictly, unlike the rest of the config: effect's decoder
+ * drops unknown nested keys, so a typo such as `baseUrl` would produce a provider that silently
+ * has no base URL and only fails at request time.
+ */
+function assertUserProviders(data: unknown, source: string) {
+  if (!isRecord(data)) return
+  const providers = data.providers
+  if (providers === undefined) return
+  const issues = ConfigProvider.validateUserProviders(providers)
+  if (issues.length === 0) return
+  throw new InvalidError({
+    path: source,
+    issues: issues.map(
+      (issue) =>
+        ({
+          code: issue.code,
+          ...(issue.code === "unrecognized_keys" ? { keys: issue.keys } : {}),
+          path: ["providers", ...issue.path],
+          message: issue.message,
+        }) as unknown as z.core.$ZodIssue,
+    ),
+  })
+}
+
+function parseConfig(data: unknown, source: string) {
+  assertUserProviders(data, source)
+  return ConfigParse.effectSchema(Info, data, source)
 }
 
 function normalizeLoadedConfig(data: unknown, source: string) {
@@ -211,6 +242,10 @@ export const Info = Schema.Struct({
   ).annotate({ description: "Agent configuration" }),
   provider: Schema.optional(Schema.Record(Schema.String, ConfigProvider.Info)).annotate({
     description: "Custom provider configurations and model overrides",
+  }),
+  providers: Schema.optional(ConfigProvider.UserProviders).annotate({
+    description:
+      "User-declared providers in the hand-written dialect (displayName, apiKeyEnv, baseURL, api, models[]). Normalized into `provider` at runtime; unknown keys are rejected.",
   }),
   mcp: Schema.optional(
     Schema.Record(
@@ -398,7 +433,7 @@ export const layer = Layer.effect(
         ),
       )
       const parsed = ConfigParse.jsonc(expanded, source)
-      const data = ConfigParse.effectSchema(Info, normalizeLoadedConfig(parsed, source), source)
+      const data = parseConfig(normalizeLoadedConfig(parsed, source), source)
       if (!("path" in options)) return data
 
       yield* Effect.promise(() => resolveLoadedPlugins(data, options.path))
@@ -663,7 +698,7 @@ export const layer = Layer.effect(
                 dir: path.dirname(source),
                 source,
               })
-              for (const providerID of Object.keys(next.provider ?? {})) {
+              for (const providerID of Object.keys({ ...(next.providers ?? {}), ...(next.provider ?? {}) })) {
                 consoleManagedProviders.add(providerID)
               }
               yield* merge(source, next, "global")
@@ -797,7 +832,7 @@ export const layer = Layer.effect(
       let next: Info
       let changed: boolean
       if (!file.endsWith(".jsonc")) {
-        const existing = ConfigParse.effectSchema(Info, ConfigParse.jsonc(before, file), file)
+        const existing = parseConfig(ConfigParse.jsonc(before, file), file)
         const merged = mergeDeep(writable(existing), patch)
         const serialized = JSON.stringify(merged, null, 2)
         changed = serialized !== before
@@ -805,7 +840,7 @@ export const layer = Layer.effect(
         next = merged
       } else {
         const updated = patchJsonc(before, patch)
-        next = ConfigParse.effectSchema(Info, ConfigParse.jsonc(updated, file), file)
+        next = parseConfig(ConfigParse.jsonc(updated, file), file)
         changed = updated !== before
         if (changed) yield* fs.writeFileString(file, updated).pipe(Effect.orDie)
       }

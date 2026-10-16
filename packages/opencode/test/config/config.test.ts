@@ -2568,3 +2568,59 @@ test("parseManagedPlist handles empty config", async () => {
   )
   expect(config.$schema).toBe("https://opencode.ai/config.json")
 })
+
+test("providers dialect loads and is preserved in config", async () => {
+  await using tmp = await tmpdir({
+    init: async (dir) => {
+      await writeConfig(dir, {
+        $schema: "https://opencode.ai/config.json",
+        providers: {
+          fjbdg: {
+            displayName: "fjbdg",
+            apiKeyEnv: "FJBDG_API_KEY",
+            api: "openai-completions",
+            baseURL: "https://newapi.example.test:10443/v1",
+            reasoning: "max",
+            models: [{ id: "m", contextWindow: 1000000, maxTokens: 384000, input: ["text", "image"] }],
+          },
+        },
+      })
+    },
+  })
+  await WithInstance.provide({
+    directory: tmp.path,
+    fn: async () => {
+      const config = await load()
+      expect(config.providers?.fjbdg?.displayName).toBe("fjbdg")
+      expect(config.providers?.fjbdg?.models).toHaveLength(1)
+    },
+  })
+})
+
+test("a typo inside providers fails the config load with the offending path", async () => {
+  await using tmp = await tmpdir({
+    init: async (dir) => {
+      await writeConfig(dir, {
+        $schema: "https://opencode.ai/config.json",
+        providers: { fjbdg: { baseUrl: "https://typo.example.test/v1" } },
+      })
+    },
+  })
+  const failure = await WithInstance.provide({ directory: tmp.path, fn: async () => await load() }).then(
+    () => undefined,
+    (err: unknown) => err,
+  )
+  expect(failure).toBeDefined()
+  // The error may be wrapped by an Effect failure, so walk the cause chain for the issues.
+  let cursor: unknown = failure
+  let issues: Array<{ code?: string; keys?: string[]; path?: string[] }> | undefined
+  for (let depth = 0; depth < 4 && cursor; depth++) {
+    const holder = cursor as { data?: { issues?: typeof issues }; cause?: unknown; defect?: unknown }
+    if (holder.data?.issues) {
+      issues = holder.data.issues
+      break
+    }
+    cursor = holder.cause ?? holder.defect
+  }
+  expect(issues?.[0]).toMatchObject({ code: "unrecognized_keys", keys: ["baseUrl"], path: ["providers", "fjbdg"] })
+})

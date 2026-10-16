@@ -1,6 +1,7 @@
 import os from "os"
 import fuzzysort from "fuzzysort"
 import { Config } from "@/config/config"
+import { ConfigProvider } from "@/config/provider"
 import { mapValues, mergeDeep, omit, pickBy, sortBy } from "remeda"
 import { NoSuchModelError, type Provider as SDK } from "ai"
 import * as Log from "@opencode-ai/core/util/log"
@@ -887,6 +888,9 @@ const ProviderLimit = Schema.Struct({
   context: Schema.Finite,
   input: optionalOmitUndefined(Schema.Finite),
   output: Schema.Finite,
+  // Set when the output limit was declared by the user in config. Such a limit is deliberate and is
+  // honored as-is instead of being clamped to OUTPUT_TOKEN_MAX (see ProviderTransform.maxOutputTokens).
+  source: optionalOmitUndefined(Schema.Literals(["config"])),
 })
 
 export const Model = Schema.Struct({
@@ -1036,6 +1040,18 @@ function fromModelsDevModel(provider: ModelsDev.Provider, model: ModelsDev.Model
   }
 }
 
+const REDACTED_API_KEY = "[redacted]"
+
+/**
+ * Provider info as sent over the HTTP API. The resolved API key stays server-side: clients only need
+ * to know that a key exists (the mask stays truthy) and where it came from (`source`, `env`), and
+ * `Provider.list()` already exposes the connected provider ids separately.
+ */
+export function redact(provider: Info): Info {
+  if (!provider.key) return provider
+  return { ...provider, key: REDACTED_API_KEY }
+}
+
 export function fromModelsDevProvider(provider: ModelsDev.Provider): Info {
   const models: Record<string, Model> = {}
   for (const [key, model] of Object.entries(provider.models)) {
@@ -1129,8 +1145,14 @@ const layer: Layer.Layer<
         // load plugins first so config() hook runs before reading cfg.provider
         const plugins = yield* plugin.list()
 
-        // now read config providers - includes any modifications from plugin config() hook
-        const configProviders = Object.entries(cfg.provider ?? {})
+        // now read config providers - includes any modifications from plugin config() hook.
+        // `providers` is the hand-written dialect; it normalizes into the same shape as `provider`,
+        // which wins on an id collision so existing configs keep their exact meaning.
+        const configProviderMap: Record<string, ConfigProvider.Info> = {
+          ...ConfigProvider.normalizeUserProviders(cfg.providers),
+          ...(cfg.provider ?? {}),
+        }
+        const configProviders = Object.entries(configProviderMap)
         const disabled = new Set(cfg.disabled_providers ?? [])
         const enabled = cfg.enabled_providers ? new Set(cfg.enabled_providers) : null
 
@@ -1245,6 +1267,7 @@ const layer: Layer.Layer<
                 context: model.limit?.context ?? existingModel?.limit?.context ?? 0,
                 input: model.limit?.input ?? existingModel?.limit?.input,
                 output: model.limit?.output ?? existingModel?.limit?.output ?? 0,
+                source: model.limit?.output !== undefined ? "config" : existingModel?.limit?.source,
               },
               headers: mergeDeep(existingModel?.headers ?? {}, model.headers ?? {}),
               family: model.family ?? existingModel?.family ?? "",
@@ -1360,7 +1383,7 @@ const layer: Layer.Layer<
             continue
           }
 
-          const configProvider = cfg.provider?.[providerID]
+          const configProvider = configProviderMap[providerID]
 
           for (const [modelID, model] of Object.entries(provider.models)) {
             model.api.id = model.api.id ?? model.id ?? modelID
@@ -1701,7 +1724,13 @@ const layer: Layer.Layer<
         return { providerID: entry.providerID, modelID: entry.modelID }
       }
 
-      const provider = Object.values(s.providers).find((p) => !cfg.provider || Object.keys(cfg.provider).includes(p.id))
+      const declaredProviders = Object.keys({
+        ...(cfg.providers ?? {}),
+        ...(cfg.provider ?? {}),
+      })
+      const provider = Object.values(s.providers).find(
+        (p) => declaredProviders.length === 0 || declaredProviders.includes(p.id),
+      )
       if (!provider) throw new Error("no providers found")
       const [model] = sort(Object.values(provider.models))
       if (!model) throw new Error("no models found")
