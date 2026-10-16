@@ -30,7 +30,9 @@ const log = Log.create({ service: "db" })
 export function getChannelPath() {
   if (["latest", "beta", "prod"].includes(InstallationChannel) || Flag.OPENCODE_DISABLE_CHANNEL_DB)
     return path.join(Global.Path.data, "papercode.db")
-  const safe = InstallationChannel.replace(/[^a-zA-Z0-9._-]/g, "-")
+  // A locally built binary reports its git branch as the channel, which would give every branch
+  // its own database and hide the user's history. Non-release channels share one stable database.
+  const safe = "local"
   return path.join(Global.Path.data, `papercode-${safe}.db`)
 }
 
