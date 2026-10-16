@@ -16,6 +16,9 @@ import { Effect } from "effect"
 import { AppRuntime } from "../../src/effect/app-runtime"
 import { makeRuntime } from "../../src/effect/run-service"
 
+// Disposing and reloading an instance takes seconds alone but can exceed the default budget on a loaded runner.
+const PROVIDER_INTEGRATION_TIMEOUT = 120_000
+
 const env = makeRuntime(Env.Service, Env.defaultLayer)
 const set = (k: string, v: string) => env.runSync((svc) => svc.set(k, v))
 
@@ -2470,7 +2473,7 @@ test("plugin config providers persist after instance dispose", async () => {
   })
   expect(second[ProviderID.make("demo")]).toBeDefined()
   expect(second[ProviderID.make("demo")].models[ModelID.make("chat")]).toBeDefined()
-})
+}, PROVIDER_INTEGRATION_TIMEOUT)
 
 test("plugin config enabled and disabled providers are honored", async () => {
   await using tmp = await tmpdir({
