@@ -16,6 +16,10 @@ import {
 } from "@/paper"
 import type { ResearchRuntimeOptions } from "@/paper/research/runtime"
 
+// createPaperRun drives the default engine end to end, and that engine renders the final export
+// through the real toolchain (pandoc + a TeX engine) whenever one is installed.
+const PAPER_RUN_INTEGRATION_TIMEOUT = 180_000
+
 const now = "2026-05-10T00:00:00Z"
 const created: string[] = []
 const TEST_MODEL = "test-provider/test-model"
@@ -95,7 +99,7 @@ describe("PaperRun observability audit", () => {
     }
     expect(snapshot.diagnostics.tool_traces.length).toBeGreaterThan(0)
     expect(snapshot.diagnostics.cost).toMatchObject({ total_usd: expect.any(Number) })
-  })
+  }, PAPER_RUN_INTEGRATION_TIMEOUT)
 
   test("records durable audit, tool trace, cost, and egress diagnostics in snapshots", async () => {
     const run = await newPaperRun()
@@ -181,5 +185,5 @@ describe("PaperRun observability audit", () => {
     expect(
       audit.entries.find((entry) => entry.kind === "data_egress" && entry.name === "code_analysis")?.attributes.blocked,
     ).toBe(2)
-  })
+  }, PAPER_RUN_INTEGRATION_TIMEOUT)
 })

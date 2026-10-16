@@ -1,6 +1,7 @@
 import { createHash } from "crypto"
 import { mkdir, readFile, writeFile } from "fs/promises"
 import path from "path"
+import { Process } from "@/util/process"
 import { discoverInitTools, type InitToolName } from "./init/discovery"
 import { initPaths, loadToolLinks } from "./init/config"
 import type { ResearchFinalGateState, ResearchRuntimeOptions } from "./research/runtime"
@@ -20,8 +21,12 @@ export interface PaperExportCommandInput {
   tool: string
   args: string[]
   cwd: string
+  /** Wall-clock budget for the command. Rendering (pandoc, TeX engines) is unbounded otherwise. */
   timeout_ms?: number
 }
+
+/** Rendering a paper through pandoc and a TeX engine is slow but not open-ended. */
+const EXPORT_COMMAND_TIMEOUT_MS = 300_000
 
 export interface PaperExportCommandResult {
   exit_code: number
@@ -99,20 +104,25 @@ function outputFile(runDir: string, bundleID: string, format: ExportFormat) {
 }
 
 async function defaultCommand(input: PaperExportCommandInput): Promise<PaperExportCommandResult> {
-  const process = Bun.spawn([input.tool, ...input.args], {
-    cwd: input.cwd,
-    stdout: "pipe",
-    stderr: "pipe",
-  })
-  const [exitCode, stdout, stderr] = await Promise.all([
-    process.exited,
-    new Response(process.stdout).text(),
-    new Response(process.stderr).text(),
-  ])
-  return {
-    exit_code: exitCode,
-    stdout,
-    stderr,
+  const timeout = input.timeout_ms ?? EXPORT_COMMAND_TIMEOUT_MS
+  const controller = new AbortController()
+  const timer = timeout > 0 ? setTimeout(() => controller.abort(), timeout) : undefined
+  try {
+    const out = await Process.run([input.tool, ...input.args], {
+      cwd: input.cwd,
+      abort: controller.signal,
+      nothrow: true,
+    })
+    const stderr = out.stderr.toString()
+    return {
+      exit_code: out.code,
+      stdout: out.stdout.toString(),
+      stderr: controller.signal.aborted
+        ? `${stderr}\n${input.tool} exceeded its ${timeout}ms budget and was terminated`.trim()
+        : stderr,
+    }
+  } finally {
+    if (timer) clearTimeout(timer)
   }
 }
 

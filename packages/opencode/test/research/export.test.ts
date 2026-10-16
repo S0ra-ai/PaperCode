@@ -93,6 +93,10 @@ const successfulRenderers: ExportRenderer = {
   docx: async () => ({ status: "written", bytes: fixtureDocx, diagnostics: [] }),
 }
 
+// Rendering through the real toolchain (pandoc + a TeX engine) is minutes of work on a cold
+// machine, so this case gets an explicit budget instead of the 60s default.
+const EXPORT_TOOLCHAIN_TIMEOUT = 240_000
+
 const failedRenderers: ExportRenderer = {
   pdf: async () => ({
     status: "failed",
@@ -182,7 +186,7 @@ describe("export bundles", () => {
     } finally {
       await clean(dir)
     }
-  })
+  }, EXPORT_TOOLCHAIN_TIMEOUT)
 
   test("records renderer diagnostics for failed PDF and DOCX exports", async () => {
     const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-export-diagnostics-test-"))

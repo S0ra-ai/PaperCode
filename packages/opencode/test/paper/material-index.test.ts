@@ -12,6 +12,10 @@ import {
   type PaperRunRuntimeOptions,
 } from "@/paper"
 
+// createPaperRun drives the default engine end to end, and that engine renders the final export
+// through the real toolchain (pandoc + a TeX engine) whenever one is installed.
+const PAPER_RUN_INTEGRATION_TIMEOUT = 180_000
+
 const cleanup: string[] = []
 const now = "2026-05-10T02:00:00Z"
 const TEST_MODEL = "test-provider/test-model"
@@ -120,5 +124,5 @@ describe("Research material index", () => {
     expect(run.snapshot.source_ledger.some((source) => source.locator.path === ".env")).toBe(false)
     expect(run.snapshot.source_ledger.some((source) => source.locator.path === "src/method.ts")).toBe(true)
     expect(run.snapshot.source_ledger.some((source) => source.locator.path === "data/scores.csv")).toBe(true)
-  })
+  }, PAPER_RUN_INTEGRATION_TIMEOUT)
 })
