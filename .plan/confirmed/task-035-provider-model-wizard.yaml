@@ -10,9 +10,9 @@ tags:
 - roles
 depends_on:
 - task-034-dialog-workbench-tui
-description: Add a global-user provider/model configuration flow for paper_fucker.
+description: Add a global-user provider/model configuration flow for papercode.
   Users enter provider id/name, base_url, api_key, and compatibility format; the system
-  discovers model lists, stores secrets outside git under ~/.paper_fucker, and assigns
+  discovers model lists, stores secrets outside git under ~/.papercode, and assigns
   default and per-role models for parent agents and subagents.
 execution:
   mode: sequential
@@ -62,13 +62,13 @@ steps:
     - timestamp: '2026-05-09T07:52:01.126799'
       level: info
       message: Implementing OpenAI-compatible provider endpoint discovery and secret-safe
-        global config storage under ~/.paper_fucker/local.
+        global config storage under ~/.papercode/local.
       agent: codex
     - timestamp: '2026-05-09T07:55:05.306563'
       level: info
       message: Implemented packages/opencode/src/paper/model-discovery.ts with ProviderEndpointConfig,
         OpenAI-compatible /models discovery, timeout diagnostics, no-key result payloads,
-        and secret-safe global storage under ~/.paper_fucker/local/provider-secrets.json.
+        and secret-safe global storage under ~/.papercode/local/provider-secrets.json.
       agent: codex
     last_run: '2026-05-09T07:55:05.306563'
     attempt_count: 2
@@ -107,7 +107,7 @@ steps:
   owner: codex
   depends_on:
   - task-035-step-03-role-assignment
-  description: Document global ~/.paper_fucker model config, provider discovery, and
+  description: Document global ~/.papercode model config, provider discovery, and
     role assignment; update CHANGELOG/README to 0.2.4-dev.
   execution:
     mode: sequential
@@ -122,7 +122,7 @@ steps:
     - timestamp: '2026-05-09T07:56:37.719292'
       level: info
       message: Updated README and CHANGELOG to 0.2.4-dev with provider discovery,
-        secret-safe ~/.paper_fucker model config, and role/subagent assignment documentation.
+        secret-safe ~/.papercode model config, and role/subagent assignment documentation.
         Added reports/provider-model-wizard.md and verified README version sync.
       agent: codex
     last_run: '2026-05-09T07:56:37.719292'

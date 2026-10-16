@@ -27,9 +27,9 @@ import { V2Api } from "./groups/v2"
 const EventSchema = Schema.Union(BusEvent.effectPayloads()).annotate({ identifier: "Event" })
 const SyncEventSchemas = SyncEvent.effectPayloads()
 
-export const RootHttpApi = HttpApi.make("paper_fucker-root").addHttpApi(ControlApi).addHttpApi(GlobalApi)
+export const RootHttpApi = HttpApi.make("papercode-root").addHttpApi(ControlApi).addHttpApi(GlobalApi)
 
-export const InstanceHttpApi = HttpApi.make("paper_fucker-instance")
+export const InstanceHttpApi = HttpApi.make("papercode-instance")
   .addHttpApi(ConfigApi)
   .addHttpApi(ExperimentalApi)
   .addHttpApi(FileApi)
@@ -47,7 +47,7 @@ export const InstanceHttpApi = HttpApi.make("paper_fucker-instance")
   .addHttpApi(TuiApi)
   .addHttpApi(WorkspaceApi)
 
-export const PaperFuckerHttpApi = HttpApi.make("paper_fucker")
+export const PaperCodeHttpApi = HttpApi.make("papercode")
   .addHttpApi(RootHttpApi)
   .addHttpApi(EventApi)
   .addHttpApi(InstanceHttpApi)

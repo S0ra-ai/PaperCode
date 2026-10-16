@@ -1,6 +1,6 @@
 # Research Intake
 
-> Historical path note: this report predates task-032. Any `packages/server` or `@paper-fucker/server` paths below are provenance only; the current paper_fucker runtime authority is `packages/opencode/src/paper`, and `packages/server` is intentionally absent.
+> Historical path note: this report predates task-032. Any `packages/server` or `@papercode/server` paths below are provenance only; the current papercode runtime authority is `packages/opencode/src/paper`, and `packages/server` is intentionally absent.
 
 Version: 0.1.22-dev
 
@@ -8,7 +8,7 @@ Task: `task-025-research-intake`
 
 ## Summary
 
-paper_fucker now normalizes user input into a run-bound `ResearchBrief.v1`. The intake layer handles topic-only papers, code-grounded papers, dataset-driven papers, and mixed material workflows.
+papercode now normalizes user input into a run-bound `ResearchBrief.v1`. The intake layer handles topic-only papers, code-grounded papers, dataset-driven papers, and mixed material workflows.
 
 ## Implemented
 

@@ -6,7 +6,7 @@ import {
   type Span,
 } from "@opentelemetry/api"
 
-const tracer = trace.getTracer("paper_fucker.research", "0.1.0")
+const tracer = trace.getTracer("papercode.research", "0.1.0")
 
 function errorMessage(error: unknown) {
   if (error instanceof Error) return error.message
@@ -53,8 +53,8 @@ export const contractAttributes = (input: {
   kind: string
   schemaVersion?: string
 }) => ({
-  "paper_fucker.research.contract.kind": input.kind,
-  ...(input.schemaVersion ? { "paper_fucker.research.schema_version": input.schemaVersion } : {}),
+  "papercode.research.contract.kind": input.kind,
+  ...(input.schemaVersion ? { "papercode.research.schema_version": input.schemaVersion } : {}),
 })
 
 export * as ResearchTelemetry from "./telemetry"

@@ -1,4 +1,4 @@
-:project       paper_fucker - 可验证论文研究自动化系统
+:project       papercode - 可验证论文研究自动化系统
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          0.13.0.138 开发历史归档
@@ -12,11 +12,11 @@
         :init
             - fix(init): resolveInitHome 忽略空字符串、"undefined" 和 "null"，避免写入错误本机状态目录
             - fix(reset): defaultResetHome 复用 resolveInitHome，reset 默认 home 与 init 路径语义保持一致
-            - fix(skill): managed skill 安装 home 解析忽略字符串化空值，避免安装到 undefined/.paper_fucker
+            - fix(skill): managed skill 安装 home 解析忽略字符串化空值，避免安装到 undefined/.papercode
         :runtime
-            - fix(global): Global.Path.home 对 PAPER_FUCKER_TEST_HOME 做同样规范化，并保留模块加载时的有效测试 home
+            - fix(global): Global.Path.home 对 PAPERCODE_TEST_HOME 做同样规范化，并保留模块加载时的有效测试 home
         :test
-            - test(init): 覆盖字符串化 PAPER_FUCKER_TEST_HOME/PAPER_FUCKER_HOME 和显式 home 优先级
+            - test(init): 覆盖字符串化 PAPERCODE_TEST_HOME/PAPERCODE_HOME 和显式 home 优先级
             - test(core): 覆盖 Global.Path.home 忽略字符串化 undefined
         :changelog
             - docs(changelog): 0.13.0.137 开发历史移入 docs/changelog/v0/0.13.0.137.CHANGELOG

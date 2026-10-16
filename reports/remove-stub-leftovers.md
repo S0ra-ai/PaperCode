@@ -10,7 +10,7 @@ Date: `2026/05/10`
 After TaskFlow reached `52/52 done`, a cleanup scan found two current-code names that still reflected earlier Phase 1 implementation scaffolding:
 
 - `packages/opencode/src/paper/research/runtime/guards.ts` exported Phase 1 stage stubs with `not_implemented` status.
-- `research-tools/src/paper_fucker_tools/mcp_tools.py` exposed `docx_generation_stub` as the canonical DOCX tool name.
+- `research-tools/src/papercode_tools/mcp_tools.py` exposed `docx_generation_stub` as the canonical DOCX tool name.
 
 Both were misleading now that the PaperRun closed loop, forced DOCX export, and authenticity gates are implemented.
 
@@ -48,7 +48,7 @@ not_implemented
 docx_generation_stub
 stub handler
 packages/server
-@paper-fucker/server
+@papercode/server
 server runtime
 ```
 

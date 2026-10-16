@@ -10,7 +10,7 @@ const embeddedUIPromise = Flag.OPENCODE_DISABLE_EMBEDDED_WEB_UI
   : // @ts-expect-error - generated file at build time
     import("opencode-web-ui.gen.ts").then((module) => module.default as Record<string, string>).catch(() => null)
 
-export const UI_UPSTREAM = new URL("https://app.paper-fucker.local")
+export const UI_UPSTREAM = new URL("https://app.papercode.local")
 
 export const csp = (hash = "") =>
   `default-src 'self'; script-src 'self' 'wasm-unsafe-eval'${hash ? ` 'sha256-${hash}'` : ""}; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; media-src 'self' data:; connect-src * data:`

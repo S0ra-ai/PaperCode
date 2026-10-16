@@ -7,7 +7,7 @@ import type { ModelRoleConfig } from "../model-router"
 
 export const INIT_CONFIG_VERSION = "config.v1" as const
 export const INIT_SECRETS_VERSION = "secrets.v1" as const
-export const PAPER_FUCKER_DIR = ".paper_fucker"
+export const PAPERCODE_DIR = ".papercode"
 
 export type ModelEndpointConfig = {
   name: string
@@ -16,7 +16,7 @@ export type ModelEndpointConfig = {
   api_key_secret?: string
 }
 
-export type PaperFuckerConfig = {
+export type PaperCodeConfig = {
   schema_version: typeof INIT_CONFIG_VERSION
   created_at: string
   updated_at: string
@@ -71,13 +71,13 @@ function envHome(value: string | undefined) {
 
 export function resolveInitHome(home?: string) {
   return path.resolve(
-    envHome(home) ?? envHome(process.env.PAPER_FUCKER_TEST_HOME) ?? envHome(process.env.PAPER_FUCKER_HOME) ?? os.homedir(),
+    envHome(home) ?? envHome(process.env.PAPERCODE_TEST_HOME) ?? envHome(process.env.PAPERCODE_HOME) ?? os.homedir(),
   )
 }
 
 export function initPaths(home?: string): InitPaths {
   const resolved = resolveInitHome(home)
-  const root = path.join(resolved, PAPER_FUCKER_DIR)
+  const root = path.join(resolved, PAPERCODE_DIR)
   return {
     home: resolved,
     root,
@@ -96,7 +96,7 @@ export async function readJsonIfExists<T>(file: string): Promise<T | undefined> 
   return JSON.parse(await readFile(file, "utf8")) as T
 }
 
-export async function writeConfig(paths: InitPaths, config: PaperFuckerConfig) {
+export async function writeConfig(paths: InitPaths, config: PaperCodeConfig) {
   await ensureInitRoot(paths)
   await writeJsonAtomic(paths.config, config)
 }
@@ -107,7 +107,7 @@ export async function writeToolLinks(paths: InitPaths, tools: Record<string, str
 }
 
 export async function loadConfig(paths: InitPaths) {
-  return readJsonIfExists<PaperFuckerConfig>(paths.config)
+  return readJsonIfExists<PaperCodeConfig>(paths.config)
 }
 
 export async function loadToolLinks(paths: InitPaths) {
@@ -118,13 +118,13 @@ export async function loadToolLinks(paths: InitPaths) {
 export function defaultConfig(input: {
   now: string
   workspace?: string
-  language?: Partial<PaperFuckerConfig["language"]>
-  access?: Partial<PaperFuckerConfig["access"]>
-  budgets?: PaperFuckerConfig["budgets"]
-  preview?: Partial<PaperFuckerConfig["preview"]>
-  models?: PaperFuckerConfig["models"]
+  language?: Partial<PaperCodeConfig["language"]>
+  access?: Partial<PaperCodeConfig["access"]>
+  budgets?: PaperCodeConfig["budgets"]
+  preview?: Partial<PaperCodeConfig["preview"]>
+  models?: PaperCodeConfig["models"]
   model_roles?: Partial<ModelRoleConfig>
-}): PaperFuckerConfig {
+}): PaperCodeConfig {
   const mode = input.access?.mode ?? "bounded"
   const acknowledged = input.access?.full_access_acknowledged ?? false
   if (mode === "full_access" && !acknowledged) {

@@ -38,7 +38,7 @@ steps:
     - timestamp: '2026-05-10T07:50:19.054785'
       level: info
       message: Audited README, CHANGELOG, reports, scripts, and .plan for stale packages/server
-        and @paper-fucker/server references. README and strict acceptance already
+        and @papercode/server references. README and strict acceptance already
         describe the current packages/opencode/src/paper hard-fork authority; scripts
         intentionally assert packages/server absence. CHANGELOG and TaskFlow completed-task
         logs keep old paths as provenance. Current cleanup scope is historical reports
@@ -71,7 +71,7 @@ steps:
       level: info
       message: Updated README to explain pre-task-032 report provenance. Added a uniform
         historical path note to 25 pre-hard-fork reports that still contain packages/server
-        or @paper-fucker/server references. Left CHANGELOG and completed TaskFlow
+        or @papercode/server references. Left CHANGELOG and completed TaskFlow
         logs untouched as immutable historical evidence, and left hard-fork/migration/strict
         reports unchanged because their packages/server mentions already assert absence/migration.
       agent: codex

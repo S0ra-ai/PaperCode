@@ -2,14 +2,14 @@ id: visible-command-surface-audit
 title: 用户可见命令面审计
 status: done
 priority: high
-owner: paper-fucker-dev-agent
+owner: papercode-dev-agent
 tags:
 - commands
 - audit
 - public-surface
 depends_on:
 - live-preview-monitor
-description: 建立 PaperVisibleCommandRegistry，保留 Paper Fucker 需要的用户命令，隐藏旧 OpenCode 普通聊天、session、agent、variant、订阅和
+description: 建立 PaperVisibleCommandRegistry，保留 PaperCode 需要的用户命令，隐藏旧 OpenCode 普通聊天、session、agent、variant、订阅和
   upsell 入口。
 execution:
   mode: sequential
@@ -18,7 +18,7 @@ steps:
 - id: visible-command-registry
   title: 定义用户可见命令注册表
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   description: 保留 /models、/status、/file、/folder、/data、/log、/preview、/export、/stop、/resume。
   execution:
@@ -28,20 +28,20 @@ steps:
     logs:
     - timestamp: '2026-05-12T02:55:29.003018'
       level: info
-      message: 开始定义 Paper Fucker 用户可见命令白名单。
-      agent: paper-fucker-dev-agent
+      message: 开始定义 PaperCode 用户可见命令白名单。
+      agent: papercode-dev-agent
     - timestamp: '2026-05-12T02:55:35.948826'
       level: info
       message: 新增 PaperVisibleCommandRegistry，保留 /models、/status、/file、/folder、/data、/log、/preview、/export、/stop、/resume
         作为产品命令集合。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-12T02:55:35.948826'
     attempt_count: 2
   meta: {}
 - id: hide-legacy-commands
   title: 隐藏旧 OpenCode 命令
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   description: 隐藏 /connect、/agents、/variants、普通 session 切换和订阅入口。
   execution:
@@ -52,21 +52,21 @@ steps:
     - timestamp: '2026-05-12T02:55:42.588132'
       level: info
       message: 开始隐藏旧 OpenCode 用户命令和订阅入口。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-12T02:55:52.224176'
       level: info
       message: 隐藏 /connect、/agents、/variants、普通 session 切换、旧 skill 命令、provider 订阅/upsell
         入口；TUI 帮助改为中文动作说明。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-12T02:55:52.224176'
     attempt_count: 2
   meta: {}
 - id: audit-tests
   title: 命令面审计测试
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
-  description: 测试用户可见命令只包含 Paper Fucker 产品命令。
+  description: 测试用户可见命令只包含 PaperCode 产品命令。
   execution:
     mode: sequential
     retry: 0
@@ -75,11 +75,11 @@ steps:
     - timestamp: '2026-05-12T02:55:58.681635'
       level: info
       message: 开始补充命令面审计测试。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-12T02:56:05.255231'
       level: info
       message: public-surface 测试覆盖旧命令、旧提示、旧 provider 订阅入口、OpenCode 普通聊天面和错误页文案。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-12T02:56:05.255231'
     attempt_count: 2
   meta: {}

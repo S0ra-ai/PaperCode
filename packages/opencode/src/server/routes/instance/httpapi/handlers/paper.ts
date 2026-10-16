@@ -88,11 +88,11 @@ function envHome(value: string | undefined) {
 }
 
 function paperRuntimeHome() {
-  return envHome(process.env.PAPER_FUCKER_TEST_HOME) ?? envHome(process.env.PAPER_FUCKER_HOME)
+  return envHome(process.env.PAPERCODE_TEST_HOME) ?? envHome(process.env.PAPERCODE_HOME)
 }
 
 function paperLogDirectory(home = paperRuntimeHome() ?? os.homedir()) {
-  return path.join(home, ".paper_fucker", "data", "log")
+  return path.join(home, ".papercode", "data", "log")
 }
 
 function paperRunCreateError(error: unknown) {

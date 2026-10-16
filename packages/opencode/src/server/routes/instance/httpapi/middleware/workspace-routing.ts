@@ -60,7 +60,7 @@ function selectedWorkspaceID(url: URL, sessionWorkspaceID?: WorkspaceID): Worksp
 function defaultDirectory(request: HttpServerRequest.HttpServerRequest, url: URL): string {
   return (
     url.searchParams.get("directory") ||
-    request.headers["x-paper-fucker-directory"] ||
+    request.headers["x-papercode-directory"] ||
     request.headers["x-opencode-directory"] ||
     process.cwd()
   )

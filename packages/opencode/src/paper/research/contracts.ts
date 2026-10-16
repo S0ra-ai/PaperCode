@@ -12,7 +12,7 @@ import {
 import { contractAttributes, withSpan } from "./telemetry"
 
 const SCHEMA_PATH = path.join(import.meta.dirname, "../../../../../schemas/research/v1.schema.json")
-const SCHEMA_ID = "https://paper-fucker.local/schemas/research/v1.schema.json"
+const SCHEMA_ID = "https://papercode.local/schemas/research/v1.schema.json"
 
 type SchemaDocument = {
   $id: string
@@ -170,7 +170,7 @@ export const storageFacts = {
 export const defaultStorageLayout = {
   facts: storageFacts,
   run_index: "index.sqlite",
-  global_index: "~/.paper_fucker/index.sqlite",
+  global_index: "~/.papercode/index.sqlite",
   index_rebuildable: true,
 } as const
 

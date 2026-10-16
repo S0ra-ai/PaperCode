@@ -22,7 +22,7 @@ function researchToolsVenv() {
 /** The interpreter the Python bridge would spawn, or an actionable error when none is installed. */
 export function pythonExecutable(options?: { python?: string }) {
   if (options?.python) return options.python
-  const override = process.env.PAPER_FUCKER_TOOL_PYTHON
+  const override = process.env.PAPERCODE_TOOL_PYTHON
   if (override) return override
   const venv = researchToolsVenv()
   if (venv) return venv
@@ -30,7 +30,7 @@ export function pythonExecutable(options?: { python?: string }) {
   if (!found) {
     throw new Error(
       `No Python interpreter found (tried ${PYTHON_EXECUTABLES.join(", ")}). ` +
-        "Install Python >= 3.11, run `uv sync` in research-tools, or point PAPER_FUCKER_TOOL_PYTHON at one.",
+        "Install Python >= 3.11, run `uv sync` in research-tools, or point PAPERCODE_TOOL_PYTHON at one.",
     )
   }
   return found

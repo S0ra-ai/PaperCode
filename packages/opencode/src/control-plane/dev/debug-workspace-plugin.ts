@@ -3,7 +3,7 @@ import { rename, writeFile } from "node:fs/promises"
 import { randomInt } from "node:crypto"
 import { setTimeout as sleep } from "node:timers/promises"
 
-const DEV_DATA_FILE = "/tmp/paper_fucker-workspace-dev-data.json"
+const DEV_DATA_FILE = "/tmp/papercode-workspace-dev-data.json"
 const DEV_DATA_TEMP_FILE = `${DEV_DATA_FILE}.tmp`
 
 async function waitForHealth(port: number) {

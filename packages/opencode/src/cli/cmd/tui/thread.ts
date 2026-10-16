@@ -210,7 +210,7 @@ export const TuiThreadCommand = cmd({
             events: undefined,
           }
         : {
-            url: "http://paper_fucker.internal",
+            url: "http://papercode.internal",
             fetch: createWorkerFetch(client),
             events: createEventSource(client),
           }

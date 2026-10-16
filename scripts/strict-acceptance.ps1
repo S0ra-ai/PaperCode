@@ -196,10 +196,10 @@ function Get-CurrentProjectVersion {
 }
 
 function Get-DeepSeekConfig {
-    $defaultsPath = Join-Path $RepoRoot ".paper_fucker/local/model-defaults.json"
+    $defaultsPath = Join-Path $RepoRoot ".papercode/local/model-defaults.json"
     $baseUrl = "https://api.deepseek.com/v1"
     $model = "deepseek-v4-pro"
-    $keyFile = Join-Path $RepoRoot ".paper_fucker/local/deepseek.env"
+    $keyFile = Join-Path $RepoRoot ".papercode/local/deepseek.env"
     if (Test-Path -LiteralPath $defaultsPath) {
         $defaults = Get-Content -Raw -LiteralPath $defaultsPath | ConvertFrom-Json
         $model = [string]$defaults.models.default_model
@@ -261,7 +261,7 @@ function Invoke-LiveProviderRequest {
 function Invoke-DeepSeekSmoke {
     if ($FixtureMode) { return "fixture live-provider-call: deepseek/deepseek-v4-pro" }
     $config = Get-DeepSeekConfig
-    Assert-StrictLive (-not [string]::IsNullOrWhiteSpace($config.api_key)) "DeepSeek API key is missing. Expected DEEPSEEK_API_KEY or .paper_fucker/local/deepseek.env." | Out-Null
+    Assert-StrictLive (-not [string]::IsNullOrWhiteSpace($config.api_key)) "DeepSeek API key is missing. Expected DEEPSEEK_API_KEY or .papercode/local/deepseek.env." | Out-Null
     $headers = @{ Authorization = "Bearer $($config.api_key)" }
     $models = Invoke-LiveProviderRequest -Uri "$($config.base_url)/models" -Headers $headers -TimeoutSec 30 -Attempts 3
     $ids = @($models.data | ForEach-Object { $_.id })
@@ -286,7 +286,7 @@ function Invoke-ExaSmoke {
         params = @{
             protocolVersion = "2024-11-05"
             capabilities = @{}
-            clientInfo = @{ name = "paper_fucker_acceptance"; version = Get-ProjectVersion }
+            clientInfo = @{ name = "papercode_acceptance"; version = Get-ProjectVersion }
         }
     } | ConvertTo-Json -Depth 8
     $response = Invoke-RestMethod -Uri "https://mcp.exa.ai/mcp" -Method Post -ContentType "application/json" -Headers @{ Accept = "application/json, text/event-stream" } -Body $body -TimeoutSec 30
@@ -295,7 +295,7 @@ function Invoke-ExaSmoke {
 }
 
 function Invoke-NatureSkillSmoke {
-    $skill = Join-Path $RepoRoot ".paper_fucker/skills/nature-paper/SKILL.md"
+    $skill = Join-Path $RepoRoot ".papercode/skills/nature-paper/SKILL.md"
     Assert-StrictLive (Test-Path -LiteralPath $skill) "nature-paper skill is not installed." | Out-Null
     $text = Get-Content -Raw -LiteralPath $skill
     Assert-StrictLive ($text -match "Nature" -and $text -match "PaperProfile\.v1") "nature-paper skill does not mention Nature and PaperProfile.v1." | Out-Null
@@ -387,7 +387,7 @@ function Invoke-LiveCrawlerFetch {
     if ($FixtureMode) { return "fixture live-crawler-fetch: skipped external HTTP fetch" }
     $code = @'
 import json
-from paper_fucker_tools.crawler import crawl_url
+from papercode_tools.crawler import crawl_url
 record = crawl_url({
     "url": "https://example.com/",
     "allow_network": True,
@@ -409,18 +409,18 @@ function Invoke-HFLiveResearchLoop {
     if ($FixtureMode) { return "fixture hf-live-research-loop: live papers/jobs/trackio boundary skipped" }
     $code = @'
 import json
-from paper_fucker_tools.huggingface_loop import hf_research_probe
+from papercode_tools.huggingface_loop import hf_research_probe
 papers = hf_research_probe({"kind": "papers", "query": "transformers", "limit": 1, "allow_network": True})
 assert papers["mode"] == "live", papers
 assert len(papers["records"]) >= 1, papers
 assert papers["records"][0]["trust"] == "hf_official", papers
-jobs = hf_research_probe({"kind": "jobs", "query": "paper_fucker", "limit": 1, "allow_network": True})
+jobs = hf_research_probe({"kind": "jobs", "query": "papercode", "limit": 1, "allow_network": True})
 assert jobs["mode"] in {"live", "blocked"}, jobs
 if jobs["mode"] == "blocked":
     assert jobs["diagnostics"] == ["hf_token_required_for_jobs"], jobs
 trackio = hf_research_probe({
     "kind": "trackio",
-    "query": "paper_fucker",
+    "query": "papercode",
     "trackio_export": {
         "run_id": "strict-live-trackio-export",
         "title": "Strict live Trackio exported metrics",
@@ -600,7 +600,7 @@ function Invoke-PaperWorkbenchUXSidebar {
 }
 
 function Invoke-HFNoMockBoundary {
-    $hfBridge = Read-RepoText "research-tools/src/paper_fucker_tools/huggingface_loop.py"
+    $hfBridge = Read-RepoText "research-tools/src/papercode_tools/huggingface_loop.py"
     $hfTests = Read-RepoText "research-tools/tests/test_huggingface_loop.py"
     Assert-HardFork ($hfBridge -match "network_not_authorized" -and $hfBridge -match "mode = `"blocked`"") "HF bridge does not block unauthorized product calls."
     Assert-HardFork (-not ($hfBridge -match "network_not_authorized_mock_used")) "HF bridge still contains a mock fallback diagnostic."
@@ -705,7 +705,7 @@ Invoke-Check "workspace-typecheck" "Workspace typecheck" {
 Invoke-Check "opencode-tui-smoke" "PaperCode TUI smoke" {
     $help = Invoke-CheckedCommand "npx" @("--yes", "bun@1.3.13", "--cwd", "packages/opencode", "src/index.ts", "--help")
     Assert-HardFork ($help -match "PaperCode" -or (Read-RepoText "packages/opencode/src/cli/logo.ts") -match "PaperCode") "Local PaperCode CLI help did not expose the product branding."
-    return "local paper_fucker CLI help responded"
+    return "local papercode CLI help responded"
 }
 Invoke-Check "live-provider-call" "At least one live OpenCode-compatible provider call" {
     Invoke-DeepSeekSmoke

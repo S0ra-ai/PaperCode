@@ -10,7 +10,7 @@ tags:
 - cli
 depends_on:
 - pre-release-live-preview-audit
-description: 在顶层 paper_fucker CLI 接入 init/doctor/reset，支持备份后清理全局 ~/.paper_fucker 与仓库
+description: 在顶层 papercode CLI 接入 init/doctor/reset，支持备份后清理全局 ~/.papercode 与仓库
   ignored runtime/local 状态，让用户能从零重新填写多个 provider/key。
 execution:
   mode: sequential
@@ -21,7 +21,7 @@ steps:
   status: done
   owner: codex
   depends_on: []
-  description: 让 paper_fucker init/help/doctor 可从主 CLI 访问，保持 Paper Fucker 品牌与中文友好诊断。
+  description: 让 papercode init/help/doctor 可从主 CLI 访问，保持 PaperCode 品牌与中文友好诊断。
   execution:
     mode: sequential
     retry: 0
@@ -34,7 +34,7 @@ steps:
       agent: codex
     - timestamp: '2026-05-11T09:29:19.844434'
       level: info
-      message: Top-level public CLI now registers InitCommand as paper_fucker init
+      message: Top-level public CLI now registers InitCommand as papercode init
         [action], with actions for init, doctor/diagnostics, and reset. Existing package-level
         init CLI also accepts doctor and reset aliases.
       agent: codex
@@ -47,8 +47,8 @@ steps:
   owner: codex
   depends_on:
   - wire-top-level-init-command
-  description: 新增 reset --scope all --backup --yes，备份并清理全局 ~/.paper_fucker、仓库 .paper_fucker/local、仓库
-    .paper_fucker/runs，不触碰 tracked 项目资产。
+  description: 新增 reset --scope all --backup --yes，备份并清理全局 ~/.papercode、仓库 .papercode/local、仓库
+    .papercode/runs，不触碰 tracked 项目资产。
   execution:
     mode: sequential
     retry: 0
@@ -56,16 +56,16 @@ steps:
     logs:
     - timestamp: '2026-05-11T09:28:53.533109'
       level: info
-      message: Implementing backup-first reset for global ~/.paper_fucker and ignored
-        workspace .paper_fucker/local plus .paper_fucker/runs while preserving tracked
+      message: Implementing backup-first reset for global ~/.papercode and ignored
+        workspace .papercode/local plus .papercode/runs while preserving tracked
         project assets.
       agent: codex
     - timestamp: '2026-05-11T09:32:55.920413'
       level: info
       message: Implemented backup-first reset runtime. reset --scope all --backup
-        --yes backs up and removes global ~/.paper_fucker plus ignored workspace .paper_fucker/local
-        and .paper_fucker/runs. It refuses ambiguous global/workspace collisions and
-        preserves tracked project assets such as .paper_fucker/skills.
+        --yes backs up and removes global ~/.papercode plus ignored workspace .papercode/local
+        and .papercode/runs. It refuses ambiguous global/workspace collisions and
+        preserves tracked project assets such as .papercode/skills.
       agent: codex
     last_run: '2026-05-11T09:32:55.920413'
     attempt_count: 2
@@ -90,7 +90,7 @@ steps:
       agent: codex
     - timestamp: '2026-05-11T09:33:08.110839'
       level: info
-      message: 'Validation passed: paper_fucker init --help shows Paper Fucker init
+      message: 'Validation passed: papercode init --help shows PaperCode init
         actions; npx --yes bun@1.3.13 --cwd packages/opencode test test/init/init.test.ts
         test/cli/public-surface.test.ts passed (9 pass); npx --yes bun@1.3.13 run
         --cwd packages/opencode typecheck passed.'

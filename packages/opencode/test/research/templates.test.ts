@@ -89,7 +89,7 @@ describe("template resolution", () => {
   })
 
   test("records TemplateSpec and applies Markdown to LaTeX through Python bridge", async () => {
-    const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-template-test-"))
+    const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-template-test-"))
     try {
       const workspace = path.join(dir, "workspace")
       const home = path.join(dir, "home")

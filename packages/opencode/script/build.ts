@@ -219,15 +219,15 @@ for (const item of targets) {
       autoloadTsconfig: true,
       autoloadPackageJson: true,
       target: name.replace(pkg.name, "bun") as any,
-      outfile: `dist/${name}/bin/paper_fucker`,
-      execArgv: [`--user-agent=paper_fucker/${Script.version}`, "--use-system-ca", "--"],
+      outfile: `dist/${name}/bin/papercode`,
+      execArgv: [`--user-agent=papercode/${Script.version}`, "--use-system-ca", "--"],
       windows: {},
     },
     files: embeddedFileMap ? { "opencode-web-ui.gen.ts": embeddedFileMap } : {},
     entrypoints: ["./src/index.ts", parserWorker, workerPath, ...(embeddedFileMap ? ["opencode-web-ui.gen.ts"] : [])],
     define: {
       OPENCODE_VERSION: JSON.stringify(Script.version),
-      PAPER_FUCKER_VERSION: JSON.stringify(productVersion),
+      PAPERCODE_VERSION: JSON.stringify(productVersion),
       OPENCODE_MIGRATIONS: JSON.stringify(migrations),
       OTUI_TREE_SITTER_WORKER_PATH: bunfsRoot + workerRelativePath,
       OPENCODE_WORKER_PATH: workerPath,
@@ -238,7 +238,7 @@ for (const item of targets) {
 
   // Smoke test: only run if binary is for current platform
   if (item.os === process.platform && item.arch === process.arch && !item.abi) {
-    const binaryPath = `dist/${name}/bin/paper_fucker`
+    const binaryPath = `dist/${name}/bin/papercode`
     console.log(`Running smoke test: ${binaryPath} --version`)
     try {
       const versionOutput = await $`${binaryPath} --version`.text()

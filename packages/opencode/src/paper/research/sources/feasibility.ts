@@ -28,8 +28,8 @@ export function assessDirectionFeasibility(input: DirectionFeasibilityInput): Di
   return withSpan(
     "research.sources.direction_feasibility",
     {
-      "paper_fucker.research.topic": input.topic,
-      "paper_fucker.research.full_access": input.full_access === true,
+      "papercode.research.topic": input.topic,
+      "papercode.research.full_access": input.full_access === true,
     },
     (span) => {
       const blockers: string[] = []
@@ -41,7 +41,7 @@ export function assessDirectionFeasibility(input: DirectionFeasibilityInput): Di
       if (openDatasets.length === 0) blockers.push("missing_open_dataset")
 
       if (blockers.includes("dataset_license_conflict")) {
-        span.setAttribute("paper_fucker.research.direction.status", "pause")
+        span.setAttribute("papercode.research.direction.status", "pause")
         return {
           schema_version: "DirectionFeasibility.v1",
           topic: input.topic,
@@ -57,7 +57,7 @@ export function assessDirectionFeasibility(input: DirectionFeasibilityInput): Di
       }
 
       if (blockers.length === 0) {
-        span.setAttribute("paper_fucker.research.direction.status", "feasible")
+        span.setAttribute("papercode.research.direction.status", "feasible")
         return {
           schema_version: "DirectionFeasibility.v1",
           topic: input.topic,
@@ -75,7 +75,7 @@ export function assessDirectionFeasibility(input: DirectionFeasibilityInput): Di
       const turn = input.full_access === true ? feasibleDirection(input.nearby_directions, createdAt) : undefined
       if (turn && blockers.every((blocker) => blocker === "missing_open_dataset")) {
         const turnPlan = discoverDatasets({ topic: turn.topic, candidates: turn.dataset_candidates, now: createdAt })
-        span.setAttribute("paper_fucker.research.direction.status", "turned")
+        span.setAttribute("papercode.research.direction.status", "turned")
         return {
           schema_version: "DirectionFeasibility.v1",
           topic: input.topic,
@@ -94,7 +94,7 @@ export function assessDirectionFeasibility(input: DirectionFeasibilityInput): Di
         }
       }
 
-      span.setAttribute("paper_fucker.research.direction.status", "pause")
+      span.setAttribute("papercode.research.direction.status", "pause")
       return {
         schema_version: "DirectionFeasibility.v1",
         topic: input.topic,

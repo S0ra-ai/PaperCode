@@ -6,8 +6,8 @@ describe("authFromToken", () => {
     expect(authFromToken(btoa("kit:secret"))).toEqual({ username: "kit", password: "secret" })
   })
 
-  test("defaults blank username to paper_fucker", () => {
-    expect(authFromToken(btoa(":secret"))).toEqual({ username: "paper_fucker", password: "secret" })
+  test("defaults blank username to papercode", () => {
+    expect(authFromToken(btoa(":secret"))).toEqual({ username: "papercode", password: "secret" })
   })
 
   test("ignores malformed tokens", () => {
@@ -18,6 +18,6 @@ describe("authFromToken", () => {
 
 describe("authTokenFromCredentials", () => {
   test("encodes credentials with the default username", () => {
-    expect(authTokenFromCredentials({ password: "secret" })).toBe(btoa("paper_fucker:secret"))
+    expect(authTokenFromCredentials({ password: "secret" })).toBe(btoa("papercode:secret"))
   })
 })

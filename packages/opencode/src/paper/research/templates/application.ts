@@ -18,7 +18,7 @@ export async function applyTemplateToMarkdown(
 ): Promise<TemplateApplicationResult> {
   return withSpan(
     "research.template.apply",
-    { "paper_fucker.research.template.id": input.spec.template_id },
+    { "papercode.research.template.id": input.spec.template_id },
     async () => {
       const outputName = input.output_name ?? "paper"
       const workDir = path.join(runDir, "template-work")

@@ -2,7 +2,7 @@ id: local-code-experiment-runner
 title: 本机代码实验 runner 与测试证据闭环
 status: done
 priority: high
-owner: paper-fucker-dev-agent
+owner: papercode-dev-agent
 tags:
 - paper-run
 - experiment
@@ -11,7 +11,7 @@ tags:
 - quality
 depends_on:
 - experiment-protocol-dataset-hardening
-description: 继续增强 Paper Fucker 面向计算机类论文的核心能力：当用户给出代码仓库但没有显式实验 manifest 时，PaperRun
+description: 继续增强 PaperCode 面向计算机类论文的核心能力：当用户给出代码仓库但没有显式实验 manifest 时，PaperRun
   应能基于授权工作区运行受控本机测试命令，提取 pass-rate 指标，形成 host experiment evidence；没有容器复现时仍阻断 final
   export，但草稿必须写出真实命令、测试输出、指标和修复建议。版本线建议 0.14.2-dev。
 execution:
@@ -21,7 +21,7 @@ steps:
 - id: design-local-runner-policy
   title: 设计本机 runner 的安全策略和指标语义
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   execution:
     mode: sequential
@@ -32,19 +32,19 @@ steps:
       level: info
       message: 开始设计本机 runner：仅对用户授权 workspace/code_paths 生效，优先选择 package test/typecheck
         脚本；输出 pass_rate 作为 host exploratory 指标；无容器复现时 final export 仍阻断。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-27T02:55:21.022654'
       level: info
       message: 策略确定：本机 runner 不替代容器复现，不越权执行任意命令；只从分析到的 package scripts 中选择 test/typecheck/check/lint
         语义命令，并以 pass_rate/test_passed 指标生成 exploratory host evidence。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-27T02:55:21.022654'
     attempt_count: 2
   meta: {}
 - id: implement-local-test-runner
   title: 实现授权代码路径的本机测试 runner
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on:
   - design-local-runner-policy
   execution:
@@ -56,19 +56,19 @@ steps:
       level: info
       message: 开始实现本机测试 runner：选择 test/typecheck/check/lint script，运行 proposed host
         exploration，输出 test_pass_rate，不替代 container reproduction。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-27T02:57:46.737743'
       level: info
       message: 已实现本机测试 runner：无 ExperimentEvidenceManifest 且存在授权 code_paths 时，PaperRun
         选择安全 package script 运行 proposed host exploration，记录 test_pass_rate/stdout/stderr/exit_code/wall_time。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-27T02:57:46.737743'
     attempt_count: 2
   meta: {}
 - id: surface-runner-evidence-in-draft
   title: 让草稿展示命令、pass-rate 和复现阻断原因
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on:
   - implement-local-test-runner
   execution:
@@ -79,19 +79,19 @@ steps:
     - timestamp: '2026-05-27T02:58:01.730836'
       level: info
       message: 开始让 DraftPaper 展示 ExperimentRun 命令、状态、metrics、stdout/stderr 摘要。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-27T02:58:14.930470'
       level: info
       message: DraftPaper 已新增 Experiment Runs 章节，展示 host/container run 的命令、exit、metrics、wall_time
         和输出摘要；authoring loop 从 orchestrator 接收 host/container runs。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-27T02:58:14.930470'
     attempt_count: 2
   meta: {}
 - id: validate-code-paper-run
   title: 运行 code PaperRun 与真实模型复评
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on:
   - surface-runner-evidence-in-draft
   execution:
@@ -103,7 +103,7 @@ steps:
       level: info
       message: 开始验证 code PaperRun：先修正 package script 发现和 runner 优先级，避免根目录 intentionally
         failing test 污染代码论文实验证据。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-27T03:41:27.022241'
       level: info
       message: 验证完成：typecheck passed；targeted opencode paper tests passed (13 pass
@@ -113,7 +113,7 @@ steps:
         typecheck, typecheck_pass=1, exit=0, wall_time≈6.1s；DeepSeek live review recorded
         in reports/live-paper-generation-review.md；preview tests, Python tests, README
         version, and CHANGELOG format all passed.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-27T03:41:27.022241'
     attempt_count: 2
   meta: {}

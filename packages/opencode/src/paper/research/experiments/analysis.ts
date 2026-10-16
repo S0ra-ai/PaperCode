@@ -71,7 +71,7 @@ export function analyzeExperimentResults(input: ExperimentAnalysisInput): Result
   return withSpan(
     "research.experiments.analyze",
     {
-      "paper_fucker.research.experiment.plan_id": input.plan.plan_id,
+      "papercode.research.experiment.plan_id": input.plan.plan_id,
     },
     (span) => {
       const metric = primaryMetric(input.plan)
@@ -251,8 +251,8 @@ export function analyzeExperimentResults(input: ExperimentAnalysisInput): Result
       const recommendation = blockers.length > 0 ? "block" : hasUnderperforming ? "revise" : "accept"
       const finalClaimsAllowed = blockers.length === 0 && reproductionStatus === "passed"
 
-      span.setAttribute("paper_fucker.research.experiment.recommendation", recommendation)
-      span.setAttribute("paper_fucker.research.experiment.final_claims_allowed", finalClaimsAllowed)
+      span.setAttribute("papercode.research.experiment.recommendation", recommendation)
+      span.setAttribute("papercode.research.experiment.final_claims_allowed", finalClaimsAllowed)
       return {
         schema_version: "ResultReport.v1",
         plan_id: input.plan.plan_id,

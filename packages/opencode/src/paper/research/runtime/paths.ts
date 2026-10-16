@@ -5,7 +5,7 @@ import os from "os"
 import path from "path"
 import { storageFacts } from "../contracts"
 
-export const PAPER_FUCKER_DIR = ".paper_fucker"
+export const PAPERCODE_DIR = ".papercode"
 export const RUNS_DIR = "runs"
 
 export type ResearchStorageScope = "workspace" | "home"
@@ -22,7 +22,7 @@ export type ResearchRunRoot = {
 }
 
 export function resolveResearchHome(home?: string) {
-  return path.resolve(home ?? process.env.PAPER_FUCKER_TEST_HOME ?? process.env.PAPER_FUCKER_HOME ?? os.homedir())
+  return path.resolve(home ?? process.env.PAPERCODE_TEST_HOME ?? process.env.PAPERCODE_HOME ?? os.homedir())
 }
 
 export function resolveResearchWorkspace(workspace?: string) {
@@ -30,11 +30,11 @@ export function resolveResearchWorkspace(workspace?: string) {
 }
 
 export function workspaceRunRoot(workspace: string) {
-  return path.join(resolveResearchWorkspace(workspace), PAPER_FUCKER_DIR, RUNS_DIR)
+  return path.join(resolveResearchWorkspace(workspace), PAPERCODE_DIR, RUNS_DIR)
 }
 
 export function homeRunRoot(home?: string) {
-  return path.join(resolveResearchHome(home), PAPER_FUCKER_DIR, RUNS_DIR)
+  return path.join(resolveResearchHome(home), PAPERCODE_DIR, RUNS_DIR)
 }
 
 export function runDirectoryName(runId: string) {
@@ -47,7 +47,7 @@ export function runDirectoryPath(root: string, runId: string) {
 
 async function ensureWritableDirectory(dir: string) {
   await mkdir(dir, { recursive: true })
-  const probe = path.join(dir, `.paper_fucker-write-${process.pid}-${randomUUID()}`)
+  const probe = path.join(dir, `.papercode-write-${process.pid}-${randomUUID()}`)
   await writeFile(probe, "")
   await removeProbeFile(probe)
 }

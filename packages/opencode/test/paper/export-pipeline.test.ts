@@ -37,7 +37,7 @@ function runtimeOptions(workspace: string, home: string): ResearchRuntimeOptions
 }
 
 async function newRun() {
-  const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-export-pipeline-"))
+  const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-export-pipeline-"))
   created.push(dir)
   const workspace = path.join(dir, "workspace")
   const home = path.join(dir, "home")

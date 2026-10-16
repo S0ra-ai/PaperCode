@@ -1,6 +1,6 @@
 # Real Paper Orchestrator
 
-> Historical path note: this report predates task-032. Any `packages/server` or `@paper-fucker/server` paths below are provenance only; the current paper_fucker runtime authority is `packages/opencode/src/paper`, and `packages/server` is intentionally absent.
+> Historical path note: this report predates task-032. Any `packages/server` or `@papercode/server` paths below are provenance only; the current papercode runtime authority is `packages/opencode/src/paper`, and `packages/server` is intentionally absent.
 
 Version: 0.1.23-dev
 
@@ -8,7 +8,7 @@ Task: `task-026-real-orchestrator`
 
 ## Summary
 
-paper_fucker now has a paper-domain orchestrator graph that represents the full closed-loop paper workflow. The runner no longer treats missing work as success: missing capabilities or missing concrete handlers produce blocked diagnostics.
+papercode now has a paper-domain orchestrator graph that represents the full closed-loop paper workflow. The runner no longer treats missing work as success: missing capabilities or missing concrete handlers produce blocked diagnostics.
 
 ## Implemented
 

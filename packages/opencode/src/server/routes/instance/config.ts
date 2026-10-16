@@ -18,7 +18,7 @@ export const ConfigRoutes = lazy(() =>
       "/",
       describeRoute({
         summary: "Get configuration",
-        description: "Retrieve the current paper_fucker configuration settings and preferences.",
+        description: "Retrieve the current papercode configuration settings and preferences.",
         operationId: "config.get",
         responses: {
           200: {
@@ -41,7 +41,7 @@ export const ConfigRoutes = lazy(() =>
       "/",
       describeRoute({
         summary: "Update configuration",
-        description: "Update paper_fucker configuration settings and preferences.",
+        description: "Update papercode configuration settings and preferences.",
         operationId: "config.update",
         responses: {
           200: {

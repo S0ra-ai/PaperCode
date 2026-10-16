@@ -9,7 +9,7 @@ tags:
 - roles
 depends_on:
 - task-021-architecture-reframe
-description: Add a paper_fucker model role router that supports all OpenCode provider/model
+description: Add a papercode model role router that supports all OpenCode provider/model
   identifiers and treats DeepSeek only as a default sample provider. It maps planning,
   literature, code analysis, experiments, writing, review, citation, and summarization
   roles to OpenCode model ids with per-role overrides.

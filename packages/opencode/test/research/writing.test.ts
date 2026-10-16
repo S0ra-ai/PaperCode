@@ -63,7 +63,7 @@ describe("writing and claim ledger", () => {
   })
 
   test("records streamed Markdown draft, claim facts, and draft facts", async () => {
-    const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-writing-test-"))
+    const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-writing-test-"))
     try {
       const workspace = path.join(dir, "workspace")
       const home = path.join(dir, "home")

@@ -103,16 +103,16 @@ function userHome(home?: string) {
     return trimmed
   }
   return path.resolve(
-    normalize(home) ?? normalize(process.env.PAPER_FUCKER_TEST_HOME) ?? normalize(process.env.PAPER_FUCKER_HOME) ?? os.homedir(),
+    normalize(home) ?? normalize(process.env.PAPERCODE_TEST_HOME) ?? normalize(process.env.PAPERCODE_HOME) ?? os.homedir(),
   )
 }
 
 export function firstPartySkillPath(skillID: ManagedPaperSkillID, workspace?: string) {
-  const workspaceSource = path.join(path.resolve(workspace ?? process.cwd()), ".paper_fucker", "skills", skillID, "SKILL.md")
+  const workspaceSource = path.join(path.resolve(workspace ?? process.cwd()), ".papercode", "skills", skillID, "SKILL.md")
   if (existsSync(workspaceSource)) return workspaceSource
-  const cwdSource = path.join(process.cwd(), ".paper_fucker", "skills", skillID, "SKILL.md")
+  const cwdSource = path.join(process.cwd(), ".papercode", "skills", skillID, "SKILL.md")
   if (existsSync(cwdSource)) return cwdSource
-  return path.resolve(import.meta.dir, "../../../..", ".paper_fucker", "skills", skillID, "SKILL.md")
+  return path.resolve(import.meta.dir, "../../../..", ".papercode", "skills", skillID, "SKILL.md")
 }
 
 export function firstPartyNatureSkillPath(workspace?: string) {

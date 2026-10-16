@@ -13,7 +13,7 @@ export function checkReferences(input: VerificationGateInput): VerificationFindi
   return withSpan(
     "research.verification.references",
     {
-      "paper_fucker.research.references.available": input.available_source_ids.length,
+      "papercode.research.references.available": input.available_source_ids.length,
     },
     () => {
       const available = new Set(input.available_source_ids)
@@ -58,7 +58,7 @@ export function checkClaimSupport(input: VerificationGateInput): VerificationFin
   return withSpan(
     "research.verification.claims",
     {
-      "paper_fucker.research.claims": input.ledger.entries.length,
+      "papercode.research.claims": input.ledger.entries.length,
     },
     () =>
       input.ledger.entries
@@ -81,7 +81,7 @@ export function checkSourceAuthenticity(input: VerificationGateInput): Verificat
   return withSpan(
     "research.verification.source_authenticity",
     {
-      "paper_fucker.research.sources.records": input.source_records?.length ?? 0,
+      "papercode.research.sources.records": input.source_records?.length ?? 0,
     },
     () => {
       const records = new Map((input.source_records ?? []).map((source) => [source.source_id, source]))
@@ -144,7 +144,7 @@ export function checkDataAndExperiments(input: VerificationGateInput): Verificat
   return withSpan(
     "research.verification.data_experiments",
     {
-      "paper_fucker.research.datasets": input.data_plan.datasets.length,
+      "papercode.research.datasets": input.data_plan.datasets.length,
     },
     () => {
       const licenseFindings = input.data_plan.license_conflicts.map((conflict) =>

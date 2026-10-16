@@ -73,7 +73,7 @@ steps:
     attempt_count: 2
   meta: {}
 - id: task-003-step-03-protect-project-paths
-  title: Preserve paper_fucker project paths
+  title: Preserve papercode project paths
   status: done
   owner: codex
   depends_on:
@@ -92,7 +92,7 @@ steps:
       agent: codex
     - timestamp: '2026-05-08T07:03:03.851268'
       level: info
-      message: Protected-path validation passed. Root README.md remains '# paper_fucker';
+      message: Protected-path validation passed. Root README.md remains '# papercode';
         root LICENSE remains Private License; root CHANGELOG/NOTICE/scripts/.plan/legacy
         are project-owned. Active upstream .github workflows were not imported. Upstream
         README/LICENSE/AGENTS are preserved under upstream/.

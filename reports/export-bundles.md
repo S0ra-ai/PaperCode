@@ -1,6 +1,6 @@
 # Export Bundles Report
 
-> Historical path note: this report predates task-032. Any `packages/server` or `@paper-fucker/server` paths below are provenance only; the current paper_fucker runtime authority is `packages/opencode/src/paper`, and `packages/server` is intentionally absent.
+> Historical path note: this report predates task-032. Any `packages/server` or `@papercode/server` paths below are provenance only; the current papercode runtime authority is `packages/opencode/src/paper`, and `packages/server` is intentionally absent.
 
 TaskFlow task: `task-015-export-bundles`
 Version: `0.1.15-dev`

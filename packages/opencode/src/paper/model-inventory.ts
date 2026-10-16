@@ -126,7 +126,7 @@ function now() {
 }
 
 function paperHome(home = os.homedir()) {
-  return path.join(home, ".paper_fucker")
+  return path.join(home, ".papercode")
 }
 
 export function modelInventoryPath(home = os.homedir()) {

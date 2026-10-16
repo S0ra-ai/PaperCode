@@ -9,7 +9,7 @@ tags:
 - artifacts
 - events
 depends_on:
-- task-004-brand-paper-fucker
+- task-004-brand-papercode
 - task-017-core-contract
 description: Implement the authoritative research runtime inside the first-party packages/server
   TypeScript package. This runtime owns runs, artifacts, event logs, permissions,
@@ -56,8 +56,8 @@ steps:
   owner: codex
   depends_on:
   - task-005-step-01-runtime-architecture
-  description: 'Implement workspace-first run storage: <workspace>/.paper_fucker/runs/<uuid>,
-    with ~/.paper_fucker/runs/<uuid> fallback and a global index.'
+  description: 'Implement workspace-first run storage: <workspace>/.papercode/runs/<uuid>,
+    with ~/.papercode/runs/<uuid> fallback and a global index.'
   execution:
     mode: sequential
     retry: 0
@@ -71,8 +71,8 @@ steps:
       agent: codex
     - timestamp: '2026-05-08T16:23:44.580167'
       level: info
-      message: Implemented workspace-first run storage under <workspace>/.paper_fucker/runs/<run-id>,
-        home fallback under ~/.paper_fucker/runs, run.json plus runtime-state.json,
+      message: Implemented workspace-first run storage under <workspace>/.papercode/runs/<run-id>,
+        home fallback under ~/.papercode/runs, run.json plus runtime-state.json,
         resume/status APIs, and run/global SQLite index refresh. Verified by packages/server
         runtime tests.
       agent: codex
@@ -129,7 +129,7 @@ steps:
       message: Implemented Full Access/Unlimited default policy, bounded 3h/24h policy
         validation, automatic resource snapshot, soft LLM/API/total budget alerts,
         and final gate state updates. Runtime operations emit OpenTelemetry spans
-        through the existing paper_fucker.research tracer wrapper.
+        through the existing papercode.research tracer wrapper.
       agent: codex
     last_run: '2026-05-08T16:24:03.711802'
     attempt_count: 2

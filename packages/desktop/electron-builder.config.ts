@@ -21,13 +21,13 @@ async function signWindows(configuration: { path: string }) {
 }
 
 const channel = (() => {
-  const raw = process.env.PAPER_FUCKER_CHANNEL ?? process.env.OPENCODE_CHANNEL
+  const raw = process.env.PAPERCODE_CHANNEL ?? process.env.OPENCODE_CHANNEL
   if (raw === "dev" || raw === "beta" || raw === "prod") return raw
   return "dev"
 })()
 
 const getBase = (): Configuration => ({
-  artifactName: "paper_fucker-desktop-${os}-${arch}.${ext}",
+  artifactName: "papercode-desktop-${os}-${arch}.${ext}",
   directories: {
     output: "dist",
     buildResources: "resources",
@@ -54,8 +54,8 @@ const getBase = (): Configuration => ({
     sign: true,
   },
   protocols: {
-    name: "paper_fucker",
-    schemes: ["paper-fucker"],
+    name: "papercode",
+    schemes: ["papercode"],
   },
   win: {
     icon: `resources/icons/icon.ico`,
@@ -85,29 +85,29 @@ function getConfig() {
     case "dev": {
       return {
         ...base,
-        appId: "ai.paperfucker.desktop.dev",
-        productName: "paper_fucker Dev",
-        rpm: { packageName: "paper_fucker-dev" },
+        appId: "ai.papercode.desktop.dev",
+        productName: "papercode Dev",
+        rpm: { packageName: "papercode-dev" },
       }
     }
     case "beta": {
       return {
         ...base,
-        appId: "ai.paperfucker.desktop.beta",
-        productName: "paper_fucker Beta",
-        protocols: { name: "paper_fucker Beta", schemes: ["paper-fucker"] },
-        publish: { provider: "github", owner: "ZhuchenZhong", repo: "paper_fucker", channel: "beta" },
-        rpm: { packageName: "paper_fucker-beta" },
+        appId: "ai.papercode.desktop.beta",
+        productName: "papercode Beta",
+        protocols: { name: "papercode Beta", schemes: ["papercode"] },
+        publish: { provider: "github", owner: "ZhuchenZhong", repo: "papercode", channel: "beta" },
+        rpm: { packageName: "papercode-beta" },
       }
     }
     case "prod": {
       return {
         ...base,
-        appId: "ai.paperfucker.desktop",
-        productName: "paper_fucker",
-        protocols: { name: "paper_fucker", schemes: ["paper-fucker"] },
-        publish: { provider: "github", owner: "ZhuchenZhong", repo: "paper_fucker", channel: "latest" },
-        rpm: { packageName: "paper_fucker" },
+        appId: "ai.papercode.desktop",
+        productName: "papercode",
+        protocols: { name: "papercode", schemes: ["papercode"] },
+        publish: { provider: "github", owner: "ZhuchenZhong", repo: "papercode", channel: "latest" },
+        rpm: { packageName: "papercode" },
       }
     }
   }

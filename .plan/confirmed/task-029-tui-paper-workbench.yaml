@@ -9,7 +9,7 @@ tags:
 - workbench
 depends_on:
 - task-028-experiment-mcp-loop
-description: Refactor OpenCode TUI so the default paper_fucker experience is a Chinese
+description: Refactor OpenCode TUI so the default papercode experience is a Chinese
   paper research workbench. It supports topic/code/material intake, model role display,
   MCP/skills/toolchain health, run stage graph, live events, source ledger, claim
   ledger, experiments, diagnostics, pause questions, preview, and export controls.

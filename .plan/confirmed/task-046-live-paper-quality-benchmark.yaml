@@ -40,14 +40,14 @@ steps:
       agent: codex
     - timestamp: '2026-05-10T08:03:12.337205'
       level: info
-      message: 'Benchmark design: topic ''可验证论文自动化系统的闭环生成与真实性审查''; workspace E:\Project\paper_fucker;
+      message: 'Benchmark design: topic ''可验证论文自动化系统的闭环生成与真实性审查''; workspace E:\Project\papercode;
         code paths packages/opencode/src/paper, packages/opencode/src/server/routes/instance/httpapi/handlers/paper.ts,
         packages/opencode/src/cli/cmd/tui/routes/paper; target_profile generic-preprint;
         language zh-CN; budget_tier standard; quality_mode reviewable_bundle; private-first
         egress allowing only selected repo paths; provider smoke uses local DeepSeek
         default model deepseek-v4-pro without logging secrets; Exa MCP, Nature skill,
         pandoc/LaTeX/DOCX and PaperRun export are included as live/toolchain checks.
-        Added .paper_fucker/runs/ to .gitignore before execution so live run artifacts
+        Added .papercode/runs/ to .gitignore before execution so live run artifacts
         stay untracked.'
       agent: codex
     last_run: '2026-05-10T08:03:12.337205'
@@ -169,7 +169,7 @@ steps:
       message: 'Verification passed: targeted PaperRun/code/export/observability tests
         passed (7 pass, 0 fail, 49 expects); npx --yes bun@1.3.13 run --cwd packages/opencode
         typecheck passed; README version 0.4.0-dev matches CHANGELOG latest version;
-        .paper_fucker/local and .paper_fucker/runs are gitignored; strict-style tracked
+        .papercode/local and .papercode/runs are gitignored; strict-style tracked
         secret scan git grep -E ''sk-[A-Za-z0-9]{20,}'' found no matches; TaskFlow
         validate_task passed for task-046 through task-051. Full strict live acceptance
         remains intentionally deferred to task-047 because task-046 proved the current

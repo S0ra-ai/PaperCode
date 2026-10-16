@@ -51,8 +51,8 @@ export function planExperiments(input: ExperimentPlanningInput): ExperimentPlan 
   return withSpan(
     "research.experiments.plan",
     {
-      "paper_fucker.research.topic": input.topic,
-      "paper_fucker.research.method": input.method_name,
+      "papercode.research.topic": input.topic,
+      "papercode.research.method": input.method_name,
     },
     (span) => {
       const primaryMetric = input.primary_metric ?? "accuracy"
@@ -94,8 +94,8 @@ export function planExperiments(input: ExperimentPlanningInput): ExperimentPlan 
           "If container reproduction fails, block final paper claims.",
         ],
       }
-      span.setAttribute("paper_fucker.research.experiments.baselines", plan.baselines.length)
-      span.setAttribute("paper_fucker.research.experiments.ablations", plan.ablations.length)
+      span.setAttribute("papercode.research.experiments.baselines", plan.baselines.length)
+      span.setAttribute("papercode.research.experiments.ablations", plan.ablations.length)
       return plan
     },
   )

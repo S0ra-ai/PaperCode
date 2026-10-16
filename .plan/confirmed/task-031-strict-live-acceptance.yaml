@@ -9,7 +9,7 @@ tags:
 - strict
 depends_on:
 - task-030-paper-authoring-loop
-description: 'Add strict live acceptance that validates the complete paper_fucker
+description: 'Add strict live acceptance that validates the complete papercode
   system: all TaskFlow tasks, README/CHANGELOG version sync, tracked secret scan,
   server/preview/Python/typecheck tests, TUI smoke, at least one OpenCode live provider
   call, Exa live search, Nature profile smoke, pandoc conversion, LaTeX PDF generation,

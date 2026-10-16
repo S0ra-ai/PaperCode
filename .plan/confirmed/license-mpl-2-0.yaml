@@ -2,13 +2,13 @@ id: license-mpl-2-0
 title: 切换项目许可证为 MPL-2.0
 status: done
 priority: high
-owner: paper-fucker-dev-agent
+owner: papercode-dev-agent
 tags:
 - license
 - docs
 - release-surface
 depends_on: []
-description: 将 Paper Fucker 原 private-first/UNLICENSED 许可口径切换为 MPL-2.0，更新许可证正文、包元数据、README/NOTICE
+description: 将 PaperCode 原 private-first/UNLICENSED 许可口径切换为 MPL-2.0，更新许可证正文、包元数据、README/NOTICE
   说明，并纳入当前开发版本验证。
 execution:
   mode: sequential
@@ -17,7 +17,7 @@ steps:
 - id: update-license-files
   title: 更新 LICENSE、README、NOTICE 与 package metadata
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   execution:
     mode: sequential
@@ -27,20 +27,20 @@ steps:
     - timestamp: '2026-05-26T23:44:23.513151'
       level: info
       message: 开始将许可证口径从 private-first/UNLICENSED 切换为 MPL-2.0。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-26T23:46:33.153605'
       level: info
       message: 已用 Mozilla 官方 MPL 2.0 正文替换根 LICENSE，并将 root、packages/opencode、packages/preview
         package metadata、README、NOTICE、docs/project-structure 许可口径切换为 MPL-2.0；root
-        repository URL 同步为 ZhuchenZhong/paper_fucker。
-      agent: paper-fucker-dev-agent
+        repository URL 同步为 ZhuchenZhong/papercode。
+      agent: papercode-dev-agent
     last_run: '2026-05-26T23:46:33.153605'
     attempt_count: 2
   meta: {}
 - id: validate-license-surface
   title: 搜索并验证用户可见许可口径无 UNLICENSED 残留
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   execution:
     mode: sequential
@@ -50,25 +50,25 @@ steps:
     - timestamp: '2026-05-26T23:46:40.417695'
       level: info
       message: 开始搜索 UNLICENSED/private license/S0ra 公开残留，并检查包元数据。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-26T23:46:54.417412'
       level: info
       message: 许可残留检查通过：README、NOTICE、LICENSE、package metadata、docs/specs/CHANGELOG/.github
         中未发现 UNLICENSED、Private License、S0ra-ai 或 package license=MIT/UNLICENSED 的公开残留。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-26T23:58:32.591882'
       level: info
       message: 扩展审计后发现旧安装脚本、桌面壳、provider referer 和多个 package.json 仍有 S0ra-ai/MIT/UNLICENSED
-        口径；已机械替换为 ZhuchenZhong/paper_fucker，并将项目 package license 统一为 MPL-2.0。复搜除 docs/changelog/v0
+        口径；已机械替换为 ZhuchenZhong/papercode，并将项目 package license 统一为 MPL-2.0。复搜除 docs/changelog/v0
         归档外无 S0ra-ai、UNLICENSED、Private License 或 package license=MIT 残留。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-26T23:46:54.417412'
     attempt_count: 2
   meta: {}
 - id: sync-version-changelog
   title: 同步 0.13.1-dev 版本与 CHANGELOG colon DSL
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   execution:
     mode: sequential
@@ -78,13 +78,13 @@ steps:
     - timestamp: '2026-05-27T01:19:56.584814'
       level: info
       message: 开始同步 MPL-2.0 许可证与文档版本检查结果。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-27T01:20:09.252772'
       level: info
       message: 已同步许可证任务结果：根 README 当前显示 MPL-2.0，LICENSE/NOTICE/package metadata 已在工作树中切换；验证通过：scripts/check-readme-version.ps1
         与 scripts/check-changelog-format.ps1 -IncludeArchives；TaskFlow validate_changelog_format/validate_changelog_versions
         均通过。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-27T01:20:09.252772'
     attempt_count: 2
   meta: {}

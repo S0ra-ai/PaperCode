@@ -2,15 +2,15 @@ id: subscription-provider-paper-acceptance
 title: 并入 ChatGPT 与 Copilot 订阅 provider 支持和真实论文验收
 status: done
 priority: high
-owner: paper-fucker-dev-agent
+owner: papercode-dev-agent
 tags:
 - provider
 - chatgpt
 - copilot
 - acceptance
 depends_on: []
-description: 将 ChatGPT 订阅和 GitHub Copilot 订阅作为 Paper Fucker 一等 provider 支持纳入当前迭代：/models
-  中能注册、登录后缓存模型、进入候选池、勾选 allowlist、选择主/备用模型，并参与全阶段动态路由。端到端验收要求使用 Paper Fucker 生成一篇论文包，并用真实模型评审是否符合预期，发现问题继续修改。版本并入
+description: 将 ChatGPT 订阅和 GitHub Copilot 订阅作为 PaperCode 一等 provider 支持纳入当前迭代：/models
+  中能注册、登录后缓存模型、进入候选池、勾选 allowlist、选择主/备用模型，并参与全阶段动态路由。端到端验收要求使用 PaperCode 生成一篇论文包，并用真实模型评审是否符合预期，发现问题继续修改。版本并入
   0.13.1-dev。
 execution:
   mode: sequential
@@ -19,7 +19,7 @@ steps:
 - id: subscription-provider-contract
   title: 固化订阅 provider 库存与路由契约
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   description: 补充 ChatGPT/openai 与 github-copilot 的 provider registration、candidate、allowlist、decision/backup/stage
     routing 测试。
@@ -31,20 +31,20 @@ steps:
     - timestamp: '2026-05-26T23:37:39.557923'
       level: info
       message: 开始补充 ChatGPT 订阅和 GitHub Copilot 订阅 provider 的库存、allowlist、主/备用模型和阶段路由契约测试。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-26T23:38:23.556146'
       level: info
       message: 已补充 model-discovery 测试，明确 ChatGPT/openai 与 github-copilot 作为一等订阅 provider：registration
         kind、候选模型、allowlist、主/备用决策模型、动态/强制阶段路由均通过。验证命令 npx --yes bun@1.3.13 --cwd
         packages/opencode test test/paper/model-discovery.test.ts 通过。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-26T23:38:23.556146'
     attempt_count: 2
   meta: {}
 - id: model-workbench-subscription-ux
   title: 检查并强化 /models 订阅入口体验
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on:
   - subscription-provider-contract
   description: 确保 /models 明确展示 ChatGPT 订阅、Copilot 订阅和其他 OpenAI-compatible provider；旧
@@ -58,19 +58,19 @@ steps:
       level: info
       message: 检查 /models 订阅 provider 入口：当前 TUI 已提供 g ChatGPT 订阅、p Copilot CLI 订阅、c
         其他 provider；补充 README 对外说明，明确三类 provider 和 allowlist/主模型/阶段路由边界。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-26T23:39:34.384706'
       level: info
       message: 已确认并强化 /models 订阅入口体验：TUI 中 ChatGPT 订阅、Copilot CLI 订阅和其他 OpenAI-compatible
         provider 三类入口存在；README 新增“模型与订阅”，说明登录缓存、候选池、主/备用模型、阶段模型和 Agent Team 路由边界。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-26T23:39:34.384706'
     attempt_count: 2
   meta: {}
 - id: live-paper-generation-review
   title: 真实生成论文并自评
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on:
   - model-workbench-subscription-ux
   description: 使用真实 DeepSeek provider 创建 PaperRun、生成 reviewable bundle/forced draft，并调用真实模型评审产物质量，输出报告。
@@ -82,21 +82,21 @@ steps:
     - timestamp: '2026-05-26T23:56:23.538879'
       level: info
       message: 开始执行真实 topic-to-paper benchmark 与真实模型验收。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-26T23:56:31.589470'
       level: info
       message: 已使用本地 ignored DeepSeek provider 真实运行 topic-to-paper benchmark。第一次生成
         run-1bdf0465，真实模型评审判定 forced draft 过薄；修复草稿生成后复跑 run-57641ab1，生成 14 stage、40
         artifacts、148 events、forced markdown/latex/pdf/docx、final export 正确因 unsupported_claim/reproduction_failure
         阻断，并写入 reports/live-paper-generation-review.md。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-26T23:56:31.589470'
     attempt_count: 2
   meta: {}
 - id: fix-acceptance-findings
   title: 修复验收暴露问题
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on:
   - live-paper-generation-review
   description: 根据真实生成与模型评审报告修复阻断或明显不符合预期的问题。
@@ -108,13 +108,13 @@ steps:
     - timestamp: '2026-05-26T23:56:39.158974'
       level: info
       message: 开始修复真实评审发现：forced draft 只有方法占位、没有可审查结构。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-26T23:56:46.165009'
       level: info
       message: 已增强 composeDraftPaper：默认生成 Abstract、Introduction、Related Work、Method、Experiments/Reproducibility、Claim
         Ledger、Limitations、Conclusion，明确呈现 claim/source/artifact 状态和 final gate 阻断原因；新增
         authoring 单测覆盖不再生成单章节占位草稿。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-26T23:56:46.165009'
     attempt_count: 2
   meta: {}
@@ -132,7 +132,7 @@ trace:
   logs: []
   attempt_count: 0
 lock:
-  by: paper-fucker-dev-agent
+  by: papercode-dev-agent
   at: '2026-05-26T23:37:29.493581'
 meta:
   created_at: '2026-05-26T23:37:20.612466'

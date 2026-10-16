@@ -82,7 +82,7 @@ async function clean(dir: string): Promise<void> {
 }
 
 async function fixtureWorkspace() {
-  const root = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-code-metadata-"))
+  const root = await mkdtemp(path.join(os.tmpdir(), "papercode-code-metadata-"))
   cleanup.push(root)
   const workspace = path.join(root, "workspace")
   const home = path.join(root, "home")
@@ -169,7 +169,7 @@ describe("PaperRun code availability metadata", () => {
   test("retries retryable temporary directory cleanup without warning when removal later succeeds", async () => {
     let calls = 0
     const warnings: string[] = []
-    await cleanCodeMetadataTempDir("C:\\Temp\\paper-fucker-code-metadata-test", {
+    await cleanCodeMetadataTempDir("C:\\Temp\\papercode-code-metadata-test", {
       attempts: 3,
       sleep: async () => {},
       gc: () => {},

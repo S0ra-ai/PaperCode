@@ -26,7 +26,7 @@ function Invoke-Checked {
 function Get-SourceArchiveFiles {
     param([string]$Root)
 
-    $temp = Join-Path ([System.IO.Path]::GetTempPath()) ("paper-fucker-release-archive-{0}.tar" -f ([System.Guid]::NewGuid().ToString("N")))
+    $temp = Join-Path ([System.IO.Path]::GetTempPath()) ("papercode-release-archive-{0}.tar" -f ([System.Guid]::NewGuid().ToString("N")))
     try {
         Invoke-Checked -File "git" -Arguments @("-C", $Root, "archive", "--worktree-attributes", "--format=tar", "-o", $temp, "HEAD") -WorkingDirectory $Root | Out-Null
         return @(Invoke-Checked -File "tar" -Arguments @("-tf", $temp) -WorkingDirectory $Root | ForEach-Object { Normalize-PathText $_ })
@@ -118,7 +118,7 @@ $sourceRules = @(
     [PSCustomObject]@{ Name = "legacy"; Pattern = '^legacy(/|$)' },
     [PSCustomObject]@{ Name = "upstream"; Pattern = '^upstream(/|$)' },
     [PSCustomObject]@{ Name = "changelog-archive"; Pattern = '^docs/changelog/v0(/|$)' },
-    [PSCustomObject]@{ Name = "local-runtime"; Pattern = '^\.paper_fucker/(local|runs)(/|$)' },
+    [PSCustomObject]@{ Name = "local-runtime"; Pattern = '^\.papercode/(local|runs)(/|$)' },
     [PSCustomObject]@{ Name = "workspace-cache"; Pattern = '(^|/)(node_modules|tmp|\.turbo)(/|$)' },
     [PSCustomObject]@{ Name = "test-tree"; Pattern = '(^|/)(test|tests)(/|$)' },
     [PSCustomObject]@{ Name = "spec-tree"; Pattern = '(^|/)specs(/|$)' },

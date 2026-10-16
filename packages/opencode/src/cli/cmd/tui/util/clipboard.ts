@@ -48,7 +48,7 @@ export async function read(): Promise<Content | undefined> {
   const os = platform()
 
   if (os === "darwin") {
-    const tmpfile = path.join(tmpdir(), "paper-fucker-clipboard.png")
+    const tmpfile = path.join(tmpdir(), "papercode-clipboard.png")
     try {
       await Process.run(
         [

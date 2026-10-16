@@ -10,8 +10,8 @@ The paper runtime can now discover models from OpenAI-compatible endpoints, keep
 
 - Added `ProviderEndpointConfig`, `ModelDiscoveryResult`, and OpenAI-compatible `/models` discovery.
 - Added secret-safe provider config storage:
-  - public config: `~/.paper_fucker/providers/<provider-id>.json`
-  - API keys: `~/.paper_fucker/local/provider-secrets.json`
+  - public config: `~/.papercode/providers/<provider-id>.json`
+  - API keys: `~/.papercode/local/provider-secrets.json`
 - Added `ModelRoleAssignment` and role/subagent override resolution.
 - Extended `/paper/providers/discover` with POST discovery for user-supplied endpoints.
 - Extended `/paper/model-roles` with POST assignment resolution.

@@ -475,7 +475,7 @@ export async function renderPaperExportPipeline(
         kind: "export_renderer",
         name: file.format,
         status: file.status === "written" ? "succeeded" : "failed",
-        span_name: `paper_fucker.export.${file.format}`,
+        span_name: `papercode.export.${file.format}`,
         attributes: {
           path: file.path,
           bytes: file.bytes,

@@ -89,7 +89,7 @@ describe("crawler data acquisition contracts", () => {
     const artifact = crawledDatasetArtifact({
       run_id: "run-crawl",
       dataset,
-      path: ".paper_fucker/runs/run-crawl/artifacts/crawl-dataset-test.json",
+      path: ".papercode/runs/run-crawl/artifacts/crawl-dataset-test.json",
     })
     const trace = crawlerToolTrace({
       run_id: "run-crawl",

@@ -1,6 +1,6 @@
 # Paper Authoring Loop Report
 
-> Historical path note: this report predates task-032. Any `packages/server` or `@paper-fucker/server` paths below are provenance only; the current paper_fucker runtime authority is `packages/opencode/src/paper`, and `packages/server` is intentionally absent.
+> Historical path note: this report predates task-032. Any `packages/server` or `@papercode/server` paths below are provenance only; the current papercode runtime authority is `packages/opencode/src/paper`, and `packages/server` is intentionally absent.
 
 - Task: `task-030-paper-authoring-loop`
 - Version: `0.1.27-dev`

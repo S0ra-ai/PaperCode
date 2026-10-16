@@ -2,7 +2,7 @@ id: live-preview-monitor
 title: PaperRun 实时 Web 监控
 status: done
 priority: critical
-owner: paper-fucker-dev-agent
+owner: papercode-dev-agent
 tags:
 - preview
 - sse
@@ -18,7 +18,7 @@ steps:
 - id: paperrun-event-stream
   title: 补齐 PaperRun 实时事件流
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   description: PaperRun 更新时产生 stage/draft/agent/cost/gate/preview 事件并可订阅。
   execution:
@@ -29,18 +29,18 @@ steps:
     - timestamp: '2026-05-12T02:54:22.501560'
       level: info
       message: 开始补齐 PaperRun 实时事件流。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-12T02:54:30.332555'
       level: info
       message: PaperRun 增加 live event bus，snapshot 更新会发布 paper.run.snapshot、stage.updated、draft.updated、agent.updated、model.routing_decision、diagnostics.cost_updated、gate.summary_updated、preview/export.updated。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-12T02:54:30.332555'
     attempt_count: 2
   meta: {}
 - id: tui-live-subscribe
   title: TUI 订阅 PaperRun SSE
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   description: PaperRun dashboard 持续刷新 snapshot，不再只读取一次。
   execution:
@@ -51,19 +51,19 @@ steps:
     - timestamp: '2026-05-12T02:54:37.761481'
       level: info
       message: 开始接入 TUI SSE 实时订阅。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-12T02:54:44.204674'
       level: info
       message: TUI PaperRun dashboard 挂载时订阅 /paper/runs/:id/events，持续更新 snapshot，并在卸载时关闭
         monitor。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-12T02:54:44.204674'
     attempt_count: 2
   meta: {}
 - id: web-preview-stream
   title: Web Preview 持续接收 snapshot
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   description: Preview server 绑定 run 更新队列，SSE 推送最新 snapshot，保持 token-protected readonly。
   execution:
@@ -74,19 +74,19 @@ steps:
     - timestamp: '2026-05-12T02:54:50.649077'
       level: info
       message: 开始绑定 Web Preview 与 PaperRun 更新队列。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-12T02:54:57.653336'
       level: info
       message: Preview server handle 新增 updateSnapshot，PaperRun snapshot 发布时会替换 preview
         队列并通过 token-protected readonly SSE 推送。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-12T02:54:57.653336'
     attempt_count: 2
   meta: {}
 - id: live-tests
   title: 实时监控测试
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   description: 覆盖 TUI SSE、Preview SSE、token 拒绝和只读写阻断。
   execution:
@@ -97,12 +97,12 @@ steps:
     - timestamp: '2026-05-12T02:55:03.706391'
       level: info
       message: 开始补充实时监控测试。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-12T02:55:12.614159'
       level: info
       message: run-api 测试覆盖 live SSE；paper-workbench 测试覆盖 TUI SSE snapshot 更新；preview
         测试覆盖 replacement snapshot 推送、token 保护和只读端点。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-12T02:55:12.614159'
     attempt_count: 2
   meta: {}

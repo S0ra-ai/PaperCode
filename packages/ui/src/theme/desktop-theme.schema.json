@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://paper-fucker.local/desktop-theme.json",
-  "title": "paper_fucker Desktop Theme",
-  "description": "A theme definition for the paper_fucker desktop application",
+  "$id": "https://papercode.local/desktop-theme.json",
+  "title": "papercode Desktop Theme",
+  "description": "A theme definition for the papercode desktop application",
   "type": "object",
   "required": ["name", "id", "light", "dark"],
   "properties": {

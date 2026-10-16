@@ -1,6 +1,6 @@
 # Model Router Report
 
-> Historical path note: this report predates task-032. Any `packages/server` or `@paper-fucker/server` paths below are provenance only; the current paper_fucker runtime authority is `packages/opencode/src/paper`, and `packages/server` is intentionally absent.
+> Historical path note: this report predates task-032. Any `packages/server` or `@papercode/server` paths below are provenance only; the current papercode runtime authority is `packages/opencode/src/paper`, and `packages/server` is intentionally absent.
 
 Version: `0.1.19-dev`
 
@@ -10,7 +10,7 @@ Date: `2026-05-09`
 
 ## Decision
 
-paper_fucker model selection is role-based and OpenCode-provider-agnostic. DeepSeek remains the default sample model, but the router accepts any OpenCode `provider/model` id and supports per-role overrides.
+papercode model selection is role-based and OpenCode-provider-agnostic. DeepSeek remains the default sample model, but the router accepts any OpenCode `provider/model` id and supports per-role overrides.
 
 ## Roles
 

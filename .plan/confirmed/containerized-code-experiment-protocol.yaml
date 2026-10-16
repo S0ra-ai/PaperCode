@@ -2,7 +2,7 @@ id: containerized-code-experiment-protocol
 title: 代码论文容器复现与基线协议
 status: done
 priority: high
-owner: paper-fucker-dev-agent
+owner: papercode-dev-agent
 tags:
 - paper-run
 - experiment
@@ -12,7 +12,7 @@ tags:
 - quality
 depends_on:
 - local-code-experiment-runner
-description: 基于真实 Paper Fucker 自生成论文和 DeepSeek 复评结论，继续补齐计算机类论文能力：host typecheck/test
+description: 基于真实 PaperCode 自生成论文和 DeepSeek 复评结论，继续补齐计算机类论文能力：host typecheck/test
   只能作为探索证据，系统需要识别用户仓库中的实验协议、基线/消融脚本和容器复现入口；没有明确容器或 baseline runner 时，草稿必须把它写成未满足协议，而不是默认生成
   BM25/Dense/RAG 等无关基线。版本线建议 0.14.3-dev。
 execution:
@@ -22,7 +22,7 @@ steps:
 - id: design-experiment-protocol-contract
   title: 设计代码仓库实验协议契约
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   execution:
     mode: sequential
@@ -33,20 +33,20 @@ steps:
       level: info
       message: 开始设计代码仓库实验协议：把 host exploration、container reproduction、proposed/baseline/ablation
         显式建模；无协议时不再生成误导性通用 baseline。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-27T03:55:53.556874'
       level: info
       message: 新增 ExperimentProtocol.v1：显式记录 proposed/baseline/ablation/container_reproduction
         entry、命令、metric、source_range 和缺口；ExperimentPlan 支持传入显式 proposed/baseline/ablation
         commands，并可关闭默认占位 baseline。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-27T03:55:53.556874'
     attempt_count: 2
   meta: {}
 - id: discover-project-experiment-protocol
   title: 从仓库脚本和 manifest 发现 proposed/baseline/ablation/container 入口
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on:
   - design-experiment-protocol-contract
   execution:
@@ -57,19 +57,19 @@ steps:
     - timestamp: '2026-05-27T03:56:09.252285'
       level: info
       message: 开始实现从 package scripts 到 ExperimentProtocol.v1 的发现链路。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-27T03:56:24.611585'
       level: info
       message: 从代码分析得到的 package scripts 生成实验协议：当前仓库发现 proposed:typecheck，metric=typecheck_pass；未发现
         baseline/ablation/container_reproduction 协议。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-27T03:56:24.611585'
     attempt_count: 2
   meta: {}
 - id: block-generic-baseline-placeholders
   title: 无协议时阻断通用基线占位并生成修复建议
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on:
   - discover-project-experiment-protocol
   execution:
@@ -80,19 +80,19 @@ steps:
     - timestamp: '2026-05-27T03:56:38.904352'
       level: info
       message: 开始移除无协议时的通用 baseline/ablation 占位，改为协议缺口。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-27T03:56:48.625015'
       level: info
       message: 代码场景无显式协议时不再自动注入 BM25/Dense/RAG/claim-ledger ablation；DraftPaper 的
         Evaluation Protocol 显示 Baselines/Ablations=none，并列出 missing_baseline_runner、missing_ablation_runner、missing_container_reproduction_runner。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-27T03:56:48.625015'
     attempt_count: 2
   meta: {}
 - id: validate-container-protocol-benchmark
   title: 重跑代码论文 benchmark 与真实模型复评
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on:
   - block-generic-baseline-placeholders
   execution:
@@ -103,14 +103,14 @@ steps:
     - timestamp: '2026-05-27T03:57:02.276610'
       level: info
       message: 开始验证协议层：typecheck、PaperRun 回归、code benchmark、报告与格式检查。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-27T03:57:36.481965'
       level: info
       message: 验证完成：opencode typecheck passed；PaperRun/authoring/experiment 回归通过；code
         benchmark run-0d1890ee-fb87-4827-b100-4d6d22660e3f blocked final export as
         expected，artifacts=41，protocol gaps recorded；preview tests、Python tests、README
         version、CHANGELOG format all passed。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-27T03:57:36.481965'
     attempt_count: 2
   meta: {}

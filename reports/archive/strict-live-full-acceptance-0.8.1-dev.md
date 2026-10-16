@@ -15,8 +15,8 @@
 | `preview-tests` | pass | 14.13 | $ bun test --timeout 30000 bun test v1.3.13 (bf2e2cec)  test\preview.test.ts: (pass) preview server > serves token-protected read-only preview endpoints (pass) preview server > cancels stale render jobs and keeps the newest markdown [32.00ms]   2 pass  0 fail  9 expect() calls Ran 2 tests across 1 file. [79.00ms] |
 | `python-tests` | pass | 3.463 | .................. ---------------------------------------------------------------------- Ran 18 tests in 1.549s  OK |
 | `server-typecheck` | pass | 22.984 | $ tsgo --noEmit |
-| `workspace-typecheck` | pass | 24.783 | @opencode-ai/console-app:typecheck: cache hit, replaying logs 53e5d5b3e8363eda @opencode-ai/console-app:typecheck: $ tsgo --noEmit @opencode-ai/plugin:typecheck: cache hit, replaying logs 0b9f556e6360790a @opencode-ai/plugin:typecheck: $ tsgo --noEmit @opencode-ai/console-function:typecheck: cache hit, replaying logs adfdc1becded7ae3 @opencode-ai/console-function:typecheck: $ tsgo --noEmit paper_fucker:typecheck: $ tsgo --noEmit   Tasks:    13 successful, 13 total Cached:    12 cached, 13 total   Time:    8.647s   |
-| `opencode-tui-smoke` | pass | 21.28 | local paper_fucker CLI help responded |
+| `workspace-typecheck` | pass | 24.783 | @opencode-ai/console-app:typecheck: cache hit, replaying logs 53e5d5b3e8363eda @opencode-ai/console-app:typecheck: $ tsgo --noEmit @opencode-ai/plugin:typecheck: cache hit, replaying logs 0b9f556e6360790a @opencode-ai/plugin:typecheck: $ tsgo --noEmit @opencode-ai/console-function:typecheck: cache hit, replaying logs adfdc1becded7ae3 @opencode-ai/console-function:typecheck: $ tsgo --noEmit papercode:typecheck: $ tsgo --noEmit   Tasks:    13 successful, 13 total Cached:    12 cached, 13 total   Time:    8.647s   |
+| `opencode-tui-smoke` | pass | 21.28 | local papercode CLI help responded |
 | `live-provider-call` | pass | 1.558 | provider deepseek model deepseek-v4-pro responded |
 | `exa-live-search` | pass | 0.334 | Exa MCP remote initialize responded |
 | `nature-skill-profile` | pass | 3.758 | nature-paper skill installed and official guidance reachable |

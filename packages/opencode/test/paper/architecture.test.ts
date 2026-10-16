@@ -1,13 +1,13 @@
 import { describe, expect, test } from "bun:test"
 import {
-  PAPER_FUCKER_ARCHITECTURE,
+  PAPERCODE_ARCHITECTURE,
   SUPPORTED_PAPER_INPUT_MODES,
   describePaperSystem,
 } from "@/paper"
 
-describe("paper_fucker paper system architecture", () => {
-  test("frames the model/agent substrate and paper_fucker as the paper domain system", () => {
-    expect(PAPER_FUCKER_ARCHITECTURE.layers).toEqual([
+describe("papercode paper system architecture", () => {
+  test("frames the model/agent substrate and papercode as the paper domain system", () => {
+    expect(PAPERCODE_ARCHITECTURE.layers).toEqual([
       {
         id: "model_agent_substrate",
         owns: ["providers", "models", "agents", "sessions", "tools", "mcp", "skills", "tui", "permissions"],
@@ -46,7 +46,7 @@ describe("paper_fucker paper system architecture", () => {
       "model_provider_runtime",
       "agent_runtime",
       "managed_skills",
-      "paper_fucker_tools",
+      "papercode_tools",
     ])
   })
 })

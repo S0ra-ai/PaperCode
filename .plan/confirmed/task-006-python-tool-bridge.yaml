@@ -42,8 +42,8 @@ steps:
       level: info
       message: 'Defined the boundary: Python provides structured MCP-style tools and
         one-shot CLI helpers; packages/server remains authoritative and records outputs
-        as events/artifacts. External tools are auto-discovered from PATH, PAPER_FUCKER_TOOL_*
-        env vars, or ~/.paper_fucker/tools.json user links.'
+        as events/artifacts. External tools are auto-discovered from PATH, PAPERCODE_TOOL_*
+        env vars, or ~/.papercode/tools.json user links.'
       agent: codex
     last_run: '2026-05-08T16:42:44.485096'
     attempt_count: 2
@@ -68,8 +68,8 @@ steps:
       agent: codex
     - timestamp: '2026-05-08T16:42:55.424020'
       level: info
-      message: 'Created research-tools Python CLI/project surface: paper-fucker-tools
-        entrypoint, python -m paper_fucker_tools, pydantic result models, external
+      message: 'Created research-tools Python CLI/project surface: papercode-tools
+        entrypoint, python -m papercode_tools, pydantic result models, external
         tool discovery/link config, MCP SDK adapter, and unittest coverage.'
       agent: codex
     last_run: '2026-05-08T16:42:55.424020'

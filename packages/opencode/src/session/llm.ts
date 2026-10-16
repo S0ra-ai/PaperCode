@@ -370,18 +370,18 @@ const live: Layer.Layer<
         maxOutputTokens: params.maxOutputTokens,
         abortSignal: input.abort,
         headers: {
-          ...(input.model.providerID.startsWith("paper_fucker") || input.model.providerID.startsWith("opencode")
+          ...(input.model.providerID.startsWith("papercode") || input.model.providerID.startsWith("opencode")
             ? {
-                "x-paper-fucker-project": opencodeProjectID,
-                "x-paper-fucker-session": input.sessionID,
-                "x-paper-fucker-request": input.user.id,
-                "x-paper-fucker-client": Flag.OPENCODE_CLIENT,
-                "User-Agent": `paper_fucker/${InstallationVersion}`,
+                "x-papercode-project": opencodeProjectID,
+                "x-papercode-session": input.sessionID,
+                "x-papercode-request": input.user.id,
+                "x-papercode-client": Flag.OPENCODE_CLIENT,
+                "User-Agent": `papercode/${InstallationVersion}`,
               }
             : {
                 "x-session-affinity": input.sessionID,
                 ...(input.parentSessionID ? { "x-parent-session-id": input.parentSessionID } : {}),
-                "User-Agent": `paper_fucker/${InstallationVersion}`,
+                "User-Agent": `papercode/${InstallationVersion}`,
               }),
           ...input.model.headers,
           ...headers,

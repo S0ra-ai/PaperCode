@@ -3,7 +3,7 @@ import { InstallationChannel } from "../installation/version"
 
 function currentKey(key: string) {
   if (!key.startsWith("OPENCODE")) return key
-  return `PAPER_FUCKER${key.slice("OPENCODE".length)}`
+  return `PAPERCODE${key.slice("OPENCODE".length)}`
 }
 
 function envValue(key: string) {

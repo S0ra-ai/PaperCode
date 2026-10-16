@@ -10,8 +10,8 @@ tags:
 - cleanup
 depends_on: []
 description: Convert the legacy docs/rebuild planning files into TaskFlow execution
-  truth for paper_fucker. Preserve source hashes and synchronization notes in TaskFlow
-  logs, translate outdated IntelliGen decisions to the confirmed paper_fucker architecture,
+  truth for papercode. Preserve source hashes and synchronization notes in TaskFlow
+  logs, translate outdated IntelliGen decisions to the confirmed papercode architecture,
   then remove docs/rebuild so .plan is the only active plan source.
 execution:
   mode: sequential
@@ -53,7 +53,7 @@ steps:
   - task-000-step-01-source-inventory
   description: Map still-valid planning content to confirmed TaskFlow tasks, rewriting
     outdated IntelliGen, ~/.intelligen, and Python-core-authority decisions to the
-    confirmed paper_fucker OpenCode TypeScript runtime architecture.
+    confirmed papercode OpenCode TypeScript runtime architecture.
   execution:
     mode: sequential
     retry: 0
@@ -62,14 +62,14 @@ steps:
     - timestamp: '2026-05-08T05:54:53.198038'
       level: info
       message: Mapping old rebuild docs into TaskFlow tasks and rewriting outdated
-        IntelliGen/Python-core authority decisions to paper_fucker/OpenCode TypeScript
+        IntelliGen/Python-core authority decisions to papercode/OpenCode TypeScript
         authority.
       agent: codex
     - timestamp: '2026-05-08T05:55:00.377380'
       level: info
       message: 'Mapped docs/rebuild content into TaskFlow: architecture and artifacts/stages
         feed task-017-core-contract plus task-005/006/008; decisions feed task-001
-        through task-016 while replacing IntelliGen with paper_fucker and Python-core
+        through task-016 while replacing IntelliGen with papercode and Python-core
         authority with OpenCode TypeScript runtime authority; migration feeds task-002/task-003/task-004/task-016;
         TUI/permissions feed task-004/task-005/task-007/task-008/task-009/task-014;
         phase-1 acceptance feeds task-018-phase-1-acceptance. Old docs are no longer

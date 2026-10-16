@@ -47,7 +47,7 @@ const providers = await WithInstance.provide({
 const provider = providers[providerID as keyof typeof providers]
 if (!provider) {
   console.error(`未找到可用 provider: ${providerID}`)
-  console.error(`请先完成登录：paper_fucker.exe auth login --provider ${providerID}`)
+  console.error(`请先完成登录：papercode.exe auth login --provider ${providerID}`)
   process.exit(1)
 }
 

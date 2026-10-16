@@ -10,7 +10,7 @@ tags:
 - skills
 - changelog
 depends_on: []
-description: 在 release/0.8.5 稳定阶段实现 Paper Fucker 模型工作台、动态模型 allowlist 决策、Nature Paper
+description: 在 release/0.8.5 稳定阶段实现 PaperCode 模型工作台、动态模型 allowlist 决策、Nature Paper
   Skill 内置安装检查，并收口 root CHANGELOG 巨型条目与缩进治理。
 execution:
   mode: sequential

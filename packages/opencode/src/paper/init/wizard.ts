@@ -7,7 +7,7 @@ import {
   writeConfig,
   writeToolLinks,
   type ModelEndpointConfig,
-  type PaperFuckerConfig,
+  type PaperCodeConfig,
 } from "./config"
 import type { ModelRoleConfig } from "../model-router"
 import { discoverInitTools, type ToolDiscoveryReport } from "./discovery"
@@ -32,14 +32,14 @@ export type InitWizardInput = {
   tool_links?: Record<string, string>
   secrets?: Record<string, string>
   secrets_passphrase?: string
-  preview?: Partial<PaperFuckerConfig["preview"]>
-  budgets?: PaperFuckerConfig["budgets"]
-  access?: Partial<PaperFuckerConfig["access"]>
+  preview?: Partial<PaperCodeConfig["preview"]>
+  budgets?: PaperCodeConfig["budgets"]
+  access?: Partial<PaperCodeConfig["access"]>
 }
 
 export type InitWizardResult = {
   paths: ReturnType<typeof initPaths>
-  config: PaperFuckerConfig
+  config: PaperCodeConfig
   tools: ToolDiscoveryReport
   skills: PaperSkillInstallResult
   managed_capabilities: PaperManagedCapability[]
@@ -52,9 +52,9 @@ function nowIso() {
 
 export async function runInitWizard(input: InitWizardInput): Promise<InitWizardResult> {
   return withSpan(
-    "paper_fucker.init.run",
+    "papercode.init.run",
     {
-      "paper_fucker.init.home": input.home ?? "",
+      "papercode.init.home": input.home ?? "",
     },
     async (span) => {
       const paths = initPaths(input.home)
@@ -86,9 +86,9 @@ export async function runInitWizard(input: InitWizardInput): Promise<InitWizardR
         home: input.home,
         workspace: input.workspace,
       })
-      span.setAttribute("paper_fucker.init.tools.available", Object.values(tools.tools).filter((tool) => tool.status === "available").length)
-      span.setAttribute("paper_fucker.init.secrets.written", wroteSecrets)
-      span.setAttribute("paper_fucker.init.skills.nature.restart_required", skills.restart_required)
+      span.setAttribute("papercode.init.tools.available", Object.values(tools.tools).filter((tool) => tool.status === "available").length)
+      span.setAttribute("papercode.init.secrets.written", wroteSecrets)
+      span.setAttribute("papercode.init.skills.nature.restart_required", skills.restart_required)
       return { paths, config, tools, skills, managed_capabilities: managedCapabilities, wrote_secrets: wroteSecrets }
     },
   )

@@ -4,7 +4,7 @@ PaperCode 的用户级项目状态围绕 `PaperRun` 展开，而不是旧 OpenCo
 
 ### 关系
 
-- `Workspace`：用户当前工作目录，可能包含代码、数据、论文材料、实验日志和 `.paper_fucker/` 本地状态。
+- `Workspace`：用户当前工作目录，可能包含代码、数据、论文材料、实验日志和 `.papercode/` 本地状态。
 - `PaperRun`：一次论文研究与产出流程，包含 intake、stage graph、events、source ledger、claim ledger、experiment status、agent tree、diagnostics、pause questions、preview/export state。
 - `Internal Session`：OpenCode substrate 的内部会话，只服务于 model/tool/agent 执行。它可以被 `PaperRun.internal_sessions[]` 引用，但不作为用户主入口暴露。
 - `Provider/Model Role`：由 PaperCode model role router 解析，支持不同角色使用不同 provider/model。
@@ -13,16 +13,16 @@ PaperCode 的用户级项目状态围绕 `PaperRun` 展开，而不是旧 OpenCo
 ### 用户入口
 
 ```text
-paper_fucker
-paper_fucker init
-paper_fucker init doctor
-paper_fucker init reset --scope all --backup --yes
-paper_fucker run "<topic>"
-paper_fucker run --code <path> "<topic>"
-paper_fucker preview <run-id>
-paper_fucker export <run-id>
-paper_fucker skills list
-paper_fucker mcp add <name> --url <url>
+papercode
+papercode init
+papercode init doctor
+papercode init reset --scope all --backup --yes
+papercode run "<topic>"
+papercode run --code <path> "<topic>"
+papercode preview <run-id>
+papercode export <run-id>
+papercode skills list
+papercode mcp add <name> --url <url>
 ```
 
 ### PaperRun API

@@ -35,7 +35,7 @@ async function clean(dir: string, attempts = 80): Promise<void> {
 }
 
 async function fixtureCodebase() {
-  const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-code-to-paper-test-"))
+  const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-code-to-paper-test-"))
   await mkdir(path.join(dir, "src"), { recursive: true })
   await mkdir(path.join(dir, "test"), { recursive: true })
   await writeFile(
@@ -198,7 +198,7 @@ describe("code-to-paper analysis", () => {
 
   test("records code-to-paper artifacts into a research run", async () => {
     const workspace = await fixtureCodebase()
-    const home = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-code-to-paper-home-"))
+    const home = await mkdtemp(path.join(os.tmpdir(), "papercode-code-to-paper-home-"))
     try {
       const options = runtimeOptions(workspace, home)
       const handle = await createResearchRun({ topic: "code paper", workspace }, options)
@@ -222,7 +222,7 @@ describe("code-to-paper analysis", () => {
 
   test("writes valid JSON artifacts when optional fields are undefined", async () => {
     const workspace = await fixtureCodebase()
-    const home = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-code-to-paper-home-"))
+    const home = await mkdtemp(path.join(os.tmpdir(), "papercode-code-to-paper-home-"))
     try {
       const options = runtimeOptions(workspace, home)
       const handle = await createResearchRun({ topic: "artifact json", workspace }, options)

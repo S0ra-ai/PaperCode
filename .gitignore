@@ -6,8 +6,8 @@ node_modules
 .idea
 .vscode
 .codex
-.paper_fucker/local/
-.paper_fucker/runs/
+.papercode/local/
+.papercode/runs/
 *~
 playground
 tmp
@@ -21,8 +21,8 @@ refs
 Session.vim
 /opencode.json
 a.out
-/paper_fucker
-/paper_fucker.exe
+/papercode
+/papercode.exe
 /papercode
 /papercode.exe
 target
@@ -37,3 +37,6 @@ logs/
 tsconfig.tsbuildinfo
 __pycache__/
 *.py[cod]
+
+# Python environment for research-tools
+research-tools/.venv/

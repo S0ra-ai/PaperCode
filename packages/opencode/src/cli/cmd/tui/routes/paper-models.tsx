@@ -178,7 +178,7 @@ export function PaperModelWorkbenchPage() {
     try {
       const response = await sdk.fetch(new URL("paper/model-inventory", sdk.url), {
         headers: {
-          ...(sdk.directory ? { "x-paper-fucker-directory": sdk.directory } : {}),
+          ...(sdk.directory ? { "x-papercode-directory": sdk.directory } : {}),
         },
       })
       return await readTuiJsonResponse<ModelInventoryPayload>(response, "模型工作台读取失败")
@@ -300,7 +300,7 @@ export function PaperModelWorkbenchPage() {
       method: "POST",
       headers: {
         "content-type": "application/json",
-        ...(sdk.directory ? { "x-paper-fucker-directory": sdk.directory } : {}),
+        ...(sdk.directory ? { "x-papercode-directory": sdk.directory } : {}),
       },
       body: JSON.stringify(body),
     })
@@ -807,7 +807,7 @@ export function PaperModelWorkbenchPage() {
           <box width={detailWidth()} flexShrink={0} flexDirection="column" gap={1} paddingLeft={1} border={["left"]} borderColor={theme.borderSubtle}>
             <text fg={theme.accent} attributes={TextAttributes.BOLD}>说明</text>
             <text fg={theme.textMuted}>{SECTION_DESCRIPTIONS[currentSection()]}</text>
-            <text fg={theme.textMuted}>x 清空全部只修改草稿；Ctrl+S 后写入 ~/.paper_fucker/model-inventory.json。</text>
+            <text fg={theme.textMuted}>x 清空全部只修改草稿；Ctrl+S 后写入 ~/.papercode/model-inventory.json。</text>
             <text fg={theme.textMuted}>候选池是 PaperRun 和 Agent Team 的唯一模型来源。</text>
             <text fg={theme.textMuted}>动态阶段模型允许运行中按质量、成本和上下文重新选择。</text>
           </box>

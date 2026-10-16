@@ -2,7 +2,7 @@ id: experiment-starter-file-artifacts
 title: 实验 starter 文件物化为独立 artifacts
 status: done
 priority: medium
-owner: paper-fucker-dev-agent
+owner: papercode-dev-agent
 tags:
 - paper-run
 - experiments
@@ -18,7 +18,7 @@ steps:
 - id: emit-file-artifacts
   title: 写入 starter file artifacts
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   description: 为 starter pack 中每个模板文件写入独立 ResearchArtifact，并保留文件用途和 starter pack 关联。
   execution:
@@ -29,19 +29,19 @@ steps:
     - timestamp: '2026-05-27T09:47:42.983302'
       level: info
       message: 开始将 ExperimentProtocolStarterPack.v1 的模板文件同步写入独立 ResearchArtifact。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-27T10:06:41.923814'
       level: info
       message: 已将 ExperimentProtocolStarterPack.v1 中的 baseline/ablation/Dockerfile/README
         模板写成独立 ExperimentProtocolStarterFile.v1 ResearchArtifact，并回写 artifact_id、artifact_path、mime_type。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-27T10:06:41.923814'
     attempt_count: 2
   meta: {}
 - id: link-file-artifacts
   title: 链接 starter pack 与 evidence ids
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on:
   - emit-file-artifacts
   description: 将 starter file artifact ids 回写到 starter pack/evidence artifact ids，确保
@@ -55,20 +55,20 @@ steps:
       level: info
       message: 开始验证 starter pack、Preview monitor、draft/export 与 evidence artifact
         ids 的追踪链路。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-27T10:10:09.006340'
       level: info
       message: 真实 code benchmark run-cd251fd2-ce6b-4e11-be02-592d7bae22a1 通过：Preview
         monitor 暴露 4 个 starter artifact_path，draft/forced export 标出 artifact 路径，evidence
         artifact 列表包含 starter file artifact ids。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-27T10:10:09.006340'
     attempt_count: 2
   meta: {}
 - id: validate-file-artifacts
   title: 测试与实跑验证
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on:
   - link-file-artifacts
   description: 补充测试并运行 code benchmark，确认 run artifacts 下存在可复制 starter files。
@@ -80,13 +80,13 @@ steps:
     - timestamp: '2026-05-27T10:10:27.689447'
       level: info
       message: 开始补充报告并运行回归验证。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-27T10:12:25.903255'
       level: info
       message: 验证通过：typecheck pass；preview test 3 pass；PaperRun/TUI targeted 15 pass；Python
         research tools 19 pass；README version 与 CHANGELOG format 检查通过；live code benchmark
         run-cd251fd2-ce6b-4e11-be02-592d7bae22a1 生成 47 artifacts 并包含 ExperimentProtocolStarterFile.v1。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-27T10:12:25.903255'
     attempt_count: 2
   meta: {}

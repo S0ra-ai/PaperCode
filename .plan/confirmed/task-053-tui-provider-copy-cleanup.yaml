@@ -21,7 +21,7 @@ steps:
   owner: codex
   depends_on: []
   description: Replace remaining OpenCode-branded provider/home example text in the
-    Paper Fucker TUI home surface with generic provider and paper_fucker examples.
+    PaperCode TUI home surface with generic provider and papercode examples.
   execution:
     mode: sequential
     retry: 0
@@ -29,7 +29,7 @@ steps:
     logs:
     - timestamp: '2026-05-10T10:23:21.485981'
       level: info
-      message: Updating Paper Fucker TUI home/tips user-visible copy to avoid legacy
+      message: Updating PaperCode TUI home/tips user-visible copy to avoid legacy
         OpenCode product wording.
       agent: codex
     - timestamp: '2026-05-10T10:24:09.462940'

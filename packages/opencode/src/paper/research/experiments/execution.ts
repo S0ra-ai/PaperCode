@@ -148,7 +148,7 @@ export function parseExperimentMetrics(stdout: string, spec: MetricSpec, metricN
   } catch {}
   const metrics: ExperimentMetric[] = []
   for (const line of stdout.split(/\r?\n/)) {
-    const payload = line.replace(/^PAPER_FUCKER_METRICS?\s+/, "")
+    const payload = line.replace(/^PAPERCODE_METRICS?\s+/, "")
     try {
       metrics.push(...parse(JSON.parse(payload)))
     } catch {}

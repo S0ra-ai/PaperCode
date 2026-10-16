@@ -75,7 +75,7 @@ describe("research capability registry", () => {
     const customCapability: ResearchCapability = {
       name: "custom.paper-check",
       type: "first_party_tool",
-      substrate: "paper_fucker",
+      substrate: "papercode",
       title: "Custom paper check",
       description: "Fixture capability used to prove registration and trace metadata.",
       input_schema: { type: "object" },
@@ -92,11 +92,11 @@ describe("research capability registry", () => {
       stage: "verification",
       capability_name: "custom.paper-check",
       capability_type: "first_party_tool",
-      substrate: "paper_fucker",
+      substrate: "papercode",
       trust: "first_party",
       cost: "free",
       network: "none",
-      otel_span_name: "paper_fucker.capability.custom.paper-check",
+      otel_span_name: "papercode.capability.custom.paper-check",
     })
     expect(() => registry.register(customCapability)).toThrow('Research capability "custom.paper-check" is already registered')
   })

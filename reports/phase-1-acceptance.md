@@ -1,6 +1,6 @@
 # Phase 1 Acceptance Report
 
-> Historical path note: this report predates task-032. Any `packages/server` or `@paper-fucker/server` paths below are provenance only; the current paper_fucker runtime authority is `packages/opencode/src/paper`, and `packages/server` is intentionally absent.
+> Historical path note: this report predates task-032. Any `packages/server` or `@papercode/server` paths below are provenance only; the current papercode runtime authority is `packages/opencode/src/paper`, and `packages/server` is intentionally absent.
 
 Date: 2026-05-09
 TaskFlow task: `task-018-phase-1-acceptance`
@@ -13,9 +13,9 @@ Phase 1 baseline passed with one corrective change: the runtime now exposes expl
 ## Checks
 
 - Migration and provenance: passed. `legacy/` contains Folio and IntelliGen archives, `upstream/opencode-manifest.json` records the OpenCode import, and `NOTICE.md` preserves OpenCode MIT provenance.
-- Local secrets: passed. `.paper_fucker/local/deepseek.env` and `.paper_fucker/local/model-defaults.json` are ignored by `.gitignore`.
-- Branding and namespace: passed. README, init diagnostics, run storage, Python tools, and runtime paths use `paper_fucker` and `~/.paper_fucker`.
-- Native Windows startup: passed. `paper_fucker --help` and `paper_fucker --version` ran in native Windows PowerShell through Bun and returned paper_fucker command metadata and version `local`.
+- Local secrets: passed. `.papercode/local/deepseek.env` and `.papercode/local/model-defaults.json` are ignored by `.gitignore`.
+- Branding and namespace: passed. README, init diagnostics, run storage, Python tools, and runtime paths use `papercode` and `~/.papercode`.
+- Native Windows startup: passed. `papercode --help` and `papercode --version` ran in native Windows PowerShell through Bun and returned papercode command metadata and version `local`.
 - Research skeleton: passed. Existing runtime tests create, index, resume, and inspect research runs with runtime state, event facts, artifact facts, cost state, final gate state, Python bridge artifacts, and init diagnostics.
 - No fake output: passed. `phaseOneStageStubs()` returns explicit `not_implemented` records for template, literature, data, experiment, writing, verification, and export. `assertAuthenticResearchOutput()` rejects `stub`, `synthetic`, and `fake` output provenance and rejects final export unless the authenticity gate is passed.
 

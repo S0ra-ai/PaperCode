@@ -8,7 +8,7 @@ tags:
 - version
 - cli
 depends_on: []
-description: 修复源码构建后的 paper_fucker.exe --version 仍显示内部预览构建号的问题，使用户可见 CLI 版本跟随根 CHANGELOG
+description: 修复源码构建后的 papercode.exe --version 仍显示内部预览构建号的问题，使用户可见 CLI 版本跟随根 CHANGELOG
   唯一版本源，并补充验证。
 execution:
   mode: sequential
@@ -19,7 +19,7 @@ steps:
   status: done
   owner: codex
   depends_on: []
-  description: 确认 CHANGELOG/README 与 paper_fucker.exe --version 的当前差异。
+  description: 确认 CHANGELOG/README 与 papercode.exe --version 的当前差异。
   execution:
     mode: sequential
     retry: 0
@@ -27,7 +27,7 @@ steps:
     logs:
     - timestamp: '2026-05-11T22:25:56.538449'
       level: info
-      message: 确认根 CHANGELOG/README 当前为 0.8.6，但源码构建出的 paper_fucker.exe --version 仍显示内部预览构建号
+      message: 确认根 CHANGELOG/README 当前为 0.8.6，但源码构建出的 papercode.exe --version 仍显示内部预览构建号
         0.0.0-release/0.8.5-202605112217，需要把用户可见 CLI version 绑定到 CHANGELOG 唯一版本源。
       agent: codex
     last_run: '2026-05-11T22:25:56.538449'
@@ -46,7 +46,7 @@ steps:
     logs:
     - timestamp: '2026-05-11T22:27:08.412763'
       level: info
-      message: 新增 ProductVersion，并在 build.ts 从根 CHANGELOG :version 注入 PAPER_FUCKER_VERSION；CLI
+      message: 新增 ProductVersion，并在 build.ts 从根 CHANGELOG :version 注入 PAPERCODE_VERSION；CLI
         --version、debug 输出与 TUI sidebar 改为显示产品版本，内部 InstallationVersion 继续保留为构建通道版本。
       agent: codex
     last_run: '2026-05-11T22:27:08.412763'
@@ -57,7 +57,7 @@ steps:
   status: done
   owner: codex
   depends_on: []
-  description: 运行相关测试、typecheck、构建和 paper_fucker.exe --version smoke。
+  description: 运行相关测试、typecheck、构建和 papercode.exe --version smoke。
   execution:
     mode: sequential
     retry: 0
@@ -66,7 +66,7 @@ steps:
     - timestamp: '2026-05-11T22:28:15.421793'
       level: info
       message: 验证通过：public-surface/init tests 12 pass；opencode typecheck 通过；bun run
-        build 通过且内部 smoke 输出 0.8.6；根目录 paper_fucker.exe --version 输出 0.8.6；paper_fucker.exe
+        build 通过且内部 smoke 输出 0.8.6；根目录 papercode.exe --version 输出 0.8.6；papercode.exe
         init --home tmp smoke 成功，默认 bounded access。
       agent: codex
     last_run: '2026-05-11T22:28:15.421793'

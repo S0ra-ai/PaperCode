@@ -2,7 +2,7 @@ id: task-112-changelog-style-normalization
 title: Normalize CHANGELOG style and indentation
 status: done
 priority: medium
-owner: codex-paper-fucker
+owner: codex-papercode
 tags:
 - docs
 - changelog
@@ -17,7 +17,7 @@ steps:
 - id: inventory-changelogs
   title: Inventory changelog files
   status: done
-  owner: codex-paper-fucker
+  owner: codex-papercode
   depends_on: []
   description: 列出所有 CHANGELOG/changelog 文件并确认需要统一的格式范围。
   execution:
@@ -28,22 +28,22 @@ steps:
     - timestamp: '2026-05-13T04:07:45.841135'
       level: info
       message: Inventorying repository changelog files and current formatting conventions.
-      agent: codex-paper-fucker
+      agent: codex-papercode
     - timestamp: '2026-05-13T04:09:20.357213'
       level: info
       message: 'Found first-party colon-DSL changelog set: CHANGELOG plus docs/changelog/v0/0.1.x.CHANGELOG
-        through 0.7.x.CHANGELOG. Excluded node_modules dependency changelogs, .paper_fucker/node_modules,
+        through 0.7.x.CHANGELOG. Excluded node_modules dependency changelogs, .papercode/node_modules,
         command docs, scripts, UI changelog source files, SVG assets, TaskFlow task
         YAML, and bundled third-party skill CHANGELOG.md because those are not first-party
         colon-DSL changelog histories.'
-      agent: codex-paper-fucker
+      agent: codex-papercode
     last_run: '2026-05-13T04:09:20.357213'
     attempt_count: 2
   meta: {}
 - id: normalize-style
   title: Normalize style and indentation
   status: done
-  owner: codex-paper-fucker
+  owner: codex-papercode
   depends_on:
   - inventory-changelogs
   description: 对目标 changelog 文件做最小必要格式统一，保持语义和版本历史不变。
@@ -56,7 +56,7 @@ steps:
       level: info
       message: Normalizing first-party colon-DSL changelogs to use explicit grouped
         sections instead of implicit unsectioned bullet lists.
-      agent: codex-paper-fucker
+      agent: codex-papercode
     - timestamp: '2026-05-13T04:12:09.563524'
       level: info
       message: 'Normalized first-party colon-DSL changelogs: CHANGELOG and docs/changelog/v0/0.1.x
@@ -64,14 +64,14 @@ steps:
         8-space change-line indentation, 12-space section bodies, no tabs/trailing
         whitespace. Updated scripts/check-changelog-format.ps1 to align with TaskFlow''s
         :changes semantics while checking all archive files.'
-      agent: codex-paper-fucker
+      agent: codex-papercode
     last_run: '2026-05-13T04:12:09.563524'
     attempt_count: 2
   meta: {}
 - id: verify-branch-push
   title: Verify, merge, and push
   status: done
-  owner: codex-paper-fucker
+  owner: codex-papercode
   depends_on:
   - normalize-style
   description: 运行 changelog/README 校验，提交分支，合回 develop，删除工作分支并推送。
@@ -84,13 +84,13 @@ steps:
       level: info
       message: Running final verification, then committing the fix branch, merging
         to develop, deleting the branch, and pushing develop.
-      agent: codex-paper-fucker
+      agent: codex-papercode
     - timestamp: '2026-05-13T04:12:59.990918'
       level: info
       message: 'Verification before commit passed: scripts/check-changelog-format.ps1
         -IncludeArchives, scripts/check-readme-version.ps1, TaskFlow validate_changelog_format,
         TaskFlow validate_changelog_versions, and git diff --check. Branch is fix/changelog-style-normalization.'
-      agent: codex-paper-fucker
+      agent: codex-papercode
     last_run: '2026-05-13T04:12:59.990918'
     attempt_count: 2
   meta: {}

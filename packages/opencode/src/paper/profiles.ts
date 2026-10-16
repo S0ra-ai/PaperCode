@@ -334,8 +334,8 @@ export function defaultPaperProfiles(): PaperProfile[] {
       "Generic preprint",
       [
         {
-          name: "paper_fucker generic preprint profile",
-          url: "local://paper_fucker/profiles/generic-preprint",
+          name: "papercode generic preprint profile",
+          url: "local://papercode/profiles/generic-preprint",
           trust: "local",
           refresh: "manual",
         },
@@ -348,7 +348,7 @@ export function defaultPaperProfiles(): PaperProfile[] {
       [
         {
           name: "PaperCode 自定义期刊草案",
-          url: "local://paper_fucker/profiles/custom-journal",
+          url: "local://papercode/profiles/custom-journal",
           trust: "local",
           refresh: "manual",
         },

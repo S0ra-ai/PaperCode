@@ -48,7 +48,7 @@ PaperCode 区分导入观察、本机进程执行和容器执行。`ExperimentEv
 脚本须输出实际测得的指标，例如：
 
 ```text
-PAPER_FUCKER_METRICS {"experiment_id":"method-main","metrics":[{"name":"accuracy","value":0.37,"direction":"higher_better"}]}
+PAPERCODE_METRICS {"experiment_id":"method-main","metrics":[{"name":"accuracy","value":0.37,"direction":"higher_better"}]}
 ```
 
 也支持完整 JSON、逐行 JSON 和 `accuracy=0.37`。零值、负值和科学计数法保留。需要越低越好的指标时，在协议及 JSON 指标中声明 `lower_better`。

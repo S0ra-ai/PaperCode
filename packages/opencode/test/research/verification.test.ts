@@ -295,7 +295,7 @@ describe("verification final gate", () => {
   })
 
   test("records a passed final gate into runtime state", async () => {
-    const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-verification-test-"))
+    const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-verification-test-"))
     try {
       const workspace = path.join(dir, "workspace")
       const home = path.join(dir, "home")

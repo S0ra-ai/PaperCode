@@ -1,4 +1,4 @@
-:project       paper_fucker - 可验证论文研究自动化系统
+:project       papercode - 可验证论文研究自动化系统
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          0.4.x 历史变更归档，主 CHANGELOG 仅保留当前活跃版本线
@@ -100,7 +100,7 @@
         :brief 运行真实 topic+code PaperRun 质量基准并生成后续硬化任务
         :changes
         - feat(benchmark): 新增 scripts/live-paper-quality-benchmark.ts, 可复现创建真实 PaperRun、forced export 与 summary JSON
-        - feat(gitignore): 忽略 .paper_fucker/runs/, 防止 live PaperRun 产物进入 Git
+        - feat(gitignore): 忽略 .papercode/runs/, 防止 live PaperRun 产物进入 Git
         - docs(benchmark): 新增 reports/live-paper-quality-benchmark.md, 记录 DeepSeek/Exa/Nature/toolchain/PaperRun 结果与质量缺口
         - docs(strict): 更新 reports/strict-live-acceptance.md, 标记 task-046 strict rerun 因无超时保护需要硬化
         - plan(taskflow): 新增 task-047..task-051, 覆盖 strict timeout、PaperRun terminal gate、PDF fallback、默认 audit coverage 与最终 benchmark 回归
@@ -109,7 +109,7 @@
             - scripts/live-paper-quality-benchmark.ts - reproducible topic+code PaperRun live benchmark
             - reports/live-paper-quality-benchmark.md - benchmark evidence, artifacts, and quality gap review
             - reports/strict-live-acceptance.md - latest task-046 strict attempt status and follow-up
-            - .gitignore - ignored .paper_fucker/runs/ runtime artifacts
+            - .gitignore - ignored .papercode/runs/ runtime artifacts
             - .plan/confirmed/task-047-strict-acceptance-timeouts.yaml - strict timeout hardening task
             - .plan/confirmed/task-048-paperrun-completion-gates.yaml - terminal/gate alignment task
             - .plan/confirmed/task-049-export-pdf-renderer-fallback.yaml - PDF renderer fallback task

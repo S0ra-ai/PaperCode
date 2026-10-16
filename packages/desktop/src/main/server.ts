@@ -19,7 +19,7 @@ type SidecarMessage =
 
 export type SidecarListener = { stop: () => Promise<void> }
 
-const SIDECAR_SERVICE_NAME = "paper_fucker server"
+const SIDECAR_SERVICE_NAME = "papercode server"
 const SIDECAR_START_STALL_TIMEOUT = 60_000
 const SIDECAR_STOP_TIMEOUT = 6_000
 
@@ -61,9 +61,9 @@ export function preferAppEnv(userDataPath: string) {
     process.env,
     mergeShellEnv(shell ? loadShellEnv(shell) : null, {
       ...process.env,
-      PAPER_FUCKER_EXPERIMENTAL_ICON_DISCOVERY: "true",
-      PAPER_FUCKER_EXPERIMENTAL_FILEWATCHER: "true",
-      PAPER_FUCKER_CLIENT: "desktop",
+      PAPERCODE_EXPERIMENTAL_ICON_DISCOVERY: "true",
+      PAPERCODE_EXPERIMENTAL_FILEWATCHER: "true",
+      PAPERCODE_CLIENT: "desktop",
       OPENCODE_EXPERIMENTAL_ICON_DISCOVERY: "true",
       OPENCODE_EXPERIMENTAL_FILEWATCHER: "true",
       OPENCODE_CLIENT: "desktop",
@@ -219,7 +219,7 @@ export async function checkHealth(url: string, password?: string | null): Promis
 
   const headers = new Headers()
   if (password) {
-    const auth = Buffer.from(`paper_fucker:${password}`).toString("base64")
+    const auth = Buffer.from(`papercode:${password}`).toString("base64")
     headers.set("authorization", `Basic ${auth}`)
   }
 

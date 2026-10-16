@@ -115,8 +115,8 @@ export async function writeResearchArtifact(
   return withSpan(
     "research.runtime.artifact_write",
     {
-      "paper_fucker.research.run_dir": runDir,
-      "paper_fucker.research.artifact.kind": input.kind,
+      "papercode.research.run_dir": runDir,
+      "papercode.research.artifact.kind": input.kind,
     },
     async (span) => {
       const run = await loadResearchRun(runDir)
@@ -174,9 +174,9 @@ export async function writeResearchArtifact(
         options,
       )
 
-      span.setAttribute("paper_fucker.research.run_id", run.run_id)
-      span.setAttribute("paper_fucker.research.artifact_id", artifact.artifact_id)
-      span.setAttribute("paper_fucker.research.artifact.sha256", digest)
+      span.setAttribute("papercode.research.run_id", run.run_id)
+      span.setAttribute("papercode.research.artifact_id", artifact.artifact_id)
+      span.setAttribute("papercode.research.artifact.sha256", digest)
       return artifact
     },
   )

@@ -41,8 +41,8 @@ export const Basic = {
   render: () => (
     <div style={{ display: "grid", gap: "8px" }}>
       <mod.Font />
-      <div style={{ "font-family": "var(--font-family-sans)" }}>paper_fucker Sans Sample</div>
-      <div style={{ "font-family": "var(--font-family-mono)" }}>paper_fucker Mono Sample</div>
+      <div style={{ "font-family": "var(--font-family-sans)" }}>papercode Sans Sample</div>
+      <div style={{ "font-family": "var(--font-family-mono)" }}>papercode Mono Sample</div>
     </div>
   ),
 }

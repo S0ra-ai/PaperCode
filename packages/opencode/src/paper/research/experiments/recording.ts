@@ -20,7 +20,7 @@ export async function recordExperimentLoop(
   return withSpan(
     "research.experiments.record_loop",
     {
-      "paper_fucker.research.experiment.plan_id": input.plan.plan_id,
+      "papercode.research.experiment.plan_id": input.plan.plan_id,
     },
     async (span) => {
       const now = options?.clock?.().toISOString()
@@ -94,7 +94,7 @@ export async function recordExperimentLoop(
         options,
       )
 
-      span.setAttribute("paper_fucker.research.experiment.recommendation", report.recommendation)
+      span.setAttribute("papercode.research.experiment.recommendation", report.recommendation)
       return {
         plan: input.plan,
         host_runs: hostRuns,

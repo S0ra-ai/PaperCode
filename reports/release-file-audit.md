@@ -1,7 +1,7 @@
 # Release File Audit
 
 - generated_at: on-demand
-- repo_root: E:\Project\paper_fucker
+- repo_root: E:\Project\papercode
 - policy: keep provenance in git, keep release artifacts product/runtime only.
 
 ## GitHub Source Archive

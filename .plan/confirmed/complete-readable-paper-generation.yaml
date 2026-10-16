@@ -2,14 +2,14 @@ id: complete-readable-paper-generation
 title: 完整可读论文生成与实验执行闭环
 status: done
 priority: high
-owner: paper-fucker-dev-agent
+owner: papercode-dev-agent
 tags:
 - paper-run
 - writing
 - experiments
 - quality
 depends_on: []
-description: 围绕用户验收目标：Paper Fucker 必须能围绕代码/实验主题生成一篇结构完整、格式稳定、可读的论文；代码类论文不能只输出审计清单，缺
+description: 围绕用户验收目标：PaperCode 必须能围绕代码/实验主题生成一篇结构完整、格式稳定、可读的论文；代码类论文不能只输出审计清单，缺
   baseline/ablation/container 时应尽量生成并执行受控实验补齐证据，再进入 final 或明确保留阻断。借鉴 Open Terminal
   的后台命令执行、输出轮询、文件产物和隔离理念。
 execution:
@@ -19,7 +19,7 @@ steps:
 - id: audit-current-paper-output
   title: 审计当前论文输出
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   description: 检查现有 final/forced draft 的结构、可读性、段落组织、引用与实验章节，明确不可读根因。
   execution:
@@ -30,20 +30,20 @@ steps:
     - timestamp: '2026-05-28T00:03:55.731575'
       level: info
       message: 开始审计现有 final/forced draft 输出，定位不可读与审计化根因。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-28T00:09:32.543210'
       level: info
       message: 审计完成：当前输出偏审计报告，根因是 composeDraftPaper 将 ledger、artifact id、命令输出直接放入正文；已将正文重组为论文式章节，并把
         ClaimLedger/starter/guidance/artifact index 移入附录。authoring/export targeted
         测试 8 pass。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-28T00:09:32.543210'
     attempt_count: 2
   meta: {}
 - id: design-experiment-executor
   title: 设计受控实验执行器
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on:
   - audit-current-paper-output
   description: 参考 Open Terminal，设计 PaperRun 内部命令执行/轮询/日志/产物模型，先支持本地 workspace baseline/ablation/container
@@ -57,19 +57,19 @@ steps:
       level: info
       message: 开始设计受控实验执行器：借鉴 Open Terminal 的后台命令、输出轮询、文件产物和隔离思路，落到 PaperRun experiment
         runner。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-28T01:33:24.677688'
       level: info
       message: 完成受控实验执行语义硬化：自动 baseline/ablation 不再掩盖 proposed 失败；真实仓库场景 run-2c6cdc44
         正确 blocked，显式协议场景 run-c60a2a12 final。针对性 PaperRun 测试 4 pass。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-28T01:33:24.677688'
     attempt_count: 2
   meta: {}
 - id: improve-paper-composer
   title: 改进论文写作器
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on:
   - audit-current-paper-output
   description: 将审计式清单改为论文式章节：摘要、引言、相关工作、方法、实验设置、结果、消融、威胁、结论；诊断清单进入附录/审稿备注。
@@ -81,23 +81,23 @@ steps:
     - timestamp: '2026-05-28T01:33:46.274384'
       level: info
       message: 开始记录论文写作器改进验收。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-28T01:34:03.296675'
       level: info
       message: 完成论文写作器重构与润色：正文改为论文式章节，实验表格修复 Markdown 空格，新增 Discussion，Data and Code
         Availability 更清楚，baseline 持平时不再写成提升。authoring/export targeted 测试 8 pass。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-28T01:34:03.296675'
     attempt_count: 2
   meta: {}
 - id: run-complete-paper-smoke
   title: 生成完整论文并自评
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on:
   - design-experiment-executor
   - improve-paper-composer
-  description: 使用 Paper Fucker 生成一篇代码/实验论文，检查 Markdown/PDF 可读性、实验表格、结论边界和 final/forced
+  description: 使用 PaperCode 生成一篇代码/实验论文，检查 Markdown/PDF 可读性、实验表格、结论边界和 final/forced
     状态。
   execution:
     mode: sequential
@@ -107,19 +107,19 @@ steps:
     - timestamp: '2026-05-28T01:34:15.378754'
       level: info
       message: 开始记录完整论文 smoke 验收。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-28T01:34:39.607494'
       level: info
       message: 完成自生成论文 smoke：真实仓库场景 run-2c6cdc44 诚实阻断并输出 forced draft；显式协议场景 run-c60a2a12
         生成完整 final Markdown/LaTeX/PDF/DOCX。报告已更新 reports/live-paper-generation-review.md。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-28T01:34:39.607494'
     attempt_count: 2
   meta: {}
 - id: document-dev-manual-plan
   title: 补开发手册计划
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on:
   - run-complete-paper-smoke
   description: 在完成论文生成主链路后，整理 docs/development 多文件开发手册结构，要求按模块、关键流程、关键函数、修改路径写清楚。
@@ -131,12 +131,12 @@ steps:
     - timestamp: '2026-05-28T01:40:08.046406'
       level: info
       message: 开始补充 docs/development 多文件开发手册。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-28T01:40:19.233817'
       level: info
       message: 完成 docs/development 手册扩展：新增 module-map.html、paper-generation.html、experiment-execution.html、developer-recipes.html，并更新
         index.html 和 style.css。链接检查通过。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-28T01:40:19.233817'
     attempt_count: 2
   meta: {}

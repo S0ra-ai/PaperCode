@@ -85,7 +85,7 @@ function metricRunner(scores: Record<string, number>, status: "succeeded" | "fai
 
 describe("experiment loop", () => {
   test("plans baselines, records successful host exploration, and passes container reproduction", async () => {
-    const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-experiment-test-"))
+    const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-experiment-test-"))
     try {
       const workspace = path.join(dir, "workspace")
       const home = path.join(dir, "home")

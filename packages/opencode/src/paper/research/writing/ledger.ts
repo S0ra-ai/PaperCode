@@ -31,8 +31,8 @@ export function composeClaimLedger(input: ComposeClaimLedgerInput): ClaimLedger 
   return withSpan(
     "research.writing.claim_ledger",
     {
-      "paper_fucker.research.topic": input.topic,
-      "paper_fucker.research.claims": input.claims.length,
+      "papercode.research.topic": input.topic,
+      "papercode.research.claims": input.claims.length,
     },
     (span) => {
       const sectionCounts = new Map<string, number>()
@@ -54,7 +54,7 @@ export function composeClaimLedger(input: ComposeClaimLedgerInput): ClaimLedger 
         return entry
       })
       const unsupported = entries.filter((entry) => entry.status !== "supported").map((entry) => entry.claim_id)
-      span.setAttribute("paper_fucker.research.claims.unsupported", unsupported.length)
+      span.setAttribute("papercode.research.claims.unsupported", unsupported.length)
       return {
         schema_version: "ClaimLedger.v1",
         topic: input.topic,

@@ -177,7 +177,7 @@ export function normalizeLocale(value: string): Locale {
 function readStoredLocale() {
   if (typeof localStorage !== "object") return
   try {
-    const raw = localStorage.getItem("paper_fucker.global.dat:language")
+    const raw = localStorage.getItem("papercode.global.dat:language")
     if (!raw) return
     const next = JSON.parse(raw) as { locale?: string }
     if (typeof next?.locale !== "string") return

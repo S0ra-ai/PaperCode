@@ -10,7 +10,7 @@ tags:
 - audit
 - 0.8.2-dev
 depends_on: []
-description: 将 Paper Fucker 当前 focused live 验收推进到可重复执行的 full workspace suite：运行并记录
+description: 将 PaperCode 当前 focused live 验收推进到可重复执行的 full workspace suite：运行并记录
   scripts/strict-acceptance.ps1 -FullWorkspaceSuite，修复发现的产品/测试/脚本问题，并把 autonomous
   audit 纳入 full-suite evidence 检查。
 execution:

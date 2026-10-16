@@ -51,7 +51,7 @@ export interface ProviderStorageOptions {
 }
 
 function paperHome(home = os.homedir()) {
-  return path.join(home, ".paper_fucker")
+  return path.join(home, ".papercode")
 }
 
 function providerDir(home = os.homedir()) {

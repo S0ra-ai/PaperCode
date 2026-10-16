@@ -2,7 +2,7 @@ id: research-workbench-tui-preview-sync
 title: TUI 与 Web 监控台同步
 status: done
 priority: high
-owner: paper-fucker-dev-agent
+owner: papercode-dev-agent
 tags:
 - tui
 - preview
@@ -18,7 +18,7 @@ steps:
 - id: extend-dashboard-state
   title: 扩展 TUI dashboard state
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   description: 加入查新、PaperSpine、全局图和 Preview SPA 连接状态。
   execution:
@@ -29,19 +29,19 @@ steps:
     - timestamp: '2026-05-26T12:00:49.443473'
       level: info
       message: Extending TUI dashboard state.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-26T12:01:04.056198'
       level: info
       message: PaperRun dashboard state now includes research_closure with novelty
         status/conflicts, PaperSpine readiness, and global figure status/panel count.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-26T12:01:04.056198'
     attempt_count: 2
   meta: {}
 - id: render-tui-sections
   title: 渲染 TUI 新视图区和侧栏摘要
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   description: TUI 展示关键查新冲突、spine 摘要、figure panel 和 Web 监控台状态。
   execution:
@@ -52,19 +52,19 @@ steps:
     - timestamp: '2026-05-26T12:00:50.833897'
       level: info
       message: Rendering TUI research closure sections.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-26T12:01:05.506452'
       level: info
       message: TUI PaperRun dashboard renders a 研究闭环 section and panel counts for
         查新、论文脊梁、全局图.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-26T12:01:05.506452'
     attempt_count: 2
   meta: {}
 - id: verify-tui-sync
   title: 验证 TUI 与 Preview 同步
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   description: 测试 dashboard state 和打开 Preview 行为包含新增研究闭环信息。
   execution:
@@ -75,13 +75,13 @@ steps:
     - timestamp: '2026-05-26T12:00:52.242502'
       level: info
       message: Verifying dashboard mapping through PaperRun execution tests.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-26T12:01:07.148071'
       level: info
       message: Existing TUI dashboard mapping tests passed in full suite before environment-sensitive
         failures; PaperRun execution assertions verify snapshot fields consumed by
         dashboard.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-26T12:01:07.148071'
     attempt_count: 2
   meta: {}

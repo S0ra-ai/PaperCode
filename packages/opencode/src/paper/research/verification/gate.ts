@@ -28,7 +28,7 @@ export function evaluateVerificationGate(input: VerificationGateInput): Verifica
   return withSpan(
     "research.verification.evaluate_gate",
     {
-      "paper_fucker.research.draft.id": input.draft.draft_id,
+      "papercode.research.draft.id": input.draft.draft_id,
     },
     (span) => {
       const reviewReport = runMultiModelReview(input.model_reviews, createdAt)
@@ -40,8 +40,8 @@ export function evaluateVerificationGate(input: VerificationGateInput): Verifica
         ...reviewReport.findings,
       ]
       const report = blockingReport(findings, createdAt)
-      span.setAttribute("paper_fucker.research.final_gate.status", report.status)
-      span.setAttribute("paper_fucker.research.final_gate.blockers", report.blockers.length)
+      span.setAttribute("papercode.research.final_gate.status", report.status)
+      span.setAttribute("papercode.research.final_gate.blockers", report.blockers.length)
       return {
         blocking_report: report,
         review_report: reviewReport,

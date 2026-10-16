@@ -2,7 +2,7 @@ id: experiment-protocol-guidance-workbench
 title: 实验协议缺口引导与补齐建议
 status: done
 priority: high
-owner: paper-fucker-dev-agent
+owner: papercode-dev-agent
 tags:
 - paper-run
 - experiments
@@ -18,7 +18,7 @@ steps:
 - id: design-guidance-artifact
   title: 定义实验协议缺口 artifact
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   description: 新增 ExperimentProtocolGuidance.v1 类型，记录缺失项、建议 package scripts、容器复现建议、用户下一步动作。
   execution:
@@ -31,19 +31,19 @@ steps:
       message: 'Starting structured ExperimentProtocolGuidance.v1 design based on
         self-review findings: code PaperRun must tell users exactly which baseline/ablation/container
         scripts are missing.'
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-27T06:27:39.636943'
       level: info
       message: Added ExperimentProtocolGuidance.v1 and guidance item schema for missing
         proposed/baseline/ablation/container reproduction protocols.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-27T06:27:39.636943'
     attempt_count: 2
   meta: {}
 - id: emit-guidance-in-paperrun
   title: PaperRun 生成补齐建议
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on:
   - design-guidance-artifact
   description: 在默认实验链路中根据 ExperimentProtocol.gaps 与 ResultReport.blockers 写入 guidance
@@ -56,20 +56,20 @@ steps:
     - timestamp: '2026-05-27T06:27:54.201980'
       level: info
       message: Implementing PaperRun guidance emission.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-27T06:28:02.393740'
       level: info
       message: Default experiment loop now emits experiments/experiment-protocol-guidance.json
         when ResultReport/protocol gaps require user action; guidance artifact is
         included in evidence artifact ids.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-27T06:28:02.393740'
     attempt_count: 2
   meta: {}
 - id: surface-guidance-in-draft-preview
   title: 草稿和 Preview 展示建议
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on:
   - emit-guidance-in-paperrun
   description: forced draft 与 Preview 在 reproduction_failure 时展示具体要补哪些脚本，而不是只显示失败码。
@@ -81,19 +81,19 @@ steps:
     - timestamp: '2026-05-27T06:28:11.210986'
       level: info
       message: Surfacing guidance in draft authoring.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-27T06:28:23.188486'
       level: info
       message: Draft authoring now receives experiment_guidance and renders an Experiment
         Protocol Fix Checklist in blocked/forced-draft outputs.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-27T06:28:23.188486'
     attempt_count: 2
   meta: {}
 - id: add-guidance-tests
   title: 覆盖缺口与成功场景测试
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on:
   - surface-guidance-in-draft-preview
   description: 补充无协议代码仓库、显式协议仓库、final evidence 三类测试，确保缺口建议不会误进入 final 成功场景。
@@ -105,19 +105,19 @@ steps:
     - timestamp: '2026-05-27T06:28:31.035577'
       level: info
       message: Adding and running guidance tests.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-27T06:28:40.497228'
       level: info
       message: 'Targeted PaperRun/code-to-paper tests passed: 8 pass, 0 fail, 61 expect
         calls. Typecheck passed.'
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-27T06:28:40.497228'
     attempt_count: 2
   meta: {}
 - id: validate-guidance-quality
   title: 运行质量门与 PaperRun 实跑
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on:
   - add-guidance-tests
   description: 运行 Paper tests/typecheck/preview/Python/strict live smoke，并复审生成的代码论文报告。
@@ -129,7 +129,7 @@ steps:
     - timestamp: '2026-05-27T06:28:56.361165'
       level: info
       message: Running validation for guidance quality and PaperRun benchmark outputs.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-27T06:31:58.395081'
       level: info
       message: 'Validation passed: targeted PaperRun/code-to-paper tests 8 pass, 0
@@ -138,7 +138,7 @@ steps:
         benchmark remained blocked final with forced draft and now shows Experiment
         Protocol Fix Checklist plus ExperimentProtocolGuidance.v1. Protocol benchmark
         remained final with no guidance artifact.'
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-27T06:31:58.395081'
     attempt_count: 2
   meta: {}

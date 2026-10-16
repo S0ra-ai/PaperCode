@@ -54,7 +54,7 @@ export async function discoverAndRecordLiteratureData(
   return withSpan(
     "research.sources.discover_and_record",
     {
-      "paper_fucker.research.topic": input.topic,
+      "papercode.research.topic": input.topic,
     },
     async (span) => {
       const run = await loadResearchRun(runDir)
@@ -147,8 +147,8 @@ export async function discoverAndRecordLiteratureData(
         },
         options,
       )
-      span.setAttribute("paper_fucker.research.sources.recorded", sourceIds.length)
-      span.setAttribute("paper_fucker.research.direction.status", feasibility.status)
+      span.setAttribute("papercode.research.sources.recorded", sourceIds.length)
+      span.setAttribute("papercode.research.direction.status", feasibility.status)
       return {
         literature,
         data_plan: dataPlan,

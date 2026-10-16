@@ -108,7 +108,7 @@ export const SessionApi = HttpApi.make("session")
           OpenApi.annotations({
             identifier: "session.list",
             summary: "List sessions",
-            description: "Get a list of all paper_fucker sessions, sorted by most recently updated.",
+            description: "Get a list of all papercode sessions, sorted by most recently updated.",
           }),
         ),
         HttpApiEndpoint.get("status", SessionPaths.status, {
@@ -129,7 +129,7 @@ export const SessionApi = HttpApi.make("session")
           OpenApi.annotations({
             identifier: "session.get",
             summary: "Get session",
-            description: "Retrieve detailed information about a specific paper_fucker session.",
+            description: "Retrieve detailed information about a specific papercode session.",
           }),
         ),
         HttpApiEndpoint.get("children", SessionPaths.children, {
@@ -196,7 +196,7 @@ export const SessionApi = HttpApi.make("session")
           OpenApi.annotations({
             identifier: "session.create",
             summary: "Create session",
-            description: "Create a new paper_fucker session for interacting with AI assistants and managing conversations.",
+            description: "Create a new papercode session for interacting with AI assistants and managing conversations.",
           }),
         ),
         HttpApiEndpoint.delete("remove", SessionPaths.remove, {
@@ -424,7 +424,7 @@ export const SessionApi = HttpApi.make("session")
   )
   .annotateMerge(
     OpenApi.annotations({
-      title: "paper_fucker experimental HttpApi",
+      title: "papercode experimental HttpApi",
       version: "0.0.1",
       description: "Experimental HttpApi surface for selected instance routes.",
     }),

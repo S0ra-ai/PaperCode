@@ -14,7 +14,7 @@ const it = testEffect(Layer.mergeAll(AgentSvc.defaultLayer, CrossSpawnSpawner.de
 const writeConfig = (dir: string, agent: Config.Info["agent"]) =>
   Effect.promise(() =>
     Bun.write(
-      path.join(dir, "paper_fucker.json"),
+      path.join(dir, "papercode.json"),
       JSON.stringify({
         $schema: "https://opencode.ai/config.json",
         agent,

@@ -1,4 +1,4 @@
-:project       paper_fucker - 可验证论文研究自动化系统
+:project       papercode - 可验证论文研究自动化系统
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
@@ -37,7 +37,7 @@
         - feat(tui): 新增 TuiPaperWorkbenchState.v1 与 TuiResearchRunState.v1 renderer-independent 状态 adapter
         - feat(tui): run view state 映射 stage graph、事件流、Source Ledger、Claim Ledger、实验状态、模型/工具/成本诊断和 controls
         - feat(opencode-tui): 首页 placeholder 改为中文论文主题/代码路径/材料/数据/实验日志输入
-        - feat(opencode-tui): 首页增加 paper_fucker 论文工作台首屏信号, 保留 plugin slots 和 prompt 行为
+        - feat(opencode-tui): 首页增加 papercode 论文工作台首屏信号, 保留 plugin slots 和 prompt 行为
         - docs(readme): 版本更新为 0.1.26-dev, 记录 TUI paper workbench 状态与首页行为
         - test(paper): 覆盖中文 home state、stage label/status mapping、pause question、panels 和 controls
         :src
@@ -141,7 +141,7 @@
         :changes
         - feat(paper): 新增 PaperProfileRegistry, PaperProfile.v1 与 PaperProfileCheck.v1 契约
         - feat(profiles): 内置 nature-paper/ieee-paper/acm-paper/springer-paper/generic-preprint profile ids
-        - feat(nature): 新增 first-party .paper_fucker/skills/nature-paper/SKILL.md, 要求运行时刷新 Nature 官方作者指南
+        - feat(nature): 新增 first-party .papercode/skills/nature-paper/SKILL.md, 要求运行时刷新 Nature 官方作者指南
         - feat(gate): profile check 输出 blockers/warnings, 可接入真实性 gate 与导出 gate
         - docs(readme): 版本更新为 0.1.21-dev, 记录 profile registry 与 Nature skill 安装路径
         - test(paper): 覆盖内置 profile ids、Nature runtime refresh policy、profile check shape 与 skill 文件
@@ -149,7 +149,7 @@
             - packages/server/src/paper/profiles.ts - paper profile registry and built-in profiles
             - packages/server/src/paper/index.ts - paper profile exports
             - packages/server/test/paper/profiles.test.ts - paper profile and Nature skill tests
-            - .paper_fucker/skills/nature-paper/SKILL.md - first-party Nature paper skill
+            - .papercode/skills/nature-paper/SKILL.md - first-party Nature paper skill
             - reports/paper-profile-skills.md - paper profile implementation report
         :verification
             - npx --yes bun@1.3.13 --cwd packages/server test test/paper/profiles.test.ts passed: 4 pass, 0 fail, 12 expects
@@ -200,7 +200,7 @@
             - TaskFlow validate_task task-022-model-router passed
 
     0.1.18-dev - 2026/05/09 (b8fabeb) [develop]
-        :brief 重定界 OpenCode 底座与 paper_fucker 论文领域内核
+        :brief 重定界 OpenCode 底座与 papercode 论文领域内核
         :changes
         - feat(paper): 新增 packages/server/src/paper 架构入口, 固化 OpenCode substrate / research runtime / paper domain 三层边界
         - feat(paper): 声明 topic/code/data/experiment-log/materials-to-paper 输入模式
@@ -245,7 +245,7 @@
         - chore(structure): 将根目录 21 个 OpenCode 上游本地化 README 移入 upstream/opencode-readmes/
         - docs(upstream): 新增 upstream/opencode-readmes/README.md, 标记这些文件仅作上游 provenance 和翻译参考
         - docs(research): 新增 packages/server/src/research/README.md, 固化 first-party research runtime 模块边界
-        - docs(readme): 版本更新为 0.1.16-dev, 说明 root paper_fucker-first 与 upstream localized README archive
+        - docs(readme): 版本更新为 0.1.16-dev, 说明 root papercode-first 与 upstream localized README archive
         - chore(taskflow): 新增并完成 task-019-project-structure-cleanup
         :src
             - upstream/opencode-readmes/ - moved upstream localized README archive
@@ -426,11 +426,11 @@
         - docs(references): 新增 OpenCode substrate 分析, 明确只通过 opencode-adapter 使用工具/session/MCP/TUI 能力
         - docs(references): 新增 Folio/IntelliGen 分析, 采纳 StageMessage discipline、FormatSpec cache、fail-closed citation、evidence UI 等概念
         - docs(references): 新增外部研究代理分析和 adopt/defer/reject summary
-        - feat(mcp): 项目 paper_fucker.jsonc 配置 Exa remote MCP server
+        - feat(mcp): 项目 papercode.jsonc 配置 Exa remote MCP server
         - chore(codex): 执行 codex mcp add exa --url https://mcp.exa.ai/mcp
         - chore(taskflow): 完成 task-016-reference-analysis 并记录 step logs
         :src
-            - .paper_fucker/paper_fucker.jsonc - Exa remote MCP configuration
+            - .papercode/papercode.jsonc - Exa remote MCP configuration
             - legacy/references/manifest.json - reference source manifest
             - legacy/references/analysis/opencode.md - OpenCode substrate decision report
             - legacy/references/analysis/folio-intelligen.md - Folio and IntelliGen decision report
@@ -466,13 +466,13 @@
     0.1.6-dev - 2026/05/08 (3e2be8c) [develop]
         :brief 新增只读研究预览与 DeepSeek/中文默认配置
         :changes
-        - feat(preview): 新增 @paper-fucker/preview first-party package 与 localhost read-only preview
+        - feat(preview): 新增 @papercode/preview first-party package 与 localhost read-only preview
         - feat(preview/server): token-checked preview/snapshot/SSE endpoints, 非 GET/HEAD/OPTIONS 写方法返回 405
         - feat(preview/ui): 新增 Markdown/LaTeX/PDF/DOCX/Annotations/Diagnostics tabs 与 render status strip
         - feat(render): PreviewRenderQueue 支持即时 Markdown 更新、derived render jobs、SSE publish 与 stale job cancellation
         - feat(annotations): 预览协议支持 claim/citation/template/experiment/reviewer/cost/agent diagnostics 与 source range/TUI ref
         - feat(init): 默认语言改为 zh-CN, 默认模型 endpoint 改为 DeepSeek deepseek-v4-pro
-        - chore(local): .gitignore 忽略 .paper_fucker/local/, 用于本地未跟踪 API key 与模型默认配置
+        - chore(local): .gitignore 忽略 .papercode/local/, 用于本地未跟踪 API key 与模型默认配置
         - docs(readme): 记录 packages/preview、中文默认语言、DeepSeek 默认模型与本地预览能力
         - chore(taskflow): 完成 task-008-preview-runtime 并记录 preview smoke report/browser screenshot
         :src
@@ -503,11 +503,11 @@
         :brief 新增初始化与诊断向导
         :changes
         - feat(init): 新增 packages/server/src/init first-party 初始化/诊断模块
-        - feat(config): 定义 ~/.paper_fucker/config.json、tools.json、secrets.enc 路径与 schema
-        - feat(discovery): 自动扫描 pandoc、LaTeX engines、Docker、Python、Git、Chrome、Edge, 支持用户链接与 PAPER_FUCKER_TOOL_* env
+        - feat(config): 定义 ~/.papercode/config.json、tools.json、secrets.enc 路径与 schema
+        - feat(discovery): 自动扫描 pandoc、LaTeX engines、Docker、Python、Git、Chrome、Edge, 支持用户链接与 PAPERCODE_TOOL_* env
         - feat(secrets): secrets.enc 使用 AES-256-GCM + PBKDF2-SHA256 加密, 禁止将凭据写入 .env 或仓库文件
         - feat(cli): 新增 init --yes 与 diagnostics CLI flow, 支持 workspace/tool/secret/budget/preview/full-access flags
-        - docs(readme): 明确初始化写入 ~/.paper_fucker 且 credentials 不进入 repo
+        - docs(readme): 明确初始化写入 ~/.papercode 且 credentials 不进入 repo
         - chore(taskflow): 完成 task-007-init-wizard 并记录 init diagnostics smoke report
         :src
             - packages/server/src/init/config.ts - config/tools path helpers and config schema
@@ -531,19 +531,19 @@
     0.1.4-dev - 2026/05/08 (760d1d4) [develop]
         :brief 接入 Python MCP/CLI research tool bridge
         :changes
-        - feat(tools): 新增 research-tools CLI 入口 paper-fucker-tools 与 python -m paper_fucker_tools
+        - feat(tools): 新增 research-tools CLI 入口 papercode-tools 与 python -m papercode_tools
         - feat(mcp): 新增 tool_diagnostics/pdf_probe/dataset_metadata_probe/experiment_log_parse/docx_generation_stub 结构化 MCP-style tools
         - feat(mcp-server): 新增 FastMCP adapter, 安装 MCP SDK 后可复用同一工具 registry
         - feat(cli): 新增 diagnostics/link-tool/mcp-call/md-to-latex/latex-to-pdf/convert-docx/serve-mcp 命令
-        - feat(discovery): pandoc/latexmk/xelatex/pdflatex/lualatex/tectonic 自动从 ~/.paper_fucker/tools.json、PAPER_FUCKER_TOOL_*、PATH 寻找
+        - feat(discovery): pandoc/latexmk/xelatex/pdflatex/lualatex/tectonic 自动从 ~/.papercode/tools.json、PAPERCODE_TOOL_*、PATH 寻找
         - feat(server/runtime): 新增 python-bridge.ts, server runtime 自动调用 Python structured tool/CLI 并记录 log artifact 与 python.tool/python.cli event
         - docs(readme): 明确 research-tools 外部工具发现、链接配置和 server runtime bridge 边界
         - chore(taskflow): 完成 task-006-python-tool-bridge 并记录 bridge smoke report
         :src
-            - research-tools/src/paper_fucker_tools/external_tools.py - external tool discovery and user link config
-            - research-tools/src/paper_fucker_tools/mcp_tools.py - structured tool registry
-            - research-tools/src/paper_fucker_tools/cli.py - one-shot CLI commands
-            - research-tools/src/paper_fucker_tools/mcp_server.py - FastMCP adapter
+            - research-tools/src/papercode_tools/external_tools.py - external tool discovery and user link config
+            - research-tools/src/papercode_tools/mcp_tools.py - structured tool registry
+            - research-tools/src/papercode_tools/cli.py - one-shot CLI commands
+            - research-tools/src/papercode_tools/mcp_server.py - FastMCP adapter
             - packages/server/src/research/runtime/python-bridge.ts - TypeScript runtime to Python bridge
             - packages/server/test/research/python-bridge.test.ts - bridge smoke test
             - research-tools/tests/test_tools.py - Python tool tests
@@ -553,8 +553,8 @@
             - .plan/confirmed/task-006-python-tool-bridge.yaml - TaskFlow execution logs and server-runtime wording correction
         :verification
             - python -m unittest discover -s research-tools/tests passed: 4 tests
-            - python -m paper_fucker_tools diagnostics --json passed
-            - python -m paper_fucker_tools md-to-latex <sample.md> -o <sample.tex> --allow-fallback passed
+            - python -m papercode_tools diagnostics --json passed
+            - python -m papercode_tools md-to-latex <sample.md> -o <sample.tex> --allow-fallback passed
             - npx --yes bun@1.3.13 --cwd packages/server test test/research/python-bridge.test.ts passed: 1 pass, 0 fail, 6 expects
             - npx --yes bun@1.3.13 --cwd packages/server test test/research/contracts.test.ts test/research/runtime.test.ts test/research/python-bridge.test.ts passed: 7 pass, 0 fail, 45 expects
             - npx --yes bun@1.3.13 run typecheck passed across workspace: 13 successful tasks
@@ -563,15 +563,15 @@
     0.1.3-dev - 2026/05/08 (d873f97) [develop]
         :brief 建立 first-party research runtime
         :changes
-        - feat(server/runtime): 新增 packages/server/src/research/runtime 作为 paper_fucker 权威运行时模块
-        - feat(run-store): 支持 workspace-first <workspace>/.paper_fucker/runs/<run-id>, ~/.paper_fucker/runs fallback, create/resume/status API
+        - feat(server/runtime): 新增 packages/server/src/research/runtime 作为 papercode 权威运行时模块
+        - feat(run-store): 支持 workspace-first <workspace>/.papercode/runs/<run-id>, ~/.papercode/runs fallback, create/resume/status API
         - feat(events): 事件写入 append-only events.jsonl, 并刷新 run-local/global SQLite index
         - feat(artifacts): 支持 artifact 规范化 sha256、逻辑路径版本化、supersedes 元数据和 locked 最新版本保护
         - feat(policy): 默认 Full Access + Unlimited Research, bounded 模式支持 3h 默认和 24h 上限
         - feat(resources): 运行时自动记录 platform/arch/hostname/cpu/memory/GPU hint 资源快照
         - feat(cost): 支持 LLM/API/total soft budget 累计与 budget.alert 事件
         - feat(gate): 新增 final gate 状态, 支持 open/passed/blocked 与 blockers
-        - feat(otel): create/resume/status/event/artifact/cost/final gate/index refresh 均接入 paper_fucker.research OpenTelemetry spans
+        - feat(otel): create/resume/status/event/artifact/cost/final gate/index refresh 均接入 papercode.research OpenTelemetry spans
         - docs(readme): 明确运行时自动 API 调用、workspace-first run store 和 packages/opencode adapter 边界
         - chore(taskflow): 完成 task-005-research-runtime 并记录 runtime smoke report
         :src
@@ -593,24 +593,24 @@
             - TaskFlow validate_task task-005-research-runtime passed
 
     0.1.2-dev - 2026/05/08 (b95a0cb) [develop]
-        :brief 建立 paper_fucker research contract/server 包
+        :brief 建立 papercode research contract/server 包
         :changes
-        - feat(server): 新增 @paper-fucker/server 作为 first-party paper_fucker server/runtime 契约包
+        - feat(server): 新增 @papercode/server 作为 first-party papercode server/runtime 契约包
         - feat(schema): 新增 schemas/research/v1.schema.json, 固化 run/event/artifact/source/tool_trace/claim/draft/review/export/checkpoint 契约
         - feat(validation): 使用 AJV 2020 校验 JSON Schema, 对缺失/旧版/不兼容 schema_version 抛出明确迁移错误
         - feat(storage): 定义 JSON/JSONL 事实文件与 rebuildable run-local/global SQLite index 契约
-        - feat(otel): 接入 @opentelemetry/api, 为 contract validation 与 index rebuild 增加 paper_fucker.research spans
+        - feat(otel): 接入 @opentelemetry/api, 为 contract validation 与 index rebuild 增加 papercode.research spans
         - feat(python): 新增 research-tools Python 包与 generated Pydantic v2 models
-        - docs(readme): 明确 packages/server 为 paper_fucker 权威 research runtime, packages/opencode 仅保留 upstream-derived CLI/agent substrate
+        - docs(readme): 明确 packages/server 为 papercode 权威 research runtime, packages/opencode 仅保留 upstream-derived CLI/agent substrate
         - chore(taskflow): 完成 task-017-core-contract 并记录 contract validation report
         :src
             - schemas/research/v1.schema.json - JSON Schema source of truth
-            - packages/server/package.json - @paper-fucker/server workspace package
+            - packages/server/package.json - @papercode/server workspace package
             - packages/server/src/research/generated/contracts.ts - generated TypeScript contract types
             - packages/server/src/research/contracts.ts - AJV validation and schema_version migration failures
             - packages/server/src/research/storage.ts - JSON/JSONL fact loading and rebuildable SQLite indexes
             - packages/server/src/research/telemetry.ts - OpenTelemetry API span wrapper
-            - research-tools/src/paper_fucker_tools/generated/research_contracts.py - generated Pydantic v2 models
+            - research-tools/src/papercode_tools/generated/research_contracts.py - generated Pydantic v2 models
             - reports/core-contract-validation.md - validation and architecture report
         :doc
             - README.md - project structure updated to separate packages/server from packages/opencode
@@ -624,37 +624,37 @@
             - TaskFlow validate_task task-017-core-contract passed
 
     0.1.1-dev - 2026/05/08 (c8da1ae) [develop]
-        :brief OpenCode fork 品牌与运行时命名迁移为 paper_fucker
+        :brief OpenCode fork 品牌与运行时命名迁移为 papercode
         :changes
-        - feat(cli): 命令入口、help、serve 输出、安装脚本、构建脚本和 Docker 默认命令迁移为 paper_fucker
-        - feat(config): 项目/全局配置迁移为 .paper_fucker、paper_fucker.json/jsonc、~/.paper_fucker
-        - feat(runtime): 默认数据库、mDNS、HTTP header、SDK server、desktop sidecar 和观测服务名迁移为 paper_fucker
-        - feat(app): Web/TUI/desktop 可见标题、存储 key、manifest、主题名和 deep link 增加 paper_fucker/paper-fucker 命名
-        - feat(github): GitHub agent workflow、命令提示、默认分支和 OIDC audience 改为 paper_fucker 命名
+        - feat(cli): 命令入口、help、serve 输出、安装脚本、构建脚本和 Docker 默认命令迁移为 papercode
+        - feat(config): 项目/全局配置迁移为 .papercode、papercode.json/jsonc、~/.papercode
+        - feat(runtime): 默认数据库、mDNS、HTTP header、SDK server、desktop sidecar 和观测服务名迁移为 papercode
+        - feat(app): Web/TUI/desktop 可见标题、存储 key、manifest、主题名和 deep link 增加 papercode/papercode 命名
+        - feat(github): GitHub agent workflow、命令提示、默认分支和 OIDC audience 改为 papercode 命名
         - test(runtime): 更新 config/storage/httpapi/cors/app/sdk/desktop 相关测试与品牌冒烟报告
-        - chore(taskflow): 完成 task-004-brand-paper-fucker 并记录品牌迁移验证日志
+        - chore(taskflow): 完成 task-004-brand-papercode 并记录品牌迁移验证日志
         :src
-            - .paper_fucker/ - 项目本地 agent/command/glossary/plugin/theme 配置命名空间
-            - packages/opencode/bin/paper_fucker - 用户可见 CLI bin 入口
-            - packages/core/src/global.ts - paper_fucker 全局路径与测试覆盖路径
-            - packages/core/src/flag/flag.ts - PAPER_FUCKER_* 环境变量优先级与 OPENCODE_* 兼容回退
+            - .papercode/ - 项目本地 agent/command/glossary/plugin/theme 配置命名空间
+            - packages/opencode/bin/papercode - 用户可见 CLI bin 入口
+            - packages/core/src/global.ts - papercode 全局路径与测试覆盖路径
+            - packages/core/src/flag/flag.ts - PAPERCODE_* 环境变量优先级与 OPENCODE_* 兼容回退
             - packages/opencode/src/index.ts - yargs 命令名、运行时环境变量与迁移标记
-            - packages/opencode/src/config/ - .paper_fucker 与 paper_fucker.json/jsonc 配置发现
-            - packages/opencode/src/server/ - paper_fucker HTTP API header、CORS、mDNS、UI fallback 和 auth 标识
+            - packages/opencode/src/config/ - .papercode 与 papercode.json/jsonc 配置发现
+            - packages/opencode/src/server/ - papercode HTTP API header、CORS、mDNS、UI fallback 和 auth 标识
             - packages/app/ - Web app 标题、协议、存储 key、主题预加载与 i18n 文案
             - packages/desktop/ - Electron app id、protocol、sidecar env、store 与 product 文案
-            - packages/sdk/js/ - SDK server 命令与 x-paper-fucker header
+            - packages/sdk/js/ - SDK server 命令与 x-papercode header
             - reports/brand-smoke.md - 品牌迁移验证报告
         :doc
-            - README.md - 版本更新为 0.1.1-dev，并明确 paper_fucker TypeScript runtime 为权威运行时
-            - .plan/confirmed/task-004-brand-paper-fucker.yaml - TaskFlow step 日志与验收结果
+            - README.md - 版本更新为 0.1.1-dev，并明确 papercode TypeScript runtime 为权威运行时
+            - .plan/confirmed/task-004-brand-papercode.yaml - TaskFlow step 日志与验收结果
         :verification
             - npx --yes bun@1.3.13 install passed
             - packages/core/opencode/app/sdk/js/ui/desktop typecheck passed
             - packages/core global path test passed: 2 pass, 0 fail
             - packages/opencode config/storage/httpapi-ui/mcp-headers/cors tests passed: 99 pass, 0 fail
             - packages/app persisted storage/theme/server/layout tests passed: 328 pass, 0 fail
-            - CLI smoke passed: --help shows paper_fucker commands and paper-fucker.local, --version returned local, serve printed paper_fucker server listening
+            - CLI smoke passed: --help shows papercode commands and papercode.local, --version returned local, serve printed papercode server listening
             - Old-name scan found no active IntelliGen/Python-core/codex-task naming outside historical or generic contexts
 
     0.1.0-dev - 2026/05/08 (88f63199) [develop]
@@ -662,7 +662,7 @@
         :changes
         - feat(upstream): 导入 OpenCode v1.14.41 root overlay 源码快照
         - docs(upstream): 记录 OpenCode upstream manifest、MIT license 与 NOTICE 归属
-        - chore(import): 保留 paper_fucker 根 README/LICENSE/CHANGELOG 并跳过 active .github workflows
+        - chore(import): 保留 papercode 根 README/LICENSE/CHANGELOG 并跳过 active .github workflows
         - chore(import): 跳过 Windows reparse point/symlink 并记录 tarball SHA256
         :src
             - packages/ - OpenCode upstream package source snapshot

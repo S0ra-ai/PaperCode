@@ -21,7 +21,7 @@ steps:
   status: done
   owner: codex
   depends_on: []
-  description: 读取 ~/.paper_fucker/providers 与 ~/.paper_fucker/local/provider-secrets.json，兼容
+  description: 读取 ~/.papercode/providers 与 ~/.papercode/local/provider-secrets.json，兼容
     env secret 和 OpenAI-compatible endpoint。
   execution:
     mode: sequential
@@ -30,14 +30,14 @@ steps:
     logs:
     - timestamp: '2026-05-11T09:33:33.330214'
       level: info
-      message: Designing provider matrix smoke around ~/.paper_fucker/providers/*.json
-        public config and ~/.paper_fucker/local/provider-secrets.json secrets, with
+      message: Designing provider matrix smoke around ~/.papercode/providers/*.json
+        public config and ~/.papercode/local/provider-secrets.json secrets, with
         no key echoing and待配置 diagnostics when no providers exist.
       agent: codex
     - timestamp: '2026-05-11T09:36:05.836650'
       level: info
-      message: Provider matrix reads public configs from ~/.paper_fucker/providers/*.json
-        and secrets from ~/.paper_fucker/local/provider-secrets.json via api_key_ref.
+      message: Provider matrix reads public configs from ~/.papercode/providers/*.json
+        and secrets from ~/.papercode/local/provider-secrets.json via api_key_ref.
         It treats no configured providers as pending_config and never prints API keys.
       agent: codex
     last_run: '2026-05-11T09:36:05.836650'

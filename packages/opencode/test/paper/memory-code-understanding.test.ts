@@ -38,7 +38,7 @@ describe("MemoryBank and code understanding layer", () => {
       title: "Secret-like file",
       summary: "api_key=secret should not leave local memory",
       tags: ["risk"],
-      source_refs: [{ path: ".paper_fucker/local/secrets.env" }],
+      source_refs: [{ path: ".papercode/local/secrets.env" }],
     })
     addPaperMemoryEntry(bank, {
       memory_id: "mem-codepath",
@@ -68,7 +68,7 @@ describe("MemoryBank and code understanding layer", () => {
   test("builds source-range-grounded code understanding graph and experiment surfaces", () => {
     const graph = createCodeUnderstandingGraph({
       run_id: "run-code",
-      workspace: "E:/Project/paper_fucker",
+      workspace: "E:/Project/papercode",
       packages: [{ name: "paper-core", root_path: "packages/opencode/src/paper" }],
     })
     addCodeFile(graph, { path: "packages/opencode/src/paper/run.ts", package_name: "paper-core" })

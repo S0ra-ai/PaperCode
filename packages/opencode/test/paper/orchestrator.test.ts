@@ -36,7 +36,7 @@ function runtimeOptions(workspace: string, home: string): ResearchRuntimeOptions
 }
 
 async function fixtureRun() {
-  const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-paper-orchestrator-test-"))
+  const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-paper-orchestrator-test-"))
   const workspace = path.join(dir, "workspace")
   const home = path.join(dir, "home")
   await mkdir(workspace, { recursive: true })

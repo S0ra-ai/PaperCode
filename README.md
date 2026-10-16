@@ -29,8 +29,8 @@ Windows PowerShell：
 ```powershell
 winget install --id Git.Git -e
 powershell -c "irm bun.sh/install.ps1 | iex"
-git clone https://github.com/ZhuchenZhong/paper_fucker.git
-cd paper_fucker
+git clone https://github.com/ZhuchenZhong/papercode.git
+cd papercode
 bun install
 bun run build
 .\papercode.exe
@@ -39,8 +39,8 @@ bun run build
 macOS / Linux：
 
 ```bash
-git clone https://github.com/ZhuchenZhong/paper_fucker.git
-cd paper_fucker
+git clone https://github.com/ZhuchenZhong/papercode.git
+cd papercode
 bun install
 bun run build
 ./papercode

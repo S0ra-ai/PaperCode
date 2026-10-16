@@ -111,7 +111,7 @@ steps:
         check-changelog-format.ps1, TaskFlow validate_changelog_format, TaskFlow validate_task,
         opencode strict-acceptance focused test, opencode typecheck, preview tests,
         and Python tests with PYTHONPATH=research-tools/src. The exact bare Python
-        command failed because PYTHONPATH was not set and could not import paper_fucker_tools.'
+        command failed because PYTHONPATH was not set and could not import papercode_tools.'
       agent: codex
     last_run: '2026-05-11T10:20:03.986053'
     attempt_count: 2

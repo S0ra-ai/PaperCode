@@ -368,7 +368,7 @@ export class App extends HeyApiClient {
   /**
    * List agents
    *
-   * Get a list of all available AI agents in the paper_fucker system.
+   * Get a list of all available AI agents in the papercode system.
    */
   public agents<ThrowOnError extends boolean = false>(
     parameters?: {
@@ -398,7 +398,7 @@ export class App extends HeyApiClient {
   /**
    * List skills
    *
-   * Get a list of all available skills in the paper_fucker system.
+   * Get a list of all available skills in the papercode system.
    */
   public skills<ThrowOnError extends boolean = false>(
     parameters?: {
@@ -430,7 +430,7 @@ export class Config extends HeyApiClient {
   /**
    * Get global configuration
    *
-   * Retrieve the current global paper_fucker configuration settings and preferences.
+   * Retrieve the current global papercode configuration settings and preferences.
    */
   public get<ThrowOnError extends boolean = false>(options?: Options<never, ThrowOnError>) {
     return (options?.client ?? this.client).get<GlobalConfigGetResponses, unknown, ThrowOnError>({
@@ -442,7 +442,7 @@ export class Config extends HeyApiClient {
   /**
    * Update global configuration
    *
-   * Update global paper_fucker configuration settings and preferences.
+   * Update global papercode configuration settings and preferences.
    */
   public update<ThrowOnError extends boolean = false>(
     parameters?: {
@@ -468,7 +468,7 @@ export class Global extends HeyApiClient {
   /**
    * Get health
    *
-   * Get health information about the paper_fucker server.
+   * Get health information about the papercode server.
    */
   public health<ThrowOnError extends boolean = false>(options?: Options<never, ThrowOnError>) {
     return (options?.client ?? this.client).get<GlobalHealthResponses, unknown, ThrowOnError>({
@@ -480,7 +480,7 @@ export class Global extends HeyApiClient {
   /**
    * Get global events
    *
-   * Subscribe to global events from the paper_fucker system using server-sent events.
+   * Subscribe to global events from the papercode system using server-sent events.
    */
   public event<ThrowOnError extends boolean = false>(options?: Options<never, ThrowOnError>) {
     return (options?.client ?? this.client).sse.get<GlobalEventResponses, unknown, ThrowOnError>({
@@ -492,7 +492,7 @@ export class Global extends HeyApiClient {
   /**
    * Dispose instance
    *
-   * Clean up and dispose all paper_fucker instances, releasing all resources.
+   * Clean up and dispose all papercode instances, releasing all resources.
    */
   public dispose<ThrowOnError extends boolean = false>(options?: Options<never, ThrowOnError>) {
     return (options?.client ?? this.client).post<GlobalDisposeResponses, unknown, ThrowOnError>({
@@ -502,9 +502,9 @@ export class Global extends HeyApiClient {
   }
 
   /**
-   * Upgrade paper_fucker
+   * Upgrade papercode
    *
-   * Upgrade paper_fucker to the specified version or latest if not specified.
+   * Upgrade papercode to the specified version or latest if not specified.
    */
   public upgrade<ThrowOnError extends boolean = false>(
     parameters?: {
@@ -567,7 +567,7 @@ export class Config2 extends HeyApiClient {
   /**
    * Get configuration
    *
-   * Retrieve the current paper_fucker configuration settings and preferences.
+   * Retrieve the current papercode configuration settings and preferences.
    */
   public get<ThrowOnError extends boolean = false>(
     parameters?: {
@@ -597,7 +597,7 @@ export class Config2 extends HeyApiClient {
   /**
    * Update configuration
    *
-   * Update paper_fucker configuration settings and preferences.
+   * Update papercode configuration settings and preferences.
    */
   public update<ThrowOnError extends boolean = false>(
     parameters?: {
@@ -726,7 +726,7 @@ export class Console extends HeyApiClient {
   /**
    * Switch active Console org
    *
-   * Persist a new active Console account/org selection for the current local paper_fucker state.
+   * Persist a new active Console account/org selection for the current local papercode state.
    */
   public switchOrg<ThrowOnError extends boolean = false>(
     parameters?: {
@@ -767,7 +767,7 @@ export class Session extends HeyApiClient {
   /**
    * List sessions
    *
-   * Get a list of all paper_fucker sessions across projects, sorted by most recently updated. Archived sessions are excluded by default.
+   * Get a list of all papercode sessions across projects, sorted by most recently updated. Archived sessions are excluded by default.
    */
   public list<ThrowOnError extends boolean = false>(
     parameters?: {
@@ -1501,7 +1501,7 @@ export class Instance extends HeyApiClient {
   /**
    * Dispose instance
    *
-   * Clean up and dispose the current paper_fucker instance, releasing all resources.
+   * Clean up and dispose the current papercode instance, releasing all resources.
    */
   public dispose<ThrowOnError extends boolean = false>(
     parameters?: {
@@ -1533,7 +1533,7 @@ export class Path extends HeyApiClient {
   /**
    * Get paths
    *
-   * Retrieve the current working directory and related path information for the paper_fucker instance.
+   * Retrieve the current working directory and related path information for the papercode instance.
    */
   public get<ThrowOnError extends boolean = false>(
     parameters?: {
@@ -1733,7 +1733,7 @@ export class Command extends HeyApiClient {
   /**
    * List commands
    *
-   * Get a list of all available commands in the paper_fucker system.
+   * Get a list of all available commands in the papercode system.
    */
   public list<ThrowOnError extends boolean = false>(
     parameters?: {
@@ -2104,7 +2104,7 @@ export class Project extends HeyApiClient {
   /**
    * List all projects
    *
-   * Get a list of projects that have been opened with paper_fucker.
+   * Get a list of projects that have been opened with papercode.
    */
   public list<ThrowOnError extends boolean = false>(
     parameters?: {
@@ -2134,7 +2134,7 @@ export class Project extends HeyApiClient {
   /**
    * Get current project
    *
-   * Retrieve the currently active project that paper_fucker is working with.
+   * Retrieve the currently active project that papercode is working with.
    */
   public current<ThrowOnError extends boolean = false>(
     parameters?: {
@@ -2278,7 +2278,7 @@ export class Pty extends HeyApiClient {
   /**
    * List PTY sessions
    *
-   * Get a list of all active pseudo-terminal (PTY) sessions managed by paper_fucker.
+   * Get a list of all active pseudo-terminal (PTY) sessions managed by papercode.
    */
   public list<ThrowOnError extends boolean = false>(
     parameters?: {
@@ -2909,7 +2909,7 @@ export class Session2 extends HeyApiClient {
   /**
    * List sessions
    *
-   * Get a list of all paper_fucker sessions, sorted by most recently updated.
+   * Get a list of all papercode sessions, sorted by most recently updated.
    */
   public list<ThrowOnError extends boolean = false>(
     parameters?: {
@@ -2951,7 +2951,7 @@ export class Session2 extends HeyApiClient {
   /**
    * Create session
    *
-   * Create a new paper_fucker session for interacting with AI assistants and managing conversations.
+   * Create a new papercode session for interacting with AI assistants and managing conversations.
    */
   public create<ThrowOnError extends boolean = false>(
     parameters?: {
@@ -3064,7 +3064,7 @@ export class Session2 extends HeyApiClient {
   /**
    * Get session
    *
-   * Retrieve detailed information about a specific paper_fucker session.
+   * Retrieve detailed information about a specific papercode session.
    */
   public get<ThrowOnError extends boolean = false>(
     parameters: {

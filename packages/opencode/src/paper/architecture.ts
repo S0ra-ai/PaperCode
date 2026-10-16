@@ -11,7 +11,7 @@ export type PaperInputMode =
   | "materials_to_paper"
 
 export type PaperSystemDescription = {
-  product: "paper_fucker"
+  product: "papercode"
   purpose: string
   model_strategy: "paper_provider_agnostic"
   supports_all_configured_models: boolean
@@ -19,12 +19,12 @@ export type PaperSystemDescription = {
     provider_id: string
     model_id: string
   }
-  core_capability_sources: Array<"model_provider_runtime" | "agent_runtime" | "managed_skills" | "paper_fucker_tools">
+  core_capability_sources: Array<"model_provider_runtime" | "agent_runtime" | "managed_skills" | "papercode_tools">
   input_modes: PaperInputMode[]
-  architecture: typeof PAPER_FUCKER_ARCHITECTURE
+  architecture: typeof PAPERCODE_ARCHITECTURE
 }
 
-export const PAPER_FUCKER_ARCHITECTURE = {
+export const PAPERCODE_ARCHITECTURE = {
   layers: [
     {
       id: "model_agent_substrate",
@@ -51,7 +51,7 @@ export const SUPPORTED_PAPER_INPUT_MODES = [
 
 export function describePaperSystem(): PaperSystemDescription {
   return {
-    product: "paper_fucker",
+    product: "papercode",
     purpose:
       "A closed-loop academic paper system with PaperCode managed providers, agents, tools, MCP servers, skills, and TUI for verifiable topic/code/data/materials-to-paper workflows.",
     model_strategy: "paper_provider_agnostic",
@@ -60,8 +60,8 @@ export function describePaperSystem(): PaperSystemDescription {
       provider_id: "deepseek",
       model_id: "deepseek-v4-pro",
     },
-    core_capability_sources: ["model_provider_runtime", "agent_runtime", "managed_skills", "paper_fucker_tools"],
+    core_capability_sources: ["model_provider_runtime", "agent_runtime", "managed_skills", "papercode_tools"],
     input_modes: [...SUPPORTED_PAPER_INPUT_MODES],
-    architecture: PAPER_FUCKER_ARCHITECTURE,
+    architecture: PAPERCODE_ARCHITECTURE,
   }
 }

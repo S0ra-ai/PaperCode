@@ -2,7 +2,7 @@ id: experiment-protocol-starter-pack
 title: 生成可复制实验协议 starter pack
 status: done
 priority: high
-owner: paper-fucker-dev-agent
+owner: papercode-dev-agent
 tags:
 - paper-run
 - experiments
@@ -18,7 +18,7 @@ steps:
 - id: design-starter-schema
   title: 定义 starter pack artifact
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   description: 设计 ExperimentProtocolStarterPack.v1，包含文件建议、脚本模板、命令和用户下一步动作。
   execution:
@@ -30,19 +30,19 @@ steps:
       level: info
       message: Designing ExperimentProtocolStarterPack.v1 from the current guidance
         output.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-27T09:07:08.069178'
       level: info
       message: Defined ExperimentProtocolStarterPack.v1 with package_json_scripts,
         starter files, and next steps; draft input can now carry starter pack metadata.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-27T09:07:08.069178'
     attempt_count: 2
   meta: {}
 - id: emit-starter-pack
   title: PaperRun 缺协议时生成 starter pack
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on:
   - design-starter-schema
   description: 根据 ExperimentProtocolGuidance.v1 写入 starter pack artifact，并挂到 evidence/export
@@ -55,21 +55,21 @@ steps:
     - timestamp: '2026-05-27T09:07:32.332710'
       level: info
       message: Emitting starter pack artifact from ExperimentProtocolGuidance.v1.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-27T09:26:37.356566'
       level: info
       message: PaperRun now emits ExperimentProtocolStarterPack.v1 whenever ExperimentProtocolGuidance.v1
         reports missing protocol. Targeted PaperRun/TUI tests confirm the artifact
         is created for missing-protocol code runs and absent for explicit protocol
         runs.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-27T09:26:37.356566'
     attempt_count: 2
   meta: {}
 - id: surface-starter-pack
   title: 草稿/Preview/TUI 展示 starter pack
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on:
   - emit-starter-pack
   description: 在 forced draft、Preview monitor 和 TUI gate 中显示 starter pack 路径和关键文件。
@@ -82,20 +82,20 @@ steps:
       level: info
       message: Starter pack is now wired into draft, Preview monitor, Preview annotations,
         and TUI gate state; running validation before closing this step.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-27T09:27:35.424858'
       level: info
       message: Starter pack is visible in DraftPaper, Preview monitor/annotations,
         and TUI sidebar Gate section. Typecheck passed; preview tests passed; PaperRun/TUI
         tests 15 pass, 0 fail.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-27T09:27:35.424858'
     attempt_count: 2
   meta: {}
 - id: validate-starter-pack
   title: 验证代码类论文实跑
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on:
   - surface-starter-pack
   description: 增加测试并运行 PaperRun code benchmark，确认 starter pack 可见且 final gate 仍诚实阻断。
@@ -108,7 +108,7 @@ steps:
       level: info
       message: Running live code benchmark to verify starter pack appears in generated
         PaperRun output.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-27T09:39:08.672702'
       level: info
       message: 'Validation passed: opencode typecheck passed; PaperRun execution +
@@ -117,7 +117,7 @@ steps:
         Live code benchmark run-a58ecba9-9276-4588-b6fa-db7e407c7f94 produced ExperimentProtocolStarterPack.v1,
         6 preview annotations, starter scripts baseline:starter/ablation:starter/repro:container:starter,
         and forced draft Starter Pack section.'
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-27T09:39:08.672702'
     attempt_count: 2
   meta: {}

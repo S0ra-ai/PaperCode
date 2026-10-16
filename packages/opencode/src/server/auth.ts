@@ -15,13 +15,13 @@ export type DecodedCredentials = {
 }
 
 export class Config extends ConfigService.Service<Config>()("@opencode/ServerAuthConfig", {
-  password: EffectConfig.string("PAPER_FUCKER_SERVER_PASSWORD").pipe(
+  password: EffectConfig.string("PAPERCODE_SERVER_PASSWORD").pipe(
     EffectConfig.orElse(() => EffectConfig.string("OPENCODE_SERVER_PASSWORD")),
     EffectConfig.option,
   ),
-  username: EffectConfig.string("PAPER_FUCKER_SERVER_USERNAME").pipe(
+  username: EffectConfig.string("PAPERCODE_SERVER_USERNAME").pipe(
     EffectConfig.orElse(() => EffectConfig.string("OPENCODE_SERVER_USERNAME")),
-    EffectConfig.withDefault("paper_fucker"),
+    EffectConfig.withDefault("papercode"),
   ),
 }) {}
 
@@ -43,7 +43,7 @@ export function header(credentials?: Credentials) {
   const password = credentials?.password ?? Flag.OPENCODE_SERVER_PASSWORD
   if (!password) return undefined
 
-  const username = credentials?.username ?? Flag.OPENCODE_SERVER_USERNAME ?? "paper_fucker"
+  const username = credentials?.username ?? Flag.OPENCODE_SERVER_USERNAME ?? "papercode"
   return `Basic ${Buffer.from(`${username}:${password}`).toString("base64")}`
 }
 

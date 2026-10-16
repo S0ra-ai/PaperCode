@@ -35,7 +35,7 @@ describe("tool.skill", () => {
     provideTmpdirInstance(
       (dir) =>
         Effect.gen(function* () {
-          const skill = path.join(dir, ".paper_fucker", "skill", "tool-skill")
+          const skill = path.join(dir, ".papercode", "skill", "tool-skill")
           yield* Effect.promise(() =>
             Bun.write(
               path.join(skill, "SKILL.md"),
@@ -52,11 +52,11 @@ Use this skill.
           )
           yield* Effect.promise(() => Bun.write(path.join(skill, "scripts", "demo.txt"), "demo"))
 
-          const home = process.env.PAPER_FUCKER_TEST_HOME
-          process.env.PAPER_FUCKER_TEST_HOME = dir
+          const home = process.env.PAPERCODE_TEST_HOME
+          process.env.PAPERCODE_TEST_HOME = dir
           yield* Effect.addFinalizer(() =>
             Effect.sync(() => {
-              process.env.PAPER_FUCKER_TEST_HOME = home
+              process.env.PAPERCODE_TEST_HOME = home
             }),
           )
 

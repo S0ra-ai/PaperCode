@@ -14,13 +14,13 @@
 
 ## 产品状态与配置
 
-- `.paper_fucker/paper_fucker.jsonc`：tracked 的项目级配置模板和 MCP 默认配置。
-- `.paper_fucker/skills/`、`.paper_fucker/agent/`、`.paper_fucker/command/`、`.paper_fucker/themes/`、`.paper_fucker/glossary/`、`.paper_fucker/tool/`：随产品维护的 first-party assets。
-- `.paper_fucker/local/`：ignored 的本地 secret、provider key、model 默认值和机器级 override。
-- `.paper_fucker/runs/`：ignored 的工作区 PaperRun 输出。
-- `~/.paper_fucker/`：用户全局配置、provider、secret、工具链接、备份和 fallback runs。
+- `.papercode/papercode.jsonc`：tracked 的项目级配置模板和 MCP 默认配置。
+- `.papercode/skills/`、`.papercode/agent/`、`.papercode/command/`、`.papercode/themes/`、`.papercode/glossary/`、`.papercode/tool/`：随产品维护的 first-party assets。
+- `.papercode/local/`：ignored 的本地 secret、provider key、model 默认值和机器级 override。
+- `.papercode/runs/`：ignored 的工作区 PaperRun 输出。
+- `~/.papercode/`：用户全局配置、provider、secret、工具链接、备份和 fallback runs。
 
-`paper_fucker init reset` 只能在备份后清理 ignored 的本地/全局状态，不能删除 tracked 项目资产。
+`papercode init reset` 只能在备份后清理 ignored 的本地/全局状态，不能删除 tracked 项目资产。
 
 ## 计划、历史与证据
 
@@ -45,7 +45,7 @@
 - 基础设施与上游兼容：`flake.nix`、`flake.lock`、`nix/`、`infra/`、`github/`、`sdks/`、`patches/`。
 - 产品文档与治理：`README.md`、`CHANGELOG`、`CONTRIBUTING.md`、`SECURITY.md`、`NOTICE.md`、`docs/`、`reports/`。
 
-ignored 的本地目录，例如 `node_modules/`、`.turbo/`、`tmp/`、`.paper_fucker/local/` 和 `.paper_fucker/runs/`，可以出现在开发者工作区，但不是 release artifact。
+ignored 的本地目录，例如 `node_modules/`、`.turbo/`、`tmp/`、`.papercode/local/` 和 `.papercode/runs/`，可以出现在开发者工作区，但不是 release artifact。
 
 ## Release 文件面
 

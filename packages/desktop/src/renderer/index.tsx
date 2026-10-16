@@ -45,7 +45,7 @@ if (import.meta.env.VITE_SENTRY_DSN) {
         (i) =>
           i.name !== "Breadcrumbs" &&
           !(
-            (import.meta.env.PAPER_FUCKER_CHANNEL ?? import.meta.env.OPENCODE_CHANNEL) === "prod" &&
+            (import.meta.env.PAPERCODE_CHANNEL ?? import.meta.env.OPENCODE_CHANNEL) === "prod" &&
             (i.name === "GlobalHandlers" || i.name === "BrowserApiErrors")
           ),
       )
@@ -55,14 +55,14 @@ if (import.meta.env.VITE_SENTRY_DSN) {
 
 void initI18n()
 
-const deepLinkEvent = "paper-fucker:deep-link"
+const deepLinkEvent = "papercode:deep-link"
 
 const emitDeepLinks = (urls: string[]) => {
   if (urls.length === 0) return
-  window.__PAPER_FUCKER__ ??= {}
-  const pending = window.__PAPER_FUCKER__.deepLinks ?? []
-  window.__PAPER_FUCKER__.deepLinks = [...pending, ...urls]
-  window.__OPENCODE__ = window.__PAPER_FUCKER__
+  window.__PAPERCODE__ ??= {}
+  const pending = window.__PAPERCODE__.deepLinks ?? []
+  window.__PAPERCODE__.deepLinks = [...pending, ...urls]
+  window.__OPENCODE__ = window.__PAPERCODE__
   window.dispatchEvent(new CustomEvent(deepLinkEvent, { detail: { urls } }))
 }
 
@@ -280,7 +280,7 @@ render(() => {
   const platform = createPlatform()
   const [windowConfig] = createResource(() => window.api.getWindowConfig().catch(() => ({ updaterEnabled: false })))
   const loadLocale = async () => {
-    const current = await platform.storage?.("paper_fucker.global.dat").getItem("language")
+    const current = await platform.storage?.("papercode.global.dat").getItem("language")
     const legacy = current ? undefined : await platform.storage?.().getItem("language.v1")
     const raw = current ?? legacy
     if (!raw) return

@@ -71,7 +71,7 @@ describe("PaperCode app i18n surface", () => {
 
   test("visible values do not reintroduce legacy chat or subscription branding", () => {
     const forbidden =
-      /Ask anything|随便问|隨便問|OpenCode|anomalyco|paper_fucker provider|paper-fucker\.local\/zen|低成本订阅|低成本訂閱|(^|[^A-Za-z])session(s)?([^A-Za-z]|$)|Session|会话|工作階段|聊天|\bchat\b|\bChat\b/i
+      /Ask anything|随便问|隨便問|OpenCode|anomalyco|papercode provider|papercode\.local\/zen|低成本订阅|低成本訂閱|(^|[^A-Za-z])session(s)?([^A-Za-z]|$)|Session|会话|工作階段|聊天|\bchat\b|\bChat\b/i
 
     for (const [locale, dict] of Object.entries(dictionaries)) {
       for (const [key, value] of Object.entries(dict)) {

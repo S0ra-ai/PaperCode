@@ -32,7 +32,7 @@ function runtimeOptions(workspace: string, home: string): ResearchRuntimeOptions
 
 describe("python tool bridge", () => {
   test("records structured Python tool and CLI outputs as runtime artifacts and events", async () => {
-    const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-python-bridge-test-"))
+    const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-python-bridge-test-"))
     try {
       const workspace = path.join(dir, "workspace")
       const home = path.join(dir, "home")

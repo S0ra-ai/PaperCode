@@ -17,7 +17,7 @@ function rewrite(request: Request, directory?: string) {
   if (request.method !== "GET" && request.method !== "HEAD") return request
 
   const value = pick(
-    request.headers.get("x-paper-fucker-directory") ?? request.headers.get("x-opencode-directory"),
+    request.headers.get("x-papercode-directory") ?? request.headers.get("x-opencode-directory"),
     directory,
   )
   if (!value) return request
@@ -28,7 +28,7 @@ function rewrite(request: Request, directory?: string) {
   }
 
   const next = new Request(url, request)
-  next.headers.delete("x-paper-fucker-directory")
+  next.headers.delete("x-papercode-directory")
   next.headers.delete("x-opencode-directory")
   return next
 }
@@ -49,7 +49,7 @@ export function createOpencodeClient(config?: Config & { directory?: string }) {
   if (config?.directory) {
     config.headers = {
       ...config.headers,
-      "x-paper-fucker-directory": encodeURIComponent(config.directory),
+      "x-papercode-directory": encodeURIComponent(config.directory),
     }
   }
 

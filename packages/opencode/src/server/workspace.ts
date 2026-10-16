@@ -85,7 +85,7 @@ export function WorkspaceRouterMiddleware(upgrade: UpgradeWebSocket): Middleware
     }
 
     const headers = new Headers(c.req.raw.headers)
-    headers.delete("x-paper-fucker-workspace")
+    headers.delete("x-papercode-workspace")
     headers.delete("x-opencode-workspace")
 
     const req = new Request(c.req.raw, { headers })

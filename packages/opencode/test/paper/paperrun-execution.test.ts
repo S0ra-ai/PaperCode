@@ -57,7 +57,7 @@ function runtimeOptions(workspace: string, home: string): PaperRunRuntimeOptions
 }
 
 async function fixtureWorkspace() {
-  const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-paperrun-execution-"))
+  const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-paperrun-execution-"))
   cleanup.push(dir)
   const workspace = path.join(dir, "workspace")
   const home = path.join(dir, "home")
@@ -329,7 +329,7 @@ describe("PaperRun default execution engine", () => {
     expect(preview.snapshot.monitor?.machine_environment).toMatchObject({
       status: "available",
       workspace,
-      default_run_root: expect.stringContaining(".paper_fucker"),
+      default_run_root: expect.stringContaining(".papercode"),
     })
     expect(preview.snapshot.monitor?.machine_environment?.runtimes.some((item) => item.id === "bun")).toBe(true)
     expect(preview.snapshot.annotations.some((annotation) => annotation.id.startsWith("experiment-guidance:"))).toBe(true)
@@ -361,7 +361,7 @@ describe("PaperRun default execution engine", () => {
             "host:ablation": 0.89,
             "container:ablation": 0.89,
           },
-          container_image: "paper-fucker/local-reproduction",
+          container_image: "papercode/local-reproduction",
           container_digest: "sha256:unit-test",
         },
         null,
@@ -626,7 +626,7 @@ describe("PaperRun default execution engine", () => {
             "host:ablation": 0.89,
             "container:ablation": 0.89,
           },
-          container_image: "paper-fucker/local-reproduction",
+          container_image: "papercode/local-reproduction",
           container_digest: "sha256:unit-test",
         },
         null,

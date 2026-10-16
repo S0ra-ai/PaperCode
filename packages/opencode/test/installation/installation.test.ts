@@ -80,7 +80,7 @@ describe("installation", () => {
         Installation.Service.use((svc) => svc.latest("npm")).pipe(Effect.provide(layer)),
       )
       expect(result).toBe("1.5.0")
-      expect(calls).toContain(`https://registry.npmjs.org/paper_fucker/${InstallationChannel}`)
+      expect(calls).toContain(`https://registry.npmjs.org/papercode/${InstallationChannel}`)
     })
 
     test("reads bun versions via registry", async () => {
@@ -94,7 +94,7 @@ describe("installation", () => {
         Installation.Service.use((svc) => svc.latest("bun")).pipe(Effect.provide(layer)),
       )
       expect(result).toBe("1.6.0")
-      expect(calls).toContain(`https://registry.npmjs.org/paper_fucker/${InstallationChannel}`)
+      expect(calls).toContain(`https://registry.npmjs.org/papercode/${InstallationChannel}`)
     })
 
     test("reads pnpm versions via registry", async () => {
@@ -108,7 +108,7 @@ describe("installation", () => {
         Installation.Service.use((svc) => svc.latest("pnpm")).pipe(Effect.provide(layer)),
       )
       expect(result).toBe("1.7.0")
-      expect(calls).toContain(`https://registry.npmjs.org/paper_fucker/${InstallationChannel}`)
+      expect(calls).toContain(`https://registry.npmjs.org/papercode/${InstallationChannel}`)
     })
 
     test("reads scoop manifest versions", async () => {
@@ -134,8 +134,8 @@ describe("installation", () => {
         () => jsonResponse({ versions: { stable: "2.0.0" } }),
         (cmd, args) => {
           // getBrewFormula: return core formula (no tap)
-          if (cmd === "brew" && args.includes("--formula") && args.includes("s0ra-ai/tap/paper_fucker")) return ""
-          if (cmd === "brew" && args.includes("--formula") && args.includes("paper_fucker")) return "paper_fucker"
+          if (cmd === "brew" && args.includes("--formula") && args.includes("s0ra-ai/tap/papercode")) return ""
+          if (cmd === "brew" && args.includes("--formula") && args.includes("papercode")) return "papercode"
           return ""
         },
       )
@@ -153,7 +153,7 @@ describe("installation", () => {
       const layer = testLayer(
         () => jsonResponse({}), // HTTP not used for tap formula
         (cmd, args) => {
-          if (cmd === "brew" && args.includes("s0ra-ai/tap/paper_fucker") && args.includes("--formula")) return "paper_fucker"
+          if (cmd === "brew" && args.includes("s0ra-ai/tap/papercode") && args.includes("--formula")) return "papercode"
           if (cmd === "brew" && args.includes("--json=v2")) return brewInfoJson
           return ""
         },

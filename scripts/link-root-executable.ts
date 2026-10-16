@@ -21,12 +21,12 @@ const archMap: Record<string, string> = {
 
 const platform = platformMap[process.platform] ?? process.platform
 const arch = archMap[process.arch] ?? process.arch
-const packageName = `paper_fucker-${platform}-${arch}`
+const packageName = `papercode-${platform}-${arch}`
 const binDir = path.join(opencodeDir, "dist", packageName, "bin")
 
-const sourceNames = process.platform === "win32" ? ["paper_fucker.exe", "paper_fucker"] : ["paper_fucker"]
+const sourceNames = process.platform === "win32" ? ["papercode.exe", "papercode"] : ["papercode"]
 const targetNames =
-  process.platform === "win32" ? ["papercode.exe", "paper_fucker.exe"] : ["papercode", "paper_fucker"]
+  process.platform === "win32" ? ["papercode.exe", "papercode.exe"] : ["papercode", "papercode"]
 
 async function exists(file: string) {
   try {
@@ -47,7 +47,7 @@ for (const name of sourceNames) {
 
 if (!source) {
   const searched = sourceNames.map((name) => path.join(binDir, name)).join(", ")
-  console.error(`Could not find compiled paper_fucker binary for ${platform}/${arch}.`)
+  console.error(`Could not find compiled papercode binary for ${platform}/${arch}.`)
   console.error(`Searched: ${searched}`)
   console.error("Run `bun run --cwd packages/opencode build --single` first, or run `bun run build` from the repo root.")
   process.exit(1)

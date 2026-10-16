@@ -55,7 +55,7 @@ describe("hard fork acceptance", () => {
   })
 
   test("creates a submission PaperRun from TUI-style input with private-first defaults", async () => {
-    const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-hard-fork-"))
+    const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-hard-fork-"))
     try {
       const workspace = path.join(dir, "workspace")
       const home = path.join(dir, "home")

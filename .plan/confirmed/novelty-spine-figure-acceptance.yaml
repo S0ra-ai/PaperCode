@@ -2,7 +2,7 @@ id: novelty-spine-figure-acceptance
 title: 查新、论文脊梁、全局图与监控台验收
 status: done
 priority: critical
-owner: paper-fucker-dev-agent
+owner: papercode-dev-agent
 tags:
 - acceptance
 - test
@@ -17,7 +17,7 @@ steps:
 - id: acceptance-tests
   title: 运行端到端验收
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   description: 运行 opencode/preview/python/typecheck 及版本、CHANGELOG 检查。
   execution:
@@ -28,7 +28,7 @@ steps:
     - timestamp: '2026-05-26T12:03:42.336219'
       level: info
       message: Running acceptance tests.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-26T12:03:57.457481'
       level: info
       message: 'Passed: opencode focused research closure + PaperRun execution tests,
@@ -36,14 +36,14 @@ steps:
         tests. Full opencode suite produced 2572 pass / 56 fail due environment-sensitive
         provider paid-model, global skills, snapshot/storage legacy tests; recorded
         as residual, not hidden.'
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-26T12:03:57.457481'
     attempt_count: 2
   meta: {}
 - id: write-acceptance-report
   title: 生成验收报告
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   description: 记录查新、PaperSpine、全局图和 Preview SPA 的证据。
   execution:
@@ -54,19 +54,19 @@ steps:
     - timestamp: '2026-05-26T12:03:43.688665'
       level: info
       message: Writing reports/novelty-spine-figure-acceptance.md.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-26T12:03:58.900943'
       level: info
       message: Generated reports/novelty-spine-figure-acceptance.md and refreshed
         reports/live-preview-browser-smoke.md.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-26T12:03:58.900943'
     attempt_count: 2
   meta: {}
 - id: sync-version-taskflow
   title: 同步版本与 TaskFlow
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   description: 更新 README/CHANGELOG，验证 TaskFlow 和 changelog 格式。
   execution:
@@ -77,13 +77,13 @@ steps:
     - timestamp: '2026-05-26T12:03:45.056042'
       level: info
       message: Preparing README/CHANGELOG version sync after work commit.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-26T12:11:54.463317'
       level: info
       message: 同步完成：work commit 71d0c81a，CHANGELOG/README 当前版本 0.13.0-dev；check-readme-version
         passed；check-changelog-format -IncludeArchives passed；TaskFlow validate_changelog_format/validate_changelog_versions
         passed；7 个新增/更新任务 validate_task 全部通过。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-26T12:11:54.463317'
     attempt_count: 2
   meta: {}

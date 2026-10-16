@@ -1,7 +1,7 @@
 import path from "path"
 import { cp, mkdir, rm } from "fs/promises"
 import { existsSync } from "fs"
-import { initPaths, PAPER_FUCKER_DIR, resolveInitHome } from "./config"
+import { initPaths, PAPERCODE_DIR, resolveInitHome } from "./config"
 
 export type InitResetScope = "all" | "global" | "workspace-local" | "workspace-runs"
 
@@ -41,18 +41,18 @@ function normalize(file: string) {
 }
 
 function ensureWorkspaceTarget(workspace: string, target: string) {
-  const root = normalize(path.join(workspace, PAPER_FUCKER_DIR))
+  const root = normalize(path.join(workspace, PAPERCODE_DIR))
   const resolved = normalize(target)
   if (resolved !== root && !resolved.startsWith(`${root}${path.sep}`)) {
-    throw new Error(`Refusing to reset path outside workspace .paper_fucker: ${resolved}`)
+    throw new Error(`Refusing to reset path outside workspace .papercode: ${resolved}`)
   }
   return resolved
 }
 
 function ensureGlobalTarget(home: string, target: string) {
   const resolved = normalize(target)
-  const expected = normalize(path.join(home, PAPER_FUCKER_DIR))
-  if (resolved !== expected || path.basename(resolved) !== PAPER_FUCKER_DIR) {
+  const expected = normalize(path.join(home, PAPERCODE_DIR))
+  if (resolved !== expected || path.basename(resolved) !== PAPERCODE_DIR) {
     throw new Error(`Refusing to reset unexpected global PaperCode path: ${resolved}`)
   }
   return resolved
@@ -74,7 +74,7 @@ async function backupTarget(target: string, backupDir: string, label: string) {
 }
 
 export function initResetBackupRoot(home?: string, now?: Date) {
-  return path.join(resolveInitHome(home), ".paper_fucker_backups", timestamp(now))
+  return path.join(resolveInitHome(home), ".papercode_backups", timestamp(now))
 }
 
 export async function resetInitState(input: InitResetInput): Promise<InitResetResult> {
@@ -84,9 +84,9 @@ export async function resetInitState(input: InitResetInput): Promise<InitResetRe
   const home = resolveInitHome(input.home)
   const workspace = normalize(input.workspace ?? process.cwd())
   const globalRoot = ensureGlobalTarget(home, initPaths(home).root)
-  const workspacePaper = normalize(path.join(workspace, PAPER_FUCKER_DIR))
+  const workspacePaper = normalize(path.join(workspace, PAPERCODE_DIR))
   if (globalRoot === workspacePaper) {
-    throw new Error("Global PaperCode home resolves to the workspace .paper_fucker directory; refusing reset.")
+    throw new Error("Global PaperCode home resolves to the workspace .papercode directory; refusing reset.")
   }
 
   const candidates: InitResetTarget[] = [
@@ -98,14 +98,14 @@ export async function resetInitState(input: InitResetInput): Promise<InitResetRe
     },
     {
       id: "workspace-local" as const,
-      path: ensureWorkspaceTarget(workspace, path.join(workspace, PAPER_FUCKER_DIR, "local")),
-      existed: existsSync(path.join(workspace, PAPER_FUCKER_DIR, "local")),
+      path: ensureWorkspaceTarget(workspace, path.join(workspace, PAPERCODE_DIR, "local")),
+      existed: existsSync(path.join(workspace, PAPERCODE_DIR, "local")),
       removed: false,
     },
     {
       id: "workspace-runs" as const,
-      path: ensureWorkspaceTarget(workspace, path.join(workspace, PAPER_FUCKER_DIR, "runs")),
-      existed: existsSync(path.join(workspace, PAPER_FUCKER_DIR, "runs")),
+      path: ensureWorkspaceTarget(workspace, path.join(workspace, PAPERCODE_DIR, "runs")),
+      existed: existsSync(path.join(workspace, PAPERCODE_DIR, "runs")),
       removed: false,
     },
   ].filter((target) => selected(scope, target.id))

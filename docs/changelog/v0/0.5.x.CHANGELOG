@@ -1,4 +1,4 @@
-:project       paper_fucker - 可验证论文研究自动化系统
+:project       papercode - 可验证论文研究自动化系统
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          0.5.x 历史变更归档，主 CHANGELOG 仅保留当前活跃版本线
@@ -8,9 +8,9 @@
 :history
 
     0.5.7-dev - 2026/05/11 (1c09b71) [develop]
-        :brief Paper Fucker 品牌表面审计
+        :brief PaperCode 品牌表面审计
         :changes
-        - fix(tui): 旧 session/sidebar footer 与 plugin sidebar footer 改为 Paper Fucker 品牌
+        - fix(tui): 旧 session/sidebar footer 与 plugin sidebar footer 改为 PaperCode 品牌
         - fix(api): paper provider discovery OpenAPI 描述改为 provider-agnostic, 不再暴露旧 OpenCode 产品措辞
         - test(brand): public-surface 测试覆盖 sidebar footer 与 paper API 品牌残留
         - chore(acceptance): strict acceptance 扩展品牌检查到 TUI home、tips、dashboard、sidebars 与 paper API
@@ -154,8 +154,8 @@
             - packages/opencode/src/paper/research/runtime/guards.ts - blocking diagnostics and authenticity provenance guard
             - packages/opencode/test/research/guards.test.ts - guard tests
             - packages/opencode/test/paper/orchestrator.test.ts - blocked diagnostic orchestration test wording
-            - research-tools/src/paper_fucker_tools/mcp_tools.py - canonical DOCX tool name
-            - research-tools/src/paper_fucker_tools/models.py - current paper runtime wording
+            - research-tools/src/papercode_tools/mcp_tools.py - canonical DOCX tool name
+            - research-tools/src/papercode_tools/models.py - current paper runtime wording
             - research-tools/tests/test_tools.py - DOCX tool registry/write test
             - reports/remove-stub-leftovers.md - cleanup report
             - .plan/confirmed/task-052-remove-stub-leftovers.yaml - TaskFlow execution logs
@@ -165,7 +165,7 @@
             - npx --yes bun@1.3.13 --cwd packages/opencode test test/research/guards.test.ts test/paper/orchestrator.test.ts passed: 6 pass, 0 fail, 14 expects
             - $env:PYTHONPATH='research-tools/src'; python -m unittest discover -s research-tools/tests passed: 5 tests OK
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
-            - focused current-code scan found no phaseOneStageStubs/ResearchStageStub/createNotImplementedStageStub/not_implemented/docx_generation_stub/stub handler/packages/server/@paper-fucker/server/server runtime matches
+            - focused current-code scan found no phaseOneStageStubs/ResearchStageStub/createNotImplementedStageStub/not_implemented/docx_generation_stub/stub handler/packages/server/@papercode/server/server runtime matches
 
     0.5.0-dev - 2026/05/10 (cf7aad5) [develop]
         :brief Live PaperRun 基准回归通过并收口 0.4.x 质量缺口

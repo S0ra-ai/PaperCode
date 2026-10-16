@@ -14,7 +14,7 @@ depends_on:
 - crawler-data-acquisition
 description: 借鉴 Hugging Face ML-Intern 的 docs/papers/datasets/jobs/sandbox/trace loop，把
   Hugging Face papers、datasets、models、spaces、jobs 和 Trackio/experiment logging 能力接入
-  Paper Fucker 的 capability bus、harness、ExperimentLedger 与 ClaimLedger。
+  PaperCode 的 capability bus、harness、ExperimentLedger 与 ClaimLedger。
 execution:
   mode: sequential
   retry: 0
@@ -65,7 +65,7 @@ steps:
       agent: codex
     - timestamp: '2026-05-10T21:07:08.417391'
       level: info
-      message: 'Added research-tools/src/paper_fucker_tools/huggingface_loop.py and
+      message: 'Added research-tools/src/papercode_tools/huggingface_loop.py and
         hf_research_probe registry entry. Product calls no longer synthesize mock
         records: without explicit fixture or allow_network they return blocked/failed
         diagnostics; fixture records are explicit test inputs only.'
@@ -161,7 +161,7 @@ outputs:
   path: packages/opencode/src/paper/huggingface-loop.ts
   description: HF research loop integration
 - type: file
-  path: research-tools/paper_fucker_tools/huggingface_loop.py
+  path: research-tools/papercode_tools/huggingface_loop.py
   description: HF Python bridge
 trace:
   logs: []

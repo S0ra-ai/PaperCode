@@ -8,8 +8,8 @@ from threading import Thread
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from paper_fucker_tools.crawler import crawl_html_provided, crawl_url, parse_html, scrapling_status
-from paper_fucker_tools.mcp_tools import TOOL_REGISTRY, call_tool
+from papercode_tools.crawler import crawl_html_provided, crawl_url, parse_html, scrapling_status
+from papercode_tools.mcp_tools import TOOL_REGISTRY, call_tool
 
 
 class _FixtureHandler(BaseHTTPRequestHandler):

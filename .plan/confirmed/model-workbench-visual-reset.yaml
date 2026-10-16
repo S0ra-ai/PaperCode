@@ -2,7 +2,7 @@ id: model-workbench-visual-reset
 title: 模型工作台视觉重排与库存清空入口
 status: done
 priority: high
-owner: paper-fucker-agent
+owner: papercode-agent
 tags:
 - 0.11.2-dev
 - tui
@@ -17,7 +17,7 @@ steps:
 - id: step-1
   title: 重排 /models 主布局
   status: done
-  owner: paper-fucker-agent
+  owner: papercode-agent
   depends_on: []
   description: 把模型工作台改成更清晰的顶部摘要、左侧导航、中部列表和右侧详情/帮助区；修复显示不全、首字母被遮挡和列表行不齐。
   execution:
@@ -28,18 +28,18 @@ steps:
     - timestamp: '2026-05-13T10:28:50.302866'
       level: info
       message: 开始重排 /models 主布局。
-      agent: paper-fucker-agent
+      agent: papercode-agent
     - timestamp: '2026-05-13T10:38:27.304900'
       level: info
       message: /models 重新设置为更清晰的全屏布局：顶部摘要、左侧导航、中部表格化列表、右侧说明；列表行改用 ASCII 状态标记，避免符号覆盖首字母；长文本统一截断。
-      agent: paper-fucker-agent
+      agent: papercode-agent
     last_run: '2026-05-13T10:38:27.304900'
     attempt_count: 2
   meta: {}
 - id: step-2
   title: 收紧已注册 provider 显示
   status: done
-  owner: paper-fucker-agent
+  owner: papercode-agent
   depends_on: []
   description: 已注册页只显示真实注册的 provider，提供清空全部配置入口，并避免空库存继续显示旧模型摘要。
   execution:
@@ -50,19 +50,19 @@ steps:
     - timestamp: '2026-05-13T10:38:28.678853'
       level: info
       message: 开始收紧已注册 provider 显示和清空入口。
-      agent: paper-fucker-agent
+      agent: papercode-agent
     - timestamp: '2026-05-13T10:38:41.975918'
       level: info
       message: 已注册页现在只显示真实可用 provider：自定义 provider 必须有发现模型，ChatGPT/Copilot/内置 provider
         必须已连接；新增 x 清空全部草稿，保存后清理本机模型库存。
-      agent: paper-fucker-agent
+      agent: papercode-agent
     last_run: '2026-05-13T10:38:41.975918'
     attempt_count: 2
   meta: {}
 - id: step-3
   title: 补充测试与版本记录
   status: done
-  owner: paper-fucker-agent
+  owner: papercode-agent
   depends_on: []
   description: 补充模型库存清空和 UI 文字/状态测试，更新 README 与 CHANGELOG 到 0.11.2-dev。
   execution:
@@ -73,12 +73,12 @@ steps:
     - timestamp: '2026-05-13T10:38:49.016983'
       level: info
       message: 开始补充测试与版本记录。
-      agent: paper-fucker-agent
+      agent: papercode-agent
     - timestamp: '2026-05-13T10:39:58.679157'
       level: info
       message: 补充模型库存清空测试，更新 README 与 CHANGELOG 到 0.11.2-dev；通过 README 版本检查、CHANGELOG
         格式/版本检查、git diff --check、opencode typecheck 和 model-discovery 测试。
-      agent: paper-fucker-agent
+      agent: papercode-agent
     last_run: '2026-05-13T10:39:58.679157'
     attempt_count: 2
   meta: {}

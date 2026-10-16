@@ -97,7 +97,7 @@ function normalizeLoadedConfig(data: unknown, source: string) {
   delete copy.theme
   delete copy.keybinds
   delete copy.tui
-  log.warn("tui keys in paper_fucker config are deprecated; move them to tui.json", { path: source })
+  log.warn("tui keys in papercode config are deprecated; move them to tui.json", { path: source })
   return copy
 }
 
@@ -167,7 +167,7 @@ export const Info = Schema.Struct({
   }),
   logLevel: Schema.optional(LogLevelRef).annotate({ description: "Log level" }),
   server: Schema.optional(ConfigServer.Server).annotate({
-    description: "Server configuration for paper_fucker serve and web commands",
+    description: "Server configuration for papercode serve and web commands",
   }),
   command: Schema.optional(Schema.Record(Schema.String, ConfigCommand.Info)).annotate({
     description: "Command configuration",
@@ -367,7 +367,7 @@ export interface Interface {
 export class Service extends Context.Service<Service, Interface>()("@opencode/Config") {}
 
 function globalConfigFile() {
-  const candidates = ["paper_fucker.jsonc", "paper_fucker.json", "config.json"].map((file) =>
+  const candidates = ["papercode.jsonc", "papercode.json", "config.json"].map((file) =>
     path.join(Global.Path.config, file),
   )
   for (const file of candidates) {
@@ -438,8 +438,8 @@ export const layer = Layer.effect(
 
       yield* Effect.promise(() => resolveLoadedPlugins(data, options.path))
       if (!data.$schema) {
-        data.$schema = "https://paper-fucker.local/config.json"
-        const updated = text.replace(/^\s*\{/, '{\n  "$schema": "https://paper-fucker.local/config.json",')
+        data.$schema = "https://papercode.local/config.json"
+        const updated = text.replace(/^\s*\{/, '{\n  "$schema": "https://papercode.local/config.json",')
         yield* fs.writeFileString(options.path, updated).pipe(Effect.catch(() => Effect.void))
       }
       return data
@@ -455,8 +455,8 @@ export const layer = Layer.effect(
     const loadGlobal = Effect.fnUntraced(function* () {
       let result: Info = {}
       result = mergeConfig(result, yield* loadFile(path.join(Global.Path.config, "config.json")))
-      result = mergeConfig(result, yield* loadFile(path.join(Global.Path.config, "paper_fucker.json")))
-      result = mergeConfig(result, yield* loadFile(path.join(Global.Path.config, "paper_fucker.jsonc")))
+      result = mergeConfig(result, yield* loadFile(path.join(Global.Path.config, "papercode.json")))
+      result = mergeConfig(result, yield* loadFile(path.join(Global.Path.config, "papercode.jsonc")))
 
       const legacy = path.join(Global.Path.config, "config")
       if (existsSync(legacy)) {
@@ -465,7 +465,7 @@ export const layer = Layer.effect(
             .then(async (mod) => {
               const { provider, model, ...rest } = mod.default
               if (provider && model) result.model = `${provider}/${model}`
-              result["$schema"] = "https://paper-fucker.local/config.json"
+              result["$schema"] = "https://papercode.local/config.json"
               result = mergeConfig(result, rest)
               await fsNode.writeFile(path.join(Global.Path.config, "config.json"), JSON.stringify(result, null, 2))
               await fsNode.unlink(legacy)
@@ -520,7 +520,7 @@ export const layer = Layer.effect(
 
         const pluginScopeForSource = Effect.fnUntraced(function* (source: string) {
           if (source.startsWith("http://") || source.startsWith("https://")) return "global"
-          if (source === "PAPER_FUCKER_CONFIG_CONTENT") return "local"
+          if (source === "PAPERCODE_CONFIG_CONTENT") return "local"
           if (containsPath(source, ctx)) return "local"
           return "global"
         })
@@ -555,8 +555,8 @@ export const layer = Layer.effect(
           if (value.type === "wellknown") {
             const url = key.replace(/\/+$/, "")
             process.env[value.key] = value.token
-            log.debug("fetching remote config", { url: `${url}/.well-known/paper_fucker` })
-            const response = yield* Effect.promise(() => fetch(`${url}/.well-known/paper_fucker`))
+            log.debug("fetching remote config", { url: `${url}/.well-known/papercode` })
+            const response = yield* Effect.promise(() => fetch(`${url}/.well-known/papercode`))
             if (!response.ok) {
               throw new Error(`failed to fetch remote config from ${url}: ${response.status}`)
             }
@@ -568,7 +568,7 @@ export const layer = Layer.effect(
               substituteWellKnownRemoteConfig({
                 value: wellknown.remote_config,
                 dir: url,
-                source: `${url}/.well-known/paper_fucker`,
+                source: `${url}/.well-known/papercode`,
               }),
             )
             const fetchedConfig = remote
@@ -582,8 +582,8 @@ export const layer = Layer.effect(
                 })) as Record<string, unknown>)
               : {}
             const remoteConfig = mergeConfig(wellknown.config ?? {}, fetchedConfig as Info)
-            if (!remoteConfig.$schema) remoteConfig.$schema = "https://paper-fucker.local/config.json"
-            const source = `${url}/.well-known/paper_fucker`
+            if (!remoteConfig.$schema) remoteConfig.$schema = "https://papercode.local/config.json"
+            const source = `${url}/.well-known/papercode`
             const next = yield* loadConfig(JSON.stringify(remoteConfig), {
               dir: path.dirname(source),
               source,
@@ -602,7 +602,7 @@ export const layer = Layer.effect(
         }
 
         if (!Flag.OPENCODE_DISABLE_PROJECT_CONFIG) {
-          for (const file of yield* ConfigPaths.files("paper_fucker", ctx.directory, ctx.worktree).pipe(Effect.orDie)) {
+          for (const file of yield* ConfigPaths.files("papercode", ctx.directory, ctx.worktree).pipe(Effect.orDie)) {
             yield* merge(file, yield* loadFile(file), "local")
           }
         }
@@ -614,14 +614,14 @@ export const layer = Layer.effect(
         const directories = yield* ConfigPaths.directories(ctx.directory, ctx.worktree)
 
         if (Flag.OPENCODE_CONFIG_DIR) {
-          log.debug("loading config from PAPER_FUCKER_CONFIG_DIR", { path: Flag.OPENCODE_CONFIG_DIR })
+          log.debug("loading config from PAPERCODE_CONFIG_DIR", { path: Flag.OPENCODE_CONFIG_DIR })
         }
 
         const deps: Fiber.Fiber<void, never>[] = []
 
         for (const dir of directories) {
-          if (dir.endsWith(".paper_fucker") || dir === Flag.OPENCODE_CONFIG_DIR) {
-            for (const file of ["paper_fucker.json", "paper_fucker.jsonc"]) {
+          if (dir.endsWith(".papercode") || dir === Flag.OPENCODE_CONFIG_DIR) {
+            for (const file of ["papercode.json", "papercode.jsonc"]) {
               const source = path.join(dir, file)
               log.debug(`loading config from ${source}`)
               yield* merge(source, yield* loadFile(source))
@@ -659,20 +659,20 @@ export const layer = Layer.effect(
           result.command = mergeDeep(result.command ?? {}, yield* Effect.promise(() => ConfigCommand.load(dir)))
           result.agent = mergeDeep(result.agent ?? {}, yield* Effect.promise(() => ConfigAgent.load(dir)))
           result.agent = mergeDeep(result.agent ?? {}, yield* Effect.promise(() => ConfigAgent.loadMode(dir)))
-          // Auto-discovered plugins under `.paper_fucker/plugin(s)` are already local files, so ConfigPlugin.load
+          // Auto-discovered plugins under `.papercode/plugin(s)` are already local files, so ConfigPlugin.load
           // returns normalized Specs and we only need to attach origin metadata here.
           const list = yield* Effect.promise(() => ConfigPlugin.load(dir))
           yield* mergePluginOrigins(dir, list)
         }
 
         if (Flag.OPENCODE_CONFIG_CONTENT) {
-          const source = "PAPER_FUCKER_CONFIG_CONTENT"
+          const source = "PAPERCODE_CONFIG_CONTENT"
           const next = yield* loadConfig(Flag.OPENCODE_CONFIG_CONTENT, {
             dir: ctx.directory,
             source,
           })
           yield* merge(source, next, "local")
-          log.debug("loaded custom config from PAPER_FUCKER_CONFIG_CONTENT")
+          log.debug("loaded custom config from PAPERCODE_CONFIG_CONTENT")
         }
 
         const activeAccount = Option.getOrUndefined(
@@ -716,7 +716,7 @@ export const layer = Layer.effect(
 
         const managedDir = ConfigManaged.managedConfigDir()
         if (existsSync(managedDir)) {
-          for (const file of ["paper_fucker.json", "paper_fucker.jsonc"]) {
+          for (const file of ["papercode.json", "papercode.jsonc"]) {
             const source = path.join(managedDir, file)
             yield* merge(source, yield* loadFile(source), "global")
           }

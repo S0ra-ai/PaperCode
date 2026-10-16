@@ -10,9 +10,9 @@ tags:
 - migration
 depends_on:
 - task-031-strict-live-acceptance
-description: Move the authoritative paper_fucker research and paper runtime from the
-  standalone @paper-fucker/server package into packages/opencode/src/paper. packages/opencode
-  becomes the paper_fucker product core rather than a substrate with an external server
+description: Move the authoritative papercode research and paper runtime from the
+  standalone @papercode/server package into packages/opencode/src/paper. packages/opencode
+  becomes the papercode product core rather than a substrate with an external server
   package. Remove the standalone server workspace after imports, tests, README, and
   reports are updated.
 execution:
@@ -83,7 +83,7 @@ steps:
   depends_on:
   - task-032-step-02-migrate-runtime
   description: Remove packages/server workspace/package/test references and update
-    root workspace docs so packages/opencode is the paper_fucker authoritative runtime.
+    root workspace docs so packages/opencode is the papercode authoritative runtime.
   execution:
     mode: sequential
     retry: 0
@@ -99,7 +99,7 @@ steps:
       message: Removed standalone packages/server workspace package/tsconfig and local
         cache directory; refreshed bun.lock with bun install; strict acceptance commands
         now use packages/opencode; active code/package/script rg for packages/server
-        and @paper-fucker/server returns no matches. strict-acceptance tests passed
+        and @papercode/server returns no matches. strict-acceptance tests passed
         (3 pass, 0 fail).
       agent: codex
     last_run: '2026-05-09T02:56:30.464733'
@@ -169,7 +169,7 @@ steps:
 outputs:
 - type: directory
   path: packages/opencode/src/paper
-  description: Authoritative paper_fucker paper runtime inside OpenCode hard fork
+  description: Authoritative papercode paper runtime inside OpenCode hard fork
 - type: directory
   path: packages/opencode/test/paper
   description: Paper core tests moved into opencode package

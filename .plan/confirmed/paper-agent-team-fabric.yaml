@@ -10,7 +10,7 @@ tags:
 - opencode-hardfork
 - 0.6.2-dev
 depends_on: []
-description: 实现 Paper Fucker 内建多 agent team 协作层，借鉴 Claude Code subagents 的独立上下文/模型/权限/skills/memory
+description: 实现 PaperCode 内建多 agent team 协作层，借鉴 Claude Code subagents 的独立上下文/模型/权限/skills/memory
   机制，以及 ML-Intern 的 submission loop、ToolRouter、ContextManager、approval gate、doom-loop
   detector 思路。目标是让 PaperRun 具备 team lead、teammates、共享任务板、mailbox、角色模型路由、权限继承收紧、artifact
   归因与 bottom-up evidence merge。
@@ -24,7 +24,7 @@ steps:
   owner: codex
   depends_on: []
   description: 将已查证的 Claude Code subagents/skills、smolagents、ML-Intern、Scrapling 资料转写为
-    Paper Fucker 设计约束，不直接复制实现。
+    PaperCode 设计约束，不直接复制实现。
   execution:
     mode: sequential
     retry: 0
@@ -33,12 +33,12 @@ steps:
     - timestamp: '2026-05-10T20:10:04.042828'
       level: info
       message: 开始整理 Claude Code subagents/skills、smolagents/ML-Intern、Scrapling 资料到
-        Paper Fucker Agent Team 设计约束。
+        PaperCode Agent Team 设计约束。
       agent: codex
     - timestamp: '2026-05-10T20:10:49.193513'
       level: info
       message: 已新增 reports/references/agent-team-and-ml-intern.md，记录 Claude Code subagents/skills、smolagents/ML-Intern、Scrapling
-        的可借鉴机制，并转化为 Paper Fucker Agent Team 设计规则。
+        的可借鉴机制，并转化为 PaperCode Agent Team 设计规则。
       agent: codex
     last_run: '2026-05-10T20:10:49.193513'
     attempt_count: 2

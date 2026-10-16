@@ -7,12 +7,12 @@ ENV BUN_RUNTIME_TRANSPILER_CACHE_PATH=${BUN_RUNTIME_TRANSPILER_CACHE_PATH}
 RUN apk add libgcc libstdc++ ripgrep
 
 FROM base AS build-amd64
-COPY dist/paper_fucker-linux-x64-baseline-musl/bin/paper_fucker /usr/local/bin/paper_fucker
+COPY dist/papercode-linux-x64-baseline-musl/bin/papercode /usr/local/bin/papercode
 
 FROM base AS build-arm64
-COPY dist/paper_fucker-linux-arm64-musl/bin/paper_fucker /usr/local/bin/paper_fucker
+COPY dist/papercode-linux-arm64-musl/bin/papercode /usr/local/bin/papercode
 
 ARG TARGETARCH
 FROM build-${TARGETARCH}
-RUN paper_fucker --version
-ENTRYPOINT ["paper_fucker"]
+RUN papercode --version
+ENTRYPOINT ["papercode"]

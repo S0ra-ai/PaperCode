@@ -1,4 +1,4 @@
-:project       paper_fucker - 可验证论文研究自动化系统
+:project       papercode - 可验证论文研究自动化系统
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          0.13.0.000-050 历史变更归档，主 CHANGELOG 仅保留当前活跃版本线
@@ -620,7 +620,7 @@
             - packages/opencode/src/paper/run.ts - PaperRun snapshot 与 preview monitor summary
         :preview
             - packages/preview/src/client.js - 只读实时 Monitor 渲染 stage、novelty、spine、figure、ledger、diagnostics
-            - packages/preview/src/style.css - Paper Fucker Monitor 视觉与响应式布局
+            - packages/preview/src/style.css - PaperCode Monitor 视觉与响应式布局
         :tui
             - packages/opencode/src/cli/cmd/tui/routes/paper/index.tsx - 研究闭环侧栏展示
             - packages/opencode/src/cli/cmd/tui/routes/paper/workbench.ts - dashboard state 增加 research_closure

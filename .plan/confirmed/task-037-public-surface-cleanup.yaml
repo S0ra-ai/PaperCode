@@ -1,5 +1,5 @@
 id: task-037-public-surface-cleanup
-title: Clean public OpenCode surface into Paper Fucker product
+title: Clean public OpenCode surface into PaperCode product
 status: done
 priority: high
 owner: codex
@@ -12,7 +12,7 @@ depends_on:
 - task-036-multimodel-agent-orchestration
 description: Clean user-visible OpenCode remnants from the hard fork. The startup
   ASCII art, TUI logo, help/banner text, public CLI commands, docs, and reports must
-  present Paper Fucker/paper_fucker as the product. Old chat/session/acp/github/pr
+  present PaperCode/papercode as the product. Old chat/session/acp/github/pr
   surfaces are removed from default user help or moved to internal/debug-only paths.
 execution:
   mode: sequential
@@ -23,8 +23,8 @@ steps:
   status: done
   owner: codex
   depends_on: []
-  description: Add tests/smokes asserting ASCII logo says Paper Fucker, default help
-    hides old chat/session surfaces, TUI logo is Paper Fucker, and user-facing docs
+  description: Add tests/smokes asserting ASCII logo says PaperCode, default help
+    hides old chat/session surfaces, TUI logo is PaperCode, and user-facing docs
     have no active OpenCode branding.
   execution:
     mode: sequential
@@ -33,13 +33,13 @@ steps:
     logs:
     - timestamp: '2026-05-09T12:28:55.540904'
       level: info
-      message: Starting red public-surface tests for Paper Fucker branding and command
+      message: Starting red public-surface tests for PaperCode branding and command
         cleanup.
       agent: codex
     - timestamp: '2026-05-09T12:33:41.877830'
       level: info
       message: 'Added test/cli/public-surface.test.ts. Red run failed as expected:
-        UI.logo did not contain Paper Fucker and src/index.ts still registered legacy
+        UI.logo did not contain PaperCode and src/index.ts still registered legacy
         public commands including AcpCommand.'
       agent: codex
     last_run: '2026-05-09T12:33:41.877830'
@@ -52,7 +52,7 @@ steps:
   depends_on:
   - task-037-step-01-red-surface-tests
   description: Update CLI logo glyphs, UI.logo consumers, TUI logo, web/upgrade/uninstall
-    banners, and startup output to use Paper Fucker user-visible branding.
+    banners, and startup output to use PaperCode user-visible branding.
   execution:
     mode: sequential
     retry: 0
@@ -65,8 +65,8 @@ steps:
       agent: codex
     - timestamp: '2026-05-09T12:41:44.026746'
       level: info
-      message: Replaced CLI/TUI logo source with Paper Fucker wordmark through packages/opencode/src/cli/logo.ts
-        and packages/opencode/src/cli/ui.ts. Verified UI.logo() renders Paper Fucker
+      message: Replaced CLI/TUI logo source with PaperCode wordmark through packages/opencode/src/cli/logo.ts
+        and packages/opencode/src/cli/ui.ts. Verified UI.logo() renders PaperCode
         and no Open Code/OpenCode branding in public-surface test.
       agent: codex
     last_run: '2026-05-09T12:41:44.026746'
@@ -155,7 +155,7 @@ steps:
     - timestamp: '2026-05-10T05:12:09.450271'
       level: info
       message: 'Verification complete for 0.2.6-dev public surface cleanup. CLI help
-        smoke shows Paper Fucker/PaperRun surface. Full opencode suite passed: 2544
+        smoke shows PaperCode/PaperRun surface. Full opencode suite passed: 2544
         pass, 38 skip, 2 todo, 0 fail, 16 snapshots, 7462 expects. Typecheck passed.
         Preview tests passed: 2 pass, 0 fail, 9 expects. Python research-tools tests
         passed: 4 OK. README/CHANGELOG version check passed. TaskFlow validate_task
@@ -168,7 +168,7 @@ steps:
 outputs:
 - type: file
   path: packages/opencode/src/cli/logo.ts
-  description: Paper Fucker ASCII logo source
+  description: PaperCode ASCII logo source
 - type: file
   path: packages/opencode/src/index.ts
   description: Cleaned public CLI command registration

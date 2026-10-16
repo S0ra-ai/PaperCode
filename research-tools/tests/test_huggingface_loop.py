@@ -7,9 +7,9 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from paper_fucker_tools import huggingface_loop
-from paper_fucker_tools.huggingface_loop import hf_research_probe
-from paper_fucker_tools.mcp_tools import TOOL_REGISTRY, call_tool
+from papercode_tools import huggingface_loop
+from papercode_tools.huggingface_loop import hf_research_probe
+from papercode_tools.mcp_tools import TOOL_REGISTRY, call_tool
 
 
 class HuggingFaceLoopToolTest(unittest.TestCase):
@@ -115,7 +115,7 @@ class HuggingFaceLoopToolTest(unittest.TestCase):
                     "paper_id": "test-paper",
                     "title": "test paper",
                     "url": "https://huggingface.co/papers/test-paper",
-                    "authors": ["paper_fucker test"],
+                    "authors": ["papercode test"],
                     "source_verified": True,
                     "trust": "test_record",
                 },

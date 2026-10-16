@@ -11,7 +11,7 @@ tags:
 - docs
 - 0.8.1-dev
 depends_on: []
-description: 建立 Paper Fucker 的自驱审计机制：在 TaskFlow 全部完成后自动寻找下一批工作，审计真实产品闭环、文档/版本/CHANGELOG、no-mock
+description: 建立 PaperCode 的自驱审计机制：在 TaskFlow 全部完成后自动寻找下一批工作，审计真实产品闭环、文档/版本/CHANGELOG、no-mock
   边界、品牌残留、strict live evidence 和 Git Flow 状态，并生成可追踪报告。
 execution:
   mode: sequential
@@ -67,7 +67,7 @@ steps:
       level: info
       message: Added scripts/autonomous-product-audit.ps1 and generated reports/autonomous-product-audit.md.
         The script checks TaskFlow queue state, README/CHANGELOG version sync, colon
-        DSL changelog shape, strict live evidence, dangerous residue, Paper Fucker/PaperRun
+        DSL changelog shape, strict live evidence, dangerous residue, PaperCode/PaperRun
         brand surface, and Git Flow branch discipline. It passes with -AllowActiveTask
         during this active TaskFlow task.
       agent: codex

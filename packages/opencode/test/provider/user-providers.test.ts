@@ -30,7 +30,7 @@ const list = () => run((provider) => provider.list())
 async function withConfig<T>(config: object, env: Record<string, string>, fn: () => Promise<T>) {
   await using tmp = await tmpdir({
     init: async (dir) => {
-      await Bun.write(path.join(dir, "paper_fucker.json"), JSON.stringify(config))
+      await Bun.write(path.join(dir, "papercode.json"), JSON.stringify(config))
     },
   })
   // The temp dir must stay alive until the instance has loaded its config, so await inside the
@@ -47,7 +47,7 @@ async function withConfig<T>(config: object, env: Record<string, string>, fn: ()
 }
 
 const dialect = {
-  $schema: "https://paper-fucker.local/config.json",
+  $schema: "https://papercode.local/config.json",
   providers: {
     fjbdg: {
       displayName: "fjbdg",
@@ -101,7 +101,7 @@ describe("providers dialect", () => {
   test("models as a record and a per-model reasoning override both work", async () => {
     await withConfig(
       {
-        $schema: "https://paper-fucker.local/config.json",
+        $schema: "https://papercode.local/config.json",
         providers: {
           local: {
             displayName: "Local",
@@ -138,7 +138,7 @@ describe("providers dialect", () => {
   test("a provider-level reasoning boolean still marks capabilities without pinning an effort", async () => {
     await withConfig(
       {
-        $schema: "https://paper-fucker.local/config.json",
+        $schema: "https://papercode.local/config.json",
         providers: {
           plain: {
             api: "openai-completions",
@@ -161,7 +161,7 @@ describe("providers dialect", () => {
   test("the legacy provider key wins when both declare the same id", async () => {
     await withConfig(
       {
-        $schema: "https://paper-fucker.local/config.json",
+        $schema: "https://papercode.local/config.json",
         providers: {
           dual: {
             displayName: "From Dialect",

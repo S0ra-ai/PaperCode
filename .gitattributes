@@ -12,10 +12,10 @@
 /docs/changelog/v0/** export-ignore
 
 # Local/runtime state must never appear in release archives.
-/.paper_fucker/local/ export-ignore
-/.paper_fucker/local/** export-ignore
-/.paper_fucker/runs/ export-ignore
-/.paper_fucker/runs/** export-ignore
+/.papercode/local/ export-ignore
+/.papercode/local/** export-ignore
+/.papercode/runs/ export-ignore
+/.papercode/runs/** export-ignore
 /node_modules/ export-ignore
 /node_modules/** export-ignore
 /.turbo/ export-ignore

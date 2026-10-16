@@ -5,7 +5,7 @@ import { NonNegativeInt, withStatics } from "@/util/schema"
 import { Global } from "@opencode-ai/core/global"
 import { AppFileSystem } from "@opencode-ai/core/filesystem"
 
-export const OAUTH_DUMMY_KEY = "paper_fucker-oauth-dummy-key"
+export const OAUTH_DUMMY_KEY = "papercode-oauth-dummy-key"
 
 const AccountID = Schema.String.pipe(
   Schema.brand("AccountID"),
@@ -108,7 +108,7 @@ export const layer = Layer.effect(
     const file = path.join(global.data, "auth-v2.json")
 
     const load: () => Effect.Effect<Writable, AuthError> = Effect.fnUntraced(function* () {
-      const authContent = process.env.PAPER_FUCKER_AUTH_CONTENT
+      const authContent = process.env.PAPERCODE_AUTH_CONTENT
       if (authContent) {
         try {
           return JSON.parse(authContent)

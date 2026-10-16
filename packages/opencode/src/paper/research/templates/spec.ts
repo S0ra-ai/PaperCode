@@ -59,8 +59,8 @@ export function createFallbackCjcTemplate(now: string): TemplateSpec {
     evidence: [
       {
         source_id: "template-source-cjc-default",
-        title: "paper_fucker built-in CJC fallback",
-        url: "paper_fucker://templates/cjc-default",
+        title: "papercode built-in CJC fallback",
+        url: "papercode://templates/cjc-default",
         trust: "fallback",
         license: "project-internal",
         license_status: "clear",

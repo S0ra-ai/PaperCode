@@ -106,7 +106,7 @@ const AgentCreateCommand = effectCmd({
           if (prompts.isCancel(scopeResult)) throw new UI.CancelledError()
           scope = scopeResult
         }
-        targetPath = path.join(scope === "global" ? Global.Path.config : path.join(ctx.worktree, ".paper_fucker"), "agents")
+        targetPath = path.join(scope === "global" ? Global.Path.config : path.join(ctx.worktree, ".papercode"), "agents")
       }
 
       // Get description

@@ -21,11 +21,11 @@
   openssl,
   webkitgtk_4_1,
   gst_all_1,
-  paper_fucker,
+  papercode,
 }:
 rustPlatform.buildRustPackage (finalAttrs: {
-  pname = "paper_fucker-desktop";
-  inherit (paper_fucker)
+  pname = "papercode-desktop";
+  inherit (papercode)
     version
     src
     node_modules
@@ -72,7 +72,7 @@ rustPlatform.buildRustPackage (finalAttrs: {
     patchShebangs packages/desktop/node_modules
 
     mkdir -p packages/desktop/src-tauri/sidecars
-    cp ${paper_fucker}/bin/paper_fucker packages/desktop/src-tauri/sidecars/paper_fucker-cli-${stdenv.hostPlatform.rust.rustcTarget}
+    cp ${papercode}/bin/papercode packages/desktop/src-tauri/sidecars/papercode-cli-${stdenv.hostPlatform.rust.rustcTarget}
   '';
 
   # see publish-tauri job in .github/workflows/publish.yml
@@ -86,15 +86,15 @@ rustPlatform.buildRustPackage (finalAttrs: {
   # should be removed once binary is renamed or decided otherwise
   # darwin output is a .app bundle so no conflict
   postFixup = lib.optionalString stdenv.hostPlatform.isLinux ''
-    mv $out/bin/paper_fucker $out/bin/paper_fucker-desktop
-    sed -i 's|^Exec=paper_fucker$|Exec=paper_fucker-desktop|' $out/share/applications/paper_fucker.desktop
+    mv $out/bin/papercode $out/bin/papercode-desktop
+    sed -i 's|^Exec=papercode$|Exec=papercode-desktop|' $out/share/applications/papercode.desktop
   '';
 
   meta = {
-    description = "paper_fucker Desktop App";
-    homepage = "https://github.com/ZhuchenZhong/paper_fucker";
+    description = "papercode Desktop App";
+    homepage = "https://github.com/ZhuchenZhong/papercode";
     license = lib.licenses.mpl20;
-    mainProgram = "paper_fucker-desktop";
-    inherit (paper_fucker.meta) platforms;
+    mainProgram = "papercode-desktop";
+    inherit (papercode.meta) platforms;
   };
 })

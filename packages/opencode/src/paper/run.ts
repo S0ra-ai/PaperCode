@@ -2437,7 +2437,7 @@ export async function getPaperRunSnapshotFromDir(runDir: string): Promise<PaperR
   const metadata = jsonRecord(status.run.metadata)
   const runtimeMetadata = jsonRecord(metadata.runtime)
   const runtimeRoot = path.dirname(metadataString(runtimeMetadata.run_dir) ?? runDir)
-  const inferredHome = runtimeRoot.endsWith(path.join(".paper_fucker", "runs"))
+  const inferredHome = runtimeRoot.endsWith(path.join(".papercode", "runs"))
     ? path.dirname(path.dirname(runtimeRoot))
     : undefined
   const budgetTier = normalizeBudgetTier(metadataBudgetTier(metadata.paper_budget_tier))

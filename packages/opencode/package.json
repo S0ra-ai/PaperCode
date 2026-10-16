@@ -1,8 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/package.json",
   "version": "1.14.41",
-  "name": "paper_fucker",
-  
+  "name": "papercode",
   "type": "module",
   "license": "MPL-2.0",
   "private": true,
@@ -29,8 +28,7 @@
     "db": "bun drizzle-kit"
   },
   "bin": {
-    "papercode": "./bin/papercode",
-    "paper_fucker": "./bin/paper_fucker"
+    "papercode": "./bin/papercode"
   },
   "exports": {
     "./*": "./src/*.ts"

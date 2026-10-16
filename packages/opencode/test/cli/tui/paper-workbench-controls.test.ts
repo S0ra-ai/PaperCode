@@ -16,7 +16,7 @@ function snapshot(): PaperRunSnapshot {
     schema_version: "PaperRun.v1",
     run_id: "run-live-controls",
     topic: "中文论文工作台 live controls",
-    workspace: "E:/Project/paper_fucker",
+    workspace: "E:/Project/papercode",
     status: "running",
     created_at: "2026-05-10T00:00:00Z",
     updated_at: "2026-05-10T00:00:00Z",
@@ -238,14 +238,14 @@ describe("TUI PaperRun live controls", () => {
 
     await submitPaperWorkbenchGuidance({
       baseUrl: "http://localhost:4096",
-      directory: "E:/Project/paper_fucker",
+      directory: "E:/Project/papercode",
       runID: "run-live-controls",
       message: "优先补充方法贡献",
       fetch: fakeFetch,
     })
     await sendPaperWorkbenchControl({
       baseUrl: "http://localhost:4096",
-      directory: "E:/Project/paper_fucker",
+      directory: "E:/Project/papercode",
       runID: "run-live-controls",
       action: "retry",
       stage: "literature",
@@ -254,7 +254,7 @@ describe("TUI PaperRun live controls", () => {
     const opened: string[] = []
     const preview = await requestPaperWorkbenchPreview({
       baseUrl: "http://localhost:4096",
-      directory: "E:/Project/paper_fucker",
+      directory: "E:/Project/papercode",
       runID: "run-live-controls",
       fetch: fakeFetch,
       openUrl: (url) => {
@@ -265,24 +265,24 @@ describe("TUI PaperRun live controls", () => {
     expect(opened).toEqual(["http://127.0.0.1:49152/preview?token=test"])
     await requestPaperWorkbenchExport({
       baseUrl: "http://localhost:4096",
-      directory: "E:/Project/paper_fucker",
+      directory: "E:/Project/papercode",
       runID: "run-live-controls",
       forced: true,
       fetch: fakeFetch,
     })
     await fetchPaperWorkbenchCapabilities({
       baseUrl: "http://localhost:4096",
-      directory: "E:/Project/paper_fucker",
+      directory: "E:/Project/papercode",
       fetch: fakeFetch,
     })
     await fetchPaperWorkbenchModelRoles({
       baseUrl: "http://localhost:4096",
-      directory: "E:/Project/paper_fucker",
+      directory: "E:/Project/papercode",
       fetch: fakeFetch,
     })
     await fetchPaperWorkbenchModelInventory({
       baseUrl: "http://localhost:4096",
-      directory: "E:/Project/paper_fucker",
+      directory: "E:/Project/papercode",
       fetch: fakeFetch,
     })
 
@@ -298,8 +298,8 @@ describe("TUI PaperRun live controls", () => {
     expect(JSON.parse(String(calls[0]!.init.body))).toEqual({ message: "优先补充方法贡献" })
     expect(JSON.parse(String(calls[1]!.init.body))).toEqual({ action: "retry", stage: "literature" })
     expect(JSON.parse(String(calls[3]!.init.body))).toEqual({ forced: true })
-    expect((calls[1]!.init.headers as Record<string, string>)["x-paper-fucker-directory"]).toBe(
-      "E:/Project/paper_fucker",
+    expect((calls[1]!.init.headers as Record<string, string>)["x-papercode-directory"]).toBe(
+      "E:/Project/papercode",
     )
   })
 })

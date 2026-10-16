@@ -2,7 +2,7 @@ id: task-111-product-ux-acceptance
 title: Product UX acceptance for 0.11.0-dev
 status: done
 priority: high
-owner: codex-paper-fucker
+owner: codex-papercode
 tags:
 - paper
 - acceptance
@@ -20,7 +20,7 @@ steps:
 - id: focused-product-tests
   title: Add and run focused product tests
   status: done
-  owner: codex-paper-fucker
+  owner: codex-papercode
   depends_on: []
   description: Cover storage isolation, run history/resume, doctor grouping, machine
     profile, and built-in capability registry.
@@ -33,20 +33,20 @@ steps:
       level: info
       message: Running focused acceptance coverage after completing feature and cleanup
         tasks.
-      agent: codex-paper-fucker
+      agent: codex-papercode
     - timestamp: '2026-05-13T02:19:51.017364'
       level: info
       message: 'Focused acceptance passed: opencode targeted suite across init/doctor,
         PaperRun home/workspace storage and resume, model registry, machine/workbench
         sidebar, visible commands, and public brand surface: 53 pass, 0 fail.'
-      agent: codex-paper-fucker
+      agent: codex-papercode
     last_run: '2026-05-13T02:19:51.017364'
     attempt_count: 2
   meta: {}
 - id: version-changelog
   title: Update version and CHANGELOG
   status: done
-  owner: codex-paper-fucker
+  owner: codex-papercode
   depends_on:
   - focused-product-tests
   description: Advance root README/CHANGELOG to 0.11.0-dev with colon DSL entries
@@ -59,7 +59,7 @@ steps:
     - timestamp: '2026-05-13T02:19:56.240107'
       level: info
       message: Preparing 0.11.0-dev README/CHANGELOG sync.
-      agent: codex-paper-fucker
+      agent: codex-papercode
     - timestamp: '2026-05-13T02:21:56.624275'
       level: info
       message: Updated root README/CHANGELOG to 0.11.0-dev and added a colon-DSL entry
@@ -67,14 +67,14 @@ steps:
         sidebar, public brand cleanup, and tests. README version check and CHANGELOG
         format/version validation pass. TaskFlow Git branch preparation was attempted
         but refused the already-dirty worktree, so no branch operation was forced.
-      agent: codex-paper-fucker
+      agent: codex-papercode
     last_run: '2026-05-13T02:21:56.624275'
     attempt_count: 2
   meta: {}
 - id: regression-suite
   title: Run required regression suite
   status: done
-  owner: codex-paper-fucker
+  owner: codex-papercode
   depends_on:
   - version-changelog
   description: Run opencode tests/typecheck, preview tests, research-tools unittest,
@@ -87,7 +87,7 @@ steps:
     - timestamp: '2026-05-13T02:23:06.151509'
       level: info
       message: Running required final regression suite.
-      agent: codex-paper-fucker
+      agent: codex-papercode
     - timestamp: '2026-05-13T03:48:14.027215'
       level: info
       message: 'Regression suite completed for 0.11.0-dev product UX acceptance. Passed:
@@ -97,7 +97,7 @@ steps:
         -s research-tools/tests (18 pass); scripts/check-readme-version.ps1; scripts/check-changelog-format.ps1
         -IncludeArchives; TaskFlow validate_changelog_format; TaskFlow validate_changelog_versions.
         CHANGELOG 0.11.0-dev verification updated.'
-      agent: codex-paper-fucker
+      agent: codex-papercode
     last_run: '2026-05-13T03:48:14.027215'
     attempt_count: 2
   meta: {}

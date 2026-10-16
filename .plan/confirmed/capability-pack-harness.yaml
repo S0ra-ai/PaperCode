@@ -11,7 +11,7 @@ tags:
 - 0.6.3-dev
 depends_on:
 - paper-agent-team-fabric
-description: 将 skills、MCP、built-in tools、Python tools、paper_fucker first-party capabilities
+description: 将 skills、MCP、built-in tools、Python tools、papercode first-party capabilities
   融合为内置能力层，并提供 harness 调度、审批、重试、去重、doom-loop 检测、成本/权限控制。用户不需要额外安装论文相关 skills/MCP，系统按
   stage 自动发现和调用。
 execution:
@@ -48,7 +48,7 @@ steps:
   status: done
   owner: codex
   depends_on: []
-  description: 将 paper_fucker 内置 skill、MCP 配置、first-party tools 注册为 runtime capabilities，避免要求用户手工安装。
+  description: 将 papercode 内置 skill、MCP 配置、first-party tools 注册为 runtime capabilities，避免要求用户手工安装。
   execution:
     mode: sequential
     retry: 0

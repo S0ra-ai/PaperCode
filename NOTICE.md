@@ -36,7 +36,7 @@ git history. Active upstream GitHub workflows were not imported.
 
 - Project: architecture-diagram-generator
 - Repository: https://github.com/Cocoon-AI/architecture-diagram-generator
-- Local location: `.paper_fucker/skills/architecture-diagram`
+- Local location: `.papercode/skills/architecture-diagram`
 - License: MIT
 
 PaperCode bundles this as an optional built-in research diagram skill for
@@ -46,7 +46,7 @@ HTML/SVG architecture and system diagrams.
 
 - Project: paper-framework-figure-studio-pro
 - Repository: https://github.com/c-narcissus/paper-framework-figure-studio-pro
-- Local location: `.paper_fucker/skills/paper-framework-figure-studio-pro`
+- Local location: `.papercode/skills/paper-framework-figure-studio-pro`
 - License: MIT-0
 
 PaperCode bundles this as an optional built-in research figure skill for
@@ -75,5 +75,5 @@ user installation.
 
 PaperCode adapts a small set of project-scope command, skill, and agent workflow
 patterns from this local reference snapshot. The adapted files live under
-`.paper_fucker/command`, `.paper_fucker/skills`, and `.paper_fucker/agent` with
+`.papercode/command`, `.papercode/skills`, and `.papercode/agent` with
 PaperCode naming and product copy.

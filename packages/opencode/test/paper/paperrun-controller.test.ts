@@ -54,7 +54,7 @@ function runtimeOptions(workspace: string, home: string): PaperRunRuntimeOptions
 }
 
 async function workspaceFixture() {
-  const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-paperrun-controller-"))
+  const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-paperrun-controller-"))
   cleanup.push(dir)
   const workspace = path.join(dir, "workspace")
   const home = path.join(dir, "home")

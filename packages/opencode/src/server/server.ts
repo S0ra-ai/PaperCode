@@ -148,7 +148,7 @@ function createHono(opts: CorsOptions, selection: ServerBackend.Selection = Serv
  * Since the Effect HttpApi backend now covers every Hono route (plus the new
  * `/api/session/*` v2 routes — see `httpapi-bridge.test.ts` for the parity
  * audit), `Server.openapi()` derives the spec from `OpenApi.fromApi(PublicApi)`.
- * `PublicApi` is `PaperFuckerHttpApi` annotated with the `matchLegacyOpenApi`
+ * `PublicApi` is `PaperCodeHttpApi` annotated with the `matchLegacyOpenApi`
  * transform that injects instance query parameters, strips Effect's optional
  * null arms, normalizes component names, and patches SSE response schemas so
  * the generated SDK keeps the legacy Hono shape.
@@ -174,9 +174,9 @@ export async function openapiHono() {
   const result = await generateSpecs(app, {
     documentation: {
       info: {
-        title: "paper_fucker",
+        title: "papercode",
         version: "1.0.0",
-        description: "paper_fucker api",
+        description: "papercode api",
       },
       openapi: "3.1.1",
     },

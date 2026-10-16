@@ -22,12 +22,12 @@ describe("ServerAuth", () => {
     expect(ServerAuth.headers()).toBeUndefined()
   })
 
-  test("defaults to the paper_fucker username", () => {
+  test("defaults to the papercode username", () => {
     Flag.OPENCODE_SERVER_PASSWORD = "secret"
     Flag.OPENCODE_SERVER_USERNAME = undefined
 
     expect(ServerAuth.headers()).toEqual({
-      Authorization: `Basic ${Buffer.from("paper_fucker:secret").toString("base64")}`,
+      Authorization: `Basic ${Buffer.from("papercode:secret").toString("base64")}`,
     })
   })
 
@@ -54,6 +54,6 @@ describe("ServerAuth", () => {
 
     expect(ServerAuth.required(config)).toBe(true)
     expect(ServerAuth.authorized({ username: "alice", password: Redacted.make("secret") }, config)).toBe(true)
-    expect(ServerAuth.authorized({ username: "paper_fucker", password: Redacted.make("secret") }, config)).toBe(false)
+    expect(ServerAuth.authorized({ username: "papercode", password: Redacted.make("secret") }, config)).toBe(false)
   })
 })

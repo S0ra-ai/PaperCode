@@ -68,7 +68,7 @@ steps:
       message: Implemented packages/server/src/paper/profiles.ts and exported it.
         Profile registry tests now pass for built-in ids, runtime-refreshed Nature
         metadata, and PaperProfileCheck output; remaining failure is the expected
-        missing .paper_fucker/skills/nature-paper/SKILL.md for step 03.
+        missing .papercode/skills/nature-paper/SKILL.md for step 03.
       agent: codex
     last_run: '2026-05-08T22:41:29.488224'
     attempt_count: 2
@@ -79,7 +79,7 @@ steps:
   owner: codex
   depends_on:
   - task-024-step-02-profile-implementation
-  description: Create .paper_fucker/skills/nature-paper/SKILL.md and make it discoverable
+  description: Create .papercode/skills/nature-paper/SKILL.md and make it discoverable
     through the capability registry.
   execution:
     mode: sequential
@@ -88,12 +88,12 @@ steps:
     logs:
     - timestamp: '2026-05-08T22:41:35.686180'
       level: info
-      message: Creating first-party .paper_fucker/skills/nature-paper/SKILL.md with
+      message: Creating first-party .papercode/skills/nature-paper/SKILL.md with
         runtime official-guidance refresh policy and PaperProfile.v1 output contract.
       agent: codex
     - timestamp: '2026-05-08T22:42:40.154135'
       level: info
-      message: 'Created .paper_fucker/skills/nature-paper/SKILL.md and wired Nature
+      message: 'Created .papercode/skills/nature-paper/SKILL.md and wired Nature
         profile official-source refresh URLs. Profile tests now pass: 4 pass, 0 fail,
         12 expects.'
       agent: codex
@@ -157,7 +157,7 @@ outputs:
   path: packages/server/src/paper/profiles.ts
   description: Paper profile registry
 - type: file
-  path: .paper_fucker/skills/nature-paper/SKILL.md
+  path: .papercode/skills/nature-paper/SKILL.md
   description: First-party Nature paper skill
 - type: file
   path: packages/server/test/paper/profiles.test.ts

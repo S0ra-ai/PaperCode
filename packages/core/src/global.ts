@@ -5,10 +5,10 @@ import { Context, Effect, Layer } from "effect"
 import { Flock } from "./util/flock"
 import { Flag } from "./flag/flag"
 
-const app = "paper_fucker"
-const homeDirName = ".paper_fucker"
+const app = "papercode"
+const homeDirName = ".papercode"
 const overrides: Partial<Record<keyof Interface, string>> = {}
-const initialTestHome = envPath(process.env.PAPER_FUCKER_TEST_HOME)
+const initialTestHome = envPath(process.env.PAPERCODE_TEST_HOME)
 
 function envPath(value: string | undefined) {
   if (!value) return undefined
@@ -18,7 +18,7 @@ function envPath(value: string | undefined) {
 }
 
 function home() {
-  return envPath(overrides.home) ?? envPath(process.env.PAPER_FUCKER_TEST_HOME) ?? initialTestHome ?? os.homedir()
+  return envPath(overrides.home) ?? envPath(process.env.PAPERCODE_TEST_HOME) ?? initialTestHome ?? os.homedir()
 }
 
 function root() {

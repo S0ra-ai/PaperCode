@@ -83,8 +83,8 @@ export function discoverDatasets(input: DatasetDiscoveryInput): DataPlan {
   return withSpan(
     "research.sources.dataset_discover",
     {
-      "paper_fucker.research.topic": input.topic,
-      "paper_fucker.research.datasets.candidates": input.candidates?.length ?? 0,
+      "papercode.research.topic": input.topic,
+      "papercode.research.datasets.candidates": input.candidates?.length ?? 0,
     },
     (span) => {
       const datasets = (input.candidates ?? []).map((candidate) => normalizeDataset(candidate, createdAt))
@@ -102,8 +102,8 @@ export function discoverDatasets(input: DatasetDiscoveryInput): DataPlan {
       if (datasets.length === 0) gaps.push("missing_dataset_candidates")
       if (datasets.length > 0 && openVerified.length === 0) gaps.push("no_open_verified_dataset")
 
-      span.setAttribute("paper_fucker.research.datasets.open_verified", openVerified.length)
-      span.setAttribute("paper_fucker.research.datasets.license_conflicts", licenseConflicts.length)
+      span.setAttribute("papercode.research.datasets.open_verified", openVerified.length)
+      span.setAttribute("papercode.research.datasets.license_conflicts", licenseConflicts.length)
       return {
         schema_version: "DataPlan.v1",
         topic: input.topic,

@@ -948,7 +948,7 @@ function humanizeLabel(value: string) {
   const normalizedLabel = displayExperimentLabel(value)
   if (normalizedLabel !== value.replace(/[-_]+/g, " ")) return normalizedLabel
   return value
-    .replace(/^Code-grounded paper_fucker workflow$/, "代码证据驱动工作流")
+    .replace(/^Code-grounded papercode workflow$/, "代码证据驱动工作流")
     .replace(/^Text2Action semantic planning with safe execution$/i, "Text2Action 语义规划与安全执行闭环")
     .replace(/^baseline:ranking-lexical$/, "词项匹配基线")
     .replace(/^ablation:ranking-no-coverage$/, "无证据覆盖消融")
@@ -965,7 +965,7 @@ function humanizeProposedLabel(input: ComposeDraftPaperInput) {
   if (frame) return frame.methodName
   const label = input.experiment_plan?.proposed.label
   if (!label) return contextualProposedLabel(input)
-  if (/paper_fucker workflow|code-grounded/i.test(label) && isRankingMetric(input.experiment_plan?.proposed.expected_metric ?? input.result_report?.primary_metric)) {
+  if (/papercode workflow|code-grounded/i.test(label) && isRankingMetric(input.experiment_plan?.proposed.expected_metric ?? input.result_report?.primary_metric)) {
     return contextualProposedLabel(input)
   }
   return humanizeLabel(label)
@@ -2037,7 +2037,7 @@ function systemArchitectureSummary(input: ComposeDraftPaperInput) {
     ["Export", "执行 final gate，写出 Markdown、LaTeX、PDF、DOCX 和 manifest。", "ExportBundle"],
   ]
   return joinBlocks([
-    "PaperRun 的架构目标是让每个阶段都可重放、可诊断、可被 Preview 展示。实现上，运行目录位于用户本机 `.paper_fucker/runs/<run_id>`，阶段产物通过 artifact store 统一登记；TUI、Preview、导出器和后续 `/resume` 都读取同一份 run 状态。",
+    "PaperRun 的架构目标是让每个阶段都可重放、可诊断、可被 Preview 展示。实现上，运行目录位于用户本机 `.papercode/runs/<run_id>`，阶段产物通过 artifact store 统一登记；TUI、Preview、导出器和后续 `/resume` 都读取同一份 run 状态。",
     markdownTable(["Stage", "Responsibility", "Primary Artifacts"], stageRows),
     "这条链路刻意把内部执行状态和用户可见论文分开：artifact 记录原始证据，draft 只引用已经绑定的 claim，export manifest 则说明哪些文件被写出、哪些 gate 检查已经通过。这样做的直接收益是：当模型、脚本、容器或引用检查失败时，失败会停在具体阶段，而不是把错误扩散成一篇看似完整但不可审查的论文。",
     input.experiment_runs
@@ -2896,7 +2896,7 @@ export function composeDraftPaper(input: ComposeDraftPaperInput): DraftPaper {
   return withSpan(
     "research.writing.compose_draft",
     {
-      "paper_fucker.research.draft.title": input.title,
+      "papercode.research.draft.title": input.title,
     },
     () => {
       const title = paperTitle(input)

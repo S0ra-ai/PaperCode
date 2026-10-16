@@ -1,14 +1,14 @@
 # Brand Smoke Report
 
 Date: 2026-05-08
-Branch: feature/rebrand-paper-fucker
-TaskFlow task: task-004-brand-paper-fucker
+Branch: feature/rebrand-papercode
+TaskFlow task: task-004-brand-papercode
 
 ## Scope
 
-- Renamed the user-visible command entrypoint to `paper_fucker`.
-- Moved project and global config defaults to `.paper_fucker`, `paper_fucker.json/jsonc`, and `~/.paper_fucker`.
-- Moved runtime storage defaults to `paper_fucker.db` and channel-scoped `paper_fucker-<channel>.db`.
+- Renamed the user-visible command entrypoint to `papercode`.
+- Moved project and global config defaults to `.papercode`, `papercode.json/jsonc`, and `~/.papercode`.
+- Moved runtime storage defaults to `papercode.db` and channel-scoped `papercode-<channel>.db`.
 - Rebranded HTTP/service identifiers, desktop product identifiers, app storage keys, SDK headers, install/build artifacts, Docker defaults, and TUI/app visible labels.
 - Kept legacy `OPENCODE_*` environment variables and selected internal upstream package names as compatibility fallbacks.
 
@@ -27,18 +27,18 @@ TaskFlow task: task-004-brand-paper-fucker
 
 ## CLI Smoke
 
-- `npx --yes bun@1.3.13 --cwd packages/opencode src/index.ts --help` lists commands under `paper_fucker`, including `paper_fucker run`, `paper_fucker serve`, and `paper_fucker web`; the mDNS default is `paper-fucker.local`.
+- `npx --yes bun@1.3.13 --cwd packages/opencode src/index.ts --help` lists commands under `papercode`, including `papercode run`, `papercode serve`, and `papercode web`; the mDNS default is `papercode.local`.
 - `npx --yes bun@1.3.13 --cwd packages/opencode src/index.ts --version` returned `local`.
-- `npx --yes bun@1.3.13 --cwd packages/opencode src/index.ts serve --hostname 127.0.0.1 --port 0` printed `paper_fucker server listening on http://127.0.0.1:4096`; the smoke process was stopped after startup verification.
+- `npx --yes bun@1.3.13 --cwd packages/opencode src/index.ts serve --hostname 127.0.0.1 --port 0` printed `papercode server listening on http://127.0.0.1:4096`; the smoke process was stopped after startup verification.
 
 ## Old Name Scan
 
-- `rg --line-number "IntelliGen|intelligen|Python core|python core|codex/task" README.md packages CHANGELOG scripts .plan/confirmed/task-004-brand-paper-fucker.yaml` found only historical `CHANGELOG` and TaskFlow references, generic `intelligence` words, model fixture URLs, upstream legal copy, and LSP/code-intelligence text. README has no active IntelliGen or Python-core authority wording.
+- `rg --line-number "IntelliGen|intelligen|Python core|python core|codex/task" README.md packages CHANGELOG scripts .plan/confirmed/task-004-brand-papercode.yaml` found only historical `CHANGELOG` and TaskFlow references, generic `intelligence` words, model fixture URLs, upstream legal copy, and LSP/code-intelligence text. README has no active IntelliGen or Python-core authority wording.
 - `rg --line-number '"opencode": "workspace:\*"|opencode@workspace|"name": "opencode"|"bin"\s*:\s*\{\s*"opencode"' package.json packages bun.lock` found no active workspace dependency, package name, or bin mapping for an `opencode` command package.
 - `docs/` is absent, so old `docs/rebuild/` planning drafts are not present as an execution source.
 
 ## Accepted Compatibility Boundary
 
 - The source directory `packages/opencode` remains unchanged in this step to avoid a broad package import-path migration.
-- Internal `@opencode-ai/*` package scopes and selected `opencode` provider identifiers remain where they are upstream compatibility keys rather than paper_fucker user-facing product surfaces.
-- Legacy `OPENCODE_*` environment variables remain as fallbacks while preferred `PAPER_FUCKER_*` variables are now supported.
+- Internal `@opencode-ai/*` package scopes and selected `opencode` provider identifiers remain where they are upstream compatibility keys rather than papercode user-facing product surfaces.
+- Legacy `OPENCODE_*` environment variables remain as fallbacks while preferred `PAPERCODE_*` variables are now supported.

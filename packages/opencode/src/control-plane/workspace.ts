@@ -561,9 +561,9 @@ export const layer = Layer.effect(
 
       const authContent = JSON.stringify(yield* auth.all())
       const env = {
-        PAPER_FUCKER_AUTH_CONTENT: authContent,
-        PAPER_FUCKER_WORKSPACE_ID: config.id,
-        PAPER_FUCKER_EXPERIMENTAL_WORKSPACES: "true",
+        PAPERCODE_AUTH_CONTENT: authContent,
+        PAPERCODE_WORKSPACE_ID: config.id,
+        PAPERCODE_EXPERIMENTAL_WORKSPACES: "true",
         OPENCODE_EXPERIMENTAL_WORKSPACES: "true",
         OTEL_EXPORTER_OTLP_HEADERS: process.env.OTEL_EXPORTER_OTLP_HEADERS,
         OTEL_EXPORTER_OTLP_ENDPOINT: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,

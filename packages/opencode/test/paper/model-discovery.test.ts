@@ -27,7 +27,7 @@ const tmpRoots: string[] = []
 const repoRoot = path.resolve(import.meta.dir, "../../../..")
 
 async function tmpHome() {
-  const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-models-"))
+  const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-models-"))
   tmpRoots.push(dir)
   return dir
 }
@@ -373,7 +373,7 @@ describe("paper provider model discovery", () => {
     expect(publicConfig).not.toContain("sk-local-only")
     expect(secretConfig).toContain("sk-local-only")
     expect(saved.config_path.startsWith(home)).toBe(true)
-    expect(saved.secret_path.startsWith(path.join(home, ".paper_fucker", "local"))).toBe(true)
+    expect(saved.secret_path.startsWith(path.join(home, ".papercode", "local"))).toBe(true)
   })
 
   test("persists discovered models into a user allowlist and routes only allowlisted models", async () => {
@@ -757,7 +757,7 @@ describe("paper provider model discovery", () => {
     expect(existsSync(scriptPath)).toBe(true)
     const script = await readFile(scriptPath, "utf8")
 
-    expect(script).toContain(".paper_fucker")
+    expect(script).toContain(".papercode")
     expect(script).toContain("providers")
     expect(script).toContain("provider-secrets.json")
     expect(script).toContain("/models")

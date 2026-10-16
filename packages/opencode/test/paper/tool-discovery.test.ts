@@ -12,13 +12,13 @@ describe("paper tool discovery", () => {
     const xelatex = path.join(local, "Programs", "MiKTeX", "miktex", "bin", "x64", "xelatex.exe")
     const latexmk = path.join(roaming, "MiKTeX", "miktex", "bin", "x64", "latexmk.exe")
     for (const file of [pandoc, xelatex, latexmk]) await Bun.write(file, "fixture executable")
-    const changed = ["PATH", "LOCALAPPDATA", "APPDATA", "PAPER_FUCKER_TOOL_PANDOC", "PAPER_FUCKER_TOOL_XELATEX", "PAPER_FUCKER_TOOL_LATEXMK"]
+    const changed = ["PATH", "LOCALAPPDATA", "APPDATA", "PAPERCODE_TOOL_PANDOC", "PAPERCODE_TOOL_XELATEX", "PAPERCODE_TOOL_LATEXMK"]
     const saved = Object.fromEntries(changed.map((key) => [key, process.env[key]]))
     try {
       process.env.PATH = ""
       process.env.LOCALAPPDATA = local
       process.env.APPDATA = roaming
-      for (const key of changed.filter((key) => key.startsWith("PAPER_FUCKER_TOOL_"))) delete process.env[key]
+      for (const key of changed.filter((key) => key.startsWith("PAPERCODE_TOOL_"))) delete process.env[key]
       const report = discoverInitTools()
       expect(report.tools.pandoc).toMatchObject({ status: "available", path: pandoc, source: "common" })
       expect(report.tools.xelatex).toMatchObject({ status: "available", path: xelatex, source: "common" })
@@ -35,14 +35,14 @@ describe("paper tool discovery", () => {
     await using tmp = await tmpdir()
     const executable = path.join(tmp.path, "pandoc.exe")
     await Bun.write(executable, "fixture executable")
-    const previous = process.env.PAPER_FUCKER_TOOL_PANDOC
+    const previous = process.env.PAPERCODE_TOOL_PANDOC
     try {
-      process.env.PAPER_FUCKER_TOOL_PANDOC = executable
+      process.env.PAPERCODE_TOOL_PANDOC = executable
       const report = discoverInitTools({ pandoc: path.join(tmp.path, "missing.exe") })
       expect(report.tools.pandoc).toMatchObject({ path: executable, source: "env" })
     } finally {
-      if (previous === undefined) delete process.env.PAPER_FUCKER_TOOL_PANDOC
-      else process.env.PAPER_FUCKER_TOOL_PANDOC = previous
+      if (previous === undefined) delete process.env.PAPERCODE_TOOL_PANDOC
+      else process.env.PAPERCODE_TOOL_PANDOC = previous
     }
   })
 })

@@ -122,8 +122,8 @@ describe("plugin.install.task", () => {
     const ok = await run(ctx(tmp.path))
     expect(ok).toBe(true)
 
-    const server = await read(path.join(tmp.path, ".paper_fucker", "paper_fucker.jsonc"))
-    const tui = await read(path.join(tmp.path, ".paper_fucker", "tui.jsonc"))
+    const server = await read(path.join(tmp.path, ".papercode", "papercode.jsonc"))
+    const tui = await read(path.join(tmp.path, ".papercode", "tui.jsonc"))
     expect(server.plugin).toEqual(["acme@1.2.3"])
     expect(tui.plugin).toEqual(["acme@1.2.3"])
   })
@@ -144,8 +144,8 @@ describe("plugin.install.task", () => {
     const ok = await run(ctx(tmp.path))
     expect(ok).toBe(true)
 
-    const server = await read(path.join(tmp.path, ".paper_fucker", "paper_fucker.jsonc"))
-    const tui = await read(path.join(tmp.path, ".paper_fucker", "tui.jsonc"))
+    const server = await read(path.join(tmp.path, ".papercode", "papercode.jsonc"))
+    const tui = await read(path.join(tmp.path, ".papercode", "tui.jsonc"))
     expect(server.plugin).toEqual([["acme@1.2.3", { custom: true, other: false }]])
     expect(tui.plugin).toEqual([["acme@1.2.3", { compact: true }]])
   })
@@ -153,8 +153,8 @@ describe("plugin.install.task", () => {
   test("preserves JSONC comments when adding plugins to server and tui config", async () => {
     await using tmp = await tmpdir()
     const target = await plugin(tmp.path, ["server", "tui"])
-    const cfg = path.join(tmp.path, ".paper_fucker")
-    const server = path.join(cfg, "paper_fucker.jsonc")
+    const cfg = path.join(tmp.path, ".papercode")
+    const server = path.join(cfg, "papercode.jsonc")
     const tui = path.join(cfg, "tui.jsonc")
     await fs.mkdir(cfg, { recursive: true })
     await Bun.write(
@@ -212,7 +212,7 @@ describe("plugin.install.task", () => {
   test("preserves JSONC comments when force replacing plugin version", async () => {
     await using tmp = await tmpdir()
     const target = await plugin(tmp.path, ["server"])
-    const cfg = path.join(tmp.path, ".paper_fucker", "paper_fucker.jsonc")
+    const cfg = path.join(tmp.path, ".papercode", "papercode.jsonc")
     await fs.mkdir(path.dirname(cfg), { recursive: true })
     await Bun.write(
       cfg,
@@ -257,14 +257,14 @@ describe("plugin.install.task", () => {
 
     const ok = await run(ctx(tmp.path))
     expect(ok).toBe(true)
-    const server = await read(path.join(tmp.path, ".paper_fucker", "paper_fucker.jsonc"))
+    const server = await read(path.join(tmp.path, ".papercode", "papercode.jsonc"))
     expect(server.plugin).toEqual(["acme@1.2.3"])
   })
 
   test("does not change configured package version without force", async () => {
     await using tmp = await tmpdir()
     const target = await plugin(tmp.path, ["server"])
-    const cfg = path.join(tmp.path, ".paper_fucker", "paper_fucker.json")
+    const cfg = path.join(tmp.path, ".papercode", "papercode.json")
     await fs.mkdir(path.dirname(cfg), { recursive: true })
     await Bun.write(cfg, JSON.stringify({ plugin: ["acme@1.0.0"] }, null, 2))
 
@@ -284,7 +284,7 @@ describe("plugin.install.task", () => {
   test("does not change scoped package version without force", async () => {
     await using tmp = await tmpdir()
     const target = await plugin(tmp.path, ["server"])
-    const cfg = path.join(tmp.path, ".paper_fucker", "paper_fucker.json")
+    const cfg = path.join(tmp.path, ".papercode", "papercode.json")
     await fs.mkdir(path.dirname(cfg), { recursive: true })
     await Bun.write(cfg, JSON.stringify({ plugin: ["@scope/acme@1.0.0"] }, null, 2))
 
@@ -304,7 +304,7 @@ describe("plugin.install.task", () => {
   test("keeps file plugin entries and still adds npm plugin", async () => {
     await using tmp = await tmpdir()
     const target = await plugin(tmp.path, ["server"])
-    const cfg = path.join(tmp.path, ".paper_fucker", "paper_fucker.json")
+    const cfg = path.join(tmp.path, ".papercode", "papercode.json")
     await fs.mkdir(path.dirname(cfg), { recursive: true })
     await Bun.write(cfg, JSON.stringify({ plugin: ["file:///tmp/acme.ts"] }, null, 2))
 
@@ -324,7 +324,7 @@ describe("plugin.install.task", () => {
   test("force replaces configured package version and keeps tuple options", async () => {
     await using tmp = await tmpdir()
     const target = await plugin(tmp.path, ["server"])
-    const cfg = path.join(tmp.path, ".paper_fucker", "paper_fucker.json")
+    const cfg = path.join(tmp.path, ".papercode", "papercode.json")
     await fs.mkdir(path.dirname(cfg), { recursive: true })
     await Bun.write(
       cfg,
@@ -366,8 +366,8 @@ describe("plugin.install.task", () => {
     const ok = await run(ctx(tmp.path))
     expect(ok).toBe(true)
 
-    expect(await Filesystem.exists(path.join(global, "paper_fucker.jsonc"))).toBe(true)
-    expect(await Filesystem.exists(path.join(tmp.path, ".paper_fucker", "paper_fucker.jsonc"))).toBe(false)
+    expect(await Filesystem.exists(path.join(global, "papercode.jsonc"))).toBe(true)
+    expect(await Filesystem.exists(path.join(tmp.path, ".papercode", "papercode.jsonc"))).toBe(false)
   })
 
   test("writes local scope under directory when vcs is not git", async () => {
@@ -386,8 +386,8 @@ describe("plugin.install.task", () => {
 
     const ok = await run(ctxDir(directory, worktree))
     expect(ok).toBe(true)
-    expect(await Filesystem.exists(path.join(directory, ".paper_fucker", "paper_fucker.jsonc"))).toBe(true)
-    expect(await Filesystem.exists(path.join(worktree, ".paper_fucker", "paper_fucker.jsonc"))).toBe(false)
+    expect(await Filesystem.exists(path.join(directory, ".papercode", "papercode.jsonc"))).toBe(true)
+    expect(await Filesystem.exists(path.join(worktree, ".papercode", "papercode.jsonc"))).toBe(false)
   })
 
   test("writes local scope under directory when worktree is root slash", async () => {
@@ -404,7 +404,7 @@ describe("plugin.install.task", () => {
 
     const ok = await run(ctxRoot(directory))
     expect(ok).toBe(true)
-    expect(await Filesystem.exists(path.join(directory, ".paper_fucker", "paper_fucker.jsonc"))).toBe(true)
+    expect(await Filesystem.exists(path.join(directory, ".papercode", "papercode.jsonc"))).toBe(true)
   })
 
   test("writes tui local scope under directory when worktree is root slash", async () => {
@@ -421,7 +421,7 @@ describe("plugin.install.task", () => {
 
     const ok = await run(ctxRoot(directory))
     expect(ok).toBe(true)
-    expect(await Filesystem.exists(path.join(directory, ".paper_fucker", "tui.jsonc"))).toBe(true)
+    expect(await Filesystem.exists(path.join(directory, ".papercode", "tui.jsonc"))).toBe(true)
   })
 
   test("writes only tui config for tui-only plugins", async () => {
@@ -436,8 +436,8 @@ describe("plugin.install.task", () => {
 
     const ok = await run(ctx(tmp.path))
     expect(ok).toBe(true)
-    expect(await Filesystem.exists(path.join(tmp.path, ".paper_fucker", "tui.jsonc"))).toBe(true)
-    expect(await Filesystem.exists(path.join(tmp.path, ".paper_fucker", "paper_fucker.jsonc"))).toBe(false)
+    expect(await Filesystem.exists(path.join(tmp.path, ".papercode", "tui.jsonc"))).toBe(true)
+    expect(await Filesystem.exists(path.join(tmp.path, ".papercode", "papercode.jsonc"))).toBe(false)
   })
 
   test("writes tui config for oc-themes-only packages", async () => {
@@ -454,10 +454,10 @@ describe("plugin.install.task", () => {
 
     const ok = await run(ctx(tmp.path))
     expect(ok).toBe(true)
-    expect(await Filesystem.exists(path.join(tmp.path, ".paper_fucker", "tui.jsonc"))).toBe(true)
-    expect(await Filesystem.exists(path.join(tmp.path, ".paper_fucker", "paper_fucker.jsonc"))).toBe(false)
+    expect(await Filesystem.exists(path.join(tmp.path, ".papercode", "tui.jsonc"))).toBe(true)
+    expect(await Filesystem.exists(path.join(tmp.path, ".papercode", "papercode.jsonc"))).toBe(false)
 
-    const tui = await read(path.join(tmp.path, ".paper_fucker", "tui.jsonc"))
+    const tui = await read(path.join(tmp.path, ".papercode", "tui.jsonc"))
     expect(tui.plugin).toEqual(["acme@1.2.3"])
   })
 
@@ -473,15 +473,15 @@ describe("plugin.install.task", () => {
 
     const ok = await run(ctx(tmp.path))
     expect(ok).toBe(false)
-    expect(await Filesystem.exists(path.join(tmp.path, ".paper_fucker", "tui.jsonc"))).toBe(false)
-    expect(await Filesystem.exists(path.join(tmp.path, ".paper_fucker", "paper_fucker.jsonc"))).toBe(false)
+    expect(await Filesystem.exists(path.join(tmp.path, ".papercode", "tui.jsonc"))).toBe(false)
+    expect(await Filesystem.exists(path.join(tmp.path, ".papercode", "papercode.jsonc"))).toBe(false)
   })
 
   test("force replaces version in both server and tui configs", async () => {
     await using tmp = await tmpdir()
     const target = await plugin(tmp.path, ["server", "tui"])
-    const server = path.join(tmp.path, ".paper_fucker", "paper_fucker.json")
-    const tui = path.join(tmp.path, ".paper_fucker", "tui.json")
+    const server = path.join(tmp.path, ".papercode", "papercode.json")
+    const tui = path.join(tmp.path, ".papercode", "tui.json")
     await fs.mkdir(path.dirname(server), { recursive: true })
     await Bun.write(server, JSON.stringify({ plugin: ["acme@1.0.0", "other@1.0.0"] }, null, 2))
     await Bun.write(tui, JSON.stringify({ plugin: [["acme@1.0.0", { mode: "safe" }], "other@1.0.0"] }, null, 2))
@@ -505,7 +505,7 @@ describe("plugin.install.task", () => {
   test("returns false and keeps config unchanged for invalid JSONC", async () => {
     await using tmp = await tmpdir()
     const target = await plugin(tmp.path, ["server"])
-    const cfg = path.join(tmp.path, ".paper_fucker", "paper_fucker.jsonc")
+    const cfg = path.join(tmp.path, ".papercode", "papercode.jsonc")
     await fs.mkdir(path.dirname(cfg), { recursive: true })
     const bad = '{"plugin": ["acme@1.0.0",}'
     await Bun.write(cfg, bad)
@@ -534,8 +534,8 @@ describe("plugin.install.task", () => {
 
     const ok = await run(ctx(tmp.path))
     expect(ok).toBe(false)
-    expect(await Filesystem.exists(path.join(tmp.path, ".paper_fucker", "paper_fucker.jsonc"))).toBe(false)
-    expect(await Filesystem.exists(path.join(tmp.path, ".paper_fucker", "tui.jsonc"))).toBe(false)
+    expect(await Filesystem.exists(path.join(tmp.path, ".papercode", "papercode.jsonc"))).toBe(false)
+    expect(await Filesystem.exists(path.join(tmp.path, ".papercode", "tui.jsonc"))).toBe(false)
   })
 
   test("returns false when manifest cannot be read", async () => {
@@ -551,7 +551,7 @@ describe("plugin.install.task", () => {
 
     const ok = await run(ctx(tmp.path))
     expect(ok).toBe(false)
-    expect(await Filesystem.exists(path.join(tmp.path, ".paper_fucker", "paper_fucker.jsonc"))).toBe(false)
+    expect(await Filesystem.exists(path.join(tmp.path, ".papercode", "papercode.jsonc"))).toBe(false)
   })
 
   test("returns false when install fails", async () => {
@@ -565,6 +565,6 @@ describe("plugin.install.task", () => {
 
     const ok = await run(ctx(tmp.path))
     expect(ok).toBe(false)
-    expect(await Filesystem.exists(path.join(tmp.path, ".paper_fucker", "paper_fucker.jsonc"))).toBe(false)
+    expect(await Filesystem.exists(path.join(tmp.path, ".papercode", "papercode.jsonc"))).toBe(false)
   })
 })

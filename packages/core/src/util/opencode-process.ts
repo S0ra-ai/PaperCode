@@ -1,5 +1,5 @@
-export const OPENCODE_RUN_ID = "PAPER_FUCKER_RUN_ID"
-export const OPENCODE_PROCESS_ROLE = "PAPER_FUCKER_PROCESS_ROLE"
+export const OPENCODE_RUN_ID = "PAPERCODE_RUN_ID"
+export const OPENCODE_PROCESS_ROLE = "PAPERCODE_PROCESS_ROLE"
 
 export function ensureRunID() {
   return (process.env[OPENCODE_RUN_ID] ??= crypto.randomUUID())

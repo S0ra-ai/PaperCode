@@ -37,7 +37,7 @@ export const InitCommand = effectCmd({
         type: "string",
       })
       .option("workspace", {
-        describe: "workspace whose ignored .paper_fucker/local and runs state may be reset",
+        describe: "workspace whose ignored .papercode/local and runs state may be reset",
         type: "string",
       })
       .option("tool", {

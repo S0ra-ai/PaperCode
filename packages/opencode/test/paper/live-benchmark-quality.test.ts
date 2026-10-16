@@ -31,8 +31,8 @@ describe("live paper quality benchmark script", () => {
   test("bounds live arXiv discovery with explicit deadlines", () => {
     const benchmark = readFileSync(path.join(repoRoot, "scripts", "live-paper-quality-benchmark.ts"), "utf8")
 
-    expect(benchmark).toContain("PAPER_FUCKER_BENCHMARK_SOURCE_BUDGET_MS")
-    expect(benchmark).toContain("PAPER_FUCKER_BENCHMARK_ARXIV_QUERY_BUDGET_MS")
+    expect(benchmark).toContain("PAPERCODE_BENCHMARK_SOURCE_BUDGET_MS")
+    expect(benchmark).toContain("PAPERCODE_BENCHMARK_ARXIV_QUERY_BUDGET_MS")
     expect(benchmark).toContain("benchmarkBoundedIntEnv")
     expect(benchmark).toContain("Math.max(bounds.min, Math.min(bounds.max")
     expect(benchmark).toContain("max: 300_000")
@@ -60,8 +60,8 @@ describe("live paper quality benchmark script", () => {
     const benchmark = readFileSync(path.join(repoRoot, "scripts", "live-paper-quality-benchmark.ts"), "utf8")
 
     expect(benchmark).toContain("LivePaperQualityBenchmarkAttemptError.v1")
-    expect(benchmark).toContain("PAPER_FUCKER_BENCHMARK_OUTPUT_ROOT")
-    expect(benchmark).toContain("PAPER_FUCKER_BENCHMARK_SELF_TEST_FAILURE")
+    expect(benchmark).toContain("PAPERCODE_BENCHMARK_OUTPUT_ROOT")
+    expect(benchmark).toContain("PAPERCODE_BENCHMARK_SELF_TEST_FAILURE")
     expect(benchmark).toContain("attempt-error.json")
     expect(benchmark).toContain('path.join(outputDir, "README.md")')
     expect(benchmark).toContain("writeAttemptReadme")
@@ -95,8 +95,8 @@ describe("live paper quality benchmark script", () => {
         cwd: repoRoot,
         env: {
           ...process.env,
-          PAPER_FUCKER_BENCHMARK_OUTPUT_ROOT: outputRoot,
-          PAPER_FUCKER_BENCHMARK_SELF_TEST_FAILURE: "1",
+          PAPERCODE_BENCHMARK_OUTPUT_ROOT: outputRoot,
+          PAPERCODE_BENCHMARK_SELF_TEST_FAILURE: "1",
         },
         encoding: "utf8",
         timeout: 20_000,

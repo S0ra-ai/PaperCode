@@ -359,7 +359,7 @@ describe("paper authoring loop", () => {
       command: { argv: ["bun", "run", mode === "container" ? "repro:container" : experiment_id === "proposed" ? "typecheck" : experiment_id] },
       environment:
         mode === "container"
-          ? ({ mode: "container" as const, image: "paper-fucker/research-runner:test", platform: "container" as const })
+          ? ({ mode: "container" as const, image: "papercode/research-runner:test", platform: "container" as const })
           : ({ mode: "host" as const, platform: process.platform }),
       metrics: [{ name: "typecheck_pass", value: 1, direction: "higher_better" as const, unit: "ratio" }],
       stdout: "ok",
@@ -377,7 +377,7 @@ describe("paper authoring loop", () => {
         metrics: [{ name: "typecheck_pass", direction: "higher_better", primary: true }],
         proposed: {
           experiment_id: "proposed",
-          label: "Code-grounded paper_fucker workflow",
+          label: "Code-grounded papercode workflow",
           role: "proposed",
           dataset_ids: [],
           command: { argv: ["bun", "run", "typecheck"] },
@@ -535,7 +535,7 @@ describe("paper authoring loop", () => {
     expect(draft.markdown).not.toContain("PaperRun 的架构目标")
     expect(draft.markdown).not.toContain("PaperCode 的差异点")
     expect(draft.markdown).not.toContain("PaperCode 工作流")
-    expect(draft.markdown).not.toContain("container:paper-fucker/research-runner")
+    expect(draft.markdown).not.toContain("container:papercode/research-runner")
     expect(draft.markdown).not.toContain("正式结论")
     expect(draft.markdown).not.toContain("证据充分性检查")
     expect(abstract).toContain("计算机类论文若缺少可追踪代码证据、显式对照和隔离复现")
@@ -774,10 +774,10 @@ describe("paper authoring loop", () => {
     expect(reproducibility).toContain("### 实验环境声明")
     expect(reproducibility).toContain("| 项目 | 内容 |")
     expect(reproducibility).toContain(`| 本机平台 | ${hostPlatformLabel} |`)
-    expect(reproducibility).toContain("| 容器镜像 | paper-fucker/research-runner:test |")
+    expect(reproducibility).toContain("| 容器镜像 | papercode/research-runner:test |")
     expect(reproducibility).not.toContain("实验环境声明：")
     expect(reproducibility).not.toContain(`本机平台：${hostPlatformLabel}`)
-    expect(reproducibility).not.toContain("容器镜像：paper-fucker/research-runner:test")
+    expect(reproducibility).not.toContain("容器镜像：papercode/research-runner:test")
     expect(reproducibility).toContain("类型检查通过状态=通过")
     expect(reproducibility).toContain("可复现性分析比较本机与容器结果")
     expect(reproducibility).toContain("### 实验执行摘要")
@@ -1302,7 +1302,7 @@ describe("paper authoring loop", () => {
         metrics: [{ name: "ranking_ndcg_at_3", direction: "higher_better", primary: true }],
         proposed: {
           experiment_id: "proposed",
-          label: "Code-grounded paper_fucker workflow",
+          label: "Code-grounded papercode workflow",
           role: "proposed",
           dataset_ids: [],
           command: { argv: ["bun", "run", "test:ranking"] },
@@ -1395,7 +1395,7 @@ describe("paper authoring loop", () => {
         ],
       },
       code_metadata: {
-        repository_url: "https://github.com/ZhuchenZhong/paper_fucker",
+        repository_url: "https://github.com/ZhuchenZhong/papercode",
         version: "0.13.0-test",
         commit_hash: "abc1234",
         worktree_dirty: true,
@@ -1679,7 +1679,7 @@ describe("paper authoring loop", () => {
     expect(dataAvailability).toContain("| 项目 | 内容 |")
     expect(dataAvailability).toContain("| 方法实现 | rankAgentTeamPapers(src/agent-team-paper.ts:3)、scorePaper(src/agent-team-paper.ts:7)、claimLedgerCoverage(src/agent-team-paper.ts:11) |")
     expect(dataAvailability).toContain("| 复现实验入口 | 排名测试、词项匹配基线、无证据覆盖消融和容器复现 |")
-    expect(dataAvailability).toContain("| 代码仓库地址 | https://github.com/ZhuchenZhong/paper_fucker |")
+    expect(dataAvailability).toContain("| 代码仓库地址 | https://github.com/ZhuchenZhong/papercode |")
     expect(dataAvailability).toContain("| 代码版本 | 0.13.0-test |")
     expect(dataAvailability).toContain("| 代码修订 | abc1234 |")
     expect(dataAvailability).toContain("| 代码工作区状态 | 含未提交或未跟踪变更 |")
@@ -1687,7 +1687,7 @@ describe("paper authoring loop", () => {
     expect(dataAvailability).toContain("方法实现包括 rankAgentTeamPapers(src/agent-team-paper.ts:3)、scorePaper(src/agent-team-paper.ts:7)、claimLedgerCoverage(src/agent-team-paper.ts:11)")
     expect(dataAvailability).toContain("复现实验入口包括排名测试、词项匹配基线、无证据覆盖消融和容器复现")
     expect(dataAvailability).toContain("复现实验入口包括排名测试、词项匹配基线、无证据覆盖消融和容器复现。\n\n| 项目 | 内容 |")
-    expect(dataAvailability).not.toContain("代码仓库地址：https://github.com/ZhuchenZhong/paper_fucker")
+    expect(dataAvailability).not.toContain("代码仓库地址：https://github.com/ZhuchenZhong/papercode")
     expect(dataAvailability).not.toContain("代码版本：0.13.0-test")
     expect(dataAvailability).not.toContain("代码修订：abc1234")
     expect(dataAvailability).not.toContain("代码工作区状态：含未提交或未跟踪变更")
@@ -2011,7 +2011,7 @@ describe("paper authoring loop", () => {
         metrics: [{ name: "ranking_ndcg_at_3", direction: "higher_better", primary: true }],
         proposed: {
           experiment_id: "proposed",
-          label: "Code-grounded paper_fucker workflow",
+          label: "Code-grounded papercode workflow",
           role: "proposed",
           dataset_ids: [],
           command: { argv: ["bun", "run", "test:ranking"] },
@@ -2118,7 +2118,7 @@ describe("paper authoring loop", () => {
             kind: "paper",
             title: "Agent Team Paper Ranking unverified literature candidate",
             url: "https://arxiv.org/search/?query=agent%20team",
-            provider: "paper_fucker-test-literature-candidate",
+            provider: "papercode-test-literature-candidate",
             license: { status: "unclear", expression: "not verified" },
             version: { value: "candidate", retrieved_at: now },
             verification: {
@@ -2144,10 +2144,10 @@ describe("paper authoring loop", () => {
     expect(relatedWork).toContain("候选文献")
     expect(relatedWork).toContain("尚未完成来源验证")
     expect(relatedWork).not.toContain("Prior work")
-    expect(relatedWork).not.toContain("paper_fucker-default-source-discovery")
+    expect(relatedWork).not.toContain("papercode-default-source-discovery")
     expect(references).toContain("当前只有未验证候选文献")
     expect(references).not.toContain("Agent Team Paper Ranking")
-    expect(references).not.toContain("paper_fucker-default-source-discovery")
+    expect(references).not.toContain("papercode-default-source-discovery")
   })
 
   test("blocks when a draft has no verified paper reference for formal References", () => {
@@ -2403,7 +2403,7 @@ describe("paper authoring loop", () => {
   })
 
   test("runs ClaimLedger-first authoring through final export with CJC front matter and supplementary bundles", async () => {
-    const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-authoring-"))
+    const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-authoring-"))
     try {
       const workspace = path.join(dir, "workspace")
       const home = path.join(dir, "home")
@@ -2537,7 +2537,7 @@ describe("paper authoring loop", () => {
   })
 
   test("blocks final export and produces a clearly marked forced draft", async () => {
-    const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-authoring-forced-"))
+    const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-authoring-forced-"))
     try {
       const workspace = path.join(dir, "workspace")
       const home = path.join(dir, "home")
@@ -2691,7 +2691,7 @@ describe("paper authoring loop", () => {
       status: "succeeded" as const,
       environment:
         mode === "container"
-          ? ({ mode: "container" as const, image: "paper-fucker/research-runner:test", platform: "container" as const })
+          ? ({ mode: "container" as const, image: "papercode/research-runner:test", platform: "container" as const })
           : ({ mode: "host" as const, platform: process.platform }),
       command: { argv: ["bun", "test", experiment_id] },
       metrics: [{ name: "ranking_ndcg_at_3", value, direction: "higher_better" as const }],
@@ -2701,7 +2701,7 @@ describe("paper authoring loop", () => {
       resource_usage: { wall_time_seconds: 0.2 },
       started_at: now,
       finished_at: now,
-      reproduction: { container_reproduced: mode === "container", image: mode === "container" ? "paper-fucker/research-runner:test" : undefined },
+      reproduction: { container_reproduced: mode === "container", image: mode === "container" ? "papercode/research-runner:test" : undefined },
     })
     const draft = composeDraftPaper({
       title: "证据约束的候选论文排序方法：显式基线、消融与容器复现",

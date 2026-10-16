@@ -5,7 +5,7 @@
 ## 结论
 
 - `research-tools` MCP 工具注册已补充闭包绑定回归测试，确认每个 tool 调用自己的 handler。
-- `packages/opencode` provider auth 失败在单测与 provider 文件级复跑中未复现；已清理由测试运行生成的 `packages/opencode/undefined/.paper_fucker` 临时目录。
+- `packages/opencode` provider auth 失败在单测与 provider 文件级复跑中未复现；已清理由测试运行生成的 `packages/opencode/undefined/.papercode` 临时目录。
 - 模型库存语义已收紧：历史候选模型不会自动提升为已注册 provider；只有订阅登录成功或自定义 endpoint 发现成功的 provider 会进入 PaperCode 候选模型来源。
 - ChatGPT 与 GitHub Copilot 订阅作为 PaperCode 一等 provider 进入模型库存与路由契约，但不会绕过用户 allowlist。
 

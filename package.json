@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/package.json",
-  "name": "paper_fucker",
+  "name": "papercode",
   "description": "Private-first verifiable research automation product",
   
   "private": true,
@@ -111,7 +111,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ZhuchenZhong/paper_fucker"
+    "url": "https://github.com/ZhuchenZhong/papercode"
   },
   "license": "MPL-2.0",
   "prettier": {

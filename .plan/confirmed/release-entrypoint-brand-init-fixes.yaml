@@ -10,8 +10,8 @@ tags:
 - branding
 - changelog
 depends_on: []
-description: Release 分支稳定修复：修正 TUI ASCII Paper Fucker 字形，移除用户可见 OpenCode 订阅 provider
-  入口，改进 paper_fucker init 默认安全初始化体验，并按新版 TaskFlow 版本规则统一 CHANGELOG 唯一版本。
+description: Release 分支稳定修复：修正 TUI ASCII PaperCode 字形，移除用户可见 OpenCode 订阅 provider
+  入口，改进 papercode init 默认安全初始化体验，并按新版 TaskFlow 版本规则统一 CHANGELOG 唯一版本。
 execution:
   mode: sequential
   retry: 0
@@ -37,7 +37,7 @@ steps:
     attempt_count: 2
   meta: {}
 - id: fix-runtime
-  title: 修复 Paper Fucker 字形、provider 列表和 init 默认访问模式
+  title: 修复 PaperCode 字形、provider 列表和 init 默认访问模式
   status: done
   owner: codex
   depends_on: []
@@ -50,7 +50,7 @@ steps:
       level: info
       message: 已修复：logo.ts 左侧字形改为清晰 PAPER；provider dialog 过滤 opencode/opencode-go
         订阅 provider 并移除 Zen/Go upsell 文案；session TUI 移除 Go upsell 弹窗；retry 限额提示改为中性
-        provider usage limit；init 默认 bounded access，24 小时默认窗口，paper_fucker init 与
+        provider usage limit；init 默认 bounded access，24 小时默认窗口，papercode init 与
         init --yes 均无需 Full Access ack。
       agent: codex
     last_run: '2026-05-11T22:13:21.833670'
@@ -107,7 +107,7 @@ steps:
     - timestamp: '2026-05-11T22:20:43.097755'
       level: info
       message: 最终验证通过：check-readme-version、check-changelog-format、validate_changelog_versions、validate_changelog_format、check-release-files、git
-        diff --check、TaskFlow validate_task 均通过；./paper_fucker.exe --help 与 init smoke
+        diff --check、TaskFlow validate_task 均通过；./papercode.exe --help 与 init smoke
         已验证；public surface 扫描确认用户可见订阅/Zen/Go/PAPEE 残留仅存在于负向测试断言。
       agent: codex
     last_run: '2026-05-11T22:20:43.097755'

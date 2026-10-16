@@ -109,7 +109,7 @@ const renderers: ExportRenderer = {
 
 describe("research pipeline end-to-end acceptance", () => {
   test("runs a fixture topic through implemented stages and produces a final export", async () => {
-    const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-e2e-"))
+    const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-e2e-"))
     try {
       const workspace = path.join(dir, "workspace")
       const home = path.join(dir, "home")
@@ -259,7 +259,7 @@ describe("research pipeline end-to-end acceptance", () => {
   })
 
   test("blocks final export on failed gate and produces a forced draft bundle", async () => {
-    const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-e2e-forced-"))
+    const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-e2e-forced-"))
     try {
       const workspace = path.join(dir, "workspace")
       const home = path.join(dir, "home")

@@ -1,15 +1,15 @@
 TaskFlow task: `task-032-opencode-paper-core-migration`
 
-The authoritative paper_fucker paper runtime has moved into the OpenCode hard fork.
+The authoritative papercode paper runtime has moved into the OpenCode hard fork.
 
 ## Changes
 
 - Moved paper, research, and init runtime code into `packages/opencode/src/paper/`.
 - Moved paper, research, and init tests into `packages/opencode/test/`.
-- Removed the standalone `@paper-fucker/server` workspace package.
+- Removed the standalone `@papercode/server` workspace package.
 - Updated strict acceptance commands to validate the migrated opencode paper runtime.
 - Added `packages/opencode/test/paper/core-migration.test.ts` to assert the paper runtime is exported from `@/paper`.
-- Synchronized paper_fucker branding in server auth and installation tests after the runtime move.
+- Synchronized papercode branding in server auth and installation tests after the runtime move.
 - Hardened Windows test teardown for SQLite/temp-directory handles used by paper authoring tests.
 
 ## Verification

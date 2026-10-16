@@ -43,7 +43,7 @@ export async function load(dir: string) {
     })
     if (!md) continue
 
-    const patterns = ["/.paper_fucker/command/", "/.paper_fucker/commands/", "/command/", "/commands/"]
+    const patterns = ["/.papercode/command/", "/.papercode/commands/", "/command/", "/commands/"]
     const name = configEntryNameFromPath(item, patterns)
 
     const config = {

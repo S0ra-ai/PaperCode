@@ -1,6 +1,6 @@
 # Architecture Reframe Report
 
-> Historical path note: this report predates task-032. Any `packages/server` or `@paper-fucker/server` paths below are provenance only; the current paper_fucker runtime authority is `packages/opencode/src/paper`, and `packages/server` is intentionally absent.
+> Historical path note: this report predates task-032. Any `packages/server` or `@papercode/server` paths below are provenance only; the current papercode runtime authority is `packages/opencode/src/paper`, and `packages/server` is intentionally absent.
 
 Version: `0.1.18-dev`
 
@@ -10,7 +10,7 @@ Date: `2026-05-09`
 
 ## Decision
 
-paper_fucker is now defined as a closed-loop paper system built on a deeply modified OpenCode substrate.
+papercode is now defined as a closed-loop paper system built on a deeply modified OpenCode substrate.
 
 OpenCode owns the substrate capabilities:
 
@@ -22,7 +22,7 @@ OpenCode owns the substrate capabilities:
 - TUI
 - permissions and plugins
 
-paper_fucker owns the paper domain:
+papercode owns the paper domain:
 
 - multi-input intake
 - paper profiles
@@ -45,7 +45,7 @@ The paper domain explicitly supports these intake modes:
 
 ## Model Positioning
 
-DeepSeek remains the default sample endpoint with model id `deepseek-v4-pro`, but the architecture is OpenCode-provider-agnostic. Any model provider that OpenCode can resolve must be eligible for paper_fucker role routing.
+DeepSeek remains the default sample endpoint with model id `deepseek-v4-pro`, but the architecture is OpenCode-provider-agnostic. Any model provider that OpenCode can resolve must be eligible for papercode role routing.
 
 ## Verification
 

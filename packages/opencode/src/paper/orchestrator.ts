@@ -261,7 +261,7 @@ function defaultHandlerFor(stage: PaperResearchStageId): PaperStageHandler {
     return {
       block: {
         reason: "handler_missing",
-        message: `Stage ${stage} has required capabilities but no concrete paper_fucker handler is implemented yet for ${brief.workflow}.`,
+        message: `Stage ${stage} has required capabilities but no concrete papercode handler is implemented yet for ${brief.workflow}.`,
       },
     }
   }
@@ -399,7 +399,7 @@ async function datasetCandidatesFromPaths(request: ResearchIntakeRequest, now: s
       dataset_id: id,
       title: path.basename(datasetPath) || datasetPath,
       url: `file://${absolute.replace(/\\/g, "/")}`,
-      provider: "paper_fucker-local-workspace",
+      provider: "papercode-local-workspace",
       license: { status: "clear", expression: "workspace-authorized local dataset" },
       version: { value: info.mtimeMs.toString(), retrieved_at: now },
       verification: {
@@ -682,8 +682,8 @@ async function defaultCodeAnalysis(
 }
 
 function methodName(request: ResearchIntakeRequest) {
-  if ((request.code_paths ?? []).length > 0) return "Code-grounded paper_fucker workflow"
-  return "Evidence-led paper_fucker workflow"
+  if ((request.code_paths ?? []).length > 0) return "Code-grounded papercode workflow"
+  return "Evidence-led papercode workflow"
 }
 
 function primaryExperimentMetric(request: ResearchIntakeRequest, evidence?: ExperimentEvidenceManifest, localMetric?: string) {
@@ -874,7 +874,7 @@ function experimentProtocolGuidance(input: {
           gap,
           severity: "blocking",
           recommended_script: "repro:container",
-          package_json_example: { "repro:container": "docker build -t paper-fucker-repro . && docker run --rm paper-fucker-repro" },
+          package_json_example: { "repro:container": "docker build -t papercode-repro . && docker run --rm papercode-repro" },
           rationale: "final export 需要隔离环境复现通过，host-only 结果只能作为 exploratory。",
           next_action: "构建真实评价镜像，在 experiments/protocol.json 登记绑定实验 ID 的结构化 docker/podman run 命令，并使用启用容器复现的预算档位执行。导入指标不能证明隔离复现。",
         },
@@ -994,7 +994,7 @@ function experimentProtocolStarterPack(input: {
     package_json_scripts: {
       "baseline:starter": "bun run experiments/starter/baseline-starter.ts",
       "ablation:starter": "bun run experiments/starter/ablation-starter.ts",
-      "repro:container:starter": "docker build -f experiments/starter/Dockerfile.repro -t paper-fucker-repro . && docker run --rm paper-fucker-repro",
+      "repro:container:starter": "docker build -f experiments/starter/Dockerfile.repro -t papercode-repro . && docker run --rm papercode-repro",
     },
     files,
     next_steps: [
@@ -1428,7 +1428,7 @@ async function localCodeSourceRecords(runDir: string, options?: ResearchRuntimeO
       kind: source.kind,
       title: source.title,
       url: source.locator?.path ? `file://${source.locator.path.replace(/\\/g, "/")}` : `file://${source.title}`,
-      provider: "paper_fucker-local-workspace",
+      provider: "papercode-local-workspace",
       license: { status: "clear" as const, expression: "workspace-authorized local source" },
       version: {
         value: typeof source.metadata?.sha256 === "string" ? source.metadata.sha256 : undefined,
@@ -1711,7 +1711,7 @@ async function defaultAuthoring(runDir: string, request: ResearchIntakeRequest, 
       source_records: result.sourceRecords,
       model_reviews: [
         {
-          model: "paper_fucker-default-reviewer",
+          model: "papercode-default-reviewer",
           verdict: "warn",
           message: "Default reviewer requires live literature verification and passed reproduction before final export.",
         },

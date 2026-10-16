@@ -23,19 +23,19 @@ function tauriDir(id: string) {
 
 // The Tauri app identifier changes between dev/beta/prod builds.
 const TAURI_APP_IDS: Record<string, string> = {
-  dev: "ai.paperfucker.desktop.dev",
-  beta: "ai.paperfucker.desktop.beta",
-  prod: "ai.paperfucker.desktop",
+  dev: "ai.papercode.desktop.dev",
+  beta: "ai.papercode.desktop.beta",
+  prod: "ai.papercode.desktop",
 }
 function tauriAppId() {
-  return app.isPackaged ? TAURI_APP_IDS[CHANNEL] : "ai.paperfucker.desktop.dev"
+  return app.isPackaged ? TAURI_APP_IDS[CHANNEL] : "ai.papercode.desktop.dev"
 }
 
 // Migrate a single Tauri .dat file into the corresponding electron-store.
-// `paper_fucker.settings.dat` is special: it maps to the `paper_fucker.settings` store
+// `papercode.settings.dat` is special: it maps to the `papercode.settings` store
 // (the electron-store name without the `.dat` extension). All other .dat files
 // keep their full filename as the electron-store name so they match what the
-// renderer already passes via IPC (e.g. `"default.dat"`, `"paper_fucker.global.dat"`).
+// renderer already passes via IPC (e.g. `"default.dat"`, `"papercode.global.dat"`).
 function migrateFile(datPath: string, filename: string) {
   let data: Record<string, unknown>
   try {
@@ -45,11 +45,11 @@ function migrateFile(datPath: string, filename: string) {
     return
   }
 
-  // paper_fucker.settings.dat -> the electron settings store ("paper_fucker.settings").
+  // papercode.settings.dat -> the electron settings store ("papercode.settings").
   // All other .dat files keep their full filename as the store name so they match
-  // what the renderer passes via IPC (e.g. "default.dat", "paper_fucker.global.dat").
+  // what the renderer passes via IPC (e.g. "default.dat", "papercode.global.dat").
   const storeName =
-    filename === "paper_fucker.settings.dat" || filename === "opencode.settings.dat" ? "paper_fucker.settings" : filename
+    filename === "papercode.settings.dat" || filename === "opencode.settings.dat" ? "papercode.settings" : filename
   const target = getStore(storeName)
   const migrated: string[] = []
   const skipped: string[] = []

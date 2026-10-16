@@ -2,7 +2,7 @@ id: paperrun-code-experiment-quality-hardening
 title: 硬化代码/实验型 PaperRun 论文生成质量
 status: done
 priority: high
-owner: paper-fucker-dev-agent
+owner: papercode-dev-agent
 tags:
 - paperrun
 - quality
@@ -12,7 +12,7 @@ tags:
 depends_on:
 - mcp-tool-binding-test-isolation
 - subscription-provider-paper-acceptance
-description: 用 Paper Fucker 自身生成代码/实验型论文包，修复代码 source range 未进入 ClaimLedger、final
+description: 用 PaperCode 自身生成代码/实验型论文包，修复代码 source range 未进入 ClaimLedger、final
   正文仍像占位草稿、export_state artifact 重复等问题。
 execution:
   mode: sequential
@@ -21,7 +21,7 @@ steps:
 - id: run-code-paper-benchmark
   title: 运行代码型 PaperRun benchmark 并审查 gate 结果
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   description: 执行 scripts/live-paper-quality-benchmark.ts --scenario code，确认代码型论文包在无复现实验证据时只因
     reproduction gate 阻断。
@@ -33,20 +33,20 @@ steps:
     - timestamp: '2026-05-27T01:58:44.821815'
       level: info
       message: 开始记录代码型 benchmark 审查结果。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-27T01:59:07.787631'
       level: info
       message: 执行 code benchmark。修复前 code 场景出现 unsupported_claim + reproduction_failure；修复后
         run-ed9b018f-cd55-4d5c-b33f-dff7906cd852 仅因 reproduction_failure 阻断，Preview
         ready，40 artifacts，ClaimLedger claim supported。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-27T01:59:07.787631'
     attempt_count: 2
   meta: {}
 - id: bind-code-sources-to-claims
   title: 把本地代码 source range 接入 ClaimLedger
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   description: 将 intake 阶段记录的本地代码 source 转换为可验证 SourceRecord，并绑定到代码方法 claim。
   execution:
@@ -57,20 +57,20 @@ steps:
     - timestamp: '2026-05-27T01:58:46.140020'
       level: info
       message: 开始记录代码 source range 接入 ClaimLedger 修复。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-27T01:59:09.103797'
       level: info
       message: packages/opencode/src/paper/orchestrator.ts 增加 localCodeSourceRecords，将
         sources.jsonl 中 code source 转换为 verified SourceRecord，并注入 ClaimLedger source_ids/source_records。PaperRun
         集成测试更新为验证 material:code:* source range 可支持代码型 claim。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-27T01:59:09.103797'
     attempt_count: 2
   meta: {}
 - id: improve-final-draft-result-writing
   title: 改善 final 论文正文中的实验结果表述
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   description: 把 ResultReport 传入写作层，final 通过时写出 proposed/baseline 指标和复现状态，避免继续显示占位草稿措辞。
   execution:
@@ -81,20 +81,20 @@ steps:
     - timestamp: '2026-05-27T01:58:47.489994'
       level: info
       message: 开始记录 final 正文实验结果写作修复。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-27T01:59:10.427674'
       level: info
       message: packages/opencode/src/paper/research/writing/draft.ts 接收 ResultReport；final
         通过时正文不再自称占位草稿，实验章节写出 proposed accuracy=0.94、best baseline baseline-bm25 accuracy=0.81
         和容器复现状态。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-27T01:59:10.427674'
     attempt_count: 2
   meta: {}
 - id: dedupe-export-state
   title: 去重 PaperRun export_state artifacts 与文件列表
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   description: 聚合 export_state 时去重格式、artifact_ids 和文件路径，避免实时监控台重复展示。
   execution:
@@ -105,19 +105,19 @@ steps:
     - timestamp: '2026-05-27T01:58:48.808422'
       level: info
       message: 开始记录 export_state 去重修复。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-27T01:59:11.759358'
       level: info
       message: packages/opencode/src/paper/run.ts 的 export_state 聚合去重 formats、artifact_ids
         和文件路径。final benchmark summary 确认 ArtifactIds=14、UniqueArtifactIds=14、Files=4、UniqueFiles=4。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-27T01:59:11.759358'
     attempt_count: 2
   meta: {}
 - id: verify-code-final-paper-generation
   title: 验证代码/实验型 final 论文生成
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   description: 执行 final benchmark、PaperRun 集成测试、模型/API、authoring/export、preview/Python/版本格式检查。
   execution:
@@ -128,7 +128,7 @@ steps:
     - timestamp: '2026-05-27T01:58:50.119361'
       level: info
       message: 开始记录验证结果。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-27T01:59:13.082270'
       level: info
       message: 验证通过：packages/opencode typecheck；test/paper/paperrun-execution.test.ts；test/paper/run-api.test.ts
@@ -136,7 +136,7 @@ steps:
         test；python research-tools unittest；check-readme-version；check-changelog-format
         -IncludeArchives。final benchmark run-e42f5fb6-1798-40e5-98c8-860944fb5818
         succeeded，final_export=final，failed_checks=[]，preview=ready。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-27T01:59:13.082270'
     attempt_count: 2
   meta: {}

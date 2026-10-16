@@ -9,10 +9,10 @@ import type { DesktopTheme } from "./types"
 export type ColorScheme = "light" | "dark" | "system"
 
 const STORAGE_KEYS = {
-  THEME_ID: "paper_fucker-theme-id",
-  COLOR_SCHEME: "paper_fucker-color-scheme",
-  THEME_CSS_LIGHT: "paper_fucker-theme-css-light",
-  THEME_CSS_DARK: "paper_fucker-theme-css-dark",
+  THEME_ID: "papercode-theme-id",
+  COLOR_SCHEME: "papercode-color-scheme",
+  THEME_CSS_LIGHT: "papercode-theme-css-light",
+  THEME_CSS_DARK: "papercode-theme-css-dark",
 } as const
 
 const THEME_STYLE_ID = "oc-theme"
@@ -66,7 +66,7 @@ const names: Record<string, string> = {
   nord: "Nord",
   "one-dark": "One Dark",
   onedarkpro: "One Dark Pro",
-  opencode: "paper_fucker",
+  opencode: "papercode",
   orng: "Orng",
   "osaka-jade": "Osaka Jade",
   palenight: "Palenight",

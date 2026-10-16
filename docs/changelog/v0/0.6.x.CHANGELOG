@@ -1,4 +1,4 @@
-:project       paper_fucker - 可验证论文研究自动化系统
+:project       papercode - 可验证论文研究自动化系统
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          0.6.x 历史变更归档，主 CHANGELOG 仅保留当前活跃版本线
@@ -21,8 +21,8 @@
             - packages/opencode/src/paper/capability-pack.ts - HF models/spaces/trackio capabilities
             - packages/opencode/src/paper/experiment-loop.ts - HF jobs/trackio experiment capability integration
             - packages/opencode/src/paper/run.ts - PaperRun HF diagnostics summary
-            - research-tools/src/paper_fucker_tools/huggingface_loop.py - HF Python bridge with explicit fixture/live-only behavior
-            - research-tools/src/paper_fucker_tools/mcp_tools.py - hf_research_probe registry entry
+            - research-tools/src/papercode_tools/huggingface_loop.py - HF Python bridge with explicit fixture/live-only behavior
+            - research-tools/src/papercode_tools/mcp_tools.py - hf_research_probe registry entry
         :test
             - packages/opencode/test/paper/huggingface-loop.test.ts - HF research loop contract tests
             - packages/opencode/test/paper/experiment-loop.test.ts - HF experiment capability regression
@@ -48,8 +48,8 @@
         :src
             - packages/opencode/src/paper/crawler.ts - crawler artifact contracts, policy checks, ledger conversion, diagnostics
             - packages/opencode/src/paper/run.ts - PaperRun crawler diagnostics summary
-            - research-tools/src/paper_fucker_tools/crawler.py - Scrapling availability and fixture crawler bridge
-            - research-tools/src/paper_fucker_tools/mcp_tools.py - web_crawl_probe registry entry
+            - research-tools/src/papercode_tools/crawler.py - Scrapling availability and fixture crawler bridge
+            - research-tools/src/papercode_tools/mcp_tools.py - web_crawl_probe registry entry
         :test
             - packages/opencode/test/paper/crawler.test.ts - TS crawler contract and gate tests
             - research-tools/tests/test_crawler.py - Python crawler adapter and MCP probe tests

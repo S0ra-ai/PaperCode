@@ -1,0 +1,20 @@
+{
+  "$schema": "https://papercode.local/config.json",
+  "provider": {},
+  "permission": {
+    "edit": {
+      "packages/opencode/migration/*": "deny",
+    },
+  },
+  "mcp": {
+    "exa": {
+      "type": "remote",
+      "url": "https://mcp.exa.ai/mcp",
+      "enabled": true,
+    },
+  },
+  "tools": {
+    "github-triage": false,
+    "github-pr-search": false,
+  },
+}

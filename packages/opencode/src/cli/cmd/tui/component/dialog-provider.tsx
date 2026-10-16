@@ -23,7 +23,7 @@ const PROVIDER_PRIORITY: Record<string, number> = {
   google: 3,
 }
 
-const CUSTOM_PROVIDER_OPTION_VALUE = "__paper_fucker_custom_provider__"
+const CUSTOM_PROVIDER_OPTION_VALUE = "__papercode_custom_provider__"
 const CUSTOM_PROVIDER_ID = /^[a-z0-9][a-z0-9-_]*$/
 
 type ProviderOptionBase = {

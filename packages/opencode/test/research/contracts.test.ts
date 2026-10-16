@@ -34,7 +34,7 @@ function run(): ResearchRun {
     schema_version: RESEARCH_SCHEMA_VERSION,
     run_id: "run:test",
     topic: "contract test",
-    workspace: "E:/Project/paper_fucker",
+    workspace: "E:/Project/papercode",
     status: "running",
     created_at: now,
     updated_at: now,
@@ -56,7 +56,7 @@ function event(): ResearchEvent {
 
 describe("research contracts", () => {
   test("loads the JSON Schema source and validates generated TypeScript contract shapes", () => {
-    expect(schema().$id).toBe("https://paper-fucker.local/schemas/research/v1.schema.json")
+    expect(schema().$id).toBe("https://papercode.local/schemas/research/v1.schema.json")
     const checked = validate("event", event())
     expect(checked.schema_version).toBe(RESEARCH_SCHEMA_VERSION)
     expect(checked.type).toBe("run.created")
@@ -70,7 +70,7 @@ describe("research contracts", () => {
   })
 
   test("rebuilds run and global SQLite indexes from JSON and JSONL fact files", async () => {
-    const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-server-test-"))
+    const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-server-test-"))
     try {
       await Bun.write(path.join(dir, "run.json"), JSON.stringify(run()))
       await Bun.write(path.join(dir, "events.jsonl"), JSON.stringify(event()) + "\n")

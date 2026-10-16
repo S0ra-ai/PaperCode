@@ -359,13 +359,13 @@ describe("HttpApi server", () => {
       }),
       app({ password: "secret" }).request(fileUrl(), {
         headers: {
-          authorization: authorization("paper_fucker", "wrong"),
+          authorization: authorization("papercode", "wrong"),
           "x-opencode-directory": tmp.path,
         },
       }),
       app({ password: "secret" }).request(fileUrl(), {
         headers: {
-          authorization: authorization("paper_fucker", "secret"),
+          authorization: authorization("papercode", "secret"),
           "x-opencode-directory": tmp.path,
         },
       }),
@@ -381,7 +381,7 @@ describe("HttpApi server", () => {
     await Bun.write(`${tmp.path}/hello.txt`, "hello")
 
     const response = await app({ password: "secret" }).request(
-      fileUrl({ token: Buffer.from("paper_fucker:secret").toString("base64") }),
+      fileUrl({ token: Buffer.from("papercode:secret").toString("base64") }),
       {
         headers: {
           "x-opencode-directory": tmp.path,

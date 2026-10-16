@@ -1,4 +1,4 @@
-:project       paper_fucker - 可验证论文研究自动化系统
+:project       papercode - 可验证论文研究自动化系统
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
@@ -10,7 +10,7 @@
     0.13.0.172-dev - 2026/05/31 (fb07ba3a) [fix/mcp-tool-binding-test-isolation]
         :brief live source discovery 预算配置增加硬上限
         :fix
-            - fix(benchmark): PAPER_FUCKER_BENCHMARK_* 预算环境变量改为 bounded int 解析，非法值回退默认值
+            - fix(benchmark): PAPERCODE_BENCHMARK_* 预算环境变量改为 bounded int 解析，非法值回退默认值
             - fix(benchmark): arXiv fetch、attempts、query budget、source budget 和验证候选数均设置最小/最大边界
             - fix(benchmark): 防止错误配置把 live source discovery 扩大成无界验证流程
         :test

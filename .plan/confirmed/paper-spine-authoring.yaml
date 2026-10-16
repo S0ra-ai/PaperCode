@@ -2,7 +2,7 @@ id: paper-spine-authoring
 title: PaperSpine 论文脊梁与写作前置结构
 status: done
 priority: high
-owner: paper-fucker-dev-agent
+owner: papercode-dev-agent
 tags:
 - paper
 - writing
@@ -18,7 +18,7 @@ steps:
 - id: define-paper-spine
   title: 定义 PaperSpine.v1
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   description: 定义中心论点、动机链、贡献链、证据链、章节意图、图表计划和 revision matrix。
   execution:
@@ -29,20 +29,20 @@ steps:
     - timestamp: '2026-05-26T11:58:09.361311'
       level: info
       message: Defining PaperSpine.v1.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-26T11:58:25.159581'
       level: info
       message: Added packages/opencode/src/paper/paper-spine.ts with central claim,
         motivation chain, contribution chain, evidence map, section intent, figure
         plan, revision matrix, and readiness state.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-26T11:58:25.159581'
     attempt_count: 2
   meta: {}
 - id: bind-spine-to-authoring
   title: 绑定写作与 Preview
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   description: PaperRun snapshot 暴露 PaperSpine；无 PaperSpine 时 final authoring 标记为未就绪。
   execution:
@@ -54,19 +54,19 @@ steps:
       level: info
       message: Binding PaperSpine to claim_ledger stage, PaperRun snapshot, and preview
         monitor.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-26T11:58:26.484574'
       level: info
       message: claim_ledger stage records PaperSpine.v1; PaperRun snapshot and PreviewMonitorSummary
         expose paper_spine; TUI dashboard shows spine readiness.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-26T11:58:26.484574'
     attempt_count: 2
   meta: {}
 - id: verify-spine
   title: 验证无证据链不能进入终稿
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   description: 测试 PaperSpine evidence map 与 ClaimLedger 的一致性。
   execution:
@@ -77,13 +77,13 @@ steps:
     - timestamp: '2026-05-26T11:58:12.033125'
       level: info
       message: Verifying PaperSpine evidence readiness.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-26T11:58:27.816323'
       level: info
       message: research-closure.test.ts verifies ready vs evidence-bound spine; paperrun-execution.test.ts
         verifies needs_evidence when reproduction evidence is missing and ready when
         final evidence passes.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-26T11:58:27.816323'
     attempt_count: 2
   meta: {}

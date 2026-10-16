@@ -1,4 +1,4 @@
-:project       paper_fucker - 可验证论文研究自动化系统
+:project       papercode - 可验证论文研究自动化系统
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          记录项目的重大变更和版本历史
@@ -10,8 +10,8 @@
     0.13.0.176-dev - 2026/05/31 (cc0b4505) [fix/mcp-tool-binding-test-isolation]
         :brief live benchmark 失败记录增加真实子进程落盘验收
         :fix
-            - fix(benchmark): 新增 PAPER_FUCKER_BENCHMARK_OUTPUT_ROOT，测试和本地调试可隔离 benchmark 输出目录
-            - fix(benchmark): 新增 PAPER_FUCKER_BENCHMARK_SELF_TEST_FAILURE，受控触发失败记录路径
+            - fix(benchmark): 新增 PAPERCODE_BENCHMARK_OUTPUT_ROOT，测试和本地调试可隔离 benchmark 输出目录
+            - fix(benchmark): 新增 PAPERCODE_BENCHMARK_SELF_TEST_FAILURE，受控触发失败记录路径
         :test
             - test(benchmark): 启动真实子进程触发 self-test failure，验证 attempt-error.json、last-failed-attempt.txt 与 paperrun-summary.json 不被发布
         :changelog

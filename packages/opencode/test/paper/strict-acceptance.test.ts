@@ -160,7 +160,7 @@ describe("strict live acceptance script", () => {
       path.join(repoRoot, "packages", "opencode", "src", "paper", "research", "experiments", "runner.ts"),
       "utf8",
     )
-    expect(runner).not.toContain("paper-fucker/research-runner:fixture")
+    expect(runner).not.toContain("papercode/research-runner:fixture")
     expect(runner).not.toContain("sha256:fixture")
     expect(runner).toContain("if (options?.container_image) result.image = options.container_image")
     expect(runner).toContain("if (options?.container_digest) result.digest = options.container_digest")

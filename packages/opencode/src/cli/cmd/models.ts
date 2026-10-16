@@ -54,8 +54,8 @@ export const ModelsCommand = effectCmd({
     }
 
     const ids = Object.keys(providers).sort((a, b) => {
-      const aIsFirstParty = a.startsWith("paper_fucker") || a.startsWith("opencode")
-      const bIsFirstParty = b.startsWith("paper_fucker") || b.startsWith("opencode")
+      const aIsFirstParty = a.startsWith("papercode") || a.startsWith("opencode")
+      const bIsFirstParty = b.startsWith("papercode") || b.startsWith("opencode")
       if (aIsFirstParty && !bIsFirstParty) return -1
       if (!aIsFirstParty && bIsFirstParty) return 1
       return a.localeCompare(b)

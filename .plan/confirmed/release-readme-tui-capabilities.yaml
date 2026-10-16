@@ -30,13 +30,13 @@ steps:
     logs:
     - timestamp: '2026-05-11T10:40:56.015472'
       level: info
-      message: Inspecting README, TUI workbench, .paper_fucker config, and capability-pack.ts
+      message: Inspecting README, TUI workbench, .papercode config, and capability-pack.ts
         before editing docs.
       agent: codex
     - timestamp: '2026-05-11T10:41:04.799749'
       level: info
-      message: Confirmed TUI default entry is paper_fucker; home tips expose paper
-        workbench, skills list, and mcp add; .paper_fucker/paper_fucker.jsonc has
+      message: Confirmed TUI default entry is papercode; home tips expose paper
+        workbench, skills list, and mcp add; .papercode/papercode.jsonc has
         Exa remote MCP enabled; built-in capability packs cover paper-profile-skills,
         literature-mcp, crawler-data, huggingface-research, code-experiment-core,
         and writing-verification-export.
@@ -49,7 +49,7 @@ steps:
   status: done
   owner: codex
   depends_on: []
-  description: Make paper_fucker TUI the primary path and move CLI commands to non-interactive/automation
+  description: Make papercode TUI the primary path and move CLI commands to non-interactive/automation
     sections.
   execution:
     mode: sequential
@@ -63,7 +63,7 @@ steps:
       agent: codex
     - timestamp: '2026-05-11T10:41:59.701495'
       level: info
-      message: README now presents paper_fucker TUI workbench as the recommended usage
+      message: README now presents papercode TUI workbench as the recommended usage
         path and moves CLI examples into a non-interactive mode section.
       agent: codex
     last_run: '2026-05-11T10:41:59.701495'

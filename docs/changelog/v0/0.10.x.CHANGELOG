@@ -1,4 +1,4 @@
-:project       paper_fucker - 可验证论文研究自动化系统
+:project       papercode - 可验证论文研究自动化系统
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          0.10.x 历史变更归档，主 CHANGELOG 仅保留当前活跃版本线
@@ -12,7 +12,7 @@
         :tui
             - feat(tui): 启动前检测终端尺寸，低于 96x28 时显示中文最低/推荐尺寸提示并拒绝渲染复杂 TUI
             - feat(tui): 运行中窗口缩小时切换到轻量阻断页，恢复尺寸后回到原页面
-            - style(tui): Paper Fucker 主题收敛为冷黑、纸白、研究蓝、琥珀风险、红色阻断和绿色可用
+            - style(tui): PaperCode 主题收敛为冷黑、纸白、研究蓝、琥珀风险、红色阻断和绿色可用
             - fix(tui): 首页、模型工作台和目录选择器使用 CJK-aware 截断，避免中文路径和长模型名逐字换行
             - fix(commands): 命令面中文化并保留 PaperRun 可见命令集，旧 provider/chat/session 入口继续隐藏
         :models

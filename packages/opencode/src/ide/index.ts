@@ -44,7 +44,7 @@ export function ide() {
 }
 
 export function alreadyInstalled() {
-  const caller = process.env["PAPER_FUCKER_CALLER"] ?? process.env["OPENCODE_CALLER"]
+  const caller = process.env["PAPERCODE_CALLER"] ?? process.env["OPENCODE_CALLER"]
   return caller === "vscode" || caller === "vscode-insiders"
 }
 
@@ -52,7 +52,7 @@ export async function install(ide: (typeof SUPPORTED_IDES)[number]["name"]) {
   const cmd = SUPPORTED_IDES.find((i) => i.name === ide)?.cmd
   if (!cmd) throw new Error(`Unknown IDE: ${ide}`)
 
-  const p = await Process.run([cmd, "--install-extension", "sst-dev.paper_fucker"], {
+  const p = await Process.run([cmd, "--install-extension", "sst-dev.papercode"], {
     nothrow: true,
   })
   const fallback =

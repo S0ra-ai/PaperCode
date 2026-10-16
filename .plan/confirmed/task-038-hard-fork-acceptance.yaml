@@ -10,7 +10,7 @@ tags:
 - paperrun
 depends_on:
 - task-037-public-surface-cleanup
-description: 'Add and run final hard fork acceptance for the integrated paper_fucker
+description: 'Add and run final hard fork acceptance for the integrated papercode
   product: PaperRun-first TUI/API, migrated paper core inside OpenCode, provider/model
   wizard, multi-layer multi-model subagents, private-first data egress, reviewable
   bundle and submission candidate quality modes, cleaned public branding, and strict
@@ -26,7 +26,7 @@ steps:
   depends_on: []
   description: Add acceptance tests/script checks for PaperRun-first TUI/API, migrated
     core, Agent Tree depth >= 2, different parent/child models, provider wizard, egress
-    policy, reviewable bundle, submission candidate, and Paper Fucker logo/branding.
+    policy, reviewable bundle, submission candidate, and PaperCode logo/branding.
   execution:
     mode: sequential
     retry: 0
@@ -163,7 +163,7 @@ steps:
         => 6 pass, 0 fail, 53 expects. Strict live acceptance passed and regenerated
         reports/strict-live-acceptance.md with README version 0.3.0-dev, full opencode
         suite 2547 pass / 38 skip / 2 todo / 0 fail, preview tests 2 pass, Python
-        tests 4 OK, server/workspace typecheck pass, local Paper Fucker CLI smoke
+        tests 4 OK, server/workspace typecheck pass, local PaperCode CLI smoke
         pass, DeepSeek live provider pass, Exa live search pass, Nature skill/profile
         pass, pandoc/LaTeX/DOCX pass, topic-to-paper and code-to-paper fixture runs
         pass, hard-fork checks pass, and Git Flow cleanup pass. README/CHANGELOG version

@@ -1,6 +1,6 @@
-# paper_fucker Desktop
+# papercode Desktop
 
-The paper_fucker Desktop app, built with Electron.
+The papercode Desktop app, built with Electron.
 
 ## Development
 

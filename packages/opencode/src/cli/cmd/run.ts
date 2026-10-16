@@ -275,17 +275,17 @@ export const RunCommand = effectCmd({
       })
       .option("attach", {
         type: "string",
-        describe: "attach to a running paper_fucker server (e.g., http://localhost:4096)",
+        describe: "attach to a running papercode server (e.g., http://localhost:4096)",
       })
       .option("password", {
         alias: ["p"],
         type: "string",
-        describe: "basic auth password (defaults to PAPER_FUCKER_SERVER_PASSWORD)",
+        describe: "basic auth password (defaults to PAPERCODE_SERVER_PASSWORD)",
       })
       .option("username", {
         alias: ["u"],
         type: "string",
-        describe: "basic auth username (defaults to PAPER_FUCKER_SERVER_USERNAME or 'paper_fucker')",
+        describe: "basic auth username (defaults to PAPERCODE_SERVER_USERNAME or 'papercode')",
       })
       .option("dir", {
         type: "string",
@@ -677,7 +677,7 @@ export const RunCommand = effectCmd({
         const request = new Request(input, init)
         return Server.Default().app.fetch(request)
       }) as typeof globalThis.fetch
-      const sdk = createOpencodeClient({ baseUrl: "http://paper_fucker.internal", fetch: fetchFn })
+      const sdk = createOpencodeClient({ baseUrl: "http://papercode.internal", fetch: fetchFn })
       await execute(sdk)
     })
   }),

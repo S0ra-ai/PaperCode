@@ -1,4 +1,4 @@
-:project       paper_fucker - 可验证论文研究自动化系统
+:project       papercode - 可验证论文研究自动化系统
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          0.8.x 历史变更归档，主 CHANGELOG 仅保留当前活跃版本线
@@ -15,16 +15,16 @@
             - docs/project-structure、docs/changelog/README 与 specs/project 统一为 PaperRun、release 文件面和 changelog 归档语义
             - root CHANGELOG 与 docs/changelog/v0 归档 changelog 作者统一为 k1d (https://github.com/ZhuchenZhong)
         :build
-            - 根目录新增 build/link 脚本，源码编译后在仓库根目录生成 paper_fucker.exe 或 paper_fucker
+            - 根目录新增 build/link 脚本，源码编译后在仓库根目录生成 papercode.exe 或 papercode
             - packages/opencode build 的 optional dependency 安装改为 --no-save，避免污染 package.json 或 bun.lock
-            - root package.json、packages/opencode/package.json 增加 author 元数据，仓库 URL 后续统一为 ZhuchenZhong/paper_fucker 远端
+            - root package.json、packages/opencode/package.json 增加 author 元数据，仓库 URL 后续统一为 ZhuchenZhong/papercode 远端
         :release
             - .gitattributes 增加 export-ignore，GitHub source archive 排除 TaskFlow、reports、legacy、upstream、本地 runtime、测试树和上游营销素材
             - packages/opencode 与 packages/preview 增加 npm files 白名单，避免 test/spec/fixture/历史证据进入 pack
             - scripts/check-release-files.ps1 生成 release-file-audit 报告并校验 source archive、npm pack 与二进制发布面
         :init
-            - 顶层 CLI 增加 paper_fucker init/doctor/reset，reset 只清理全局和 ignored runtime/local 状态并先备份
-            - Windows 源码预览流程改为 bun run build 后直接运行 .\paper_fucker.exe
+            - 顶层 CLI 增加 papercode init/doctor/reset，reset 只清理全局和 ignored runtime/local 状态并先备份
+            - Windows 源码预览流程改为 bun run build 后直接运行 .\papercode.exe
             - provider matrix smoke 支持逐 provider 调用 /models 和最小 chat completion，并在无配置时生成 pending_config 报告
         :preview
             - PaperRun preview endpoint 启动 token-protected localhost 预览服务
@@ -43,7 +43,7 @@
             - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
             - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-changelog-format.ps1 passed for root and archives
             - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-release-files.ps1 passed
-            - bun run build passed and generated .\paper_fucker.exe
+            - bun run build passed and generated .\papercode.exe
             - npx --yes bun@1.3.13 --cwd packages/opencode test targeted readiness suite passed: 26 pass, 0 fail
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
             - npx --yes bun@1.3.13 --cwd packages/preview test passed: 2 pass, 0 fail
@@ -149,8 +149,8 @@
         - test(paper): 新增 PaperRun final export pass 场景并扩展 crawler/HF bridge 测试
         - chore(test): PaperRun 长耗时 focused 测试超时提升到 60s
         :src
-            - research-tools/src/paper_fucker_tools/crawler.py - authorized live crawl with Scrapling adapter and urllib fallback
-            - research-tools/src/paper_fucker_tools/huggingface_loop.py - live papers, token-gated jobs, explicit Trackio export boundary
+            - research-tools/src/papercode_tools/crawler.py - authorized live crawl with Scrapling adapter and urllib fallback
+            - research-tools/src/papercode_tools/huggingface_loop.py - live papers, token-gated jobs, explicit Trackio export boundary
             - packages/opencode/src/paper/orchestrator.ts - ExperimentEvidenceManifest.v1 evidence ingestion for reproduction-passed final export
             - packages/opencode/src/paper/research/storage.ts - idempotent global index rebuild for concurrent PaperRun benchmarks
             - scripts/live-paper-quality-benchmark.ts - added final scenario with final_export=final

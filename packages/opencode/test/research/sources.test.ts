@@ -69,7 +69,7 @@ function dataset(id: string, title: string, overrides: Partial<DatasetCandidate>
 
 describe("literature and data discovery", () => {
   test("records sufficient open literature and datasets as feasible run facts", async () => {
-    const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-sources-test-"))
+    const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-sources-test-"))
     try {
       const workspace = path.join(dir, "workspace")
       const home = path.join(dir, "home")

@@ -2,7 +2,7 @@ id: experiment-guidance-preview-surface
 title: 实验协议补齐建议进入 Preview 与 TUI 可见面
 status: done
 priority: high
-owner: paper-fucker-dev-agent
+owner: papercode-dev-agent
 tags:
 - paper-run
 - preview
@@ -19,7 +19,7 @@ steps:
 - id: inspect-preview-state
   title: 审计当前 Preview/TUI 状态链路
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   description: 确认 ExperimentProtocolGuidance 当前只在哪些层可见，定位 Preview snapshot、TUI sidebar
     和 diagnostics 的接入点。
@@ -33,21 +33,21 @@ steps:
       message: Branch preparation could not switch because the worktree already contains
         prior dirty changes; continuing in the existing worktree without reverting
         user/generated changes.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-27T07:57:02.679016'
       level: info
       message: Inspected PaperRun snapshot, preview monitor, preview client, and TUI
         sidebar. ExperimentProtocolGuidance.v1 was only present as artifact/draft
         content; Preview monitor annotations and TUI gate/sidebar state had no structured
         guidance surface.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-27T07:57:02.679016'
     attempt_count: 2
   meta: {}
 - id: surface-guidance
   title: 接入 PaperRun snapshot 与实时 Preview
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on:
   - inspect-preview-state
   description: 在 PaperRun snapshot/preview annotations/monitor 中展示实验协议缺口、补齐脚本建议和 final
@@ -61,20 +61,20 @@ steps:
       level: info
       message: Wiring ExperimentProtocolGuidance into PaperRun snapshot and Preview
         state.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-27T07:58:21.877313'
       level: info
       message: Added diagnostics.experiment_guidance to PaperRunSnapshot, included
         ExperimentProtocolGuidance.v1 in live preview monitor, and added experiment-guidance
         annotations for missing protocol suggestions.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-27T07:58:21.877313'
     attempt_count: 2
   meta: {}
 - id: surface-tui
   title: 接入 TUI 侧栏诊断
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on:
   - surface-guidance
   description: 让 PaperRun 侧栏在 reproduction_failure 或 needs_protocol 时显示实验协议补齐建议摘要，而不是只显示失败码。
@@ -86,20 +86,20 @@ steps:
     - timestamp: '2026-05-27T07:58:45.037422'
       level: info
       message: Surfacing guidance in the TUI sidebar gate and overview next action.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-27T07:59:14.834348'
       level: info
       message: TUI PaperRun sidebar now exposes experiment_guidance summary and suggested
         scripts, and overview next_action prioritizes protocol repair before generic
         forced draft guidance.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-27T07:59:14.834348'
     attempt_count: 2
   meta: {}
 - id: validate-generation
   title: 运行测试与 PaperRun 实跑复审
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on:
   - surface-tui
   description: 运行相关单测、类型检查、preview/Python/版本检查，并用代码类 PaperRun benchmark 复审生成内容是否仍存在不可接受缺口。
@@ -111,7 +111,7 @@ steps:
     - timestamp: '2026-05-27T07:59:41.939197'
       level: info
       message: Running targeted PaperRun/TUI tests and typecheck.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-27T08:45:13.076563'
       level: info
       message: 'Validation passed: PaperRun execution + TUI workbench tests 15 pass,
@@ -120,7 +120,7 @@ steps:
         Live code benchmark generated run-67ab1f3f-6c96-4d76-92da-fc4a44cba8ab with
         final blocked, forced draft, and Preview monitor showing baseline:<name>,
         ablation:<name>, repro:container guidance.'
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-27T08:45:13.076563'
     attempt_count: 2
   meta: {}

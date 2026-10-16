@@ -11,7 +11,7 @@
         :brief PaperCode 换壳与本机 oh-my-opencode 表面素材迁入
         :brand
             - feat(brand): TUI 标题、终端标题、logo、错误页、提示语、preview 标题和公开测试期望统一为 PaperCode
-            - feat(cli): 新增 papercode bin 入口与根目录 papercode 可执行文件链接，同时保留 paper_fucker 兼容入口
+            - feat(cli): 新增 papercode bin 入口与根目录 papercode 可执行文件链接，同时保留 papercode 兼容入口
             - docs(surface): README、开发手册、能力包、内置 agent 和 skill 文案同步 PaperCode 表面品牌
         :skills
             - feat(skills): 参考 oh-my-opencode 本机快照新增 PaperCode change review、security research、workflow skill

@@ -40,8 +40,8 @@ process.env.XDG_CONFIG_HOME = path.join(exerciseGlobalRoot, "config")
 process.env.XDG_STATE_HOME = path.join(exerciseGlobalRoot, "state")
 process.env.XDG_CACHE_HOME = path.join(exerciseGlobalRoot, "cache")
 process.env.OPENCODE_DISABLE_SHARE = "true"
-const exerciseConfigDirectory = path.join(exerciseGlobalRoot, "config", "paper_fucker")
-const exerciseDataDirectory = path.join(exerciseGlobalRoot, "data", "paper_fucker")
+const exerciseConfigDirectory = path.join(exerciseGlobalRoot, "config", "papercode")
+const exerciseDataDirectory = path.join(exerciseGlobalRoot, "data", "papercode")
 
 const preserveExerciseDatabase = !!process.env.OPENCODE_HTTPAPI_EXERCISE_DB
 const exerciseDatabasePath =
@@ -403,7 +403,7 @@ const scenarios: Scenario[] = [
     .seeded(() =>
       Effect.promise(() =>
         Bun.write(
-          path.join(exerciseConfigDirectory, "paper_fucker.jsonc"),
+          path.join(exerciseConfigDirectory, "papercode.jsonc"),
           JSON.stringify({ username: "httpapi-global" }, null, 2),
         ),
       ),
@@ -416,7 +416,7 @@ const scenarios: Scenario[] = [
           object(body)
           check(body.username === "httpapi-global", "global config update should return patched config")
           const text = yield* Effect.promise(() =>
-            Bun.file(path.join(exerciseConfigDirectory, "paper_fucker.jsonc")).text(),
+            Bun.file(path.join(exerciseConfigDirectory, "papercode.jsonc")).text(),
           )
           check(text.includes('"username": "httpapi-global"'), "global config update should write isolated config file")
         }),
@@ -435,8 +435,8 @@ const scenarios: Scenario[] = [
     ),
   http.get("/path", "path.get").json(200, (body, ctx) => {
     object(body)
-    check(body.directory === ctx.directory, "directory should resolve from x-paper-fucker-directory")
-    check(body.worktree === ctx.directory, "worktree should resolve from x-paper-fucker-directory")
+    check(body.directory === ctx.directory, "directory should resolve from x-papercode-directory")
+    check(body.worktree === ctx.directory, "worktree should resolve from x-papercode-directory")
   }),
   http.get("/vcs", "vcs.get").json(),
   http
@@ -786,7 +786,7 @@ const scenarios: Scenario[] = [
   http
     .get("/experimental/tool", "tool.list")
     .at((ctx) => ({
-      path: `/experimental/tool?${new URLSearchParams({ provider: "paper_fucker", model: "test" })}`,
+      path: `/experimental/tool?${new URLSearchParams({ provider: "papercode", model: "test" })}`,
       headers: ctx.headers(),
     }))
     .json(200, array, "status"),
@@ -1614,7 +1614,7 @@ function withContext<A, E>(scenario: ActiveScenario, use: (ctx: SeededContext<un
         const base: ScenarioContext = {
           directory: context.dir?.path,
           headers: (extra) => ({
-            ...(context.dir?.path ? { "x-paper-fucker-directory": context.dir.path } : {}),
+            ...(context.dir?.path ? { "x-papercode-directory": context.dir.path } : {}),
             ...extra,
           }),
           file: (name, content) =>
@@ -1641,7 +1641,7 @@ function withContext<A, E>(scenario: ActiveScenario, use: (ctx: SeededContext<un
                 time: { created: Date.now() },
                 agent: "build",
                 model: {
-                  providerID: ProviderID.paper_fucker,
+                  providerID: ProviderID.papercode,
                   modelID: ModelID.make("test"),
                 },
               }

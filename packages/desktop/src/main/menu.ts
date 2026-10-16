@@ -15,7 +15,7 @@ export function createMenu(deps: Deps) {
 
   const template: Electron.MenuItemConstructorOptions[] = [
     {
-      label: "paper_fucker",
+      label: "papercode",
       submenu: [
         { role: "about" },
         {
@@ -120,18 +120,18 @@ export function createMenu(deps: Deps) {
     {
       label: "Help",
       submenu: [
-        { label: "paper_fucker Documentation", click: () => shell.openExternal("https://github.com/ZhuchenZhong/paper_fucker") },
-        { label: "Repository", click: () => shell.openExternal("https://github.com/ZhuchenZhong/paper_fucker") },
+        { label: "papercode Documentation", click: () => shell.openExternal("https://github.com/ZhuchenZhong/papercode") },
+        { label: "Repository", click: () => shell.openExternal("https://github.com/ZhuchenZhong/papercode") },
         { type: "separator" },
         { type: "separator" },
         {
           label: "Share Feedback",
           click: () =>
-            shell.openExternal("https://github.com/ZhuchenZhong/paper_fucker/issues/new"),
+            shell.openExternal("https://github.com/ZhuchenZhong/papercode/issues/new"),
         },
         {
           label: "Report a Bug",
-          click: () => shell.openExternal("https://github.com/ZhuchenZhong/paper_fucker/issues/new"),
+          click: () => shell.openExternal("https://github.com/ZhuchenZhong/papercode/issues/new"),
         },
       ],
     },

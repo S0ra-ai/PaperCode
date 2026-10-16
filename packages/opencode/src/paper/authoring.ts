@@ -669,8 +669,8 @@ export async function runPaperAuthoringLoop(
   return withSpan(
     "paper.authoring.loop",
     {
-      "paper_fucker.paper.authoring.title": input.title,
-      "paper_fucker.paper.authoring.profile": input.target_profile ?? "cjc-paper",
+      "papercode.paper.authoring.title": input.title,
+      "papercode.paper.authoring.profile": input.target_profile ?? "cjc-paper",
     },
     async (span) => {
       const run = await loadResearchRun(runDir)
@@ -797,8 +797,8 @@ export async function runPaperAuthoringLoop(
         },
         options,
       )
-      span.setAttribute("paper_fucker.paper.authoring.final_blocked", finalExportBlocked)
-      span.setAttribute("paper_fucker.paper.authoring.export_status", exported.bundle.status)
+      span.setAttribute("papercode.paper.authoring.final_blocked", finalExportBlocked)
+      span.setAttribute("papercode.paper.authoring.export_status", exported.bundle.status)
 
       return {
         schema_version: "PaperAuthoringLoop.v1",

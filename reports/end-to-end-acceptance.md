@@ -1,6 +1,6 @@
 # End-to-End Acceptance Report
 
-> Historical path note: this report predates task-032. Any `packages/server` or `@paper-fucker/server` paths below are provenance only; the current paper_fucker runtime authority is `packages/opencode/src/paper`, and `packages/server` is intentionally absent.
+> Historical path note: this report predates task-032. Any `packages/server` or `@papercode/server` paths below are provenance only; the current papercode runtime authority is `packages/opencode/src/paper`, and `packages/server` is intentionally absent.
 
 Version: `0.1.17-dev`
 
@@ -10,11 +10,11 @@ Date: `2026-05-09`
 
 ## Scope
 
-This acceptance closes the remaining fixture-level validation gap for the first-party paper_fucker research runtime. It verifies that an automatic research run can move from a topic through the implemented pipeline stages and produce gated export artifacts without relying on manual shell commands inside the user workflow.
+This acceptance closes the remaining fixture-level validation gap for the first-party papercode research runtime. It verifies that an automatic research run can move from a topic through the implemented pipeline stages and produce gated export artifacts without relying on manual shell commands inside the user workflow.
 
 Covered stages:
 
-- Research run creation under workspace-local `.paper_fucker/runs/<run-id>`.
+- Research run creation under workspace-local `.papercode/runs/<run-id>`.
 - Trusted template resolution with `TemplateSpec.v1`.
 - Literature and dataset discovery with source verification, license metadata, `LiteratureMap.v1`, `DataPlan.v1`, and `DatasetCard.v1`.
 - Experiment planning, host exploration, container reproduction, and `ResultReport.v1`.

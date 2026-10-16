@@ -79,7 +79,7 @@ describe("built-in capability packs and harness scheduler", () => {
     expect(running).toMatchObject({ action: "run", call: { call_id: "call-crawl", status: "running" } })
     expect(running.call?.trace).toMatchObject({
       capability_name: "python.web-crawler.scrapling",
-      otel_span_name: "paper_fucker.capability.python.web-crawler.scrapling",
+      otel_span_name: "papercode.capability.python.web-crawler.scrapling",
     })
     failHarnessCall(harness, "call-crawl", "network timeout")
     expect(harness.calls.find((call) => call.call_id === "call-crawl")?.status).toBe("queued")

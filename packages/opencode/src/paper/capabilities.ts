@@ -33,7 +33,7 @@ export type ResearchCapabilityNetwork = "none" | "optional" | "required"
 export interface ResearchCapability {
   name: string
   type: ResearchCapabilityType
-  substrate: "opencode" | "paper_fucker" | "python" | "external_mcp" | "codex_skill"
+  substrate: "opencode" | "papercode" | "python" | "external_mcp" | "codex_skill"
   title: string
   description: string
   input_schema: Record<string, unknown>
@@ -124,7 +124,7 @@ export class ResearchCapabilityRegistry {
       trust: capability.trust,
       cost: capability.cost,
       network: capability.network,
-      otel_span_name: `paper_fucker.capability.${capability.name}`,
+      otel_span_name: `papercode.capability.${capability.name}`,
     }
   }
 }

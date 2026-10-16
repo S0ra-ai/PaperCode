@@ -1,8 +1,8 @@
 id: paper-workbench-ux-acceptance
-title: Paper Fucker 工作台 UX 验收
+title: PaperCode 工作台 UX 验收
 status: done
 priority: critical
-owner: paper-fucker-dev-agent
+owner: papercode-dev-agent
 tags:
 - acceptance
 - docs
@@ -18,7 +18,7 @@ steps:
 - id: docs-version
   title: 更新 README 和 CHANGELOG
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   description: README 记录 TUI-first、环境工作台和实时监控，CHANGELOG 记录 0.9.0-dev。
   execution:
@@ -29,19 +29,19 @@ steps:
     - timestamp: '2026-05-12T03:21:15.395328'
       level: info
       message: 开始收口 README 与 CHANGELOG 版本文档。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-12T03:21:26.673501'
       level: info
       message: README 已改为 0.9.0-dev 开发态 TUI-first 对外说明；CHANGELOG 记录 0.9.0-dev，commit
         f04c7c8，colon DSL 缩进通过。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-12T03:21:26.673501'
     attempt_count: 2
   meta: {}
 - id: quality-gates
   title: 运行质量门
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   description: 运行 opencode/preview/Python 测试、typecheck、README 版本检查、CHANGELOG 格式检查。
   execution:
@@ -52,21 +52,21 @@ steps:
     - timestamp: '2026-05-12T03:21:41.156980'
       level: info
       message: 开始记录质量门结果。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-12T03:21:51.175193'
       level: info
       message: 质量门通过：opencode full test 2601 pass / 0 fail；opencode typecheck pass；preview
         test 3 pass；PYTHONPATH=research-tools/src Python unittest 18 pass；README version
         check pass；CHANGELOG format check pass。裸 Python unittest 未设置 PYTHONPATH 时失败，原因是
         package source 不在 sys.path。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-12T03:21:51.175193'
     attempt_count: 2
   meta: {}
 - id: taskflow-validate
   title: 验证 TaskFlow 任务图
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   description: validate_task 与 validate_changelog_format 全部通过。
   execution:
@@ -77,12 +77,12 @@ steps:
     - timestamp: '2026-05-12T03:22:06.756060'
       level: info
       message: 开始验证 TaskFlow 任务图和 changelog。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-12T03:22:20.361197'
       level: info
       message: TaskFlow validate_task 对 7 个新增任务全部通过；validate_changelog_format 与 validate_changelog_versions
         均通过。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-12T03:22:20.361197'
     attempt_count: 2
   meta: {}

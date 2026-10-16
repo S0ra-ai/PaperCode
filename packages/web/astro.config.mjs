@@ -31,7 +31,7 @@ export default defineConfig({
     configSchema(),
     solidJs(),
     starlight({
-      title: "paper_fucker",
+      title: "papercode",
       defaultLocale: "root",
       locales: {
         root: {

@@ -6,7 +6,7 @@ import { Global } from "@opencode-ai/core/global"
 
 describe("global paths", () => {
   test("tmp path is under the system temp directory", () => {
-    expect(Global.Path.tmp).toBe(path.join(os.tmpdir(), "paper_fucker"))
+    expect(Global.Path.tmp).toBe(path.join(os.tmpdir(), "papercode"))
     expect(Global.make().tmp).toBe(Global.Path.tmp)
   })
 
@@ -15,13 +15,13 @@ describe("global paths", () => {
   })
 
   test("ignores stringified undefined test home", () => {
-    const previous = process.env.PAPER_FUCKER_TEST_HOME
-    process.env.PAPER_FUCKER_TEST_HOME = "undefined"
+    const previous = process.env.PAPERCODE_TEST_HOME
+    process.env.PAPERCODE_TEST_HOME = "undefined"
     try {
       expect(Global.Path.home).toBe(os.homedir())
     } finally {
-      if (previous === undefined) delete process.env.PAPER_FUCKER_TEST_HOME
-      else process.env.PAPER_FUCKER_TEST_HOME = previous
+      if (previous === undefined) delete process.env.PAPERCODE_TEST_HOME
+      else process.env.PAPERCODE_TEST_HOME = previous
     }
   })
 })

@@ -11,8 +11,8 @@ export function publish(port: number, domain?: string) {
   if (bonjour) unpublish()
 
   try {
-    const host = domain ?? "paper-fucker.local"
-    const name = `paper-fucker-${port}`
+    const host = domain ?? "papercode.local"
+    const name = `papercode-${port}`
     bonjour = new Bonjour()
     const service = bonjour.publish({
       name,

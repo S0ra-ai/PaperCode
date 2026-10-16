@@ -53,7 +53,7 @@ The following pre-hard-fork reports now carry a top-level historical path note:
 - `reports/verification-gate.md`
 - `reports/writing-claim-ledger.md`
 
-The note states that any `packages/server` or `@paper-fucker/server` paths are provenance only and that the current runtime authority is `packages/opencode/src/paper`.
+The note states that any `packages/server` or `@papercode/server` paths are provenance only and that the current runtime authority is `packages/opencode/src/paper`.
 
 ## Intentionally Retained History
 
@@ -63,7 +63,7 @@ The following current files may still mention `packages/server` by design:
 
 - `README.md`: explains that historical reports may retain old paths and that `packages/server` is absent now.
 - `reports/hard-fork-acceptance.md`: records the hard-fork acceptance condition that the former sidecar is absent.
-- `reports/opencode-paper-core-migration.md`: records the migration from `@paper-fucker/server`.
+- `reports/opencode-paper-core-migration.md`: records the migration from `@papercode/server`.
 - `reports/strict-live-acceptance.md`: records strict acceptance evidence for the absent sidecar.
 - `scripts/strict-acceptance.ps1`: asserts `packages/server` does not exist.
 

@@ -30,24 +30,24 @@ const session = (input: Partial<Session> & Pick<Session, "id" | "directory">) =>
 
 describe("layout deep links", () => {
   test("parses open-project deep links", () => {
-    expect(parseDeepLink("paper-fucker://open-project?directory=/tmp/demo")).toBe("/tmp/demo")
+    expect(parseDeepLink("papercode://open-project?directory=/tmp/demo")).toBe("/tmp/demo")
   })
 
   test("ignores non-project deep links", () => {
-    expect(parseDeepLink("paper-fucker://other?directory=/tmp/demo")).toBeUndefined()
+    expect(parseDeepLink("papercode://other?directory=/tmp/demo")).toBeUndefined()
     expect(parseDeepLink("https://example.com")).toBeUndefined()
   })
 
   test("ignores malformed deep links safely", () => {
-    expect(() => parseDeepLink("paper-fucker://open-project/%E0%A4%A%")).not.toThrow()
-    expect(parseDeepLink("paper-fucker://open-project/%E0%A4%A%")).toBeUndefined()
+    expect(() => parseDeepLink("papercode://open-project/%E0%A4%A%")).not.toThrow()
+    expect(parseDeepLink("papercode://open-project/%E0%A4%A%")).toBeUndefined()
   })
 
   test("parses links when URL.canParse is unavailable", () => {
     const original = Object.getOwnPropertyDescriptor(URL, "canParse")
     Object.defineProperty(URL, "canParse", { configurable: true, value: undefined })
     try {
-      expect(parseDeepLink("paper-fucker://open-project?directory=/tmp/demo")).toBe("/tmp/demo")
+      expect(parseDeepLink("papercode://open-project?directory=/tmp/demo")).toBe("/tmp/demo")
     } finally {
       if (original) Object.defineProperty(URL, "canParse", original)
       if (!original) Reflect.deleteProperty(URL, "canParse")
@@ -55,49 +55,49 @@ describe("layout deep links", () => {
   })
 
   test("ignores open-project deep links without directory", () => {
-    expect(parseDeepLink("paper-fucker://open-project")).toBeUndefined()
-    expect(parseDeepLink("paper-fucker://open-project?directory=")).toBeUndefined()
+    expect(parseDeepLink("papercode://open-project")).toBeUndefined()
+    expect(parseDeepLink("papercode://open-project?directory=")).toBeUndefined()
   })
 
   test("collects only valid open-project directories", () => {
     const result = collectOpenProjectDeepLinks([
-      "paper-fucker://open-project?directory=/a",
-      "paper-fucker://other?directory=/b",
-      "paper-fucker://open-project?directory=/c",
+      "papercode://open-project?directory=/a",
+      "papercode://other?directory=/b",
+      "papercode://open-project?directory=/c",
     ])
     expect(result).toEqual(["/a", "/c"])
   })
 
   test("parses new-session deep links with optional prompt", () => {
-    expect(parseNewSessionDeepLink("paper-fucker://new-session?directory=/tmp/demo")).toEqual({ directory: "/tmp/demo" })
-    expect(parseNewSessionDeepLink("paper-fucker://new-session?directory=/tmp/demo&prompt=hello%20world")).toEqual({
+    expect(parseNewSessionDeepLink("papercode://new-session?directory=/tmp/demo")).toEqual({ directory: "/tmp/demo" })
+    expect(parseNewSessionDeepLink("papercode://new-session?directory=/tmp/demo&prompt=hello%20world")).toEqual({
       directory: "/tmp/demo",
       prompt: "hello world",
     })
   })
 
   test("ignores new-session deep links without directory", () => {
-    expect(parseNewSessionDeepLink("paper-fucker://new-session")).toBeUndefined()
-    expect(parseNewSessionDeepLink("paper-fucker://new-session?directory=")).toBeUndefined()
+    expect(parseNewSessionDeepLink("papercode://new-session")).toBeUndefined()
+    expect(parseNewSessionDeepLink("papercode://new-session?directory=")).toBeUndefined()
   })
 
   test("collects only valid new-session deep links", () => {
     const result = collectNewSessionDeepLinks([
-      "paper-fucker://new-session?directory=/a",
-      "paper-fucker://open-project?directory=/b",
-      "paper-fucker://new-session?directory=/c&prompt=ship%20it",
+      "papercode://new-session?directory=/a",
+      "papercode://open-project?directory=/b",
+      "papercode://new-session?directory=/c&prompt=ship%20it",
     ])
     expect(result).toEqual([{ directory: "/a" }, { directory: "/c", prompt: "ship it" }])
   })
 
   test("drains global deep links once", () => {
     const target = {
-      __PAPER_FUCKER__: {
-        deepLinks: ["paper-fucker://open-project?directory=/a"],
+      __PAPERCODE__: {
+        deepLinks: ["papercode://open-project?directory=/a"],
       },
-    } as unknown as Window & { __PAPER_FUCKER__?: { deepLinks?: string[] } }
+    } as unknown as Window & { __PAPERCODE__?: { deepLinks?: string[] } }
 
-    expect(drainPendingDeepLinks(target)).toEqual(["paper-fucker://open-project?directory=/a"])
+    expect(drainPendingDeepLinks(target)).toEqual(["papercode://open-project?directory=/a"])
     expect(drainPendingDeepLinks(target)).toEqual([])
   })
 })

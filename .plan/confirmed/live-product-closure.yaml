@@ -12,7 +12,7 @@ tags:
 - export
 - 0.8.0-dev
 depends_on: []
-description: 补齐 Paper Fucker 从可验收骨架到真实产品闭环的剩余缺口：实现授权 live crawler、增强 Hugging Face
+description: 补齐 PaperCode 从可验收骨架到真实产品闭环的剩余缺口：实现授权 live crawler、增强 Hugging Face
   live research loop、提供 reproduction-pass final export 场景，并将 strict acceptance 升级为能区分
   focused/live/full 的真实验收报告。
 execution:
@@ -68,7 +68,7 @@ steps:
       agent: codex
     - timestamp: '2026-05-10T21:56:44.282633'
       level: info
-      message: 'Implemented authorized live crawler fetch in research-tools/src/paper_fucker_tools/crawler.py:
+      message: 'Implemented authorized live crawler fetch in research-tools/src/papercode_tools/crawler.py:
         Scrapling-first when installed, stdlib HTTP fallback otherwise, explicit allow_network
         gate, robots policy diagnostics, content hash/title/text extraction, and no
         scrapling_live_fetch_not_implemented path. Added local HTTP unit test; Python
@@ -192,10 +192,10 @@ steps:
   meta: {}
 outputs:
 - type: file
-  path: research-tools/src/paper_fucker_tools/crawler.py
+  path: research-tools/src/papercode_tools/crawler.py
   description: Live crawler bridge
 - type: file
-  path: research-tools/src/paper_fucker_tools/huggingface_loop.py
+  path: research-tools/src/papercode_tools/huggingface_loop.py
   description: HF live research bridge
 - type: file
   path: scripts/strict-acceptance.ps1

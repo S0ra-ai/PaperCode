@@ -57,7 +57,7 @@ describe("research intake", () => {
   test("normalizes code-grounded requests and preserves model-role overrides", () => {
     const request: ResearchIntakeRequest = {
       topic: "从一个 TypeScript 研究代理仓库生成论文",
-      workspace_path: "E:\\Project\\paper_fucker",
+      workspace_path: "E:\\Project\\papercode",
       code_paths: ["packages/opencode/src/paper", "packages/opencode/src/paper/research"],
       target_profile: "nature-paper",
       model_roles: {
@@ -69,7 +69,7 @@ describe("research intake", () => {
     const brief = normalizeResearchIntake(request)
 
     expect(brief.workflow).toBe("code_to_paper")
-    expect(brief.inputs.workspace_path).toBe("E:/Project/paper_fucker")
+    expect(brief.inputs.workspace_path).toBe("E:/Project/papercode")
     expect(brief.inputs.code_paths).toEqual(["packages/opencode/src/paper", "packages/opencode/src/paper/research"])
     expect(brief.target_profile).toBe("cjc-paper")
     expect(brief.target_journal).toBe("中国计算机学报")
@@ -122,7 +122,7 @@ describe("research intake", () => {
   })
 
   test("records ResearchBrief.v1 as a run artifact and intake event", async () => {
-    const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-intake-test-"))
+    const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-intake-test-"))
     try {
       const workspace = path.join(dir, "workspace")
       const home = path.join(dir, "home")

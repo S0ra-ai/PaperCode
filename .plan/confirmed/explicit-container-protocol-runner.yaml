@@ -2,7 +2,7 @@ id: explicit-container-protocol-runner
 title: 显式容器复现协议 runner
 status: done
 priority: high
-owner: paper-fucker-dev-agent
+owner: papercode-dev-agent
 tags:
 - paper-run
 - experiment
@@ -21,7 +21,7 @@ steps:
 - id: wire-container-protocol-runner
   title: 接入 container_reproduction 协议执行
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   execution:
     mode: sequential
@@ -32,20 +32,20 @@ steps:
       level: info
       message: 开始把 ExperimentProtocol.v1 的 container_reproduction entry 接入实际 container
         runner。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-27T04:05:48.332521'
       level: info
       message: 已接入显式 container_reproduction 协议：container 模式下优先执行 repro/container package
         script，缺失时返回结构化 environment_failed；baseline/ablation/proposed 使用同一协议 runner
         执行真实命令。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-27T04:05:48.332521'
     attempt_count: 2
   meta: {}
 - id: enforce-baseline-protocol-gate
   title: 缺 baseline 协议时阻断 final claims
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on:
   - wire-container-protocol-runner
   execution:
@@ -57,20 +57,20 @@ steps:
       level: info
       message: 开始收紧 final gate：缺 baseline 协议时即使 proposed/container 通过也不允许 final research
         claims。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-27T04:06:24.644455'
       level: info
       message: ResultReport 新增 experiment_protocol_incomplete gate：无 baseline runner
         为 blocking；无 ablation runner 为 warning。这样仅凭 host typecheck/container 脚本通过不会放行代码论文
         final claims。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-27T04:06:24.644455'
     attempt_count: 2
   meta: {}
 - id: add-container-protocol-tests
   title: 增加显式容器脚本与 baseline gate 测试
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on:
   - enforce-baseline-protocol-gate
   execution:
@@ -81,7 +81,7 @@ steps:
     - timestamp: '2026-05-27T04:06:38.400939'
       level: info
       message: 开始补充测试：显式协议脚本发现、缺 baseline gate、container reproduction e2e。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-27T04:20:46.942868'
       level: info
       message: 'Added and ran focused tests for code-to-paper protocol detection,
@@ -92,14 +92,14 @@ steps:
         npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/code-to-paper.test.ts
         test/paper/experiment-loop.test.ts test/paper/paperrun-execution.test.ts --timeout
         60000 passed, 12 tests / 62 assertions.'
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-27T04:20:46.942868'
     attempt_count: 2
   meta: {}
 - id: validate-paper-run-quality
   title: 重跑验证与质量报告
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on:
   - add-container-protocol-tests
   execution:
@@ -111,7 +111,7 @@ steps:
       level: info
       message: Starting validation of typecheck, live paper quality benchmark, and
         PaperRun artifact quality after protocol runner fixes.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-27T06:13:17.244824'
       level: info
       message: 'Completed validation and self-review. Evidence: full packages/opencode
@@ -124,7 +124,7 @@ steps:
         reproduction and final export; final scenario succeeded with SourceEvidenceManifest
         and final gate passed. Updated reports/live-paper-generation-review.md with
         qualitative assessment.'
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-27T06:13:17.244824'
     attempt_count: 2
   meta: {}

@@ -89,7 +89,7 @@ export function createPermissionState(input: ResearchPermissionInput | undefined
 }
 
 export function detectResourceSnapshot(now: string): ResearchResourceSnapshot {
-  const gpuHint = process.env.CUDA_VISIBLE_DEVICES || process.env.PAPER_FUCKER_GPU
+  const gpuHint = process.env.CUDA_VISIBLE_DEVICES || process.env.PAPERCODE_GPU
   return {
     detected_at: now,
     platform: process.platform,

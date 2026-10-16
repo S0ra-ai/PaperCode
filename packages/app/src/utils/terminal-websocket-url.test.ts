@@ -9,14 +9,14 @@ describe("terminalWebSocketURL", () => {
       directory: "/tmp/project",
       cursor: 0,
       sameOrigin: false,
-      username: "paper_fucker",
+      username: "papercode",
       password: "secret",
     })
 
     expect(url.protocol).toBe("ws:")
     expect(url.username).toBe("")
     expect(url.password).toBe("")
-    expect(url.searchParams.get("auth_token")).toBe(btoa("paper_fucker:secret"))
+    expect(url.searchParams.get("auth_token")).toBe(btoa("papercode:secret"))
   })
 
   test("omits query auth for same-origin saved credentials", () => {
@@ -26,7 +26,7 @@ describe("terminalWebSocketURL", () => {
       directory: "/tmp/project",
       cursor: 10,
       sameOrigin: true,
-      username: "paper_fucker",
+      username: "papercode",
       password: "secret",
     })
 
@@ -41,12 +41,12 @@ describe("terminalWebSocketURL", () => {
       directory: "/tmp/project",
       cursor: 10,
       sameOrigin: true,
-      username: "paper_fucker",
+      username: "papercode",
       password: "secret",
       authToken: true,
     })
 
     expect(url.protocol).toBe("wss:")
-    expect(url.searchParams.get("auth_token")).toBe(btoa("paper_fucker:secret"))
+    expect(url.searchParams.get("auth_token")).toBe(btoa("papercode:secret"))
   })
 })

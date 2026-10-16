@@ -49,8 +49,8 @@ function detectPlatformAndArch() {
 
 function findBinary() {
   const { platform, arch } = detectPlatformAndArch()
-  const packageName = `paper_fucker-${platform}-${arch}`
-  const binaryName = platform === "windows" ? "paper_fucker.exe" : "paper_fucker"
+  const packageName = `papercode-${platform}-${arch}`
+  const binaryName = platform === "windows" ? "papercode.exe" : "papercode"
 
   try {
     // Use require.resolve to find the package
@@ -80,7 +80,7 @@ async function main() {
     // On non-Windows platforms, just verify the binary package exists
     // Don't replace the wrapper script - it handles binary execution
     const { binaryPath } = findBinary()
-    const target = path.join(__dirname, "bin", ".paper_fucker")
+    const target = path.join(__dirname, "bin", ".papercode")
     if (fs.existsSync(target)) fs.unlinkSync(target)
     try {
       fs.linkSync(binaryPath, target)
@@ -89,7 +89,7 @@ async function main() {
     }
     fs.chmodSync(target, 0o755)
   } catch (error) {
-    console.error("Failed to setup paper_fucker binary:", error.message)
+    console.error("Failed to setup papercode binary:", error.message)
     process.exit(1)
   }
 }

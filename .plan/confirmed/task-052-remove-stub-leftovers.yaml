@@ -11,7 +11,7 @@ tags:
 depends_on:
 - task-051-live-benchmark-regression-pass
 description: Remove misleading Phase 1 stub/not_implemented naming from the current
-  paper_fucker runtime and Python research-tool surface now that the closed-loop PaperRun
+  papercode runtime and Python research-tool surface now that the closed-loop PaperRun
   implementation exists. Replace it with explicit blocking diagnostics and canonical
   DOCX generation tool names, while retaining authenticity checks that reject placeholder/synthetic
   facts.
@@ -40,7 +40,7 @@ steps:
       level: info
       message: 'Found two current-code cleanup targets: packages/opencode/src/paper/research/runtime/guards.ts
         still exposes Phase 1 not_implemented stage stubs via ResearchStageStub/createNotImplementedStageStub/phaseOneStageStubs
-        and tests assert that wording; research-tools/src/paper_fucker_tools/mcp_tools.py
+        and tests assert that wording; research-tools/src/papercode_tools/mcp_tools.py
         exposes docx_generation_stub as the canonical registry entry. Historical reports
         and CHANGELOG references are provenance only and will remain documented as
         historical.'
@@ -146,7 +146,7 @@ outputs:
   description: Tests assert blocking diagnostics and placeholder rejection without
     Phase 1 stub wording.
 - type: file
-  path: research-tools/src/paper_fucker_tools/mcp_tools.py
+  path: research-tools/src/papercode_tools/mcp_tools.py
   description: Canonical DOCX generation tool name replaces stub suffix.
 - type: file
   path: research-tools/tests/test_tools.py

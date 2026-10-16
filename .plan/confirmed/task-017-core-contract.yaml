@@ -10,14 +10,14 @@ tags:
 - events
 - artifacts
 depends_on:
-- task-004-brand-paper-fucker
-description: Define the first authoritative paper_fucker research contracts before
+- task-004-brand-papercode
+description: Define the first authoritative papercode research contracts before
   runtime, tool bridge, or preview implementation. This task implements the planned
   task-005a role using a TaskFlow-valid ID. It fixes schemas/research/ as the schema
   source, JSON Schema as the source of truth, generated TypeScript and Python types
   committed to the repo, schema_version plus runtime migrations, JSON/JSONL files
   as fact sources, SQLite as rebuildable indexes, and packages/server ownership of
-  paper_fucker research contracts and server-side runtime surfaces.
+  papercode research contracts and server-side runtime surfaces.
 execution:
   mode: sequential
   retry: 0
@@ -29,7 +29,7 @@ steps:
   depends_on: []
   description: Create the schemas/research/ contract scope, generated TypeScript path
     packages/server/src/research/generated/, and generated Python Pydantic v2 path
-    research-tools/src/paper_fucker_tools/generated/.
+    research-tools/src/papercode_tools/generated/.
   execution:
     mode: sequential
     retry: 0
@@ -41,24 +41,24 @@ steps:
         JSON Schema will be the source under schemas/research; TypeScript runtime
         support will live in packages/server/src/research; generated TypeScript output
         will be written to packages/server/src/research/generated; Python Pydantic
-        v2 models will be generated under research-tools/src/paper_fucker_tools/generated.
+        v2 models will be generated under research-tools/src/papercode_tools/generated.
       agent: codex
     - timestamp: '2026-05-08T15:57:13.120035'
       level: info
       message: Created schemas/research/v1.schema.json as the JSON Schema source of
-        truth. Created first-party @paper-fucker/server package under packages/server,
+        truth. Created first-party @papercode/server package under packages/server,
         with generated TypeScript contracts at packages/server/src/research/generated/contracts.ts.
-        Created generated Pydantic v2 models at research-tools/src/paper_fucker_tools/generated/research_contracts.py
-        and research-tools package metadata. Moved new paper_fucker domain code out
+        Created generated Pydantic v2 models at research-tools/src/papercode_tools/generated/research_contracts.py
+        and research-tools package metadata. Moved new papercode domain code out
         of packages/opencode; packages/opencode remains only the upstream-derived
         CLI/agent substrate.
       agent: codex
     - timestamp: '2026-05-08T15:59:42.799591'
       level: info
-      message: 'Architecture correction after user feedback: the authoritative paper_fucker
+      message: 'Architecture correction after user feedback: the authoritative papercode
         research contract/runtime package is packages/server, not packages/opencode.
         packages/opencode remains the upstream-derived CLI/agent substrate only; new
-        domain code is in @paper-fucker/server.'
+        domain code is in @papercode/server.'
       agent: codex
     last_run: '2026-05-08T15:57:13.120035'
     attempt_count: 2
@@ -70,7 +70,7 @@ steps:
   depends_on:
   - task-017-step-01-schema-scope
   description: Specify run-local JSON/JSONL fact files, run-local index.sqlite, and
-    global ~/.paper_fucker/index.sqlite as rebuildable indexes.
+    global ~/.papercode/index.sqlite as rebuildable indexes.
   execution:
     mode: sequential
     retry: 0
@@ -85,7 +85,7 @@ steps:
       level: info
       message: Implemented the storage contract in packages/server/src/research/storage.ts.
         run.json and JSONL fact files are authoritative; run-local index.sqlite and
-        global ~/.paper_fucker/index.sqlite are rebuildable derived indexes. Tests
+        global ~/.papercode/index.sqlite are rebuildable derived indexes. Tests
         rebuild both indexes from JSON/JSONL facts and assert SQLite row counts.
       agent: codex
     last_run: '2026-05-08T15:57:24.446640'
@@ -145,7 +145,7 @@ steps:
         explicit ResearchContractMigrationError failures for missing/legacy/unsupported
         schema_version values, generated Pydantic v2 models under research-tools,
         and OpenTelemetry API spans through packages/server/src/research/telemetry.ts.
-        Validation and index rebuild functions now emit paper_fucker.research spans
+        Validation and index rebuild functions now emit papercode.research spans
         when a tracer provider is configured.
       agent: codex
     last_run: '2026-05-08T15:57:34.773476'
@@ -188,7 +188,7 @@ outputs:
   path: packages/server/src/research/generated
   description: Generated TypeScript contract types
 - type: directory
-  path: research-tools/src/paper_fucker_tools/generated
+  path: research-tools/src/papercode_tools/generated
   description: Generated Pydantic v2 contract models
 - type: report
   path: reports/core-contract-validation.md

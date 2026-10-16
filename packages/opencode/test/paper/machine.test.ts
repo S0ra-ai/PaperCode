@@ -18,7 +18,7 @@ afterEach(async () => {
 })
 
 async function tempContext() {
-  const root = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-machine-"))
+  const root = await mkdtemp(path.join(os.tmpdir(), "papercode-machine-"))
   cleanup.push(root)
   const workspace = path.join(root, "workspace")
   const home = path.join(root, "home")
@@ -42,11 +42,11 @@ describe("Paper machine profile", () => {
     expect(changedWorkspace).not.toBe(original)
     expect(changedWorkspace.profile.workspace).toBe(second.workspace)
     expect(changedWorkspace.profile.disk?.path).toBe(second.workspace)
-    expect(changedWorkspace.profile.default_run_root).toBe(path.join(first.home, ".paper_fucker", "runs"))
+    expect(changedWorkspace.profile.default_run_root).toBe(path.join(first.home, ".papercode", "runs"))
 
     const changedHome = await inspectPaperMachineProfile({ workspace: second.workspace, home: second.home })
     expect(changedHome).not.toBe(changedWorkspace)
-    expect(changedHome.profile.default_run_root).toBe(path.join(second.home, ".paper_fucker", "runs"))
+    expect(changedHome.profile.default_run_root).toBe(path.join(second.home, ".papercode", "runs"))
     expect(changedHome.profile.disk?.path).toBe(second.workspace)
 
     const refreshed = await inspectPaperMachineProfile({ workspace: second.workspace, home: second.home, refresh: true })
@@ -64,7 +64,7 @@ describe("Paper machine profile", () => {
     expect(result.profile.schema_version).toBe("PaperMachineProfile.v1")
     expect(result.environment.schema_version).toBe("PaperExperimentEnvironmentStatus.v1")
     expect(result.profile.workspace).toBe(path.resolve(workspace))
-    expect(result.profile.default_run_root).toContain(".paper_fucker")
+    expect(result.profile.default_run_root).toContain(".papercode")
     expect(result.profile.gpu.mode).toBe("cpu-only")
     expect(result.environment.status).toBe("available")
     expect(result.environment.optional_missing.map((item) => item.id)).toContain("docker")

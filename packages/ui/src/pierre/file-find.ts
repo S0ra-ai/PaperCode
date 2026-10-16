@@ -79,8 +79,8 @@ function installShortcuts() {
 function clearHighlightFind() {
   const api = (globalThis as { CSS?: { highlights?: { delete: (name: string) => void } } }).CSS?.highlights
   if (!api) return
-  api.delete("paper-fucker-find")
-  api.delete("paper-fucker-find-current")
+  api.delete("papercode-find")
+  api.delete("papercode-find-current")
 }
 
 function supportsHighlights() {
@@ -296,14 +296,14 @@ export function createFileFind(opts: CreateFileFindOptions) {
     const Highlight = (globalThis as unknown as { Highlight?: any }).Highlight
     if (!api || typeof Highlight !== "function") return false
 
-    api.delete("paper-fucker-find")
-    api.delete("paper-fucker-find-current")
+    api.delete("papercode-find")
+    api.delete("papercode-find-current")
 
     const active = ranges[currentIndex]
-    if (active) api.set("paper-fucker-find-current", new Highlight(active))
+    if (active) api.set("papercode-find-current", new Highlight(active))
 
     const rest = ranges.filter((_, i) => i !== currentIndex)
-    if (rest.length > 0) api.set("paper-fucker-find", new Highlight(...rest))
+    if (rest.length > 0) api.set("papercode-find", new Highlight(...rest))
     return true
   }
 

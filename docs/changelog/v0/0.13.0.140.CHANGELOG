@@ -1,4 +1,4 @@
-:project       paper_fucker - 可验证论文研究自动化系统
+:project       papercode - 可验证论文研究自动化系统
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          0.13.0.140 开发历史归档
@@ -13,9 +13,9 @@
             - fix(models): 从模型工作台注册 ChatGPT 或 GitHub Copilot 订阅时，只展示对应 provider 的授权入口
             - fix(models): 指定 provider 授权不再暴露 Other/custom 入口，避免订阅登录流程混杂
         :release
-            - chore(install): 安装脚本、GitHub Action 示例、更新检查和 MCP OAuth client_uri 指向 ZhuchenZhong/paper_fucker
-            - chore(publish): Arch/Homebrew 发布元数据使用 Paper Fucker 研究工作台描述，并改为 MPL-2.0 许可证
-            - chore(nix): Nix 包 homepage 指向 ZhuchenZhong/paper_fucker，license 改为 lib.licenses.mpl20
+            - chore(install): 安装脚本、GitHub Action 示例、更新检查和 MCP OAuth client_uri 指向 ZhuchenZhong/papercode
+            - chore(publish): Arch/Homebrew 发布元数据使用 PaperCode 研究工作台描述，并改为 MPL-2.0 许可证
+            - chore(nix): Nix 包 homepage 指向 ZhuchenZhong/papercode，license 改为 lib.licenses.mpl20
         :test
             - test(tui): provider-options 覆盖指定 provider 过滤，不暴露 Other/custom 入口
         :changelog

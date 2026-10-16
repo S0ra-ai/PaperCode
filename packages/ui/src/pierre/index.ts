@@ -62,11 +62,11 @@ const unsafeCSS = `
   background-color: var(--diffs-bg-selection-text);
 }
 
-::highlight(paper-fucker-find) {
+::highlight(papercode-find) {
   background-color: rgb(from var(--surface-warning-base) r g b / 0.35);
 }
 
-::highlight(paper-fucker-find-current) {
+::highlight(papercode-find-current) {
   background-color: rgb(from var(--surface-warning-strong) r g b / 0.55);
 }
 
@@ -161,7 +161,7 @@ ${lineCommentStyles}
 
 export function createDefaultOptions<T>(style: FileDiffOptions<T>["diffStyle"]) {
   return {
-    theme: "paper_fucker",
+    theme: "papercode",
     themeType: "system",
     disableLineNumbers: false,
     overflow: "wrap",

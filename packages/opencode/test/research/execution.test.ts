@@ -141,7 +141,7 @@ describe("explicit workspace experiment protocols", () => {
 
 describe("observed experiment metrics", () => {
   test("retains scientific values including zero, negative and exponents", () => {
-    expect(parseExperimentMetrics('PAPER_FUCKER_METRICS {"accuracy":0}', spec, "accuracy")[0]?.value).toBe(0)
+    expect(parseExperimentMetrics('PAPERCODE_METRICS {"accuracy":0}', spec, "accuracy")[0]?.value).toBe(0)
     expect(parseExperimentMetrics("loss=-1.2e-3", spec, "loss")[0]?.value).toBe(-0.0012)
     expect(parseExperimentMetrics('{"metrics":[{"name":"accuracy","value":0.37}]}', spec, "accuracy")[0]?.value).toBe(
       0.37,

@@ -2,7 +2,7 @@ id: task-106-skill-mcp-bundle-intake
 title: Skill MCP bundle intake for 0.10.3-dev
 status: done
 priority: high
-owner: codex-paper-fucker
+owner: codex-papercode
 tags:
 - paper
 - skills
@@ -19,9 +19,9 @@ steps:
 - id: inspect-skill-assets
   title: Inspect newly added skill assets
   status: done
-  owner: codex-paper-fucker
+  owner: codex-papercode
   depends_on: []
-  description: Review .paper_fucker/skills/architecture-diagram and .paper_fucker/skills/paper-framework-figure-studio-pro
+  description: Review .papercode/skills/architecture-diagram and .papercode/skills/paper-framework-figure-studio-pro
     metadata without overwriting user-provided content.
   execution:
     mode: sequential
@@ -30,29 +30,29 @@ steps:
     logs:
     - timestamp: '2026-05-13T01:43:22.522025'
       level: info
-      message: Inspected .paper_fucker/skills/architecture-diagram and .paper_fucker/skills/paper-framework-figure-studio-pro.
+      message: Inspected .papercode/skills/architecture-diagram and .papercode/skills/paper-framework-figure-studio-pro.
         architecture-diagram exposes SKILL.md with MIT notice; figure studio exposes
         metadata.json, SKILL.md, LICENSE, templates, examples, and subtype atlas assets
         with MIT-0 metadata. Noted bb-browser as managed capability rather than vendored
         product source.
-      agent: codex-paper-fucker
+      agent: codex-papercode
     - timestamp: '2026-05-13T01:43:29.333435'
       level: warning
       message: Git Flow branch preparation is deferred because the repository was
         already dirty on develop with pre-existing TaskFlow and skill intake changes;
         continuing through TaskFlow locks/logs without destructive cleanup.
-      agent: codex-paper-fucker
+      agent: codex-papercode
     last_run: '2026-05-13T01:43:22.522025'
     attempt_count: 2
   meta: {}
 - id: register-paper-capabilities
   title: Register paper-relevant managed capabilities
   status: done
-  owner: codex-paper-fucker
+  owner: codex-papercode
   depends_on:
   - inspect-skill-assets
   description: Add architecture diagram, figure studio, and bb-browser managed capability
-    semantics to Paper Fucker capability/doctor surfaces.
+    semantics to PaperCode capability/doctor surfaces.
   execution:
     mode: sequential
     retry: 0
@@ -65,14 +65,14 @@ steps:
         to crawler/data acquisition pack, renamed user-facing local tool titles away
         from OpenCode, and added PaperManagedCapability inspection through inspectPaperManagedCapabilities.
         Focused run-api test passed after registration.
-      agent: codex-paper-fucker
+      agent: codex-papercode
     last_run: '2026-05-13T01:44:14.171579'
     attempt_count: 2
   meta: {}
 - id: notice-license-boundaries
   title: Document NOTICE and boundary notes
   status: done
-  owner: codex-paper-fucker
+  owner: codex-papercode
   depends_on:
   - register-paper-capabilities
   description: Update NOTICE/README-facing notes for third-party skill origins, license
@@ -88,13 +88,13 @@ steps:
         boundaries for architecture-diagram-generator (MIT), paper-framework-figure-studio-pro
         (MIT-0), and bb-browser as an optional managed capability that is diagnosed
         but not vendored as first-party source.
-      agent: codex-paper-fucker
+      agent: codex-papercode
     last_run: '2026-05-13T01:44:23.687475'
     attempt_count: 2
   meta: {}
 outputs:
 - type: directory
-  path: .paper_fucker/skills
+  path: .papercode/skills
   description: Tracked Paper-managed skill bundle assets
 - type: file
   path: packages/opencode/src/paper/capability-pack.ts

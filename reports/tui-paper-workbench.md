@@ -1,6 +1,6 @@
 # TUI Paper Workbench Report
 
-> Historical path note: this report predates task-032. Any `packages/server` or `@paper-fucker/server` paths below are provenance only; the current paper_fucker runtime authority is `packages/opencode/src/paper`, and `packages/server` is intentionally absent.
+> Historical path note: this report predates task-032. Any `packages/server` or `@papercode/server` paths below are provenance only; the current papercode runtime authority is `packages/opencode/src/paper`, and `packages/server` is intentionally absent.
 
 - Task: `task-029-tui-paper-workbench`
 - Version: `0.1.26-dev`
@@ -9,7 +9,7 @@
 
 ## Scope
 
-This task moves the OpenCode-derived TUI toward a paper_fucker research workbench instead of a generic chat home screen.
+This task moves the OpenCode-derived TUI toward a papercode research workbench instead of a generic chat home screen.
 
 ## Implemented
 
@@ -19,7 +19,7 @@ This task moves the OpenCode-derived TUI toward a paper_fucker research workbenc
 - Added standard run panels for stage graph, events, Source Ledger, Claim Ledger, experiment status, and model/tool/cost diagnostics.
 - Added run controls for pause, resume, preview, export, and capability installation.
 - Updated OpenCode TUI home placeholders to accept paper topics, code paths, paper materials, datasets, and experiment logs.
-- Added first-screen `paper_fucker 论文工作台` signal while preserving plugin slots and prompt behavior.
+- Added first-screen `papercode 论文工作台` signal while preserving plugin slots and prompt behavior.
 - Updated README and colon-history CHANGELOG to version `0.1.26-dev`.
 
 ## Notes

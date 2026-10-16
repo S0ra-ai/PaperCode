@@ -40,7 +40,7 @@ describe("PaperRun Agent Team Fabric", () => {
       capabilities: ["read", "grep", "paper.memory"],
       permissions: {
         allowed_tool_names: ["read", "shell"],
-        allowed_paths: ["packages/opencode/src/paper", ".paper_fucker/local"],
+        allowed_paths: ["packages/opencode/src/paper", ".papercode/local"],
         data_egress: "allow_authorized_paths",
         network_allowed: true,
       },

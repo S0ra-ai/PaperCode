@@ -12,9 +12,9 @@ if (-not $Directory) {
     $Directory = $RepoRoot
 }
 
-$Exe = Join-Path $RepoRoot "paper_fucker.exe"
+$Exe = Join-Path $RepoRoot "papercode.exe"
 if (-not (Test-Path -LiteralPath $Exe)) {
-    $Exe = "paper_fucker.exe"
+    $Exe = "papercode.exe"
 }
 
 if (-not $SkipLogin) {

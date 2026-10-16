@@ -121,12 +121,12 @@ export async function runHostExploration(
   return withSpan(
     "research.experiments.host_exploration",
     {
-      "paper_fucker.research.experiment.plan_id": plan.plan_id,
+      "papercode.research.experiment.plan_id": plan.plan_id,
     },
     async (span) => {
       const runs = []
       for (const spec of plannedExperimentSpecs(plan)) runs.push(await executeSpec(plan, spec, "host", runner, options))
-      span.setAttribute("paper_fucker.research.experiments.runs", runs.length)
+      span.setAttribute("papercode.research.experiments.runs", runs.length)
       return runs
     },
   )
@@ -141,7 +141,7 @@ export async function runContainerReproduction(
   return withSpan(
     "research.experiments.container_reproduction",
     {
-      "paper_fucker.research.experiment.plan_id": plan.plan_id,
+      "papercode.research.experiment.plan_id": plan.plan_id,
     },
     async (span) => {
       const runnableIds = new Set(hostRuns.filter((run) => run.status === "succeeded").map((run) => run.experiment_id))
@@ -149,7 +149,7 @@ export async function runContainerReproduction(
       for (const spec of plannedExperimentSpecs(plan).filter((item) => runnableIds.has(item.experiment_id))) {
         runs.push(await executeSpec(plan, spec, "container", runner, options))
       }
-      span.setAttribute("paper_fucker.research.experiments.container_runs", runs.length)
+      span.setAttribute("papercode.research.experiments.container_runs", runs.length)
       return runs
     },
   )

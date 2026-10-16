@@ -1,5 +1,5 @@
 import { OpenApi } from "effect/unstable/httpapi"
-import { PaperFuckerHttpApi } from "./api"
+import { PaperCodeHttpApi } from "./api"
 
 type OpenApiParameter = {
   name: string
@@ -89,7 +89,7 @@ const PathParameterSchemas = {
 
 const LegacyComponentDescriptions = {
   LogLevel: "Log level",
-  ServerConfig: "Server configuration for paper_fucker serve and web commands",
+  ServerConfig: "Server configuration for papercode serve and web commands",
   LayoutConfig: "@deprecated Always uses stretch layout.",
 } satisfies Record<string, string>
 
@@ -438,7 +438,7 @@ function fixSelfReferencingComponents(spec: OpenApiSpec) {
     }
   }
   // Simplest fix: generate the raw spec (without transform) to get correct schemas
-  const raw = OpenApi.fromApi(PaperFuckerHttpApi) as unknown as OpenApiSpec
+  const raw = OpenApi.fromApi(PaperCodeHttpApi) as unknown as OpenApiSpec
   const rawSchemas = raw.components?.schemas
   if (!rawSchemas) return
   for (const name of selfRefs) {
@@ -535,11 +535,11 @@ function pathParameterSchema(route: string, name: string) {
   return undefined
 }
 
-export const PublicApi = PaperFuckerHttpApi.annotateMerge(
+export const PublicApi = PaperCodeHttpApi.annotateMerge(
   OpenApi.annotations({
-    title: "paper_fucker",
+    title: "papercode",
     version: "1.0.0",
-    description: "paper_fucker api",
+    description: "papercode api",
     transform: matchLegacyOpenApi,
   }),
 )

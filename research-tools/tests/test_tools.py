@@ -10,9 +10,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from paper_fucker_tools.external_tools import discover_external_tools, save_tool_link
-from paper_fucker_tools.mcp_tools import TOOL_REGISTRY, call_tool
-from paper_fucker_tools.models import ToolResult
+from papercode_tools.external_tools import discover_external_tools, save_tool_link
+from papercode_tools.mcp_tools import TOOL_REGISTRY, call_tool
+from papercode_tools.models import ToolResult
 
 
 class ToolDiscoveryTest(unittest.TestCase):
@@ -66,7 +66,7 @@ class StructuredToolTest(unittest.TestCase):
                 "docx_generation",
                 {
                     "output_path": str(output),
-                    "title": "paper_fucker draft",
+                    "title": "papercode draft",
                     "paragraphs": ["Claim-ledger backed draft paragraph."],
                 },
             )
@@ -77,7 +77,7 @@ class StructuredToolTest(unittest.TestCase):
 
 class MCPServerAdapterTest(unittest.TestCase):
     def test_mcp_server_registers_each_tool_with_its_own_handler(self) -> None:
-        import paper_fucker_tools.mcp_server as mcp_server
+        import papercode_tools.mcp_server as mcp_server
 
         class FakeFastMCP:
             def __init__(self, name: str) -> None:

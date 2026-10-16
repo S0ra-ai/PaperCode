@@ -41,8 +41,8 @@ export async function recordExportBundle(
   return withSpan(
     "research.export.record_bundle",
     {
-      "paper_fucker.research.export.mode": input.mode,
-      "paper_fucker.research.draft.id": input.draft.draft_id,
+      "papercode.research.export.mode": input.mode,
+      "papercode.research.draft.id": input.draft.draft_id,
     },
     async (span) => {
       const run = await loadResearchRun(runDir)
@@ -103,8 +103,8 @@ export async function recordExportBundle(
         },
         options,
       )
-      span.setAttribute("paper_fucker.research.export.files", files.length)
-      span.setAttribute("paper_fucker.research.export.diagnostics", bundle.manifest.tool_diagnostics.length)
+      span.setAttribute("papercode.research.export.files", files.length)
+      span.setAttribute("papercode.research.export.diagnostics", bundle.manifest.tool_diagnostics.length)
       return { bundle, artifact }
     },
   )

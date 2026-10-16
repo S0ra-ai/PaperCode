@@ -108,7 +108,7 @@ const failedRenderers: ExportRenderer = {
 
 describe("export bundles", () => {
   test("records final Markdown/LaTeX/PDF/DOCX export when final gate passed", async () => {
-    const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-export-test-"))
+    const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-export-test-"))
     try {
       const workspace = path.join(dir, "workspace")
       const home = path.join(dir, "home")
@@ -156,7 +156,7 @@ describe("export bundles", () => {
   })
 
   test("allows forced draft export with visible failed checks", async () => {
-    const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-forced-export-test-"))
+    const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-forced-export-test-"))
     try {
       const workspace = path.join(dir, "workspace")
       const home = path.join(dir, "home")
@@ -185,7 +185,7 @@ describe("export bundles", () => {
   })
 
   test("records renderer diagnostics for failed PDF and DOCX exports", async () => {
-    const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-export-diagnostics-test-"))
+    const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-export-diagnostics-test-"))
     try {
       const workspace = path.join(dir, "workspace")
       const home = path.join(dir, "home")
@@ -218,7 +218,7 @@ describe("export bundles", () => {
   })
 
   test("includes a complete manifest with source artifact refs", async () => {
-    const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-export-manifest-test-"))
+    const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-export-manifest-test-"))
     try {
       const workspace = path.join(dir, "workspace")
       const home = path.join(dir, "home")

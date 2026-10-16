@@ -1,4 +1,4 @@
-:project       paper_fucker - 可验证论文研究自动化系统
+:project       papercode - 可验证论文研究自动化系统
 :author        k1d (https://github.com/ZhuchenZhong)
 :repo
 :desc          0.9.x 历史变更归档，主 CHANGELOG 仅保留当前活跃版本线
@@ -12,7 +12,7 @@
         - feat(models): Paper 模型库存合并 OpenCode 内置 provider/model 候选，GitHub Copilot 等底座 provider 可进入 Paper allowlist 并作为主决策模型
         - feat(tui): /models 保存 allowlist、主决策模型或自定义 endpoint 后通知首页刷新，不再停留在未配置模型
         - feat(workspace): 新增 /folder（别名 /workspace、/cwd）选择当前对话工作目录，只影响当前 TUI 会话的新 PaperRun
-        - fix(api): PaperRun 创建与 paper API 使用 PAPER_FUCKER_HOME/PAPER_FUCKER_TEST_HOME，避免读取错误的全局模型库存
+        - fix(api): PaperRun 创建与 paper API 使用 PAPERCODE_HOME/PAPERCODE_TEST_HOME，避免读取错误的全局模型库存
         :src
             - packages/opencode/src/paper/model-inventory.ts - built-in provider candidates and persisted allowlist merge
             - packages/opencode/src/server/routes/instance/httpapi/handlers/paper.ts - provider candidate merge and Paper home propagation
@@ -58,7 +58,7 @@
         :verification
             - npx --yes bun@1.3.13 --cwd packages/opencode test test/cli/tui/paper-workbench.test.ts test/cli/tui/paper-visible-commands.test.ts test/paper/model-discovery.test.ts passed, 18 tests
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
-            - bun run build passed and linked root paper_fucker.exe
+            - bun run build passed and linked root papercode.exe
 
     0.9.2-dev - 2026/05/12 (86722f9) [develop]
         :brief 修复 /models 模型工作台和 Shift+Tab 研究深度切换
@@ -110,7 +110,7 @@
             - python -m unittest discover -s research-tools/tests passed, 18 tests
 
     0.9.0-dev - 2026/05/12 (f04c7c8) [develop]
-        :brief 开发态重置与 Paper Fucker TUI/实时监控重构
+        :brief 开发态重置与 PaperCode TUI/实时监控重构
         - feat(tui): 首页改为中文 PaperRun 入口，移除 Build/Plan、Ask anything、CLI flag 示例和旧 agents/commands 提示
         - feat(models): /models 成为模型工作台入口，隐藏 /connect、旧模型切换和 provider fallback，并在无配置时显示未配置模型
         - feat(environment): 新增 PaperEnvironmentStatus，在 TUI 中展示模型、MCP、Skill、Pandoc、LaTeX、Docker、Python、Preview 和 Nature skill 状态
@@ -118,7 +118,7 @@
         - chore(commands): 新增 PaperVisibleCommandRegistry，收口用户可见命令并隐藏旧 OpenCode 聊天/session/agent/variant/订阅入口
         - docs(readme): README 改为开发态 TUI-first 对外说明，CLI 和 init/doctor 不再作为主流程
         :src
-            - packages/opencode/src/cli/cmd/tui/app.tsx - 隐藏旧 OpenCode 用户命令并接入 Paper Fucker 模型工作台
+            - packages/opencode/src/cli/cmd/tui/app.tsx - 隐藏旧 OpenCode 用户命令并接入 PaperCode 模型工作台
             - packages/opencode/src/cli/cmd/tui/component/prompt/index.tsx - 中文 PaperRun 输入、未配置模型引导和底部提示
             - packages/opencode/src/cli/cmd/tui/routes/home.tsx - 首页自然语言研究输入示例
             - packages/opencode/src/cli/cmd/tui/routes/paper/workbench.ts - PaperEnvironmentStatus、文件材料分类和 PaperRun SSE monitor
@@ -141,7 +141,7 @@
         - feat(model): 新增 PaperModelInventory，记录 provider/model 候选池、allowlist、主决策模型、role overrides、smoke 状态和成本/上下文提示
         - feat(router): PaperRun 通过 allowlist 动态选择 planner、writer、reviewer、citation、subagent 等角色模型，强制指定未授权模型时生成 pause question
         - feat(api): 新增 /paper/model-inventory 与 /paper/model-routing/decision，并支持 provider discovery persist 后写入模型候选池
-        - feat(tui): 中文 TUI 新增 Paper Fucker 模型工作台入口，右侧栏显示主决策模型、可用模型数、最近路由和 role 状态
+        - feat(tui): 中文 TUI 新增 PaperCode 模型工作台入口，右侧栏显示主决策模型、可用模型数、最近路由和 role 状态
         - feat(skill): init/doctor 检查并幂等安装内置 nature-paper skill 到 Codex 与 agents skill 目录
         - docs(readme): README 更新为 0.8.9 pre-release 稳定状态，补充模型工作台、Nature skill 与内置能力说明
         - chore(changelog): root CHANGELOG 收口 0.8.5-dev 巨型条目，禁止 active changelog 出现 :commits 聚合块、异常缩进和超长聚合项
@@ -179,37 +179,37 @@
         :verification
             - npx --yes bun@1.3.13 --cwd packages/opencode test test/init/init.test.ts test/cli/public-surface.test.ts passed, 13 tests
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
-            - bun run build passed; root paper_fucker.exe linked and --version returned 0.8.8
-            - paper_fucker.exe init --home .\\tmp\\init-ux-smoke-home printed Chinese summary without DB migration noise
-            - paper_fucker.exe init doctor --home .\\tmp\\init-ux-smoke-home printed Chinese health summary without DB migration noise
-            - paper_fucker.exe init --home .\\tmp\\init-ux-json-home --json preserved full machine-readable JSON output
+            - bun run build passed; root papercode.exe linked and --version returned 0.8.8
+            - papercode.exe init --home .\\tmp\\init-ux-smoke-home printed Chinese summary without DB migration noise
+            - papercode.exe init doctor --home .\\tmp\\init-ux-smoke-home printed Chinese health summary without DB migration noise
+            - papercode.exe init --home .\\tmp\\init-ux-json-home --json preserved full machine-readable JSON output
 
     0.8.7 - 2026/05/12 (d0b7dd1) [pre-release]
         :brief 修复 CLI 用户可见版本面跟随 CHANGELOG
-        - fix(version): 构建时从根 CHANGELOG :version 注入 PAPER_FUCKER_VERSION
-        - fix(cli): paper_fucker --version、debug 与 TUI sidebar 使用产品版本，不再暴露内部预览构建号
+        - fix(version): 构建时从根 CHANGELOG :version 注入 PAPERCODE_VERSION
+        - fix(cli): papercode --version、debug 与 TUI sidebar 使用产品版本，不再暴露内部预览构建号
         - test(cli): public surface 增加产品版本来源回归检查
         :src
             - packages/core/src/installation/version.ts - 新增 ProductVersion，保留 InstallationVersion 作为内部构建版本
-            - packages/opencode/script/build.ts - 解析根 CHANGELOG 并注入 PAPER_FUCKER_VERSION
+            - packages/opencode/script/build.ts - 解析根 CHANGELOG 并注入 PAPERCODE_VERSION
             - packages/opencode/src/index.ts - CLI --version 使用 ProductVersion
             - packages/opencode/src/cli/cmd/debug/index.ts - debug 同时输出产品版本与构建版本
             - packages/opencode/src/cli/cmd/tui/routes/session/sidebar.tsx - TUI footer 显示产品版本
         :verification
             - npx --yes bun@1.3.13 --cwd packages/opencode test test/cli/public-surface.test.ts test/init/init.test.ts passed, 12 tests
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
-            - bun run build passed; build smoke paper_fucker --version returned 0.8.7 after CHANGELOG/README sync
-            - paper_fucker.exe init --home .\\tmp\\init-version-smoke-home passed with bounded defaults
+            - bun run build passed; build smoke papercode --version returned 0.8.7 after CHANGELOG/README sync
+            - papercode.exe init --home .\\tmp\\init-version-smoke-home passed with bounded defaults
 
     0.8.6 - 2026/05/12 (e0d3c8a) [pre-release]
         :brief 修复首次运行入口、品牌字形与 provider 订阅残留
-        - fix(tui): Paper Fucker TUI ASCII 字形修正为清晰 PAPER，不再显示 PAPEE/Pepee 误读字形
+        - fix(tui): PaperCode TUI ASCII 字形修正为清晰 PAPER，不再显示 PAPEE/Pepee 误读字形
         - fix(provider): TUI 与 embedded Web provider 列表隐藏 opencode/opencode-go 订阅入口，移除 Zen/Go upsell 弹窗和订阅文案
-        - fix(init): paper_fucker init 默认使用 bounded access，init 与 init --yes 都不再要求 Full Access 风险确认
-        - docs(readme): Windows 源码编译后的首次初始化示例改为直接运行 .\paper_fucker.exe init
+        - fix(init): papercode init 默认使用 bounded access，init 与 init --yes 都不再要求 Full Access 风险确认
+        - docs(readme): Windows 源码编译后的首次初始化示例改为直接运行 .\papercode.exe init
         - test(init): 覆盖默认 bounded 初始化和 public surface 订阅残留扫描
         :src
-            - packages/opencode/src/cli/logo.ts - TUI Paper Fucker pixel logo 字形
+            - packages/opencode/src/cli/logo.ts - TUI PaperCode pixel logo 字形
             - packages/opencode/src/cli/cmd/tui/component/dialog-provider.tsx - provider connect 列表过滤订阅 provider
             - packages/opencode/src/cli/cmd/tui/routes/session/index.tsx - 移除 Go upsell 触发逻辑
             - packages/opencode/src/session/retry.ts - provider limit 改为中性诊断
@@ -218,7 +218,7 @@
             - packages/app/src/hooks/use-providers.ts - embedded Web UI 隐藏订阅 provider
             - packages/app/src/components/*.tsx - 移除 OpenCode Zen/Go 用户可见订阅入口
         :doc
-            - README.md - 首次初始化命令改为 .\paper_fucker.exe init
+            - README.md - 首次初始化命令改为 .\papercode.exe init
             - docs/internal/README.md - README 维护规则改为 init 必须安全默认可直接完成
         :test
             - packages/opencode/test/init/init.test.ts - 默认 bounded init 回归测试
@@ -226,7 +226,7 @@
         :verification
             - npx --yes bun@1.3.13 --cwd packages/opencode test test/init/init.test.ts test/cli/public-surface.test.ts passed: 11 pass, 0 fail
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
-            - bun run build passed and regenerated root paper_fucker.exe
-            - ./paper_fucker.exe --help passed and shows Paper Fucker
-            - ./paper_fucker.exe init --home ./tmp/init-smoke-home-2 passed with bounded access and no Full Access ack
+            - bun run build passed and regenerated root papercode.exe
+            - ./papercode.exe --help passed and shows PaperCode
+            - ./papercode.exe init --home ./tmp/init-smoke-home-2 passed with bounded access and no Full Access ack
             - rg subscription/Zen/Go/PAPEE public surface scan passed except negative-test assertions

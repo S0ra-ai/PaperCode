@@ -78,7 +78,7 @@ steps:
   owner: codex
   depends_on:
   - paper-workbench-ux-flow-step-02-copy
-  description: Update README to explain the actual Paper Fucker workflow from launch
+  description: Update README to explain the actual PaperCode workflow from launch
     to export.
   execution:
     mode: sequential

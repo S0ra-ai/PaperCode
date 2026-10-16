@@ -77,7 +77,7 @@ async function writeOrchestratorState(runDir: string, state: OrchestratorSnapsho
 export async function startAutomaticResearchRun(input: OrchestratorRunInput, options?: ResearchRuntimeOptions) {
   return withSpan(
     "research.orchestrator.run",
-    { "paper_fucker.research.run_dir": input.run_dir },
+    { "papercode.research.run_dir": input.run_dir },
     async (span) => {
       const status = await getResearchRunStatus(input.run_dir)
       let snapshot: OrchestratorSnapshot = {
@@ -184,8 +184,8 @@ export async function startAutomaticResearchRun(input: OrchestratorRunInput, opt
         )
       }
       await writeOrchestratorState(input.run_dir, snapshot, options)
-      span.setAttribute("paper_fucker.research.run_id", status.run.run_id)
-      span.setAttribute("paper_fucker.research.orchestrator.paused", snapshot.paused)
+      span.setAttribute("papercode.research.run_id", status.run.run_id)
+      span.setAttribute("papercode.research.orchestrator.paused", snapshot.paused)
       return snapshot
     },
   )

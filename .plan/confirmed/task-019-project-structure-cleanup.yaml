@@ -50,7 +50,7 @@ steps:
   depends_on:
   - task-019-step-01-inventory
   description: Move localized upstream README files from repository root into upstream/opencode-readmes/
-    so root stays paper_fucker-first while preserving provenance.
+    so root stays papercode-first while preserving provenance.
   execution:
     mode: sequential
     retry: 0

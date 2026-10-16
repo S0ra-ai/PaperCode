@@ -538,7 +538,7 @@ export class Agent implements ACPAgent {
     log.info("initialize", { protocolVersion: params.protocolVersion })
 
     const authMethod: AuthMethod = {
-      description: "Run `paper_fucker auth login` in the terminal",
+      description: "Run `papercode auth login` in the terminal",
       name: "Login with opencode",
       id: "opencode-login",
     }
@@ -549,7 +549,7 @@ export class Agent implements ACPAgent {
         "terminal-auth": {
           command: "opencode",
           args: ["auth", "login"],
-          label: "paper_fucker Login",
+          label: "papercode Login",
         },
       }
     }
@@ -575,7 +575,7 @@ export class Agent implements ACPAgent {
       },
       authMethods: [authMethod],
       agentInfo: {
-        name: "paper_fucker",
+        name: "papercode",
         version: InstallationVersion,
       },
     }
@@ -991,7 +991,7 @@ export class Agent implements ACPAgent {
         }
       } else if (part.type === "file") {
         // Replay file attachments as appropriate ACP content blocks.
-        // paper_fucker stores files internally as { type: "file", url, filename, mime }.
+        // papercode stores files internally as { type: "file", url, filename, mime }.
         // We convert these back to ACP blocks based on the URL scheme and MIME type:
         // - file:// URLs → resource_link
         // - data: URLs with image/* → image block

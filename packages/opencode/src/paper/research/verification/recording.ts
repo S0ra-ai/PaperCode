@@ -19,7 +19,7 @@ export async function recordVerificationGate(
   return withSpan(
     "research.verification.record_gate",
     {
-      "paper_fucker.research.draft.id": input.draft.draft_id,
+      "papercode.research.draft.id": input.draft.draft_id,
     },
     async (span) => {
       const run = await loadResearchRun(runDir)
@@ -79,7 +79,7 @@ export async function recordVerificationGate(
         },
         options,
       )
-      span.setAttribute("paper_fucker.research.final_gate.status", finalGate.status)
+      span.setAttribute("papercode.research.final_gate.status", finalGate.status)
       return {
         ...result,
         artifacts: {

@@ -18,23 +18,23 @@ try {
   process.chdir(homedir())
 } catch {}
 
-process.env.PAPER_FUCKER_DISABLE_EMBEDDED_WEB_UI = "true"
+process.env.PAPERCODE_DISABLE_EMBEDDED_WEB_UI = "true"
 process.env.OPENCODE_DISABLE_EMBEDDED_WEB_UI = "true"
 
 const APP_NAMES: Record<string, string> = {
-  dev: "paper_fucker Dev",
-  beta: "paper_fucker Beta",
-  prod: "paper_fucker",
+  dev: "papercode Dev",
+  beta: "papercode Beta",
+  prod: "papercode",
 }
 const APP_IDS: Record<string, string> = {
-  dev: "ai.paperfucker.desktop.dev",
-  beta: "ai.paperfucker.desktop.beta",
-  prod: "ai.paperfucker.desktop",
+  dev: "ai.papercode.desktop.dev",
+  beta: "ai.papercode.desktop.beta",
+  prod: "ai.papercode.desktop",
 }
-const TEST_ONBOARDING = (process.env.PAPER_FUCKER_TEST_ONBOARDING ?? process.env.OPENCODE_TEST_ONBOARDING) === "1"
-const appId = app.isPackaged ? APP_IDS[CHANNEL] : "ai.paperfucker.desktop.dev"
+const TEST_ONBOARDING = (process.env.PAPERCODE_TEST_ONBOARDING ?? process.env.OPENCODE_TEST_ONBOARDING) === "1"
+const appId = app.isPackaged ? APP_IDS[CHANNEL] : "ai.papercode.desktop.dev"
 const onboardingTestRoot = setupOnboardingTestEnv()
-app.setName(app.isPackaged ? APP_NAMES[CHANNEL] : "paper_fucker Dev")
+app.setName(app.isPackaged ? APP_NAMES[CHANNEL] : "papercode Dev")
 app.setAppUserModelId(appId)
 app.setPath("userData", onboardingTestRoot ? join(onboardingTestRoot, "desktop") : join(app.getPath("appData"), appId))
 if (onboardingTestRoot) app.setPath("sessionData", join(onboardingTestRoot, "session"))
@@ -82,12 +82,12 @@ useSystemCertificates()
 function setupOnboardingTestEnv() {
   if (!TEST_ONBOARDING) return
 
-  const root = join(tmpdir(), `paper_fucker-onboarding-${randomUUID()}`)
+  const root = join(tmpdir(), `papercode-onboarding-${randomUUID()}`)
   rmSync(root, { recursive: true, force: true })
   ;["data", "config", "cache", "state", "desktop", "session"].forEach((dir) =>
     mkdirSync(join(root, dir), { recursive: true }),
   )
-  process.env.PAPER_FUCKER_DB = ":memory:"
+  process.env.PAPERCODE_DB = ":memory:"
   process.env.OPENCODE_DB = ":memory:"
   process.env.XDG_DATA_HOME = join(root, "data")
   process.env.XDG_CONFIG_HOME = join(root, "config")
@@ -118,7 +118,7 @@ function setupApp() {
   preferAppEnv(app.getPath("userData"))
 
   app.on("second-instance", (_event: Event, argv: string[]) => {
-    const urls = argv.filter((arg: string) => arg.startsWith("paper-fucker://") || arg.startsWith("opencode://"))
+    const urls = argv.filter((arg: string) => arg.startsWith("papercode://") || arg.startsWith("opencode://"))
     if (urls.length) {
       logger.log("deep link received via second-instance", { urls })
       emitDeepLinks(urls)
@@ -148,7 +148,7 @@ function setupApp() {
 
   void app.whenReady().then(async () => {
     if (!TEST_ONBOARDING) migrate()
-    app.setAsDefaultProtocolClient("paper-fucker")
+    app.setAsDefaultProtocolClient("papercode")
     registerRendererProtocol()
     setDockIcon()
     setupAutoUpdater()
@@ -230,7 +230,7 @@ async function initialize() {
     server = listener
     serverReady.resolve({
       url,
-      username: "paper_fucker",
+      username: "papercode",
       password,
     })
 
@@ -346,7 +346,7 @@ function ensureLoopbackNoProxy() {
 }
 
 async function getSidecarPort() {
-  const fromEnv = process.env.PAPER_FUCKER_PORT ?? process.env.OPENCODE_PORT
+  const fromEnv = process.env.PAPERCODE_PORT ?? process.env.OPENCODE_PORT
   if (fromEnv) {
     const parsed = Number.parseInt(fromEnv, 10)
     if (!Number.isNaN(parsed)) return parsed
@@ -369,11 +369,11 @@ async function getSidecarPort() {
 }
 
 function sqliteFileExists() {
-  if (process.env.PAPER_FUCKER_DB === ":memory:" || process.env.OPENCODE_DB === ":memory:") return true
+  if (process.env.PAPERCODE_DB === ":memory:" || process.env.OPENCODE_DB === ":memory:") return true
 
   const xdg = process.env.XDG_DATA_HOME
   const base = xdg && xdg.length > 0 ? xdg : join(homedir(), ".local", "share")
-  return existsSync(join(base, "paper_fucker", "paper_fucker.db")) || existsSync(join(base, "opencode", "opencode.db"))
+  return existsSync(join(base, "papercode", "papercode.db")) || existsSync(join(base, "opencode", "opencode.db"))
 }
 
 function setupAutoUpdater() {

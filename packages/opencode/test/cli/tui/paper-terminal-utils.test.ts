@@ -26,7 +26,7 @@ describe("PaperCode terminal utilities", () => {
   })
 
   test("truncates mixed Chinese and Windows paths by display width", () => {
-    const value = "E:\\Project\\中文论文材料\\very-long-folder\\paper_fucker"
+    const value = "E:\\Project\\中文论文材料\\very-long-folder\\papercode"
     const truncated = truncateDisplayMiddle(value, 24)
 
     expect(displayWidth("中文AB")).toBe(6)

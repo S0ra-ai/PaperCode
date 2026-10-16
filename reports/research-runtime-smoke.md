@@ -1,6 +1,6 @@
 # Research Runtime Smoke
 
-> Historical path note: this report predates task-032. Any `packages/server` or `@paper-fucker/server` paths below are provenance only; the current paper_fucker runtime authority is `packages/opencode/src/paper`, and `packages/server` is intentionally absent.
+> Historical path note: this report predates task-032. Any `packages/server` or `@papercode/server` paths below are provenance only; the current papercode runtime authority is `packages/opencode/src/paper`, and `packages/server` is intentionally absent.
 
 Date: 2026-05-08
 TaskFlow task: task-005-research-runtime
@@ -8,18 +8,18 @@ Branch: feature/research-runtime
 
 ## Scope
 
-The authoritative paper_fucker research runtime now lives in `packages/server/src/research/runtime`.
+The authoritative papercode research runtime now lives in `packages/server/src/research/runtime`.
 It is intentionally first-party server/runtime code, not new domain code inside `packages/opencode`.
 `packages/opencode` remains the upstream-derived agent/CLI substrate and future adapter surface.
 
 ## Implemented Runtime Surface
 
-- `paths.ts`: workspace-first `<workspace>/.paper_fucker/runs/<run-id>` placement, `~/.paper_fucker/runs/<run-id>` fallback, run directory discovery, and relative artifact path safety.
+- `paths.ts`: workspace-first `<workspace>/.papercode/runs/<run-id>` placement, `~/.papercode/runs/<run-id>` fallback, run directory discovery, and relative artifact path safety.
 - `run-store.ts`: run creation, run loading, resume, status snapshots, append-only event facts, run/global SQLite index refresh, cost recording, and final gate updates.
 - `artifact-store.ts`: versioned artifact writes, stable normalized data hashing, supersedes metadata, locked artifact rejection, and artifact lifecycle events.
 - `policy.ts`: Full Access + Unlimited Research default policy, bounded mode with 3h default and 24h cap, resource auto-detection, soft budget tracking, and budget alerts.
 - `state.ts`: mutable runtime state in `runtime-state.json` for permissions, resources, cost, and final gate state.
-- OpenTelemetry spans: runtime create/resume/status, event append, index refresh, artifact write, cost record, and final gate update all route through `paper_fucker.research` span helpers.
+- OpenTelemetry spans: runtime create/resume/status, event append, index refresh, artifact write, cost record, and final gate update all route through `papercode.research` span helpers.
 
 ## Smoke Coverage
 
@@ -28,7 +28,7 @@ It is intentionally first-party server/runtime code, not new domain code inside 
   - `runtime-state.json`
   - JSONL fact files
   - run-local `index.sqlite`
-  - global `~/.paper_fucker/index.sqlite`
+  - global `~/.papercode/index.sqlite`
 - Resume and status APIs return current run state and fact counts.
 - Artifact writes are append-only, hash normalized data, version repeated logical paths, and reject superseding a locked latest artifact.
 - Permission/resource/cost/final gate state records:

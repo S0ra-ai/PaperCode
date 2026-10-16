@@ -82,7 +82,7 @@ describe("plugin.install.concurrent", () => {
     expect(out.map((x) => x.code)).toEqual(Array.from({ length: all.length }, () => 0))
     expect(out.map((x) => x.stderr.toString()).filter(Boolean)).toEqual([])
 
-    const cfg = await read(path.join(tmp.path, ".paper_fucker", "paper_fucker.jsonc"))
+    const cfg = await read(path.join(tmp.path, ".papercode", "papercode.jsonc"))
     expectPlugins(cfg.plugin, all)
   }, 60_000)
 
@@ -105,8 +105,8 @@ describe("plugin.install.concurrent", () => {
     expect(out.map((x) => x.code)).toEqual(Array.from({ length: all.length }, () => 0))
     expect(out.map((x) => x.stderr.toString()).filter(Boolean)).toEqual([])
 
-    const server = await read(path.join(tmp.path, ".paper_fucker", "paper_fucker.jsonc"))
-    const tui = await read(path.join(tmp.path, ".paper_fucker", "tui.jsonc"))
+    const server = await read(path.join(tmp.path, ".papercode", "papercode.jsonc"))
+    const tui = await read(path.join(tmp.path, ".papercode", "tui.jsonc"))
     expectPlugins(server.plugin, all)
     expectPlugins(tui.plugin, all)
   }, 60_000)
@@ -114,7 +114,7 @@ describe("plugin.install.concurrent", () => {
   test("preserves updates when existing config uses .json", async () => {
     await using tmp = await tmpdir()
     const target = await plugin(tmp.path, ["server"])
-    const cfg = path.join(tmp.path, ".paper_fucker", "paper_fucker.json")
+    const cfg = path.join(tmp.path, ".papercode", "papercode.json")
     await fs.mkdir(path.dirname(cfg), { recursive: true })
     await Bun.write(cfg, JSON.stringify({ plugin: ["seed@1.0.0"] }, null, 2))
 
@@ -135,6 +135,6 @@ describe("plugin.install.concurrent", () => {
 
     const json = await read(cfg)
     expectPlugins(json.plugin, ["seed@1.0.0", ...next])
-    expect(await Filesystem.exists(path.join(tmp.path, ".paper_fucker", "paper_fucker.jsonc"))).toBe(false)
+    expect(await Filesystem.exists(path.join(tmp.path, ".papercode", "papercode.jsonc"))).toBe(false)
   }, 60_000)
 })

@@ -1,6 +1,6 @@
 # Research Skill/MCP Bus
 
-> Historical path note: this report predates task-032. Any `packages/server` or `@paper-fucker/server` paths below are provenance only; the current paper_fucker runtime authority is `packages/opencode/src/paper`, and `packages/server` is intentionally absent.
+> Historical path note: this report predates task-032. Any `packages/server` or `@papercode/server` paths below are provenance only; the current papercode runtime authority is `packages/opencode/src/paper`, and `packages/server` is intentionally absent.
 
 Version: 0.1.20-dev
 
@@ -21,7 +21,7 @@ Task: `task-023-research-skill-mcp-bus`
   - Exa remote MCP search.
   - OpenCode `read`, `grep`, `glob`, `task`, and `shell`.
   - `nature-paper` and `jupyter-notebook` skills.
-  - paper_fucker ClaimLedger and export bundle tools.
+  - papercode ClaimLedger and export bundle tools.
   - Python experiment log parsing and dataset metadata probing.
 
 ## Verification

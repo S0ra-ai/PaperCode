@@ -1,6 +1,6 @@
 # Experiment MCP Loop
 
-> Historical path note: this report predates task-032. Any `packages/server` or `@paper-fucker/server` paths below are provenance only; the current paper_fucker runtime authority is `packages/opencode/src/paper`, and `packages/server` is intentionally absent.
+> Historical path note: this report predates task-032. Any `packages/server` or `@papercode/server` paths below are provenance only; the current papercode runtime authority is `packages/opencode/src/paper`, and `packages/server` is intentionally absent.
 
 Version: 0.1.25-dev
 
@@ -8,7 +8,7 @@ Task: `task-028-experiment-mcp-loop`
 
 ## Summary
 
-paper_fucker now exposes a paper-domain experiment loop helper that connects experiment stages to skills, OpenCode shell, and Python research tools, and makes final claim eligibility depend on reproduction status.
+papercode now exposes a paper-domain experiment loop helper that connects experiment stages to skills, OpenCode shell, and Python research tools, and makes final claim eligibility depend on reproduction status.
 
 ## Implemented
 

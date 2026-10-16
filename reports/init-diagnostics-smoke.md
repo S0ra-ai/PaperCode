@@ -1,6 +1,6 @@
 # Init Diagnostics Smoke
 
-> Historical path note: this report predates task-032. Any `packages/server` or `@paper-fucker/server` paths below are provenance only; the current paper_fucker runtime authority is `packages/opencode/src/paper`, and `packages/server` is intentionally absent.
+> Historical path note: this report predates task-032. Any `packages/server` or `@papercode/server` paths below are provenance only; the current papercode runtime authority is `packages/opencode/src/paper`, and `packages/server` is intentionally absent.
 
 Date: 2026-05-08
 TaskFlow task: task-007-init-wizard
@@ -9,14 +9,14 @@ Branch: feature/init-diagnostics
 ## Scope
 
 The first-party server package now owns the initialization and diagnostics flow for
-`~/.paper_fucker`. The flow creates config, tool links, and encrypted secrets outside
+`~/.papercode`. The flow creates config, tool links, and encrypted secrets outside
 the repository, then reports tool availability in a machine-readable diagnostics
 payload.
 
 ## Implemented Surface
 
 - `packages/server/src/init/config.ts`: `config.json`, `tools.json`, default config, and path helpers.
-- `packages/server/src/init/discovery.ts`: pandoc, LaTeX engines, Docker, Python, Git, Chrome, and Edge discovery through user links, `PAPER_FUCKER_TOOL_*`, `PATH`, and common Windows locations.
+- `packages/server/src/init/discovery.ts`: pandoc, LaTeX engines, Docker, Python, Git, Chrome, and Edge discovery through user links, `PAPERCODE_TOOL_*`, `PATH`, and common Windows locations.
 - `packages/server/src/init/secrets.ts`: `secrets.enc` AES-256-GCM encryption with PBKDF2-SHA256.
 - `packages/server/src/init/wizard.ts`: non-interactive setup and diagnostics API.
 - `packages/server/src/init/cli.ts`: `init --yes ...` and `diagnostics` command flow.
@@ -24,8 +24,8 @@ payload.
 ## Verified Behavior
 
 - Full Access mode requires explicit `--full-access-ack` or equivalent API acknowledgement.
-- Secrets are encrypted into `~/.paper_fucker/secrets.enc` and are not written to `config.json`.
-- Tool links are stored in `~/.paper_fucker/tools.json`, the same format consumed by Python research tools.
+- Secrets are encrypted into `~/.papercode/secrets.enc` and are not written to `config.json`.
+- Tool links are stored in `~/.papercode/tools.json`, the same format consumed by Python research tools.
 - Diagnostics report missing tools cleanly and marks linked tools as available from `config`.
 
 ## Verification

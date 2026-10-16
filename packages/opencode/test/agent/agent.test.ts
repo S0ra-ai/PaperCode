@@ -55,7 +55,7 @@ test("build agent has correct default properties", async () => {
   })
 })
 
-test("plan agent denies edits except .paper_fucker/plans/*", async () => {
+test("plan agent denies edits except .papercode/plans/*", async () => {
   await using tmp = await tmpdir()
   await WithInstance.provide({
     directory: tmp.path,
@@ -65,7 +65,7 @@ test("plan agent denies edits except .paper_fucker/plans/*", async () => {
       // Wildcard is denied
       expect(evalPerm(plan, "edit")).toBe("deny")
       // But specific path is allowed
-      expect(Permission.evaluate("edit", ".paper_fucker/plans/foo.md", plan!.permission).action).toBe("allow")
+      expect(Permission.evaluate("edit", ".papercode/plans/foo.md", plan!.permission).action).toBe("allow")
     },
   })
 })
@@ -584,7 +584,7 @@ test("skill directories are allowed for external_directory", async () => {
   await using tmp = await tmpdir({
     git: true,
     init: async (dir) => {
-      const skillDir = path.join(dir, ".paper_fucker", "skill", "perm-skill")
+      const skillDir = path.join(dir, ".papercode", "skill", "perm-skill")
       await Bun.write(
         path.join(skillDir, "SKILL.md"),
         `---
@@ -598,21 +598,21 @@ description: Permission skill.
     },
   })
 
-  const home = process.env.PAPER_FUCKER_TEST_HOME
-  process.env.PAPER_FUCKER_TEST_HOME = tmp.path
+  const home = process.env.PAPERCODE_TEST_HOME
+  process.env.PAPERCODE_TEST_HOME = tmp.path
 
   try {
     await WithInstance.provide({
       directory: tmp.path,
       fn: async () => {
         const build = await load(tmp.path, (svc) => svc.get("build"))
-        const skillDir = path.join(tmp.path, ".paper_fucker", "skill", "perm-skill")
+        const skillDir = path.join(tmp.path, ".papercode", "skill", "perm-skill")
         const target = path.join(skillDir, "reference", "notes.md")
         expect(Permission.evaluate("external_directory", target, build!.permission).action).toBe("allow")
       },
     })
   } finally {
-    process.env.PAPER_FUCKER_TEST_HOME = home
+    process.env.PAPERCODE_TEST_HOME = home
   }
 })
 

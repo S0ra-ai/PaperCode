@@ -1,5 +1,5 @@
 id: task-001-repo-governance
-title: Establish paper_fucker repository governance
+title: Establish papercode repository governance
 status: done
 priority: critical
 owner: codex
@@ -10,7 +10,7 @@ tags:
 - license
 depends_on:
 - task-000-docs-sync-and-cleanup
-description: 'Initialize the repository governance baseline for paper_fucker: TaskFlow-first
+description: 'Initialize the repository governance baseline for papercode: TaskFlow-first
   planning, Git Flow, private-first licensing, upstream notice policy, and project
   documentation. This task makes the repository safe to use as the long-term GitHub
   home for the OpenCode-derived research product.'
@@ -23,7 +23,7 @@ steps:
   status: done
   owner: codex
   depends_on: []
-  description: Verify TaskFlow is bound to E:\Project\paper_fucker\.plan, inspect
+  description: Verify TaskFlow is bound to E:\Project\papercode\.plan, inspect
     current branch/remotes, and record the dirty worktree items before making governance
     edits.
   execution:
@@ -33,13 +33,13 @@ steps:
     logs:
     - timestamp: '2026-05-08T05:57:31.897814'
       level: info
-      message: Verified TaskFlow bound to E:\Project\paper_fucker\.plan and git repo
-        on main with origin https://github.com/S0ra-ai/paper_fucker.git before branch
+      message: Verified TaskFlow bound to E:\Project\papercode\.plan and git repo
+        on main with origin https://github.com/S0ra-ai/papercode.git before branch
         setup.
       agent: codex
     - timestamp: '2026-05-08T05:57:38.126247'
       level: info
-      message: 'Baseline recorded: repo root E:\Project\paper_fucker, initial branch
+      message: 'Baseline recorded: repo root E:\Project\papercode, initial branch
         main at f06df3d, remote origin configured, dirty items were untracked .plan/,
         README.md, docs/ and tracked LICENSE modification after governance work began.'
       agent: codex
@@ -107,7 +107,7 @@ steps:
   depends_on:
   - task-001-step-02-gitflow-baseline
   - task-001-step-03-private-license-notice
-  description: Update README to name paper_fucker as the product and repository, describe
+  description: Update README to name papercode as the product and repository, describe
     OpenCode hard-fork direction, create CHANGELOG using the project's colon metadata
     and :history style, set the initial version to 0.1.0-dev, and add a version check
     so README always matches the latest CHANGELOG entry.
@@ -123,7 +123,7 @@ steps:
       agent: codex
     - timestamp: '2026-05-08T05:58:45.663600'
       level: info
-      message: Updated README as the paper_fucker project entrypoint with version
+      message: Updated README as the papercode project entrypoint with version
         marker 0.1.0-dev, created CHANGELOG as the only version source using colon
         metadata and :history format, and added scripts/check-readme-version.ps1.
         The check passed.

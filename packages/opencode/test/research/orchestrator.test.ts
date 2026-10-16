@@ -52,7 +52,7 @@ const successfulHandlers = (except: Partial<Record<ResearchStageId, StageHandler
 
 describe("automatic research orchestrator", () => {
   test("runs the stage graph, applies queued guidance, and emits preview startup", async () => {
-    const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-orchestrator-test-"))
+    const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-orchestrator-test-"))
     try {
       const workspace = path.join(dir, "workspace")
       const home = path.join(dir, "home")
@@ -107,7 +107,7 @@ describe("automatic research orchestrator", () => {
   })
 
   test("pauses on policy conditions and exposes run controls", async () => {
-    const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-orchestrator-test-"))
+    const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-orchestrator-test-"))
     try {
       const workspace = path.join(dir, "workspace")
       const home = path.join(dir, "home")

@@ -1,9 +1,9 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "paper_fucker",
+    "title": "papercode",
     "version": "1.0.0",
-    "description": "paper_fucker api"
+    "description": "papercode api"
   },
   "paths": {
     "/auth/{providerID}": {
@@ -220,7 +220,7 @@
             }
           }
         },
-        "description": "Get health information about the paper_fucker server.",
+        "description": "Get health information about the papercode server.",
         "summary": "Get health",
         "x-codeSamples": [
           {
@@ -247,7 +247,7 @@
             }
           }
         },
-        "description": "Subscribe to global events from the paper_fucker system using server-sent events.",
+        "description": "Subscribe to global events from the papercode system using server-sent events.",
         "summary": "Get global events",
         "x-codeSamples": [
           {
@@ -274,7 +274,7 @@
             }
           }
         },
-        "description": "Retrieve the current global paper_fucker configuration settings and preferences.",
+        "description": "Retrieve the current global papercode configuration settings and preferences.",
         "summary": "Get global configuration",
         "x-codeSamples": [
           {
@@ -309,7 +309,7 @@
             }
           }
         },
-        "description": "Update global paper_fucker configuration settings and preferences.",
+        "description": "Update global papercode configuration settings and preferences.",
         "summary": "Update global configuration",
         "requestBody": {
           "content": {
@@ -346,7 +346,7 @@
             }
           }
         },
-        "description": "Clean up and dispose all paper_fucker instances, releasing all resources.",
+        "description": "Clean up and dispose all papercode instances, releasing all resources.",
         "summary": "Dispose instance",
         "x-codeSamples": [
           {
@@ -413,8 +413,8 @@
             }
           }
         },
-        "description": "Upgrade paper_fucker to the specified version or latest if not specified.",
-        "summary": "Upgrade paper_fucker",
+        "description": "Upgrade papercode to the specified version or latest if not specified.",
+        "summary": "Upgrade papercode",
         "requestBody": {
           "content": {
             "application/json": {
@@ -516,7 +516,7 @@
             }
           }
         },
-        "description": "Retrieve the current paper_fucker configuration settings and preferences.",
+        "description": "Retrieve the current papercode configuration settings and preferences.",
         "summary": "Get configuration",
         "x-codeSamples": [
           {
@@ -568,7 +568,7 @@
             }
           }
         },
-        "description": "Update paper_fucker configuration settings and preferences.",
+        "description": "Update papercode configuration settings and preferences.",
         "summary": "Update configuration",
         "requestBody": {
           "content": {
@@ -804,7 +804,7 @@
             }
           }
         },
-        "description": "Persist a new active Console account/org selection for the current local paper_fucker state.",
+        "description": "Persist a new active Console account/org selection for the current local papercode state.",
         "summary": "Switch active Console org",
         "requestBody": {
           "content": {
@@ -1294,7 +1294,7 @@
             }
           }
         },
-        "description": "Get a list of all paper_fucker sessions across projects, sorted by most recently updated. Archived sessions are excluded by default.",
+        "description": "Get a list of all papercode sessions across projects, sorted by most recently updated. Archived sessions are excluded by default.",
         "summary": "List sessions",
         "x-codeSamples": [
           {
@@ -1799,7 +1799,7 @@
             }
           }
         },
-        "description": "Clean up and dispose the current paper_fucker instance, releasing all resources.",
+        "description": "Clean up and dispose the current papercode instance, releasing all resources.",
         "summary": "Dispose instance",
         "x-codeSamples": [
           {
@@ -1843,7 +1843,7 @@
             }
           }
         },
-        "description": "Retrieve the current working directory and related path information for the paper_fucker instance.",
+        "description": "Retrieve the current working directory and related path information for the papercode instance.",
         "summary": "Get paths",
         "x-codeSamples": [
           {
@@ -2162,7 +2162,7 @@
             }
           }
         },
-        "description": "Get a list of all available commands in the paper_fucker system.",
+        "description": "Get a list of all available commands in the papercode system.",
         "summary": "List commands",
         "x-codeSamples": [
           {
@@ -2210,7 +2210,7 @@
             }
           }
         },
-        "description": "Get a list of all available AI agents in the paper_fucker system.",
+        "description": "Get a list of all available AI agents in the papercode system.",
         "summary": "List agents",
         "x-codeSamples": [
           {
@@ -2274,7 +2274,7 @@
             }
           }
         },
-        "description": "Get a list of all available skills in the paper_fucker system.",
+        "description": "Get a list of all available skills in the papercode system.",
         "summary": "List skills",
         "x-codeSamples": [
           {
@@ -2964,7 +2964,7 @@
             }
           }
         },
-        "description": "Get a list of projects that have been opened with paper_fucker.",
+        "description": "Get a list of projects that have been opened with papercode.",
         "summary": "List all projects",
         "x-codeSamples": [
           {
@@ -3008,7 +3008,7 @@
             }
           }
         },
-        "description": "Retrieve the currently active project that paper_fucker is working with.",
+        "description": "Retrieve the currently active project that papercode is working with.",
         "summary": "Get current project",
         "x-codeSamples": [
           {
@@ -3273,7 +3273,7 @@
             }
           }
         },
-        "description": "Get a list of all active pseudo-terminal (PTY) sessions managed by paper_fucker.",
+        "description": "Get a list of all active pseudo-terminal (PTY) sessions managed by papercode.",
         "summary": "List PTY sessions",
         "x-codeSamples": [
           {
@@ -4408,7 +4408,7 @@
             }
           }
         },
-        "description": "Get a list of all paper_fucker sessions, sorted by most recently updated.",
+        "description": "Get a list of all papercode sessions, sorted by most recently updated.",
         "summary": "List sessions",
         "x-codeSamples": [
           {
@@ -4460,7 +4460,7 @@
             }
           }
         },
-        "description": "Create a new paper_fucker session for interacting with AI assistants and managing conversations.",
+        "description": "Create a new papercode session for interacting with AI assistants and managing conversations.",
         "summary": "Create session",
         "requestBody": {
           "content": {
@@ -4634,7 +4634,7 @@
             }
           }
         },
-        "description": "Retrieve detailed information about a specific paper_fucker session.",
+        "description": "Retrieve detailed information about a specific papercode session.",
         "summary": "Get session",
         "x-codeSamples": [
           {

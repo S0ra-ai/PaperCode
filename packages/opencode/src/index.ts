@@ -77,7 +77,7 @@ const cli = yargs(args)
   })
   .middleware(async (opts) => {
     if (opts.pure) {
-      process.env.PAPER_FUCKER_PURE = "1"
+      process.env.PAPERCODE_PURE = "1"
       process.env.OPENCODE_PURE = "1"
     }
 
@@ -94,8 +94,8 @@ const cli = yargs(args)
     Heap.start()
 
     process.env.AGENT = "1"
-    process.env.PAPER_FUCKER = "1"
-    process.env.PAPER_FUCKER_PID = String(process.pid)
+    process.env.PAPERCODE = "1"
+    process.env.PAPERCODE_PID = String(process.pid)
     process.env.OPENCODE = "1"
     process.env.OPENCODE_PID = String(process.pid)
 

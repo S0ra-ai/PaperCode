@@ -2,7 +2,7 @@ id: task-109-machine-sidebar-experiment-env
 title: Machine sidebar experiment environment for 0.10.6-dev
 status: done
 priority: high
-owner: codex-paper-fucker
+owner: codex-papercode
 tags:
 - paper
 - machine
@@ -22,7 +22,7 @@ steps:
 - id: machine-profile-runtime
   title: Implement machine profile runtime
   status: done
-  owner: codex-paper-fucker
+  owner: codex-papercode
   depends_on: []
   description: Add PaperMachineProfile and PaperExperimentEnvironmentStatus detection
     with non-blocking cached checks.
@@ -37,14 +37,14 @@ steps:
         inspection in packages/opencode/src/paper/machine.ts, with cached OS/CPU/memory/disk/workspace/default
         run root/GPU/toolchain/runtime detection. Snapshot diagnostics now include
         machine_profile and experiment_environment.
-      agent: codex-paper-fucker
+      agent: codex-papercode
     last_run: '2026-05-13T02:04:56.254893'
     attempt_count: 2
   meta: {}
 - id: doctor-machine-integration
   title: Integrate machine profile into doctor
   status: done
-  owner: codex-paper-fucker
+  owner: codex-papercode
   depends_on:
   - machine-profile-runtime
   description: Expose machine/runtime status in paperDoctor and init doctor grouped
@@ -59,14 +59,14 @@ steps:
       message: paperDoctor now includes machine_profile and experiment_environment,
         and PaperDoctorReport.v1 includes machine_profile in configured/blocked checks.
         init doctor tests still pass.
-      agent: codex-paper-fucker
+      agent: codex-papercode
     last_run: '2026-05-13T02:05:07.067232'
     attempt_count: 2
   meta: {}
 - id: tui-machine-sidebar
   title: Render machine page/sidebar
   status: done
-  owner: codex-paper-fucker
+  owner: codex-papercode
   depends_on:
   - doctor-machine-integration
   description: Add machine status view in the PaperRun sidebar with refresh semantics
@@ -81,7 +81,7 @@ steps:
       message: PaperRun TUI sidebar now renders a 机器 section with OS, CPU, memory,
         disk, GPU/CPU-only mode, run root, and available/optional/blocked capability
         counts. Focused PaperRun API + TUI workbench tests passed together (14 pass).
-      agent: codex-paper-fucker
+      agent: codex-papercode
     last_run: '2026-05-13T02:05:20.708717'
     attempt_count: 2
   meta: {}

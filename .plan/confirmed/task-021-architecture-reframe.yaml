@@ -1,5 +1,5 @@
 id: task-021-architecture-reframe
-title: Reframe paper_fucker as OpenCode-based closed-loop paper system
+title: Reframe papercode as OpenCode-based closed-loop paper system
 status: done
 priority: high
 owner: codex
@@ -10,10 +10,10 @@ tags:
 depends_on:
 - task-020-end-to-end-acceptance
 description: Reframe the product from a DeepSeek-centered research pipeline into an
-  OpenCode-substrate paper_fucker domain system for topic/code/data/materials-to-paper
+  OpenCode-substrate papercode domain system for topic/code/data/materials-to-paper
   workflows. Establish packages/server/src/paper as the paper domain entrypoint and
   update README/CHANGELOG to describe OpenCode providers, MCP, skills, tools, TUI,
-  and paper_fucker domain runtime boundaries.
+  and papercode domain runtime boundaries.
 execution:
   mode: sequential
   retry: 0
@@ -33,7 +33,7 @@ steps:
     - timestamp: '2026-05-08T22:10:48.162422'
       level: info
       message: 'Starting TDD red step for paper architecture boundary: tests will
-        require a paper domain entrypoint that frames OpenCode as substrate, paper_fucker
+        require a paper domain entrypoint that frames OpenCode as substrate, papercode
         as domain runtime, and DeepSeek as only one supported model option.'
       agent: codex
     - timestamp: '2026-05-08T22:11:24.060896'
@@ -77,7 +77,7 @@ steps:
   owner: codex
   depends_on:
   - task-021-step-02-paper-domain-entrypoint
-  description: Rewrite README positioning around OpenCode substrate plus paper_fucker
+  description: Rewrite README positioning around OpenCode substrate plus papercode
     domain runtime and document task chain.
   execution:
     mode: sequential
@@ -86,7 +86,7 @@ steps:
     logs:
     - timestamp: '2026-05-08T22:12:20.423082'
       level: info
-      message: Updating README and architecture report to frame paper_fucker as an
+      message: Updating README and architecture report to frame papercode as an
         OpenCode-substrate, provider-agnostic, MCP/skills-driven closed-loop paper
         system.
       agent: codex

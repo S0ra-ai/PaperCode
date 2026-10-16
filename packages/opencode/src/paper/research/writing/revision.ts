@@ -38,8 +38,8 @@ export function createDraftRevision(input: CreateDraftRevisionInput): DraftRevis
   return withSpan(
     "research.writing.revision",
     {
-      "paper_fucker.research.draft.previous_bytes": input.previous_markdown.length,
-      "paper_fucker.research.draft.next_bytes": input.next_markdown.length,
+      "papercode.research.draft.previous_bytes": input.previous_markdown.length,
+      "papercode.research.draft.next_bytes": input.next_markdown.length,
     },
     () => ({
       schema_version: "DraftRevision.v1",

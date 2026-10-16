@@ -2,7 +2,7 @@ id: task-110-readme-brand-repo-cleanup
 title: README brand and repository cleanup for 0.10.7-dev
 status: done
 priority: high
-owner: codex-paper-fucker
+owner: codex-papercode
 tags:
 - paper
 - brand
@@ -21,7 +21,7 @@ steps:
 - id: remove-legacy
   title: Delete tracked legacy directory
   status: done
-  owner: codex-paper-fucker
+  owner: codex-papercode
   depends_on: []
   description: Remove tracked legacy/ content directly, without archiving.
   execution:
@@ -33,14 +33,14 @@ steps:
       level: info
       message: Deleted tracked legacy/ after resolving and verifying the absolute
         target path stayed under the repository root.
-      agent: codex-paper-fucker
+      agent: codex-papercode
     last_run: '2026-05-13T02:06:08.257686'
     attempt_count: 2
   meta: {}
 - id: public-brand-scan
   title: Clean public brand surfaces
   status: done
-  owner: codex-paper-fucker
+  owner: codex-papercode
   depends_on:
   - remove-legacy
   description: Scan README/help/doctor/toasts/glossary/commands/tool docs for upstream
@@ -53,18 +53,18 @@ steps:
     - timestamp: '2026-05-13T02:17:05.509954'
       level: info
       message: 'Cleaned user-visible brand residue: removed upstream model front matter
-        from .paper_fucker commands, deleted old glossary/tool docs, switched Paper
-        TUI headers/temp names/model source/strategy strings to Paper Fucker naming,
+        from .papercode commands, deleted old glossary/tool docs, switched Paper
+        TUI headers/temp names/model source/strategy strings to PaperCode naming,
         hid upstream managed provider entries, and verified focused public-surface/model
         tests pass.'
-      agent: codex-paper-fucker
+      agent: codex-papercode
     last_run: '2026-05-13T02:17:05.509954'
     attempt_count: 2
   meta: {}
 - id: rewrite-readme-notice
   title: Rewrite README and NOTICE
   status: done
-  owner: codex-paper-fucker
+  owner: codex-papercode
   depends_on:
   - public-brand-scan
   description: Create a concise Chinese TUI-first GitHub README and update NOTICE/license
@@ -77,14 +77,14 @@ steps:
     - timestamp: '2026-05-13T02:17:11.125283'
       level: info
       message: Reviewing rewritten README/NOTICE before closing the cleanup task.
-      agent: codex-paper-fucker
+      agent: codex-papercode
     - timestamp: '2026-05-13T02:17:39.653378'
       level: info
       message: Rewrote README as Chinese TUI-first GitHub product homepage at target
         0.11.0-dev, and updated NOTICE with bundled architecture-diagram, paper-framework-figure-studio-pro,
         and managed bb-browser boundaries. Final README/CHANGELOG version sync remains
         the explicit task-111 version-changelog step.
-      agent: codex-paper-fucker
+      agent: codex-papercode
     last_run: '2026-05-13T02:17:39.653378'
     attempt_count: 2
   meta: {}

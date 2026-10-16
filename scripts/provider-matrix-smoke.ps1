@@ -11,10 +11,10 @@ $ErrorActionPreference = "Stop"
 
 $RepoRoot = Split-Path -Parent $PSScriptRoot
 if (-not $UserHome) {
-    $UserHome = if ($env:PAPER_FUCKER_HOME) { $env:PAPER_FUCKER_HOME } else { [Environment]::GetFolderPath("UserProfile") }
+    $UserHome = if ($env:PAPERCODE_HOME) { $env:PAPERCODE_HOME } else { [Environment]::GetFolderPath("UserProfile") }
 }
 
-$PaperHome = Join-Path $UserHome ".paper_fucker"
+$PaperHome = Join-Path $UserHome ".papercode"
 $ProviderDir = Join-Path $PaperHome "providers"
 $SecretPath = Join-Path $PaperHome "local/provider-secrets.json"
 $ReportFullPath = Join-Path $RepoRoot $ReportPath

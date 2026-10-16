@@ -2,7 +2,7 @@ id: global-figure-journal-profile
 title: 高水平期刊全局图与 Journal Figure Profile
 status: done
 priority: high
-owner: paper-fucker-dev-agent
+owner: papercode-dev-agent
 tags:
 - paper
 - figure
@@ -19,7 +19,7 @@ steps:
 - id: define-figure-contracts
   title: 定义全局图契约
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   description: 新增 GlobalFigureSpec、FigurePanelPlan、FigureEvidenceMap、JournalFigureProfile
     类型。
@@ -31,19 +31,19 @@ steps:
     - timestamp: '2026-05-26T11:59:00.337358'
       level: info
       message: Defining global figure contracts.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-26T11:59:14.580783'
       level: info
       message: Added packages/opencode/src/paper/global-figure.ts with GlobalFigureSpec,
         FigurePanelPlan, FigureEvidenceMap, and JournalFigureProfile.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-26T11:59:14.581285'
     attempt_count: 2
   meta: {}
 - id: generate-profile-figure-plan
   title: 生成期刊适配图表计划
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   description: 从 PaperSpine、ClaimLedger 和 target profile 生成 overview figure 方案。
   execution:
@@ -54,19 +54,19 @@ steps:
     - timestamp: '2026-05-26T11:59:01.655979'
       level: info
       message: Generating journal profile-aware overview figure plan from PaperSpine.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-26T11:59:15.902977'
       level: info
       message: claim_ledger stage creates GlobalFigureSpec from PaperSpine and target_profile,
         including Nature-style overview guidance and four evidence-linked panels.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-26T11:59:15.902977'
     attempt_count: 2
   meta: {}
 - id: verify-figure-profile
   title: 验证 panel 证据和 profile 检查
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   description: 测试每个 panel 均有目的、来源、caption 和期刊约束检查。
   execution:
@@ -77,13 +77,13 @@ steps:
     - timestamp: '2026-05-26T11:59:02.980650'
       level: info
       message: Verifying panel evidence and profile checks.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-26T11:59:17.232902'
       level: info
       message: research-closure.test.ts verifies panel ids, evidence checks, and ready
         status; paperrun-execution.test.ts verifies PaperRun snapshot carries global
         figure panels.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-26T11:59:17.232902'
     attempt_count: 2
   meta: {}

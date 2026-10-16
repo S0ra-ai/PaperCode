@@ -16,7 +16,7 @@ function apiUrl(baseUrl: string, path: string) {
 function paperHeaders(directory?: string, json = false) {
   return {
     ...(json ? { "content-type": "application/json" } : {}),
-    ...(directory ? { "x-paper-fucker-directory": directory } : {}),
+    ...(directory ? { "x-papercode-directory": directory } : {}),
   }
 }
 

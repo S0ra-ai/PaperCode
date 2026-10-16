@@ -29,9 +29,9 @@ const log = Log.create({ service: "db" })
 
 export function getChannelPath() {
   if (["latest", "beta", "prod"].includes(InstallationChannel) || Flag.OPENCODE_DISABLE_CHANNEL_DB)
-    return path.join(Global.Path.data, "paper_fucker.db")
+    return path.join(Global.Path.data, "papercode.db")
   const safe = InstallationChannel.replace(/[^a-zA-Z0-9._-]/g, "-")
-  return path.join(Global.Path.data, `paper_fucker-${safe}.db`)
+  return path.join(Global.Path.data, `papercode-${safe}.db`)
 }
 
 export const Path = iife(() => {

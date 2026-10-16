@@ -1,6 +1,6 @@
 # Paper Profile Skills
 
-> Historical path note: this report predates task-032. Any `packages/server` or `@paper-fucker/server` paths below are provenance only; the current paper_fucker runtime authority is `packages/opencode/src/paper`, and `packages/server` is intentionally absent.
+> Historical path note: this report predates task-032. Any `packages/server` or `@papercode/server` paths below are provenance only; the current papercode runtime authority is `packages/opencode/src/paper`, and `packages/server` is intentionally absent.
 
 Version: 0.1.21-dev
 
@@ -8,7 +8,7 @@ Task: `task-024-paper-profile-skills`
 
 ## Summary
 
-paper_fucker now has a first-party paper profile registry for submission-aware structure and checks. Profiles are domain guidance and gate inputs; they do not bypass authenticity checks for claims, references, data, code, or reproduction.
+papercode now has a first-party paper profile registry for submission-aware structure and checks. Profiles are domain guidance and gate inputs; they do not bypass authenticity checks for claims, references, data, code, or reproduction.
 
 ## Implemented
 
@@ -22,7 +22,7 @@ paper_fucker now has a first-party paper profile registry for submission-aware s
   - `generic-preprint`
 - Added Nature profile official-source refresh policy.
 - Added profile check output with `blockers` and `warnings` for gate integration.
-- Installed first-party `nature-paper` skill at `.paper_fucker/skills/nature-paper/SKILL.md`.
+- Installed first-party `nature-paper` skill at `.papercode/skills/nature-paper/SKILL.md`.
 
 ## Official Source Handling
 

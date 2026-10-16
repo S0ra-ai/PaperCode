@@ -41,12 +41,12 @@ export const AttachCommand = cmd({
       .option("password", {
         alias: ["p"],
         type: "string",
-        describe: "basic auth password (defaults to PAPER_FUCKER_SERVER_PASSWORD)",
+        describe: "basic auth password (defaults to PAPERCODE_SERVER_PASSWORD)",
       })
       .option("username", {
         alias: ["u"],
         type: "string",
-        describe: "basic auth username (defaults to PAPER_FUCKER_SERVER_USERNAME or 'paper_fucker')",
+        describe: "basic auth username (defaults to PAPERCODE_SERVER_USERNAME or 'papercode')",
       }),
   handler: async (args) => {
     const unguard = win32InstallCtrlCGuard()

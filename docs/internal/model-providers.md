@@ -4,7 +4,7 @@
 
 ## 两种写法
 
-配置读取顺序（后者覆盖前者）：项目 `paper_fucker.json[c]` → `.paper_fucker/` 目录 → `~/.paper_fucker/paper_fucker.json[c]` → `~/.paper_fucker/config/{config.json,paper_fucker.json,paper_fucker.jsonc}`。可用 `PAPER_FUCKER_CONFIG` 指定单个配置文件、`PAPER_FUCKER_CONFIG_CONTENT` 直接注入内容、`PAPER_FUCKER_CONFIG_DIR` 改配置目录。
+配置读取顺序（后者覆盖前者）：项目 `papercode.json[c]` → `.papercode/` 目录 → `~/.papercode/papercode.json[c]` → `~/.papercode/config/{config.json,papercode.json,papercode.jsonc}`。可用 `PAPERCODE_CONFIG` 指定单个配置文件、`PAPERCODE_CONFIG_CONTENT` 直接注入内容、`PAPERCODE_CONFIG_DIR` 改配置目录。
 
 ### `providers`：手写方言（推荐）
 
@@ -12,7 +12,7 @@
 
 ```json
 {
-  "$schema": "https://paper-fucker.local/config.json",
+  "$schema": "https://papercode.local/config.json",
   "model": "fjbdg/deepseek-v4-flash-vision-exp",
   "providers": {
     "fjbdg": {
@@ -59,13 +59,13 @@
 
 ## 密钥来源
 
-优先级：`options.apiKey`（配置内联）> 环境变量（`env` / `apiKeyEnv`）> `~/.paper_fucker/data/auth.json`（`papercode providers login`）。推荐只写 `apiKeyEnv`，把密钥留在环境变量里，避免进入版本库。
+优先级：`options.apiKey`（配置内联）> 环境变量（`env` / `apiKeyEnv`）> `~/.papercode/data/auth.json`（`papercode providers login`）。推荐只写 `apiKeyEnv`，把密钥留在环境变量里，避免进入版本库。
 
 `papercode providers list` 会把配置声明的 provider 的环境变量一并列在 `Environment` 段（仅显示变量名，不显示值）。HTTP API 返回的 provider 列表里 `key` 字段被替换为 `[redacted]`，客户端只用 `source` / `env` 判断连通性。
 
 ## 让论文管线使用它
 
-论文管线的模型选择独立于会话默认模型，状态保存在 `~/.paper_fucker/model-inventory.json`：
+论文管线的模型选择独立于会话默认模型，状态保存在 `~/.papercode/model-inventory.json`：
 
 1. **provider 可见**：配置里声明过的 provider 会自动出现在模型工作台（`/models`）的候选里，注册类型为 `manual`，来源标记 `source: "manual"`。
 2. **允许列表**：模型默认**不**自动允许；需要在工作台勾选，或写入 `allowlist`。路由要求"允许列表非空 + 主决策模型在允许列表内"。
@@ -99,6 +99,6 @@ bun run --conditions=browser src/index.ts run "论文主题"                 # �
 观察 PaperRun 实际使用的模型：
 
 ```bash
-grep 'service=llm' ~/.paper_fucker/data/log/dev.log | tail -3
+grep 'service=llm' ~/.papercode/data/log/dev.log | tail -3
 # 期望：service=llm providerID=<你的 id> modelID=<你的模型> ...
 ```

@@ -15,8 +15,8 @@ type BenchmarkScenario = "topic" | "code" | "final" | "protocol" | "starter-reru
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url))
 const repoRoot = path.resolve(scriptDir, "..")
-const benchmarkOutputRoot = process.env.PAPER_FUCKER_BENCHMARK_OUTPUT_ROOT
-  ? path.resolve(process.env.PAPER_FUCKER_BENCHMARK_OUTPUT_ROOT)
+const benchmarkOutputRoot = process.env.PAPERCODE_BENCHMARK_OUTPUT_ROOT
+  ? path.resolve(process.env.PAPERCODE_BENCHMARK_OUTPUT_ROOT)
   : path.join(repoRoot, "tmp", "live-paper-quality-benchmark")
 
 function argValue(name: string): string | undefined {
@@ -171,7 +171,7 @@ function installBenchmarkFailureRecorder() {
 
 installBenchmarkFailureRecorder()
 
-if (process.env.PAPER_FUCKER_BENCHMARK_SELF_TEST_FAILURE === "1") {
+if (process.env.PAPERCODE_BENCHMARK_SELF_TEST_FAILURE === "1") {
   throw new Error("live benchmark self-test failure recorder")
 }
 
@@ -212,7 +212,7 @@ function summaryOutput(summary: Record<string, unknown>, extra: Record<string, u
 
 const commonPolicy = {
   mode: "private_first" as const,
-  denied_patterns: ["**/.env*", "**/.git/**", "**/node_modules/**", "**/*secret*", ".paper_fucker/local/**"],
+  denied_patterns: ["**/.env*", "**/.git/**", "**/node_modules/**", "**/*secret*", ".papercode/local/**"],
   external_model_full_text: false,
 }
 
@@ -439,10 +439,10 @@ async function protocolBenchmarkWorkspace(dataset: ReturnType<typeof liveArxivRa
       "}",
       "",
       "if (variant === 'all') {",
-      "  console.log('PAPER_FUCKER_METRICS ' + JSON.stringify([outputs.proposed, outputs.baseline, outputs.ablation]))",
+      "  console.log('PAPERCODE_METRICS ' + JSON.stringify([outputs.proposed, outputs.baseline, outputs.ablation]))",
       "} else {",
       "  const selected = outputs[variant]",
-      "  console.log('PAPER_FUCKER_METRIC ' + JSON.stringify(selected.metrics[0]))",
+      "  console.log('PAPERCODE_METRIC ' + JSON.stringify(selected.metrics[0]))",
       "  console.log(`top3=${selected.ranked_ids.join(',')}`)",
       "}",
       "",
@@ -453,12 +453,12 @@ async function protocolBenchmarkWorkspace(dataset: ReturnType<typeof liveArxivRa
     path.join(workspace, "package.json"),
     `${JSON.stringify(
       {
-        name: "paper-fucker-live-ranking-protocol",
+        name: "papercode-live-ranking-protocol",
         version: "0.1.0",
         license: "MPL-2.0",
         repository: {
           type: "git",
-          url: "https://github.com/ZhuchenZhong/paper_fucker",
+          url: "https://github.com/ZhuchenZhong/papercode",
         },
         scripts: {
           "test:ranking": "bun run experiments/evaluate-agent-ranking.ts --variant=proposed",
@@ -526,7 +526,7 @@ function licenseExpressionFromUrl(url: string | undefined) {
   return url
 }
 
-const arxivUserAgent = "paper-fucker-live-benchmark/1.0 (+https://github.com/ZhuchenZhong/paper_fucker)"
+const arxivUserAgent = "papercode-live-benchmark/1.0 (+https://github.com/ZhuchenZhong/papercode)"
 
 function benchmarkBoundedIntEnv(name: string, fallback: number, bounds: { min: number; max: number }) {
   const raw = process.env[name]
@@ -536,23 +536,23 @@ function benchmarkBoundedIntEnv(name: string, fallback: number, bounds: { min: n
   return Math.max(bounds.min, Math.min(bounds.max, Math.floor(value)))
 }
 
-const arxivFetchTimeoutMs = benchmarkBoundedIntEnv("PAPER_FUCKER_BENCHMARK_ARXIV_FETCH_TIMEOUT_MS", 15_000, {
+const arxivFetchTimeoutMs = benchmarkBoundedIntEnv("PAPERCODE_BENCHMARK_ARXIV_FETCH_TIMEOUT_MS", 15_000, {
   min: 1_000,
   max: 30_000,
 })
-const arxivMaxAttempts = benchmarkBoundedIntEnv("PAPER_FUCKER_BENCHMARK_ARXIV_MAX_ATTEMPTS", 3, {
+const arxivMaxAttempts = benchmarkBoundedIntEnv("PAPERCODE_BENCHMARK_ARXIV_MAX_ATTEMPTS", 3, {
   min: 1,
   max: 5,
 })
-const arxivQueryBudgetMs = benchmarkBoundedIntEnv("PAPER_FUCKER_BENCHMARK_ARXIV_QUERY_BUDGET_MS", 90_000, {
+const arxivQueryBudgetMs = benchmarkBoundedIntEnv("PAPERCODE_BENCHMARK_ARXIV_QUERY_BUDGET_MS", 90_000, {
   min: 15_000,
   max: 120_000,
 })
-const arxivVerificationCandidateLimit = benchmarkBoundedIntEnv("PAPER_FUCKER_BENCHMARK_ARXIV_VERIFY_LIMIT", 6, {
+const arxivVerificationCandidateLimit = benchmarkBoundedIntEnv("PAPERCODE_BENCHMARK_ARXIV_VERIFY_LIMIT", 6, {
   min: 3,
   max: 8,
 })
-const protocolBenchmarkBudgetMs = benchmarkBoundedIntEnv("PAPER_FUCKER_BENCHMARK_SOURCE_BUDGET_MS", 240_000, {
+const protocolBenchmarkBudgetMs = benchmarkBoundedIntEnv("PAPERCODE_BENCHMARK_SOURCE_BUDGET_MS", 240_000, {
   min: 30_000,
   max: 300_000,
 })
@@ -923,7 +923,7 @@ const request = await (async () => {
     }
   }
   return {
-    topic: "paper_fucker 论文工作台代码库的架构与可验证导出机制",
+    topic: "papercode 论文工作台代码库的架构与可验证导出机制",
     workspace_path: repoRoot,
     code_paths: codePaths,
     paper_files: ["README.md"],

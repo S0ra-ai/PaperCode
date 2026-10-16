@@ -181,7 +181,7 @@ export const InstanceRoutes = (upgrade: UpgradeWebSocket, opts?: CorsOptions): H
       "/instance/dispose",
       describeRoute({
         summary: "Dispose instance",
-        description: "Clean up and dispose the current paper_fucker instance, releasing all resources.",
+        description: "Clean up and dispose the current papercode instance, releasing all resources.",
         operationId: "instance.dispose",
         responses: {
           200: {
@@ -203,7 +203,7 @@ export const InstanceRoutes = (upgrade: UpgradeWebSocket, opts?: CorsOptions): H
       "/path",
       describeRoute({
         summary: "Get paths",
-        description: "Retrieve the current working directory and related path information for the paper_fucker instance.",
+        description: "Retrieve the current working directory and related path information for the papercode instance.",
         operationId: "path.get",
         responses: {
           200: {
@@ -389,7 +389,7 @@ export const InstanceRoutes = (upgrade: UpgradeWebSocket, opts?: CorsOptions): H
       "/command",
       describeRoute({
         summary: "List commands",
-        description: "Get a list of all available commands in the paper_fucker system.",
+        description: "Get a list of all available commands in the papercode system.",
         operationId: "command.list",
         responses: {
           200: {
@@ -412,7 +412,7 @@ export const InstanceRoutes = (upgrade: UpgradeWebSocket, opts?: CorsOptions): H
       "/agent",
       describeRoute({
         summary: "List agents",
-        description: "Get a list of all available AI agents in the paper_fucker system.",
+        description: "Get a list of all available AI agents in the papercode system.",
         operationId: "app.agents",
         responses: {
           200: {
@@ -435,7 +435,7 @@ export const InstanceRoutes = (upgrade: UpgradeWebSocket, opts?: CorsOptions): H
       "/skill",
       describeRoute({
         summary: "List skills",
-        description: "Get a list of all available skills in the paper_fucker system.",
+        description: "Get a list of all available skills in the papercode system.",
         operationId: "app.skills",
         responses: {
           200: {

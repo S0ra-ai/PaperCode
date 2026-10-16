@@ -760,7 +760,7 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
       title: "Open docs",
       value: "docs.open",
       onSelect: () => {
-        open("https://github.com/ZhuchenZhong/paper_fucker").catch(() => {})
+        open("https://github.com/ZhuchenZhong/papercode").catch(() => {})
         dialog.clear()
       },
       category: "System",

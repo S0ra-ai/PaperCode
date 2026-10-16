@@ -77,7 +77,7 @@ steps:
   status: done
   owner: codex
   depends_on: []
-  description: 确保 Paper Fucker 用户入口、sidebar、Agent Team、capability/skills/MCP 健康状态、pause
+  description: 确保 PaperCode 用户入口、sidebar、Agent Team、capability/skills/MCP 健康状态、pause
     questions、cost/token/context/outlines 均可见。
   execution:
     mode: sequential
@@ -91,7 +91,7 @@ steps:
       agent: codex
     - timestamp: '2026-05-10T21:25:51.314239'
       level: info
-      message: Strict acceptance now verifies Paper Fucker TUI/help smoke, PaperRun
+      message: Strict acceptance now verifies PaperCode TUI/help smoke, PaperRun
         workbench UX sidebar cost/token/context/outline, Agent Tree, Agent Team, Gate,
         Memory/Code, pause questions, capability health, model roles, public branding,
         and no legacy OpenCode command surface.

@@ -144,8 +144,8 @@ describe("containsPath", () => {
     await WithInstance.provide({
       directory: subdir,
       fn: () => {
-        // .paper_fucker at worktree root, but we're running from packages/lib
-        expect(containsPath(path.join(tmp.path, ".paper_fucker", "state"), Instance.current)).toBe(true)
+        // .papercode at worktree root, but we're running from packages/lib
+        expect(containsPath(path.join(tmp.path, ".papercode", "state"), Instance.current)).toBe(true)
         // sibling package should also be accessible
         expect(containsPath(path.join(tmp.path, "packages", "other", "file.ts"), Instance.current)).toBe(true)
         // worktree root itself

@@ -9,7 +9,7 @@ tags:
 - windows
 - docs
 depends_on: []
-description: 实现从源码编译后在项目根目录生成当前平台可执行文件：Windows 为 paper_fucker.exe，类 Unix 为 paper_fucker；更新
+description: 实现从源码编译后在项目根目录生成当前平台可执行文件：Windows 为 papercode.exe，类 Unix 为 papercode；更新
   README 安装说明为 bun run build 后直接运行根目录产物。
 execution:
   mode: sequential
@@ -28,12 +28,12 @@ steps:
     - timestamp: '2026-05-11T21:27:00.195761'
       level: info
       message: 约定源码编译入口：根目录 bun run build 编译当前平台 packages/opencode 二进制，然后复制到仓库根目录。Windows
-        根目录产物为 paper_fucker.exe；类 Unix 为 paper_fucker。生成产物不进入 git。
+        根目录产物为 papercode.exe；类 Unix 为 papercode。生成产物不进入 git。
       agent: codex
     - timestamp: '2026-05-11T21:27:05.512708'
       level: info
       message: 已确定用户期望：不是临时 function，不要求 PATH 安装；源码编译完成后项目根目录出现可执行文件即可。约定 Windows
-        为 ./paper_fucker.exe，可通过 .\paper_fucker.exe 或资源管理器直接运行；类 Unix 为 ./paper_fucker。
+        为 ./papercode.exe，可通过 .\papercode.exe 或资源管理器直接运行；类 Unix 为 ./papercode。
       agent: codex
     last_run: '2026-05-11T21:27:05.512708'
     attempt_count: 2
@@ -55,8 +55,8 @@ steps:
       agent: codex
     - timestamp: '2026-05-11T21:27:30.420007'
       level: info
-      message: 新增 scripts/link-root-executable.ts：根据当前平台查找 packages/opencode/dist/paper_fucker-<platform>-<arch>/bin/paper_fucker(.exe)，复制到仓库根目录为
-        paper_fucker.exe 或 paper_fucker。根 package.json 新增 build 与 link:bin；.gitignore
+      message: 新增 scripts/link-root-executable.ts：根据当前平台查找 packages/opencode/dist/papercode-<platform>-<arch>/bin/papercode(.exe)，复制到仓库根目录为
+        papercode.exe 或 papercode。根 package.json 新增 build 与 link:bin；.gitignore
         忽略生成的根目录二进制。
       agent: codex
     last_run: '2026-05-11T21:27:30.420007'
@@ -74,12 +74,12 @@ steps:
     logs:
     - timestamp: '2026-05-11T21:27:35.105991'
       level: info
-      message: 准备修正 README 安装说明：删除临时 PowerShell function，改为 bun run build 生成根目录 paper_fucker.exe。
+      message: 准备修正 README 安装说明：删除临时 PowerShell function，改为 bun run build 生成根目录 papercode.exe。
       agent: codex
     - timestamp: '2026-05-11T21:28:05.014262'
       level: info
-      message: README 已改为真实源码编译流程：bun install 后执行 bun run build，根目录生成 Windows 的 .\paper_fucker.exe
-        或 macOS/Linux 的 ./paper_fucker；删除临时 PowerShell function 方案，并将示例命令改为 .\paper_fucker.exe。内部
+      message: README 已改为真实源码编译流程：bun install 后执行 bun run build，根目录生成 Windows 的 .\papercode.exe
+        或 macOS/Linux 的 ./papercode；删除临时 PowerShell function 方案，并将示例命令改为 .\papercode.exe。内部
         README 同步安装说明规则。
       agent: codex
     last_run: '2026-05-11T21:28:05.014262'
@@ -101,8 +101,8 @@ steps:
       agent: codex
     - timestamp: '2026-05-11T21:32:43.883661'
       level: info
-      message: 验证通过：bun run build 成功编译当前 Windows 平台二进制并复制到根目录 paper_fucker.exe；.\paper_fucker.exe
-        --version passed；.\paper_fucker.exe --help passed；构建脚本使用 --no-save 后未再修改 package.json/bun.lock；bun
+      message: 验证通过：bun run build 成功编译当前 Windows 平台二进制并复制到根目录 papercode.exe；.\papercode.exe
+        --version passed；.\papercode.exe --help passed；构建脚本使用 --no-save 后未再修改 package.json/bun.lock；bun
         run typecheck passed；check-readme-version.ps1 passed；check-changelog-format.ps1
         passed；check-release-files.ps1 passed；git diff --check passed；TaskFlow validate_changelog_format
         passed；TaskFlow validate_task release-root-executable-build passed。

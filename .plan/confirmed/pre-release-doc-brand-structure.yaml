@@ -10,7 +10,7 @@ tags:
 - structure
 - changelog
 depends_on: []
-description: 在 0.8.5-rc.1 前整理 README/docs/reports/changelog 和根目录结构，确保对外品牌为 Paper Fucker，主
+description: 在 0.8.5-rc.1 前整理 README/docs/reports/changelog 和根目录结构，确保对外品牌为 PaperCode，主
   CHANGELOG 拆分归档，项目目录入口清晰。
 execution:
   mode: sequential
@@ -38,8 +38,8 @@ steps:
       message: 'Audit complete: root CHANGELOG was 983 lines; only docs/changelog/v0/0.1.x.CHANGELOG
         existed; preview runtime exists with packages/preview token-protected read-only
         server, SSE client, and packages/opencode/src/paper/preview.ts run-bound adapter;
-        public preview HTML and Paper HTTP API still used paper_fucker lowercase in
-        visible title/copy; README title/status needed Paper Fucker public brand and
+        public preview HTML and Paper HTTP API still used papercode lowercase in
+        visible title/copy; README title/status needed PaperCode public brand and
         clearer project structure/readiness docs.'
       agent: codex
     last_run: '2026-05-11T09:14:48.733567'
@@ -78,7 +78,7 @@ steps:
   owner: codex
   depends_on:
   - split-main-changelog
-  description: 更新 README pre-release 状态、文档入口、项目结构说明和历史路径说明，明确 tracked/ignored .paper_fucker
+  description: 更新 README pre-release 状态、文档入口、项目结构说明和历史路径说明，明确 tracked/ignored .papercode
     边界。
   execution:
     mode: sequential
@@ -92,11 +92,11 @@ steps:
       agent: codex
     - timestamp: '2026-05-11T09:18:52.310479'
       level: info
-      message: README now uses Paper Fucker as the public brand, documents release-readiness
+      message: README now uses PaperCode as the public brand, documents release-readiness
         vs release-branch boundaries, links docs/project-structure.md, and records
         live preview status accurately. Added docs/project-structure.md, docs/changelog/README.md,
         and reports/pre-release-readiness.md. Preview HTML/test and PaperRun HTTP
-        API descriptions now expose Paper Fucker branding.
+        API descriptions now expose PaperCode branding.
       agent: codex
     last_run: '2026-05-11T09:18:52.310479'
     attempt_count: 2
@@ -107,7 +107,7 @@ steps:
   owner: codex
   depends_on:
   - sync-docs-and-structure
-  description: 补充/运行品牌检查，确保对外启动、help、TUI、doctor、README 当前表述使用 Paper Fucker；OpenCode
+  description: 补充/运行品牌检查，确保对外启动、help、TUI、doctor、README 当前表述使用 PaperCode；OpenCode
     仅作为 substrate/provenance 出现。
   execution:
     mode: sequential
@@ -123,7 +123,7 @@ steps:
       level: info
       message: 'Brand acceptance passed: packages/preview test passed (2 pass), packages/opencode
         public-surface + strict-acceptance focused tests passed (15 pass), and public
-        preview/API text no longer exposes lowercase paper_fucker or third-party Deerflow
+        preview/API text no longer exposes lowercase papercode or third-party Deerflow
         branding in visible preview surfaces. Historical reports remain provenance
         only.'
       agent: codex

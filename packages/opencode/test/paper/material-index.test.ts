@@ -50,7 +50,7 @@ function runtimeOptions(workspace: string, home: string): PaperRunRuntimeOptions
 }
 
 async function fixture() {
-  const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-material-index-"))
+  const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-material-index-"))
   cleanup.push(dir)
   const workspace = path.join(dir, "workspace")
   const home = path.join(dir, "home")

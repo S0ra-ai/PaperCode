@@ -225,7 +225,7 @@ export async function refreshResearchIndexes(runDir: string, options?: ResearchP
   return withSpan(
     "research.runtime.index_refresh",
     {
-      "paper_fucker.research.run_dir": runDir,
+      "papercode.research.run_dir": runDir,
     },
     async (span) => {
       const run = await loadResearchRun(runDir)
@@ -238,8 +238,8 @@ export async function refreshResearchIndexes(runDir: string, options?: ResearchP
       const seenRunDirs = new Set(runDirs.map((item) => path.resolve(item).toLowerCase()))
       if (!seenRunDirs.has(normalizedRunDir)) runDirs.push(runDir)
       const global_index_path = await rebuildGlobalIndex(runDirs, { home: options?.home })
-      span.setAttribute("paper_fucker.research.run_id", run.run_id)
-      span.setAttribute("paper_fucker.research.global_index.path", global_index_path)
+      span.setAttribute("papercode.research.run_id", run.run_id)
+      span.setAttribute("papercode.research.global_index.path", global_index_path)
       return { run_index_path: runSummary.run_index_path, global_index_path }
     },
   )
@@ -253,8 +253,8 @@ export async function appendResearchEvent(
   return withSpan(
     "research.runtime.event_append",
     {
-      "paper_fucker.research.run_dir": runDir,
-      "paper_fucker.research.event.type": input.type,
+      "papercode.research.run_dir": runDir,
+      "papercode.research.event.type": input.type,
     },
     async (span) => {
       const run = await loadResearchRun(runDir)
@@ -269,8 +269,8 @@ export async function appendResearchEvent(
         payload: input.payload ?? {},
       })
       await writeRun(runDir, { ...run, updated_at: createdAt })
-      span.setAttribute("paper_fucker.research.run_id", run.run_id)
-      span.setAttribute("paper_fucker.research.event_id", event.event_id)
+      span.setAttribute("papercode.research.run_id", run.run_id)
+      span.setAttribute("papercode.research.event_id", event.event_id)
       if (options?.refresh_indexes !== false) await refreshResearchIndexes(runDir, options)
       return event
     },
@@ -284,7 +284,7 @@ export async function createResearchRun(
   return withSpan(
     "research.runtime.run_create",
     {
-      "paper_fucker.research.topic": input.topic,
+      "papercode.research.topic": input.topic,
     },
     async (span) => {
       const createdAt = nowIso(options)
@@ -333,9 +333,9 @@ export async function createResearchRun(
         { ...options, refresh_indexes: false },
       )
       await refreshResearchIndexes(runDir, { workspace, home: options?.home })
-      span.setAttribute("paper_fucker.research.run_id", runId)
-      span.setAttribute("paper_fucker.research.run_dir", runDir)
-      span.setAttribute("paper_fucker.research.storage_scope", runRoot.scope)
+      span.setAttribute("papercode.research.run_id", runId)
+      span.setAttribute("papercode.research.run_dir", runDir)
+      span.setAttribute("papercode.research.storage_scope", runRoot.scope)
       return {
         run: await loadResearchRun(runDir),
         run_dir: runDir,
@@ -354,8 +354,8 @@ export async function updateResearchRunStatus(
   return withSpan(
     "research.runtime.run_status_update",
     {
-      "paper_fucker.research.run_dir": runDir,
-      "paper_fucker.research.run.status": status,
+      "papercode.research.run_dir": runDir,
+      "papercode.research.run.status": status,
     },
     async () => {
       const updatedAt = nowIso(options)
@@ -380,7 +380,7 @@ export async function resumeResearchRun(runDir: string, options?: ResearchRuntim
   return withSpan(
     "research.runtime.run_resume",
     {
-      "paper_fucker.research.run_dir": runDir,
+      "papercode.research.run_dir": runDir,
     },
     async () => {
       const run = await loadResearchRun(runDir)
@@ -439,7 +439,7 @@ export async function getResearchRunStatus(runDir: string): Promise<ResearchRunS
   return withSpan(
     "research.runtime.run_status",
     {
-      "paper_fucker.research.run_dir": runDir,
+      "papercode.research.run_dir": runDir,
     },
     async (span) => {
       const [
@@ -467,9 +467,9 @@ export async function getResearchRunStatus(runDir: string): Promise<ResearchRunS
         readJsonlFacts(runDir, "export"),
         readJsonlFacts(runDir, "checkpoint"),
       ])
-      span.setAttribute("paper_fucker.research.run_id", run.run_id)
-      span.setAttribute("paper_fucker.research.events.count", events.length)
-      span.setAttribute("paper_fucker.research.artifacts.count", artifacts.length)
+      span.setAttribute("papercode.research.run_id", run.run_id)
+      span.setAttribute("papercode.research.events.count", events.length)
+      span.setAttribute("papercode.research.artifacts.count", artifacts.length)
       return {
         run,
         run_dir: runDir,
@@ -495,9 +495,9 @@ export async function recordResearchCost(runDir: string, usage: ResearchCostUsag
   return withSpan(
     "research.runtime.cost_record",
     {
-      "paper_fucker.research.run_dir": runDir,
-      "paper_fucker.research.cost.llm_usd": usage.llm_usd ?? 0,
-      "paper_fucker.research.cost.api_usd": usage.api_usd ?? 0,
+      "papercode.research.run_dir": runDir,
+      "papercode.research.cost.llm_usd": usage.llm_usd ?? 0,
+      "papercode.research.cost.api_usd": usage.api_usd ?? 0,
     },
     async () => {
       const updatedAt = nowIso(options)
@@ -546,8 +546,8 @@ export async function setResearchFinalGate(
   return withSpan(
     "research.runtime.final_gate_update",
     {
-      "paper_fucker.research.run_dir": runDir,
-      "paper_fucker.research.final_gate.status": gate.status,
+      "papercode.research.run_dir": runDir,
+      "papercode.research.final_gate.status": gate.status,
     },
     async () => {
       const updatedAt = nowIso(options)

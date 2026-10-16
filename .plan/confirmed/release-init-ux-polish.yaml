@@ -9,7 +9,7 @@ tags:
 - ux
 - cli
 depends_on: []
-description: 修复 paper_fucker init/doctor 首次使用体验：默认输出中文摘要，JSON 仅作为 --json 模式；避免每次 CLI
+description: 修复 papercode init/doctor 首次使用体验：默认输出中文摘要，JSON 仅作为 --json 模式；避免每次 CLI
   都重复显示 one-time migration；补充 CLI 输出回归测试。
 execution:
   mode: sequential
@@ -30,7 +30,7 @@ steps:
       level: info
       message: 确认问题根因：init/doctor 直接 console.log(JSON.stringify(...))，默认输出内部结构；runInitWizard
         在未传 models 时仍传入空 endpoints，导致 default_model 指向 DeepSeek 但 provider endpoint
-        为空；CLI 迁移 marker 固定检查 paper_fucker.db，而 release channel 实际数据库为 paper_fucker-release-0.8.5.db，导致反复显示
+        为空；CLI 迁移 marker 固定检查 papercode.db，而 release channel 实际数据库为 papercode-release-0.8.5.db，导致反复显示
         one-time migration。
       agent: codex
     last_run: '2026-05-11T22:43:38.519869'
@@ -61,7 +61,7 @@ steps:
   status: done
   owner: codex
   depends_on: []
-  description: 迁移后写入 paper_fucker.db marker 或等价状态，防止每次 CLI 重复 one-time migration 提示。
+  description: 迁移后写入 papercode.db marker 或等价状态，防止每次 CLI 重复 one-time migration 提示。
   execution:
     mode: sequential
     retry: 0
@@ -69,7 +69,7 @@ steps:
     logs:
     - timestamp: '2026-05-11T22:44:12.881878'
       level: info
-      message: CLI 迁移 marker 改为 Database.Path，匹配 release channel 的 paper_fucker-release-0.8.5.db；init/completion
+      message: CLI 迁移 marker 改为 Database.Path，匹配 release channel 的 papercode-release-0.8.5.db；init/completion
         命令跳过 session DB migration，初始化命令不再出现数据库迁移噪声。
       agent: codex
     last_run: '2026-05-11T22:44:12.881878'
@@ -89,7 +89,7 @@ steps:
     - timestamp: '2026-05-11T22:48:10.148233'
       level: info
       message: 验证通过：targeted init/public-surface tests 13 pass；opencode typecheck
-        passed；bun run build passed and root paper_fucker.exe --version returned 0.8.8；paper_fucker.exe
+        passed；bun run build passed and root papercode.exe --version returned 0.8.8；papercode.exe
         init / init doctor 默认中文摘要且无 DB migration 噪声；--json 保留完整结构化输出；README version
         check、changelog format -IncludeArchives、TaskFlow changelog format/versions
         均通过。

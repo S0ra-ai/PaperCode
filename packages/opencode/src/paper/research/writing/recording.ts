@@ -23,8 +23,8 @@ export async function recordDraftWriting(
   return withSpan(
     "research.writing.record_draft",
     {
-      "paper_fucker.research.draft.id": input.draft.draft_id,
-      "paper_fucker.research.claims": input.ledger.entries.length,
+      "papercode.research.draft.id": input.draft.draft_id,
+      "papercode.research.claims": input.ledger.entries.length,
     },
     async (span) => {
       const run = await loadResearchRun(runDir)
@@ -101,7 +101,7 @@ export async function recordDraftWriting(
         },
         options,
       )
-      span.setAttribute("paper_fucker.research.claims.unsupported", input.ledger.unsupported_claim_ids.length)
+      span.setAttribute("papercode.research.claims.unsupported", input.ledger.unsupported_claim_ids.length)
       return {
         ledger: input.ledger,
         draft: input.draft,

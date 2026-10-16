@@ -120,7 +120,7 @@ export async function resolveAndRecordTemplate(
 ) {
   return withSpan(
     "research.template.resolve",
-    { "paper_fucker.research.template.venue": input.venue ?? "" },
+    { "papercode.research.template.venue": input.venue ?? "" },
     async (span) => {
       const resolution = resolveTemplateCandidates(input, options)
       const artifact = await writeResearchArtifact(
@@ -146,7 +146,7 @@ export async function resolveAndRecordTemplate(
         },
         options,
       )
-      span.setAttribute("paper_fucker.research.template.action", resolution.action)
+      span.setAttribute("papercode.research.template.action", resolution.action)
       return { resolution, artifact }
     },
   )

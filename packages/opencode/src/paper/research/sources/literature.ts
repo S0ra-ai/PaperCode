@@ -64,8 +64,8 @@ export function discoverLiterature(input: LiteratureDiscoveryInput): LiteratureM
   return withSpan(
     "research.sources.literature_discover",
     {
-      "paper_fucker.research.topic": input.topic,
-      "paper_fucker.research.sources.candidates": input.candidates?.length ?? 0,
+      "papercode.research.topic": input.topic,
+      "papercode.research.sources.candidates": input.candidates?.length ?? 0,
     },
     (span) => {
       const sources = (input.candidates && input.candidates.length > 0
@@ -81,8 +81,8 @@ export function discoverLiterature(input: LiteratureDiscoveryInput): LiteratureM
       const minVerified = input.min_verified_sources ?? 3
       if (verified.length < minVerified) gaps.push("insufficient_verified_literature")
 
-      span.setAttribute("paper_fucker.research.sources.verified", verified.length)
-      span.setAttribute("paper_fucker.research.sources.verification_failures", failures.length)
+      span.setAttribute("papercode.research.sources.verified", verified.length)
+      span.setAttribute("papercode.research.sources.verification_failures", failures.length)
       return {
         schema_version: "LiteratureMap.v1",
         topic: input.topic,

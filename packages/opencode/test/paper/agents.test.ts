@@ -189,7 +189,7 @@ describe("paper multi-model agent orchestration", () => {
         },
         {
           allowed_tool_names: ["read", "shell"],
-          allowed_paths: ["packages/opencode", ".paper_fucker/local"],
+          allowed_paths: ["packages/opencode", ".papercode/local"],
           data_egress: "allow_authorized_paths",
           network_allowed: true,
         },

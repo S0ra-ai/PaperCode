@@ -2,7 +2,7 @@
 
 Version: 0.2.6-dev
 
-This task cleans the user-facing OpenCode remnants from the PaperCode hard fork without removing the internal substrate that paper_fucker still uses for providers, agents, sessions, tools, MCP, skills, permissions, and plugins.
+This task cleans the user-facing OpenCode remnants from the PaperCode hard fork without removing the internal substrate that papercode still uses for providers, agents, sessions, tools, MCP, skills, permissions, and plugins.
 
 ## Implemented
 
@@ -21,9 +21,9 @@ This task cleans the user-facing OpenCode remnants from the PaperCode hard fork 
   - `stats`
   - `upgrade`
   - `uninstall`
-- Hid old resume/session/agent compatibility flags from public `paper_fucker`, `paper_fucker attach`, and `paper_fucker run` help.
+- Hid old resume/session/agent compatibility flags from public `papercode`, `papercode attach`, and `papercode run` help.
 - Reworded public non-interactive execution as `PaperRun` input instead of generic chat.
-- Reworded `paper_fucker export [runID]` as PaperRun bundle export.
+- Reworded `papercode export [runID]` as PaperRun bundle export.
 - Replaced generic chat/coding TUI home tips with Chinese PaperRun workbench guidance covering topic-to-paper, code-to-paper, Source Ledger, Claim Ledger, MCP/skills, budget tiers, data egress, preview, and export.
 - Stabilized Windows full-suite verification around native file watchers, VCS branch cache refresh, local workspace sync startup, plugin metadata concurrency, prompt queue timing, processor timing, and temporary authoring cleanup.
 

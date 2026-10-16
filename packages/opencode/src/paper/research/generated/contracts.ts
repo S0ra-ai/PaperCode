@@ -43,7 +43,7 @@ export interface ResearchStorageLayout {
     checkpoints: "checkpoints.jsonl"
   }
   run_index: "index.sqlite"
-  global_index: "~/.paper_fucker/index.sqlite"
+  global_index: "~/.papercode/index.sqlite"
   index_rebuildable: true
 }
 

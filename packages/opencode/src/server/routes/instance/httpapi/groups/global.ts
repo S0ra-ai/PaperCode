@@ -50,7 +50,7 @@ export const GlobalApi = HttpApi.make("global").add(
         OpenApi.annotations({
           identifier: "global.health",
           summary: "Get health",
-          description: "Get health information about the paper_fucker server.",
+          description: "Get health information about the papercode server.",
         }),
       ),
       HttpApiEndpoint.get("event", GlobalPaths.event, {
@@ -59,7 +59,7 @@ export const GlobalApi = HttpApi.make("global").add(
         OpenApi.annotations({
           identifier: "global.event",
           summary: "Get global events",
-          description: "Subscribe to global events from the paper_fucker system using server-sent events.",
+          description: "Subscribe to global events from the papercode system using server-sent events.",
         }),
       ),
       HttpApiEndpoint.get("configGet", GlobalPaths.config, {
@@ -68,7 +68,7 @@ export const GlobalApi = HttpApi.make("global").add(
         OpenApi.annotations({
           identifier: "global.config.get",
           summary: "Get global configuration",
-          description: "Retrieve the current global paper_fucker configuration settings and preferences.",
+          description: "Retrieve the current global papercode configuration settings and preferences.",
         }),
       ),
       HttpApiEndpoint.patch("configUpdate", GlobalPaths.config, {
@@ -79,7 +79,7 @@ export const GlobalApi = HttpApi.make("global").add(
         OpenApi.annotations({
           identifier: "global.config.update",
           summary: "Update global configuration",
-          description: "Update global paper_fucker configuration settings and preferences.",
+          description: "Update global papercode configuration settings and preferences.",
         }),
       ),
       HttpApiEndpoint.post("dispose", GlobalPaths.dispose, {
@@ -88,7 +88,7 @@ export const GlobalApi = HttpApi.make("global").add(
         OpenApi.annotations({
           identifier: "global.dispose",
           summary: "Dispose instance",
-          description: "Clean up and dispose all paper_fucker instances, releasing all resources.",
+          description: "Clean up and dispose all papercode instances, releasing all resources.",
         }),
       ),
       HttpApiEndpoint.post("upgrade", GlobalPaths.upgrade, {
@@ -98,8 +98,8 @@ export const GlobalApi = HttpApi.make("global").add(
       }).annotateMerge(
         OpenApi.annotations({
           identifier: "global.upgrade",
-          summary: "Upgrade paper_fucker",
-          description: "Upgrade paper_fucker to the specified version or latest if not specified.",
+          summary: "Upgrade papercode",
+          description: "Upgrade papercode to the specified version or latest if not specified.",
         }),
       ),
     )

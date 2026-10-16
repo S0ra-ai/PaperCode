@@ -284,7 +284,7 @@ export const layer: Layer.Layer<
     const tools: Interface["tools"] = Effect.fn("ToolRegistry.tools")(function* (input) {
       const filtered = (yield* all()).filter((tool) => {
         if (tool.id === WebSearchTool.id) {
-          return input.providerID === ProviderID.paper_fucker || input.providerID === ProviderID.opencode || Flag.OPENCODE_ENABLE_EXA
+          return input.providerID === ProviderID.papercode || input.providerID === ProviderID.opencode || Flag.OPENCODE_ENABLE_EXA
         }
 
         const usePatch =

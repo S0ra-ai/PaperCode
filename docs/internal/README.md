@@ -21,7 +21,7 @@
 - `packages/opencode/src/paper` 是唯一论文领域 runtime，负责 `PaperRun`、intake、stage graph、capability registry、model role router、recursive agent fabric、ClaimLedger、verification gate、preview/export binding 和 observability。
 - `packages/preview/` 是只读实时网页 Preview 包。
 - `research-tools/` 是 Python/MCP/tool bridge，用于外部工具发现、文档转换、爬虫/数据辅助和 Pydantic 侧校验。
-- `.paper_fucker/` 下的 tracked assets 是产品能力的一部分；`.paper_fucker/local/` 与 `.paper_fucker/runs/` 是 ignored runtime state。
+- `.papercode/` 下的 tracked assets 是产品能力的一部分；`.papercode/local/` 与 `.papercode/runs/` 是 ignored runtime state。
 
 旧 OpenCode chat/session 能力只作为内部 substrate，不再是用户默认产品形态。用户主状态是 `PaperRun`。
 
@@ -36,7 +36,7 @@ README 必须把 TUI 和内置能力作为主路径，而不是表现成 CLI-onl
 - `code-experiment-core`：OpenCode read/grep/glob/task/shell、Jupyter skill、Python experiment log parser、dataset metadata probe。
 - `writing-verification-export`：ClaimLedger、SourceLedger、review gate、export bundle。
 
-`.paper_fucker/paper_fucker.jsonc` 中 Exa remote MCP 默认启用。README 可以展示该事实，但不要暗示所有外部 MCP 都无需凭据或网络授权。
+`.papercode/papercode.jsonc` 中 Exa remote MCP 默认启用。README 可以展示该事实，但不要暗示所有外部 MCP 都无需凭据或网络授权。
 
 ## Release 分支规则
 
@@ -57,7 +57,7 @@ README 必须把 TUI 和内置能力作为主路径，而不是表现成 CLI-onl
 
 ## TaskFlow 约束
 
-- 所有普通 TaskFlow 调用使用 `project_id="paper_fucker"`。
+- 所有普通 TaskFlow 调用使用 `project_id="papercode"`。
 - 写任务前必须先 `validate_project_binding` 和 `get_runtime_info`。
 - 修改任务前必须 `claim_task`，结束后必须 `release_task`。
 - `CHANGELOG` 是 colon DSL，不是 Markdown。
@@ -124,12 +124,12 @@ $env:PYTHONPATH = 'research-tools/src'; python -m unittest discover -s research-
 
 ## README 安装说明规则
 
-对外 README 必须说明用户如何获得 `paper_fucker` 命令，不能只展示命令用法。
+对外 README 必须说明用户如何获得 `papercode` 命令，不能只展示命令用法。
 
 - 尚未发布正式 installer、tag、npm 包或包管理器包时，安装章节必须标为“源码预览”，并提供 Windows 可执行的 Git+Bun+clone+`bun install`+`bun run build` 路径。
 - 不得把尚未发布的 release installer、npm 包、Chocolatey、Scoop、Homebrew 或 GitHub release artifact 写成主安装方式。
-- 源码编译完成后，仓库根目录必须有当前平台可执行文件；Windows 是 `paper_fucker.exe`，macOS/Linux 是 `paper_fucker`。
-- Windows 源码预览示例应使用 `.\paper_fucker.exe`，不要要求用户创建临时 PowerShell function。
+- 源码编译完成后，仓库根目录必须有当前平台可执行文件；Windows 是 `papercode.exe`，macOS/Linux 是 `papercode`。
+- Windows 源码预览示例应使用 `.\papercode.exe`，不要要求用户创建临时 PowerShell function。
 - `papercode init` 必须能以 bounded access 安全默认值直接完成；README 示例优先使用 `papercode init`，Full Access 只能通过显式 `--full-access-ack` 启用。
 - `papercode init` / `papercode init doctor` 默认必须输出用户可读中文摘要；完整 JSON 只能作为 `--json` 机器接口提供。
 - 可选外部工具只列能力影响和发现方式；不要把 Pandoc、LaTeX、Docker、Python 说成基础 TUI 必装项。

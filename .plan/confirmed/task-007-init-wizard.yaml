@@ -11,7 +11,7 @@ tags:
 depends_on:
 - task-005-research-runtime
 - task-006-python-tool-bridge
-description: Implement paper_fucker init as a full diagnostic setup flow for models,
+description: Implement papercode init as a full diagnostic setup flow for models,
   encrypted secrets, external tools, workspaces, preview preferences, resource/cost
   budgets, and Full Access risk acknowledgement.
 execution:
@@ -23,7 +23,7 @@ steps:
   status: done
   owner: codex
   depends_on: []
-  description: Define ~/.paper_fucker config files, secrets.enc format, model endpoint
+  description: Define ~/.papercode config files, secrets.enc format, model endpoint
     configuration, tool paths, preview preferences, budget preferences, and Full Access
     settings.
   execution:
@@ -34,14 +34,14 @@ steps:
     - timestamp: '2026-05-08T16:51:59.137596'
       level: info
       message: Starting init diagnostics wizard on feature/init-diagnostics. The flow
-        will write ~/.paper_fucker/config.json, ~/.paper_fucker/tools.json, and ~/.paper_fucker/secrets.enc;
+        will write ~/.papercode/config.json, ~/.papercode/tools.json, and ~/.papercode/secrets.enc;
         external tools are auto-discovered with optional user links; secrets never
         go into .env or repository files.
       agent: codex
     - timestamp: '2026-05-08T16:55:18.312399'
       level: info
-      message: Defined ~/.paper_fucker/config.json, ~/.paper_fucker/tools.json, and
-        ~/.paper_fucker/secrets.enc schemas in packages/server/src/init. Config covers
+      message: Defined ~/.papercode/config.json, ~/.papercode/tools.json, and
+        ~/.papercode/secrets.enc schemas in packages/server/src/init. Config covers
         model endpoints, workspace default, preview preference, budgets, and Full
         Access/bounded access settings.
       agent: codex
@@ -64,13 +64,13 @@ steps:
     - timestamp: '2026-05-08T16:55:18.504862'
       level: info
       message: Implementing external tool discovery for pandoc, LaTeX engines, Docker,
-        Python, Git, Chrome, and Edge via config links, PAPER_FUCKER_TOOL_* env vars,
+        Python, Git, Chrome, and Edge via config links, PAPERCODE_TOOL_* env vars,
         PATH, and common Windows locations.
       agent: codex
     - timestamp: '2026-05-08T16:55:30.133387'
       level: info
       message: Implemented tool discovery in packages/server/src/init/discovery.ts.
-        It scans user links, PAPER_FUCKER_TOOL_* env vars, PATH/PATHEXT, and common
+        It scans user links, PAPERCODE_TOOL_* env vars, PATH/PATHEXT, and common
         Windows paths for pandoc, latexmk, xelatex, pdflatex, lualatex, tectonic,
         docker, python, git, chrome, and edge.
       agent: codex
@@ -83,7 +83,7 @@ steps:
   owner: codex
   depends_on:
   - task-007-step-01-config-schema
-  description: Store model/API credentials in ~/.paper_fucker/secrets.enc and never
+  description: Store model/API credentials in ~/.papercode/secrets.enc and never
     write secrets to .env or repo files.
   execution:
     mode: sequential
@@ -93,7 +93,7 @@ steps:
     - timestamp: '2026-05-08T16:55:18.697614'
       level: info
       message: Implementing AES-256-GCM secrets.enc storage with PBKDF2-SHA256 key
-        derivation. Secrets are written only to ~/.paper_fucker/secrets.enc, not .env
+        derivation. Secrets are written only to ~/.papercode/secrets.enc, not .env
         or repository files.
       agent: codex
     - timestamp: '2026-05-08T16:55:30.324602'
@@ -165,7 +165,7 @@ steps:
   meta: {}
 outputs:
 - type: artifact
-  path: paper_fucker init
+  path: papercode init
   description: Initialization command and TUI flow
 - type: report
   path: reports/init-diagnostics-smoke.md

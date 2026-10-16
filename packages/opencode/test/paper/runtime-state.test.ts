@@ -28,7 +28,7 @@ afterEach(async () => {
 
 describe("PaperRun runtime state persistence", () => {
   test("atomic JSON writes survive concurrent updates on the real filesystem", async () => {
-    const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-runtime-state-"))
+    const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-runtime-state-"))
     cleanup.push(dir)
     const file = path.join(dir, "run.json")
 

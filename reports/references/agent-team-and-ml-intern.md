@@ -15,7 +15,7 @@ PaperCode should borrow mechanisms, not product shape:
 - Agent Team: a PaperRun owns a team with a lead and specialist teammates. Teammates map onto recursive AgentTree nodes but share a run-level task board and mailbox.
 - Multi-model assignment: every teammate can use a different provider/model through OpenCode model roles and subagent overrides.
 - Isolated context: high-volume research, crawling, code mapping, and experiment logs stay in specialist contexts. The team only merges concise evidence-backed outputs.
-- Skill preloading: paper profile, crawler, citation, statistics, code understanding, and export skills are built-in paper_fucker capability packs and can be preloaded into relevant teammates.
+- Skill preloading: paper profile, crawler, citation, statistics, code understanding, and export skills are built-in papercode capability packs and can be preloaded into relevant teammates.
 - Memory bank: teammate memories are scoped to user/project/local policy. Project-local paper memory is private by default and must not be sent to external tools without data-egress approval.
 - Harness loop: all capability calls flow through a scheduler that records tool traces, approval requirements, low-value repeated expansion, retries, and blocked diagnostics.
 - Approval gate: sensitive calls such as network crawl, external model full-text egress, Hugging Face Jobs, container/GPU execution, destructive file operations, and license-conflicting source use must pause or downgrade.

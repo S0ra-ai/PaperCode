@@ -1,6 +1,6 @@
-# paper_fucker Research Runtime Boundaries
+# papercode Research Runtime Boundaries
 
-This directory is the first-party paper_fucker research runtime. Domain logic for paper generation belongs here, not in `packages/opencode`.
+This directory is the first-party papercode research runtime. Domain logic for paper generation belongs here, not in `packages/opencode`.
 
 ## First-Party Modules
 
@@ -15,4 +15,4 @@ This directory is the first-party paper_fucker research runtime. Domain logic fo
 
 ## Upstream Boundary
 
-`packages/opencode` remains the upstream-derived agent/tool/session/model/TUI substrate. New paper_fucker research contracts, stage state, gates, and export logic should be added under this runtime and integrated through explicit adapters when substrate behavior is needed.
+`packages/opencode` remains the upstream-derived agent/tool/session/model/TUI substrate. New papercode research contracts, stage state, gates, and export logic should be added under this runtime and integrated through explicit adapters when substrate behavior is needed.

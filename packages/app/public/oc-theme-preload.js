@@ -1,15 +1,15 @@
 ;(function () {
-  var key = "paper_fucker-theme-id"
+  var key = "papercode-theme-id"
   var themeId = localStorage.getItem(key) || "oc-2"
 
   if (themeId === "oc-1") {
     themeId = "oc-2"
     localStorage.setItem(key, themeId)
-    localStorage.removeItem("paper_fucker-theme-css-light")
-    localStorage.removeItem("paper_fucker-theme-css-dark")
+    localStorage.removeItem("papercode-theme-css-light")
+    localStorage.removeItem("papercode-theme-css-dark")
   }
 
-  var scheme = localStorage.getItem("paper_fucker-color-scheme") || "system"
+  var scheme = localStorage.getItem("papercode-color-scheme") || "system"
   var isDark = scheme === "dark" || (scheme === "system" && matchMedia("(prefers-color-scheme: dark)").matches)
   var mode = isDark ? "dark" : "light"
 
@@ -18,7 +18,7 @@
 
   if (themeId === "oc-2") return
 
-  var css = localStorage.getItem("paper_fucker-theme-css-" + mode)
+  var css = localStorage.getItem("papercode-theme-css-" + mode)
   if (css) {
     var style = document.createElement("style")
     style.id = "oc-theme-preload"

@@ -65,7 +65,7 @@ export function assertAuthenticResearchOutput(input: {
   const sourceType = input.provenance.source_type
   if (sourceType === "placeholder" || sourceType === "synthetic" || sourceType === "fake") {
     throw new ResearchAuthenticityError(
-      `${input.kind} output is ${sourceType}; paper_fucker must not turn unverified placeholder material into research facts.`,
+      `${input.kind} output is ${sourceType}; papercode must not turn unverified placeholder material into research facts.`,
     )
   }
 

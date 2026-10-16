@@ -131,7 +131,7 @@ describe("TUI PaperRun workbench", () => {
     const calls: Array<{ url: string; init: RequestInit }> = []
     const result = await submitPaperWorkbenchPrompt({
       baseUrl: "http://localhost:4096",
-      directory: "E:/Project/paper_fucker",
+      directory: "E:/Project/papercode",
       prompt: { input: "--code packages/opencode 生成论文", parts: [] },
       fetch: async (input, init) => {
         calls.push({ url: String(input), init: init ?? {} })
@@ -150,7 +150,7 @@ describe("TUI PaperRun workbench", () => {
     expect(calls).toHaveLength(1)
     expect(calls[0]!.url).toBe("http://localhost:4096/paper/runs")
     expect(calls[0]!.init.method).toBe("POST")
-    expect((calls[0]!.init.headers as Record<string, string>)["x-paper-fucker-directory"]).toBe("E:/Project/paper_fucker")
+    expect((calls[0]!.init.headers as Record<string, string>)["x-papercode-directory"]).toBe("E:/Project/papercode")
     expect(JSON.parse(String(calls[0]!.init.body))).toMatchObject({
       topic: "生成论文",
       code_paths: ["packages/opencode"],
@@ -162,7 +162,7 @@ describe("TUI PaperRun workbench", () => {
     await expect(
       submitPaperWorkbenchPrompt({
         baseUrl: "http://localhost:4096",
-        directory: "E:/Project/paper_fucker",
+        directory: "E:/Project/papercode",
         prompt: { input: "我想研究关于 agent team 的论文", parts: [] },
         fetch: async () =>
           Response.json({
@@ -170,7 +170,7 @@ describe("TUI PaperRun workbench", () => {
               code: "paper_run_create_failed",
               message: "PaperRun 创建失败：workspace_path 缺失",
               action: "请先用 /folder 选择当前工作目录。",
-              log_path: "C:/Users/13750/.paper_fucker/data/log",
+              log_path: "C:/Users/13750/.papercode/data/log",
             },
           }),
       }),
@@ -181,7 +181,7 @@ describe("TUI PaperRun workbench", () => {
     const calls: Array<{ url: string; init: RequestInit }> = []
     const result = await requestPaperWorkbenchExperimentStarterApply({
       baseUrl: "http://localhost:4096",
-      directory: "E:/Project/paper_fucker",
+      directory: "E:/Project/papercode",
       runID: "run-paper",
       fetch: async (input, init) => {
         calls.push({ url: String(input), init: init ?? {} })
@@ -191,17 +191,17 @@ describe("TUI PaperRun workbench", () => {
           status: "ready",
           dry_run: false,
           overwrite: false,
-          workspace_path: "E:/Project/paper_fucker",
+          workspace_path: "E:/Project/papercode",
           files: [
             {
               path: "experiments/starter/Dockerfile.repro",
-              target_path: "E:/Project/paper_fucker/experiments/starter/Dockerfile.repro",
+              target_path: "E:/Project/papercode/experiments/starter/Dockerfile.repro",
               status: "written",
               message: "已写入",
             },
             {
               path: "package.json",
-              target_path: "E:/Project/paper_fucker/package.json",
+              target_path: "E:/Project/papercode/package.json",
               status: "written",
               message: "已写入",
             },
@@ -219,7 +219,7 @@ describe("TUI PaperRun workbench", () => {
     expect(calls).toHaveLength(1)
     expect(calls[0]!.url).toBe("http://localhost:4096/paper/runs/run-paper/experiment-starter/apply")
     expect(calls[0]!.init.method).toBe("POST")
-    expect((calls[0]!.init.headers as Record<string, string>)["x-paper-fucker-directory"]).toBe("E:/Project/paper_fucker")
+    expect((calls[0]!.init.headers as Record<string, string>)["x-papercode-directory"]).toBe("E:/Project/papercode")
     expect(JSON.parse(String(calls[0]!.init.body))).toEqual({
       dry_run: false,
       overwrite: false,
@@ -231,7 +231,7 @@ describe("TUI PaperRun workbench", () => {
     const calls: Array<{ url: string; init: RequestInit }> = []
     const result = await requestPaperWorkbenchExperimentProtocolRun({
       baseUrl: "http://localhost:4096",
-      directory: "E:/Project/paper_fucker",
+      directory: "E:/Project/papercode",
       runID: "run-paper",
       fetch: async (input, init) => {
         calls.push({ url: String(input), init: init ?? {} })
@@ -240,7 +240,7 @@ describe("TUI PaperRun workbench", () => {
           run_id: "run-paper",
           status: "succeeded",
           dry_run: false,
-          workspace_path: "E:/Project/paper_fucker",
+          workspace_path: "E:/Project/papercode",
           planned_commands: [],
           host_runs: [{ experiment_id: "proposed", role: "proposed", environment: "host", status: "succeeded", command: "bun run typecheck", exit_code: 0, wall_time_seconds: 0.1, metrics: [] }],
           container_runs: [{ experiment_id: "proposed", role: "proposed", environment: "container", status: "succeeded", command: "bun run repro:container", exit_code: 0, wall_time_seconds: 0.1, metrics: [] }],
@@ -311,9 +311,9 @@ describe("TUI PaperRun workbench", () => {
           os: { platform: "win32", release: "10.0", arch: "x64", hostname: "test" },
           cpu: { model: "test cpu", cores: 8 },
           memory: { free_bytes: 1024, total_bytes: 2048 },
-          disk: { path: "E:/Project/paper_fucker", free_bytes: 4096, total_bytes: 8192 },
-          workspace: "E:/Project/paper_fucker",
-          default_run_root: "C:/Users/test/.paper_fucker/runs",
+          disk: { path: "E:/Project/papercode", free_bytes: 4096, total_bytes: 8192 },
+          workspace: "E:/Project/papercode",
+          default_run_root: "C:/Users/test/.papercode/runs",
           gpu: { mode: "cpu-only", devices: [], cuda: { status: "optional_missing" }, rocm: { status: "optional_missing" } },
           compilers: [{ id: "gcc", label: "gcc", status: "available", version: "gcc 13.2.0" }],
           runtimes: [
@@ -351,7 +351,7 @@ describe("TUI PaperRun workbench", () => {
           summary: "已生成实验协议 starter pack。",
           package_json_scripts: {
             "baseline:starter": "bun run experiments/starter/baseline-starter.ts",
-            "repro:container:starter": "docker build -f experiments/starter/Dockerfile.repro -t paper-fucker-repro . && docker run --rm paper-fucker-repro",
+            "repro:container:starter": "docker build -f experiments/starter/Dockerfile.repro -t papercode-repro . && docker run --rm papercode-repro",
           },
           files: [
             {
@@ -429,7 +429,7 @@ describe("TUI PaperRun workbench", () => {
       status: "available",
       status_label: "可用",
       gpu_mode: "CPU-only",
-      workspace: "E:/Project/paper_fucker",
+      workspace: "E:/Project/papercode",
     })
     expect(state.experiment_environment.groups.map((group) => group.label)).toEqual(["GPU", "运行时", "编译器", "容器 / 虚拟化"])
     expect(state.experiment_environment.groups.find((group) => group.id === "virtualization")).toMatchObject({

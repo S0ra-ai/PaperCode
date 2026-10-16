@@ -80,7 +80,7 @@
             <tr>
               <td><code>research-tools</code></td>
               <td>Python 研究工具和 MCP bridge。适合放数据处理、查新辅助、实验工具包装。</td>
-              <td><code>src/paper_fucker_tools/mcp_server.py</code><br /><code>tests/test_tools.py</code></td>
+              <td><code>src/papercode_tools/mcp_server.py</code><br /><code>tests/test_tools.py</code></td>
               <td>新增 Python 工具、外部依赖诊断、测试隔离。</td>
             </tr>
             <tr>
@@ -94,7 +94,7 @@
 
         <h2>状态与文件</h2>
         <div class="swimlane">
-          <div class="lane"><strong>本机状态</strong><span><code>~/.paper_fucker/model-inventory.json</code> 保存 provider/model allowlist；<code>~/.paper_fucker/runs</code> 保存运行历史、artifacts、exports。</span></div>
+          <div class="lane"><strong>本机状态</strong><span><code>~/.papercode/model-inventory.json</code> 保存 provider/model allowlist；<code>~/.papercode/runs</code> 保存运行历史、artifacts、exports。</span></div>
           <div class="lane"><strong>运行事实</strong><span><code>run.json</code> 是 run 元信息；<code>events.jsonl</code>、<code>sources.jsonl</code>、<code>claims.jsonl</code>、<code>artifacts.jsonl</code> 是事实日志；<code>index.sqlite</code> 是重建索引。</span></div>
           <div class="lane"><strong>导出文件</strong><span><code>exports/&lt;bundle-id&gt;</code> 写 Markdown、LaTeX、PDF、DOCX 和 manifest；final 与 forced draft 必须能从 manifest 追溯。</span></div>
           <div class="lane"><strong>实时监控</strong><span><code>PreviewSnapshot.v1</code> 是 Web Monitor 和 TUI dashboard 的共同数据面，新增字段必须保持向后兼容。</span></div>

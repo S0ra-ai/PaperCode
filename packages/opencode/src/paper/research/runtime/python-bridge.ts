@@ -81,7 +81,7 @@ export async function runPythonCommand(args: string[], options?: PythonBridgeOpt
   return withSpan(
     "research.runtime.python_command",
     {
-      "paper_fucker.research.python.command": command.join(" "),
+      "papercode.research.python.command": command.join(" "),
     },
     async (span) => {
       const proc = Bun.spawn(command, {
@@ -91,7 +91,7 @@ export async function runPythonCommand(args: string[], options?: PythonBridgeOpt
         stderr: "pipe",
       })
       const [stdout, stderr, exitCode] = await Promise.all([readStream(proc.stdout), readStream(proc.stderr), proc.exited])
-      span.setAttribute("paper_fucker.research.python.exit_code", exitCode)
+      span.setAttribute("papercode.research.python.exit_code", exitCode)
       return {
         command,
         exit_code: exitCode,
@@ -174,11 +174,11 @@ export async function callPythonStructuredTool(
   return withSpan(
     "research.runtime.python_structured_tool",
     {
-      "paper_fucker.research.python.tool": input.name,
+      "papercode.research.python.tool": input.name,
     },
     async () => {
       const command = await runPythonCommand(
-        ["-m", "paper_fucker_tools", "mcp-call", input.name, "--input-json", JSON.stringify(input.input ?? {})],
+        ["-m", "papercode_tools", "mcp-call", input.name, "--input-json", JSON.stringify(input.input ?? {})],
         options,
       )
       return recordPythonResult(
@@ -199,10 +199,10 @@ export async function runPythonCliTool(runDir: string, input: PythonCliToolInput
   return withSpan(
     "research.runtime.python_cli_tool",
     {
-      "paper_fucker.research.python.cli": input.name,
+      "papercode.research.python.cli": input.name,
     },
     async () => {
-      const command = await runPythonCommand(["-m", "paper_fucker_tools", ...input.args], options)
+      const command = await runPythonCommand(["-m", "papercode_tools", ...input.args], options)
       return recordPythonResult(
         runDir,
         {

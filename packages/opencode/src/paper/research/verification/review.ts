@@ -57,7 +57,7 @@ export function runMultiModelReview(reviews: ModelReviewInput[], now: string): R
   return withSpan(
     "research.verification.multi_model_review",
     {
-      "paper_fucker.research.reviewers": reviews.length,
+      "papercode.research.reviewers": reviews.length,
     },
     (span) => {
       const findings: VerificationFinding[] = []
@@ -81,7 +81,7 @@ export function runMultiModelReview(reviews: ModelReviewInput[], now: string): R
             : findings.some((finding) => finding.category === "reviewer_warning")
               ? "warn"
               : "pass"
-      span.setAttribute("paper_fucker.research.review.consensus", consensus)
+      span.setAttribute("papercode.research.review.consensus", consensus)
       return {
         schema_version: "ReviewReport.v1",
         created_at: now,

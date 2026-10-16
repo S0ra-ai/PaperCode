@@ -71,7 +71,7 @@ function UiI18nBridge(props: ParentProps) {
 
 declare global {
   interface Window {
-    __PAPER_FUCKER__?: {
+    __PAPERCODE__?: {
       updaterEnabled?: boolean
       deepLinks?: string[]
       wsl?: boolean

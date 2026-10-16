@@ -143,7 +143,7 @@ function stageAuditEntry(event: ResearchEvent): PaperObservabilityAuditEntry | u
     kind: "stage",
     name: stage,
     status,
-    span_name: `paper_fucker.stage.${stage}`,
+    span_name: `papercode.stage.${stage}`,
     attributes: {
       event_type: event.type,
       ...event.payload,
@@ -235,7 +235,7 @@ export async function recordPaperToolTrace(
       kind: "tool",
       name: input.tool_name,
       status: input.status,
-      span_name: `paper_fucker.tool.${input.tool_name}`,
+      span_name: `papercode.tool.${input.tool_name}`,
       attributes: {
         trace_id: trace.trace_id,
         has_error: Boolean(input.error),
@@ -263,7 +263,7 @@ export async function recordPaperCostUsage(
       kind: "cost",
       name: input.reason ?? "cost_usage",
       status: "succeeded",
-      span_name: "paper_fucker.cost.usage",
+      span_name: "papercode.cost.usage",
       attributes: {
         llm_usd: input.llm_usd ?? 0,
         api_usd: input.api_usd ?? 0,
@@ -291,7 +291,7 @@ export async function recordPaperDataEgressAudit(
       kind: "data_egress",
       name: input.stage ?? "data_egress",
       status: result.blocked.length > 0 ? "blocked" : "succeeded",
-      span_name: "paper_fucker.data_egress.evaluate",
+      span_name: "papercode.data_egress.evaluate",
       attributes: {
         stage: input.stage,
         candidates: input.candidates.length,
@@ -318,7 +318,7 @@ export async function recordDefaultPaperRunObservability(
         kind: "model_role",
         name: role,
         status: "succeeded",
-        span_name: `paper_fucker.model_role.${role}`,
+        span_name: `papercode.model_role.${role}`,
         attributes: {
           provider_id: model.provider_id,
           model_id: model.model_id,
@@ -335,7 +335,7 @@ export async function recordDefaultPaperRunObservability(
         kind: "capability",
         name: capability.name,
         status: "succeeded",
-        span_name: `paper_fucker.capability.${capability.name}`,
+        span_name: `papercode.capability.${capability.name}`,
         attributes: {
           type: capability.type,
           stage_count: capability.allowed_stages.length,
@@ -353,7 +353,7 @@ export async function recordDefaultPaperRunObservability(
       kind: "subagent",
       name: "root_run_agent",
       status: "succeeded",
-      span_name: "paper_fucker.agent.root_run_agent",
+      span_name: "papercode.agent.root_run_agent",
       attributes: {
         agent_id: `${run.run_id}:root`,
         depth: 0,

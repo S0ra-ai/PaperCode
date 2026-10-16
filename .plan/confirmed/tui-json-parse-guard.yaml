@@ -2,7 +2,7 @@ id: tui-json-parse-guard
 title: 修复 TUI 非 JSON 响应导致 fatal
 status: done
 priority: high
-owner: paper-fucker-dev-agent
+owner: papercode-dev-agent
 tags:
 - bugfix
 - tui
@@ -17,7 +17,7 @@ steps:
 - id: add-json-guard
   title: 增加 TUI JSON 安全解析
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   description: 新增 readTuiJsonResponse 并替换模型工作台、PaperRun workbench 的 response.json
     直接调用。
@@ -29,19 +29,19 @@ steps:
     - timestamp: '2026-05-12T08:46:57.831591'
       level: info
       message: 开始增加 TUI shared JSON response guard。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-12T08:47:10.265030'
       level: info
       message: 新增 TUI shared readTuiJsonResponse，模型工作台和 PaperRun workbench 不再直接调用
         response.json；非 JSON/空响应会变成中文诊断，模型工作台读取失败时留在对话内显示错误，不再 fatal。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-12T08:47:10.265030'
     attempt_count: 2
   meta: {}
 - id: verify-json-guard
   title: 验证 JSON guard 和构建
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   description: 运行新增测试、targeted tests、typecheck、版本校验和 build。
   execution:
@@ -52,13 +52,13 @@ steps:
     - timestamp: '2026-05-12T08:47:25.519017'
       level: info
       message: 开始运行 JSON guard regression、targeted TUI/model tests、typecheck 与 build。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-12T08:51:02.702769'
       level: info
       message: 验证通过：paper-json-response + paper-workbench + paper-visible-commands
         + model-discovery targeted tests 20 pass；opencode typecheck passed；README
         version 0.9.2.2-dev matches CHANGELOG；CHANGELOG format -IncludeArchives passed。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-12T08:51:02.702769'
     attempt_count: 2
   meta: {}

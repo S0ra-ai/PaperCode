@@ -43,7 +43,7 @@ function runtimeOptions(workspace: string, home: string): ResearchRuntimeOptions
 
 describe("research runtime", () => {
   test("creates a home-first run and rebuilds local and global indexes", async () => {
-    const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-runtime-test-"))
+    const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-runtime-test-"))
     try {
       const workspace = path.join(dir, "workspace")
       const home = path.join(dir, "home")
@@ -60,8 +60,8 @@ describe("research runtime", () => {
 
       expect(handle.storage_scope).toBe("home")
       expect(handle.run.workspace).toBe(workspace)
-      expect(handle.run_dir.startsWith(path.join(home, ".paper_fucker", "runs"))).toBe(true)
-      expect(handle.run_dir.startsWith(path.join(workspace, ".paper_fucker", "runs"))).toBe(false)
+      expect(handle.run_dir.startsWith(path.join(home, ".papercode", "runs"))).toBe(true)
+      expect(handle.run_dir.startsWith(path.join(workspace, ".papercode", "runs"))).toBe(false)
       expect(existsSync(path.join(handle.run_dir, "run.json"))).toBe(true)
       expect(existsSync(path.join(handle.run_dir, "runtime-state.json"))).toBe(true)
       expect(existsSync(path.join(handle.run_dir, "events.jsonl"))).toBe(true)
@@ -89,7 +89,7 @@ describe("research runtime", () => {
   })
 
   test("stores append-only events and versioned artifacts with lock protection", async () => {
-    const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-runtime-test-"))
+    const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-runtime-test-"))
     try {
       const workspace = path.join(dir, "workspace")
       const home = path.join(dir, "home")
@@ -153,7 +153,7 @@ describe("research runtime", () => {
   })
 
   test("tracks bounded permissions, resource state, cost alerts, final gate, and resume", async () => {
-    const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-runtime-test-"))
+    const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-runtime-test-"))
     try {
       const workspace = path.join(dir, "workspace")
       const home = path.join(dir, "home")

@@ -2,7 +2,7 @@ id: tui-prompt-tdz-crash-fix
 title: 修复 TUI Prompt 研究深度初始化崩溃
 status: done
 priority: high
-owner: paper-fucker-dev-agent
+owner: papercode-dev-agent
 tags:
 - bugfix
 - tui
@@ -17,7 +17,7 @@ steps:
 - id: fix-initialization-order
   title: 修复 Prompt 初始化顺序
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   description: 将依赖 store 的 paperBudgetTier memo 与 cyclePaperBudgetTier 移到 createStore
     之后。
@@ -30,19 +30,19 @@ steps:
       level: info
       message: 复现原因明确：paperBudgetTier createMemo 在 createStore 之前执行，Solid 创建组件时立即读取尚未初始化的
         store。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-12T08:32:20.369626'
       level: info
       message: 已将 paperBudgetTier createMemo 与 cyclePaperBudgetTier 移到 createStore
         初始化之后，消除 store TDZ 读取。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-12T08:32:20.369626'
     attempt_count: 2
   meta: {}
 - id: verify-build-and-tui
   title: 验证 typecheck、测试与源码构建
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   description: 运行 targeted tests、opencode typecheck、版本与 changelog 检查，并重新构建根目录可执行文件。
   execution:
@@ -53,13 +53,13 @@ steps:
     - timestamp: '2026-05-12T08:32:31.225485'
       level: info
       message: 开始验证 targeted tests、typecheck、版本/changelog 检查与源码构建。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-12T08:37:26.927977'
       level: info
       message: 验证通过：targeted opencode tests 18 pass；opencode typecheck passed；README/CHANGELOG
-        校验通过；bun run build passed；root paper_fucker.exe --version 返回 0.9.2.1-dev；真实
+        校验通过；bun run build passed；root papercode.exe --version 返回 0.9.2.1-dev；真实
         TUI 启动烟测进入首页，无 Cannot access before initialization fatal。
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-12T08:37:26.927977'
     attempt_count: 2
   meta: {}

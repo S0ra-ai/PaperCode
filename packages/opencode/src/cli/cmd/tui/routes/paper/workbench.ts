@@ -640,7 +640,7 @@ function apiUrl(baseUrl: string, path: string) {
 function apiHeaders(directory?: string, json = false) {
   return {
     ...(json ? { "content-type": "application/json" } : {}),
-    ...(directory ? { "x-paper-fucker-directory": directory } : {}),
+    ...(directory ? { "x-papercode-directory": directory } : {}),
   }
 }
 

@@ -2,7 +2,7 @@ id: tui-terminal-model-brand-hardening
 title: TUI terminal, model workbench, and brand hardening
 status: done
 priority: high
-owner: paper-fucker-agent
+owner: papercode-agent
 tags:
 - tui
 - model-workbench
@@ -10,7 +10,7 @@ tags:
 - brand
 - 0.10.2-dev
 depends_on: []
-description: Implement Paper Fucker TUI terminal size guard, native/fallback picker,
+description: Implement PaperCode TUI terminal size guard, native/fallback picker,
   redesigned model workbench with provider registrations and scrollable multi-select
   lists, schema-safe PaperRun creation, and user-visible OpenCode brand cleanup. Version
   0.10.2-dev.
@@ -21,7 +21,7 @@ steps:
 - id: inspect-current-tui
   title: Inspect current TUI/model/schema entrypoints
   status: done
-  owner: paper-fucker-agent
+  owner: papercode-agent
   depends_on: []
   description: Confirm current home, model workbench, folder picker, schema validation,
     and brand surfaces before editing.
@@ -34,24 +34,24 @@ steps:
       level: info
       message: Created feature/tui-terminal-model-brand-hardening after TaskFlow task
         creation dirtied the worktree; proceeding with current TUI/model/schema inspection.
-      agent: paper-fucker-agent
+      agent: papercode-agent
     - timestamp: '2026-05-12T23:44:22.134185'
       level: info
       message: Confirmed model workbench lacks scroll offset and provider registrations,
         folder picker is TUI-only, PaperRun schema validation uses runtime file schema,
         and user-visible OpenCode/OC surfaces remain in titles/errors/command flows.
-      agent: paper-fucker-agent
+      agent: papercode-agent
     last_run: '2026-05-12T23:44:22.134185'
     attempt_count: 2
   meta: {}
 - id: terminal-guard-and-style
-  title: Add terminal size guard and Paper Fucker visual style
+  title: Add terminal size guard and PaperCode visual style
   status: done
-  owner: paper-fucker-agent
+  owner: papercode-agent
   depends_on:
   - inspect-current-tui
   description: Implement minimum/recommended terminal sizing, resize blocking page,
-    CJK-safe truncation, and distinct Paper Fucker palette/layout updates.
+    CJK-safe truncation, and distinct PaperCode palette/layout updates.
   execution:
     mode: sequential
     retry: 0
@@ -59,23 +59,23 @@ steps:
     logs:
     - timestamp: '2026-05-12T23:44:59.826045'
       level: info
-      message: Implementing minimum terminal guard, Paper Fucker visual style, CJK-safe
+      message: Implementing minimum terminal guard, PaperCode visual style, CJK-safe
         truncation, and responsive prompt metadata.
-      agent: paper-fucker-agent
+      agent: papercode-agent
     - timestamp: '2026-05-13T00:36:11.695855'
       level: info
       message: Implemented TerminalCapabilityGuard with 96x28 minimum and 120x34 recommendation,
         startup/runtime small-terminal Chinese blocking pages, CJK-aware truncation,
-        responsive home prompt layout, and Paper Fucker cold-black/paper-white/research-blue
+        responsive home prompt layout, and PaperCode cold-black/paper-white/research-blue
         visual palette.
-      agent: paper-fucker-agent
+      agent: papercode-agent
     last_run: '2026-05-13T00:36:11.695855'
     attempt_count: 2
   meta: {}
 - id: native-picker
   title: Implement native and fallback picker
   status: done
-  owner: paper-fucker-agent
+  owner: papercode-agent
   depends_on:
   - inspect-current-tui
   description: Add cross-platform native folder/file picker with Windows drive-aware
@@ -89,21 +89,21 @@ steps:
       level: info
       message: Added cross-platform native picker helper and Windows drive-aware fallback
         folder browser with CJK-safe path truncation and list scrolling.
-      agent: paper-fucker-agent
+      agent: papercode-agent
     - timestamp: '2026-05-13T00:36:19.585034'
       level: info
       message: Implemented PaperNativePicker for Windows FolderBrowserDialog/OpenFileDialog,
         macOS osascript, Linux zenity/kdialog; /folder uses native picker first and
         falls back to a Chinese, Windows-drive-aware TUI directory picker with scrolling;
         /file, /data, and /log append selected materials to the PaperRun intake prompt.
-      agent: paper-fucker-agent
+      agent: papercode-agent
     last_run: '2026-05-13T00:36:19.585034'
     attempt_count: 2
   meta: {}
 - id: model-workbench-redesign
   title: Redesign model workbench
   status: done
-  owner: paper-fucker-agent
+  owner: papercode-agent
   depends_on:
   - inspect-current-tui
   description: Implement provider registration pages, registered-only candidates,
@@ -119,7 +119,7 @@ steps:
       message: Reworking model inventory semantics and full-screen /models page with
         provider registrations, sorted scrollable candidate/allowlist lists, main/backup
         decision models, and stage model policies.
-      agent: paper-fucker-agent
+      agent: papercode-agent
     - timestamp: '2026-05-13T00:36:30.162455'
       level: info
       message: 'Redesigned /models as a full-screen four-area workbench: provider
@@ -127,18 +127,18 @@ steps:
         stage model policies. Candidates now only come from registered providers,
         lists sort by provider/model ref, support scrolling, and route agents only
         through allowlist-backed policies.'
-      agent: paper-fucker-agent
+      agent: papercode-agent
     last_run: '2026-05-13T00:36:30.162455'
     attempt_count: 2
   meta: {}
 - id: paperrun-schema-brand
   title: Harden PaperRun schema and brand surfaces
   status: done
-  owner: paper-fucker-agent
+  owner: papercode-agent
   depends_on:
   - model-workbench-redesign
   description: Fix schema ref resolution in source and built exe paths, improve structured
-    errors, and remove user-visible OpenCode/OC surfaces from Paper Fucker flows.
+    errors, and remove user-visible OpenCode/OC surfaces from PaperCode flows.
   execution:
     mode: sequential
     retry: 0
@@ -148,21 +148,21 @@ steps:
       level: info
       message: Embedded research schema fallback, improved Ajv validator lookup, structured
         schema error codes, and patched visible OC terminal title/message surfaces.
-      agent: paper-fucker-agent
+      agent: papercode-agent
     - timestamp: '2026-05-13T00:36:37.636765'
       level: info
       message: Added embedded research schema fallback for packaged exe runtime, improved
         Ajv schema lookup and structured Chinese PaperRun create diagnostics, removed
-        remaining visible OC/OpenCode title/error/command surfaces from Paper Fucker
+        remaining visible OC/OpenCode title/error/command surfaces from PaperCode
         flows, and Chinese-localized the fallback provider dialog copy.
-      agent: paper-fucker-agent
+      agent: papercode-agent
     last_run: '2026-05-13T00:36:37.636765'
     attempt_count: 2
   meta: {}
 - id: docs-changelog-tests
   title: Document, changelog, and verify
   status: done
-  owner: paper-fucker-agent
+  owner: papercode-agent
   depends_on:
   - terminal-guard-and-style
   - native-picker
@@ -178,7 +178,7 @@ steps:
     - timestamp: '2026-05-13T00:36:53.522235'
       level: info
       message: Running final documentation, changelog, and verification closure.
-      agent: paper-fucker-agent
+      agent: papercode-agent
     - timestamp: '2026-05-13T00:37:04.913017'
       level: info
       message: 'Updated README to 0.10.2-dev and documented terminal/model/folder
@@ -186,15 +186,15 @@ steps:
         full test 2621 pass/0 fail, typecheck passed, preview tests 3 pass, Python
         research-tools 18 pass, README version check passed, CHANGELOG format check
         passed, TaskFlow task/changelog validations passed, and bun run build produced
-        root paper_fucker.exe with version smoke 0.10.2-dev.'
-      agent: paper-fucker-agent
+        root papercode.exe with version smoke 0.10.2-dev.'
+      agent: papercode-agent
     last_run: '2026-05-13T00:37:04.913017'
     attempt_count: 2
   meta: {}
 outputs:
 - type: directory
   path: packages/opencode/src/cli/cmd/tui
-  description: Paper Fucker TUI guard, picker, model workbench, and visual hardening
+  description: PaperCode TUI guard, picker, model workbench, and visual hardening
 - type: directory
   path: packages/opencode/src/paper
   description: Model inventory/provider registration and PaperRun schema hardening

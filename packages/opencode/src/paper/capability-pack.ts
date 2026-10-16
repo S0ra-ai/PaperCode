@@ -407,7 +407,7 @@ export function builtinPaperCapabilityPacks(): PaperCapabilityPack[] {
         capability({
           name: "paper.claim-ledger",
           type: "first_party_tool",
-          substrate: "paper_fucker",
+          substrate: "papercode",
           title: "ClaimLedger writer",
           description: "Create, update, and verify ClaimLedger entries before draft generation.",
           trust: "first_party",
@@ -418,7 +418,7 @@ export function builtinPaperCapabilityPacks(): PaperCapabilityPack[] {
         capability({
           name: "paper.source-ledger",
           type: "first_party_tool",
-          substrate: "paper_fucker",
+          substrate: "papercode",
           title: "SourceLedger verifier",
           description: "Verify source ranges, licenses, and source-to-claim links.",
           trust: "first_party",
@@ -429,7 +429,7 @@ export function builtinPaperCapabilityPacks(): PaperCapabilityPack[] {
         capability({
           name: "paper.review-gate",
           type: "first_party_tool",
-          substrate: "paper_fucker",
+          substrate: "papercode",
           title: "Authenticity review gate",
           description: "Run claim, citation, source, license, data, and reproduction checks before final export.",
           trust: "first_party",
@@ -440,7 +440,7 @@ export function builtinPaperCapabilityPacks(): PaperCapabilityPack[] {
         capability({
           name: "paper.export-bundle",
           type: "first_party_tool",
-          substrate: "paper_fucker",
+          substrate: "papercode",
           title: "Paper export bundle",
           description: "Build final and forced-draft paper bundles from verified run artifacts.",
           trust: "first_party",

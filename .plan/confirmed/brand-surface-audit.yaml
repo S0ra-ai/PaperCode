@@ -11,7 +11,7 @@ tags:
 depends_on:
 - paper-workbench-ux-flow
 description: Ensure user-visible startup ASCII, TUI logo, help, doctor, errors, and
-  strict reports consistently use Paper Fucker and do not expose OpenCode/Open Code
+  strict reports consistently use PaperCode and do not expose OpenCode/Open Code
   as the product surface.
 execution:
   mode: sequential
@@ -36,7 +36,7 @@ steps:
       agent: codex
     - timestamp: '2026-05-10T19:02:12.036177'
       level: info
-      message: Scanned Paper Fucker public surfaces with rg and direct reads. Found
+      message: Scanned PaperCode public surfaces with rg and direct reads. Found
         user-visible OpenCode remnants in the legacy session sidebar footer, plugin
         sidebar footer, and paper provider-discovery OpenAPI description; provider
         ids and internal OpenCode substrate imports remain internal compatibility
@@ -51,7 +51,7 @@ steps:
   owner: codex
   depends_on:
   - brand-surface-audit-step-01-scan
-  description: Replace user-facing product remnants with Paper Fucker while preserving
+  description: Replace user-facing product remnants with PaperCode while preserving
     internal OpenCode substrate terminology where appropriate.
   execution:
     mode: sequential
@@ -65,7 +65,7 @@ steps:
       agent: codex
     - timestamp: '2026-05-10T19:02:26.354572'
       level: info
-      message: Replaced user-visible Open/Code footer branding with Paper Fucker in
+      message: Replaced user-visible Open/Code footer branding with PaperCode in
         TUI session sidebar and plugin sidebar footer. Reworded paper provider discovery
         OpenAPI description to provider-agnostic wording while preserving internal
         provider compatibility names.
@@ -80,7 +80,7 @@ steps:
   depends_on:
   - brand-surface-audit-step-02-clean
   description: Ensure strict acceptance checks logo and visible help/doctor/TUI surfaces
-    for Paper Fucker and OpenCode remnants.
+    for PaperCode and OpenCode remnants.
   execution:
     mode: sequential
     retry: 0
@@ -94,7 +94,7 @@ steps:
     - timestamp: '2026-05-10T19:02:34.619676'
       level: info
       message: Expanded scripts/strict-acceptance.ps1 Invoke-HardForkPublicBranding
-        to check Paper Fucker logo, command cleanup, TUI home, tips, dashboard sidebar,
+        to check PaperCode logo, command cleanup, TUI home, tips, dashboard sidebar,
         session/sidebar footer branding, and provider-agnostic paper API wording.
         Added public-surface regression tests for sidebar/API wording.
       agent: codex

@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://paper-fucker.local/schemas/research/v1.schema.json",
-  "title": "paper_fucker research contracts v1",
-  "description": "Authoritative JSON Schema source for paper_fucker research run facts, events, artifacts, and indexes.",
+  "$id": "https://papercode.local/schemas/research/v1.schema.json",
+  "title": "papercode research contracts v1",
+  "description": "Authoritative JSON Schema source for papercode research run facts, events, artifacts, and indexes.",
   "$defs": {
     "SchemaVersion": {
       "const": "research.v1"
@@ -151,7 +151,7 @@
           "const": "index.sqlite"
         },
         "global_index": {
-          "const": "~/.paper_fucker/index.sqlite"
+          "const": "~/.papercode/index.sqlite"
         },
         "index_rebuildable": {
           "const": true

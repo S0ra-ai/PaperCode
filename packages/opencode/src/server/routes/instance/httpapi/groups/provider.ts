@@ -69,7 +69,7 @@ export const ProviderApi = HttpApi.make("provider")
   )
   .annotateMerge(
     OpenApi.annotations({
-      title: "paper_fucker experimental HttpApi",
+      title: "papercode experimental HttpApi",
       version: "0.0.1",
       description: "Experimental HttpApi surface for selected instance routes.",
     }),

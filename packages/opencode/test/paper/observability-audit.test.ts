@@ -54,7 +54,7 @@ function runtimeOptions(workspace: string, home: string): ResearchRuntimeOptions
 }
 
 async function newPaperRun() {
-  const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-observability-"))
+  const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-observability-"))
   created.push(dir)
   const workspace = path.join(dir, "workspace")
   const home = path.join(dir, "home")
@@ -106,7 +106,7 @@ describe("PaperRun observability audit", () => {
         kind: "capability",
         name: "exa",
         status: "succeeded",
-        span_name: "paper_fucker.capability.exa",
+        span_name: "papercode.capability.exa",
         attributes: { stage: "literature", cost: "metered" },
       },
       run.options,
@@ -117,7 +117,7 @@ describe("PaperRun observability audit", () => {
         kind: "model_role",
         name: "writer",
         status: "succeeded",
-        span_name: "paper_fucker.model.writer",
+        span_name: "papercode.model.writer",
         attributes: { provider_id: "deepseek", model_id: "deepseek-v4-pro" },
       },
       run.options,
@@ -128,7 +128,7 @@ describe("PaperRun observability audit", () => {
         kind: "subagent",
         name: "reviewer-depth-2",
         status: "succeeded",
-        span_name: "paper_fucker.agent.reviewer",
+        span_name: "papercode.agent.reviewer",
         attributes: { parent_agent_id: "root", depth: 2 },
       },
       run.options,
@@ -159,7 +159,7 @@ describe("PaperRun observability audit", () => {
         kind: "export_renderer",
         name: "docx",
         status: "failed",
-        span_name: "paper_fucker.export.docx",
+        span_name: "papercode.export.docx",
         attributes: { diagnostic: "pandoc missing" },
       },
       run.options,

@@ -10,7 +10,7 @@ tags:
 - 0.6.4-dev
 depends_on:
 - capability-pack-harness
-description: 实现 Paper Fucker 的 MemoryBank 与代码理解层，保留长期项目知识、agent 学习、代码结构摘要、source range、symbol/file
+description: 实现 PaperCode 的 MemoryBank 与代码理解层，保留长期项目知识、agent 学习、代码结构摘要、source range、symbol/file
   graph、实验入口和风险记忆；默认本地私有，不外传未授权内容。
 execution:
   mode: sequential

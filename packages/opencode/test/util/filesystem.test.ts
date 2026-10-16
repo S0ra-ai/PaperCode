@@ -154,20 +154,20 @@ describe("filesystem", () => {
       const nested = path.join(project, "nested")
       await fs.mkdir(nested, { recursive: true })
 
-      await fs.writeFile(path.join(tmp.path, "paper_fucker.json"), "{}", "utf-8")
-      await fs.writeFile(path.join(tmp.path, "paper_fucker.jsonc"), "{}", "utf-8")
-      await fs.writeFile(path.join(project, "paper_fucker.json"), "{}", "utf-8")
-      await fs.writeFile(path.join(project, "paper_fucker.jsonc"), "{}", "utf-8")
+      await fs.writeFile(path.join(tmp.path, "papercode.json"), "{}", "utf-8")
+      await fs.writeFile(path.join(tmp.path, "papercode.jsonc"), "{}", "utf-8")
+      await fs.writeFile(path.join(project, "papercode.json"), "{}", "utf-8")
+      await fs.writeFile(path.join(project, "papercode.jsonc"), "{}", "utf-8")
 
-      const result = await Filesystem.findUp(["paper_fucker.json", "paper_fucker.jsonc"], nested, tmp.path, {
+      const result = await Filesystem.findUp(["papercode.json", "papercode.jsonc"], nested, tmp.path, {
         rootFirst: true,
       })
 
       expect(result).toEqual([
-        path.join(tmp.path, "paper_fucker.json"),
-        path.join(tmp.path, "paper_fucker.jsonc"),
-        path.join(project, "paper_fucker.json"),
-        path.join(project, "paper_fucker.jsonc"),
+        path.join(tmp.path, "papercode.json"),
+        path.join(tmp.path, "papercode.jsonc"),
+        path.join(project, "papercode.json"),
+        path.join(project, "papercode.jsonc"),
       ])
     })
   })

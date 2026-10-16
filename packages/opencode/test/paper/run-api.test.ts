@@ -41,7 +41,7 @@ function app() {
       Layer.provide(
         ConfigProvider.layer(
           ConfigProvider.fromUnknown({
-            PAPER_FUCKER_SERVER_PASSWORD: undefined,
+            PAPERCODE_SERVER_PASSWORD: undefined,
             OPENCODE_SERVER_PASSWORD: undefined,
           }),
         ),
@@ -73,8 +73,8 @@ function runPath(template: string, runID: string) {
 }
 
 afterEach(async () => {
-  if (previousPaperHome === undefined) delete process.env.PAPER_FUCKER_TEST_HOME
-  else process.env.PAPER_FUCKER_TEST_HOME = previousPaperHome
+  if (previousPaperHome === undefined) delete process.env.PAPERCODE_TEST_HOME
+  else process.env.PAPERCODE_TEST_HOME = previousPaperHome
   previousPaperHome = undefined
   stopAllPaperRunLivePreviews()
   Flag.OPENCODE_EXPERIMENTAL_HTTPAPI = originalHttpApi
@@ -128,12 +128,12 @@ describe("PaperRun HttpApi", () => {
 
   test("serves Paper model inventory JSON through the default Hono TUI backend", async () => {
     await using tmp = await tmpdir({ git: true, config: { formatter: false, lsp: false } })
-    previousPaperHome = process.env.PAPER_FUCKER_TEST_HOME
-    process.env.PAPER_FUCKER_TEST_HOME = tmp.path
+    previousPaperHome = process.env.PAPERCODE_TEST_HOME
+    process.env.PAPERCODE_TEST_HOME = tmp.path
     Flag.OPENCODE_EXPERIMENTAL_HTTPAPI = false
 
     const response = await Server.Legacy().app.request(PaperPaths.modelInventory, {
-      headers: { "x-paper-fucker-directory": tmp.path },
+      headers: { "x-papercode-directory": tmp.path },
     })
 
     expect(response.status).toBe(200)
@@ -170,12 +170,12 @@ describe("PaperRun HttpApi", () => {
         },
       },
     })
-    previousPaperHome = process.env.PAPER_FUCKER_TEST_HOME
-    process.env.PAPER_FUCKER_TEST_HOME = tmp.path
+    previousPaperHome = process.env.PAPERCODE_TEST_HOME
+    process.env.PAPERCODE_TEST_HOME = tmp.path
     Flag.OPENCODE_EXPERIMENTAL_HTTPAPI = false
 
     const response = await Server.Legacy().app.request(PaperPaths.modelInventory, {
-      headers: { "x-paper-fucker-directory": tmp.path },
+      headers: { "x-papercode-directory": tmp.path },
     })
 
     expect(response.status).toBe(200)
@@ -195,9 +195,9 @@ describe("PaperRun HttpApi", () => {
 
   test("registers OpenAI-compatible providers with all discovered models enabled by default", async () => {
     await using tmp = await tmpdir({ git: true, config: { formatter: false, lsp: false } })
-    previousPaperHome = process.env.PAPER_FUCKER_TEST_HOME
-    process.env.PAPER_FUCKER_TEST_HOME = tmp.path
-    const headers = { "x-paper-fucker-directory": tmp.path }
+    previousPaperHome = process.env.PAPERCODE_TEST_HOME
+    process.env.PAPERCODE_TEST_HOME = tmp.path
+    const headers = { "x-papercode-directory": tmp.path }
     const previousFetch = globalThis.fetch
     globalThis.fetch = (async () =>
       Response.json({
@@ -238,9 +238,9 @@ describe("PaperRun HttpApi", () => {
 
   test("serves PaperRun lifecycle, diagnostics, capability, provider, and role endpoints", async () => {
     await using tmp = await tmpdir({ git: true, config: { formatter: false, lsp: false } })
-    previousPaperHome = process.env.PAPER_FUCKER_TEST_HOME
-    process.env.PAPER_FUCKER_TEST_HOME = tmp.path
-    const headers = { "x-paper-fucker-directory": tmp.path }
+    previousPaperHome = process.env.PAPERCODE_TEST_HOME
+    process.env.PAPERCODE_TEST_HOME = tmp.path
+    const headers = { "x-papercode-directory": tmp.path }
 
     const create = await app().request(PaperPaths.runs, {
       ...json({
@@ -411,10 +411,10 @@ describe("PaperRun HttpApi", () => {
         return { home, workspace }
       },
     })
-    previousPaperHome = process.env.PAPER_FUCKER_TEST_HOME
-    process.env.PAPER_FUCKER_TEST_HOME = tmp.extra.home
+    previousPaperHome = process.env.PAPERCODE_TEST_HOME
+    process.env.PAPERCODE_TEST_HOME = tmp.extra.home
     await seedTestModelInventory(tmp.extra.home)
-    const headers = { "x-paper-fucker-directory": tmp.extra.workspace }
+    const headers = { "x-papercode-directory": tmp.extra.workspace }
     const run = await createPaperRun(
       {
         topic: "代码实验 starter 写入验证",
@@ -496,11 +496,11 @@ describe("PaperRun HttpApi", () => {
         return { home, workspace, legacyHome }
       },
     })
-    previousPaperHome = process.env.PAPER_FUCKER_TEST_HOME
-    process.env.PAPER_FUCKER_TEST_HOME = tmp.extra.home
+    previousPaperHome = process.env.PAPERCODE_TEST_HOME
+    process.env.PAPERCODE_TEST_HOME = tmp.extra.home
     const previousLegacyHome = process.env.OPENCODE_TEST_HOME
     process.env.OPENCODE_TEST_HOME = tmp.extra.legacyHome
-    const headers = { "x-paper-fucker-directory": tmp.extra.workspace }
+    const headers = { "x-papercode-directory": tmp.extra.workspace }
 
     try {
       const homeCreate = await app().request(PaperPaths.runs, {
@@ -509,9 +509,9 @@ describe("PaperRun HttpApi", () => {
       })
       expect(homeCreate.status).toBe(200)
       const homeBody = await homeCreate.json()
-      expect(path.resolve(homeBody.run_dir).startsWith(path.join(tmp.extra.home, ".paper_fucker", "runs"))).toBe(true)
-      expect(path.resolve(homeBody.run_dir).startsWith(path.join(tmp.extra.workspace, ".paper_fucker", "runs"))).toBe(false)
-      expect(existsSync(path.join(tmp.extra.legacyHome, ".paper_fucker", "runs"))).toBe(false)
+      expect(path.resolve(homeBody.run_dir).startsWith(path.join(tmp.extra.home, ".papercode", "runs"))).toBe(true)
+      expect(path.resolve(homeBody.run_dir).startsWith(path.join(tmp.extra.workspace, ".papercode", "runs"))).toBe(false)
+      expect(existsSync(path.join(tmp.extra.legacyHome, ".papercode", "runs"))).toBe(false)
       expect(homeBody.run.diagnostics.runtime_root).toBe(path.dirname(homeBody.run_dir))
 
       const workspaceCreate = await app().request(PaperPaths.runs, {
@@ -520,7 +520,7 @@ describe("PaperRun HttpApi", () => {
       })
       expect(workspaceCreate.status).toBe(200)
       const workspaceBody = await workspaceCreate.json()
-      expect(path.resolve(workspaceBody.run_dir).startsWith(path.join(tmp.extra.workspace, ".paper_fucker", "runs"))).toBe(true)
+      expect(path.resolve(workspaceBody.run_dir).startsWith(path.join(tmp.extra.workspace, ".papercode", "runs"))).toBe(true)
 
       const list = await app().request(PaperPaths.runs, { headers })
       expect(list.status).toBe(200)

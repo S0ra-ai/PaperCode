@@ -51,7 +51,7 @@ describe("public PaperCode surface", () => {
     expect(debug).toContain("papercode version: ${ProductVersion}")
     expect(sidebar).toContain("{ProductVersion}")
     expect(build).toContain("CHANGELOG")
-    expect(build).toContain("PAPER_FUCKER_VERSION")
+    expect(build).toContain("PAPERCODE_VERSION")
   })
 
   test("public CLI help strings use PaperRun and hide legacy chat/session wording", async () => {

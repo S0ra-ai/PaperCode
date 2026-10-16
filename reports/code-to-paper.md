@@ -1,6 +1,6 @@
 # Code To Paper
 
-> Historical path note: this report predates task-032. Any `packages/server` or `@paper-fucker/server` paths below are provenance only; the current paper_fucker runtime authority is `packages/opencode/src/paper`, and `packages/server` is intentionally absent.
+> Historical path note: this report predates task-032. Any `packages/server` or `@papercode/server` paths below are provenance only; the current papercode runtime authority is `packages/opencode/src/paper`, and `packages/server` is intentionally absent.
 
 Version: 0.1.24-dev
 
@@ -8,7 +8,7 @@ Task: `task-027-code-to-paper`
 
 ## Summary
 
-paper_fucker can now turn code paths into source-grounded paper artifacts. The implementation is deliberately conservative: every extracted method, test, and reproduction command is tied to a concrete source range.
+papercode can now turn code paths into source-grounded paper artifacts. The implementation is deliberately conservative: every extracted method, test, and reproduction command is tied to a concrete source range.
 
 ## Implemented
 

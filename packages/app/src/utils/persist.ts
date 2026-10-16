@@ -22,8 +22,8 @@ type PersistTarget = {
 }
 
 const LEGACY_STORAGE = "default.dat"
-const GLOBAL_STORAGE = "paper_fucker.global.dat"
-const LOCAL_PREFIX = "paper_fucker."
+const GLOBAL_STORAGE = "papercode.global.dat"
+const LOCAL_PREFIX = "papercode."
 const fallback = new Map<string, boolean>()
 
 const CACHE_MAX_ENTRIES = 500
@@ -337,7 +337,7 @@ async function migrateLegacyAsync(input: {
 function workspaceStorage(dir: string) {
   const head = (dir.slice(0, 12) || "workspace").replace(/[^a-zA-Z0-9._-]/g, "-")
   const sum = checksum(dir) ?? "0"
-  return `paper_fucker.workspace.${head}.${sum}.dat`
+  return `papercode.workspace.${head}.${sum}.dat`
 }
 
 function legacyWorkspaceStorage(dir: string) {

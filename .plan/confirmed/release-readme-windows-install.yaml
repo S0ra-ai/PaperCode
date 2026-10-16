@@ -9,7 +9,7 @@ tags:
 - install
 - windows
 depends_on: []
-description: 在对外 README 中增加 Windows 用户可执行的安装、源码预览运行、首次初始化、TUI 启动和可选外部工具说明，避免只展示 paper_fucker
+description: 在对外 README 中增加 Windows 用户可执行的安装、源码预览运行、首次初始化、TUI 启动和可选外部工具说明，避免只展示 papercode
   命令而缺少获得命令的方法。
 execution:
   mode: sequential
@@ -57,8 +57,8 @@ steps:
     - timestamp: '2026-05-11T21:16:36.096074'
       level: info
       message: README 新增安装章节：Windows 源码预览路径包括 Git、Bun、clone、bun install、临时 PowerShell
-        paper_fucker function、paper_fucker --help；说明基础 TUI 只需要 Git+Bun，Pandoc/LaTeX/Docker/Python
-        是按能力启用的可选工具；所有 init 示例更新为 paper_fucker init --yes。docs/internal/README.md
+        papercode function、papercode --help；说明基础 TUI 只需要 Git+Bun，Pandoc/LaTeX/Docker/Python
+        是按能力启用的可选工具；所有 init 示例更新为 papercode init --yes。docs/internal/README.md
         增加 README 安装说明维护规则。
       agent: codex
     last_run: '2026-05-11T21:16:36.096074'
@@ -81,7 +81,7 @@ steps:
       agent: codex
     - timestamp: '2026-05-11T21:17:39.967678'
       level: info
-      message: 验证通过：README 中临时 PowerShell function 可启动 paper_fucker --help 并显示 Paper
+      message: 验证通过：README 中临时 PowerShell function 可启动 papercode --help 并显示 Paper
         Fucker banner；check-readme-version.ps1 passed；check-changelog-format.ps1 passed；check-release-files.ps1
         passed；git diff --check passed；TaskFlow validate_changelog_format passed；TaskFlow
         validate_task release-readme-windows-install passed。工作提交 3f60a80。

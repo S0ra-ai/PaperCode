@@ -39,7 +39,7 @@ steps:
       level: info
       message: Created legacy/references/manifest.json with OpenCode, Folio, IntelliGen,
         AI Scientist, PaperOrchestra, AutoResearch, EvoScientist, FARS, and related
-        AutoRA source records. Added Exa remote MCP config to .paper_fucker/paper_fucker.jsonc
+        AutoRA source records. Added Exa remote MCP config to .papercode/papercode.jsonc
         and ran codex mcp add exa --url https://mcp.exa.ai/mcp.
       agent: codex
     last_run: '2026-05-08T17:57:21.724192'
@@ -52,7 +52,7 @@ steps:
   depends_on:
   - task-016-step-01-reference-manifest
   description: Analyze OpenCode tools, permissions, agents, subagents, LSP, MCP, session
-    model, and how they map to paper_fucker research runtime needs.
+    model, and how they map to papercode research runtime needs.
   execution:
     mode: sequential
     retry: 0

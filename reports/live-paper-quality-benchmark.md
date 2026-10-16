@@ -8,7 +8,7 @@ Date: `2026/05/10`
 ## Scenario
 
 - Topic: `可验证论文自动化系统的闭环生成与真实性审查`
-- Workspace: `E:\Project\paper_fucker`
+- Workspace: `E:\Project\papercode`
 - Code paths:
   - `packages/opencode/src/paper`
   - `packages/opencode/src/server/routes/instance/httpapi/handlers/paper.ts`
@@ -19,12 +19,12 @@ Date: `2026/05/10`
 - Language: `zh-CN`
 - Budget tier: `standard`
 - Quality mode: `reviewable_bundle`
-- Data egress: `private_first`, only the selected code/report/material paths allowed; `.paper_fucker/local/**`, `.env*`, `.git/**`, `node_modules/**`, and secret-like files denied.
+- Data egress: `private_first`, only the selected code/report/material paths allowed; `.papercode/local/**`, `.env*`, `.git/**`, `node_modules/**`, and secret-like files denied.
 
 ## Regression Result
 
 - Run id: `run-ee44237e-e1cc-40d5-abee-611dbc9a8222`
-- Run dir: `.paper_fucker/runs/run-ee44237e-e1cc-40d5-abee-611dbc9a8222` (ignored by Git)
+- Run dir: `.papercode/runs/run-ee44237e-e1cc-40d5-abee-611dbc9a8222` (ignored by Git)
 - Snapshot status: `blocked`
 - Stage graph: 13 succeeded, 1 blocked.
 - Blocked stage: `reproduction`
@@ -103,7 +103,7 @@ Covered checks include:
 - Benchmark summary JSON: `tmp/live-paper-quality-benchmark/paperrun-summary.json` (ignored by Git)
 - Captured task output: `tmp/live-paper-quality-benchmark/task051-output.json` (ignored by Git)
 - Toolchain smoke files: `tmp/live-paper-quality-benchmark/toolchain/` (ignored by Git)
-- PaperRun artifacts: `.paper_fucker/runs/run-ee44237e-e1cc-40d5-abee-611dbc9a8222/` (ignored by Git)
+- PaperRun artifacts: `.papercode/runs/run-ee44237e-e1cc-40d5-abee-611dbc9a8222/` (ignored by Git)
 
 ## Residual Gate
 

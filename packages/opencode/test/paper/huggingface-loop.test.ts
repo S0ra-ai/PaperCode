@@ -45,9 +45,9 @@ describe("Hugging Face research loop", () => {
       authors: ["S0ra"],
     })
     const dataset = createHFDatasetRecord({
-      dataset_id: "s0ra/paper-fucker-bench",
-      title: "paper_fucker benchmark",
-      url: "https://huggingface.co/datasets/s0ra/paper-fucker-bench",
+      dataset_id: "s0ra/papercode-bench",
+      title: "papercode benchmark",
+      url: "https://huggingface.co/datasets/s0ra/papercode-bench",
       license: "apache-2.0",
       version: "sha-test",
       splits: ["train", "test"],
@@ -62,7 +62,7 @@ describe("Hugging Face research loop", () => {
     expect(sources.map((source) => source.kind)).toEqual(["paper", "dataset"])
     expect(sources[1].metadata).toMatchObject({
       artifact_schema: "HFDatasetRecord.v1",
-      hf_record_id: "s0ra/paper-fucker-bench",
+      hf_record_id: "s0ra/papercode-bench",
       source_verified: true,
     })
     expect(hfLoopDiagnostics({ sources })).toMatchObject({

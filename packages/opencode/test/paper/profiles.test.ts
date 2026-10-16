@@ -117,7 +117,7 @@ describe("paper profile registry", () => {
   })
 
   test("installs a first-party nature-paper skill with runtime official-source refresh instructions", async () => {
-    const skillUrl = new URL("../../../../.paper_fucker/skills/nature-paper/SKILL.md", import.meta.url)
+    const skillUrl = new URL("../../../../.papercode/skills/nature-paper/SKILL.md", import.meta.url)
     const skill = await Bun.file(skillUrl).text()
 
     expect(skill).toContain("name: nature-paper")

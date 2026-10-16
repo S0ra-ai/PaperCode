@@ -231,7 +231,7 @@ export function Prompt(props: PromptProps) {
       try {
         const response = await sdk.fetch(new URL("paper/model-inventory", sdk.url), {
           headers: {
-            ...(sdk.directory ? { "x-paper-fucker-directory": sdk.directory } : {}),
+            ...(sdk.directory ? { "x-papercode-directory": sdk.directory } : {}),
           },
         })
         return await readTuiJsonResponse<PaperPromptModelInventoryPayload>(response, "模型状态读取失败")

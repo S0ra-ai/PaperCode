@@ -2,7 +2,7 @@ id: preview-spa-live-monitor
 title: Preview SPA 实时研究监控台
 status: done
 priority: critical
-owner: paper-fucker-dev-agent
+owner: papercode-dev-agent
 tags:
 - preview
 - spa
@@ -19,7 +19,7 @@ steps:
 - id: extend-preview-protocol
   title: 扩展 PreviewSnapshot 协议
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   description: 增加 novelty、spine、global figure、stage、gate、cost 和 timeline summary 字段。
   execution:
@@ -30,19 +30,19 @@ steps:
     - timestamp: '2026-05-26T11:59:58.625530'
       level: info
       message: Extending PreviewSnapshot monitor protocol.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-26T12:00:13.472640'
       level: info
       message: PreviewSnapshot now includes PreviewMonitorSummary with stage graph,
         novelty, paper_spine, global_figure, gate, and timeline.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-26T12:00:13.472640'
     attempt_count: 2
   meta: {}
 - id: build-preview-spa
   title: 实现 SPA 监控台布局
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   description: 改造浏览器端为多视图区、侧栏、timeline 和实时状态面板。
   execution:
@@ -53,19 +53,19 @@ steps:
     - timestamp: '2026-05-26T11:59:59.947598'
       level: info
       message: Building browser monitor UI.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-26T12:00:14.799546'
       level: info
-      message: Rebuilt packages/preview index/client/style as a Paper Fucker Monitor
+      message: Rebuilt packages/preview index/client/style as a PaperCode Monitor
         with 总览、查新、论文脊梁、全局图、草稿、账本、诊断 views.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-26T12:00:14.799546'
     attempt_count: 2
   meta: {}
 - id: verify-preview-spa
   title: 验证 SSE 实时刷新和只读边界
   status: done
-  owner: paper-fucker-dev-agent
+  owner: papercode-dev-agent
   depends_on: []
   description: 更新 preview tests 与 browser smoke，覆盖新增视图实时刷新。
   execution:
@@ -76,13 +76,13 @@ steps:
     - timestamp: '2026-05-26T12:00:01.273559'
       level: info
       message: Updating preview tests and live smoke.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     - timestamp: '2026-05-26T12:00:16.125495'
       level: info
       message: Preview test passed; scripts/live-preview-browser-smoke.ps1 passed
         token rejection, read-only write rejection, and SSE snapshot refresh. Report
         written to reports/live-preview-browser-smoke.md.
-      agent: paper-fucker-dev-agent
+      agent: papercode-dev-agent
     last_run: '2026-05-26T12:00:16.125495'
     attempt_count: 2
   meta: {}

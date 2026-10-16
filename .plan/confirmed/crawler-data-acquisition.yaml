@@ -63,7 +63,7 @@ steps:
       agent: codex
     - timestamp: '2026-05-10T20:52:24.684251'
       level: info
-      message: Added research-tools/src/paper_fucker_tools/crawler.py with Scrapling
+      message: Added research-tools/src/papercode_tools/crawler.py with Scrapling
         availability detection, fixture HTML extraction, blocked diagnostics for missing/unauthorized
         live crawl, and registered web_crawl_probe in MCP-style tool registry.
       agent: codex
@@ -154,7 +154,7 @@ outputs:
   path: packages/opencode/src/paper/crawler.ts
   description: Crawler contracts and gate integration
 - type: file
-  path: research-tools/paper_fucker_tools/crawler.py
+  path: research-tools/papercode_tools/crawler.py
   description: Python crawler bridge
 trace:
   logs: []

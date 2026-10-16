@@ -18,41 +18,41 @@ async function clean(dir: string, attempts = 30): Promise<void> {
 
 describe("init wizard", () => {
   test("ignores stringified empty home environment values", () => {
-    const previousTestHome = process.env.PAPER_FUCKER_TEST_HOME
-    const previousHome = process.env.PAPER_FUCKER_HOME
-    process.env.PAPER_FUCKER_TEST_HOME = "undefined"
-    process.env.PAPER_FUCKER_HOME = "null"
+    const previousTestHome = process.env.PAPERCODE_TEST_HOME
+    const previousHome = process.env.PAPERCODE_HOME
+    process.env.PAPERCODE_TEST_HOME = "undefined"
+    process.env.PAPERCODE_HOME = "null"
     try {
       expect(resolveInitHome()).toBe(path.resolve(os.homedir()))
       expect(defaultResetHome()).toBe(path.resolve(os.homedir()))
     } finally {
-      if (previousTestHome === undefined) delete process.env.PAPER_FUCKER_TEST_HOME
-      else process.env.PAPER_FUCKER_TEST_HOME = previousTestHome
-      if (previousHome === undefined) delete process.env.PAPER_FUCKER_HOME
-      else process.env.PAPER_FUCKER_HOME = previousHome
+      if (previousTestHome === undefined) delete process.env.PAPERCODE_TEST_HOME
+      else process.env.PAPERCODE_TEST_HOME = previousTestHome
+      if (previousHome === undefined) delete process.env.PAPERCODE_HOME
+      else process.env.PAPERCODE_HOME = previousHome
     }
   })
 
   test("prefers explicit valid home over stringified environment values", async () => {
-    const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-init-home-"))
-    const previousTestHome = process.env.PAPER_FUCKER_TEST_HOME
-    const previousHome = process.env.PAPER_FUCKER_HOME
-    process.env.PAPER_FUCKER_TEST_HOME = "undefined"
-    process.env.PAPER_FUCKER_HOME = "null"
+    const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-init-home-"))
+    const previousTestHome = process.env.PAPERCODE_TEST_HOME
+    const previousHome = process.env.PAPERCODE_HOME
+    process.env.PAPERCODE_TEST_HOME = "undefined"
+    process.env.PAPERCODE_HOME = "null"
     try {
       expect(resolveInitHome(dir)).toBe(path.resolve(dir))
-      expect(initPaths(dir).root).toBe(path.join(path.resolve(dir), ".paper_fucker"))
+      expect(initPaths(dir).root).toBe(path.join(path.resolve(dir), ".papercode"))
     } finally {
-      if (previousTestHome === undefined) delete process.env.PAPER_FUCKER_TEST_HOME
-      else process.env.PAPER_FUCKER_TEST_HOME = previousTestHome
-      if (previousHome === undefined) delete process.env.PAPER_FUCKER_HOME
-      else process.env.PAPER_FUCKER_HOME = previousHome
+      if (previousTestHome === undefined) delete process.env.PAPERCODE_TEST_HOME
+      else process.env.PAPERCODE_TEST_HOME = previousTestHome
+      if (previousHome === undefined) delete process.env.PAPERCODE_HOME
+      else process.env.PAPERCODE_HOME = previousHome
       await clean(dir)
     }
   })
 
   test("uses bounded access by default so first-run init works without Full Access acknowledgement", async () => {
-    const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-init-default-"))
+    const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-init-default-"))
     try {
       const result = await runInitWizard({ home: dir })
 
@@ -71,7 +71,7 @@ describe("init wizard", () => {
   })
 
   test("formats init and doctor output as Chinese summaries by default", async () => {
-    const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-init-format-"))
+    const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-init-format-"))
     try {
       const result = await runInitWizard({ home: dir })
       const initText = formatInitResult(result)
@@ -95,8 +95,8 @@ describe("init wizard", () => {
     }
   })
 
-  test("writes config, linked tools, encrypted secrets, and diagnostics under ~/.paper_fucker", async () => {
-    const dir = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-init-test-"))
+  test("writes config, linked tools, encrypted secrets, and diagnostics under ~/.papercode", async () => {
+    const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-init-test-"))
     try {
       const fakePandoc = path.join(dir, process.platform === "win32" ? "pandoc.exe" : "pandoc")
       await writeFile(fakePandoc, "")
@@ -164,11 +164,11 @@ describe("init wizard", () => {
   })
 
   test("backs up and resets only global plus ignored workspace state", async () => {
-    const home = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-reset-home-"))
-    const workspace = await mkdtemp(path.join(os.tmpdir(), "paper-fucker-reset-workspace-"))
+    const home = await mkdtemp(path.join(os.tmpdir(), "papercode-reset-home-"))
+    const workspace = await mkdtemp(path.join(os.tmpdir(), "papercode-reset-workspace-"))
     try {
-      const globalRoot = path.join(home, ".paper_fucker")
-      const workspaceRoot = path.join(workspace, ".paper_fucker")
+      const globalRoot = path.join(home, ".papercode")
+      const workspaceRoot = path.join(workspace, ".papercode")
       const localDir = path.join(workspaceRoot, "local")
       const runsDir = path.join(workspaceRoot, "runs")
       const trackedSkillDir = path.join(workspaceRoot, "skills", "nature-paper")
@@ -190,7 +190,7 @@ describe("init wizard", () => {
         now: new Date("2026-05-11T00:00:00Z"),
       })
 
-      expect(result.backup_dir).toBe(path.join(home, ".paper_fucker_backups", "20260511T000000Z"))
+      expect(result.backup_dir).toBe(path.join(home, ".papercode_backups", "20260511T000000Z"))
       expect(existsSync(globalRoot)).toBe(false)
       expect(existsSync(localDir)).toBe(false)
       expect(existsSync(runsDir)).toBe(false)

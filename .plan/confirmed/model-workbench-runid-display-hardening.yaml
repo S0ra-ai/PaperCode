@@ -2,7 +2,7 @@ id: model-workbench-runid-display-hardening
 title: 模型工作台三页重构与 PaperRun 创建硬化
 status: done
 priority: high
-owner: paper-fucker-agent
+owner: papercode-agent
 tags:
 - 0.11.1-dev
 - tui
@@ -18,7 +18,7 @@ steps:
 - id: step-1
   title: 重构 /models 为三页工作台
   status: done
-  owner: paper-fucker-agent
+  owner: papercode-agent
   depends_on: []
   description: 将模型工作台收敛为已注册、所有模型、流程模型三页；已注册页按 ChatGPT 订阅、Copilot 订阅、其他 provider 分组，并支持删除
     provider。
@@ -31,14 +31,14 @@ steps:
       level: info
       message: /models 已收敛为三页：已注册、所有模型、全流程模型；已注册页展示用户配置过的 provider，按 ChatGPT 订阅、Copilot
         CLI 订阅和其他 provider 分类，并支持删除 provider。
-      agent: paper-fucker-agent
+      agent: papercode-agent
     last_run: '2026-05-13T10:16:10.812646'
     attempt_count: 2
   meta: {}
 - id: step-2
   title: 收紧模型候选池和动态策略
   status: done
-  owner: paper-fucker-agent
+  owner: papercode-agent
   depends_on: []
   description: 候选模型只来自已注册 provider；所有模型页多选写入候选池；主/备用决策模型只能从候选池选；流程模型支持自动、动态、强制指定。
   execution:
@@ -49,18 +49,18 @@ steps:
     - timestamp: '2026-05-13T10:16:20.149602'
       level: info
       message: 开始收紧模型候选池和动态策略。
-      agent: paper-fucker-agent
+      agent: papercode-agent
     - timestamp: '2026-05-13T10:16:29.256925'
       level: info
       message: 模型库存语义已收紧：allowlist 是唯一可用模型池，删除 provider 会清理 candidates、allowlist、主/备用决策模型和强制阶段策略；阶段模型保留自动、动态、强制指定。
-      agent: paper-fucker-agent
+      agent: papercode-agent
     last_run: '2026-05-13T10:16:29.256925'
     attempt_count: 2
   meta: {}
 - id: step-3
   title: 修复显示不全与滚动
   status: done
-  owner: paper-fucker-agent
+  owner: papercode-agent
   depends_on: []
   description: 模型页、provider 页和主界面使用可滚动全屏布局，长路径和模型名截断，toast 不遮挡输入区。
   execution:
@@ -71,19 +71,19 @@ steps:
     - timestamp: '2026-05-13T10:16:37.069858'
       level: info
       message: 开始修复显示不全与滚动。
-      agent: paper-fucker-agent
+      agent: papercode-agent
     - timestamp: '2026-05-13T10:16:44.595131'
       level: info
       message: 模型列表沿用全屏工作台和滚动窗口；模型/provider/path 文本使用截断显示，列表保持 PageUp/PageDown/Home/End
         导航。
-      agent: paper-fucker-agent
+      agent: papercode-agent
     last_run: '2026-05-13T10:16:44.595131'
     attempt_count: 2
   meta: {}
 - id: step-4
   title: 修复 PaperRun run_id 冲突
   status: done
-  owner: paper-fucker-agent
+  owner: papercode-agent
   depends_on: []
   description: PaperRun 创建时遇到 run_id 已存在或索引唯一冲突自动重试并清理半成品；错误返回中文结构化诊断。
   execution:
@@ -94,19 +94,19 @@ steps:
     - timestamp: '2026-05-13T10:16:52.388561'
       level: info
       message: 开始修复 PaperRun run_id 冲突。
-      agent: paper-fucker-agent
+      agent: papercode-agent
     - timestamp: '2026-05-13T10:16:59.621499'
       level: info
       message: PaperRun 创建增加唯一 run_id 生成：当生成的 run_id 已存在时自动重试，避免 index.sqlite runs.run_id
         UNIQUE 冲突。
-      agent: paper-fucker-agent
+      agent: papercode-agent
     last_run: '2026-05-13T10:16:59.621499'
     attempt_count: 2
   meta: {}
 - id: step-5
   title: 测试与文档版本同步
   status: done
-  owner: paper-fucker-agent
+  owner: papercode-agent
   depends_on: []
   description: 补充模型工作台、provider 删除、run_id 重试和 README/CHANGELOG 检查；更新 0.11.1-dev changelog。
   execution:
@@ -117,12 +117,12 @@ steps:
     - timestamp: '2026-05-13T10:17:08.129122'
       level: info
       message: 开始补充测试与版本同步。
-      agent: paper-fucker-agent
+      agent: papercode-agent
     - timestamp: '2026-05-13T10:19:07.927141'
       level: info
       message: 补充 model-discovery/run-api 测试，更新 README 与 CHANGELOG 到 0.11.1-dev，并通过
         README 版本、CHANGELOG 格式、git diff --check、opencode typecheck 和目标测试。
-      agent: paper-fucker-agent
+      agent: papercode-agent
     last_run: '2026-05-13T10:19:07.927141'
     attempt_count: 2
   meta: {}
