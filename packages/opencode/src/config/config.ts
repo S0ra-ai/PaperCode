@@ -427,7 +427,11 @@ export function maskSecrets(info: Info): Info {
           provider: Object.fromEntries(
             Object.entries(info.provider).map(([id, provider]) => [
               id,
-              { ...provider, options: maskOptions(provider.options as Record<string, unknown> | undefined) },
+              {
+                ...provider,
+                options: maskOptions(provider.options as Record<string, unknown> | undefined),
+                models: maskModelOptions(provider.models as Record<string, unknown> | undefined) as typeof provider.models,
+              },
             ]),
           ),
         }
@@ -437,12 +441,43 @@ export function maskSecrets(info: Info): Info {
           providers: Object.fromEntries(
             Object.entries(info.providers).map(([id, provider]) => [
               id,
-              { ...provider, options: maskOptions(provider.options as Record<string, unknown> | undefined) },
+              {
+                ...provider,
+                options: maskOptions(provider.options as Record<string, unknown> | undefined),
+                models: maskModelOptions(provider.models as Record<string, unknown> | undefined) as typeof provider.models,
+              },
             ]),
           ),
         }
       : {}),
   }
+}
+
+function maskModelOptions(models: Record<string, unknown> | undefined) {
+  if (!models) return models
+  return Object.fromEntries(
+    Object.entries(models).map(([id, model]) => {
+      if (model === null || typeof model !== "object") return [id, model]
+      const record = model as Record<string, unknown>
+      return [
+        id,
+        {
+          ...record,
+          ...(record.options ? { options: maskOptions(record.options as Record<string, unknown>) } : {}),
+          ...(record.headers
+            ? {
+                headers: Object.fromEntries(
+                  Object.entries(record.headers as Record<string, unknown>).map(([header, value]) => [
+                    header,
+                    typeof value === "string" && SECRET_KEY.test(header) ? REDACTED_SECRET : value,
+                  ]),
+                ),
+              }
+            : {}),
+        },
+      ]
+    }),
+  )
 }
 
 function restoreOptions(

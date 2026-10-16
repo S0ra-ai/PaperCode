@@ -1,3 +1,4 @@
+import nodePath from "path"
 import { NodePath } from "@effect/platform-node"
 import { Effect, Layer, Path, Schema, Context } from "effect"
 import { FetchHttpClient, HttpClient, HttpClientRequest, HttpClientResponse } from "effect/unstable/http"
@@ -8,6 +9,18 @@ import * as Log from "@opencode-ai/core/util/log"
 
 const skillConcurrency = 4
 const fileConcurrency = 8
+
+/**
+ * A remote index supplies both the skill name and its file list, and both end up in `path.join`
+ * calls that write to disk. Anything absolute, empty or escaping its parent is dropped: a hostile or
+ * compromised index must not be able to write outside the skills cache.
+ */
+function safeRelative(candidate: string): string | undefined {
+  if (!candidate || candidate.includes("\0")) return undefined
+  const normalized = nodePath.normalize(candidate)
+  if (normalized.startsWith("..") || nodePath.isAbsolute(normalized)) return undefined
+  return normalized
+}
 
 class IndexSkill extends Schema.Class<IndexSkill>("IndexSkill")({
   name: Schema.String,
@@ -77,6 +90,10 @@ export const layer: Layer.Layer<Service, never, AppFileSystem.Service | Path.Pat
             log.warn("skill entry missing SKILL.md", { url: index, skill: skill.name })
             return false
           }
+          if (!safeRelative(skill.name)) {
+            log.warn("skill entry has an unsafe name; skipping", { url: index, skill: skill.name })
+            return false
+          }
           return true
         })
 
@@ -84,11 +101,20 @@ export const layer: Layer.Layer<Service, never, AppFileSystem.Service | Path.Pat
           list,
           (skill) =>
             Effect.gen(function* () {
-              const root = path.join(cache, skill.name)
+              const name = safeRelative(skill.name)!
+              const root = path.join(cache, name)
+              const files = skill.files.map(safeRelative).filter((file): file is string => file !== undefined)
 
               yield* Effect.forEach(
-                skill.files,
-                (file) => download(new URL(file, `${host}/${skill.name}/`).href, path.join(root, file)),
+                files,
+                (file) => {
+                  const target = path.join(root, file)
+                  if (!target.startsWith(root + path.sep)) {
+                    log.warn("skill file escapes its directory; skipping", { url: index, skill: name, file })
+                    return Effect.void
+                  }
+                  return download(new URL(file, `${host}/${name}/`).href, target)
+                },
                 {
                   concurrency: fileConcurrency,
                 },

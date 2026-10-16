@@ -337,4 +337,23 @@ test("root routes require credentials on both backends when a password is set", 
       await listener.stop?.()
     }
   }
+
+})
+
+test("refuses a non-loopback bind without a server password", async () => {
+  Flag.OPENCODE_EXPERIMENTAL_HTTPAPI = true
+  Flag.OPENCODE_SERVER_PASSWORD = undefined
+  delete process.env.OPENCODE_SERVER_PASSWORD
+  delete process.env.PAPERCODE_SERVER_PASSWORD
+
+  await expect(Server.listen({ hostname: "0.0.0.0", port: 0 })).rejects.toThrow(/Refusing to bind/)
+
+  process.env.PAPERCODE_ALLOW_INSECURE_BIND = "1"
+  try {
+    const listener = await Server.listen({ hostname: "0.0.0.0", port: 0 })
+    expect(listener.port).toBeGreaterThan(0)
+    await listener.stop?.()
+  } finally {
+    delete process.env.PAPERCODE_ALLOW_INSECURE_BIND
+  }
 })

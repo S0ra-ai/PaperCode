@@ -182,7 +182,8 @@ export async function saveProviderEndpointConfig(
   secrets[apiKeyRef] = config.api_key
 
   await writeFile(publicPath, `${JSON.stringify(publicConfig, null, 2)}\n`, "utf8")
-  await writeFile(secretPath, `${JSON.stringify(secrets, null, 2)}\n`, "utf8")
+  // Credentials, so keep them owner-only like auth.json instead of the default 0644.
+  await writeFile(secretPath, `${JSON.stringify(secrets, null, 2)}\n`, { encoding: "utf8", mode: 0o600 })
 
   return {
     ...publicConfig,

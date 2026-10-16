@@ -2633,6 +2633,24 @@ describe("config secret masking", () => {
     },
   } as unknown as Config.Info
 
+  test("masks credentials nested in a model's options and headers", () => {
+    const withModel = {
+      providers: {
+        dialect: {
+          models: {
+            m: { options: { apiKey: "model-secret", baseURL: "https://keep.test/v1" }, headers: { authorization: "Bearer h" } },
+          },
+        },
+      },
+    } as unknown as Config.Info
+    const masked = Config.maskSecrets(withModel)
+    const model = masked.providers?.dialect?.models as Record<string, { options?: Record<string, unknown>; headers?: Record<string, string> }>
+    expect(model?.m?.options?.apiKey).toBe("[redacted]")
+    expect(model?.m?.options?.baseURL).toBe("https://keep.test/v1")
+    expect(model?.m?.headers?.authorization).toBe("[redacted]")
+    expect(JSON.stringify(masked)).not.toContain("model-secret")
+  })
+
   test("masks credentials in both provider keys and leaves other options alone", () => {
     const masked = Config.maskSecrets(config)
     expect(masked.provider?.legacy?.options?.apiKey).toBe("[redacted]")

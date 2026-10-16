@@ -895,3 +895,22 @@ describe("config provider lifecycle", () => {
     expect(candidates.length).toBeGreaterThan(0)
   })
 })
+
+describe("paper provider secrets file", () => {
+  test("is written owner-only", async () => {
+    const home = await tmpHome()
+    await saveProviderEndpointConfig(
+      {
+        provider_id: "secured",
+        provider_name: "Secured",
+        base_url: "https://secured.example/v1",
+        api_key: "sk-should-be-private",
+        compatibility: "openai-compatible",
+      },
+      { home },
+    )
+    const { stat } = await import("fs/promises")
+    const mode = (await stat(providerSecretPath(home))).mode & 0o777
+    expect(mode).toBe(0o600)
+  })
+})

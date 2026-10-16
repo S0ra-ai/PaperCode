@@ -187,6 +187,15 @@ export async function openapiHono() {
 export let url: URL
 
 export async function listen(opts: ListenOptions): Promise<Listener> {
+  // Binding beyond loopback without a password exposes an unauthenticated control plane to the
+  // network (the --mdns flag does exactly that by defaulting the hostname to 0.0.0.0).
+  const loopback = opts.hostname === "127.0.0.1" || opts.hostname === "localhost" || opts.hostname === "::1"
+  if (!loopback && !Flag.OPENCODE_SERVER_PASSWORD && !process.env.PAPERCODE_ALLOW_INSECURE_BIND) {
+    throw new Error(
+      `Refusing to bind ${opts.hostname} without a server password. Set PAPERCODE_SERVER_PASSWORD, ` +
+        "or bind 127.0.0.1, or set PAPERCODE_ALLOW_INSECURE_BIND=1 to accept an unauthenticated server.",
+    )
+  }
   const selected = select()
   const inner: Listener =
     selected.backend === "effect-httpapi" ? await listenHttpApi(opts, selected) : await listenLegacy(opts)

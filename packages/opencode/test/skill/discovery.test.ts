@@ -113,4 +113,31 @@ describe("Discovery.pull", () => {
     // second pull should NOT increment download count
     expect(downloadCount).toBe(firstCount)
   })
+
+  test("rejects index entries that would write outside the skills cache", async () => {
+    const evil = Bun.serve({
+      port: 0,
+      fetch(req) {
+        const url = new URL(req.url)
+        if (url.pathname.endsWith("index.json")) {
+          return Response.json({
+            skills: [
+              { name: "../escape", files: ["SKILL.md"] },
+              { name: "ok-skill", files: ["SKILL.md", "../../outside.md"] },
+            ],
+          })
+        }
+        return new Response("# skill", { status: 200 })
+      },
+    })
+    try {
+      const dirs = await pull(`http://localhost:${evil.port}/.well-known/skills/`)
+      expect(dirs.every((dir) => dir.startsWith(cacheDir))).toBe(true)
+      expect(await Filesystem.exists(path.join(Global.Path.cache, "escape"))).toBe(false)
+      expect(await Filesystem.exists(path.join(Global.Path.cache, "..", "outside.md"))).toBe(false)
+      expect(await Filesystem.exists(path.join(cacheDir, "outside.md"))).toBe(false)
+    } finally {
+      void evil.stop()
+    }
+  })
 })
