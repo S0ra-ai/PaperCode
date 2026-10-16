@@ -57,18 +57,31 @@ import {
   PaperExportPayload,
   PaperExperimentStarterApplyPayload,
   PaperExperimentProtocolRunPayload,
+  PaperApiError,
   PaperGuidancePayload,
   PaperRunCreatePayload,
   ProviderDiscoverPayload,
 } from "../groups/paper"
 
-function mapPaperError(error: unknown) {
-  if (error instanceof PaperRunNotFoundError) return new HttpApiError.NotFound({})
-  return new HttpApiError.BadRequest({})
+function paperApiError(code: string, error: unknown) {
+  return new PaperApiError({
+    error: {
+      schema_version: "PaperApiError.v1",
+      code,
+      message: errorText(error),
+      action: "请检查论文工作台的模型与允许列表、当前工作目录，或查看日志目录获取完整堆栈。",
+      log_path: paperLogDirectory(),
+    },
+  })
 }
 
-function mapPaperBadRequest() {
-  return new HttpApiError.BadRequest({})
+function mapPaperError(error: unknown) {
+  if (error instanceof PaperRunNotFoundError) return new HttpApiError.NotFound({})
+  return paperApiError("paper_request_failed", error)
+}
+
+function mapPaperBadRequest(error: unknown) {
+  return paperApiError("paper_request_rejected", error)
 }
 
 function errorText(error: unknown) {
@@ -519,13 +532,17 @@ export const paperHandlers = HttpApiBuilder.group(InstanceHttpApi, "paper", (han
     const modelRolesAssign = Effect.fn("PaperHttpApi.modelRolesAssign")(function* (ctx: {
       payload: typeof ModelRoleAssignmentPayload.Type
     }) {
-      return yield* Effect.sync(() => ({
-        roles: resolveAllModelRoleAssignments({
-          default_model: ctx.payload.default_model,
-          roles: ctx.payload.roles as Parameters<typeof resolveAllModelRoleAssignments>[0]["roles"],
-          subagents: ctx.payload.subagents ? { ...ctx.payload.subagents } : undefined,
+      return yield* Effect.try({
+        try: () => ({
+          roles: resolveAllModelRoleAssignments({
+            default_model: ctx.payload.default_model,
+            roles: ctx.payload.roles as Parameters<typeof resolveAllModelRoleAssignments>[0]["roles"],
+            subagents: ctx.payload.subagents ? { ...ctx.payload.subagents } : undefined,
+          }),
         }),
-      })).pipe(Effect.catch(() => Effect.fail(new HttpApiError.BadRequest({}))))
+        // The resolver throws for malformed ids, so it is wrapped to keep the diagnostics.
+        catch: (error) => paperApiError("paper_model_role_assignment_failed", error),
+      })
     })
 
     return handlers

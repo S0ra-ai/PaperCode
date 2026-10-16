@@ -102,6 +102,24 @@ export const ModelRoutingDecisionPayload = Schema.Struct({
   forced_model: Schema.optional(Schema.String),
 })
 
+/**
+ * Error body for the paper routes that fail after the request is understood. Mirrors the
+ * PaperApiError.v1 envelope the TUI already reads (message + next action + log directory), so a
+ * control or export failure keeps its diagnostics instead of collapsing into an empty 400.
+ */
+export class PaperApiError extends Schema.ErrorClass<PaperApiError>("PaperApiError")(
+  {
+    error: Schema.Struct({
+      schema_version: Schema.Literal("PaperApiError.v1"),
+      code: Schema.String,
+      message: Schema.String,
+      action: Schema.optional(Schema.String),
+      log_path: Schema.optional(Schema.String),
+    }),
+  },
+  { httpApiStatus: 400 },
+) {}
+
 export const PaperPaths = {
   runs: `${root}/runs`,
   run: `${root}/runs/:runID`,
@@ -130,7 +148,7 @@ export const PaperApi = HttpApi.make("paper")
         HttpApiEndpoint.post("createRun", PaperPaths.runs, {
           payload: PaperRunCreatePayload,
           success: described(AnyJson, "Created PaperRun snapshot"),
-          error: HttpApiError.BadRequest,
+          error: PaperApiError,
         }).annotateMerge(
           OpenApi.annotations({
             identifier: "paper.runs.create",
@@ -140,7 +158,7 @@ export const PaperApi = HttpApi.make("paper")
         ),
         HttpApiEndpoint.get("listRuns", PaperPaths.runs, {
           success: described(AnyJson, "PaperRun history entries"),
-          error: HttpApiError.BadRequest,
+          error: PaperApiError,
         }).annotateMerge(
           OpenApi.annotations({
             identifier: "paper.runs.list",
@@ -151,7 +169,7 @@ export const PaperApi = HttpApi.make("paper")
         HttpApiEndpoint.get("getRun", PaperPaths.run, {
           params: { runID: Schema.String },
           success: described(AnyJson, "PaperRun snapshot"),
-          error: [HttpApiError.BadRequest, HttpApiError.NotFound],
+          error: [PaperApiError, HttpApiError.NotFound],
         }).annotateMerge(
           OpenApi.annotations({
             identifier: "paper.runs.get",
@@ -162,7 +180,7 @@ export const PaperApi = HttpApi.make("paper")
         HttpApiEndpoint.post("resumeRun", PaperPaths.resume, {
           params: { runID: Schema.String },
           success: described(AnyJson, "Resumed PaperRun snapshot"),
-          error: [HttpApiError.BadRequest, HttpApiError.NotFound],
+          error: [PaperApiError, HttpApiError.NotFound],
         }).annotateMerge(
           OpenApi.annotations({
             identifier: "paper.runs.resume",
@@ -173,7 +191,7 @@ export const PaperApi = HttpApi.make("paper")
         HttpApiEndpoint.get("events", PaperPaths.events, {
           params: { runID: Schema.String },
           success: Schema.String.pipe(HttpApiSchema.asText({ contentType: "text/event-stream" })),
-          error: [HttpApiError.BadRequest, HttpApiError.NotFound],
+          error: [PaperApiError, HttpApiError.NotFound],
         }).annotateMerge(
           OpenApi.annotations({
             identifier: "paper.runs.events",
@@ -185,7 +203,7 @@ export const PaperApi = HttpApi.make("paper")
           params: { runID: Schema.String },
           payload: PaperGuidancePayload,
           success: described(AnyJson, "Guidance response"),
-          error: [HttpApiError.BadRequest, HttpApiError.NotFound],
+          error: [PaperApiError, HttpApiError.NotFound],
         }).annotateMerge(
           OpenApi.annotations({
             identifier: "paper.runs.guidance",
@@ -197,7 +215,7 @@ export const PaperApi = HttpApi.make("paper")
           params: { runID: Schema.String },
           payload: PaperControlPayload,
           success: described(AnyJson, "PaperRun controller state"),
-          error: [HttpApiError.BadRequest, HttpApiError.NotFound],
+          error: [PaperApiError, HttpApiError.NotFound],
         }).annotateMerge(
           OpenApi.annotations({
             identifier: "paper.runs.control",
@@ -208,7 +226,7 @@ export const PaperApi = HttpApi.make("paper")
         HttpApiEndpoint.get("preview", PaperPaths.preview, {
           params: { runID: Schema.String },
           success: described(AnyJson, "Read-only PaperRun preview payload"),
-          error: [HttpApiError.BadRequest, HttpApiError.NotFound],
+          error: [PaperApiError, HttpApiError.NotFound],
         }).annotateMerge(
           OpenApi.annotations({
             identifier: "paper.runs.preview",
@@ -220,7 +238,7 @@ export const PaperApi = HttpApi.make("paper")
           params: { runID: Schema.String },
           payload: PaperExportPayload,
           success: described(AnyJson, "Paper export bundle status"),
-          error: [HttpApiError.BadRequest, HttpApiError.NotFound],
+          error: [PaperApiError, HttpApiError.NotFound],
         }).annotateMerge(
           OpenApi.annotations({
             identifier: "paper.runs.export",
@@ -232,7 +250,7 @@ export const PaperApi = HttpApi.make("paper")
           params: { runID: Schema.String },
           payload: PaperExperimentStarterApplyPayload,
           success: described(AnyJson, "Experiment starter workspace apply result"),
-          error: [HttpApiError.BadRequest, HttpApiError.NotFound],
+          error: [PaperApiError, HttpApiError.NotFound],
         }).annotateMerge(
           OpenApi.annotations({
             identifier: "paper.runs.experiment_starter.apply",
@@ -245,7 +263,7 @@ export const PaperApi = HttpApi.make("paper")
           params: { runID: Schema.String },
           payload: PaperExperimentProtocolRunPayload,
           success: described(AnyJson, "Experiment protocol run result"),
-          error: [HttpApiError.BadRequest, HttpApiError.NotFound],
+          error: [PaperApiError, HttpApiError.NotFound],
         }).annotateMerge(
           OpenApi.annotations({
             identifier: "paper.runs.experiments.run",
@@ -284,7 +302,7 @@ export const PaperApi = HttpApi.make("paper")
         HttpApiEndpoint.post("providersDiscoverOpenAI", PaperPaths.providersDiscover, {
           payload: ProviderDiscoverPayload,
           success: described(AnyJson, "OpenAI-compatible provider/model discovery"),
-          error: HttpApiError.BadRequest,
+          error: PaperApiError,
         }).annotateMerge(
           OpenApi.annotations({
             identifier: "paper.providers.discoverOpenAI",
@@ -314,7 +332,7 @@ export const PaperApi = HttpApi.make("paper")
         HttpApiEndpoint.post("modelInventoryAllowlist", PaperPaths.modelInventory, {
           payload: ModelInventoryAllowlistPayload,
           success: described(AnyJson, "Updated paper model allowlist"),
-          error: HttpApiError.BadRequest,
+          error: PaperApiError,
         }).annotateMerge(
           OpenApi.annotations({
             identifier: "paper.model_inventory.allowlist",
@@ -325,7 +343,7 @@ export const PaperApi = HttpApi.make("paper")
         HttpApiEndpoint.post("modelRoutingDecision", PaperPaths.modelRoutingDecision, {
           payload: ModelRoutingDecisionPayload,
           success: described(AnyJson, "Paper model routing decision"),
-          error: HttpApiError.BadRequest,
+          error: PaperApiError,
         }).annotateMerge(
           OpenApi.annotations({
             identifier: "paper.model_routing.decision",
@@ -336,7 +354,7 @@ export const PaperApi = HttpApi.make("paper")
         HttpApiEndpoint.post("modelRolesAssign", PaperPaths.modelRoles, {
           payload: ModelRoleAssignmentPayload,
           success: described(AnyJson, "Resolved paper model role assignment"),
-          error: HttpApiError.BadRequest,
+          error: PaperApiError,
         }).annotateMerge(
           OpenApi.annotations({
             identifier: "paper.model_roles.assign",

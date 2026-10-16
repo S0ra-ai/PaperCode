@@ -546,4 +546,22 @@ describe("PaperRun HttpApi", () => {
       else process.env.OPENCODE_TEST_HOME = previousLegacyHome
     }
   })
+
+  test("keeps diagnostics on a rejected paper request instead of an empty 400", async () => {
+    await using tmp = await tmpdir({ git: true, config: { formatter: false, lsp: false } })
+    previousPaperHome = process.env.PAPERCODE_TEST_HOME
+    process.env.PAPERCODE_TEST_HOME = tmp.path
+    const headers = { "x-papercode-directory": tmp.path }
+
+    const response = await app().request(PaperPaths.modelRoles, {
+      ...json({ default_model: "not-a-model-ref" }),
+      headers: { ...headers, "content-type": "application/json" },
+    })
+
+    const body = await response.json()
+    expect(body.error?.schema_version).toBe("PaperApiError.v1")
+    expect(typeof body.error?.message).toBe("string")
+    expect(body.error.message.length).toBeGreaterThan(0)
+    expect(typeof body.error?.log_path).toBe("string")
+  }, PAPER_RUN_INTEGRATION_TIMEOUT)
 })
