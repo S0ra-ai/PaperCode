@@ -24,6 +24,13 @@ const hasAppleCredentials = Boolean(
   process.env.APPLE_ID && process.env.APPLE_APP_SPECIFIC_PASSWORD && process.env.APPLE_TEAM_ID,
 )
 
+// GitHub Actions turns a job-level `env: CSC_LINK: ${{ secrets.UNSET }}` into an empty string, and
+// electron-builder decides whether to sign with `cscLink == null` - an empty string is "specified",
+// so it would try to build a keychain from nothing and fail instead of producing an ad-hoc build.
+for (const name of ["CSC_LINK", "CSC_KEY_PASSWORD"]) {
+  if (process.env[name] === "") delete process.env[name]
+}
+
 const channel = (() => {
   const raw = process.env.PAPERCODE_CHANNEL ?? process.env.OPENCODE_CHANNEL
   if (raw === "dev" || raw === "beta" || raw === "prod") return raw
