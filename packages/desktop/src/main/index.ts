@@ -379,9 +379,12 @@ function sqliteFileExists() {
 function setupAutoUpdater() {
   if (!UPDATER_ENABLED) return
   autoUpdater.logger = logger
-  autoUpdater.channel = "latest"
-  autoUpdater.allowPrerelease = false
-  autoUpdater.allowDowngrade = true
+  // The updater fetches `${channel}-mac.yml` (or `latest-mac.yml`) from the release the publish
+  // config points at. A beta build that asked for "latest" could never see its own channel's
+  // metadata - and with downgrades allowed it could be replaced by an older production build.
+  autoUpdater.channel = CHANNEL === "beta" ? "beta" : "latest"
+  autoUpdater.allowPrerelease = CHANNEL === "beta"
+  autoUpdater.allowDowngrade = false
   autoUpdater.autoDownload = false
   autoUpdater.autoInstallOnAppQuit = false
   logger.log("auto updater configured", {
