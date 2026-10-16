@@ -458,7 +458,7 @@ async function protocolBenchmarkWorkspace(dataset: ReturnType<typeof liveArxivRa
         license: "MPL-2.0",
         repository: {
           type: "git",
-          url: "https://github.com/ZhuchenZhong/papercode",
+          url: "https://github.com/S0ra-ai/PaperCode",
         },
         scripts: {
           "test:ranking": "bun run experiments/evaluate-agent-ranking.ts --variant=proposed",
@@ -526,7 +526,7 @@ function licenseExpressionFromUrl(url: string | undefined) {
   return url
 }
 
-const arxivUserAgent = "papercode-live-benchmark/1.0 (+https://github.com/ZhuchenZhong/papercode)"
+const arxivUserAgent = "papercode-live-benchmark/1.0 (+https://github.com/S0ra-ai/PaperCode)"
 
 function benchmarkBoundedIntEnv(name: string, fallback: number, bounds: { min: number; max: number }) {
   const raw = process.env[name]

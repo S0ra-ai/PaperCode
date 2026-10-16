@@ -7,7 +7,7 @@ import { useSettings } from "@/context/settings"
 import { persisted } from "@/utils/persist"
 import { DialogReleaseNotes, type Highlight } from "@/components/dialog-release-notes"
 
-const CHANGELOG_URL = "https://raw.githubusercontent.com/ZhuchenZhong/papercode/develop/CHANGELOG"
+const CHANGELOG_URL = "https://raw.githubusercontent.com/S0ra-ai/PaperCode/develop/CHANGELOG"
 
 type Store = {
   version?: string

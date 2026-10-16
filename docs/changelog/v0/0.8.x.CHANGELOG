@@ -1,5 +1,5 @@
 :project       papercode - 可验证论文研究自动化系统
-:author        k1d (https://github.com/ZhuchenZhong)
+:author        S0ra-ai
 :repo
 :desc          0.8.x 历史变更归档，主 CHANGELOG 仅保留当前活跃版本线
 :version       0.8.5-dev
@@ -13,11 +13,11 @@
             - README 改为中文 GitHub 首页，保留 TUI-first、内置 capability packs、多 provider、Preview/export、隐私和 Windows 源码运行路径
             - 内部维护说明移入 docs/internal/README.md，README 不再暴露 TaskFlow、release 测试脚本、审计目录和维护者命令
             - docs/project-structure、docs/changelog/README 与 specs/project 统一为 PaperRun、release 文件面和 changelog 归档语义
-            - root CHANGELOG 与 docs/changelog/v0 归档 changelog 作者统一为 k1d (https://github.com/ZhuchenZhong)
+            - root CHANGELOG 与 docs/changelog/v0 归档 changelog 作者统一为 S0ra-ai (https://github.com/S0ra-ai)
         :build
             - 根目录新增 build/link 脚本，源码编译后在仓库根目录生成 papercode.exe 或 papercode
             - packages/opencode build 的 optional dependency 安装改为 --no-save，避免污染 package.json 或 bun.lock
-            - root package.json、packages/opencode/package.json 增加 author 元数据，仓库 URL 后续统一为 ZhuchenZhong/papercode 远端
+            - root package.json、packages/opencode/package.json 增加 author 元数据，仓库 URL 后续统一为 S0ra-ai/PaperCode 远端
         :release
             - .gitattributes 增加 export-ignore，GitHub source archive 排除 TaskFlow、reports、legacy、upstream、本地 runtime、测试树和上游营销素材
             - packages/opencode 与 packages/preview 增加 npm files 白名单，避免 test/spec/fixture/历史证据进入 pack

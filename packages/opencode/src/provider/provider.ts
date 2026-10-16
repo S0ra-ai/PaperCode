@@ -413,7 +413,7 @@ function custom(dep: CustomDep): Record<string, CustomLoader> {
         autoload: false,
         options: {
           headers: {
-            "HTTP-Referer": "https://github.com/ZhuchenZhong/papercode",
+            "HTTP-Referer": "https://github.com/S0ra-ai/PaperCode",
             "X-Title": "papercode",
             "X-Source": "papercode",
           },
@@ -424,7 +424,7 @@ function custom(dep: CustomDep): Record<string, CustomLoader> {
         autoload: false,
         options: {
           headers: {
-            "HTTP-Referer": "https://github.com/ZhuchenZhong/papercode",
+            "HTTP-Referer": "https://github.com/S0ra-ai/PaperCode",
             "X-Title": "papercode",
           },
         },
@@ -434,7 +434,7 @@ function custom(dep: CustomDep): Record<string, CustomLoader> {
         autoload: false,
         options: {
           headers: {
-            "HTTP-Referer": "https://github.com/ZhuchenZhong/papercode",
+            "HTTP-Referer": "https://github.com/S0ra-ai/PaperCode",
             "X-Title": "papercode",
           },
         },
@@ -444,7 +444,7 @@ function custom(dep: CustomDep): Record<string, CustomLoader> {
         autoload: false,
         options: {
           headers: {
-            "http-referer": "https://github.com/ZhuchenZhong/papercode",
+            "http-referer": "https://github.com/S0ra-ai/PaperCode",
             "x-title": "papercode",
           },
         },
@@ -542,7 +542,7 @@ function custom(dep: CustomDep): Record<string, CustomLoader> {
         autoload: false,
         options: {
           headers: {
-            "HTTP-Referer": "https://github.com/ZhuchenZhong/papercode",
+            "HTTP-Referer": "https://github.com/S0ra-ai/PaperCode",
             "X-Title": "papercode",
           },
         },
@@ -827,7 +827,7 @@ function custom(dep: CustomDep): Record<string, CustomLoader> {
         autoload: false,
         options: {
           headers: {
-            "HTTP-Referer": "https://github.com/ZhuchenZhong/papercode",
+            "HTTP-Referer": "https://github.com/S0ra-ai/PaperCode",
             "X-Title": "papercode",
           },
         },

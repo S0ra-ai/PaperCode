@@ -96,7 +96,7 @@ function getConfig() {
         appId: "ai.papercode.desktop.beta",
         productName: "papercode Beta",
         protocols: { name: "papercode Beta", schemes: ["papercode"] },
-        publish: { provider: "github", owner: "ZhuchenZhong", repo: "papercode", channel: "beta" },
+        publish: { provider: "github", owner: "S0ra-ai", repo: "PaperCode", channel: "beta" },
         rpm: { packageName: "papercode-beta" },
       }
     }
@@ -106,7 +106,7 @@ function getConfig() {
         appId: "ai.papercode.desktop",
         productName: "papercode",
         protocols: { name: "papercode", schemes: ["papercode"] },
-        publish: { provider: "github", owner: "ZhuchenZhong", repo: "papercode", channel: "latest" },
+        publish: { provider: "github", owner: "S0ra-ai", repo: "PaperCode", channel: "latest" },
         rpm: { packageName: "papercode" },
       }
     }

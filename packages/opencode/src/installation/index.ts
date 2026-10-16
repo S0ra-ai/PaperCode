@@ -255,7 +255,7 @@ export const layer: Layer.Layer<Service, never, HttpClient.HttpClient | ChildPro
           }
 
           const response = yield* httpOk.execute(
-            HttpClientRequest.get("https://api.github.com/repos/ZhuchenZhong/papercode/releases/latest").pipe(
+            HttpClientRequest.get("https://api.github.com/repos/S0ra-ai/PaperCode/releases/latest").pipe(
               HttpClientRequest.acceptJson,
             ),
           )

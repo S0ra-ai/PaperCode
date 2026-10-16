@@ -139,7 +139,7 @@
     if (document.querySelector(".doc-toolbar")) return
 
     const title = pages[currentIndex]?.[1] || "开发手册"
-    const sourceHref = `https://github.com/ZhuchenZhong/papercode/blob/develop/docs/development/${encodeURIComponent(current)}`
+    const sourceHref = `https://github.com/S0ra-ai/PaperCode/blob/develop/docs/development/${encodeURIComponent(current)}`
     const toolbar = document.createElement("div")
     toolbar.className = "doc-toolbar"
     toolbar.innerHTML = [

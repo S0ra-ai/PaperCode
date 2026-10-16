@@ -92,7 +92,7 @@ rustPlatform.buildRustPackage (finalAttrs: {
 
   meta = {
     description = "papercode Desktop App";
-    homepage = "https://github.com/ZhuchenZhong/papercode";
+    homepage = "https://github.com/S0ra-ai/PaperCode";
     license = lib.licenses.mpl20;
     mainProgram = "papercode-desktop";
     inherit (papercode.meta) platforms;

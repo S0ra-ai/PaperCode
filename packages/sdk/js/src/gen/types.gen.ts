@@ -1209,7 +1209,7 @@ export type Config = {
     diff_style?: "auto" | "stacked"
   }
   /**
-   * Command configuration, see https://github.com/ZhuchenZhong/papercode
+   * Command configuration, see https://github.com/S0ra-ai/PaperCode
    */
   command?: {
     [key: string]: {
@@ -1266,7 +1266,7 @@ export type Config = {
     [key: string]: AgentConfig | undefined
   }
   /**
-   * Agent configuration, see https://github.com/ZhuchenZhong/papercode
+   * Agent configuration, see https://github.com/S0ra-ai/PaperCode
    */
   agent?: {
     plan?: AgentConfig

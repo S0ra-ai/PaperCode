@@ -45,7 +45,7 @@ export class McpOAuthProvider implements OAuthClientProvider {
     return {
       redirect_uris: [this.redirectUrl],
       client_name: "papercode",
-      client_uri: "https://github.com/ZhuchenZhong/papercode",
+      client_uri: "https://github.com/S0ra-ai/PaperCode",
       grant_types: ["authorization_code", "refresh_token"],
       response_types: ["code"],
       token_endpoint_auth_method: this.config.clientSecret ? "client_secret_post" : "none",

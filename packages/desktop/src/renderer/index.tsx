@@ -212,7 +212,7 @@ const createPlatform = (): Platform => {
 
       const notification = new Notification(title, {
         body: description ?? "",
-        icon: "https://github.com/ZhuchenZhong.png",
+        icon: "https://github.com/S0ra-ai.png",
       })
       notification.onclick = () => {
         void window.api.showWindow()

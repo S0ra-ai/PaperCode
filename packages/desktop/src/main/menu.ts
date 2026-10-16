@@ -120,18 +120,18 @@ export function createMenu(deps: Deps) {
     {
       label: "Help",
       submenu: [
-        { label: "papercode Documentation", click: () => shell.openExternal("https://github.com/ZhuchenZhong/papercode") },
-        { label: "Repository", click: () => shell.openExternal("https://github.com/ZhuchenZhong/papercode") },
+        { label: "papercode Documentation", click: () => shell.openExternal("https://github.com/S0ra-ai/PaperCode") },
+        { label: "Repository", click: () => shell.openExternal("https://github.com/S0ra-ai/PaperCode") },
         { type: "separator" },
         { type: "separator" },
         {
           label: "Share Feedback",
           click: () =>
-            shell.openExternal("https://github.com/ZhuchenZhong/papercode/issues/new"),
+            shell.openExternal("https://github.com/S0ra-ai/PaperCode/issues/new"),
         },
         {
           label: "Report a Bug",
-          click: () => shell.openExternal("https://github.com/ZhuchenZhong/papercode/issues/new"),
+          click: () => shell.openExternal("https://github.com/S0ra-ai/PaperCode/issues/new"),
         },
       ],
     },

@@ -96,7 +96,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
 
   meta = {
     description = "Private-first verifiable research automation agent";
-    homepage = "https://github.com/ZhuchenZhong/papercode";
+    homepage = "https://github.com/S0ra-ai/PaperCode";
     license = lib.licenses.mpl20;
     mainProgram = "papercode";
     inherit (node_modules.meta) platforms;

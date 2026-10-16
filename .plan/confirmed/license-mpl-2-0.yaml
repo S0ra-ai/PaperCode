@@ -32,7 +32,7 @@ steps:
       level: info
       message: 已用 Mozilla 官方 MPL 2.0 正文替换根 LICENSE，并将 root、packages/opencode、packages/preview
         package metadata、README、NOTICE、docs/project-structure 许可口径切换为 MPL-2.0；root
-        repository URL 同步为 ZhuchenZhong/papercode。
+        repository URL 同步为 S0ra-ai/PaperCode。
       agent: papercode-dev-agent
     last_run: '2026-05-26T23:46:33.153605'
     attempt_count: 2
@@ -59,7 +59,7 @@ steps:
     - timestamp: '2026-05-26T23:58:32.591882'
       level: info
       message: 扩展审计后发现旧安装脚本、桌面壳、provider referer 和多个 package.json 仍有 S0ra-ai/MIT/UNLICENSED
-        口径；已机械替换为 ZhuchenZhong/papercode，并将项目 package license 统一为 MPL-2.0。复搜除 docs/changelog/v0
+        口径；已机械替换为 S0ra-ai/PaperCode，并将项目 package license 统一为 MPL-2.0。复搜除 docs/changelog/v0
         归档外无 S0ra-ai、UNLICENSED、Private License 或 package license=MIT 残留。
       agent: papercode-dev-agent
     last_run: '2026-05-26T23:46:54.417412'

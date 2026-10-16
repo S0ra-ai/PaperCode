@@ -29,7 +29,7 @@ Windows PowerShell：
 ```powershell
 winget install --id Git.Git -e
 powershell -c "irm bun.sh/install.ps1 | iex"
-git clone https://github.com/ZhuchenZhong/papercode.git
+git clone https://github.com/S0ra-ai/PaperCode.git
 cd papercode
 bun install
 bun run build
@@ -39,7 +39,7 @@ bun run build
 macOS / Linux：
 
 ```bash
-git clone https://github.com/ZhuchenZhong/papercode.git
+git clone https://github.com/S0ra-ai/PaperCode.git
 cd papercode
 bun install
 bun run build

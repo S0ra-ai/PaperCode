@@ -1,5 +1,5 @@
 :project       papercode - 可验证论文研究自动化系统
-:author        k1d (https://github.com/ZhuchenZhong)
+:author        S0ra-ai
 :repo
 :desc          0.13.0.139 开发历史归档
 :version       0.13.0.139-dev
@@ -11,7 +11,7 @@
         :brief App/Desktop 用户可见表面统一到 PaperRun，开发手册导航拆分为使用与开发主线
         :app
             - fix(app): App 主语言包将高频导航、toast、Prompt 示例和上下文统计收口为 PaperRun 与论文研究表达
-            - fix(app): 桌面菜单、通知图标、错误页、设置链接和项目头像统一指向 ZhuchenZhong/papercode
+            - fix(app): 桌面菜单、通知图标、错误页、设置链接和项目头像统一指向 S0ra-ai/PaperCode
             - fix(app): 默认 PaperRun 标题识别支持 New PaperRun/Child PaperRun，同时保留旧本机数据可读性
         :docs
             - docs(development): 参考 ReadTheDocs 结构，将开发手册左侧导航拆为入门、使用、开发、架构、运行时与工作台

@@ -1395,7 +1395,7 @@ describe("paper authoring loop", () => {
         ],
       },
       code_metadata: {
-        repository_url: "https://github.com/ZhuchenZhong/papercode",
+        repository_url: "https://github.com/S0ra-ai/PaperCode",
         version: "0.13.0-test",
         commit_hash: "abc1234",
         worktree_dirty: true,
@@ -1679,7 +1679,7 @@ describe("paper authoring loop", () => {
     expect(dataAvailability).toContain("| 项目 | 内容 |")
     expect(dataAvailability).toContain("| 方法实现 | rankAgentTeamPapers(src/agent-team-paper.ts:3)、scorePaper(src/agent-team-paper.ts:7)、claimLedgerCoverage(src/agent-team-paper.ts:11) |")
     expect(dataAvailability).toContain("| 复现实验入口 | 排名测试、词项匹配基线、无证据覆盖消融和容器复现 |")
-    expect(dataAvailability).toContain("| 代码仓库地址 | https://github.com/ZhuchenZhong/papercode |")
+    expect(dataAvailability).toContain("| 代码仓库地址 | https://github.com/S0ra-ai/PaperCode |")
     expect(dataAvailability).toContain("| 代码版本 | 0.13.0-test |")
     expect(dataAvailability).toContain("| 代码修订 | abc1234 |")
     expect(dataAvailability).toContain("| 代码工作区状态 | 含未提交或未跟踪变更 |")
@@ -1687,7 +1687,7 @@ describe("paper authoring loop", () => {
     expect(dataAvailability).toContain("方法实现包括 rankAgentTeamPapers(src/agent-team-paper.ts:3)、scorePaper(src/agent-team-paper.ts:7)、claimLedgerCoverage(src/agent-team-paper.ts:11)")
     expect(dataAvailability).toContain("复现实验入口包括排名测试、词项匹配基线、无证据覆盖消融和容器复现")
     expect(dataAvailability).toContain("复现实验入口包括排名测试、词项匹配基线、无证据覆盖消融和容器复现。\n\n| 项目 | 内容 |")
-    expect(dataAvailability).not.toContain("代码仓库地址：https://github.com/ZhuchenZhong/papercode")
+    expect(dataAvailability).not.toContain("代码仓库地址：https://github.com/S0ra-ai/PaperCode")
     expect(dataAvailability).not.toContain("代码版本：0.13.0-test")
     expect(dataAvailability).not.toContain("代码修订：abc1234")
     expect(dataAvailability).not.toContain("代码工作区状态：含未提交或未跟踪变更")

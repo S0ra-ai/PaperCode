@@ -2345,7 +2345,7 @@ export default function Layout(props: ParentProps) {
       settingsKeybind={() => command.keybind("settings.open")}
       onOpenSettings={openSettings}
       helpLabel={() => language.t("sidebar.help")}
-      onOpenHelp={() => platform.openLink("https://github.com/ZhuchenZhong/papercode/issues/new")}
+      onOpenHelp={() => platform.openLink("https://github.com/S0ra-ai/PaperCode/issues/new")}
       renderPanel={() =>
         mobile ? <SidebarPanel project={currentProject} mobile /> : <SidebarPanel project={currentProject} merged />
       }

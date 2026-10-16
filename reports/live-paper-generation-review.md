@@ -558,7 +558,7 @@
 
 - 协议场景复跑 `run-2b119262-1cd8-4951-9d1e-f46db44971cd`：status=`succeeded`，final export=`final`，Markdown/LaTeX/PDF/DOCX 均生成，failed checks 为空。
 - 最新 final Markdown：`C:\Users\13750\.papercode\runs\run-2b119262-1cd8-4951-9d1e-f46db44971cd\exports\bundle-final-draft-paper\bundle-final-draft-paper.md`。
-- 数据与代码可用性章节现在写出代码仓库地址 `https://github.com/ZhuchenZhong/papercode`。
+- 数据与代码可用性章节现在写出代码仓库地址 `https://github.com/S0ra-ai/PaperCode`。
 - 数据与代码可用性章节现在写出代码版本 `0.1.0`。
 - 数据与代码可用性章节现在写出代码许可证 `MPL-2.0`。
 - 质量判断：代码可用性从“未登记”推进到可复核仓库、版本和许可证信息，更接近计算机类论文的可复现声明。
