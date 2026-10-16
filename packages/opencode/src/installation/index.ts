@@ -195,7 +195,9 @@ export const layer: Layer.Layer<Service, never, HttpClient.HttpClient | ChildPro
 
           for (const check of checks) {
             const output = yield* check.command()
-            const installedName = "papercode"
+            // The npm-family package this project publishes is `papercode-ai` (see script/publish.ts);
+            // a bare `papercode` on the registry belongs to an unrelated package.
+            const installedName = "papercode-ai"
             if (output.includes(installedName)) {
               return check.name
             }
