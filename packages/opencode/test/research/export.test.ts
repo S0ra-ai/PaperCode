@@ -167,7 +167,7 @@ describe("export bundles", () => {
         now,
       }
 
-      await recordExportBundle(handle.run_dir, input, options)
+      const first = await recordExportBundle(handle.run_dir, input, options)
       // A bundle id is derived from the mode and the draft, so exporting the same run again writes the
       // same export:<bundle>:<format> ids. The fact files are append-only and keep both; the index has
       // to collapse them, otherwise the rebuild fails and the run can never be indexed again.
@@ -178,6 +178,16 @@ describe("export bundles", () => {
       const db = new Database(path.join(handle.run_dir, "index.sqlite"), { readonly: true })
       try {
         expect((db.query("SELECT COUNT(*) AS count FROM exports").get() as { count: number }).count).toBe(4)
+        // The rows must be the second export's: its artifact id is the only thing distinguishing the two
+        // generations, and the files on disk are the ones it wrote.
+        expect(second.artifact.artifact_id).not.toBe(first.artifact.artifact_id)
+        const rows = db.query("SELECT payload_json FROM exports").all() as Array<{ payload_json: string }>
+        expect(rows.map((row) => JSON.parse(row.payload_json).artifact_ids[0])).toEqual([
+          second.artifact.artifact_id,
+          second.artifact.artifact_id,
+          second.artifact.artifact_id,
+          second.artifact.artifact_id,
+        ])
       } finally {
         db.close()
       }

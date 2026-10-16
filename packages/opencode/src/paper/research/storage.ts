@@ -25,9 +25,14 @@ export const RUN_INDEX_FILENAME = "index.sqlite"
 export const GLOBAL_INDEX_FILENAME = "index.sqlite"
 
 type JsonlKind = Exclude<ResearchContractKind, "run">
+type SqliteStatement = {
+  run(...values: unknown[]): unknown
+  get(...values: unknown[]): unknown
+}
+
 type SqliteDatabase = {
   exec(sql: string): unknown
-  prepare(sql: string): { run(...values: unknown[]): unknown }
+  prepare(sql: string): SqliteStatement
   close(): unknown
 }
 
@@ -153,6 +158,10 @@ type SqlBinding = string | number | bigint | boolean | null | Uint8Array
  * twice writes the same `export:<bundle>:<format>` ids again, because a bundle id is derived from the
  * mode and the draft. The index is a projection of those files and has to tolerate that - the row
  * that survives is the last one, which is the export whose files are actually on disk.
+ *
+ * The index is therefore a union of every generation: when a newer ledger emits fewer rows than the
+ * one before it, the ids it never re-states (a positional `claim:<section>:<n>`, say) keep their older
+ * row. Dropping them would mean knowing which generation is current, which the fact files do not say.
  */
 function insertJson<T>(db: SqliteDatabase, table: string, columns: string[], rows: T[], values: (row: T) => SqlBinding[]) {
   const placeholders = columns.map(() => "?").join(", ")
@@ -160,11 +169,36 @@ function insertJson<T>(db: SqliteDatabase, table: string, columns: string[], row
   for (const row of rows) statement.run(...values(row), JSON.stringify(row))
 }
 
+/**
+ * Row count of the index itself. The fact arrays can be longer than the tables they fill: a fact file
+ * is append-only, so re-exporting a run repeats primary keys and the rebuild keeps the last row for
+ * each. Counting facts here would describe rows the index does not have.
+ */
+function indexCount(db: SqliteDatabase, table: string) {
+  return (db.prepare(`SELECT COUNT(*) AS count FROM ${table}`).get() as { count: number }).count
+}
+
+/** Facts read from the append-only files, which can outnumber the rows they produce. */
+function factCount(facts: IndexedFacts) {
+  return (
+    facts.events.length +
+    facts.artifacts.length +
+    facts.sources.length +
+    facts.tool_traces.length +
+    facts.claims.length +
+    facts.drafts.length +
+    facts.reviews.length +
+    facts.exports.length +
+    facts.checkpoints.length
+  )
+}
+
 export async function rebuildRunIndex(runDir: string): Promise<ResearchIndexSummary> {
   return withSpan("research.index.rebuild_run", { "papercode.research.run_dir": runDir }, async (span) => {
     const facts = await loadRunFacts(runDir)
     const indexPath = runIndexPath(runDir)
     const db = openDatabase(indexPath)
+    let counts: ResearchIndexSummary["counts"]
     try {
       db.exec("PRAGMA busy_timeout = 30000;")
       createRunSchema(db)
@@ -217,28 +251,33 @@ export async function rebuildRunIndex(runDir: string): Promise<ResearchIndexSumm
         row.stage,
         row.status,
       ])
+      counts = {
+        events: indexCount(db, "events"),
+        artifacts: indexCount(db, "artifacts"),
+        sources: indexCount(db, "sources"),
+        tool_traces: indexCount(db, "tool_traces"),
+        claims: indexCount(db, "claims"),
+        drafts: indexCount(db, "drafts"),
+        reviews: indexCount(db, "reviews"),
+        exports: indexCount(db, "exports"),
+        checkpoints: indexCount(db, "checkpoints"),
+      }
     } finally {
       db.close()
     }
 
+    // Collisions are expected (an export re-run repeats its ids), but the count is the only trace
+    // left of one: the rebuild no longer fails loudly on a duplicate primary key.
+    const collapsed = factCount(facts) - Object.values(counts).reduce((total, value) => total + value, 0)
+    if (collapsed > 0) span.setAttribute("papercode.research.index.collapsed_facts", collapsed)
     span.setAttribute("papercode.research.run_id", facts.run.run_id)
     span.setAttribute("papercode.research.index.path", indexPath)
-    span.setAttribute("papercode.research.events.count", facts.events.length)
-    span.setAttribute("papercode.research.artifacts.count", facts.artifacts.length)
+    span.setAttribute("papercode.research.events.count", counts.events)
+    span.setAttribute("papercode.research.artifacts.count", counts.artifacts)
     return {
       run_id: facts.run.run_id,
       run_index_path: indexPath,
-      counts: {
-        events: facts.events.length,
-        artifacts: facts.artifacts.length,
-        sources: facts.sources.length,
-        tool_traces: facts.tool_traces.length,
-        claims: facts.claims.length,
-        drafts: facts.drafts.length,
-        reviews: facts.reviews.length,
-        exports: facts.exports.length,
-        checkpoints: facts.checkpoints.length,
-      },
+      counts,
     }
   })
 }
