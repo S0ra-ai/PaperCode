@@ -63,10 +63,10 @@ opencode 데스크톱 앱을 쓰면서 서버는 WSL에서 실행하고 싶다�
 :::
 
 :::caution
-`--hostname 0.0.0.0`을 사용할 때는 `OPENCODE_SERVER_PASSWORD`를 설정해 서버를 보호하세요.
+`--hostname 0.0.0.0`을 사용할 때는 `PAPERCODE_SERVER_PASSWORD`를 설정해 서버를 보호하세요.
 
 ```bash
-OPENCODE_SERVER_PASSWORD=your-password opencode serve --hostname 0.0.0.0
+PAPERCODE_SERVER_PASSWORD=your-password opencode serve --hostname 0.0.0.0
 ```
 
 :::
@@ -77,7 +77,7 @@ OPENCODE_SERVER_PASSWORD=your-password opencode serve --hostname 0.0.0.0
 
 Windows에서 웹 사용 경험을 가장 좋게 하려면:
 
-1. **PowerShell 대신 WSL terminal에서 `opencode web` 실행하기**
+1. **PowerShell 대신 WSL terminal에서 `papercode web` 실행하기**
 
    ```bash
    opencode web --hostname 0.0.0.0
@@ -87,7 +87,7 @@ Windows에서 웹 사용 경험을 가장 좋게 하려면:
 
    `http://localhost:<port>`로 접속하세요(opencode가 URL을 출력합니다).
 
-WSL에서 `opencode web`를 실행하면 올바른 파일 시스템 접근과 terminal 통합을 유지하면서도 Windows 브라우저에서 바로 사용할 수 있습니다.
+WSL에서 `papercode web`를 실행하면 올바른 파일 시스템 접근과 terminal 통합을 유지하면서도 Windows 브라우저에서 바로 사용할 수 있습니다.
 
 ---
 
@@ -116,4 +116,4 @@ opencode
 
 - Windows 드라이브에 있는 프로젝트라도 opencode는 WSL에서 실행하면 파일 접근이 더 자연스럽습니다
 - 통합된 개발 워크플로를 위해 opencode와 함께 VS Code의 [WSL 확장](https://code.visualstudio.com/docs/remote/wsl)을 사용해 보세요
-- opencode 설정과 세션은 WSL 환경의 `~/.local/share/opencode/`에 저장됩니다
+- opencode 설정과 세션은 WSL 환경의 `~/.papercode/data/`에 저장됩니다

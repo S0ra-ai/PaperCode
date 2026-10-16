@@ -18,7 +18,9 @@ import type { ResearchRuntimeOptions } from "@/paper/research/runtime"
 
 // createPaperRun drives the default engine end to end, and that engine renders the final export
 // through the real toolchain (pandoc + a TeX engine) whenever one is installed.
-const PAPER_RUN_INTEGRATION_TIMEOUT = 180_000
+// A full PaperRun renders through the real toolchain (pandoc + a TeX engine) when one is installed,
+// which takes minutes on a loaded machine.
+const PAPER_RUN_INTEGRATION_TIMEOUT = 300_000
 
 const now = "2026-05-10T00:00:00Z"
 const created: string[] = []

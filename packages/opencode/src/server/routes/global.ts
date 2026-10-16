@@ -155,7 +155,9 @@ export const GlobalRoutes = lazy(() =>
         },
       }),
       async (c) => {
-        return c.json(await AppRuntime.runPromise(Config.Service.use((cfg) => cfg.getGlobal())))
+        return c.json(
+          Config.maskSecrets(await AppRuntime.runPromise(Config.Service.use((cfg) => cfg.getGlobal()))),
+        )
       },
     )
     .patch(
@@ -179,7 +181,15 @@ export const GlobalRoutes = lazy(() =>
       validator("json", Config.Info.zod),
       async (c) => {
         const config = c.req.valid("json")
-        const result = await AppRuntime.runPromise(Config.Service.use((cfg) => cfg.updateGlobal(config)))
+        const result = await AppRuntime.runPromise(
+          Config.Service.use((cfg) =>
+            Effect.gen(function* () {
+              // A masked value means the client echoed back what it read; keep the stored secret.
+              const restored = Config.restoreMaskedSecrets(config, yield* cfg.getGlobal())
+              return yield* cfg.updateGlobal(restored)
+            }),
+          ),
+        )
         if (result.changed) {
           void AppRuntime.runPromise(disposeAllInstancesAndEmitGlobalDisposed({ swallowErrors: true })).catch(
             () => undefined,

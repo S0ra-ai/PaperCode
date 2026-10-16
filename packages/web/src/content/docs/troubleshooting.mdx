@@ -11,12 +11,12 @@ To debug issues with OpenCode, start by checking the logs and local data it stor
 
 Log files are written to:
 
-- **macOS/Linux**: `~/.local/share/opencode/log/`
+- **macOS/Linux**: `~/.papercode/data/log/`
 - **Windows**: Press `WIN+R` and paste `%USERPROFILE%\.local\share\opencode\log`
 
 Log files are named with timestamps (e.g., `2025-01-09T123456.log`) and the most recent 10 log files are kept.
 
-You can set the log level with the `--log-level` command-line option to get more detailed debug information. For example, `opencode --log-level DEBUG`.
+You can set the log level with the `--log-level` command-line option to get more detailed debug information. For example, `papercode --log-level DEBUG`.
 
 ---
 
@@ -24,7 +24,7 @@ You can set the log level with the `--log-level` command-line option to get more
 
 opencode stores session data and other application data on disk at:
 
-- **macOS/Linux**: `~/.local/share/opencode/`
+- **macOS/Linux**: `~/.papercode/data/`
 - **Windows**: Press `WIN+R` and paste `%USERPROFILE%\.local\share\opencode`
 
 This directory contains:
@@ -57,9 +57,9 @@ If the desktop app is crashing on launch, hanging, or behaving strangely, start 
 
 Open your global config file and look for a `plugin` key.
 
-- **macOS/Linux**: `~/.config/opencode/opencode.jsonc` (or `~/.config/opencode/opencode.json`)
-- **macOS/Linux** (older installs): `~/.local/share/opencode/opencode.jsonc`
-- **Windows**: Press `WIN+R` and paste `%USERPROFILE%\.config\opencode\opencode.jsonc`
+- **macOS/Linux**: `~/.papercode/config/papercode.jsonc` (or `~/.papercode/config/papercode.json`)
+- **macOS/Linux** (older installs): `~/.papercode/data/papercode.jsonc`
+- **Windows**: Press `WIN+R` and paste `%USERPROFILE%\.config\opencode\papercode.jsonc`
 
 If you have plugins configured, temporarily disable them by removing the key or setting it to an empty array:
 
@@ -75,10 +75,10 @@ If you have plugins configured, temporarily disable them by removing the key or 
 OpenCode can also load local plugins from disk. Temporarily move these out of the way (or rename the folder) and restart the desktop app:
 
 - **Global plugins**
-  - **macOS/Linux**: `~/.config/opencode/plugins/`
+  - **macOS/Linux**: `~/.papercode/config/plugins/`
   - **Windows**: Press `WIN+R` and paste `%USERPROFILE%\.config\opencode\plugins`
 - **Project plugins** (only if you use per-project config)
-  - `<your-project>/.opencode/plugins/`
+  - `<your-project>/.papercode/plugins/`
 
 If the app starts working again, re-enable plugins one at a time to find which one is causing the issue.
 
@@ -111,13 +111,13 @@ From the Home screen, click the server name (with the status dot) to open the Se
 
 #### Remove `server.port` / `server.hostname` from your config
 
-If your `opencode.json(c)` contains a `server` section, temporarily remove it and restart the desktop app.
+If your `papercode.json(c)` contains a `server` section, temporarily remove it and restart the desktop app.
 
 #### Check environment variables
 
-If you have `OPENCODE_PORT` set in your environment, the desktop app will try to use that port for the local server.
+If you have `PAPERCODE_PORT` set in your environment, the desktop app will try to use that port for the local server.
 
-- Unset `OPENCODE_PORT` (or pick a free port) and restart.
+- Unset `PAPERCODE_PORT` (or pick a free port) and restart.
 
 ---
 
@@ -199,7 +199,7 @@ Here are some common issues and how to resolve them.
 
 1. Check the logs for error messages
 2. Try running with `--print-logs` to see output in the terminal
-3. Ensure you have the latest version with `opencode upgrade`
+3. Ensure you have the latest version with `papercode upgrade`
 
 ---
 
@@ -227,7 +227,7 @@ Examples:
 - `openrouter/google/gemini-2.5-flash`
 - `opencode/kimi-k2`
 
-To figure out what models you have access to, run `opencode models`
+To figure out what models you have access to, run `papercode models`
 
 ---
 
@@ -241,7 +241,7 @@ To resolve this:
 2. If the issue persists, try clearing your stored configuration:
 
    ```bash
-   rm -rf ~/.local/share/opencode
+   rm -rf ~/.papercode/data
    ```
 
    On Windows, press `WIN+R` and delete: `%USERPROFILE%\.local\share\opencode`

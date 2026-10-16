@@ -6,7 +6,7 @@ description: Interact with opencode server over HTTP.
 import config from "../../../config.mjs"
 export const typesUrl = `${config.github}/blob/dev/packages/sdk/js/src/gen/types.gen.ts`
 
-The `opencode serve` command runs a headless HTTP server that exposes an OpenAPI endpoint that an opencode client can use.
+The `papercode serve` command runs a headless HTTP server that exposes an OpenAPI endpoint that an opencode client can use.
 
 ---
 
@@ -36,10 +36,10 @@ opencode serve --cors http://localhost:5173 --cors https://app.example.com
 
 ### Authentication
 
-Set `OPENCODE_SERVER_PASSWORD` to protect the server with HTTP basic auth. The username defaults to `opencode`, or set `OPENCODE_SERVER_USERNAME` to override it. This applies to both `opencode serve` and `opencode web`.
+Set `PAPERCODE_SERVER_PASSWORD` to protect the server with HTTP basic auth. The username defaults to `opencode`, or set `PAPERCODE_SERVER_USERNAME` to override it. This applies to both `papercode serve` and `papercode web`.
 
 ```bash
-OPENCODE_SERVER_PASSWORD=your-password opencode serve
+PAPERCODE_SERVER_PASSWORD=your-password opencode serve
 ```
 
 ---
@@ -56,8 +56,8 @@ Use the opencode server to interact with opencode programmatically.
 
 This architecture lets opencode support multiple clients and allows you to interact with opencode programmatically.
 
-You can run `opencode serve` to start a standalone server. If you have the
-opencode TUI running, `opencode serve` will start a new server.
+You can run `papercode serve` to start a standalone server. If you have the
+opencode TUI running, `papercode serve` will start a new server.
 
 ---
 

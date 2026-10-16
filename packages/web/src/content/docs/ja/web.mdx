@@ -20,10 +20,10 @@ opencode web
 これにより、利用可能なランダムなポートを使用して `127.0.0.1` でローカルサーバーが起動され、デフォルトのブラウザで OpenCode が自動的に開きます。
 
 :::caution
-`OPENCODE_SERVER_PASSWORD` が設定されていない場合、サーバーは保護されません。これはローカルで使用する場合には問題ありませんが、ネットワークアクセス用に設定する必要があります。
+`PAPERCODE_SERVER_PASSWORD` が設定されていない場合、サーバーは保護されません。これはローカルで使用する場合には問題ありませんが、ネットワークアクセス用に設定する必要があります。
 :::
 :::tip[Windows ユーザー]
-最高のエクスペリエンスを得るには、PowerShell ではなく [WSL](/docs/windows-wsl) から `opencode web` を実行します。これにより、ファイルシステムへの適切なアクセスとターミナルの統合が保証されます。
+最高のエクスペリエンスを得るには、PowerShell ではなく [WSL](/docs/windows-wsl) から `papercode web` を実行します。これにより、ファイルシステムへの適切なアクセスとターミナルの統合が保証されます。
 :::
 
 ---
@@ -81,13 +81,13 @@ opencode web --cors https://example.com
 
 ### 認証
 
-アクセスを保護するには、`OPENCODE_SERVER_PASSWORD` 環境変数を使用してパスワードを設定します。
+アクセスを保護するには、`PAPERCODE_SERVER_PASSWORD` 環境変数を使用してパスワードを設定します。
 
 ```bash
-OPENCODE_SERVER_PASSWORD=secret opencode web
+PAPERCODE_SERVER_PASSWORD=secret opencode web
 ```
 
-ユーザー名のデフォルトは `opencode` ですが、`OPENCODE_SERVER_USERNAME` で変更できます。
+ユーザー名のデフォルトは `opencode` ですが、`PAPERCODE_SERVER_USERNAME` で変更できます。
 
 ---
 
@@ -127,7 +127,7 @@ opencode attach http://localhost:4096
 
 ## 設定ファイル
 
-`opencode.json` 設定ファイルでサーバー設定を構成することもできます。
+`papercode.json` 設定ファイルでサーバー設定を構成することもできます。
 
 ```json
 {

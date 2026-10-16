@@ -369,7 +369,7 @@ How is auth handled in @packages/functions/src/api/index.ts?
 }
 ```
 
-這與設定伺服器/執行時行為的 `opencode.json` 是分開的。
+這與設定伺服器/執行時行為的 `papercode.json` 是分開的。
 
 ### 選項
 
@@ -379,7 +379,7 @@ How is auth handled in @packages/functions/src/api/index.ts?
 - `scroll_speed` - 控制使用捲動指令時 TUI 的捲動速度（最小值：`0.001`，支援小數值）。預設為 `3`。**注意：如果 `scroll_acceleration.enabled` 設定為 `true`，則此設定會被忽略。**
 - `diff_style` - 控制差異呈現方式。`"auto"` 根據終端機寬度自適應，`"stacked"` 始終顯示單列。
 
-使用 `OPENCODE_TUI_CONFIG` 載入自訂 TUI 設定路徑。
+使用 `PAPERCODE_TUI_CONFIG` 載入自訂 TUI 設定路徑。
 
 ---
 

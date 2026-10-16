@@ -59,10 +59,10 @@ Si `localhost` ne fonctionne pas dans votre configuration, utilisez plutôt l'ad
 :::
 
 :::caution
-Lorsque vous utilisez `--hostname 0.0.0.0`, définissez `OPENCODE_SERVER_PASSWORD` pour sécuriser le serveur.
+Lorsque vous utilisez `--hostname 0.0.0.0`, définissez `PAPERCODE_SERVER_PASSWORD` pour sécuriser le serveur.
 
 ```bash
-OPENCODE_SERVER_PASSWORD=your-password opencode serve --hostname 0.0.0.0
+PAPERCODE_SERVER_PASSWORD=your-password opencode serve --hostname 0.0.0.0
 ```
 
 :::
@@ -73,7 +73,7 @@ OPENCODE_SERVER_PASSWORD=your-password opencode serve --hostname 0.0.0.0
 
 Pour la meilleure expérience web sous Windows:
 
-1. **Exécutez `opencode web` dans le terminal WSL** plutôt que dans PowerShell:
+1. **Exécutez `papercode web` dans le terminal WSL** plutôt que dans PowerShell:
 
    ```bash
    opencode web --hostname 0.0.0.0
@@ -81,7 +81,7 @@ Pour la meilleure expérience web sous Windows:
 
 2. **Accédez-y depuis votre navigateur Windows** à `http://localhost:<port>` (OpenCode affiche l'URL)
 
-Lancer `opencode web` depuis WSL garantit un accès correct au système de fichiers et une bonne intégration terminal, tout en restant accessible depuis votre navigateur Windows.
+Lancer `papercode web` depuis WSL garantit un accès correct au système de fichiers et une bonne intégration terminal, tout en restant accessible depuis votre navigateur Windows.
 
 ---
 
@@ -110,4 +110,4 @@ Pour une expérience plus fluide, vous pouvez cloner/copier votre dépôt dans l
 
 - Gardez OpenCode dans WSL pour les projets stockés sur des lecteurs Windows: l'accès aux fichiers est fluide
 - Utilisez l'[extension WSL de VS Code](https://code.visualstudio.com/docs/remote/wsl) avec OpenCode pour un flux de travail intégré
-- Votre configuration OpenCode et vos sessions sont stockées dans l'environnement WSL à `~/.local/share/opencode/`
+- Votre configuration OpenCode et vos sessions sont stockées dans l'environnement WSL à `~/.papercode/data/`

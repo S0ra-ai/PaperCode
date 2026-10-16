@@ -65,7 +65,7 @@ Das System-Theme ist ideal fuer Nutzer, die:
 
 Du kannst ein Theme ueber `/theme` auswaehlen oder direkt in der [Konfiguration](/docs/config) setzen.
 
-```json title="opencode.json" {3}
+```json title="papercode.json" {3}
 {
   "$schema": "https://opencode.ai/config.json",
   "theme": "tokyonight"
@@ -86,9 +86,9 @@ Damit lassen sich Themes einfach erstellen und anpassen.
 Themes werden aus mehreren Verzeichnissen in folgender Reihenfolge geladen, wobei spaetere Verzeichnisse fruehere ueberschreiben:
 
 1. **Eingebaute Themes** - Diese sind im Binary eingebettet
-2. **Benutzer-Config-Verzeichnis** - Definiert in `~/.config/opencode/themes/*.json` oder `$XDG_CONFIG_HOME/opencode/themes/*.json`
-3. **Projekt-Root-Verzeichnis** - Definiert in `<project-root>/.opencode/themes/*.json`
-4. **Aktuelles Arbeitsverzeichnis** - Definiert in `./.opencode/themes/*.json`
+2. **Benutzer-Config-Verzeichnis** - Definiert in `~/.papercode/config/themes/*.json` oder `$XDG_CONFIG_HOME/opencode/themes/*.json`
+3. **Projekt-Root-Verzeichnis** - Definiert in `<project-root>/.papercode/themes/*.json`
+4. **Aktuelles Arbeitsverzeichnis** - Definiert in `./.papercode/themes/*.json`
 
 Wenn mehrere Verzeichnisse ein Theme mit demselben Namen enthalten, wird das Theme aus dem Verzeichnis mit der hoeheren Prioritaet verwendet.
 
@@ -101,15 +101,15 @@ Um ein eigenes Theme zu erstellen, lege eine JSON-Datei in einem der Theme-Verze
 Fuer benutzerweite Themes:
 
 ```bash no-frame
-mkdir -p ~/.config/opencode/themes
-vim ~/.config/opencode/themes/my-theme.json
+mkdir -p ~/.papercode/config/themes
+vim ~/.papercode/config/themes/my-theme.json
 ```
 
 Und fuer projektspezifische Themes:
 
 ```bash no-frame
-mkdir -p .opencode/themes
-vim .opencode/themes/my-theme.json
+mkdir -p .papercode/themes
+vim .papercode/themes/my-theme.json
 ```
 
 ---

@@ -390,6 +390,109 @@ function patchJsonc(input: string, patch: unknown, path: string[] = []): string 
   return Object.entries(patch).reduce((result, [key, value]) => patchJsonc(result, value, [...path, key]), input)
 }
 
+/** Marker used when config is sent to clients; a client echoing it back keeps the stored secret. */
+export const REDACTED_SECRET = "[redacted]"
+
+// Provider options are an open record, so an inline credential can arrive under any of these names.
+const SECRET_KEY = /(api[_-]?key|token|secret|password|authorization|credential)/i
+
+function maskOptions(options: Record<string, unknown> | undefined) {
+  if (!options) return options
+  const next: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(options)) {
+    if (typeof value === "string" && SECRET_KEY.test(key)) {
+      next[key] = value ? REDACTED_SECRET : value
+      continue
+    }
+    if (key === "headers" && value !== null && typeof value === "object" && !Array.isArray(value)) {
+      next[key] = Object.fromEntries(
+        Object.entries(value as Record<string, unknown>).map(([header, headerValue]) => [
+          header,
+          typeof headerValue === "string" && SECRET_KEY.test(header) ? REDACTED_SECRET : headerValue,
+        ]),
+      )
+      continue
+    }
+    next[key] = value
+  }
+  return next
+}
+
+/** Config as sent to clients: inline credentials in provider options are masked, not returned. */
+export function maskSecrets(info: Info): Info {
+  return {
+    ...info,
+    ...(info.provider
+      ? {
+          provider: Object.fromEntries(
+            Object.entries(info.provider).map(([id, provider]) => [
+              id,
+              { ...provider, options: maskOptions(provider.options as Record<string, unknown> | undefined) },
+            ]),
+          ),
+        }
+      : {}),
+    ...(info.providers
+      ? {
+          providers: Object.fromEntries(
+            Object.entries(info.providers).map(([id, provider]) => [
+              id,
+              { ...provider, options: maskOptions(provider.options as Record<string, unknown> | undefined) },
+            ]),
+          ),
+        }
+      : {}),
+  }
+}
+
+function restoreOptions(
+  next: Record<string, unknown> | undefined,
+  previous: Record<string, unknown> | undefined,
+) {
+  if (!next || !previous) return next
+  const restored: Record<string, unknown> = { ...next }
+  for (const [key, value] of Object.entries(next)) {
+    if (value === REDACTED_SECRET && previous[key] !== undefined) restored[key] = previous[key]
+    if (key === "headers" && value !== null && typeof value === "object" && !Array.isArray(value)) {
+      const previousHeaders = (previous[key] ?? {}) as Record<string, unknown>
+      restored[key] = Object.fromEntries(
+        Object.entries(value as Record<string, unknown>).map(([header, headerValue]) => [
+          header,
+          headerValue === REDACTED_SECRET && previousHeaders[header] !== undefined ? previousHeaders[header] : headerValue,
+        ]),
+      )
+    }
+  }
+  return restored
+}
+
+/**
+ * Apply a config that a client read back from `maskSecrets`: a masked value means "unchanged", so the
+ * stored secret survives an edit-then-save round trip instead of being replaced by the marker.
+ */
+export function restoreMaskedSecrets(next: Info, previous: Info): Info {
+  const restoreAll = <T extends { options?: unknown }>(incoming: Record<string, T> | undefined, stored: Record<string, T> | undefined) =>
+    incoming
+      ? Object.fromEntries(
+          Object.entries(incoming).map(([id, provider]) => [
+            id,
+            {
+              ...provider,
+              options: restoreOptions(
+                provider.options as Record<string, unknown> | undefined,
+                stored?.[id]?.options as Record<string, unknown> | undefined,
+              ),
+            },
+          ]),
+        )
+      : undefined
+  return {
+    ...next,
+    ...(next.provider ? { provider: restoreAll(next.provider, previous.provider) } : {}),
+    ...(next.providers ? { providers: restoreAll(next.providers, previous.providers) } : {}),
+  }
+}
+
 function writable(info: Info) {
   const { plugin_origins: _plugin_origins, ...next } = info
   return next

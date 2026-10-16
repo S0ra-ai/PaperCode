@@ -59,10 +59,10 @@ WSL ให้ประสิทธิภาพระบบไฟล์ที่�
 :::
 
 :::caution
-เมื่อใช้ `--hostname 0.0.0.0` ให้ตั้งค่า `OPENCODE_SERVER_PASSWORD` เพื่อป้องกันเซิร์ฟเวอร์
+เมื่อใช้ `--hostname 0.0.0.0` ให้ตั้งค่า `PAPERCODE_SERVER_PASSWORD` เพื่อป้องกันเซิร์ฟเวอร์
 
 ```bash
-OPENCODE_SERVER_PASSWORD=your-password opencode serve --hostname 0.0.0.0
+PAPERCODE_SERVER_PASSWORD=your-password opencode serve --hostname 0.0.0.0
 ```
 
 :::
@@ -73,7 +73,7 @@ OPENCODE_SERVER_PASSWORD=your-password opencode serve --hostname 0.0.0.0
 
 เพื่อประสบการณ์เว็บที่ดีที่สุดบน Windows:
 
-1. **รัน `opencode web` ใน terminal WSL** แทน PowerShell:
+1. **รัน `papercode web` ใน terminal WSL** แทน PowerShell:
 
    ```bash
    opencode web --hostname 0.0.0.0
@@ -81,7 +81,7 @@ OPENCODE_SERVER_PASSWORD=your-password opencode serve --hostname 0.0.0.0
 
 2. **เข้าจากเบราว์เซอร์บน Windows** ที่ `http://localhost:<port>` (OpenCode จะแสดง URL ให้)
 
-การรัน `opencode web` จาก WSL ช่วยให้เข้าถึงระบบไฟล์และใช้งาน terminal ได้ถูกต้อง พร้อมเปิดใช้งานผ่านเบราว์เซอร์ Windows ได้เหมือนเดิม
+การรัน `papercode web` จาก WSL ช่วยให้เข้าถึงระบบไฟล์และใช้งาน terminal ได้ถูกต้อง พร้อมเปิดใช้งานผ่านเบราว์เซอร์ Windows ได้เหมือนเดิม
 
 ---
 
@@ -110,4 +110,4 @@ opencode
 
 - แม้โปรเจกต์จะอยู่บนไดรฟ์ Windows ก็ควรรัน OpenCode ใน WSL เพื่อการเข้าถึงไฟล์ที่ลื่นกว่า
 - ใช้ OpenCode ควบคู่กับ [WSL extension ของ VS Code](https://code.visualstudio.com/docs/remote/wsl) เพื่อเวิร์กโฟลว์ที่ต่อเนื่อง
-- การตั้งค่าและเซสชันของ OpenCode จะถูกเก็บในสภาพแวดล้อม WSL ที่ `~/.local/share/opencode/`
+- การตั้งค่าและเซสชันของ OpenCode จะถูกเก็บในสภาพแวดล้อม WSL ที่ `~/.papercode/data/`

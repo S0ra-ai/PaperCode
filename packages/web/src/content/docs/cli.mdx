@@ -75,7 +75,7 @@ This command will guide you through creating a new agent with a custom system pr
 
 | Flag                                        | Short | Description                                                                                                                                                                                                                |
 | ------------------------------------------- | ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| <nobr><code>{"--path"}</code></nobr>        |       | Directory to write the agent file to (defaults to global or `.opencode/agent` based on the prompt)                                                                                                                         |
+| <nobr><code>{"--path"}</code></nobr>        |       | Directory to write the agent file to (defaults to global or `.papercode/agent` based on the prompt)                                                                                                                         |
 | <nobr><code>{"--description"}</code></nobr> |       | What the agent should do                                                                                                                                                                                                   |
 | <nobr><code>{"--mode"}</code></nobr>        |       | Agent mode: `all`, `primary`, or `subagent`                                                                                                                                                                                |
 | <nobr><code>{"--permissions"}</code></nobr> |       | Comma-separated list of permissions to allow (default: all). Available: `bash`, `read`, `edit`, `glob`, `grep`, `webfetch`, `task`, `todowrite`, `websearch`, `lsp`, `skill`. Anything omitted is denied. Alias: `--tools` |
@@ -121,8 +121,8 @@ opencode attach http://10.20.30.40:4096
 | <nobr><code>{"--continue"}</code></nobr> | `-c`  | Continue the last session                                                  |
 | <nobr><code>{"--session"}</code></nobr>  | `-s`  | Session ID to continue                                                     |
 | <nobr><code>{"--fork"}</code></nobr>     |       | Fork the session when continuing (use with `--continue` or `--session`)    |
-| <nobr><code>{"--password"}</code></nobr> | `-p`  | Basic auth password (defaults to `OPENCODE_SERVER_PASSWORD`)               |
-| <nobr><code>{"--username"}</code></nobr> | `-u`  | Basic auth username (defaults to `OPENCODE_SERVER_USERNAME` or `opencode`) |
+| <nobr><code>{"--password"}</code></nobr> | `-p`  | Basic auth password (defaults to `PAPERCODE_SERVER_PASSWORD`)               |
+| <nobr><code>{"--username"}</code></nobr> | `-u`  | Basic auth username (defaults to `PAPERCODE_SERVER_USERNAME` or `opencode`) |
 
 ---
 
@@ -138,7 +138,7 @@ opencode auth [command]
 
 #### login
 
-OpenCode is powered by the provider list at [Models.dev](https://models.dev), so you can use `opencode auth login` to configure API keys for any provider you'd like to use. This is stored in `~/.local/share/opencode/auth.json`.
+OpenCode is powered by the provider list at [Models.dev](https://models.dev), so you can use `papercode auth login` to configure API keys for any provider you'd like to use. This is stored in `~/.papercode/data/auth.json`.
 
 ```bash
 opencode auth login
@@ -349,7 +349,7 @@ This is useful for scripting, automation, or when you want a quick answer withou
 opencode run Explain the use of context in Go
 ```
 
-You can also attach to a running `opencode serve` instance to avoid MCP server cold boot times on every run:
+You can also attach to a running `papercode serve` instance to avoid MCP server cold boot times on every run:
 
 ```bash
 # Start a headless server in one terminal
@@ -374,8 +374,8 @@ opencode run --attach http://localhost:4096 "Explain async/await in JavaScript"
 | <nobr><code>{"--format"}</code></nobr>                       |       | Format: default (formatted) or json (raw JSON events)                      |
 | <nobr><code>{"--title"}</code></nobr>                        |       | Title for the session (uses truncated prompt if no value provided)         |
 | <nobr><code>{"--attach"}</code></nobr>                       |       | Attach to a running opencode server (e.g., http://localhost:4096)          |
-| <nobr><code>{"--password"}</code></nobr>                     | `-p`  | Basic auth password (defaults to `OPENCODE_SERVER_PASSWORD`)               |
-| <nobr><code>{"--username"}</code></nobr>                     | `-u`  | Basic auth username (defaults to `OPENCODE_SERVER_USERNAME` or `opencode`) |
+| <nobr><code>{"--password"}</code></nobr>                     | `-p`  | Basic auth password (defaults to `PAPERCODE_SERVER_PASSWORD`)               |
+| <nobr><code>{"--username"}</code></nobr>                     | `-u`  | Basic auth username (defaults to `PAPERCODE_SERVER_USERNAME` or `opencode`) |
 | <nobr><code>{"--dir"}</code></nobr>                          |       | Directory to run in, or path on the remote server when attaching           |
 | <nobr><code>{"--port"}</code></nobr>                         |       | Port for the local server (defaults to random port)                        |
 | <nobr><code>{"--variant"}</code></nobr>                      |       | Model variant (provider-specific reasoning effort)                         |
@@ -392,7 +392,7 @@ Start a headless OpenCode server for API access. Check out the [server docs](/do
 opencode serve
 ```
 
-This starts an HTTP server that provides API access to opencode functionality without the TUI interface. Set `OPENCODE_SERVER_PASSWORD` to enable HTTP basic auth (username defaults to `opencode`).
+This starts an HTTP server that provides API access to opencode functionality without the TUI interface. Set `PAPERCODE_SERVER_PASSWORD` to enable HTTP basic auth (username defaults to `opencode`).
 
 #### Flags
 
@@ -505,7 +505,7 @@ Start a headless OpenCode server with a web interface.
 opencode web
 ```
 
-This starts an HTTP server and opens a web browser to access OpenCode through a web interface. Set `OPENCODE_SERVER_PASSWORD` to enable HTTP basic auth (username defaults to `opencode`).
+This starts an HTTP server and opens a web browser to access OpenCode through a web interface. Set `PAPERCODE_SERVER_PASSWORD` to enable HTTP basic auth (username defaults to `opencode`).
 
 #### Flags
 
@@ -678,31 +678,31 @@ OpenCode can be configured using environment variables.
 
 | Variable                              | Type    | Description                                       |
 | ------------------------------------- | ------- | ------------------------------------------------- |
-| `OPENCODE_AUTO_SHARE`                 | boolean | Automatically share sessions                      |
-| `OPENCODE_GIT_BASH_PATH`              | string  | Path to Git Bash executable on Windows            |
-| `OPENCODE_CONFIG`                     | string  | Path to config file                               |
-| `OPENCODE_TUI_CONFIG`                 | string  | Path to TUI config file                           |
-| `OPENCODE_CONFIG_DIR`                 | string  | Path to config directory                          |
-| `OPENCODE_CONFIG_CONTENT`             | string  | Inline json config content                        |
-| `OPENCODE_DISABLE_AUTOUPDATE`         | boolean | Disable automatic update checks                   |
-| `OPENCODE_DISABLE_PRUNE`              | boolean | Disable pruning of old data                       |
-| `OPENCODE_DISABLE_TERMINAL_TITLE`     | boolean | Disable automatic terminal title updates          |
-| `OPENCODE_PERMISSION`                 | string  | Inlined json permissions config                   |
-| `OPENCODE_DISABLE_DEFAULT_PLUGINS`    | boolean | Disable default plugins                           |
-| `OPENCODE_DISABLE_LSP_DOWNLOAD`       | boolean | Disable automatic LSP server downloads            |
-| `OPENCODE_ENABLE_EXPERIMENTAL_MODELS` | boolean | Enable experimental models                        |
-| `OPENCODE_DISABLE_AUTOCOMPACT`        | boolean | Disable automatic context compaction              |
-| `OPENCODE_DISABLE_CLAUDE_CODE`        | boolean | Disable reading from `.claude` (prompt + skills)  |
-| `OPENCODE_DISABLE_CLAUDE_CODE_PROMPT` | boolean | Disable reading `~/.claude/CLAUDE.md`             |
-| `OPENCODE_DISABLE_CLAUDE_CODE_SKILLS` | boolean | Disable loading `.claude/skills`                  |
-| `OPENCODE_DISABLE_MODELS_FETCH`       | boolean | Disable fetching models from remote sources       |
-| `OPENCODE_DISABLE_MOUSE`              | boolean | Disable mouse capture in the TUI                  |
-| `OPENCODE_FAKE_VCS`                   | string  | Fake VCS provider for testing purposes            |
-| `OPENCODE_CLIENT`                     | string  | Client identifier (defaults to `cli`)             |
-| `OPENCODE_ENABLE_EXA`                 | boolean | Enable Exa web search tools                       |
-| `OPENCODE_SERVER_PASSWORD`            | string  | Enable basic auth for `serve`/`web`               |
-| `OPENCODE_SERVER_USERNAME`            | string  | Override basic auth username (default `opencode`) |
-| `OPENCODE_MODELS_URL`                 | string  | Custom URL for fetching models configuration      |
+| `PAPERCODE_AUTO_SHARE`                 | boolean | Automatically share sessions                      |
+| `PAPERCODE_GIT_BASH_PATH`              | string  | Path to Git Bash executable on Windows            |
+| `PAPERCODE_CONFIG`                     | string  | Path to config file                               |
+| `PAPERCODE_TUI_CONFIG`                 | string  | Path to TUI config file                           |
+| `PAPERCODE_CONFIG_DIR`                 | string  | Path to config directory                          |
+| `PAPERCODE_CONFIG_CONTENT`             | string  | Inline json config content                        |
+| `PAPERCODE_DISABLE_AUTOUPDATE`         | boolean | Disable automatic update checks                   |
+| `PAPERCODE_DISABLE_PRUNE`              | boolean | Disable pruning of old data                       |
+| `PAPERCODE_DISABLE_TERMINAL_TITLE`     | boolean | Disable automatic terminal title updates          |
+| `PAPERCODE_PERMISSION`                 | string  | Inlined json permissions config                   |
+| `PAPERCODE_DISABLE_DEFAULT_PLUGINS`    | boolean | Disable default plugins                           |
+| `PAPERCODE_DISABLE_LSP_DOWNLOAD`       | boolean | Disable automatic LSP server downloads            |
+| `PAPERCODE_ENABLE_EXPERIMENTAL_MODELS` | boolean | Enable experimental models                        |
+| `PAPERCODE_DISABLE_AUTOCOMPACT`        | boolean | Disable automatic context compaction              |
+| `PAPERCODE_DISABLE_CLAUDE_CODE`        | boolean | Disable reading from `.claude` (prompt + skills)  |
+| `PAPERCODE_DISABLE_CLAUDE_CODE_PROMPT` | boolean | Disable reading `~/.claude/CLAUDE.md`             |
+| `PAPERCODE_DISABLE_CLAUDE_CODE_SKILLS` | boolean | Disable loading `.claude/skills`                  |
+| `PAPERCODE_DISABLE_MODELS_FETCH`       | boolean | Disable fetching models from remote sources       |
+| `PAPERCODE_DISABLE_MOUSE`              | boolean | Disable mouse capture in the TUI                  |
+| `PAPERCODE_FAKE_VCS`                   | string  | Fake VCS provider for testing purposes            |
+| `PAPERCODE_CLIENT`                     | string  | Client identifier (defaults to `cli`)             |
+| `PAPERCODE_ENABLE_EXA`                 | boolean | Enable Exa web search tools                       |
+| `PAPERCODE_SERVER_PASSWORD`            | string  | Enable basic auth for `serve`/`web`               |
+| `PAPERCODE_SERVER_USERNAME`            | string  | Override basic auth username (default `opencode`) |
+| `PAPERCODE_MODELS_URL`                 | string  | Custom URL for fetching models configuration      |
 
 ---
 
@@ -712,16 +712,16 @@ These environment variables enable experimental features that may change or be r
 
 | Variable                                        | Type    | Description                             |
 | ----------------------------------------------- | ------- | --------------------------------------- |
-| `OPENCODE_EXPERIMENTAL`                         | boolean | Enable all experimental features        |
-| `OPENCODE_EXPERIMENTAL_ICON_DISCOVERY`          | boolean | Enable icon discovery                   |
-| `OPENCODE_EXPERIMENTAL_DISABLE_COPY_ON_SELECT`  | boolean | Disable copy on select in TUI           |
-| `OPENCODE_EXPERIMENTAL_BASH_DEFAULT_TIMEOUT_MS` | number  | Default timeout for bash commands in ms |
-| `OPENCODE_EXPERIMENTAL_OUTPUT_TOKEN_MAX`        | number  | Max output tokens for LLM responses     |
-| `OPENCODE_EXPERIMENTAL_FILEWATCHER`             | boolean | Enable file watcher for entire dir      |
-| `OPENCODE_EXPERIMENTAL_OXFMT`                   | boolean | Enable oxfmt formatter                  |
-| `OPENCODE_EXPERIMENTAL_LSP_TOOL`                | boolean | Enable experimental LSP tool            |
-| `OPENCODE_EXPERIMENTAL_DISABLE_FILEWATCHER`     | boolean | Disable file watcher                    |
-| `OPENCODE_EXPERIMENTAL_EXA`                     | boolean | Enable experimental Exa features        |
-| `OPENCODE_EXPERIMENTAL_LSP_TY`                  | boolean | Enable TY LSP for python files          |
-| `OPENCODE_EXPERIMENTAL_MARKDOWN`                | boolean | Enable experimental markdown features   |
-| `OPENCODE_EXPERIMENTAL_PLAN_MODE`               | boolean | Enable plan mode                        |
+| `PAPERCODE_EXPERIMENTAL`                         | boolean | Enable all experimental features        |
+| `PAPERCODE_EXPERIMENTAL_ICON_DISCOVERY`          | boolean | Enable icon discovery                   |
+| `PAPERCODE_EXPERIMENTAL_DISABLE_COPY_ON_SELECT`  | boolean | Disable copy on select in TUI           |
+| `PAPERCODE_EXPERIMENTAL_BASH_DEFAULT_TIMEOUT_MS` | number  | Default timeout for bash commands in ms |
+| `PAPERCODE_EXPERIMENTAL_OUTPUT_TOKEN_MAX`        | number  | Max output tokens for LLM responses     |
+| `PAPERCODE_EXPERIMENTAL_FILEWATCHER`             | boolean | Enable file watcher for entire dir      |
+| `PAPERCODE_EXPERIMENTAL_OXFMT`                   | boolean | Enable oxfmt formatter                  |
+| `PAPERCODE_EXPERIMENTAL_LSP_TOOL`                | boolean | Enable experimental LSP tool            |
+| `PAPERCODE_EXPERIMENTAL_DISABLE_FILEWATCHER`     | boolean | Disable file watcher                    |
+| `PAPERCODE_EXPERIMENTAL_EXA`                     | boolean | Enable experimental Exa features        |
+| `PAPERCODE_EXPERIMENTAL_LSP_TY`                  | boolean | Enable TY LSP for python files          |
+| `PAPERCODE_EXPERIMENTAL_MARKDOWN`                | boolean | Enable experimental markdown features   |
+| `PAPERCODE_EXPERIMENTAL_PLAN_MODE`               | boolean | Enable plan mode                        |

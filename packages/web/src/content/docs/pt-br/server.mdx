@@ -6,7 +6,7 @@ description: Interaja com o servidor opencode via HTTP.
 import config from "../../../../config.mjs"
 export const typesUrl = `${config.github}/blob/dev/packages/sdk/js/src/gen/types.gen.ts`
 
-O comando `opencode serve` executa um servidor HTTP sem cabeça que expõe um endpoint OpenAPI que um cliente opencode pode usar.
+O comando `papercode serve` executa um servidor HTTP sem cabeça que expõe um endpoint OpenAPI que um cliente opencode pode usar.
 
 ---
 
@@ -36,10 +36,10 @@ opencode serve --cors http://localhost:5173 --cors https://app.example.com
 
 ### Autenticação
 
-Defina `OPENCODE_SERVER_PASSWORD` para proteger o servidor com autenticação básica HTTP. O nome de usuário padrão é `opencode`, ou defina `OPENCODE_SERVER_USERNAME` para substituí-lo. Isso se aplica tanto ao `opencode serve` quanto ao `opencode web`.
+Defina `PAPERCODE_SERVER_PASSWORD` para proteger o servidor com autenticação básica HTTP. O nome de usuário padrão é `opencode`, ou defina `PAPERCODE_SERVER_USERNAME` para substituí-lo. Isso se aplica tanto ao `papercode serve` quanto ao `papercode web`.
 
 ```bash
-OPENCODE_SERVER_PASSWORD=your-password opencode serve
+PAPERCODE_SERVER_PASSWORD=your-password opencode serve
 ```
 
 ---
@@ -54,7 +54,7 @@ Use o servidor opencode para interagir com o opencode programaticamente.
 
 Essa arquitetura permite que o opencode suporte múltiplos clientes e permite que você interaja com o opencode programaticamente.
 
-Você pode executar `opencode serve` para iniciar um servidor autônomo. Se você tiver o TUI do opencode em execução, `opencode serve` iniciará um novo servidor.
+Você pode executar `papercode serve` para iniciar um servidor autônomo. Se você tiver o TUI do opencode em execução, `papercode serve` iniciará um novo servidor.
 
 ---
 

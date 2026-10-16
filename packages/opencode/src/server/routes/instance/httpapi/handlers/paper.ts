@@ -26,6 +26,7 @@ import { discoverOpenAICompatibleModels, saveProviderEndpointConfig } from "@/pa
 import {
   candidatesFromBuiltinProviders,
   candidatesFromConfigProviders,
+  declaredModelIDs,
   isConfiguredPaperProviderRegistration,
   loadPaperModelInventory,
   mergeConfigProviderCandidates,
@@ -355,9 +356,16 @@ export const paperHandlers = HttpApiBuilder.group(InstanceHttpApi, "paper", (han
       const connected = yield* Provider.Service.use((service) => service.list()).pipe(
         Effect.catch(() => Effect.succeed({})),
       )
-      const configProviderIDs = yield* Config.Service.use((service) => service.get()).pipe(
-        Effect.map((cfg) => Object.keys({ ...(cfg.providers ?? {}), ...(cfg.provider ?? {}) })),
-        Effect.catch(() => Effect.succeed([] as string[])),
+      const declaredModels = yield* Config.Service.use((service) => service.get()).pipe(
+        Effect.map((cfg) =>
+          Object.fromEntries(
+            Object.entries({ ...(cfg.providers ?? {}), ...(cfg.provider ?? {}) }).map(([providerID, provider]) => [
+              providerID,
+              declaredModelIDs(provider as { models?: Record<string, unknown> }),
+            ]),
+          ),
+        ),
+        Effect.catch(() => Effect.succeed({} as Record<string, string[]>)),
       )
       return yield* Effect.promise(async () => {
         const state = await paperModelWorkbench(paperGlobalOptions())
@@ -375,7 +383,7 @@ export const paperHandlers = HttpApiBuilder.group(InstanceHttpApi, "paper", (han
             .map(([providerID]) => providerID),
         )
         const builtinCandidates = candidatesFromBuiltinProviders(providers)
-        const configCandidates = candidatesFromConfigProviders(connected, configProviderIDs)
+        const configCandidates = candidatesFromConfigProviders(connected, declaredModels)
         const inventory = mergeConfigProviderCandidates(
           mergeModelCandidates(
             state.inventory,
@@ -410,9 +418,16 @@ export const paperHandlers = HttpApiBuilder.group(InstanceHttpApi, "paper", (han
       const connected = yield* Provider.Service.use((service) => service.list()).pipe(
         Effect.catch(() => Effect.succeed({})),
       )
-      const configProviderIDs = yield* Config.Service.use((service) => service.get()).pipe(
-        Effect.map((cfg) => Object.keys({ ...(cfg.providers ?? {}), ...(cfg.provider ?? {}) })),
-        Effect.catch(() => Effect.succeed([] as string[])),
+      const declaredModels = yield* Config.Service.use((service) => service.get()).pipe(
+        Effect.map((cfg) =>
+          Object.fromEntries(
+            Object.entries({ ...(cfg.providers ?? {}), ...(cfg.provider ?? {}) }).map(([providerID, provider]) => [
+              providerID,
+              declaredModelIDs(provider as { models?: Record<string, unknown> }),
+            ]),
+          ),
+        ),
+        Effect.catch(() => Effect.succeed({} as Record<string, string[]>)),
       )
       return yield* Effect.tryPromise({
         try: async () => {
@@ -427,7 +442,7 @@ export const paperHandlers = HttpApiBuilder.group(InstanceHttpApi, "paper", (han
           const builtinCandidates = candidatesFromBuiltinProviders(providers).filter((candidate) =>
             subscriptionProviderIDs.has(candidate.provider_id),
           )
-          const configCandidates = candidatesFromConfigProviders(connected, configProviderIDs)
+          const configCandidates = candidatesFromConfigProviders(connected, declaredModels)
           // A registration may point at any candidate the workbench can show, including the ones
           // derived from providers declared in config.
           const candidatePool = [...storedInventory.candidates, ...builtinCandidates, ...configCandidates]

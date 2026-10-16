@@ -84,8 +84,8 @@ opencode attach http://10.20.30.40:4096
 | <nobr><code>{"--continue"}</code></nobr> | `-c`   | Nastavi posljednju sesiju                                                                     |
 | <nobr><code>{"--session"}</code></nobr>  | `-s`   | ID sesije za nastavak                                                                         |
 | <nobr><code>{"--fork"}</code></nobr>     |        | Forkuj sesiju prilikom nastavka (koristite sa `--continue` ili `--session`)                   |
-| <nobr><code>{"--password"}</code></nobr> | `-p`   | Lozinka za osnovnu autentifikaciju (zadano: `OPENCODE_SERVER_PASSWORD`)                       |
-| <nobr><code>{"--username"}</code></nobr> | `-u`   | Korisničko ime za osnovnu autentifikaciju (zadano: `OPENCODE_SERVER_USERNAME` ili `opencode`) |
+| <nobr><code>{"--password"}</code></nobr> | `-p`   | Lozinka za osnovnu autentifikaciju (zadano: `PAPERCODE_SERVER_PASSWORD`)                       |
+| <nobr><code>{"--username"}</code></nobr> | `-u`   | Korisničko ime za osnovnu autentifikaciju (zadano: `PAPERCODE_SERVER_USERNAME` ili `opencode`) |
 
 ---
 
@@ -123,7 +123,7 @@ opencode auth [command]
 
 #### login
 
-OpenCode pokreće lista provajdera na [Models.dev](https://models.dev), tako da možete koristiti `opencode auth login` da konfigurirate API ključeve za bilo kojeg provajdera kojeg želite koristiti. Ovo je pohranjeno u `~/.local/share/opencode/auth.json`.
+OpenCode pokreće lista provajdera na [Models.dev](https://models.dev), tako da možete koristiti `papercode auth login` da konfigurirate API ključeve za bilo kojeg provajdera kojeg želite koristiti. Ovo je pohranjeno u `~/.papercode/data/auth.json`.
 
 ```bash
 opencode auth login
@@ -324,7 +324,7 @@ Ovo je korisno za skriptiranje, automatizaciju ili kada želite brz odgovor bez 
 opencode run Explain the use of context in Go
 ```
 
-Također možete priključiti pokrenutu `opencode serve` instancu kako biste izbjegli vrijeme hladnog pokretanja MCP servera pri svakom pokretanju:
+Također možete priključiti pokrenutu `papercode serve` instancu kako biste izbjegli vrijeme hladnog pokretanja MCP servera pri svakom pokretanju:
 
 ```bash
 # Start a headless server in one terminal
@@ -349,8 +349,8 @@ opencode run --attach http://localhost:4096 "Explain async/await in JavaScript"
 | <nobr><code>{"--format"}</code></nobr>   |        | Format: default (formatiran) ili json (sirovi JSON događaji)                                  |
 | <nobr><code>{"--title"}</code></nobr>    |        | Naslov sesije (koristi skraćeni prompt ako nije navedena vrijednost)                          |
 | <nobr><code>{"--attach"}</code></nobr>   |        | Priključite na pokrenuti OpenCode server (npr. http://localhost:4096)                         |
-| <nobr><code>{"--password"}</code></nobr> | `-p`   | Lozinka za osnovnu autentifikaciju (zadano: `OPENCODE_SERVER_PASSWORD`)                       |
-| <nobr><code>{"--username"}</code></nobr> | `-u`   | Korisničko ime za osnovnu autentifikaciju (zadano: `OPENCODE_SERVER_USERNAME` ili `opencode`) |
+| <nobr><code>{"--password"}</code></nobr> | `-p`   | Lozinka za osnovnu autentifikaciju (zadano: `PAPERCODE_SERVER_PASSWORD`)                       |
+| <nobr><code>{"--username"}</code></nobr> | `-u`   | Korisničko ime za osnovnu autentifikaciju (zadano: `PAPERCODE_SERVER_USERNAME` ili `opencode`) |
 | <nobr><code>{"--dir"}</code></nobr>      |        | Direktorij za pokretanje, ili putanja na udaljenom serveru pri spajanju                       |
 | <nobr><code>{"--variant"}</code></nobr>  |        | Varijanta modela (napor zaključivanja specifičan za provajdera)                               |
 | <nobr><code>{"--thinking"}</code></nobr> |        | Prikaži blokove razmišljanja                                                                  |
@@ -366,7 +366,7 @@ Pokrenite OpenCode headless server za API pristup. Pogledajte [server docs](/doc
 opencode serve
 ```
 
-Ovo pokreće HTTP server koji pruža API pristup funkcionalnosti OpenCode-a bez TUI interfejsa. Postavite `OPENCODE_SERVER_PASSWORD` da omogućite HTTP osnovnu auth (korisničko ime je zadano na `opencode`).
+Ovo pokreće HTTP server koji pruža API pristup funkcionalnosti OpenCode-a bez TUI interfejsa. Postavite `PAPERCODE_SERVER_PASSWORD` da omogućite HTTP osnovnu auth (korisničko ime je zadano na `opencode`).
 
 #### Opcije
 
@@ -462,7 +462,7 @@ Pokrenite OpenCode headless server sa web interfejsom.
 opencode web
 ```
 
-Ovo pokreće HTTP server i otvara web pretraživač za pristup OpenCode-u preko web interfejsa. Postavite `OPENCODE_SERVER_PASSWORD` da omogućite HTTP osnovnu auth (korisničko ime je zadano na `opencode`).
+Ovo pokreće HTTP server i otvara web pretraživač za pristup OpenCode-u preko web interfejsa. Postavite `PAPERCODE_SERVER_PASSWORD` da omogućite HTTP osnovnu auth (korisničko ime je zadano na `opencode`).
 
 #### Opcije
 
@@ -561,30 +561,30 @@ OpenCode se može konfigurirati pomoću varijabli okruženja.
 
 | Varijabla                             | Tip     | Opis                                                               |
 | ------------------------------------- | ------- | ------------------------------------------------------------------ |
-| `OPENCODE_AUTO_SHARE`                 | boolean | Automatski dijeli sesije                                           |
-| `OPENCODE_GIT_BASH_PATH`              | string  | Putanja do Git Bash izvršne datoteke na Windows-u                  |
-| `OPENCODE_CONFIG`                     | string  | Putanja do konfiguracijskog fajla                                  |
-| `OPENCODE_TUI_CONFIG`                 | string  | Putanja do TUI konfiguracijskog fajla                              |
-| `OPENCODE_CONFIG_DIR`                 | string  | Putanja do konfiguracijskog direktorija                            |
-| `OPENCODE_CONFIG_CONTENT`             | string  | Inline json konfiguracijski sadržaj                                |
-| `OPENCODE_DISABLE_AUTOUPDATE`         | boolean | Onemogući automatske provjere ažuriranja                           |
-| `OPENCODE_DISABLE_PRUNE`              | boolean | Onemogući brisanje (pruning) starih podataka                       |
-| `OPENCODE_DISABLE_TERMINAL_TITLE`     | boolean | Onemogući automatsko ažuriranje naslova terminala                  |
-| `OPENCODE_PERMISSION`                 | string  | Inline json konfiguracija dozvola                                  |
-| `OPENCODE_DISABLE_DEFAULT_PLUGINS`    | boolean | Onemogući podrazumijevane dodatke (plugins)                        |
-| `OPENCODE_DISABLE_LSP_DOWNLOAD`       | boolean | Onemogući automatsko preuzimanje LSP servera                       |
-| `OPENCODE_ENABLE_EXPERIMENTAL_MODELS` | boolean | Omogući eksperimentalne modele                                     |
-| `OPENCODE_DISABLE_AUTOCOMPACT`        | boolean | Onemogući automatsko sažimanje konteksta                           |
-| `OPENCODE_DISABLE_CLAUDE_CODE`        | boolean | Onemogući čitanje iz `.claude` (prompt + vještine)                 |
-| `OPENCODE_DISABLE_CLAUDE_CODE_PROMPT` | boolean | Onemogući čitanje `~/.claude/CLAUDE.md`                            |
-| `OPENCODE_DISABLE_CLAUDE_CODE_SKILLS` | boolean | Onemogući učitavanje `.claude/skills`                              |
-| `OPENCODE_DISABLE_MODELS_FETCH`       | boolean | Onemogući dohvaćanje modela iz udaljenih izvora                    |
-| `OPENCODE_FAKE_VCS`                   | string  | Lažni VCS provajder za potrebe testiranja                          |
-| `OPENCODE_CLIENT`                     | string  | Identifikator klijenta (zadano na `cli`)                           |
-| `OPENCODE_ENABLE_EXA`                 | boolean | Omogući Exa alate za web pretraživanje                             |
-| `OPENCODE_SERVER_PASSWORD`            | string  | Omogući osnovnu autentifikaciju za `serve`/`web`                   |
-| `OPENCODE_SERVER_USERNAME`            | string  | Poništi osnovno korisničko ime autentifikacije (zadano `opencode`) |
-| `OPENCODE_MODELS_URL`                 | string  | Prilagođeni URL za dohvaćanje konfiguracije modela                 |
+| `PAPERCODE_AUTO_SHARE`                 | boolean | Automatski dijeli sesije                                           |
+| `PAPERCODE_GIT_BASH_PATH`              | string  | Putanja do Git Bash izvršne datoteke na Windows-u                  |
+| `PAPERCODE_CONFIG`                     | string  | Putanja do konfiguracijskog fajla                                  |
+| `PAPERCODE_TUI_CONFIG`                 | string  | Putanja do TUI konfiguracijskog fajla                              |
+| `PAPERCODE_CONFIG_DIR`                 | string  | Putanja do konfiguracijskog direktorija                            |
+| `PAPERCODE_CONFIG_CONTENT`             | string  | Inline json konfiguracijski sadržaj                                |
+| `PAPERCODE_DISABLE_AUTOUPDATE`         | boolean | Onemogući automatske provjere ažuriranja                           |
+| `PAPERCODE_DISABLE_PRUNE`              | boolean | Onemogući brisanje (pruning) starih podataka                       |
+| `PAPERCODE_DISABLE_TERMINAL_TITLE`     | boolean | Onemogući automatsko ažuriranje naslova terminala                  |
+| `PAPERCODE_PERMISSION`                 | string  | Inline json konfiguracija dozvola                                  |
+| `PAPERCODE_DISABLE_DEFAULT_PLUGINS`    | boolean | Onemogući podrazumijevane dodatke (plugins)                        |
+| `PAPERCODE_DISABLE_LSP_DOWNLOAD`       | boolean | Onemogući automatsko preuzimanje LSP servera                       |
+| `PAPERCODE_ENABLE_EXPERIMENTAL_MODELS` | boolean | Omogući eksperimentalne modele                                     |
+| `PAPERCODE_DISABLE_AUTOCOMPACT`        | boolean | Onemogući automatsko sažimanje konteksta                           |
+| `PAPERCODE_DISABLE_CLAUDE_CODE`        | boolean | Onemogući čitanje iz `.claude` (prompt + vještine)                 |
+| `PAPERCODE_DISABLE_CLAUDE_CODE_PROMPT` | boolean | Onemogući čitanje `~/.claude/CLAUDE.md`                            |
+| `PAPERCODE_DISABLE_CLAUDE_CODE_SKILLS` | boolean | Onemogući učitavanje `.claude/skills`                              |
+| `PAPERCODE_DISABLE_MODELS_FETCH`       | boolean | Onemogući dohvaćanje modela iz udaljenih izvora                    |
+| `PAPERCODE_FAKE_VCS`                   | string  | Lažni VCS provajder za potrebe testiranja                          |
+| `PAPERCODE_CLIENT`                     | string  | Identifikator klijenta (zadano na `cli`)                           |
+| `PAPERCODE_ENABLE_EXA`                 | boolean | Omogući Exa alate za web pretraživanje                             |
+| `PAPERCODE_SERVER_PASSWORD`            | string  | Omogući osnovnu autentifikaciju za `serve`/`web`                   |
+| `PAPERCODE_SERVER_USERNAME`            | string  | Poništi osnovno korisničko ime autentifikacije (zadano `opencode`) |
+| `PAPERCODE_MODELS_URL`                 | string  | Prilagođeni URL za dohvaćanje konfiguracije modela                 |
 
 ---
 
@@ -594,16 +594,16 @@ Ove varijable okruženja omogućavaju eksperimentalne karakteristike koje se mog
 
 | Varijabla                                       | Tip     | Opis                                              |
 | ----------------------------------------------- | ------- | ------------------------------------------------- |
-| `OPENCODE_EXPERIMENTAL`                         | boolean | Omogući sve eksperimentalne funkcije              |
-| `OPENCODE_EXPERIMENTAL_ICON_DISCOVERY`          | boolean | Omogući otkrivanje ikona                          |
-| `OPENCODE_EXPERIMENTAL_DISABLE_COPY_ON_SELECT`  | boolean | Onemogući kopiranje pri odabiru u TUI             |
-| `OPENCODE_EXPERIMENTAL_BASH_DEFAULT_TIMEOUT_MS` | number  | Zadano vremensko ograničenje za bash naredbe u ms |
-| `OPENCODE_EXPERIMENTAL_OUTPUT_TOKEN_MAX`        | number  | Maksimalni izlazni tokeni za LLM odgovore         |
-| `OPENCODE_EXPERIMENTAL_FILEWATCHER`             | boolean | Omogući praćenje datoteka za cijeli direktorij    |
-| `OPENCODE_EXPERIMENTAL_OXFMT`                   | boolean | Omogući oxfmt formatter                           |
-| `OPENCODE_EXPERIMENTAL_LSP_TOOL`                | boolean | Omogući eksperimentalni LSP alat                  |
-| `OPENCODE_EXPERIMENTAL_DISABLE_FILEWATCHER`     | boolean | Onemogući praćenje datoteka                       |
-| `OPENCODE_EXPERIMENTAL_EXA`                     | boolean | Omogući eksperimentalne Exa funkcije              |
-| `OPENCODE_EXPERIMENTAL_LSP_TY`                  | boolean | Omogući TY LSP za python datoteke                 |
-| `OPENCODE_EXPERIMENTAL_MARKDOWN`                | boolean | Omogući eksperimentalne Markdown funkcije         |
-| `OPENCODE_EXPERIMENTAL_PLAN_MODE`               | boolean | Omogući Plan mod                                  |
+| `PAPERCODE_EXPERIMENTAL`                         | boolean | Omogući sve eksperimentalne funkcije              |
+| `PAPERCODE_EXPERIMENTAL_ICON_DISCOVERY`          | boolean | Omogući otkrivanje ikona                          |
+| `PAPERCODE_EXPERIMENTAL_DISABLE_COPY_ON_SELECT`  | boolean | Onemogući kopiranje pri odabiru u TUI             |
+| `PAPERCODE_EXPERIMENTAL_BASH_DEFAULT_TIMEOUT_MS` | number  | Zadano vremensko ograničenje za bash naredbe u ms |
+| `PAPERCODE_EXPERIMENTAL_OUTPUT_TOKEN_MAX`        | number  | Maksimalni izlazni tokeni za LLM odgovore         |
+| `PAPERCODE_EXPERIMENTAL_FILEWATCHER`             | boolean | Omogući praćenje datoteka za cijeli direktorij    |
+| `PAPERCODE_EXPERIMENTAL_OXFMT`                   | boolean | Omogući oxfmt formatter                           |
+| `PAPERCODE_EXPERIMENTAL_LSP_TOOL`                | boolean | Omogući eksperimentalni LSP alat                  |
+| `PAPERCODE_EXPERIMENTAL_DISABLE_FILEWATCHER`     | boolean | Onemogući praćenje datoteka                       |
+| `PAPERCODE_EXPERIMENTAL_EXA`                     | boolean | Omogući eksperimentalne Exa funkcije              |
+| `PAPERCODE_EXPERIMENTAL_LSP_TY`                  | boolean | Omogući TY LSP za python datoteke                 |
+| `PAPERCODE_EXPERIMENTAL_MARKDOWN`                | boolean | Omogući eksperimentalne Markdown funkcije         |
+| `PAPERCODE_EXPERIMENTAL_PLAN_MODE`               | boolean | Omogući Plan mod                                  |

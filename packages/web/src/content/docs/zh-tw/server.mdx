@@ -6,7 +6,7 @@ description: 透過 HTTP 與 opencode 伺服器互動。
 import config from "../../../../config.mjs"
 export const typesUrl = `${config.github}/blob/dev/packages/sdk/js/src/gen/types.gen.ts`
 
-`opencode serve` 指令執行一個無介面的 HTTP 伺服器，暴露一個 OpenAPI 端點供 opencode 客戶端使用。
+`papercode serve` 指令執行一個無介面的 HTTP 伺服器，暴露一個 OpenAPI 端點供 opencode 客戶端使用。
 
 ---
 
@@ -36,10 +36,10 @@ opencode serve --cors http://localhost:5173 --cors https://app.example.com
 
 ### 認證
 
-設定 `OPENCODE_SERVER_PASSWORD` 以使用 HTTP 基本認證保護伺服器。使用者名稱預設為 `opencode`，也可以設定 `OPENCODE_SERVER_USERNAME` 來覆蓋它。這適用於 `opencode serve` 和 `opencode web`。
+設定 `PAPERCODE_SERVER_PASSWORD` 以使用 HTTP 基本認證保護伺服器。使用者名稱預設為 `opencode`，也可以設定 `PAPERCODE_SERVER_USERNAME` 來覆蓋它。這適用於 `papercode serve` 和 `papercode web`。
 
 ```bash
-OPENCODE_SERVER_PASSWORD=your-password opencode serve
+PAPERCODE_SERVER_PASSWORD=your-password opencode serve
 ```
 
 ---
@@ -54,7 +54,7 @@ OPENCODE_SERVER_PASSWORD=your-password opencode serve
 
 這種架構讓 opencode 支援多個客戶端，並允許你以程式化方式與 opencode 互動。
 
-你可以執行 `opencode serve` 來啟動一個獨立的伺服器。如果你已經在執行 opencode TUI，`opencode serve` 會啟動一個新的伺服器。
+你可以執行 `papercode serve` 來啟動一個獨立的伺服器。如果你已經在執行 opencode TUI，`papercode serve` 會啟動一個新的伺服器。
 
 ---
 

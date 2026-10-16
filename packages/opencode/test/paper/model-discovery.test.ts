@@ -815,7 +815,7 @@ describe("providers declared in config", () => {
   }
 
   test("candidates carry the declared metadata and only cover declared providers", () => {
-    const candidates = candidatesFromConfigProviders(catalog, ["fjbdg"])
+    const candidates = candidatesFromConfigProviders(catalog, { fjbdg: ["deepseek-v4-flash-vision-exp"] })
     expect(candidates).toHaveLength(1)
     const [candidate] = candidates
     expect(candidate).toMatchObject({
@@ -833,7 +833,7 @@ describe("providers declared in config", () => {
   test("merging registers the provider but leaves its models un-allowed", async () => {
     const home = await tmpHome()
     const stored = await loadPaperModelInventory({ home })
-    const merged = mergeConfigProviderCandidates(stored, candidatesFromConfigProviders(catalog, ["fjbdg"]))
+    const merged = mergeConfigProviderCandidates(stored, candidatesFromConfigProviders(catalog, { fjbdg: ["deepseek-v4-flash-vision-exp"] }))
     expect(merged.provider_registrations.fjbdg).toMatchObject({ kind: "manual", status: "registered", model_count: 1 })
     expect(merged.allowlist).toEqual([])
     expect(merged.candidates.every((candidate) => candidate.allowed === false)).toBe(true)
@@ -842,7 +842,7 @@ describe("providers declared in config", () => {
   test("allowlisting a declared model unblocks routing for the paper roles", async () => {
     const home = await tmpHome()
     const stored = await loadPaperModelInventory({ home })
-    const merged = mergeConfigProviderCandidates(stored, candidatesFromConfigProviders(catalog, ["fjbdg"]))
+    const merged = mergeConfigProviderCandidates(stored, candidatesFromConfigProviders(catalog, { fjbdg: ["deepseek-v4-flash-vision-exp"] }))
     const ref = "fjbdg/deepseek-v4-flash-vision-exp"
     const inventory = await updatePaperModelAllowlist([ref], {
       home,
@@ -863,7 +863,7 @@ describe("config provider lifecycle", () => {
   test("a disabled registration is not resurrected by the next inventory read", async () => {
     const home = await tmpHome()
     const stored = await loadPaperModelInventory({ home })
-    const registered = mergeConfigProviderCandidates(stored, candidatesFromConfigProviders(catalog, ["fjbdg"]))
+    const registered = mergeConfigProviderCandidates(stored, candidatesFromConfigProviders(catalog, { fjbdg: ["m-1"] }))
     const disabled = {
       ...registered,
       provider_registrations: {
@@ -873,14 +873,14 @@ describe("config provider lifecycle", () => {
     }
     await savePaperModelInventory(disabled, { home })
     const reloaded = await loadPaperModelInventory({ home })
-    const again = mergeConfigProviderCandidates(reloaded, candidatesFromConfigProviders(catalog, ["fjbdg"]))
+    const again = mergeConfigProviderCandidates(reloaded, candidatesFromConfigProviders(catalog, { fjbdg: ["m-1"] }))
     expect(again.provider_registrations.fjbdg?.status).toBe("disabled")
   })
 
   test("a client that omits provider_registrations does not lose config candidates", async () => {
     const home = await tmpHome()
     const stored = await loadPaperModelInventory({ home })
-    const merged = mergeConfigProviderCandidates(stored, candidatesFromConfigProviders(catalog, ["fjbdg"]))
+    const merged = mergeConfigProviderCandidates(stored, candidatesFromConfigProviders(catalog, { fjbdg: ["m-1"] }))
     const ref = "fjbdg/m-1"
     const saved = await updatePaperModelAllowlist([ref], {
       home,

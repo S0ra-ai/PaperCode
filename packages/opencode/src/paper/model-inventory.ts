@@ -436,16 +436,37 @@ function configCostHint(cost: { input?: number; output?: number } | undefined): 
   return (cost.input ?? 0) > 0 || (cost.output ?? 0) > 0 ? "standard" : "unknown"
 }
 
+/** Model ids a config provider entry declares, for either the dialect (array/record) or legacy record. */
+export function declaredModelIDs(provider: {
+  models?: Record<string, unknown> | readonly { id?: string }[]
+}): string[] {
+  const models = provider.models
+  if (!models) return []
+  if (Array.isArray(models)) {
+    return models
+      .map((model) => (model as { id?: string }).id)
+      .filter((id): id is string => typeof id === "string" && id.length > 0)
+  }
+  return Object.keys(models as Record<string, unknown>)
+}
+
+/**
+ * `declared` maps a provider id to the model ids the user wrote in config. Only those become
+ * candidates: a config entry that merely overrides one model of a registry provider must not drag
+ * that provider's whole catalog into the paper workbench.
+ */
 export function candidatesFromConfigProviders(
   providers: ConfigProviderCatalog,
-  providerIDs: readonly string[],
+  declared: Record<string, readonly string[]>,
 ): PaperModelCandidate[] {
   const timestamp = now()
-  const wanted = new Set(providerIDs)
   return Object.entries(providers)
-    .filter(([providerID]) => wanted.has(providerID))
-    .flatMap(([providerID, provider]) =>
-      Object.entries(provider.models ?? {}).map(([modelID, model]) => {
+    .filter(([providerID]) => declared[providerID] !== undefined)
+    .flatMap(([providerID, provider]) => {
+      const wanted = new Set(declared[providerID])
+      return Object.entries(provider.models ?? {})
+        .filter(([modelID]) => wanted.has(modelID))
+        .map(([modelID, model]) => {
         const capabilities = new Set(inferCapabilities(modelID))
         if (model.capabilities?.reasoning) {
           capabilities.add("planning")
@@ -465,8 +486,8 @@ export function candidatesFromConfigProviders(
           allowed: false,
           discovered_at: timestamp,
         }
-      }),
-    )
+        })
+    })
 }
 
 /**

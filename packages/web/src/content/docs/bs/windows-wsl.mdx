@@ -59,10 +59,10 @@ Ako `localhost` ne radi u vasem setupu, povezte se preko WSL IP adrese (u WSL-u:
 :::
 
 :::caution
-Kada koristite `--hostname 0.0.0.0`, postavite `OPENCODE_SERVER_PASSWORD` da zastitite server.
+Kada koristite `--hostname 0.0.0.0`, postavite `PAPERCODE_SERVER_PASSWORD` da zastitite server.
 
 ```bash
-OPENCODE_SERVER_PASSWORD=your-password opencode serve --hostname 0.0.0.0
+PAPERCODE_SERVER_PASSWORD=your-password opencode serve --hostname 0.0.0.0
 ```
 
 :::
@@ -73,7 +73,7 @@ OPENCODE_SERVER_PASSWORD=your-password opencode serve --hostname 0.0.0.0
 
 Za najbolje web iskustvo na Windowsu:
 
-1. **Pokrenite `opencode web` u WSL terminalu** umjesto u PowerShell-u:
+1. **Pokrenite `papercode web` u WSL terminalu** umjesto u PowerShell-u:
 
    ```bash
    opencode web --hostname 0.0.0.0
@@ -81,7 +81,7 @@ Za najbolje web iskustvo na Windowsu:
 
 2. **Otvorite iz Windows browsera** na `http://localhost:<port>` (OpenCode ispisuje URL)
 
-Pokretanje `opencode web` iz WSL-a osigurava ispravan pristup fajl sistemu i terminalsku integraciju, a i dalje je dostupno iz Windows browsera.
+Pokretanje `papercode web` iz WSL-a osigurava ispravan pristup fajl sistemu i terminalsku integraciju, a i dalje je dostupno iz Windows browsera.
 
 ---
 
@@ -110,4 +110,4 @@ Za najgladje iskustvo, razmislite da klonirate/kopirate repo u WSL fajl sistem (
 
 - Drzite OpenCode u WSL-u za projekte na Windows diskovima - pristup fajlovima je jednostavan
 - Koristite VS Code [WSL ekstenziju](https://code.visualstudio.com/docs/remote/wsl) uz OpenCode za integrisan tok rada
-- Vase OpenCode konfiguracije i sesije cuvaju se u WSL okruzenju na `~/.local/share/opencode/`
+- Vase OpenCode konfiguracije i sesije cuvaju se u WSL okruzenju na `~/.papercode/data/`

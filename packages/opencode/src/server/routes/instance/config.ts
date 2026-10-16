@@ -34,7 +34,7 @@ export const ConfigRoutes = lazy(() =>
       async (c) =>
         jsonRequest("ConfigRoutes.get", c, function* () {
           const cfg = yield* Config.Service
-          return yield* cfg.get()
+          return Config.maskSecrets(yield* cfg.get())
         }),
     )
     .patch(
@@ -63,8 +63,11 @@ export const ConfigRoutes = lazy(() =>
           Effect.gen(function* () {
             const config = c.req.valid("json")
             const cfg = yield* Config.Service
-            yield* cfg.update(config)
-            return { config, ctx: yield* InstanceState.context }
+            // A masked value means the client echoed back what it read; keep the stored secret.
+            const restored = Config.restoreMaskedSecrets(config, yield* cfg.get())
+            yield* cfg.update(restored)
+            return { config: restored, ctx: yield* InstanceState.context }
+
           }),
         )
         const response = c.json(result.config)

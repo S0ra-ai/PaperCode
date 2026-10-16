@@ -12,13 +12,15 @@ export const configHandlers = HttpApiBuilder.group(InstanceHttpApi, "config", (h
     const configSvc = yield* Config.Service
 
     const get = Effect.fn("ConfigHttpApi.get")(function* () {
-      return yield* configSvc.get()
+      return Config.maskSecrets(yield* configSvc.get())
     })
 
     const update = Effect.fn("ConfigHttpApi.update")(function* (ctx) {
-      yield* configSvc.update(ctx.payload)
+      // A masked value means the client echoed back what it read; keep the stored secret.
+      const restored = Config.restoreMaskedSecrets(ctx.payload, yield* configSvc.get())
+      yield* configSvc.update(restored)
       yield* markInstanceForDisposal(yield* InstanceState.context)
-      return ctx.payload
+      return restored
     })
 
     const providers = Effect.fn("ConfigHttpApi.providers")(function* () {

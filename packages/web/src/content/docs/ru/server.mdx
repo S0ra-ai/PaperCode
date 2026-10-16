@@ -6,7 +6,7 @@ description: Взаимодействуйте с сервером opencode че�
 import config from "../../../../config.mjs"
 export const typesUrl = `${config.github}/blob/dev/packages/sdk/js/src/gen/types.gen.ts`
 
-Команда `opencode serve` запускает автономный HTTP-сервер, который предоставляет конечную точку OpenAPI, которую может использовать клиент с открытым кодом.
+Команда `papercode serve` запускает автономный HTTP-сервер, который предоставляет конечную точку OpenAPI, которую может использовать клиент с открытым кодом.
 
 ---
 
@@ -36,10 +36,10 @@ opencode serve --cors http://localhost:5173 --cors https://app.example.com
 
 ### Аутентификация
 
-Установите `OPENCODE_SERVER_PASSWORD`, чтобы защитить сервер с помощью базовой аутентификации HTTP. Имя пользователя по умолчанию — `opencode` или установите `OPENCODE_SERVER_USERNAME`, чтобы переопределить его. Это относится как к `opencode serve`, так и к `opencode web`.
+Установите `PAPERCODE_SERVER_PASSWORD`, чтобы защитить сервер с помощью базовой аутентификации HTTP. Имя пользователя по умолчанию — `opencode` или установите `PAPERCODE_SERVER_USERNAME`, чтобы переопределить его. Это относится как к `papercode serve`, так и к `papercode web`.
 
 ```bash
-OPENCODE_SERVER_PASSWORD=your-password opencode serve
+PAPERCODE_SERVER_PASSWORD=your-password opencode serve
 ```
 
 ---
@@ -56,8 +56,8 @@ OPENCODE_SERVER_PASSWORD=your-password opencode serve
 
 Эта архитектура позволяет открытому коду поддерживать несколько клиентов и позволяет программно взаимодействовать с открытым кодом.
 
-Вы можете запустить `opencode serve`, чтобы запустить автономный сервер. Если у вас есть
-TUI с открытым кодом запущен, `opencode serve` запустит новый сервер.
+Вы можете запустить `papercode serve`, чтобы запустить автономный сервер. Если у вас есть
+TUI с открытым кодом запущен, `papercode serve` запустит новый сервер.
 
 ---
 

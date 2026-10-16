@@ -14,7 +14,9 @@ import {
 
 const now = "2026-05-10T00:00:00Z"
 const TEST_MODEL = "test-provider/test-model"
-const PAPER_RUN_INTEGRATION_TIMEOUT = 180_000
+// A full PaperRun renders through the real toolchain (pandoc + a TeX engine) when one is installed,
+// which takes minutes on a loaded machine.
+const PAPER_RUN_INTEGRATION_TIMEOUT = 300_000
 const cleanup: string[] = []
 
 type CodeMetadataCleanupOptions = {

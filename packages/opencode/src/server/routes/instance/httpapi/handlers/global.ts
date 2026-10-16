@@ -81,11 +81,13 @@ export const globalHandlers = HttpApiBuilder.group(RootHttpApi, "global", (handl
     })
 
     const configGet = Effect.fn("GlobalHttpApi.configGet")(function* () {
-      return yield* config.getGlobal()
+      return Config.maskSecrets(yield* config.getGlobal())
     })
 
     const configUpdate = Effect.fn("GlobalHttpApi.configUpdate")(function* (ctx) {
-      const result = yield* config.updateGlobal(ctx.payload)
+      // A masked value means the client echoed back what it read; keep the stored secret.
+      const restored = Config.restoreMaskedSecrets(ctx.payload, yield* config.getGlobal())
+      const result = yield* config.updateGlobal(restored)
       if (result.changed) bridge.fork(disposeAllInstancesAndEmitGlobalDisposed({ swallowErrors: true }))
       return result.info
     })

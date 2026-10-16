@@ -6,7 +6,7 @@ description: HTTP 経由で OpenCode サーバーと通信します。
 import config from "../../../../config.mjs"
 export const typesUrl = `${config.github}/blob/dev/packages/sdk/js/src/gen/types.gen.ts`
 
-`opencode serve` コマンドは、OpenCode クライアントが使用できる OpenAPI エンドポイントを公開するヘッドレス HTTP サーバーを実行します。
+`papercode serve` コマンドは、OpenCode クライアントが使用できる OpenAPI エンドポイントを公開するヘッドレス HTTP サーバーを実行します。
 
 ---
 
@@ -36,10 +36,10 @@ opencode serve --cors http://localhost:5173 --cors https://app.example.com
 
 ### 認証
 
-HTTP 基本認証でサーバーを保護するには、`OPENCODE_SERVER_PASSWORD` を設定します。ユーザー名はデフォルトで `opencode` になるか、`OPENCODE_SERVER_USERNAME` を設定してオーバーライドします。これは、`opencode serve` と `opencode web` の両方に当てはまります。
+HTTP 基本認証でサーバーを保護するには、`PAPERCODE_SERVER_PASSWORD` を設定します。ユーザー名はデフォルトで `opencode` になるか、`PAPERCODE_SERVER_USERNAME` を設定してオーバーライドします。これは、`papercode serve` と `papercode web` の両方に当てはまります。
 
 ```bash
-OPENCODE_SERVER_PASSWORD=your-password opencode serve
+PAPERCODE_SERVER_PASSWORD=your-password opencode serve
 ```
 
 ---
@@ -52,7 +52,7 @@ OPENCODE_SERVER_PASSWORD=your-password opencode serve
 OpenCode サーバーを使用して、プログラムで OpenCode と対話します。
 :::
 
-`opencode serve` を実行してスタンドアロンサーバーを起動できます。すでに OpenCode TUI を実行している場合でも、`opencode serve` は新しいサーバーを起動します。
+`papercode serve` を実行してスタンドアロンサーバーを起動できます。すでに OpenCode TUI を実行している場合でも、`papercode serve` は新しいサーバーを起動します。
 
 ---
 

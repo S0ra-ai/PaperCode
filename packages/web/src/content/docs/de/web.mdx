@@ -18,11 +18,11 @@ opencode web
 Dadurch wird ein lokaler Server auf `127.0.0.1` mit einem zufällig verfügbaren Port gestartet und OpenCode automatisch in Ihrem Standardbrowser geöffnet.
 
 :::caution
-Wenn `OPENCODE_SERVER_PASSWORD` nicht gesetzt ist, ist der Server ungesichert. Dies ist für den lokalen Gebrauch in Ordnung, sollte aber für den Netzwerkzugriff eingestellt werden.
+Wenn `PAPERCODE_SERVER_PASSWORD` nicht gesetzt ist, ist der Server ungesichert. Dies ist für den lokalen Gebrauch in Ordnung, sollte aber für den Netzwerkzugriff eingestellt werden.
 :::
 
 :::tip[Windows-Nutzer]
-Um die beste Erfahrung zu erzielen, führen Sie `opencode web` über [WSL](/docs/windows-wsl) und nicht über PowerShell aus. Dies gewährleistet den ordnungsgemäßen Zugriff auf das Dateisystem und die Terminalintegration.
+Um die beste Erfahrung zu erzielen, führen Sie `papercode web` über [WSL](/docs/windows-wsl) und nicht über PowerShell aus. Dies gewährleistet den ordnungsgemäßen Zugriff auf das Dateisystem und die Terminalintegration.
 :::
 
 ---
@@ -80,13 +80,13 @@ opencode web --cors https://example.com
 
 ### Authentifizierung
 
-Um den Zugriff zu schützen, legen Sie mithilfe der Umgebungsvariablen `OPENCODE_SERVER_PASSWORD` ein Passwort fest:
+Um den Zugriff zu schützen, legen Sie mithilfe der Umgebungsvariablen `PAPERCODE_SERVER_PASSWORD` ein Passwort fest:
 
 ```bash
-OPENCODE_SERVER_PASSWORD=secret opencode web
+PAPERCODE_SERVER_PASSWORD=secret opencode web
 ```
 
-Der Benutzername ist standardmäßig `opencode`, kann aber mit `OPENCODE_SERVER_USERNAME` geändert werden.
+Der Benutzername ist standardmäßig `opencode`, kann aber mit `PAPERCODE_SERVER_USERNAME` geändert werden.
 
 ---
 
@@ -126,7 +126,7 @@ Dadurch können Sie sowohl die Weboberfläche als auch das Terminal gleichzeitig
 
 ## Konfigurationsdatei
 
-Sie können Servereinstellungen auch in Ihrer `opencode.json`-Konfigurationsdatei konfigurieren:
+Sie können Servereinstellungen auch in Ihrer `papercode.json`-Konfigurationsdatei konfigurieren:
 
 ```json
 {

@@ -6,7 +6,7 @@ description: Samhandle med OpenCode-tjener over HTTP.
 import config from "../../../../config.mjs"
 export const typesUrl = `${config.github}/blob/dev/packages/sdk/js/src/gen/types.gen.ts`
 
-Kommandoen `opencode serve` kjører en hodeløs HTTP-server som eksponerer et OpenAPI-endepunkt som en OpenCode-klient kan bruke.
+Kommandoen `papercode serve` kjører en hodeløs HTTP-server som eksponerer et OpenAPI-endepunkt som en OpenCode-klient kan bruke.
 
 ---
 
@@ -36,10 +36,10 @@ opencode serve --cors http://localhost:5173 --cors https://app.example.com
 
 ### Autentisering
 
-Sett `OPENCODE_SERVER_PASSWORD` for å beskytte serveren med HTTP grunnleggende autentisering. Brukernavnet er satt til `opencode` som standard, eller sett `OPENCODE_SERVER_USERNAME` for å overstyre det. Dette gjelder både `opencode serve` og `opencode web`.
+Sett `PAPERCODE_SERVER_PASSWORD` for å beskytte serveren med HTTP grunnleggende autentisering. Brukernavnet er satt til `opencode` som standard, eller sett `PAPERCODE_SERVER_USERNAME` for å overstyre det. Dette gjelder både `papercode serve` og `papercode web`.
 
 ```bash
-OPENCODE_SERVER_PASSWORD=your-password opencode serve
+PAPERCODE_SERVER_PASSWORD=your-password opencode serve
 ```
 
 ---
@@ -56,8 +56,8 @@ Bruk OpenCode-serveren til å samhandle med OpenCode programmatisk.
 
 Denne arkitekturen lar OpenCode støtte flere klienter og lar deg samhandle med OpenCode programmatisk.
 
-Du kan kjøre `opencode serve` for å starte en frittstående server. Hvis du har
-OpenCode TUI kjører, vil `opencode serve` starte en ny server.
+Du kan kjøre `papercode serve` for å starte en frittstående server. Hvis du har
+OpenCode TUI kjører, vil `papercode serve` starte en ny server.
 
 ---
 

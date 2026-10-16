@@ -59,10 +59,10 @@ Kurulumunuzda `localhost` calismiyorsa bunun yerine WSL IP adresini kullanin (WS
 :::
 
 :::caution
-`--hostname 0.0.0.0` kullaniyorsaniz sunucuyu guvene almak icin `OPENCODE_SERVER_PASSWORD` ayarlayin.
+`--hostname 0.0.0.0` kullaniyorsaniz sunucuyu guvene almak icin `PAPERCODE_SERVER_PASSWORD` ayarlayin.
 
 ```bash
-OPENCODE_SERVER_PASSWORD=your-password opencode serve --hostname 0.0.0.0
+PAPERCODE_SERVER_PASSWORD=your-password opencode serve --hostname 0.0.0.0
 ```
 
 :::
@@ -73,7 +73,7 @@ OPENCODE_SERVER_PASSWORD=your-password opencode serve --hostname 0.0.0.0
 
 Windows'ta en iyi web deneyimi icin:
 
-1. **`opencode web` komutunu PowerShell yerine WSL terminalinde calistirin**:
+1. **`papercode web` komutunu PowerShell yerine WSL terminalinde calistirin**:
 
    ```bash
    opencode web --hostname 0.0.0.0
@@ -81,7 +81,7 @@ Windows'ta en iyi web deneyimi icin:
 
 2. **Windows tarayicinizdan** `http://localhost:<port>` adresini acin (opencode URL'yi yazdirir)
 
-`opencode web` komutunu WSL'den calistirmak, dosya sistemi erisimi ve terminal entegrasyonunu daha tutarli hale getirirken tarayicidan erisimi korur.
+`papercode web` komutunu WSL'den calistirmak, dosya sistemi erisimi ve terminal entegrasyonunu daha tutarli hale getirirken tarayicidan erisimi korur.
 
 ---
 
@@ -110,4 +110,4 @@ En sorunsuz deneyim icin deponuzu WSL dosya sistemine (ornegin `~/code/` altina)
 
 - Windows suruculerinde duran projelerde opencode'u WSL icinde calistirin - dosya erisimi daha sorunsuz olur
 - Butunlesik bir gelistirme akisi icin opencode ile birlikte VS Code [WSL eklentisini](https://code.visualstudio.com/docs/remote/wsl) kullanin
-- opencode konfigurasyonunuz ve oturumlariniz WSL ortaminda `~/.local/share/opencode/` konumunda saklanir
+- opencode konfigurasyonunuz ve oturumlariniz WSL ortaminda `~/.papercode/data/` konumunda saklanir

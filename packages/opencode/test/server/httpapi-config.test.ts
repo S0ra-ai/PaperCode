@@ -52,4 +52,38 @@ describe("config HttpApi", () => {
       lsp: false,
     })
   })
+
+  test("masks inline provider credentials on read and restores them on write-back", async () => {
+    await using tmp = await tmpdir({
+      config: {
+        formatter: false,
+        lsp: false,
+        providers: {
+          fjbdg: {
+            api: "openai-completions",
+            baseURL: "https://keep.example.test/v1",
+            options: { apiKey: "sk-live-secret" },
+            models: [{ id: "m" }],
+          },
+        },
+      },
+    })
+    const headers = { "content-type": "application/json", "x-opencode-directory": tmp.path }
+
+    const read = await app().request("/config", { headers })
+    const body = await read.json()
+    expect(body.providers.fjbdg.options.apiKey).toBe("[redacted]")
+    expect(body.providers.fjbdg.baseURL).toBe("https://keep.example.test/v1")
+    expect(JSON.stringify(body)).not.toContain("sk-live-secret")
+
+    // The client edits and writes back exactly what it read; the stored secret must survive.
+    const patched = await app().request("/config", {
+      method: "PATCH",
+      headers,
+      body: JSON.stringify({ ...body, username: "patched", formatter: false, lsp: false }),
+    })
+    expect(patched.status).toBe(200)
+    const after = await patched.json()
+    expect(after.providers.fjbdg.options.apiKey).toBe("sk-live-secret")
+  })
 })

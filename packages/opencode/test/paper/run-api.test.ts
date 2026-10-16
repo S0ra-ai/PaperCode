@@ -20,6 +20,11 @@ import { resetDatabase } from "../fixture/db"
 import { disposeAllInstances, tmpdir } from "../fixture/fixture"
 import * as Log from "@opencode-ai/core/util/log"
 
+// createPaperRun drives the default engine, which renders through the real toolchain when installed.
+// A full PaperRun renders through the real toolchain (pandoc + a TeX engine) when one is installed,
+// which takes minutes on a loaded machine.
+const PAPER_RUN_INTEGRATION_TIMEOUT = 300_000
+
 void Log.init({ print: false })
 
 const originalHttpApi = Flag.OPENCODE_EXPERIMENTAL_HTTPAPI
@@ -480,7 +485,7 @@ describe("PaperRun HttpApi", () => {
     const snapshot = (await get.json()).run
     expect(snapshot.artifacts.some((artifact: { metadata?: { artifact_schema?: string } }) => artifact.metadata?.artifact_schema === "ExperimentProtocolStarterApplyResult.v1")).toBe(true)
     expect(snapshot.events.some((event: { type: string }) => event.type === "experiment.starterpack.applied")).toBe(true)
-  })
+  }, PAPER_RUN_INTEGRATION_TIMEOUT)
 
   test("stores PaperRuns in PaperCode home by default and resumes home/workspace history", async () => {
     await using tmp = await tmpdir({

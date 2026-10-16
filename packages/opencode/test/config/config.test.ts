@@ -2624,3 +2624,38 @@ test("a typo inside providers fails the config load with the offending path", as
   }
   expect(issues?.[0]).toMatchObject({ code: "unrecognized_keys", keys: ["baseUrl"], path: ["providers", "fjbdg"] })
 })
+
+describe("config secret masking", () => {
+  const config = {
+    provider: { legacy: { options: { apiKey: "legacy-secret", baseURL: "https://legacy.test/v1" } } },
+    providers: {
+      dialect: { options: { apiKey: "dialect-secret", headers: { authorization: "Bearer h", "x-keep": "keep" } } },
+    },
+  } as unknown as Config.Info
+
+  test("masks credentials in both provider keys and leaves other options alone", () => {
+    const masked = Config.maskSecrets(config)
+    expect(masked.provider?.legacy?.options?.apiKey).toBe("[redacted]")
+    expect(masked.provider?.legacy?.options?.baseURL).toBe("https://legacy.test/v1")
+    expect(masked.providers?.dialect?.options?.apiKey).toBe("[redacted]")
+    expect((masked.providers?.dialect?.options?.headers as Record<string, string>).authorization).toBe("[redacted]")
+    expect((masked.providers?.dialect?.options?.headers as Record<string, string>)["x-keep"]).toBe("keep")
+    expect(JSON.stringify(masked)).not.toContain("dialect-secret")
+  })
+
+  test("a masked value round-tripped by a client keeps the stored secret", () => {
+    const masked = Config.maskSecrets(config)
+    const restored = Config.restoreMaskedSecrets(masked, config)
+    expect(restored.provider?.legacy?.options?.apiKey).toBe("legacy-secret")
+    expect(restored.providers?.dialect?.options?.apiKey).toBe("dialect-secret")
+    expect((restored.providers?.dialect?.options?.headers as Record<string, string>).authorization).toBe("Bearer h")
+  })
+
+  test("a genuinely changed value wins over the stored one", () => {
+    const incoming = {
+      providers: { dialect: { options: { apiKey: "sk-rotated" } } },
+    } as unknown as Config.Info
+    const restored = Config.restoreMaskedSecrets(incoming, config)
+    expect(restored.providers?.dialect?.options?.apiKey).toBe("sk-rotated")
+  })
+})

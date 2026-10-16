@@ -59,10 +59,10 @@ import { Steps } from "@astrojs/starlight/components"
 :::
 
 :::caution
-عند استخدام `--hostname 0.0.0.0`، اضبط `OPENCODE_SERVER_PASSWORD` لحماية الخادم.
+عند استخدام `--hostname 0.0.0.0`، اضبط `PAPERCODE_SERVER_PASSWORD` لحماية الخادم.
 
 ```bash
-OPENCODE_SERVER_PASSWORD=your-password opencode serve --hostname 0.0.0.0
+PAPERCODE_SERVER_PASSWORD=your-password opencode serve --hostname 0.0.0.0
 ```
 
 :::
@@ -73,7 +73,7 @@ OPENCODE_SERVER_PASSWORD=your-password opencode serve --hostname 0.0.0.0
 
 لأفضل تجربة ويب على Windows:
 
-1. **شغّل `opencode web` من terminal داخل WSL** بدلًا من PowerShell:
+1. **شغّل `papercode web` من terminal داخل WSL** بدلًا من PowerShell:
 
    ```bash
    opencode web --hostname 0.0.0.0
@@ -81,7 +81,7 @@ OPENCODE_SERVER_PASSWORD=your-password opencode serve --hostname 0.0.0.0
 
 2. **افتحه من متصفح Windows** عبر `http://localhost:<port>` (يعرض OpenCode الرابط)
 
-تشغيل `opencode web` من WSL يضمن وصولًا صحيحًا لنظام الملفات وتكاملًا أفضل مع terminal، مع بقائه متاحًا من متصفح Windows.
+تشغيل `papercode web` من WSL يضمن وصولًا صحيحًا لنظام الملفات وتكاملًا أفضل مع terminal، مع بقائه متاحًا من متصفح Windows.
 
 ---
 
@@ -110,4 +110,4 @@ opencode
 
 - شغّل OpenCode داخل WSL للمشاريع المخزنة على أقراص Windows حتى يكون الوصول للملفات سلسًا
 - استخدم [إضافة WSL في VS Code](https://code.visualstudio.com/docs/remote/wsl) مع OpenCode لسير عمل تطوير متكامل
-- إعدادات OpenCode وجلساته تُخزَّن داخل بيئة WSL في `~/.local/share/opencode/`
+- إعدادات OpenCode وجلساته تُخزَّن داخل بيئة WSL في `~/.papercode/data/`

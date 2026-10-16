@@ -6,7 +6,7 @@ description: Interakcja z serwerem opencode za pośrednictwem protokołu HTTP.
 import config from "../../../../config.mjs"
 export const typesUrl = `${config.github}/blob/dev/packages/sdk/js/src/gen/types.gen.ts`
 
-Komenda `opencode serve` uruchamia bezgłowy serwer HTTP, który udostępnia punkt końcowy OpenAPI, z którego może korzystać klient opencode.
+Komenda `papercode serve` uruchamia bezgłowy serwer HTTP, który udostępnia punkt końcowy OpenAPI, z którego może korzystać klient opencode.
 
 ---
 
@@ -36,10 +36,10 @@ opencode serve --cors http://localhost:5173 --cors https://app.example.com
 
 ### Uwierzytelnianie
 
-Ustaw `OPENCODE_SERVER_PASSWORD`, aby chronić serwer za pomocą podstawowego uwierzytelniania HTTP. Domyślną nazwą użytkownika jest `opencode` lub ustaw `OPENCODE_SERVER_USERNAME`, aby ją zastąpić. Dotyczy to zarówno `opencode serve`, jak i `opencode web`.
+Ustaw `PAPERCODE_SERVER_PASSWORD`, aby chronić serwer za pomocą podstawowego uwierzytelniania HTTP. Domyślną nazwą użytkownika jest `opencode` lub ustaw `PAPERCODE_SERVER_USERNAME`, aby ją zastąpić. Dotyczy to zarówno `papercode serve`, jak i `papercode web`.
 
 ```bash
-OPENCODE_SERVER_PASSWORD=your-password opencode serve
+PAPERCODE_SERVER_PASSWORD=your-password opencode serve
 ```
 
 ---
@@ -56,8 +56,8 @@ Użyj serwera opencode do programowej interakcji z opencode.
 
 Ta architektura umożliwia obsługę wielu klientów przez opencode i programową interakcję z kodem otwartym.
 
-Możesz uruchomić `opencode serve`, aby uruchomić samodzielny serwer. Jeśli masz
-opencode TUI działa, `opencode serve` uruchomi nowy serwer.
+Możesz uruchomić `papercode serve`, aby uruchomić samodzielny serwer. Jeśli masz
+opencode TUI działa, `papercode serve` uruchomi nowy serwer.
 
 ---
 

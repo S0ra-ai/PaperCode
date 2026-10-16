@@ -62,10 +62,10 @@ OpenCode デスクトップアプリを使いつつ、サーバーは WSL で動
 環境によって `localhost` が使えない場合は、WSL 側で `hostname -I` を実行して IP アドレスを確認し、`http://<wsl-ip>:4096` に接続してください。
 :::
 :::caution
-`--hostname 0.0.0.0` を使う場合は、`OPENCODE_SERVER_PASSWORD` を設定してサーバーを保護してください。
+`--hostname 0.0.0.0` を使う場合は、`PAPERCODE_SERVER_PASSWORD` を設定してサーバーを保護してください。
 
 ```bash
-OPENCODE_SERVER_PASSWORD=your-password opencode serve --hostname 0.0.0.0
+PAPERCODE_SERVER_PASSWORD=your-password opencode serve --hostname 0.0.0.0
 ```
 
 :::
@@ -74,7 +74,7 @@ OPENCODE_SERVER_PASSWORD=your-password opencode serve --hostname 0.0.0.0
 
 Windows で Web 利用を快適にするには:
 
-1. **PowerShell ではなく WSL ターミナルで `opencode web` を実行する**
+1. **PowerShell ではなく WSL ターミナルで `papercode web` を実行する**
 
    ```bash
    opencode web --hostname 0.0.0.0
@@ -84,7 +84,7 @@ Windows で Web 利用を快適にするには:
 
    `http://localhost:<port>` にアクセスします（URL は OpenCode が表示します）。
 
-WSL から `opencode web` を実行すると、適切なファイルシステムアクセスとターミナル統合を維持したまま、Windows ブラウザから利用できます。
+WSL から `papercode web` を実行すると、適切なファイルシステムアクセスとターミナル統合を維持したまま、Windows ブラウザから利用できます。
 
 ---
 
@@ -113,4 +113,4 @@ opencode
 
 - Windows ドライブ上のプロジェクトでも、OpenCode は WSL で実行するとファイルアクセスがスムーズです
 - OpenCode と一緒に VS Code の [WSL 拡張機能](https://code.visualstudio.com/docs/remote/wsl) を使うと統合的な開発フローを構築できます
-- OpenCode の設定とセッションは WSL 環境内の `~/.local/share/opencode/` に保存されます
+- OpenCode の設定とセッションは WSL 環境内の `~/.papercode/data/` に保存されます

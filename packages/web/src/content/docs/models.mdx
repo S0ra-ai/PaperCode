@@ -51,7 +51,7 @@ Here are several models that work well with OpenCode, in no particular order. (T
 To set one of these as the default model, you can set the `model` key in your
 OpenCode config.
 
-```json title="opencode.json" {3}
+```json title="papercode.json" {3}
 {
   "$schema": "https://opencode.ai/config.json",
   "model": "lmstudio/google/gemma-3n-e4b"
@@ -68,7 +68,7 @@ If you've configured a [custom provider](/docs/providers#custom), the `provider_
 
 You can globally configure a model's options through the config.
 
-```jsonc title="opencode.jsonc" {7-12,19-24}
+```jsonc title="papercode.jsonc" {7-12,19-24}
 {
   "$schema": "https://opencode.ai/config.json",
   "provider": {
@@ -107,7 +107,7 @@ You can also configure these options for any agents that you are using. The agen
 
 You can also define custom variants that extend built-in ones. Variants let you configure different settings for the same model without creating duplicate entries:
 
-```jsonc title="opencode.jsonc" {6-21}
+```jsonc title="papercode.jsonc" {6-21}
 {
   "$schema": "https://opencode.ai/config.json",
   "provider": {
@@ -172,7 +172,7 @@ This list is not comprehensive. Many other providers have built-in defaults too.
 
 You can override existing variants or add your own:
 
-```jsonc title="opencode.jsonc" {7-18}
+```jsonc title="papercode.jsonc" {7-18}
 {
   "$schema": "https://opencode.ai/config.json",
   "provider": {
@@ -209,7 +209,7 @@ When OpenCode starts up, it checks for models in the following priority order:
 
 2. The model list in the OpenCode config.
 
-   ```json title="opencode.json"
+   ```json title="papercode.json"
    {
      "$schema": "https://opencode.ai/config.json",
      "model": "anthropic/claude-sonnet-4-20250514"

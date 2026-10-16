@@ -6,7 +6,7 @@ description: Komunicirajte s opencode serverom preko HTTP-a.
 import config from "../../../../config.mjs"
 export const typesUrl = `${config.github}/blob/dev/packages/sdk/js/src/gen/types.gen.ts`
 
-Komanda `opencode serve` pokrece headless HTTP server koji izlaže OpenAPI endpoint koji opencode klijent moze koristiti.
+Komanda `papercode serve` pokrece headless HTTP server koji izlaže OpenAPI endpoint koji opencode klijent moze koristiti.
 
 ---
 
@@ -36,10 +36,10 @@ opencode serve --cors http://localhost:5173 --cors https://app.example.com
 
 ### Autentifikacija
 
-Postavite `OPENCODE_SERVER_PASSWORD` da zastitite server HTTP basic auth mehanizmom. Korisnicko ime je po defaultu `opencode`, ili postavite `OPENCODE_SERVER_USERNAME` za nadjacavanje. Ovo vazi i za `opencode serve` i za `opencode web`.
+Postavite `PAPERCODE_SERVER_PASSWORD` da zastitite server HTTP basic auth mehanizmom. Korisnicko ime je po defaultu `opencode`, ili postavite `PAPERCODE_SERVER_USERNAME` za nadjacavanje. Ovo vazi i za `papercode serve` i za `papercode web`.
 
 ```bash
-OPENCODE_SERVER_PASSWORD=your-password opencode serve
+PAPERCODE_SERVER_PASSWORD=your-password opencode serve
 ```
 
 ---
@@ -54,7 +54,7 @@ Koristite opencode server za programsku interakciju sa opencode-om.
 
 Ova arhitektura omogucava opencode podrsku za vise klijenata i programsku interakciju.
 
-Mozete pokrenuti `opencode serve` da startate standalone server. Ako je opencode TUI vec pokrenut, `opencode serve` ce pokrenuti novi server.
+Mozete pokrenuti `papercode serve` da startate standalone server. Ako je opencode TUI vec pokrenut, `papercode serve` ce pokrenuti novi server.
 
 ---
 

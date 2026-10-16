@@ -95,7 +95,9 @@ const successfulRenderers: ExportRenderer = {
 
 // Rendering through the real toolchain (pandoc + a TeX engine) is minutes of work on a cold
 // machine, so this case gets an explicit budget instead of the 60s default.
-const EXPORT_TOOLCHAIN_TIMEOUT = 240_000
+// A full PaperRun renders through the real toolchain (pandoc + a TeX engine) when one is installed,
+// which takes minutes on a loaded machine.
+const EXPORT_TOOLCHAIN_TIMEOUT = 300_000
 
 const failedRenderers: ExportRenderer = {
   pdf: async () => ({

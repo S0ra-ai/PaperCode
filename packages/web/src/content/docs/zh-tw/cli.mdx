@@ -84,8 +84,8 @@ opencode attach http://10.20.30.40:4096
 | <nobr><code>{"--continue"}</code></nobr> | `-c` | 繼續上一個工作階段                                                      |
 | <nobr><code>{"--session"}</code></nobr>  | `-s` | 要繼續的工作階段 ID                                                     |
 | <nobr><code>{"--fork"}</code></nobr>     |      | 繼續時分支工作階段（與 `--continue` 或 `--session` 一起使用）           |
-| <nobr><code>{"--password"}</code></nobr> | `-p` | 基本驗證密碼（預設使用 `OPENCODE_SERVER_PASSWORD`）                     |
-| <nobr><code>{"--username"}</code></nobr> | `-u` | 基本驗證使用者名稱（預設使用 `OPENCODE_SERVER_USERNAME` 或 `opencode`） |
+| <nobr><code>{"--password"}</code></nobr> | `-p` | 基本驗證密碼（預設使用 `PAPERCODE_SERVER_PASSWORD`）                     |
+| <nobr><code>{"--username"}</code></nobr> | `-u` | 基本驗證使用者名稱（預設使用 `PAPERCODE_SERVER_USERNAME` 或 `opencode`） |
 
 ---
 
@@ -123,7 +123,7 @@ opencode auth [command]
 
 #### login
 
-OpenCode 基於 [Models.dev](https://models.dev) 的供應商列表運作，因此您可以使用 `opencode auth login` 為任何想要使用的供應商設定 API 金鑰。金鑰儲存在 `~/.local/share/opencode/auth.json` 中。
+OpenCode 基於 [Models.dev](https://models.dev) 的供應商列表運作，因此您可以使用 `papercode auth login` 為任何想要使用的供應商設定 API 金鑰。金鑰儲存在 `~/.papercode/data/auth.json` 中。
 
 ```bash
 opencode auth login
@@ -327,7 +327,7 @@ opencode run [message..]
 opencode run Explain the use of context in Go
 ```
 
-您還可以連接到正在執行的 `opencode serve` 實例，以避免每次執行時 MCP 伺服器的冷啟動時間：
+您還可以連接到正在執行的 `papercode serve` 實例，以避免每次執行時 MCP 伺服器的冷啟動時間：
 
 ```bash
 # Start a headless server in one terminal
@@ -352,8 +352,8 @@ opencode run --attach http://localhost:4096 "Explain async/await in JavaScript"
 | <nobr><code>{"--format"}</code></nobr>   |      | 格式：default（格式化輸出）或 json（原始 JSON 事件）                    |
 | <nobr><code>{"--title"}</code></nobr>    |      | 工作階段標題（未提供值時使用截斷的提示詞）                              |
 | <nobr><code>{"--attach"}</code></nobr>   |      | 連接到正在執行的 opencode 伺服器（例如 http://localhost:4096）          |
-| <nobr><code>{"--password"}</code></nobr> | `-p` | 基本驗證密碼（預設使用 `OPENCODE_SERVER_PASSWORD`）                     |
-| <nobr><code>{"--username"}</code></nobr> | `-u` | 基本驗證使用者名稱（預設使用 `OPENCODE_SERVER_USERNAME` 或 `opencode`） |
+| <nobr><code>{"--password"}</code></nobr> | `-p` | 基本驗證密碼（預設使用 `PAPERCODE_SERVER_PASSWORD`）                     |
+| <nobr><code>{"--username"}</code></nobr> | `-u` | 基本驗證使用者名稱（預設使用 `PAPERCODE_SERVER_USERNAME` 或 `opencode`） |
 | <nobr><code>{"--dir"}</code></nobr>      |      | 執行目錄，或附加時遠端伺服器上的路徑                                    |
 | <nobr><code>{"--variant"}</code></nobr>  |      | 模型變體（特定於提供者的推理級別）                                      |
 | <nobr><code>{"--thinking"}</code></nobr> |      | 顯示思考區塊                                                            |
@@ -369,7 +369,7 @@ opencode run --attach http://localhost:4096 "Explain async/await in JavaScript"
 opencode serve
 ```
 
-此指令啟動一個 HTTP 伺服器，提供對 OpenCode 功能的 API 存取，無需 TUI 介面。設定 `OPENCODE_SERVER_PASSWORD` 可啟用 HTTP 基本認證（使用者名稱預設為 `opencode`）。
+此指令啟動一個 HTTP 伺服器，提供對 OpenCode 功能的 API 存取，無需 TUI 介面。設定 `PAPERCODE_SERVER_PASSWORD` 可啟用 HTTP 基本認證（使用者名稱預設為 `opencode`）。
 
 #### 旗標
 
@@ -465,7 +465,7 @@ opencode import https://opncd.ai/s/abc123
 opencode web
 ```
 
-此指令啟動一個 HTTP 伺服器並開啟瀏覽器，透過 Web 介面存取 OpenCode。設定 `OPENCODE_SERVER_PASSWORD` 可啟用 HTTP 基本認證（使用者名稱預設為 `opencode`）。
+此指令啟動一個 HTTP 伺服器並開啟瀏覽器，透過 Web 介面存取 OpenCode。設定 `PAPERCODE_SERVER_PASSWORD` 可啟用 HTTP 基本認證（使用者名稱預設為 `opencode`）。
 
 #### 旗標
 
@@ -564,30 +564,30 @@ OpenCode 可以透過環境變數進行設定。
 
 | 變數                                  | 類型    | 說明                                        |
 | ------------------------------------- | ------- | ------------------------------------------- |
-| `OPENCODE_AUTO_SHARE`                 | boolean | 自動分享工作階段                            |
-| `OPENCODE_GIT_BASH_PATH`              | string  | Windows 上 Git Bash 可執行檔的路徑          |
-| `OPENCODE_CONFIG`                     | string  | 設定檔路徑                                  |
-| `OPENCODE_TUI_CONFIG`                 | string  | TUI 設定檔路徑                              |
-| `OPENCODE_CONFIG_DIR`                 | string  | 設定目錄路徑                                |
-| `OPENCODE_CONFIG_CONTENT`             | string  | 內嵌 JSON 設定內容                          |
-| `OPENCODE_DISABLE_AUTOUPDATE`         | boolean | 停用自動更新檢查                            |
-| `OPENCODE_DISABLE_PRUNE`              | boolean | 停用舊資料清理                              |
-| `OPENCODE_DISABLE_TERMINAL_TITLE`     | boolean | 停用自動終端機標題更新                      |
-| `OPENCODE_PERMISSION`                 | string  | 內嵌 JSON 權限設定                          |
-| `OPENCODE_DISABLE_DEFAULT_PLUGINS`    | boolean | 停用預設外掛程式                            |
-| `OPENCODE_DISABLE_LSP_DOWNLOAD`       | boolean | 停用 LSP 伺服器自動下載                     |
-| `OPENCODE_ENABLE_EXPERIMENTAL_MODELS` | boolean | 啟用實驗性模型                              |
-| `OPENCODE_DISABLE_AUTOCOMPACT`        | boolean | 停用自動上下文壓縮                          |
-| `OPENCODE_DISABLE_CLAUDE_CODE`        | boolean | 停用讀取 `.claude`（提示詞 + 技能）         |
-| `OPENCODE_DISABLE_CLAUDE_CODE_PROMPT` | boolean | 停用讀取 `~/.claude/CLAUDE.md`              |
-| `OPENCODE_DISABLE_CLAUDE_CODE_SKILLS` | boolean | 停用載入 `.claude/skills`                   |
-| `OPENCODE_DISABLE_MODELS_FETCH`       | boolean | 停用從遠端來源擷取模型                      |
-| `OPENCODE_FAKE_VCS`                   | string  | 用於測試目的的模擬 VCS 供應商               |
-| `OPENCODE_CLIENT`                     | string  | 用戶端識別碼（預設為 `cli`）                |
-| `OPENCODE_ENABLE_EXA`                 | boolean | 啟用 Exa 網路搜尋工具                       |
-| `OPENCODE_SERVER_PASSWORD`            | string  | 為 `serve`/`web` 啟用基本認證               |
-| `OPENCODE_SERVER_USERNAME`            | string  | 覆寫基本認證使用者名稱（預設為 `opencode`） |
-| `OPENCODE_MODELS_URL`                 | string  | 自訂模型設定擷取 URL                        |
+| `PAPERCODE_AUTO_SHARE`                 | boolean | 自動分享工作階段                            |
+| `PAPERCODE_GIT_BASH_PATH`              | string  | Windows 上 Git Bash 可執行檔的路徑          |
+| `PAPERCODE_CONFIG`                     | string  | 設定檔路徑                                  |
+| `PAPERCODE_TUI_CONFIG`                 | string  | TUI 設定檔路徑                              |
+| `PAPERCODE_CONFIG_DIR`                 | string  | 設定目錄路徑                                |
+| `PAPERCODE_CONFIG_CONTENT`             | string  | 內嵌 JSON 設定內容                          |
+| `PAPERCODE_DISABLE_AUTOUPDATE`         | boolean | 停用自動更新檢查                            |
+| `PAPERCODE_DISABLE_PRUNE`              | boolean | 停用舊資料清理                              |
+| `PAPERCODE_DISABLE_TERMINAL_TITLE`     | boolean | 停用自動終端機標題更新                      |
+| `PAPERCODE_PERMISSION`                 | string  | 內嵌 JSON 權限設定                          |
+| `PAPERCODE_DISABLE_DEFAULT_PLUGINS`    | boolean | 停用預設外掛程式                            |
+| `PAPERCODE_DISABLE_LSP_DOWNLOAD`       | boolean | 停用 LSP 伺服器自動下載                     |
+| `PAPERCODE_ENABLE_EXPERIMENTAL_MODELS` | boolean | 啟用實驗性模型                              |
+| `PAPERCODE_DISABLE_AUTOCOMPACT`        | boolean | 停用自動上下文壓縮                          |
+| `PAPERCODE_DISABLE_CLAUDE_CODE`        | boolean | 停用讀取 `.claude`（提示詞 + 技能）         |
+| `PAPERCODE_DISABLE_CLAUDE_CODE_PROMPT` | boolean | 停用讀取 `~/.claude/CLAUDE.md`              |
+| `PAPERCODE_DISABLE_CLAUDE_CODE_SKILLS` | boolean | 停用載入 `.claude/skills`                   |
+| `PAPERCODE_DISABLE_MODELS_FETCH`       | boolean | 停用從遠端來源擷取模型                      |
+| `PAPERCODE_FAKE_VCS`                   | string  | 用於測試目的的模擬 VCS 供應商               |
+| `PAPERCODE_CLIENT`                     | string  | 用戶端識別碼（預設為 `cli`）                |
+| `PAPERCODE_ENABLE_EXA`                 | boolean | 啟用 Exa 網路搜尋工具                       |
+| `PAPERCODE_SERVER_PASSWORD`            | string  | 為 `serve`/`web` 啟用基本認證               |
+| `PAPERCODE_SERVER_USERNAME`            | string  | 覆寫基本認證使用者名稱（預設為 `opencode`） |
+| `PAPERCODE_MODELS_URL`                 | string  | 自訂模型設定擷取 URL                        |
 
 ---
 
@@ -597,16 +597,16 @@ OpenCode 可以透過環境變數進行設定。
 
 | 變數                                            | 類型    | 說明                            |
 | ----------------------------------------------- | ------- | ------------------------------- |
-| `OPENCODE_EXPERIMENTAL`                         | boolean | 啟用所有實驗性功能              |
-| `OPENCODE_EXPERIMENTAL_ICON_DISCOVERY`          | boolean | 啟用圖示探索                    |
-| `OPENCODE_EXPERIMENTAL_DISABLE_COPY_ON_SELECT`  | boolean | 停用 TUI 中的選取即複製         |
-| `OPENCODE_EXPERIMENTAL_BASH_DEFAULT_TIMEOUT_MS` | number  | bash 指令的預設逾時時間（毫秒） |
-| `OPENCODE_EXPERIMENTAL_OUTPUT_TOKEN_MAX`        | number  | LLM 回應的最大輸出 Token 數     |
-| `OPENCODE_EXPERIMENTAL_FILEWATCHER`             | boolean | 啟用整個目錄的檔案監看器        |
-| `OPENCODE_EXPERIMENTAL_OXFMT`                   | boolean | 啟用 oxfmt 格式化器             |
-| `OPENCODE_EXPERIMENTAL_LSP_TOOL`                | boolean | 啟用實驗性 LSP 工具             |
-| `OPENCODE_EXPERIMENTAL_DISABLE_FILEWATCHER`     | boolean | 停用檔案監看器                  |
-| `OPENCODE_EXPERIMENTAL_EXA`                     | boolean | 啟用實驗性 Exa 功能             |
-| `OPENCODE_EXPERIMENTAL_LSP_TY`                  | boolean | 為 python 檔案啟用 TY LSP       |
-| `OPENCODE_EXPERIMENTAL_MARKDOWN`                | boolean | 啟用實驗性 Markdown 功能        |
-| `OPENCODE_EXPERIMENTAL_PLAN_MODE`               | boolean | 啟用計畫模式                    |
+| `PAPERCODE_EXPERIMENTAL`                         | boolean | 啟用所有實驗性功能              |
+| `PAPERCODE_EXPERIMENTAL_ICON_DISCOVERY`          | boolean | 啟用圖示探索                    |
+| `PAPERCODE_EXPERIMENTAL_DISABLE_COPY_ON_SELECT`  | boolean | 停用 TUI 中的選取即複製         |
+| `PAPERCODE_EXPERIMENTAL_BASH_DEFAULT_TIMEOUT_MS` | number  | bash 指令的預設逾時時間（毫秒） |
+| `PAPERCODE_EXPERIMENTAL_OUTPUT_TOKEN_MAX`        | number  | LLM 回應的最大輸出 Token 數     |
+| `PAPERCODE_EXPERIMENTAL_FILEWATCHER`             | boolean | 啟用整個目錄的檔案監看器        |
+| `PAPERCODE_EXPERIMENTAL_OXFMT`                   | boolean | 啟用 oxfmt 格式化器             |
+| `PAPERCODE_EXPERIMENTAL_LSP_TOOL`                | boolean | 啟用實驗性 LSP 工具             |
+| `PAPERCODE_EXPERIMENTAL_DISABLE_FILEWATCHER`     | boolean | 停用檔案監看器                  |
+| `PAPERCODE_EXPERIMENTAL_EXA`                     | boolean | 啟用實驗性 Exa 功能             |
+| `PAPERCODE_EXPERIMENTAL_LSP_TY`                  | boolean | 為 python 檔案啟用 TY LSP       |
+| `PAPERCODE_EXPERIMENTAL_MARKDOWN`                | boolean | 啟用實驗性 Markdown 功能        |
+| `PAPERCODE_EXPERIMENTAL_PLAN_MODE`               | boolean | 啟用計畫模式                    |

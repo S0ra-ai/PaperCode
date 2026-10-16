@@ -18,11 +18,11 @@ opencode web
 يؤدي ذلك إلى تشغيل خادم محلي على `127.0.0.1` بمنفذ عشوائي متاح، ويفتح OpenCode تلقائيا في المتصفح الافتراضي لديك.
 
 :::caution
-إذا لم يتم تعيين `OPENCODE_SERVER_PASSWORD` فسيكون الخادم دون حماية. هذا مناسب للاستخدام المحلي، لكنه يجب أن يكون مُعينا عند إتاحة الوصول عبر الشبكة.
+إذا لم يتم تعيين `PAPERCODE_SERVER_PASSWORD` فسيكون الخادم دون حماية. هذا مناسب للاستخدام المحلي، لكنه يجب أن يكون مُعينا عند إتاحة الوصول عبر الشبكة.
 :::
 
 :::tip[مستخدمو Windows]
-لأفضل تجربة، شغّل `opencode web` من [WSL](/docs/windows-wsl) بدلا من PowerShell. يضمن ذلك وصولا صحيحا إلى نظام الملفات وتكاملا أفضل مع terminal.
+لأفضل تجربة، شغّل `papercode web` من [WSL](/docs/windows-wsl) بدلا من PowerShell. يضمن ذلك وصولا صحيحا إلى نظام الملفات وتكاملا أفضل مع terminal.
 :::
 
 ---
@@ -80,13 +80,13 @@ opencode web --cors https://example.com
 
 ### المصادقة
 
-لحماية الوصول، عيّن كلمة مرور عبر متغير البيئة `OPENCODE_SERVER_PASSWORD`:
+لحماية الوصول، عيّن كلمة مرور عبر متغير البيئة `PAPERCODE_SERVER_PASSWORD`:
 
 ```bash
-OPENCODE_SERVER_PASSWORD=secret opencode web
+PAPERCODE_SERVER_PASSWORD=secret opencode web
 ```
 
-اسم المستخدم الافتراضي هو `opencode`، ويمكن تغييره عبر `OPENCODE_SERVER_USERNAME`.
+اسم المستخدم الافتراضي هو `opencode`، ويمكن تغييره عبر `PAPERCODE_SERVER_USERNAME`.
 
 ---
 
@@ -126,7 +126,7 @@ opencode attach http://localhost:4096
 
 ## ملف الإعدادات
 
-يمكنك أيضا ضبط إعدادات الخادم داخل ملف الإعدادات `opencode.json`:
+يمكنك أيضا ضبط إعدادات الخادم داخل ملف الإعدادات `papercode.json`:
 
 ```json
 {

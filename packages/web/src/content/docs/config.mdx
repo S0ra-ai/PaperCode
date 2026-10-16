@@ -11,7 +11,7 @@ You can configure OpenCode using a JSON config file.
 
 OpenCode supports both **JSON** and **JSONC** (JSON with Comments) formats.
 
-```jsonc title="opencode.jsonc"
+```jsonc title="papercode.jsonc"
 {
   "$schema": "https://opencode.ai/config.json",
   "model": "anthropic/claude-sonnet-4-5",
@@ -44,18 +44,18 @@ For example, if your global config sets `autoupdate: true` and your project conf
 Config sources are loaded in this order (later sources override earlier ones):
 
 1. **Remote config** (from `.well-known/opencode`) - organizational defaults
-2. **Global config** (`~/.config/opencode/opencode.json`) - user preferences
-3. **Custom config** (`OPENCODE_CONFIG` env var) - custom overrides
-4. **Project config** (`opencode.json` in project) - project-specific settings
-5. **`.opencode` directories** - agents, commands, plugins
-6. **Inline config** (`OPENCODE_CONFIG_CONTENT` env var) - runtime overrides
+2. **Global config** (`~/.papercode/config/papercode.json`) - user preferences
+3. **Custom config** (`PAPERCODE_CONFIG` env var) - custom overrides
+4. **Project config** (`papercode.json` in project) - project-specific settings
+5. **`.papercode` directories** - agents, commands, plugins
+6. **Inline config** (`PAPERCODE_CONFIG_CONTENT` env var) - runtime overrides
 7. **Managed config files** (`/Library/Application Support/opencode/` on macOS) - admin-controlled
 8. **macOS managed preferences** (`.mobileconfig` via MDM) - highest priority, not user-overridable
 
 This means project configs can override global defaults, and global configs can override remote organizational defaults. Managed settings override everything.
 
 :::note
-The `.opencode` and `~/.config/opencode` directories use **plural names** for subdirectories: `agents/`, `commands/`, `modes/`, `plugins/`, `skills/`, `tools/`, and `themes/`. Singular names (e.g., `agent/`) are also supported for backwards compatibility.
+The `.papercode` and `~/.papercode/config` directories use **plural names** for subdirectories: `agents/`, `commands/`, `modes/`, `plugins/`, `skills/`, `tools/`, and `themes/`. Singular names (e.g., `agent/`) are also supported for backwards compatibility.
 :::
 
 ---
@@ -82,7 +82,7 @@ For example, if your organization provides MCP servers that are disabled by defa
 
 You can enable specific servers in your local config:
 
-```json title="opencode.json"
+```json title="papercode.json"
 {
   "mcp": {
     "jira": {
@@ -98,9 +98,9 @@ You can enable specific servers in your local config:
 
 ### Global
 
-Place your global OpenCode config in `~/.config/opencode/opencode.json`. Use global config for user-wide server/runtime preferences like providers, models, and permissions.
+Place your global OpenCode config in `~/.papercode/config/papercode.json`. Use global config for user-wide server/runtime preferences like providers, models, and permissions.
 
-For TUI-specific settings, use `~/.config/opencode/tui.json`.
+For TUI-specific settings, use `~/.papercode/config/tui.json`.
 
 Global config overrides remote organizational defaults.
 
@@ -108,7 +108,7 @@ Global config overrides remote organizational defaults.
 
 ### Per project
 
-Add `opencode.json` in your project root. Project config has the highest precedence among standard config files - it overrides both global and remote configs.
+Add `papercode.json` in your project root. Project config has the highest precedence among standard config files - it overrides both global and remote configs.
 
 For project-specific TUI settings, add `tui.json` alongside it.
 
@@ -124,10 +124,10 @@ This is also safe to be checked into Git and uses the same schema as the global 
 
 ### Custom path
 
-Specify a custom config file path using the `OPENCODE_CONFIG` environment variable.
+Specify a custom config file path using the `PAPERCODE_CONFIG` environment variable.
 
 ```bash
-export OPENCODE_CONFIG=/path/to/my/custom-config.json
+export PAPERCODE_CONFIG=/path/to/my/custom-config.json
 opencode run "Hello world"
 ```
 
@@ -137,17 +137,17 @@ Custom config is loaded between global and project configs in the precedence ord
 
 ### Custom directory
 
-Specify a custom config directory using the `OPENCODE_CONFIG_DIR`
+Specify a custom config directory using the `PAPERCODE_CONFIG_DIR`
 environment variable. This directory will be searched for agents, commands,
-modes, and plugins just like the standard `.opencode` directory, and should
+modes, and plugins just like the standard `.papercode` directory, and should
 follow the same structure.
 
 ```bash
-export OPENCODE_CONFIG_DIR=/path/to/my/config-directory
+export PAPERCODE_CONFIG_DIR=/path/to/my/config-directory
 opencode run "Hello world"
 ```
 
-The custom directory is loaded after the global config and `.opencode` directories, so it **can override** their settings.
+The custom directory is loaded after the global config and `.papercode` directories, so it **can override** their settings.
 
 ---
 
@@ -157,7 +157,7 @@ Organizations can enforce configuration that users cannot override. Managed sett
 
 #### File-based
 
-Drop an `opencode.json` or `opencode.jsonc` file in the system managed config directory:
+Drop an `papercode.json` or `papercode.jsonc` file in the system managed config directory:
 
 | Platform | Path                                     |
 | -------- | ---------------------------------------- |
@@ -176,7 +176,7 @@ OpenCode checks these paths:
 1. `/Library/Managed Preferences/<user>/ai.opencode.managed.plist`
 2. `/Library/Managed Preferences/ai.opencode.managed.plist`
 
-The plist keys map directly to `opencode.json` fields. MDM metadata keys (`PayloadUUID`, `PayloadType`, etc.) are stripped automatically.
+The plist keys map directly to `papercode.json` fields. MDM metadata keys (`PayloadUUID`, `PayloadType`, etc.) are stripped automatically.
 
 **Creating a `.mobileconfig`**
 
@@ -277,17 +277,17 @@ Use a dedicated `tui.json` (or `tui.jsonc`) file for TUI-specific settings.
 }
 ```
 
-Use `OPENCODE_TUI_CONFIG` to point to a custom TUI config file.
+Use `PAPERCODE_TUI_CONFIG` to point to a custom TUI config file.
 
-Legacy `theme`, `keybinds`, and `tui` keys in `opencode.json` are deprecated and automatically migrated when possible.
+Legacy `theme`, `keybinds`, and `tui` keys in `papercode.json` are deprecated and automatically migrated when possible.
 
 ---
 
 ### Server
 
-You can configure server settings for the `opencode serve` and `opencode web` commands through the `server` option.
+You can configure server settings for the `papercode serve` and `papercode web` commands through the `server` option.
 
-```json title="opencode.json"
+```json title="papercode.json"
 {
   "$schema": "https://opencode.ai/config.json",
   "server": {
@@ -316,7 +316,7 @@ Available options:
 
 You can configure the shell used for the interactive terminal using the `shell` option. Compatible shells are also used for agent tool calls.
 
-```json title="opencode.json"
+```json title="papercode.json"
 {
   "$schema": "https://opencode.ai/config.json",
   "shell": "pwsh"
@@ -331,7 +331,7 @@ If not specified, OpenCode will automatically discover and use a sensible defaul
 
 You can manage the tools an LLM can use through the `tools` option.
 
-```json title="opencode.json"
+```json title="papercode.json"
 {
   "$schema": "https://opencode.ai/config.json",
   "tools": {
@@ -349,7 +349,7 @@ You can manage the tools an LLM can use through the `tools` option.
 
 You can configure the providers and models you want to use in your OpenCode config through the `provider`, `model` and `small_model` options.
 
-```json title="opencode.json"
+```json title="papercode.json"
 {
   "$schema": "https://opencode.ai/config.json",
   "provider": {},
@@ -362,7 +362,7 @@ The `small_model` option configures a separate model for lightweight tasks like 
 
 Provider options can include `timeout`, `chunkTimeout`, and `setCacheKey`:
 
-```json title="opencode.json"
+```json title="papercode.json"
 {
   "$schema": "https://opencode.ai/config.json",
   "provider": {
@@ -393,7 +393,7 @@ Some providers support additional configuration options beyond the generic `time
 
 Amazon Bedrock supports AWS-specific configuration:
 
-```json title="opencode.json"
+```json title="papercode.json"
 {
   "$schema": "https://opencode.ai/config.json",
   "provider": {
@@ -439,7 +439,7 @@ Set your UI theme in `tui.json`.
 
 You can configure specialized agents for specific tasks through the `agent` option.
 
-```jsonc title="opencode.jsonc"
+```jsonc title="papercode.jsonc"
 {
   "$schema": "https://opencode.ai/config.json",
   "agent": {
@@ -457,7 +457,7 @@ You can configure specialized agents for specific tasks through the `agent` opti
 }
 ```
 
-You can also define agents using markdown files in `~/.config/opencode/agents/` or `.opencode/agents/`. [Learn more here](/docs/agents).
+You can also define agents using markdown files in `~/.papercode/config/agents/` or `.papercode/agents/`. [Learn more here](/docs/agents).
 
 ---
 
@@ -465,7 +465,7 @@ You can also define agents using markdown files in `~/.config/opencode/agents/` 
 
 You can set the default agent using the `default_agent` option. This determines which agent is used when none is explicitly specified.
 
-```json title="opencode.json"
+```json title="papercode.json"
 {
   "$schema": "https://opencode.ai/config.json",
   "default_agent": "plan"
@@ -474,7 +474,7 @@ You can set the default agent using the `default_agent` option. This determines 
 
 The default agent must be a primary agent (not a subagent). This can be a built-in agent like `"build"` or `"plan"`, or a [custom agent](/docs/agents) you've defined. If the specified agent doesn't exist or is a subagent, OpenCode will fall back to `"build"` with a warning.
 
-This setting applies across all interfaces: TUI, CLI (`opencode run`), desktop app, and GitHub Action.
+This setting applies across all interfaces: TUI, CLI (`papercode run`), desktop app, and GitHub Action.
 
 ---
 
@@ -482,7 +482,7 @@ This setting applies across all interfaces: TUI, CLI (`opencode run`), desktop a
 
 You can configure the [share](/docs/share) feature through the `share` option.
 
-```json title="opencode.json"
+```json title="papercode.json"
 {
   "$schema": "https://opencode.ai/config.json",
   "share": "manual"
@@ -503,7 +503,7 @@ By default, sharing is set to manual mode where you need to explicitly share con
 
 You can configure custom commands for repetitive tasks through the `command` option.
 
-```jsonc title="opencode.jsonc"
+```jsonc title="papercode.jsonc"
 {
   "$schema": "https://opencode.ai/config.json",
   "command": {
@@ -521,7 +521,7 @@ You can configure custom commands for repetitive tasks through the `command` opt
 }
 ```
 
-You can also define commands using markdown files in `~/.config/opencode/commands/` or `.opencode/commands/`. [Learn more here](/docs/commands).
+You can also define commands using markdown files in `~/.papercode/config/commands/` or `.papercode/commands/`. [Learn more here](/docs/commands).
 
 ---
 
@@ -546,7 +546,7 @@ OpenCode uses snapshots to track file changes during agent operations, enabling 
 
 For large repositories or projects with many submodules, the snapshot system can cause slow indexing and significant disk usage as it tracks all changes using an internal git repository. You can disable snapshots using the `snapshot` option.
 
-```json title="opencode.json"
+```json title="papercode.json"
 {
   "$schema": "https://opencode.ai/config.json",
   "snapshot": false
@@ -561,7 +561,7 @@ Note that disabling snapshots means changes made by the agent cannot be rolled b
 
 OpenCode will automatically download any new updates when it starts up. You can disable this with the `autoupdate` option.
 
-```json title="opencode.json"
+```json title="papercode.json"
 {
   "$schema": "https://opencode.ai/config.json",
   "autoupdate": false
@@ -577,7 +577,7 @@ Notice that this only works if it was not installed using a package manager such
 
 You can enable and configure code formatters through the `formatter` option. Omit it to keep formatters disabled.
 
-```json title="opencode.json"
+```json title="papercode.json"
 {
   "$schema": "https://opencode.ai/config.json",
   "formatter": true
@@ -586,7 +586,7 @@ You can enable and configure code formatters through the `formatter` option. Omi
 
 Use an object to keep built-ins enabled while configuring overrides or custom formatters.
 
-```json title="opencode.json"
+```json title="papercode.json"
 {
   "$schema": "https://opencode.ai/config.json",
   "formatter": {
@@ -612,7 +612,7 @@ Use an object to keep built-ins enabled while configuring overrides or custom fo
 
 You can enable and configure LSP servers through the `lsp` option. Omit it to keep LSP disabled.
 
-```json title="opencode.json"
+```json title="papercode.json"
 {
   "$schema": "https://opencode.ai/config.json",
   "lsp": true
@@ -621,7 +621,7 @@ You can enable and configure LSP servers through the `lsp` option. Omit it to ke
 
 Use an object to keep built-ins enabled while configuring overrides or custom LSP servers.
 
-```json title="opencode.json"
+```json title="papercode.json"
 {
   "$schema": "https://opencode.ai/config.json",
   "lsp": {
@@ -642,7 +642,7 @@ By default, opencode **allows all operations** without requiring explicit approv
 
 For example, to ensure that the `edit` and `bash` tools require user approval:
 
-```json title="opencode.json"
+```json title="papercode.json"
 {
   "$schema": "https://opencode.ai/config.json",
   "permission": {
@@ -660,7 +660,7 @@ For example, to ensure that the `edit` and `bash` tools require user approval:
 
 You can control context compaction behavior through the `compaction` option.
 
-```json title="opencode.json"
+```json title="papercode.json"
 {
   "$schema": "https://opencode.ai/config.json",
   "compaction": {
@@ -681,7 +681,7 @@ You can control context compaction behavior through the `compaction` option.
 
 You can configure file watcher ignore patterns through the `watcher` option.
 
-```json title="opencode.json"
+```json title="papercode.json"
 {
   "$schema": "https://opencode.ai/config.json",
   "watcher": {
@@ -698,7 +698,7 @@ Patterns follow glob syntax. Use this to exclude noisy directories from file wat
 
 You can configure MCP servers you want to use through the `mcp` option.
 
-```json title="opencode.json"
+```json title="papercode.json"
 {
   "$schema": "https://opencode.ai/config.json",
   "mcp": {}
@@ -713,9 +713,9 @@ You can configure MCP servers you want to use through the `mcp` option.
 
 [Plugins](/docs/plugins) extend OpenCode with custom tools, hooks, and integrations.
 
-Place plugin files in `.opencode/plugins/` or `~/.config/opencode/plugins/`. You can also load plugins from npm through the `plugin` option.
+Place plugin files in `.papercode/plugins/` or `~/.papercode/config/plugins/`. You can also load plugins from npm through the `plugin` option.
 
-```json title="opencode.json"
+```json title="papercode.json"
 {
   "$schema": "https://opencode.ai/config.json",
   "plugin": ["opencode-helicone-session", "@my-org/custom-plugin"]
@@ -730,7 +730,7 @@ Place plugin files in `.opencode/plugins/` or `~/.config/opencode/plugins/`. You
 
 You can configure the instructions for the model you're using through the `instructions` option.
 
-```json title="opencode.json"
+```json title="papercode.json"
 {
   "$schema": "https://opencode.ai/config.json",
   "instructions": ["CONTRIBUTING.md", "docs/guidelines.md", ".cursor/rules/*.md"]
@@ -746,7 +746,7 @@ about rules here](/docs/rules).
 
 You can disable providers that are loaded automatically through the `disabled_providers` option. This is useful when you want to prevent certain providers from being loaded even if their credentials are available.
 
-```json title="opencode.json"
+```json title="papercode.json"
 {
   "$schema": "https://opencode.ai/config.json",
   "disabled_providers": ["openai", "gemini"]
@@ -769,7 +769,7 @@ The `disabled_providers` option accepts an array of provider IDs. When a provide
 
 You can specify an allowlist of providers through the `enabled_providers` option. When set, only the specified providers will be enabled and all others will be ignored.
 
-```json title="opencode.json"
+```json title="papercode.json"
 {
   "$schema": "https://opencode.ai/config.json",
   "enabled_providers": ["anthropic", "openai"]
@@ -790,7 +790,7 @@ If a provider appears in both `enabled_providers` and `disabled_providers`, the 
 
 The `experimental` key contains options that are under active development.
 
-```json title="opencode.json"
+```json title="papercode.json"
 {
   "$schema": "https://opencode.ai/config.json",
   "experimental": {}
@@ -813,10 +813,10 @@ You can use variable substitution in your config files to reference environment 
 
 Use `{env:VARIABLE_NAME}` to substitute environment variables:
 
-```json title="opencode.json"
+```json title="papercode.json"
 {
   "$schema": "https://opencode.ai/config.json",
-  "model": "{env:OPENCODE_MODEL}",
+  "model": "{env:PAPERCODE_MODEL}",
   "provider": {
     "anthropic": {
       "models": {},
@@ -836,7 +836,7 @@ If the environment variable is not set, it will be replaced with an empty string
 
 Use `{file:path/to/file}` to substitute the contents of a file:
 
-```json title="opencode.json"
+```json title="papercode.json"
 {
   "$schema": "https://opencode.ai/config.json",
   "instructions": ["./custom-instructions.md"],

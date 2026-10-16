@@ -15,7 +15,7 @@ ACP is an open protocol that standardizes communication between code editors and
 
 ## Configure
 
-To use OpenCode via ACP, configure your editor to run the `opencode acp` command.
+To use OpenCode via ACP, configure your editor to run the `papercode acp` command.
 
 The command starts OpenCode as an ACP-compatible subprocess that communicates with your editor over JSON-RPC via stdio.
 
@@ -110,7 +110,7 @@ If you need to pass environment variables:
       command = "opencode",
       args = { "acp" },
       env = {
-        OPENCODE_API_KEY = os.getenv("OPENCODE_API_KEY")
+        PAPERCODE_API_KEY = os.getenv("PAPERCODE_API_KEY")
       }
     }
   }
@@ -138,7 +138,7 @@ require("codecompanion").setup({
 
 This config sets up CodeCompanion to use OpenCode as the ACP agent for chat.
 
-If you need to pass environment variables (like `OPENCODE_API_KEY`), refer to [Configuring Adapters: Environment Variables](https://codecompanion.olimorris.dev/getting-started#setting-an-api-key) in the CodeCompanion.nvim documentation for full details.
+If you need to pass environment variables (like `PAPERCODE_API_KEY`), refer to [Configuring Adapters: Environment Variables](https://codecompanion.olimorris.dev/getting-started#setting-an-api-key) in the CodeCompanion.nvim documentation for full details.
 
 ## Support
 
