@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.150-dev - 2026/05/31 (87d031c1) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.150-dev - 2026/05/31 (ec0b915d) [fix/mcp-tool-binding-test-isolation]
         :brief 自主审计要求 strict live 与 full workspace 证据显式区分当前性
         :audit
             - test(audit): strict-live-evidence 从 CHANGELOG :version 读取当前版本，并拒绝 project_version 缺失或指向旧版本的 strict live 报告

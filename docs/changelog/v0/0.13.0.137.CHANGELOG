@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.137-dev - 2026/05/31 (0517e0ad) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.137-dev - 2026/05/31 (ca1bcf4d) [fix/mcp-tool-binding-test-isolation]
         :brief 清理 TUI、Prompt 与系统提示中的用户可见旧产品语义，统一为 PaperRun 工作台表达
         :tui
             - fix(tui): PaperRun 创建、分支、删除、共享、工作区切换和消息操作的用户提示改为中文 PaperRun 语义

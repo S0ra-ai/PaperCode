@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.152-dev - 2026/05/31 (069ae6cf) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.152-dev - 2026/05/31 (823ab6c5) [fix/mcp-tool-binding-test-isolation]
         :brief strict acceptance 报告写入顶层项目版本并纳入当前性校验
         :test
             - test(acceptance): strict-acceptance Write-Report 增加 Project version 头，报告打开后即可判断证据所属版本

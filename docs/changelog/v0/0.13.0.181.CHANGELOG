@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.181-dev - 2026/05/31 (aa4581d8) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.181-dev - 2026/05/31 (a4eb8bb7) [fix/mcp-tool-binding-test-isolation]
         :brief README 同步 CJC 生成质量状态
         :docs
             - docs(readme): README 增加当前验收状态，记录 final benchmark、四格式导出、CJC 表格列宽和参考文献样式进展

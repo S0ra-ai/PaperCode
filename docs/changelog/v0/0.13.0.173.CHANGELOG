@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.173-dev - 2026/05/31 (dc752ad1) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.173-dev - 2026/05/31 (6f6bc6fc) [fix/mcp-tool-binding-test-isolation]
         :brief live benchmark 失败 attempt 结构化落盘
         :fix
             - fix(benchmark): live-paper-quality-benchmark 注册 uncaughtException 和 unhandledRejection 处理器

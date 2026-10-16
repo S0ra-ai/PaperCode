@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.149-dev - 2026/05/31 (8b050800) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.149-dev - 2026/05/31 (10fecbb3) [fix/mcp-tool-binding-test-isolation]
         :brief 开发手册新增渲染验收与 favicon，防止交互控件回退
         :docs
             - docs(development): 16 个开发手册 HTML 页面统一声明 favicon，浏览器打开时不再产生 favicon 404

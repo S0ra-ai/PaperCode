@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.136-dev - 2026/05/31 (4fdec923) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.136-dev - 2026/05/31 (1112ee09) [fix/mcp-tool-binding-test-isolation]
         :brief 开发手册补齐 ReadTheDocs 风格自动目录、章节锚点和全页翻页导航
         :docs
             - docs(development): 新增 manual.js，为所有开发手册 HTML 页面自动生成本页目录、标题锚点、面包屑和上一页/下一页

@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.141-dev - 2026/05/31 (a974e709) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.141-dev - 2026/05/31 (26f57c6d) [fix/mcp-tool-binding-test-isolation]
         :brief TaskFlow 计划状态同步到 137 个完成任务，并归档测试隔离审计报告
         :taskflow
             - docs(taskflow): 新增并固化 16 个已完成 confirmed 任务，覆盖论文生成、实验协议、容器/本地执行、订阅 provider、MPL-2.0 与开发手册

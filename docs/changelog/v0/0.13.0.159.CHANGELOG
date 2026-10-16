@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.159-dev - 2026/05/31 (06a12b57) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.159-dev - 2026/05/31 (9ca6776c) [fix/mcp-tool-binding-test-isolation]
         :brief 中国计算机学报正文小标题编号与开发手册风格确认
         :fix
             - fix(authoring): CJC profile 对未编号的小标题按父章节补齐层级编号，避免 PDF/目录出现裸小标题

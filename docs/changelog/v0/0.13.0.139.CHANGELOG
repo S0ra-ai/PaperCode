@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.139-dev - 2026/05/31 (15f9c3bc) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.139-dev - 2026/05/31 (16906e5d) [fix/mcp-tool-binding-test-isolation]
         :brief App/Desktop 用户可见表面统一到 PaperRun，开发手册导航拆分为使用与开发主线
         :app
             - fix(app): App 主语言包将高频导航、toast、Prompt 示例和上下文统计收口为 PaperRun 与论文研究表达

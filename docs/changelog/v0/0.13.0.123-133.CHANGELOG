@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.133-dev - 2026/05/31 (564bd8fd) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.133-dev - 2026/05/31 (d9e3191b) [fix/mcp-tool-binding-test-isolation]
         :brief PaperRun 并发创建、模型工作台 provider 注册语义、响应式模型页、中国计算机学报正文格式、开发手册、MPL-2.0 授权、MCP 工具绑定、Session prompt、App i18n 与用户入口清理
         :prompt
             - fix(prompt): default、anthropic、beast、trinity、gemini 与 copilot-gpt-5 session prompt 统一使用 PaperCode 身份

@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.175-dev - 2026/05/31 (3a902ee4) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.175-dev - 2026/05/31 (d2fb8a15) [fix/mcp-tool-binding-test-isolation]
         :brief live benchmark 中断信号写入失败 attempt 诊断
         :fix
             - fix(benchmark): SIGINT 与 SIGTERM 接入失败 attempt 记录流程，错误码为 benchmark_interrupted

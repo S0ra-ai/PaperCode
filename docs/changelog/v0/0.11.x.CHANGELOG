@@ -7,7 +7,7 @@
 
 :history
 
-    0.11.2-dev - 2026/05/13 (ba0cc982) [feature/model-workbench-visual-reset]
+    0.11.2-dev - 2026/05/13 (52dc6dcd) [feature/model-workbench-visual-reset]
         :brief 清空本机模型库存并重排模型工作台界面
         :tui
             - fix(models): 已注册页只显示真实可用 provider，自定义 provider 必须已有模型，ChatGPT/Copilot/内置 provider 必须已连接
@@ -21,7 +21,7 @@
             - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/model-discovery.test.ts
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
 
-    0.11.1-dev - 2026/05/13 (ed57d7dc) [feature/model-workbench-runid-display-hardening]
+    0.11.1-dev - 2026/05/13 (70432e75) [feature/model-workbench-runid-display-hardening]
         :brief 重构模型工作台三页体验并修复 PaperRun run_id 冲突
         :tui
             - feat(models): /models 收敛为已注册、所有模型、全流程模型三页
@@ -49,7 +49,7 @@
             - TaskFlow validate_changelog_versions
             - git diff --check
 
-    0.11.0-dev - 2026/05/13 (b0db5090) [develop]
+    0.11.0-dev - 2026/05/13 (e3b06708) [develop]
         :brief 将 PaperCode 推进为更独立的论文研究工作台，补齐配置隔离、历史恢复、机器环境、内置论文 skills 和公开文档
         :capabilities
             - feat(skills): 将 architecture-diagram 与 paper-framework-figure-studio-pro 纳入 PaperCode 托管能力和 doctor 检查

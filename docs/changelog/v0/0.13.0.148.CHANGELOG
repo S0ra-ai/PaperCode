@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.148-dev - 2026/05/31 (1ac40f69) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.148-dev - 2026/05/31 (4dd62a44) [fix/mcp-tool-binding-test-isolation]
         :brief 开发手册补齐 ReadTheDocs 风格导航与交互
         :docs
             - docs(development): 多页 HTML 手册增加顶部工具条，支持目录收起、正文展开、浅色/深色切换和查看本页源码

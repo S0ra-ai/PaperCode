@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.182-dev - 2026/05/31 (6a225ea1) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.182-dev - 2026/05/31 (4f5eef7b) [fix/mcp-tool-binding-test-isolation]
         :brief PaperCode 换壳与本机 oh-my-opencode 表面素材迁入
         :brand
             - feat(brand): TUI 标题、终端标题、logo、错误页、提示语、preview 标题和公开测试期望统一为 PaperCode

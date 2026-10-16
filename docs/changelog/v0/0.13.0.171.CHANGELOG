@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.171-dev - 2026/05/31 (fade6e75) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.171-dev - 2026/05/31 (e92f87f3) [fix/mcp-tool-binding-test-isolation]
         :brief live arXiv source discovery 增加全局预算与超时诊断
         :fix
             - fix(benchmark): arXiv fetch、单 query 和 protocol source discovery 分别增加可配置时间预算

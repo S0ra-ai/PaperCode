@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.165-dev - 2026/05/31 (ac0480a4) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.165-dev - 2026/05/31 (c3af97e5) [fix/mcp-tool-binding-test-isolation]
         :brief 开发手册按 ReadTheDocs 式开发粒度加深
         :docs
             - docs(development): 总览页新增开发文档粒度，要求每页回答状态来源、代码入口、修改文件、失败呈现和验收命令

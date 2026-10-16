@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.100-dev - 2026/05/30 (168909e2) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.100-dev - 2026/05/30 (21332390) [fix/mcp-tool-binding-test-isolation]
         :brief code metadata 清理稳定化
         :test
             - test(cleanup): code metadata 临时目录清理增加 EBUSY/EACCES/EPERM/ENOTEMPTY/EFAULT 可控重试断言
@@ -19,7 +19,7 @@
             - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/authoring.test.ts test/paper/live-benchmark-quality.test.ts test/paper/code-metadata-version.test.ts --test-name-pattern "complete code-paper|renders ranking benchmark|live paper quality|prefers product README version|retries retryable temporary directory cleanup"
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
 
-    0.13.0.99-dev - 2026/05/30 (c90ecaef) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.99-dev - 2026/05/30 (834adcc2) [fix/mcp-tool-binding-test-isolation]
         :brief 占位参考文献过滤
         :authoring
             - fix(references): DOI/arXiv 缺失且 URL 为 example、localhost、file 等占位来源时不进入正式参考文献
@@ -31,7 +31,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - note: protocol live 复审未重复触发，避免 arXiv HTTP 429 限流扩大
 
-    0.13.0.98-dev - 2026/05/30 (443f6f65) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.98-dev - 2026/05/30 (5ad64e48) [fix/mcp-tool-binding-test-isolation]
         :brief ranking 结论章节表格化
         :authoring
             - fix(markdown): ranking 结论改为结论项/证据/边界表格
@@ -43,7 +43,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - note: protocol live 复审未重复触发，避免 arXiv HTTP 429 限流扩大
 
-    0.13.0.97-dev - 2026/05/30 (9bf20c5e) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.97-dev - 2026/05/30 (37165883) [fix/mcp-tool-binding-test-isolation]
         :brief ranking 效度威胁表格化
         :authoring
             - fix(markdown): ranking 效度威胁改为效度类型/威胁/缓解方式表格
@@ -55,7 +55,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - note: protocol live 复审未重复触发，避免 arXiv HTTP 429 限流扩大
 
-    0.13.0.96-dev - 2026/05/30 (791d8370) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.96-dev - 2026/05/30 (7102ff9a) [fix/mcp-tool-binding-test-isolation]
         :brief ranking 限制章节表格化
         :authoring
             - fix(markdown): ranking 限制章节改为限制/影响/后续处理表格
@@ -67,7 +67,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - note: protocol live 复审未重复触发，避免 arXiv HTTP 429 限流扩大
 
-    0.13.0.95-dev - 2026/05/30 (87dc0361) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.95-dev - 2026/05/30 (f8004ea4) [fix/mcp-tool-binding-test-isolation]
         :brief ranking 结果章节小节化
         :authoring
             - fix(markdown): ranking 结果章节拆为主结果、结果表、消融分析和统计解释小节
@@ -79,7 +79,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - note: protocol live 复审未重复触发，避免 arXiv HTTP 429 限流扩大
 
-    0.13.0.94-dev - 2026/05/30 (fe334224) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.94-dev - 2026/05/30 (03328bf1) [fix/mcp-tool-binding-test-isolation]
         :brief ranking 主要贡献表格化
         :authoring
             - fix(markdown): ranking 主要贡献改为贡献/内容/证据位置表格
@@ -91,7 +91,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - note: protocol live 复审未重复触发，避免 arXiv HTTP 429 限流扩大
 
-    0.13.0.93-dev - 2026/05/30 (014f864e) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.93-dev - 2026/05/30 (b8784506) [fix/mcp-tool-binding-test-isolation]
         :brief ranking 研究问题表格化
         :authoring
             - fix(markdown): ranking 研究问题改为编号/关注点/问题/回答章节表格
@@ -103,7 +103,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - note: protocol live 复审未重复触发，避免 arXiv HTTP 429 限流扩大
 
-    0.13.0.92-dev - 2026/05/30 (9d3d0aa6) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.92-dev - 2026/05/30 (80bfbd54) [fix/mcp-tool-binding-test-isolation]
         :brief 参考文献时间戳日期化
         :authoring
             - fix(references): 参考文献发表时间和检索时间将 ISO 时间戳收敛为日期格式
@@ -114,7 +114,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - note: protocol live 复审未重复触发，避免 arXiv HTTP 429 限流扩大
 
-    0.13.0.91-dev - 2026/05/30 (10c0a60b) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.91-dev - 2026/05/30 (829b4903) [fix/mcp-tool-binding-test-isolation]
         :brief ranking 复现实验入口补齐执行状态
         :authoring
             - fix(appendix): ranking 附录 B 的复现实验入口表新增执行状态与结果位置列
@@ -126,7 +126,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - note: protocol live 复审未重复触发，避免 arXiv HTTP 429 限流扩大
 
-    0.13.0.90-dev - 2026/05/30 (fae878e9) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.90-dev - 2026/05/30 (5b7f152f) [fix/mcp-tool-binding-test-isolation]
         :brief ranking 附录补齐实现定位表
         :authoring
             - fix(appendix): ranking 附录 A 新增实现定位表，列出 rankAgentTeamPapers、scorePaper 与 claimLedgerCoverage 的源码定位和复核用途
@@ -138,7 +138,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - note: protocol live 复审未重复触发，避免 arXiv HTTP 429 限流扩大
 
-    0.13.0.89-dev - 2026/05/30 (3fa3b977) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.89-dev - 2026/05/30 (4e4a449d) [fix/mcp-tool-binding-test-isolation]
         :brief ranking 方法章节结构化
         :authoring
             - fix(method): ranking 方法正文拆为“排序接口”“评分函数”“对照与复现”三级小节
@@ -150,7 +150,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - note: protocol live 复审未重复触发，避免 arXiv HTTP 429 限流扩大
 
-    0.13.0.88-dev - 2026/05/30 (e876880a) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.88-dev - 2026/05/30 (a5f971a2) [fix/mcp-tool-binding-test-isolation]
         :brief 方法公式去除重复特征解释
         :authoring
             - fix(method): 评分公式权重表存在时不再追加重复的 relevance、claim_coverage 与 recency 散文解释
@@ -161,7 +161,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - note: protocol live 复审未重复触发，避免 arXiv HTTP 429 限流扩大
 
-    0.13.0.87-dev - 2026/05/30 (33114fc5) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.87-dev - 2026/05/30 (e80ce302) [fix/mcp-tool-binding-test-isolation]
         :brief 排名评分公式独立成块
         :authoring
             - fix(method): 候选论文排序评分公式从方法长段落中拆出为独立公式块
@@ -174,7 +174,7 @@
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol (blocked: live arXiv HTTP 429 rate limit)
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario code (ran; final export blocked by reproduction_failure)
 
-    0.13.0.86-dev - 2026/05/30 (941d4b52) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.86-dev - 2026/05/30 (c81fa3ab) [fix/mcp-tool-binding-test-isolation]
         :brief 资源预算与降级策略表格化
         :authoring
             - fix(markdown): 实验设置章节新增资源预算表，展示运行时间、内存和 GPU 预算
@@ -186,7 +186,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.85-dev - 2026/05/30 (d45899ea) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.85-dev - 2026/05/30 (058e1a8d) [fix/mcp-tool-binding-test-isolation]
         :brief 实验设置表格补齐标题间距
         :authoring
             - fix(markdown): 实验设置章节的指标、基线和消融三级标题后补齐空行
@@ -197,7 +197,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.84-dev - 2026/05/30 (b7b23103) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.84-dev - 2026/05/30 (c6254310) [fix/mcp-tool-binding-test-isolation]
         :brief 实验环境声明改为表格
         :authoring
             - fix(markdown): 可复现性章节中的实验环境声明改为三级小节和表格
@@ -209,7 +209,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.83-dev - 2026/05/30 (ab5a3d1e) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.83-dev - 2026/05/30 (3d7aa898) [fix/mcp-tool-binding-test-isolation]
         :brief 声明章节改为表格
         :authoring
             - fix(markdown): 声明章节用表格展示基金项目、作者贡献、利益冲突和伦理审批
@@ -220,7 +220,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.82-dev - 2026/05/30 (1f4e00b8) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.82-dev - 2026/05/30 (5ce73911) [fix/mcp-tool-binding-test-isolation]
         :brief 作者信息改为表格
         :authoring
             - fix(markdown): 作者信息章节用表格展示作者、机构和通信作者缺省项
@@ -231,7 +231,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.81-dev - 2026/05/30 (22160ff8) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.81-dev - 2026/05/30 (604ff160) [fix/mcp-tool-binding-test-isolation]
         :brief 代码可用性小节格式正式化
         :authoring
             - fix(markdown): 数据与代码可用性章节中的代码可用性改为三级小节
@@ -243,7 +243,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.80-dev - 2026/05/30 (1e8ea41b) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.80-dev - 2026/05/30 (4c369620) [fix/mcp-tool-binding-test-isolation]
         :brief 代码可用性改为表格
         :authoring
             - fix(availability): 代码可用性章节用表格展示方法实现、复现实验入口、代码包、仓库、版本、修订、工作区状态和许可证
@@ -255,7 +255,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.79-dev - 2026/05/30 (d6ad9b37) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.79-dev - 2026/05/30 (5b0ffbd2) [fix/mcp-tool-binding-test-isolation]
         :brief Markdown 导出压缩多余空行
         :authoring
             - fix(markdown): DraftPaper 渲染时压缩三连及以上空行，避免数据与代码可用性等段落出现拼接草稿感
@@ -266,7 +266,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.78-dev - 2026/05/30 (9eadc40d) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.78-dev - 2026/05/30 (935b60ec) [fix/mcp-tool-binding-test-isolation]
         :brief 结果与复现表格统一论文顺序
         :authoring
             - fix(results): 结果表按本文方法、基线、消融输出，不再沿用运行记录原始顺序
@@ -279,7 +279,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.77-dev - 2026/05/30 (98da67ea) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.77-dev - 2026/05/30 (f8e6eced) [fix/mcp-tool-binding-test-isolation]
         :brief 作者与声明缺省项去除模板占位
         :authoring
             - fix(metadata): 作者、机构和通信作者缺省项改为本次材料未提供
@@ -291,7 +291,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.76-dev - 2026/05/30 (c201e490) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.76-dev - 2026/05/30 (16059b5a) [fix/mcp-tool-binding-test-isolation]
         :brief 消融比较补齐指标口径
         :authoring
             - fix(abstract): 无证据覆盖消融改为排序 nDCG@3 数值低于本文方法
@@ -304,7 +304,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.75-dev - 2026/05/30 (4d1bacc4) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.75-dev - 2026/05/30 (cf043f91) [fix/mcp-tool-binding-test-isolation]
         :brief 结果段基线比较补齐指标口径
         :authoring
             - fix(result): 结果章节将本文方法高于基线改为本文方法的排序 nDCG@3 数值高于最佳基线
@@ -315,7 +315,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.74-dev - 2026/05/30 (3ef630a3) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.74-dev - 2026/05/30 (f2c721f4) [fix/mcp-tool-binding-test-isolation]
         :brief dirty 工作区补齐复现边界
         :authoring
             - fix(availability): 代码工作区含未提交或未跟踪变更时，数据与代码可用性章节补充复现边界
@@ -327,7 +327,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.73-dev - 2026/05/30 (364199fb) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.73-dev - 2026/05/30 (caea3edb) [fix/mcp-tool-binding-test-isolation]
         :brief 基线解释改为差异口径
         :authoring
             - fix(setup): 词项匹配基线理由改为检验完整排序与简单词项排序在当前候选集上的差异
@@ -341,7 +341,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.72-dev - 2026/05/30 (ba8e87b1) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.72-dev - 2026/05/30 (df15ad1f) [fix/mcp-tool-binding-test-isolation]
         :brief GPU 预算改为显式启用
         :experiments
             - fix(plan): ExperimentPlan 默认不再分配 GPU 预算，只有显式 resource_budget 才记录 GPU 小时
@@ -356,7 +356,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.71-dev - 2026/05/30 (c7e9fe29) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.71-dev - 2026/05/30 (d4bbe3b1) [fix/mcp-tool-binding-test-isolation]
         :brief 研究问题与引言统一为相关性口径
         :authoring
             - fix(introduction): ranking 引言改为检查 claim_coverage 项是否与排序差异相关
@@ -370,7 +370,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.70-dev - 2026/05/30 (b48dedd9) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.70-dev - 2026/05/30 (dff19cfb) [fix/mcp-tool-binding-test-isolation]
         :brief 证据覆盖表述改为相关性口径
         :authoring
             - fix(result): ranking 消融解释将 claim_coverage 可观测贡献改为与排序差异相关
@@ -383,7 +383,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.69-dev - 2026/05/30 (d397cff1) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.69-dev - 2026/05/30 (c6965de7) [fix/mcp-tool-binding-test-isolation]
         :brief 消融差异补齐方向
         :authoring
             - fix(result): ranking 摘要和结果明确无证据覆盖消融低于本文方法
@@ -395,7 +395,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.68-dev - 2026/05/30 (ad26e34c) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.68-dev - 2026/05/30 (5accd305) [fix/mcp-tool-binding-test-isolation]
         :brief 排序指标差异改为绝对差值口径
         :authoring
             - fix(result): ranking 摘要、结果、讨论和结论使用绝对差值表述 nDCG@3 差异
@@ -407,7 +407,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.67-dev - 2026/05/30 (4d51b64a) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.67-dev - 2026/05/30 (19f8219c) [fix/mcp-tool-binding-test-isolation]
         :brief 方法框分支说明去重
         :authoring
             - fix(method): ranking 方法框只保留一条分支检查说明
@@ -419,7 +419,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.66-dev - 2026/05/30 (b4a6ae45) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.66-dev - 2026/05/30 (c84a558b) [fix/mcp-tool-binding-test-isolation]
         :brief 数据缺失降级策略改为替代数据边界
         :authoring
             - fix(protocol): 数据集不可用时要求使用明确标注为替代数据的可核验评测集
@@ -431,7 +431,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.65-dev - 2026/05/30 (baebd58b) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.65-dev - 2026/05/30 (df8f3825) [fix/mcp-tool-binding-test-isolation]
         :brief 工作区数据访问列改为本地可核验
         :authoring
             - fix(availability): file:// 或 workspace 数据集在数据可用性表格中显示为本地可核验
@@ -444,7 +444,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.64-dev - 2026/05/30 (8d9d13bd) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.64-dev - 2026/05/30 (fb00acef) [fix/mcp-tool-binding-test-isolation]
         :brief 实验协议入口说明改为覆盖口径
         :authoring
             - fix(protocol): ranking 实验设置说明 4 个入口覆盖本文方法、词项匹配基线、无证据覆盖消融和容器复现
@@ -456,7 +456,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.63-dev - 2026/05/30 (6d5bb56f) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.63-dev - 2026/05/30 (6304d5c5) [fix/mcp-tool-binding-test-isolation]
         :brief 复现实验数量口径改为实验记录
         :authoring
             - fix(contribution): ranking 主要贡献将本机/容器运行改为本机/容器实验记录
@@ -468,7 +468,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.62-dev - 2026/05/30 (f224b98e) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.62-dev - 2026/05/30 (83ea9e05) [fix/mcp-tool-binding-test-isolation]
         :brief 方法结构表改为框编号
         :authoring
             - fix(figure): ranking 方法结构表标题从图 1 改为框 1
@@ -480,7 +480,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.61-dev - 2026/05/30 (c8a9e6ba) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.61-dev - 2026/05/30 (0ff17886) [fix/mcp-tool-binding-test-isolation]
         :brief 数据可用性避免夸大开放性
         :authoring
             - fix(availability): 数据与代码可用性章节将开放数据集总称改为可核验数据集
@@ -492,7 +492,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.60-dev - 2026/05/30 (b60949ce) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.60-dev - 2026/05/30 (1fdd8b0f) [fix/mcp-tool-binding-test-isolation]
         :brief 方法图改为导出友好结构表
         :authoring
             - fix(figure): ranking 方法图从 Mermaid 代码块改为 Markdown 结构表
@@ -505,7 +505,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.59-dev - 2026/05/30 (a76a6503) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.59-dev - 2026/05/30 (37126252) [fix/mcp-tool-binding-test-isolation]
         :brief 方法流程图改为可渲染结构图
         :authoring
             - fix(figure): ranking 方法章节输出 Mermaid flowchart
@@ -517,7 +517,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.58-dev - 2026/05/30 (a6c6071b) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.58-dev - 2026/05/30 (642979ac) [fix/mcp-tool-binding-test-isolation]
         :brief 作者与声明缺失信息改为论文模板口吻
         :authoring
             - fix(manuscript): 作者信息缺失时输出待补充而不是未登记
@@ -529,7 +529,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.57-dev - 2026/05/30 (c8fe4431) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.57-dev - 2026/05/30 (e1ff3cbc) [fix/mcp-tool-binding-test-isolation]
         :brief 代码可用性补充代码包名
         :authoring
             - fix(availability): 代码可用性章节增加 workspace package 名称
@@ -541,7 +541,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.56-dev - 2026/05/30 (31f522b1) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.56-dev - 2026/05/30 (ae4313aa) [fix/mcp-tool-binding-test-isolation]
         :brief 代码可用性优先使用产品版本
         :authoring
             - fix(availability): 代码可用性章节优先输出 README/CHANGELOG 中的产品版本
@@ -554,7 +554,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.55-dev - 2026/05/30 (b903eb4d) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.55-dev - 2026/05/30 (220439bf) [fix/mcp-tool-binding-test-isolation]
         :brief 代码可用性补充工作区状态
         :authoring
             - fix(availability): 代码可用性章节支持输出 git 工作区状态
@@ -566,7 +566,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.54-dev - 2026/05/30 (b4c2d644) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.54-dev - 2026/05/30 (74a29072) [fix/mcp-tool-binding-test-isolation]
         :brief 代码可用性补充 git 修订号
         :authoring
             - fix(availability): 代码可用性章节支持输出代码修订短 hash
@@ -578,7 +578,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.53-dev - 2026/05/30 (e890853c) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.53-dev - 2026/05/30 (6946ea57) [fix/mcp-tool-binding-test-isolation]
         :brief 可复现性章节补充资源记录边界
         :authoring
             - fix(reproducibility): 可复现性章节增加资源记录边界
@@ -590,7 +590,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.52-dev - 2026/05/30 (fd74c37a) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.52-dev - 2026/05/30 (4d9e6e21) [fix/mcp-tool-binding-test-isolation]
         :brief 代码可用性补充仓库版本许可证
         :authoring
             - fix(availability): 代码可用性章节支持代码仓库地址、代码版本和代码许可证元数据
@@ -602,7 +602,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.51-dev - 2026/05/30 (25f8171e) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.51-dev - 2026/05/30 (25656e31) [fix/mcp-tool-binding-test-isolation]
         :brief 摘要补充 ranking 评测边界
         :authoring
             - fix(abstract): ranking 摘要写出评测集候选数

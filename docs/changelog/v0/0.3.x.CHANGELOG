@@ -7,7 +7,7 @@
 
 :history
 
-    0.3.7-dev - 2026/05/10 (55167c9) [develop]
+    0.3.7-dev - 2026/05/10 (55dd712) [develop]
         :brief 报告路径卫生清理, 标记迁移前 server 路径为历史证据
         :changes
         - docs(reports): 为 25 个 task-032 前报告添加 historical path note, 避免将 packages/server 误读为当前架构
@@ -24,7 +24,7 @@
             - rg audit confirmed pre-hard-fork report server-path references are marked as historical provenance
             - CHANGELOG and TaskFlow completed-task logs intentionally retained as historical evidence
 
-    0.3.6-dev - 2026/05/10 (7d335eb) [develop]
+    0.3.6-dev - 2026/05/10 (5284740) [develop]
         :brief PaperRun 新增 observability audit、cost、tool trace 与 data-egress 诊断
         :changes
         - feat(observability): 新增 PaperObservabilityAudit.v1 与 summary coverage, 覆盖 stage、capability、model_role、subagent、tool、data_egress、export_renderer、cost
@@ -50,7 +50,7 @@
             - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/observability-audit.test.ts test/paper/strict-acceptance.test.ts passed: 4 pass, 0 fail, 43 expects
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
 
-    0.3.5-dev - 2026/05/10 (855a944) [develop]
+    0.3.5-dev - 2026/05/10 (458265c) [develop]
         :brief PaperRun export pipeline 写出真实文件与 manifest
         :changes
         - feat(export): 新增 run-bound export pipeline, 写出 Markdown、LaTeX、PDF、DOCX 与 manifest.json
@@ -76,7 +76,7 @@
             - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/run-api.test.ts passed: 1 pass, 0 fail, 27 expects
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
 
-    0.3.4-dev - 2026/05/10 (30479e1) [develop]
+    0.3.4-dev - 2026/05/10 (7a72399) [develop]
         :brief TUI 论文工作台新增 PaperRun live controls 与能力健康显示
         :changes
         - feat(tui): PaperRun dashboard 新增发送指导、继续运行、重试阶段、取消运行、打开预览、导出终稿、导出 forced draft、能力健康、模型角色 controls
@@ -97,7 +97,7 @@
             - npx --yes bun@1.3.13 --cwd packages/opencode test test/cli/tui/paper-workbench.test.ts test/cli/tui/paper-workbench-controls.test.ts passed: 5 pass, 0 fail, 38 expects
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
 
-    0.3.3-dev - 2026/05/10 (11d1042) [develop]
+    0.3.3-dev - 2026/05/10 (7da099c) [develop]
         :brief Intake 新增真实材料索引与 Source Ledger 记录
         :changes
         - feat(intake): 新增 MaterialIndex.v1, 支持 code_paths、paper_files、dataset_paths、experiment_logs 的 workspace-safe 索引
@@ -118,7 +118,7 @@
             - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/material-index.test.ts passed: 2 pass, 0 fail, 11 expects
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
 
-    0.3.2-dev - 2026/05/10 (644922b) [develop]
+    0.3.2-dev - 2026/05/10 (2d57f05) [develop]
         :brief 新增持久化 PaperRun controller、guidance queue 与控制 API
         :changes
         - feat(controller): 新增 PaperRunController.v1, 持久化 checkpoints、guidance_queue、controls、internal_sessions 与 controller status
@@ -144,7 +144,7 @@
             - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/paperrun-controller.test.ts test/paper/run-api.test.ts passed: 2 pass, 0 fail, 36 expects
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
 
-    0.3.1-dev - 2026/05/10 (e78a169) [develop]
+    0.3.1-dev - 2026/05/10 (d8e98c3) [develop]
         :brief PaperRun 创建默认驱动论文 stage engine
         :changes
         - feat(paperrun): createPaperRun 默认调用 startPaperResearchRun, 创建 run 后直接推进 14-stage paper graph
@@ -167,7 +167,7 @@
             - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/run-api.test.ts test/cli/tui/paper-workbench.test.ts test/paper/paperrun-execution.test.ts passed: 5 pass, 0 fail, 56 expects
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
 
-    0.3.0-dev - 2026/05/10 (9fdb7dc) [develop]
+    0.3.0-dev - 2026/05/10 (427b61b) [develop]
         :brief OpenCode hard fork 最终验收为 PaperCode 论文工作台
         :changes
         - test(acceptance): 新增 hard-fork acceptance 覆盖 paper core 迁移、PaperRun API/TUI、submission 预算档、多层多模型 Agent Tree、private-first data egress、forced draft 阻断原因

@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.153-dev - 2026/05/31 (99cd21e1) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.153-dev - 2026/05/31 (e9b3fca0) [fix/mcp-tool-binding-test-isolation]
         :brief 开发手册使用指南改为完整产品路径手册
         :docs
             - docs(development): 使用页按使用参数、运行模式、输入材料、质量调优、实时监控、恢复导出重写，贴近 ReadTheDocs/Furo 手册结构

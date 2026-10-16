@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.167-dev - 2026/05/31 (ffc46aea) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.167-dev - 2026/05/31 (56369963) [fix/mcp-tool-binding-test-isolation]
         :brief CJC 投稿准备度附录按现有附录连续编号
         :fix
             - fix(authoring): 投稿准备度附录不再硬编码为附录 G，改为扫描当前 Markdown 中已有附录并自动续号

@@ -7,7 +7,7 @@
 
 :history
 
-    0.1.27-dev - 2026/05/09 (5bc5d8b) [develop]
+    0.1.27-dev - 2026/05/09 (70df728) [develop]
         :brief 新增 run-bound 论文写作、预览、审稿与导出闭环
         :changes
         - feat(authoring): 新增 PaperAuthoringLoop.v1, 串联 ClaimLedger-first draft、profile-aware revision、verification gate 和 export
@@ -31,7 +31,7 @@
             - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
             - TaskFlow validate_task task-030-paper-authoring-loop passed
 
-    0.1.26-dev - 2026/05/09 (8e82c90) [develop]
+    0.1.26-dev - 2026/05/09 (256bede) [develop]
         :brief 将 TUI 首屏改为中文论文工作台
         :changes
         - feat(tui): 新增 TuiPaperWorkbenchState.v1 与 TuiResearchRunState.v1 renderer-independent 状态 adapter
@@ -53,7 +53,7 @@
             - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
             - TaskFlow validate_task task-029-tui-paper-workbench passed
 
-    0.1.25-dev - 2026/05/09 (f4fa60d) [develop]
+    0.1.25-dev - 2026/05/09 (a9cbba7) [develop]
         :brief 新增 MCP/Skill 辅助实验与复现 Claim Policy
         :changes
         - feat(experiment): 新增 experiment-loop paper domain helpers, 解析日志 metric 并解析 direction/unit
@@ -74,7 +74,7 @@
             - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
             - TaskFlow validate_task task-028-experiment-mcp-loop passed
 
-    0.1.24-dev - 2026/05/09 (6842b6d) [develop]
+    0.1.24-dev - 2026/05/09 (94ba246) [develop]
         :brief 新增 code-to-paper 源码证据 Artifact
         :changes
         - feat(code): 新增 CodebaseMap.v1, MethodExtraction.v1, ExperimentSurface.v1, ReproductionPlan.v1 artifacts
@@ -94,7 +94,7 @@
             - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
             - TaskFlow validate_task task-027-code-to-paper passed
 
-    0.1.23-dev - 2026/05/09 (ec78dfe) [develop]
+    0.1.23-dev - 2026/05/09 (f4327e1) [develop]
         :brief 新增真实论文 Orchestrator 图并移除 stub completion
         :changes
         - feat(paper): 新增 ResearchRunGraph.v1 / ResearchRunController.v1 paper orchestrator, 覆盖 intake 到 export 14 个 stage
@@ -116,7 +116,7 @@
             - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
             - TaskFlow validate_task task-026-real-orchestrator passed
 
-    0.1.22-dev - 2026/05/09 (4b3c5e7) [develop]
+    0.1.22-dev - 2026/05/09 (8913ab6) [develop]
         :brief 新增多输入 ResearchIntake 与 ResearchBrief 记录
         :changes
         - feat(paper): 新增 ResearchIntakeRequest 与 ResearchBrief.v1, 支持 topic/code/data/materials workflows
@@ -136,7 +136,7 @@
             - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
             - TaskFlow validate_task task-025-research-intake passed
 
-    0.1.21-dev - 2026/05/09 (4e7754e) [develop]
+    0.1.21-dev - 2026/05/09 (0135524) [develop]
         :brief 新增论文投稿 Profile 系统与 nature-paper skill
         :changes
         - feat(paper): 新增 PaperProfileRegistry, PaperProfile.v1 与 PaperProfileCheck.v1 契约
@@ -157,7 +157,7 @@
             - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
             - TaskFlow validate_task task-024-paper-profile-skills passed
 
-    0.1.20-dev - 2026/05/09 (d0f2a9a) [develop]
+    0.1.20-dev - 2026/05/09 (58e0ff2) [develop]
         :brief 新增 MCP/Skill/Tool/Python 论文能力总线
         :changes
         - feat(paper): 新增 ResearchCapabilityRegistry, 支持能力注册、重复注册诊断、stage/type 过滤与 trace metadata
@@ -178,7 +178,7 @@
             - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
             - TaskFlow validate_task task-023-research-skill-mcp-bus passed
 
-    0.1.19-dev - 2026/05/09 (60227c0) [develop]
+    0.1.19-dev - 2026/05/09 (801b9cf) [develop]
         :brief 新增 OpenCode provider-agnostic 模型角色路由
         :changes
         - feat(paper): 新增 ModelRoleRouter, 支持 planner/literature/code/experiment/writer/reviewer/citation/summarizer 角色
@@ -199,7 +199,7 @@
             - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
             - TaskFlow validate_task task-022-model-router passed
 
-    0.1.18-dev - 2026/05/09 (b8fabeb) [develop]
+    0.1.18-dev - 2026/05/09 (b9d67db) [develop]
         :brief 重定界 OpenCode 底座与 papercode 论文领域内核
         :changes
         - feat(paper): 新增 packages/server/src/paper 架构入口, 固化 OpenCode substrate / research runtime / paper domain 三层边界
@@ -219,7 +219,7 @@
             - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
             - TaskFlow validate_task task-021-architecture-reframe passed
 
-    0.1.17-dev - 2026/05/09 (e214ff4) [develop]
+    0.1.17-dev - 2026/05/09 (467cac4) [develop]
         :brief 补齐端到端研究流水线验收
         :changes
         - test(e2e): 新增 fixture topic acceptance, 串联 template/literature-data/experiment/writing/verification/export
@@ -239,7 +239,7 @@
             - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
             - TaskFlow validate_task task-020-end-to-end-acceptance passed
 
-    0.1.16-dev - 2026/05/09 (2f644e4) [develop]
+    0.1.16-dev - 2026/05/09 (b39fa1b) [develop]
         :brief 整理项目结构与 first-party 边界
         :changes
         - chore(structure): 将根目录 21 个 OpenCode 上游本地化 README 移入 upstream/opencode-readmes/
@@ -258,7 +258,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
             - root README.*.md structure check passed: only README.md remains at root
 
-    0.1.15-dev - 2026/05/09 (6e4994e) [develop]
+    0.1.15-dev - 2026/05/09 (f5fc85f) [develop]
         :brief 实现 final 与 forced-draft export bundle
         :changes
         - feat(export): 新增 ExportBundle.v1, ExportFile, ExportManifest, ExportRenderer 和 verification summary schema
@@ -280,7 +280,7 @@
             - npx --yes bun@1.3.13 --cwd packages/server test test/research/export.test.ts passed: 5 pass, 0 fail, 14 expects
             - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
 
-    0.1.14-dev - 2026/05/09 (09a4874) [develop]
+    0.1.14-dev - 2026/05/09 (b180155) [develop]
         :brief 实现最终真实性 verification gate
         :changes
         - feat(verification): 新增 VerificationFinding, BlockingReport.v1, ReviewReport.v1, ModelReviewInput, VerificationGateResult schema
@@ -305,7 +305,7 @@
             - npx --yes bun@1.3.13 --cwd packages/server test test/research/verification.test.ts passed: 6 pass, 0 fail, 11 expects
             - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
 
-    0.1.13-dev - 2026/05/09 (2b5a38f) [develop]
+    0.1.13-dev - 2026/05/09 (06032db) [develop]
         :brief 实现 ClaimLedger-first Markdown 写作
         :changes
         - feat(writing): 新增 ClaimLedger.v1, DraftPaper.v1, CitationRef, DraftSection, CheckpointGuidance, DraftRevision 领域 payload schema
@@ -329,7 +329,7 @@
             - npx --yes bun@1.3.13 --cwd packages/server test test/research/writing.test.ts passed: 5 pass, 0 fail, 16 expects
             - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
 
-    0.1.12-dev - 2026/05/09 (d7bf542) [develop]
+    0.1.12-dev - 2026/05/09 (81e8dc5) [develop]
         :brief 实现实验循环与容器复现门禁
         :changes
         - feat(experiments): 新增 ExperimentPlan.v1, ExperimentRun.v1, ResultReport.v1 领域 payload schema
@@ -353,7 +353,7 @@
             - npx --yes bun@1.3.13 --cwd packages/server test test/research/experiments.test.ts passed: 5 pass, 0 fail, 14 expects
             - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
 
-    0.1.11-dev - 2026/05/09 (ee88ff1) [develop]
+    0.1.11-dev - 2026/05/09 (c43b799) [develop]
         :brief 实现开放文献与数据发现
         :changes
         - feat(sources): 新增 SourceRecord.v1, LiteratureMap.v1, DataPlan.v1, DatasetCard.v1, DirectionFeasibility.v1 领域 payload schema
@@ -376,7 +376,7 @@
             - npx --yes bun@1.3.13 --cwd packages/server test test/research/sources.test.ts passed: 4 pass, 0 fail, 14 expects
             - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
 
-    0.1.10-dev - 2026/05/09 (385fe8e) [develop]
+    0.1.10-dev - 2026/05/09 (01a9e3c) [develop]
         :brief 实现可信模板解析与 Markdown-to-LaTeX 应用
         :changes
         - feat(templates): 新增 TemplateSpec.v1, 包含 source evidence、trust、license status、confidence、required files、conflict flags
@@ -396,7 +396,7 @@
             - npx --yes bun@1.3.13 --cwd packages/server test test/research/templates.test.ts test/research/python-bridge.test.ts passed: 5 pass, 0 fail, 18 expects
             - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
 
-    0.1.9-dev - 2026/05/09 (77f144c) [develop]
+    0.1.9-dev - 2026/05/09 (7dd2b45) [develop]
         :brief 实现自动 topic-to-paper orchestrator
         :changes
         - feat(orchestrator): 新增 first-party automatic stage graph, 覆盖 intake/template/literature/data/experiment/writing/verification/export
@@ -419,7 +419,7 @@
             - npx --yes bun@1.3.13 --cwd packages/server test test/research/orchestrator.test.ts test/research/runtime.test.ts test/research/guards.test.ts passed: 8 pass, 0 fail, 44 expects
             - npx --yes bun@1.3.13 run --cwd packages/server typecheck passed
 
-    0.1.8-dev - 2026/05/09 (e876c63) [develop]
+    0.1.8-dev - 2026/05/09 (aaf818e) [develop]
         :brief 完成参考项目分析并接入 Exa MCP
         :changes
         - docs(references): 新增 reference manifest, 记录 OpenCode/Folio/IntelliGen/AI Scientist/PaperOrchestra/AutoResearch/EvoScientist/FARS/AutoRA 来源与 license 状态
@@ -441,7 +441,7 @@
             - npx --yes bun@1.3.13 --cwd packages/opencode src/index.ts mcp list --help passed
             - codex mcp add exa --url https://mcp.exa.ai/mcp passed
 
-    0.1.7-dev - 2026/05/09 (9bae52d) [develop]
+    0.1.7-dev - 2026/05/09 (cba5420) [develop]
         :brief 通过 Phase 1 验收并补齐真实性守卫
         :changes
         - feat(runtime): 新增 phaseOneStageStubs, 将模板/文献/数据/实验/写作/验证/导出显式标记为 not_implemented
@@ -463,7 +463,7 @@
             - python -m unittest discover initially failed until research-tools/src was added to PYTHONPATH
             - PYTHONPATH=research-tools/src python -m unittest discover -s research-tools/tests passed: 4 tests
 
-    0.1.6-dev - 2026/05/08 (3e2be8c) [develop]
+    0.1.6-dev - 2026/05/08 (0c48ee8) [develop]
         :brief 新增只读研究预览与 DeepSeek/中文默认配置
         :changes
         - feat(preview): 新增 @papercode/preview first-party package 与 localhost read-only preview
@@ -499,7 +499,7 @@
             - npx --yes bun@1.3.13 run typecheck passed across workspace: 14 successful tasks
             - TaskFlow validate_task task-008-preview-runtime passed
 
-    0.1.5-dev - 2026/05/08 (8e81d99) [develop]
+    0.1.5-dev - 2026/05/08 (afe52e3) [develop]
         :brief 新增初始化与诊断向导
         :changes
         - feat(init): 新增 packages/server/src/init first-party 初始化/诊断模块
@@ -528,7 +528,7 @@
             - npx --yes bun@1.3.13 run typecheck passed across workspace: 13 successful tasks
             - TaskFlow validate_task task-007-init-wizard passed
 
-    0.1.4-dev - 2026/05/08 (760d1d4) [develop]
+    0.1.4-dev - 2026/05/08 (8a5c780) [develop]
         :brief 接入 Python MCP/CLI research tool bridge
         :changes
         - feat(tools): 新增 research-tools CLI 入口 papercode-tools 与 python -m papercode_tools
@@ -560,7 +560,7 @@
             - npx --yes bun@1.3.13 run typecheck passed across workspace: 13 successful tasks
             - TaskFlow validate_task task-006-python-tool-bridge passed
 
-    0.1.3-dev - 2026/05/08 (d873f97) [develop]
+    0.1.3-dev - 2026/05/08 (cbcc5c4) [develop]
         :brief 建立 first-party research runtime
         :changes
         - feat(server/runtime): 新增 packages/server/src/research/runtime 作为 papercode 权威运行时模块
@@ -592,7 +592,7 @@
             - npx --yes bun@1.3.13 run typecheck passed across workspace: 13 successful tasks
             - TaskFlow validate_task task-005-research-runtime passed
 
-    0.1.2-dev - 2026/05/08 (b95a0cb) [develop]
+    0.1.2-dev - 2026/05/08 (d150533) [develop]
         :brief 建立 papercode research contract/server 包
         :changes
         - feat(server): 新增 @papercode/server 作为 first-party papercode server/runtime 契约包
@@ -623,7 +623,7 @@
             - npx --yes bun@1.3.13 run typecheck passed across workspace: 13 successful tasks
             - TaskFlow validate_task task-017-core-contract passed
 
-    0.1.1-dev - 2026/05/08 (c8da1ae) [develop]
+    0.1.1-dev - 2026/05/08 (dee13e0) [develop]
         :brief OpenCode fork 品牌与运行时命名迁移为 papercode
         :changes
         - feat(cli): 命令入口、help、serve 输出、安装脚本、构建脚本和 Docker 默认命令迁移为 papercode
@@ -657,7 +657,7 @@
             - CLI smoke passed: --help shows papercode commands and papercode.local, --version returned local, serve printed papercode server listening
             - Old-name scan found no active IntelliGen/Python-core/codex-task naming outside historical or generic contexts
 
-    0.1.0-dev - 2026/05/08 (88f63199) [develop]
+    0.1.0-dev - 2026/05/08 (955781e1) [develop]
         :brief 导入 OpenCode v1.14.41 源码快照
         :changes
         - feat(upstream): 导入 OpenCode v1.14.41 root overlay 源码快照
@@ -681,7 +681,7 @@
             - Verified active .github was not imported
             - Verified no node_modules/.turbo/dist/build/coverage/htmlcov, nested .git, or reparse points remained in repository snapshot
 
-    0.1.0-dev - 2026/05/08 (0906d17c) [develop]
+    0.1.0-dev - 2026/05/08 (fa21d99d) [develop]
         :brief 归档旧 IntelliGen 与 Folio 参考项目
         :changes
         - docs(legacy): 归档旧 IntelliGen 过滤快照
@@ -696,7 +696,7 @@
             - Folio bundle verified successfully
             - Forbidden artifact scan found no real .env, dependency directories, virtualenvs, caches, pycache, sandbox/site/build output, logs, nested archives, or WAL/SHM files
 
-    0.1.0-dev - 2026/05/08 (196557f3) [develop]
+    0.1.0-dev - 2026/05/08 (e32db351) [develop]
         :brief 初始化 TaskFlow 计划与仓库治理
         :changes
         - docs(governance): 建立 TaskFlow-first 计划源、私有优先仓库策略、Git Flow 分支治理和 README 版本追踪

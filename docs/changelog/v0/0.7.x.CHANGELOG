@@ -7,7 +7,7 @@
 
 :history
 
-    0.7.0-dev - 2026/05/11 (1db0157) [develop]
+    0.7.0-dev - 2026/05/11 (2a113a4) [develop]
         :brief Agent Team capability acceptance and no-mock boundary
         :changes
         - test(acceptance): 新增 Agent Team capability acceptance 场景, 覆盖内置 skills/MCP/Python capability fusion、harness approval、递归 team 和 source-bound evidence merge

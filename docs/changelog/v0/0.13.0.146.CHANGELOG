@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.146-dev - 2026/05/31 (dd6f60b1) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.146-dev - 2026/05/31 (1e0fda71) [fix/mcp-tool-binding-test-isolation]
         :brief 自主产品审计新增用户可见旧品牌反向检查
         :audit
             - test(audit): autonomous-product-audit 新增 public-surface-no-legacy-branding，反向扫描 README、TUI 首页、模型页、PaperRun dashboard、paper API 和 Preview

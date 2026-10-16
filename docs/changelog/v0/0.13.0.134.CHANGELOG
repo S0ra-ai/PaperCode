@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.134-dev - 2026/05/31 (5c6c49ce) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.134-dev - 2026/05/31 (6c160b51) [fix/mcp-tool-binding-test-isolation]
         :brief 开发手册按 ReadTheDocs 风格收口，并将 root CHANGELOG 当前线拆为活跃摘要与归档历史
         :docs
             - docs(development): 总览页明确开发手册主线，使用入口仅作为维护者本机验收路径

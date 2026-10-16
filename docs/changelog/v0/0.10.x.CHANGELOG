@@ -7,7 +7,7 @@
 
 :history
 
-    0.10.2-dev - 2026/05/13 (2e3d297e) [feature/tui-terminal-model-brand-hardening]
+    0.10.2-dev - 2026/05/13 (5d9cfd71) [feature/tui-terminal-model-brand-hardening]
         :brief 硬化终端尺寸保护、模型工作台、目录选择、PaperRun schema 和品牌表面
         :tui
             - feat(tui): 启动前检测终端尺寸，低于 96x28 时显示中文最低/推荐尺寸提示并拒绝渲染复杂 TUI
@@ -30,7 +30,7 @@
             - test(tui): 覆盖终端尺寸 guard、CJK 路径截断、Paper 可见命令与公开品牌表面
             - test(models): 覆盖 provider 注册边界、备用决策模型、阶段强制模型和 allowlist-only 路由
 
-    0.10.1-dev - 2026/05/12 (51712c9f) [feature/tui-model-workspace-run-hardening]
+    0.10.1-dev - 2026/05/12 (645f7121) [feature/tui-model-workspace-run-hardening]
         :brief 强化 TUI 模型工作台、工作目录选择和 PaperRun 创建诊断
         - feat(tui): /models 改为独立全屏模型工作台，分离 Provider、候选模型、可用模型、主决策模型、阶段模型和诊断页面
         - feat(models): 可用模型改为 allowlist 唯一事实源，候选模型只代表发现结果，批量多选后一次保存
@@ -50,7 +50,7 @@
             - npx --yes bun@1.3.13 --cwd packages/preview test passed, 3 tests
             - python -m unittest discover -s research-tools/tests passed, 18 tests
 
-    0.10.0-dev - 2026/05/12 (fa7b3da7) [develop]
+    0.10.0-dev - 2026/05/12 (5d5b39fb) [develop]
         :brief 重构 /models 模型工作台，支持 Provider 管理、主模型、可用模型和阶段模型自动/强制配置
         - feat(tui): /models 首页拆成 Provider 管理、主模型、可用模型、阶段模型四块，减少单弹窗大列表遮挡
         - feat(provider): Provider 管理支持自定义 OpenAI-compatible endpoint、内置 provider 授权和按 provider 查看候选模型

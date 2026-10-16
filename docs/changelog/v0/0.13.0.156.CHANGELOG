@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.156-dev - 2026/05/31 (da8d1cbd) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.156-dev - 2026/05/31 (ee76ce3f) [fix/mcp-tool-binding-test-isolation]
         :brief 可见命令面纳入 autonomous product audit
         :test
             - test(audit): autonomous-product-audit 新增 visible-command-surface 检查，锁定 PaperVisibleCommandRegistry 精确只包含 /models、/status、/file、/folder、/data、/log、/preview、/export、/stop、/resume

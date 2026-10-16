@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.135-dev - 2026/05/31 (5cf7246e) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.135-dev - 2026/05/31 (de7b3bc6) [fix/mcp-tool-binding-test-isolation]
         :brief 强化代码实验论文生成、实验协议重跑、CJC final gate 和 no-mock 来源边界
         :paper
             - feat(authoring): Text2Action 代码论文按方法型论文组织摘要、研究问题、贡献、研究设计、相关工作、方法、结果和结论

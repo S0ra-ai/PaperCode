@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.174-dev - 2026/05/31 (80d21a02) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.174-dev - 2026/05/31 (97f54877) [fix/mcp-tool-binding-test-isolation]
         :brief live benchmark 失败诊断增加稳定错误码
         :fix
             - fix(benchmark): attempt-error.json 的 error 增加 code 字段，区分 source timeout、rate limit、source verification、schema、export 和 model configuration

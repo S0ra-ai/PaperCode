@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.170-dev - 2026/05/31 (7684b62a) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.170-dev - 2026/05/31 (1e944c28) [fix/mcp-tool-binding-test-isolation]
         :brief live benchmark summary 成功发布保护与开发手册写作规范
         :fix
             - fix(benchmark): live-paper-quality-benchmark 不再在启动时清空场景输出目录，改为每次写入 attempts 子目录

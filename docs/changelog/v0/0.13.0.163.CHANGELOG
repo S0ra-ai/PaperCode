@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.163-dev - 2026/05/31 (45608f68) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.163-dev - 2026/05/31 (2202a8df) [fix/mcp-tool-binding-test-isolation]
         :brief 打磨 final CJC 论文限制章节与主文工程词
         :fix
             - fix(authoring): CJC profile 将 limitations 标题从“限制与待修复项”改为“限制与未来工作”，避免通过 final gate 的论文主文出现待修复标题

@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.180-dev - 2026/05/31 (70f528d5) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.180-dev - 2026/05/31 (fcb160f1) [fix/mcp-tool-binding-test-isolation]
         :brief CJC 参考文献改为正式条目样式
         :fix
             - fix(authoring): 正式参考文献条目从运行式发表/检索字段调整为 `[序号] 作者. 题名[文献类型/OL]. 日期[引用日期]. 定位.` 样式

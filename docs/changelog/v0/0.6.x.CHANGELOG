@@ -7,7 +7,7 @@
 
 :history
 
-    0.6.6-dev - 2026/05/11 (1c1c2a5) [develop]
+    0.6.6-dev - 2026/05/11 (bf7f9ba) [develop]
         :brief Hugging Face / ML-Intern research loop
         :changes
         - feat(hf): 新增 ML-Intern-inspired HF research loop contracts, 覆盖 docs/papers/datasets/models/spaces/jobs/trackio
@@ -37,7 +37,7 @@
             - TaskFlow validate_task ml-intern-hf-research-loop
             - git diff --check
 
-    0.6.5-dev - 2026/05/11 (b188ae0) [develop]
+    0.6.5-dev - 2026/05/11 (554369c) [develop]
         :brief Crawler 数据采集与 Source Ledger gate
         :changes
         - feat(crawler): 新增 WebCrawlPlan、CrawlSourceRecord、CrawledDataset、CrawlComplianceReport 和 gate summary
@@ -62,7 +62,7 @@
             - TaskFlow validate_changelog_format
             - TaskFlow validate_task crawler-data-acquisition
 
-    0.6.4-dev - 2026/05/11 (86b5b08) [develop]
+    0.6.4-dev - 2026/05/11 (1d28df0) [develop]
         :brief MemoryBank 与代码理解层
         :changes
         - feat(memory): 新增 MemoryBank.v1, 支持 scope、share policy、provenance、retention、secret/path redaction 与查询摘要
@@ -85,7 +85,7 @@
             - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/memory-code-understanding.test.ts test/paper/agent-team.test.ts test/cli/tui/paper-workbench.test.ts passed: 9 pass, 0 fail, 58 expects
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
 
-    0.6.3-dev - 2026/05/11 (590d9f9) [develop]
+    0.6.3-dev - 2026/05/11 (e27d57c) [develop]
         :brief 内置 capability pack 与 harness 调度层
         :changes
         - feat(capability): 新增内置 PaperCapabilityPack, 覆盖 paper profiles、literature MCP、crawler、Hugging Face、code/experiment、writing/verification/export
@@ -107,7 +107,7 @@
             - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/capability-harness.test.ts test/paper/capabilities.test.ts passed: 7 pass, 0 fail, 25 expects
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
 
-    0.6.2-dev - 2026/05/11 (408a187) [develop]
+    0.6.2-dev - 2026/05/11 (8f84a00) [develop]
         :brief PaperRun Agent Team 协作层
         :changes
         - feat(agent-team): 新增 PaperAgentTeam、成员、任务板、mailbox、harness decision 与 source-bound evidence merge
@@ -130,7 +130,7 @@
             - npx --yes bun@1.3.13 --cwd packages/opencode test test/cli/tui/paper-workbench.test.ts passed: 4 pass, 0 fail, 33 expects
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
 
-    0.6.1-dev - 2026/05/11 (affb5f1) [develop]
+    0.6.1-dev - 2026/05/11 (9db3c60) [develop]
         :brief strict live-run 证据升级
         :changes
         - test(acceptance): topic-to-paper-live-run 与 code-to-paper-live-run 改为执行真实 PaperRun benchmark, 不再用 fixture e2e 测试冒充 live-run 证据
@@ -151,7 +151,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
             - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\strict-acceptance.ps1 -CheckTimeoutSeconds 300 passed
 
-    0.6.0-dev - 2026/05/11 (0e792d7) [develop]
+    0.6.0-dev - 2026/05/11 (e77f3a7) [develop]
         :brief 递归 Agent 与论文工作台综合验收
         :changes
         - test(acceptance): 综合验收递归 Agent Fabric、PaperRun 右侧栏、中文工作台流程、品牌表面与 strict live acceptance

@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.140-dev - 2026/05/31 (dee367d4) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.140-dev - 2026/05/31 (92fa441c) [fix/mcp-tool-binding-test-isolation]
         :brief Provider 授权入口按订阅类型收口，公开安装、发布和 Nix 元数据迁移到 S0ra-ai 与 MPL-2.0
         :tui
             - fix(models): 从模型工作台注册 ChatGPT 或 GitHub Copilot 订阅时，只展示对应 provider 的授权入口

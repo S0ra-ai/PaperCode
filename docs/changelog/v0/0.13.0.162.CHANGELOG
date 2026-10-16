@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.162-dev - 2026/05/31 (f6240567) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.162-dev - 2026/05/31 (f3ff45dc) [fix/mcp-tool-binding-test-isolation]
         :brief 修复排序论文附录复现状态与主文结果不一致
         :fix
             - fix(authoring): ranking appendix 执行状态先按 experiment id 精确匹配，匹配不到且同角色运行唯一时按角色回退，避免 protocol_id 与 ExperimentRun.experiment_id 不一致时误报缺失

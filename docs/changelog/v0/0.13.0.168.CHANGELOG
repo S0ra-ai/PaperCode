@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.168-dev - 2026/05/31 (2b067431) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.168-dev - 2026/05/31 (dba6cfa1) [fix/mcp-tool-binding-test-isolation]
         :brief ranking 成稿引言与资源边界口吻论文语体化
         :fix
             - fix(authoring): ranking 引言从“系统需要在有限候选集内判断”改为“研究者需要在有限候选集内判断”，减少产品口吻残留

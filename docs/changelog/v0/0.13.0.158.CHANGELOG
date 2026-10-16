@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.158-dev - 2026/05/31 (8b1082ef) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.158-dev - 2026/05/31 (6f4874f5) [fix/mcp-tool-binding-test-isolation]
         :brief PaperRun 模型路由强制只使用用户 allowlist
         :fix
             - fix(paper): createPaperRun 不再把请求中的 model_roles 合并进 allowlist，阶段强制模型只作为路由请求处理

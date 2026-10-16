@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.164-dev - 2026/05/31 (811b8327) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.164-dev - 2026/05/31 (897ad9d0) [fix/mcp-tool-binding-test-isolation]
         :brief CJC ranking 英文摘要同步真实结果证据
         :fix
             - fix(authoring): CJC ranking 英文摘要不再使用 This paper presents 与结构追踪模板句，改为写入候选论文排序任务、排序接口、主指标、基线差值、消融差值、候选数、标签边界和容器复现结果

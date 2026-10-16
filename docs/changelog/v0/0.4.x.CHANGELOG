@@ -7,7 +7,7 @@
 
 :history
 
-    0.4.4-dev - 2026/05/10 (713835c) [develop]
+    0.4.4-dev - 2026/05/10 (d9e87f8) [develop]
         :brief 默认 PaperRun 引擎自动记录完整 observability audit 覆盖
         :changes
         - fix(observability): 新增 recordDefaultPaperRunObservability, 自动记录 model_role/capability/subagent/tool/data_egress/cost
@@ -32,7 +32,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts produced empty missing_kinds with counts stage=28, capability=12, model_role=8, subagent=1, tool=1, data_egress=1, export_renderer=4, cost=1
 
-    0.4.3-dev - 2026/05/10 (7d5df2a) [develop]
+    0.4.3-dev - 2026/05/10 (423d742) [develop]
         :brief PDF 导出支持多 LaTeX 引擎 fallback 并修复 Windows TeX 路径/standalone LaTeX
         :changes
         - fix(export): PDF renderer 按 latexmk -> xelatex -> pdflatex -> lualatex -> tectonic 顺序尝试
@@ -54,7 +54,7 @@
             - Direct pandoc -s + xelatex smoke generated tmp/pdf-fallback-smoke/smoke.pdf
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts produced run-045f3eb0-cb86-4340-89b9-d0ee58464040 with forced Markdown/LaTeX/PDF/DOCX export and PDF status written
 
-    0.4.2-dev - 2026/05/10 (18562fb) [develop]
+    0.4.2-dev - 2026/05/10 (5afbcf6) [develop]
         :brief 对齐 PaperRun 完成态、真实性 gate 与 reproduction_failure 阶段展示
         :changes
         - fix(paperrun): PaperRun snapshot status 新增 blocked, 完整执行但 final gate 阻断时不再显示 running
@@ -76,7 +76,7 @@
             - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/paperrun-execution.test.ts test/paper/paperrun-controller.test.ts test/cli/tui/paper-workbench-controls.test.ts passed: 4 pass, 0 fail, 48 expects
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
 
-    0.4.1-dev - 2026/05/10 (fad39b1) [develop]
+    0.4.1-dev - 2026/05/10 (39c056c) [develop]
         :brief 严格验收脚本增加逐项超时、进度报告与 focused 默认测试集
         :changes
         - fix(strict): scripts/strict-acceptance.ps1 新增 CheckTimeoutSeconds、FullWorkspaceSuite 与 FullWorkspaceTimeoutSeconds 参数
@@ -96,7 +96,7 @@
             - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\strict-acceptance.ps1 -FixtureMode -CheckTimeoutSeconds 120 -ReportPath tmp/strict-acceptance-fixture.md passed
             - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\strict-acceptance.ps1 -CheckTimeoutSeconds 300 -ReportPath reports/strict-live-acceptance.md passed in strict-live-focused mode
 
-    0.4.0-dev - 2026/05/10 (b0452c8) [develop]
+    0.4.0-dev - 2026/05/10 (ad873af) [develop]
         :brief 运行真实 topic+code PaperRun 质量基准并生成后续硬化任务
         :changes
         - feat(benchmark): 新增 scripts/live-paper-quality-benchmark.ts, 可复现创建真实 PaperRun、forced export 与 summary JSON

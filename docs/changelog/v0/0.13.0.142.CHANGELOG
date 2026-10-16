@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.142-dev - 2026/05/31 (eef8e551) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.142-dev - 2026/05/31 (d8d09868) [fix/mcp-tool-binding-test-isolation]
         :brief strict live acceptance 刷新当前验收报告，并修复 changelog 归档检查的版本硬编码
         :acceptance
             - fix(strict): changelog-split-archives 改为校验 root :version 与唯一活跃 history header 一致，不再硬编码旧 0.8.x 线

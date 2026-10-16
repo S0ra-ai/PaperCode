@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.122-dev - 2026/05/31 (b5f0bec4) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.122-dev - 2026/05/31 (24b053c8) [fix/mcp-tool-binding-test-isolation]
         :brief Text2Action 成稿质量、实验环境面板、Web 监控台验收与 CJC 期刊入口收口
         :authoring
             - fix(writing): Text2Action 论文优先按语义规划、安全执行和服务机器人方法论文成稿，不再落回通用证据工作流叙述

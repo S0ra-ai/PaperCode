@@ -7,7 +7,7 @@
 
 :history
 
-    0.8.5-dev - 2026/05/11 (9db955a) [develop]
+    0.8.5-dev - 2026/05/11 (676096e) [develop]
         :brief release 前 readiness、中文文档、文件发布面和初始化入口收口
         :docs
             - README 改为中文 GitHub 首页，保留 TUI-first、内置 capability packs、多 provider、Preview/export、隐私和 Windows 源码运行路径
@@ -55,7 +55,7 @@
             - reports/live-preview-acceptance.md - live preview acceptance evidence
             - reports/provider-matrix-smoke.md - pending_config provider matrix report
 
-    0.8.4-dev - 2026/05/11 (e96072c) [develop]
+    0.8.4-dev - 2026/05/11 (04ae8b8) [develop]
         :brief strict acceptance 锁定 verified source final gate
         - test(acceptance): final-export-pass-run 读取 live benchmark summary，断言 final_export=final、failed_checks empty、SourceEvidenceManifest.v1 存在、final gate passed
         - fix(runtime): PaperRun JSON 原子写入使用唯一 tmp 文件名，并对 Windows EPERM/EBUSY/EACCES/ENOTEMPTY replace 失败做短退避重试
@@ -75,7 +75,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
             - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\strict-acceptance.ps1 -CheckTimeoutSeconds 300 passed
 
-    0.8.3-dev - 2026/05/11 (bec3df2) [develop]
+    0.8.3-dev - 2026/05/11 (76500fa) [develop]
         :brief 最终导出 source authenticity gate 硬化
         - feat(verification): final export 现在要求引用来源必须 clear license 且 verification.status=verified
         - feat(orchestrator): 新增 SourceEvidenceManifest.v1 ingestion，从 paper_files/experiment_logs 读取用户或工具提供的验证来源清单
@@ -97,7 +97,7 @@
             - npx --yes bun@1.3.13 --cwd packages/opencode test focused paper-critical suite passed: 30 pass, 0 fail
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario final passed with final_export=final and SourceEvidenceManifest.v1
 
-    0.8.2-dev - 2026/05/11 (54bee71) [develop]
+    0.8.2-dev - 2026/05/11 (b83f8de) [develop]
         :brief 全仓 strict acceptance 验收硬化
         - test(acceptance): 全量 packages/opencode test 纳入 strict-live-full 正式验收并通过 2586 pass / 0 fail
         - fix(test): paper/research 临时目录清理加入 Windows EBUSY/EACCES/EPERM 重试与警告降级，避免清理句柄竞争污染产品断言
@@ -120,7 +120,7 @@
             - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\strict-acceptance.ps1 -FullWorkspaceSuite -CheckTimeoutSeconds 600 -FullWorkspaceTimeoutSeconds 2700 -ReportPath reports/strict-live-full-acceptance.md passed
             - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\autonomous-product-audit.ps1 -AllowActiveTask passed
 
-    0.8.1-dev - 2026/05/11 (1c6692d) [develop]
+    0.8.1-dev - 2026/05/11 (d6b5790) [develop]
         :brief 自驱产品审计与持续推进流程
         - feat(audit): 新增 autonomous product audit 脚本，TaskFlow 空队列后可自动审计并寻找下一轮工作
         - feat(report): 生成 reports/autonomous-product-audit.md，记录 TaskFlow、版本、strict live evidence、no-mock residue、品牌和 Git Flow 状态
@@ -140,7 +140,7 @@
             - TaskFlow validate_changelog_format passed
             - git diff --check passed
 
-    0.8.0-dev - 2026/05/11 (c6499a2) [develop]
+    0.8.0-dev - 2026/05/11 (d70c56a) [develop]
         :brief 真实产品闭环补齐
         - feat(crawler): 实现授权 live web crawl，Scrapling-first 并提供 stdlib HTTP fallback，不再返回未实现诊断
         - feat(huggingface): HF papers 使用官方 Hub API live 记录，jobs 需要 token，Trackio 支持显式导出 metrics 作为产品证据

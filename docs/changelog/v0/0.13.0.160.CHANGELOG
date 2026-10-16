@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.160-dev - 2026/05/31 (73aa1c44) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.160-dev - 2026/05/31 (e0de70b0) [fix/mcp-tool-binding-test-isolation]
         :brief 实验资源证据进入论文正文与实时监控
         :feat
             - feat(paper): 实验执行摘要表新增峰值内存与 GPU 用量列，有记录时显示数值，缺采集时明确标为未采集

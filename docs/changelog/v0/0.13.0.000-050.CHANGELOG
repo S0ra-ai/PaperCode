@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.50-dev - 2026/05/30 (f3197dd0) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.50-dev - 2026/05/30 (7681cca5) [fix/mcp-tool-binding-test-isolation]
         :brief 结果章节补充统计解释边界
         :authoring
             - fix(results): 结果章节增加统计解释段落
@@ -19,7 +19,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.49-dev - 2026/05/30 (376056fc) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.49-dev - 2026/05/30 (ca07e51c) [fix/mcp-tool-binding-test-isolation]
         :brief 可复现性章节补充实验环境声明
         :authoring
             - fix(reproducibility): 可复现性章节增加实验环境声明
@@ -30,7 +30,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.48-dev - 2026/05/30 (bce24843) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.48-dev - 2026/05/30 (b3cb37ee) [fix/mcp-tool-binding-test-isolation]
         :brief ranking 方法章节增加图 1 流程概览
         :authoring
             - fix(method): ranking 方法章节增加图 1 候选论文排序与复现实验流程
@@ -41,7 +41,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.47-dev - 2026/05/30 (5c7e70a4) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.47-dev - 2026/05/30 (3cbda664) [fix/mcp-tool-binding-test-isolation]
         :brief 数据与代码可用性补充代码状态
         :authoring
             - fix(availability): 数据与代码可用性章节增加代码可用性段落
@@ -52,7 +52,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.46-dev - 2026/05/30 (2def2e90) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.46-dev - 2026/05/30 (5fca1284) [fix/mcp-tool-binding-test-isolation]
         :brief ranking 评分公式补充符号说明
         :authoring
             - fix(method): 评分公式后说明 p 表示待排序候选论文
@@ -63,7 +63,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.45-dev - 2026/05/30 (4aa89451) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.45-dev - 2026/05/30 (c9762b88) [fix/mcp-tool-binding-test-isolation]
         :brief ranking 方法章节补充评分公式
         :authoring
             - fix(method): 从 scorePaper 代码证据解析 relevance、claim_coverage 和 recency 权重
@@ -74,7 +74,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.44-dev - 2026/05/30 (ff9ca4ca) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.44-dev - 2026/05/30 (7629bc88) [fix/mcp-tool-binding-test-isolation]
         :brief 生成稿增加正式声明区块并增强 live benchmark 退化重试
         :authoring
             - fix(metadata): 作者信息区移除进入投稿前和系统不会等产品说明口吻
@@ -89,7 +89,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.43-dev - 2026/05/30 (d7ed0181) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.43-dev - 2026/05/30 (59ef4586) [fix/mcp-tool-binding-test-isolation]
         :brief 生成稿实验表格增加连续表号
         :authoring
             - fix(results): 结果章节主结果表增加表 1 说明
@@ -101,7 +101,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.42-dev - 2026/05/30 (ac100419) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.42-dev - 2026/05/30 (ea80a934) [fix/mcp-tool-binding-test-isolation]
         :brief 生成稿增加作者信息区块
         :authoring
             - fix(structure): scaffold 在题名后、摘要前增加作者信息区块
@@ -112,7 +112,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.41-dev - 2026/05/30 (f7b68589) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.41-dev - 2026/05/30 (64f13cfb) [fix/mcp-tool-binding-test-isolation]
         :brief ranking 主文隐藏内部来源标记
         :authoring
             - fix(method): ranking 方法章节不再输出 [来源 1] 这类内部证据标记
@@ -123,7 +123,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.40-dev - 2026/05/30 (ef74ead7) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.40-dev - 2026/05/30 (db5e54d0) [fix/mcp-tool-binding-test-isolation]
         :brief 相关工作正文增加参考文献编号引用
         :authoring
             - fix(citation): ranking 相关工作代表文献输出与参考文献一致的编号引用
@@ -134,7 +134,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.39-dev - 2026/05/30 (89a8eee0) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.39-dev - 2026/05/30 (eb048059) [fix/mcp-tool-binding-test-isolation]
         :brief 生成稿增加关键词章节
         :authoring
             - fix(structure): 论文 scaffold 在摘要后、引言前增加关键词章节
@@ -145,7 +145,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.38-dev - 2026/05/30 (c5af9eaf) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.38-dev - 2026/05/30 (b2c7f7cf) [fix/mcp-tool-binding-test-isolation]
         :brief 参考文献保留作者并从 live arXiv 抓取作者元数据
         :authoring
             - fix(reference): SourceCandidate/SourceRecord 增加 authors 字段
@@ -158,7 +158,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.37-dev - 2026/05/30 (1f8489af) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.37-dev - 2026/05/30 (60189573) [fix/mcp-tool-binding-test-isolation]
         :brief ranking 主文移除 gate 口吻并补充特征解释
         :authoring
             - fix(method): ranking 方法章节解释 relevance、claim_coverage 和 recency 的含义
@@ -171,7 +171,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.36-dev - 2026/05/30 (cf31badc) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.36-dev - 2026/05/30 (75308ea6) [fix/mcp-tool-binding-test-isolation]
         :brief ranking 研究问题改为论文式问题表述
         :authoring
             - fix(rq): ranking 研究问题改为排序机制、特征贡献和环境一致性三项论文问题
@@ -182,7 +182,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.35-dev - 2026/05/30 (4a6099c0) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.35-dev - 2026/05/30 (38d9ef91) [fix/mcp-tool-binding-test-isolation]
         :brief ranking 附录改为材料定位与复现实验入口
         :authoring
             - fix(appendix): ranking 附录 A 改为材料与实现定位，不再输出证据追踪和断言 1
@@ -194,7 +194,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.34-dev - 2026/05/30 (24d52409) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.34-dev - 2026/05/30 (5898ce87) [fix/mcp-tool-binding-test-isolation]
         :brief ranking 限制章节改为论文式边界说明
         :authoring
             - fix(limitations): ranking 终稿标题改为限制，不再输出限制与待修复项
@@ -206,7 +206,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.33-dev - 2026/05/30 (4fc98a84) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.33-dev - 2026/05/30 (232d5b1e) [fix/mcp-tool-binding-test-isolation]
         :brief ranking 讨论与效度威胁改为具体实验分析
         :authoring
             - fix(discussion): ranking 讨论解释完整排序相对词项匹配基线和无证据覆盖消融的差值
@@ -218,7 +218,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.32-dev - 2026/05/30 (1035d3fa) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.32-dev - 2026/05/30 (c205f957) [fix/mcp-tool-binding-test-isolation]
         :brief ranking 引言、贡献和方法改为论文式叙事
         :authoring
             - fix(introduction): ranking 引言改为文献检索、综述准备和研究选题动机，不再使用正文完整性元叙述
@@ -230,7 +230,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.31-dev - 2026/05/30 (82178247) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.31-dev - 2026/05/30 (2f5b3f5c) [fix/mcp-tool-binding-test-isolation]
         :brief ranking 终稿主文移除审计式证据章节
         :authoring
             - fix(structure): ranking 终稿不再输出研究设计与证据流、证据与可追踪性两章审计主文
@@ -241,7 +241,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.30-dev - 2026/05/30 (c8c0c68e) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.30-dev - 2026/05/30 (f0f60bb2) [fix/mcp-tool-binding-test-isolation]
         :brief ranking 相关工作改为排序与检索三线索
         :authoring
             - fix(related-work): ranking 场景改为排序解释、检索与推荐评测、复现与验证三条研究线索
@@ -252,7 +252,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.29-dev - 2026/05/30 (6966d9d5) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.29-dev - 2026/05/30 (2683d5ec) [fix/mcp-tool-binding-test-isolation]
         :brief 数据可用性翻译 live ranking 标签策略
         :authoring
             - fix(data): live arXiv ranking dataset 的 label_policy 不再以英文内部字段进入论文
@@ -263,7 +263,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.28-dev - 2026/05/30 (0246efae) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.28-dev - 2026/05/30 (ab00e37b) [fix/mcp-tool-binding-test-isolation]
         :brief live ranking benchmark 使用更贴题的真实文献与非退化排序信号
         :benchmark
             - fix(live): protocol 场景查询从泛化多智能体自动化改为 paper recommendation ranking，减少参考文献偏题
@@ -276,7 +276,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.27-dev - 2026/05/30 (10e75517) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.27-dev - 2026/05/30 (1ea59f33) [fix/mcp-tool-binding-test-isolation]
         :brief ranking 终稿隐藏内部审计附录
         :authoring
             - fix(appendix): ranking 场景不再输出附录 E 断言证据表和附录 F 证据记录索引
@@ -288,7 +288,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.26-dev - 2026/05/30 (a90da790) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.26-dev - 2026/05/30 (b36f99d8) [fix/mcp-tool-binding-test-isolation]
         :brief 可复现性正文表格去除命令和日志列
         :authoring
             - fix(repro): 可复现性本机/容器比较表去除容器命令列，只保留状态、主指标和差值
@@ -301,7 +301,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.25-dev - 2026/05/30 (fb294890) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.25-dev - 2026/05/30 (94ca84ad) [fix/mcp-tool-binding-test-isolation]
         :brief ranking 相关工作改为论文式综述段落
         :authoring
             - fix(related-work): ranking 场景相关工作改为工具调用与智能体协作、复现与验证、论文到代码执行三条叙事线索
@@ -314,7 +314,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.24-dev - 2026/05/30 (805efee7) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.24-dev - 2026/05/30 (51b90c5e) [fix/mcp-tool-binding-test-isolation]
         :brief ranking 论文标题、摘要和结论转向具体排序方法
         :authoring
             - fix(title): ranking 场景标题改为证据约束的候选论文排序方法，不再沿用泛化代码论文标题
@@ -327,7 +327,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.23-dev - 2026/05/30 (782b54a2) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.23-dev - 2026/05/30 (12b06652) [fix/mcp-tool-binding-test-isolation]
         :brief 实验证据措辞去除工程审计残留
         :authoring
             - fix(wording): 将可追踪来源改为可核验材料来源，减少运行审计口吻
@@ -340,7 +340,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.22-dev - 2026/05/30 (f6644e9c) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.22-dev - 2026/05/30 (3b931e16) [fix/mcp-tool-binding-test-isolation]
         :brief 研究问题改为候选论文排序任务三问
         :authoring
             - fix(rq): ranking 场景研究问题改为排序接口、特征贡献和复现一致性三问
@@ -353,7 +353,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.21-dev - 2026/05/30 (374f36e1) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.21-dev - 2026/05/30 (336844a3) [fix/mcp-tool-binding-test-isolation]
         :brief 基线、消融和结果解释改为实验语义表述
         :authoring
             - fix(experiment): ranking 场景下基线说明改为只依赖查询词重合的排序对照，不再只说 package.json 入口
@@ -366,7 +366,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.20-dev - 2026/05/30 (11bb9858) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.20-dev - 2026/05/30 (a501f590) [fix/mcp-tool-binding-test-isolation]
         :brief 方法章节改为具体排序实现描述
         :authoring
             - fix(method): ranking 场景方法章节说明 rankAgentTeamPapers 与 scorePaper 的职责，不再渲染源码审计式方法段
@@ -379,7 +379,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.19-dev - 2026/05/30 (07afe00a) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.19-dev - 2026/05/30 (efeffd81) [fix/mcp-tool-binding-test-isolation]
         :brief 摘要、引言和贡献改为具体排序方法焦点
         :authoring
             - fix(abstract): ranking 场景摘要使用 rankAgentTeamPapers 和 scorePaper 构成的候选论文排序接口，不再以源码范围作为主表达
@@ -391,7 +391,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.18-dev - 2026/05/30 (33198226) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.18-dev - 2026/05/30 (3b16f8f2) [fix/mcp-tool-binding-test-isolation]
         :brief 排序实验对象与讨论改为领域特异表达
         :authoring
             - fix(experiment): ranking 场景下将本文方法渲染为“证据约束的论文排序方法”，不再使用代码证据驱动工作流
@@ -403,7 +403,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.17-dev - 2026/05/30 (18a17a0b) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.17-dev - 2026/05/30 (b85a9f41) [fix/mcp-tool-binding-test-isolation]
         :brief 证据与附录残余审计口吻收敛
         :authoring
             - fix(study-design): 研究设计说明改为读者复核路径，不再输出人工审查、审稿人等过程词
@@ -415,7 +415,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.16-dev - 2026/05/30 (7f18f60e) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.16-dev - 2026/05/30 (5b65e2fa) [fix/mcp-tool-binding-test-isolation]
         :brief 相关工作与附录机械措辞继续收敛
         :authoring
             - fix(related-work): 相关工作分类改为“工具调用与智能体协作”，并去除主题线索中重复的关键词括注
@@ -427,7 +427,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.15-dev - 2026/05/30 (136bf987) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.15-dev - 2026/05/30 (17c85347) [fix/mcp-tool-binding-test-isolation]
         :brief 摘要、引言、研究问题与相关工作去流程化
         :authoring
             - fix(front-matter): 摘要改为“缺少依据的过程记录”与“证据链满足结果表述条件”，移除流程产物、成稿和证据充分性检查口吻
@@ -440,7 +440,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.14-dev - 2026/05/30 (9e7ca20d) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.14-dev - 2026/05/30 (e0dd764d) [fix/mcp-tool-binding-test-isolation]
         :brief 研究设计与附录改为论文式复核材料
         :authoring
             - fix(study-design): 研究设计章节改为五类证据约束，不再输出“生成流畅正文”“写作阶段”等流程说明
@@ -451,7 +451,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.13-dev - 2026/05/30 (8cd5275f) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.13-dev - 2026/05/30 (0c5cd25e) [fix/mcp-tool-binding-test-isolation]
         :brief 讨论、效度威胁、限制与结论改为论文式收束
         :authoring
             - fix(discussion): 讨论段聚焦结果解释与证据边界，移除“自动化系统”“后续投稿前”等产品报告口吻
@@ -463,7 +463,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.12-dev - 2026/05/30 (3771cff6) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.12-dev - 2026/05/30 (142b8448) [fix/mcp-tool-binding-test-isolation]
         :brief 证据链、数据可用性与实验设置改为论文式表达
         :authoring
             - fix(evidence): 证据与可追踪性章节改为证据链约束实验结论，移除“写作阶段只把”等产品说明口吻
@@ -475,7 +475,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.11-dev - 2026/05/30 (4ba6313e) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.11-dev - 2026/05/30 (b6f31642) [fix/mcp-tool-binding-test-isolation]
         :brief 方法与可复现性段落去流程化
         :authoring
             - fix(method): 方法段改为材料边界、代码证据抽取和可复现实验约束三部分，不再输出运行流程说明
@@ -486,7 +486,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.10-dev - 2026/05/30 (d28d03ec) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.10-dev - 2026/05/30 (ce755979) [fix/mcp-tool-binding-test-isolation]
         :brief 相关工作段移除系统化“文献图”口吻
         :authoring
             - fix(related-work): 相关工作开头改为“本文纳入 ... 条相关文献记录”，不再输出“本次相关工作”
@@ -497,7 +497,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.9-dev - 2026/05/30 (b754fccb) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.9-dev - 2026/05/30 (a3b29701) [fix/mcp-tool-binding-test-isolation]
         :brief 摘要和引言改为问题驱动叙述
         :authoring
             - fix(draft): 摘要开头改为计算机类论文缺少代码证据、显式对照和隔离复现时的研究风险，不再以流程目标开场
@@ -508,7 +508,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.8-dev - 2026/05/30 (d8545837) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.8-dev - 2026/05/30 (be7e91a2) [fix/mcp-tool-binding-test-isolation]
         :brief 终稿主文去除“本次运行”日志口吻
         :authoring
             - fix(draft): 来源概述、数据可用性、证据模型、可复现性和效度威胁主文改用“本研究”“本机与容器比较”“当前实验环境”等论文式表达
@@ -519,7 +519,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.7-dev - 2026/05/30 (58cd886c) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.7-dev - 2026/05/30 (527c62a9) [fix/mcp-tool-binding-test-isolation]
         :brief 终稿主文移除工程审计词，转为论文式证据充分性表述
         :authoring
             - fix(draft): 摘要、引言、研究设计和可复现性主文使用“证据充分性”“正式结论”等论文式表达，减少终稿检查、导出包等运行审计词
@@ -530,7 +530,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.6-dev - 2026/05/30 (62819ced) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.6-dev - 2026/05/30 (bb59e91d) [fix/mcp-tool-binding-test-isolation]
         :brief 研究问题、贡献与来源概述转向证据化论文表达
         :authoring
             - fix(draft): 研究问题显式绑定证据边界、基线、消融和容器复现，不再按标题生成模板化问题
@@ -541,7 +541,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.5-dev - 2026/05/30 (11678f63) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.5-dev - 2026/05/30 (bd022d66) [fix/mcp-tool-binding-test-isolation]
         :brief 相关工作对比段按作用去重选择代表文献
         :authoring
             - fix(related-work): “对比这些方向”段按作用组选择不同代表，避免同一篇文献重复代表多个方向
@@ -551,7 +551,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.4-dev - 2026/05/30 (6f3fc8b8) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.4-dev - 2026/05/30 (31d66964) [fix/mcp-tool-binding-test-isolation]
         :brief 增强代码论文相关工作综合与文献作用标注
         :authoring
             - fix(related-work): 已验证文献不再只按表格罗列，新增“综合来看”谱系段，按工具/智能体、复现验证、任务数据和论文到代码链路归类
@@ -562,7 +562,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.3-dev - 2026/05/30 (68ebc64a) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.3-dev - 2026/05/30 (87fe161d) [fix/mcp-tool-binding-test-isolation]
         :brief 提升代码论文终稿的指标措辞、效度威胁和实时来源稳定性
         :authoring
             - fix(draft): 主指标统一输出为“以 ... 作为主指标”或“在 ... 这一主指标上”，移除“主指标 排序”等模板残留
@@ -575,7 +575,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.2-dev - 2026/05/30 (a95e91b1) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.2-dev - 2026/05/30 (930295cb) [fix/mcp-tool-binding-test-isolation]
         :brief 清理终稿导出 fallback 诊断语义
         :export
             - fix(pdf): LaTeX engine fallback 成功后不再把失败尝试写入最终 PDF diagnostics
@@ -585,7 +585,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
             - npx --yes bun@1.3.13 scripts/live-paper-quality-benchmark.ts --scenario protocol
 
-    0.13.0.1-dev - 2026/05/30 (7ced85ef) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.1-dev - 2026/05/30 (b295074f) [fix/mcp-tool-binding-test-isolation]
         :brief TUI 期刊工作台与期刊 profile 路由
         :tui
             - feat(journal): 新增 /journal 期刊工作台，支持内置期刊选择、当前期刊查看和未知期刊抓取草案
@@ -602,7 +602,7 @@
             - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/run-api.test.ts
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck
 
-    0.13.0-dev - 2026/05/26 (71d0c81a) [develop]
+    0.13.0-dev - 2026/05/26 (80dcdf47) [develop]
         :brief 研究闭环监控：查新、PaperSpine、全局图与实时 Preview
         - feat(paper): 新增 NoveltyCheckpoint/PriorWorkMap/ExperimentNoveltyGate，按 literature、experiment_design、claim_ledger 阶段记录查新证据
         - feat(paper): 新增 ResearchWikiDigest、PaperSpine 和 GlobalFigureSpec artifact，补齐 idea archive、论文脊梁和期刊图示闭环

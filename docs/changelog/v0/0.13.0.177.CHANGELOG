@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.177-dev - 2026/05/31 (b771c9d8) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.177-dev - 2026/05/31 (347223e2) [fix/mcp-tool-binding-test-isolation]
         :brief live benchmark attempt 目录新增自描述 README
         :fix
             - fix(benchmark): 每个 live benchmark attempt 目录写入 README.md，记录状态、场景、版本、summary、error 与发布 summary 路径

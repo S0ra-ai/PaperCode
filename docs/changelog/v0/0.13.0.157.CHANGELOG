@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.157-dev - 2026/05/31 (5d9cd647) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.157-dev - 2026/05/31 (a9f5487b) [fix/mcp-tool-binding-test-isolation]
         :brief 开发手册明确 ReadTheDocs 式开发写法基准
         :docs
             - docs(development): 总览新增文档写法基准，按参数、模式、输入、输出、调优、排障组织后续开发页面

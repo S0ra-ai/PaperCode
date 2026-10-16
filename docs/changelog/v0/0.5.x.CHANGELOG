@@ -7,7 +7,7 @@
 
 :history
 
-    0.5.7-dev - 2026/05/11 (1c09b71) [develop]
+    0.5.7-dev - 2026/05/11 (4eecc44) [develop]
         :brief PaperCode 品牌表面审计
         :changes
         - fix(tui): 旧 session/sidebar footer 与 plugin sidebar footer 改为 PaperCode 品牌
@@ -28,7 +28,7 @@
             - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-changelog-format.ps1 passed
             - TaskFlow validate_task brand-surface-audit passed
 
-    0.5.6-dev - 2026/05/11 (002f011) [develop]
+    0.5.6-dev - 2026/05/11 (bb0c146) [develop]
         :brief 明确 PaperRun 工作台用户流程
         :changes
         - feat(tui): 首页 placeholder 和标题改为主题/代码/材料/数据/日志输入后自动创建 PaperRun 的流程表达
@@ -49,7 +49,7 @@
             - npx --yes bun@1.3.13 --cwd packages/opencode test test/cli/tui/paper-workbench.test.ts test/cli/public-surface.test.ts passed: 8 pass, 0 fail, 77 expects
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
 
-    0.5.5-dev - 2026/05/11 (399aeb2) [develop]
+    0.5.5-dev - 2026/05/11 (b6779ac) [develop]
         :brief PaperRun 右侧诊断栏
         :changes
         - feat(tui): PaperRun dashboard 新增固定右侧栏, 保留 OpenCode 原 cost/token/context 价值并改为 PaperRun 语义
@@ -65,7 +65,7 @@
             - npx --yes bun@1.3.13 --cwd packages/opencode test test/cli/tui/paper-workbench.test.ts test/cli/tui/paper-workbench-controls.test.ts passed: 5 pass, 0 fail, 44 expects
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
 
-    0.5.4-dev - 2026/05/11 (9fa7acd) [develop]
+    0.5.4-dev - 2026/05/11 (67f9dc1) [develop]
         :brief 统一 CHANGELOG colon-history 缩进
         :changes
         - docs(changelog): 将历史版本行统一为 4 空格缩进, 修复 0.1.9-dev 等早期条目掉到 0 缩进的问题
@@ -80,7 +80,7 @@
             - powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-readme-version.ps1 passed
             - TaskFlow validate_task changelog-format-normalization passed
 
-    0.5.4-dev - 2026/05/11 (f514f02) [develop]
+    0.5.4-dev - 2026/05/11 (63f93a9) [develop]
         :brief 递归 PaperRun Agent Fabric
         :changes
         - feat(agent): 新增 RecursiveAgentPolicy.v1 与 AgentExpansionDecision, 子 agent 不再受预算档固定深度限制
@@ -103,7 +103,7 @@
             - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/agents.test.ts test/paper/hard-fork-acceptance.test.ts test/cli/tui/paper-workbench-controls.test.ts passed: 10 pass, 0 fail, 64 expects
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
 
-    0.5.3-dev - 2026/05/10 (ab28a53) [develop]
+    0.5.3-dev - 2026/05/10 (d2b1cb0) [develop]
         :brief 移除 tracked 文档中的 secret-like 示例 token
         :changes
         - fix(security): github/README.md 中的 ANTHROPIC_API_KEY 示例从 sk-ant 形态改为 <provider-api-key>
@@ -120,7 +120,7 @@
             - git grep -n -P "github_pat_[A-Za-z0-9_]{10,}" -- . ':!CHANGELOG' ':!reports' ':!tmp' returned no matches
             - TaskFlow validate_task task-054-tracked-secret-example-cleanup passed
 
-    0.5.2-dev - 2026/05/10 (d266530) [develop]
+    0.5.2-dev - 2026/05/10 (676d25d) [develop]
         :brief 清理 TUI 首页模型 provider 与代码示例文案
         :changes
         - fix(tui): 首页 code-to-paper placeholder 从 `--code packages/opencode` 改为 `--code .`, 避免把用户引向上游目录名
@@ -139,7 +139,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
             - current TUI copy scan found no OpenCode provider/Open Code/Tip/English theme/--code packages/opencode matches in home tips
 
-    0.5.1-dev - 2026/05/10 (878cdfb) [develop]
+    0.5.1-dev - 2026/05/10 (ca65cfc) [develop]
         :brief 清理当前运行时残留的 Phase 1 stub 命名
         :changes
         - fix(runtime): ResearchStageStub/createNotImplementedStageStub/phaseOneStageStubs 改为 ResearchStageBlockingDiagnostic/createStageBlockingDiagnostic
@@ -167,7 +167,7 @@
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
             - focused current-code scan found no phaseOneStageStubs/ResearchStageStub/createNotImplementedStageStub/not_implemented/docx_generation_stub/stub handler/packages/server/@papercode/server/server runtime matches
 
-    0.5.0-dev - 2026/05/10 (cf7aad5) [develop]
+    0.5.0-dev - 2026/05/10 (3e66875) [develop]
         :brief Live PaperRun 基准回归通过并收口 0.4.x 质量缺口
         :changes
         - test(benchmark): 重新执行真实 topic+code PaperRun, 记录 run-ee44237e-e1cc-40d5-abee-611dbc9a8222

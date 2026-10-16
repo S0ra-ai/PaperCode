@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.143-dev - 2026/05/31 (9c431d9f) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.143-dev - 2026/05/31 (c759c54d) [fix/mcp-tool-binding-test-isolation]
         :brief 开发手册补齐接口与数据契约页面，并增加文档搜索与导航
         :docs
             - docs(development): 新增 api-contracts.html，集中说明 PaperRun HTTP API、结构化错误、事实日志、artifact schema、事件、Preview snapshot 与 export manifest 契约

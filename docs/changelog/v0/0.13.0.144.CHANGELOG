@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.144-dev - 2026/05/31 (6da21ac0) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.144-dev - 2026/05/31 (63aca1ca) [fix/mcp-tool-binding-test-isolation]
         :brief 开发手册检查脚本固化导航、链接、客户端脚本和可选渲染验收
         :test
             - test(docs): 新增 scripts/check-development-docs.ps1，校验 docs/development 页面清单、共享脚本、样式、active 导航和内部链接

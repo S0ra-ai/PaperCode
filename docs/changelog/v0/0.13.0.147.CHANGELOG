@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.147-dev - 2026/05/31 (117b6d73) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.147-dev - 2026/05/31 (9513d641) [fix/mcp-tool-binding-test-isolation]
         :brief 禁止 disabled 或 needs_auth provider 的历史 allowlist 继续进入模型路由
         :model
             - fix(models): model inventory 归一化时按 provider 注册状态过滤 allowlist，disabled、needs_auth 或不支持的旧注册不能继续被 routePaperModel 使用

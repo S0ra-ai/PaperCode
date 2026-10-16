@@ -6,7 +6,7 @@
 
 :history
 
-    0.13.0.184-dev - 2026/10/16 (89b4756) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.184-dev - 2026/10/16 (e608e5b) [fix/mcp-tool-binding-test-isolation]
         :brief 模型配置支持自定义 provider，论文模型选择打通配置声明，品牌收尾为 PaperCode
         :feat
             - feat(config): 新增 providers 方言（displayName/apiKeyEnv/api/baseURL/models[] 与 contextWindow/maxTokens/input/reasoning），归一化到既有 provider 记录，未知字段直接报错
@@ -67,7 +67,7 @@
             - review: 23 个独立 agent 对四处改动做对抗性复核，确认 10 项问题（其中缺字静默、Latin 字体失效、CI 误发 draft Release、空 CSC_LINK 四项已按本条修复）
             - typecheck: bun run typecheck 13/13 通过（含 desktop 与 opencode）
 
-    0.13.0.183-dev - 2026/05/31 (8899d49d) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.183-dev - 2026/05/31 (a8dacd87) [fix/mcp-tool-binding-test-isolation]
         :brief PaperCode 公开文案与 CLI 提示继续收口
         :docs
             - docs(readme): 隐私段改为产品化说明，避免在主文档突出内部状态目录与旧环境变量细节

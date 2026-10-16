@@ -7,7 +7,7 @@
 
 :history
 
-    0.2.6-dev - 2026/05/09 (66db257) [develop]
+    0.2.6-dev - 2026/05/09 (596e14d) [develop]
         :brief 清理 OpenCode 用户可见表面为 PaperCode 论文工作台
         :changes
         - feat(cli): 启动 ASCII logo 与默认 help/banner 改为 PaperCode wordmark
@@ -54,7 +54,7 @@
             - scripts/check-readme-version.ps1 passed: README 0.2.6-dev matches CHANGELOG
             - TaskFlow validate_task task-037-public-surface-cleanup passed with no warnings
 
-    0.2.5-dev - 2026/05/09 (5786258) [develop]
+    0.2.5-dev - 2026/05/09 (c7c0b8f) [develop]
         :brief 新增多层多模型 Agent 编排与私有优先数据外传策略
         :changes
         - feat(agents): 新增 AgentRoleRouter 与 PaperAgentTree, 支持 root/stage/worker/specialist/reviewer/verifier/citation 多层子 agent
@@ -101,7 +101,7 @@
             - python -m unittest discover -s research-tools/tests passed: 4 tests OK
             - scripts/check-readme-version.ps1 passed: README 0.2.5-dev matches CHANGELOG latest version
 
-    0.2.4-dev - 2026/05/09 (dd2fd98) [develop]
+    0.2.4-dev - 2026/05/09 (19f66c8) [develop]
         :brief 新增 OpenAI-compatible Provider/Model 角色向导基础
         :changes
         - feat(models): 新增 ProviderEndpointConfig 与 OpenAI-compatible /models discovery, 支持 base_url、api_key、compatibility、timeout diagnostics
@@ -127,7 +127,7 @@
             - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/model-discovery.test.ts passed: 3 pass, 0 fail, 13 expects
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
 
-    0.2.3-dev - 2026/05/09 (476b978) [develop]
+    0.2.3-dev - 2026/05/09 (6405f6b) [develop]
         :brief 将 TUI 默认入口改为中文 PaperRun 论文工作台
         :changes
         - feat(tui): 首页 prompt 解析主题、代码路径、论文材料、数据集、实验日志、profile、language、budget 为 PaperRunCreateRequest
@@ -152,7 +152,7 @@
             - npx --yes bun@1.3.13 --cwd packages/opencode test test/cli/tui/paper-workbench.test.ts passed: 3 pass, 0 fail, 20 expects
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
 
-    0.2.2-dev - 2026/05/09 (8442f6a) [develop]
+    0.2.2-dev - 2026/05/09 (026de1e) [develop]
         :brief 新增一等 PaperRun HTTP/SSE API
         :changes
         - feat(paper): 新增 PaperRun.v1 状态投影, 汇总 intake、stage graph、Source Ledger、Claim Ledger、实验状态、Agent Tree、diagnostics、pause questions、preview/export state
@@ -175,7 +175,7 @@
             - npx --yes bun@1.3.13 --cwd packages/opencode test test/paper/run-api.test.ts passed: 1 pass, 0 fail, 23 expects
             - npx --yes bun@1.3.13 run --cwd packages/opencode typecheck passed
 
-    0.2.1-dev - 2026/05/09 (3debb73) [develop]
+    0.2.1-dev - 2026/05/09 (6e9ca5f) [develop]
         :brief 将 papercode 论文运行时迁入 OpenCode hard fork
         :changes
         - refactor(opencode): 将 paper/research/init runtime 从 packages/server 迁入 packages/opencode/src/paper
@@ -196,7 +196,7 @@
             - npx --yes bun@1.3.13 --cwd packages/preview test passed: 2 pass, 0 fail
             - PYTHONPATH=research-tools/src python -m unittest discover -s research-tools/tests passed: 4 tests
 
-    0.2.0-dev - 2026/05/09 (d57a117) [develop]
+    0.2.0-dev - 2026/05/09 (bbf049e) [develop]
         :brief 完整闭环论文系统 strict live acceptance
         :changes
         - feat(acceptance): 新增 scripts/strict-acceptance.ps1, 覆盖 18 个严格验收检查

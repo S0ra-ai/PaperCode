@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.145-dev - 2026/05/31 (53486a36) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.145-dev - 2026/05/31 (b201c5bb) [fix/mcp-tool-binding-test-isolation]
         :brief 自主产品审计支持 Git Flow 活跃分支，并纳入开发手册检查证据
         :audit
             - fix(audit): changelog-shape 改为校验 root :version 与唯一活跃 history entry 一致，并允许 develop、feature/*、fix/* Git Flow 分支

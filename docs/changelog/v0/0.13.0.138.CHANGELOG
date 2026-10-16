@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.138-dev - 2026/05/31 (fbec350f) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.138-dev - 2026/05/31 (ac271581) [fix/mcp-tool-binding-test-isolation]
         :brief 初始化、reset、skill 安装与全局路径解析忽略字符串化空 home 环境变量
         :init
             - fix(init): resolveInitHome 忽略空字符串、"undefined" 和 "null"，避免写入错误本机状态目录

@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.169-dev - 2026/05/31 (bb73aef1) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.169-dev - 2026/05/31 (125c130a) [fix/mcp-tool-binding-test-isolation]
         :brief 投稿准备度附录文案去运行态措辞
         :fix
             - fix(authoring): 投稿准备度附录的数据可用性从“已登记”改为“已纳入”，降低运行状态口吻

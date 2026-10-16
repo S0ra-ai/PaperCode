@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.166-dev - 2026/05/31 (7e0edc81) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.166-dev - 2026/05/31 (0e0fb69f) [fix/mcp-tool-binding-test-isolation]
         :brief CJC 成稿默认作者与声明表述去半成品化
         :fix
             - fix(authoring): DraftPaper 默认作者信息从“本次材料未提供”改为匿名作者、匿名单位和匿名通信作者

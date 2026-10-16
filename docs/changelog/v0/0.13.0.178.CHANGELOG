@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.178-dev - 2026/05/31 (f165aabd) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.178-dev - 2026/05/31 (a1f67f89) [fix/mcp-tool-binding-test-isolation]
         :brief final benchmark 完整论文包复审证据落库
         :docs
             - docs(report): reports/live-paper-generation-review.md 记录 final benchmark 真实运行命令、run id、summary、导出路径和 PDF 视觉抽查结果

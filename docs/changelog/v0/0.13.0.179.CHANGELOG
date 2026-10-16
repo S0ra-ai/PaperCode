@@ -7,7 +7,7 @@
 
 :history
 
-    0.13.0.179-dev - 2026/05/31 (e96c82e5) [fix/mcp-tool-binding-test-isolation]
+    0.13.0.179-dev - 2026/05/31 (49076792) [fix/mcp-tool-binding-test-isolation]
         :brief CJC 表格长文本列宽提示增强
         :fix
             - fix(authoring): CJC profile formatting 为 Markdown pipe table separator 写入 CJK-aware 列宽提示，Pandoc LaTeX 会给长叙述列更宽比例
