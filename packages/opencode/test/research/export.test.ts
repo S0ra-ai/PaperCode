@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test"
+import { Database } from "bun:sqlite"
 import { mkdir, mkdtemp, rm } from "fs/promises"
 import { setTimeout as sleep } from "node:timers/promises"
 import os from "os"
@@ -143,6 +144,43 @@ describe("export bundles", () => {
       const status = await getResearchRunStatus(handle.run_dir)
       expect(status.counts.exports).toBe(4)
       expect(status.artifact_versions.map((item) => item.logical_path)).toContain("exports/export-bundle.json")
+    } finally {
+      await clean(dir)
+    }
+  })
+
+  test("re-exporting a run rebuilds its index instead of colliding on export ids", async () => {
+    const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-reexport-test-"))
+    try {
+      const workspace = path.join(dir, "workspace")
+      const home = path.join(dir, "home")
+      await mkdir(workspace, { recursive: true })
+      await mkdir(home, { recursive: true })
+      const options = runtimeOptions(workspace, home)
+      const handle = await createResearchRun({ topic: "LLM retrieval evaluation" }, options)
+      const input = {
+        mode: "final" as const,
+        draft: draft(),
+        final_gate: gate("passed"),
+        source_artifact_ids: ["artifact-draft"],
+        renderers: successfulRenderers,
+        now,
+      }
+
+      await recordExportBundle(handle.run_dir, input, options)
+      // A bundle id is derived from the mode and the draft, so exporting the same run again writes the
+      // same export:<bundle>:<format> ids. The fact files are append-only and keep both; the index has
+      // to collapse them, otherwise the rebuild fails and the run can never be indexed again.
+      const second = await recordExportBundle(handle.run_dir, input, options)
+      expect(second.bundle.files.every((file) => file.status === "written")).toBe(true)
+      expect((await getResearchRunStatus(handle.run_dir)).counts.exports).toBe(8)
+
+      const db = new Database(path.join(handle.run_dir, "index.sqlite"), { readonly: true })
+      try {
+        expect((db.query("SELECT COUNT(*) AS count FROM exports").get() as { count: number }).count).toBe(4)
+      } finally {
+        db.close()
+      }
     } finally {
       await clean(dir)
     }

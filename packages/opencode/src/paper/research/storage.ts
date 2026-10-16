@@ -148,9 +148,15 @@ function createRunSchema(db: SqliteDatabase) {
 
 type SqlBinding = string | number | bigint | boolean | null | Uint8Array
 
+/**
+ * The fact files are append-only, so the same primary key can appear more than once: exporting a run
+ * twice writes the same `export:<bundle>:<format>` ids again, because a bundle id is derived from the
+ * mode and the draft. The index is a projection of those files and has to tolerate that - the row
+ * that survives is the last one, which is the export whose files are actually on disk.
+ */
 function insertJson<T>(db: SqliteDatabase, table: string, columns: string[], rows: T[], values: (row: T) => SqlBinding[]) {
   const placeholders = columns.map(() => "?").join(", ")
-  const statement = db.prepare(`INSERT INTO ${table} (${columns.join(", ")}) VALUES (${placeholders})`)
+  const statement = db.prepare(`INSERT OR REPLACE INTO ${table} (${columns.join(", ")}) VALUES (${placeholders})`)
   for (const row of rows) statement.run(...values(row), JSON.stringify(row))
 }
 
