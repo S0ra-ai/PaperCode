@@ -1,6 +1,13 @@
 import path from "path"
 import { Effect } from "effect"
-import { listPaperRuns, resumePaperRun, type PaperRunHistoryEntry, type PaperRunSnapshot } from "@/paper/run"
+import {
+  exportPaperRun,
+  listPaperRuns,
+  resumePaperRun,
+  type PaperExportBundle,
+  type PaperRunHistoryEntry,
+  type PaperRunSnapshot,
+} from "@/paper/run"
 import { effectCmd } from "../effect-cmd"
 
 function statusLabel(status: PaperRunHistoryEntry["status"]) {
@@ -56,6 +63,23 @@ function formatResume(run: PaperRunSnapshot) {
   ].join("\n")
 }
 
+function formatExportBundle(bundle: PaperExportBundle) {
+  const lines = [
+    `导出状态: ${bundle.status === "final" ? "终稿" : bundle.status === "forced_draft" ? "forced draft（含未通过检查）" : "被阻断"}`,
+    `PaperRun: ${bundle.run_id}`,
+    bundle.failed_checks.length ? `未通过检查: ${bundle.failed_checks.join(", ")}` : undefined,
+    "",
+    ...(bundle.files ?? []).map(
+      (file) => `${file.status === "written" ? "✓" : "✗"} ${file.format.padEnd(8)} ${file.path}`,
+    ),
+    ...(bundle.manifest_path ? ["", `清单: ${bundle.manifest_path}`] : []),
+    ...(bundle.tool_diagnostics?.length ? ["", `工具链: ${bundle.tool_diagnostics.join("; ")}`] : []),
+    "",
+    bundle.message,
+  ].filter((line): line is string => line !== undefined)
+  return lines.join("\n")
+}
+
 export const RunsCommand = effectCmd({
   command: "runs <action>",
   describe: "list PaperRun history",
@@ -65,7 +89,7 @@ export const RunsCommand = effectCmd({
       .positional("action", {
         describe: "runs action",
         type: "string",
-        choices: ["list"] as const,
+        choices: ["list", "export"] as const,
       })
       .option("json", {
         describe: "print machine-readable JSON output",
@@ -92,9 +116,31 @@ export const RunsCommand = effectCmd({
         describe: "maximum runs to print",
         type: "number",
         default: 20,
+      })
+      .option("run", {
+        describe: "PaperRun id to export (export action)",
+        type: "string",
+      })
+      .option("forced", {
+        describe: "export a clearly marked forced draft even when the final gate blocks",
+        type: "boolean",
       }),
   handler: Effect.fn("Cli.runs")(function* (args) {
     return yield* Effect.promise(async () => {
+      if (args.action === "export") {
+        if (!args.run) {
+          console.error("runs export 需要 --run <runID>；先用 papercode runs list 查看可导出的 PaperRun。")
+          process.exit(1)
+        }
+        const bundle = await exportPaperRun(
+          args.run,
+          { forced: Boolean(args.forced) },
+          { home: args.home, workspace: args.workspace ?? process.cwd() },
+        )
+        console.log(args.json ? JSON.stringify(bundle, null, 2) : formatExportBundle(bundle))
+        if (bundle.status === "blocked") process.exit(1)
+        return
+      }
       const runs = await listPaperRuns({
         home: args.home,
         workspace: args.workspace ?? process.cwd(),
