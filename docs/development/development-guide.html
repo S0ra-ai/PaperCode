@@ -207,6 +207,7 @@ rg "paper.run.snapshot|PreviewSnapshot|renderGate" packages/preview packages/ope
             <tr><td>PaperRun 创建失败</td><td>请求 payload、schema 注册、workspace path、run id 唯一性、日志。</td><td>后端返回结构化诊断，不把 AJV 或数据库错误裸露给用户。</td></tr>
             <tr><td>Preview 不刷新</td><td>SSE token、snapshot publisher、客户端 render helper、只读路由。</td><td>先用 browser smoke 验证 DOM，再补协议字段和前端渲染测试。</td></tr>
             <tr><td>PDF 格式异常</td><td>Markdown 结构、CJC profile、Pandoc 参数、XeLaTeX/ctex、表格宽度。</td><td>先修结构化 Markdown，再修导出参数，最后人工查看 PDF。</td></tr>
+            <tr><td>PDF 编译失败或中文缺字</td><td>ctex 平台字体集、<code>PAPERCODE_EXPORT_CJK_FONT</code>、导出目录里的 <code>.log</code> 与 <code>missfont.log</code>。</td><td>先看日志里首个 <code>!</code> 错误行；字体缺失就装字体或指定已有字体，别把平台专有字体写进参数。</td></tr>
           </tbody>
         </table>
 

@@ -28,6 +28,9 @@ export interface PaperExportCommandInput {
 /** Rendering a paper through pandoc and a TeX engine is slow but not open-ended. */
 const EXPORT_COMMAND_TIMEOUT_MS = 300_000
 
+/** How much of a failed renderer's stderr is kept in a diagnostic; a TeX run can emit megabytes. */
+const DIAGNOSTIC_EXCERPT_LIMIT = 400
+
 export interface PaperExportCommandResult {
   exit_code: number
   stdout: string
@@ -45,6 +48,7 @@ export interface RenderPaperExportPipelineInput {
   renderers?: ExportRenderer
   tools?: PaperExportToolPaths
   command?: PaperExportCommandRunner
+  fonts?: PaperExportFonts
   now?: string
 }
 
@@ -218,11 +222,41 @@ function pdfArgs(engine: PaperExportToolName, cwd: string, texPath: string) {
   return ["-interaction=nonstopmode", `-output-directory=${latexCwd}`, latexTexPath]
 }
 
+/** Han, kana, hangul, CJK punctuation and fullwidth forms all need a CJK-capable font. */
 function hasCjk(value: string) {
-  return /[\u3400-\u9fff]/.test(value)
+  return /[\u3000-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uac00-\ud7af\uf900-\ufaff\uff00-\uffef]/.test(value)
 }
 
-function pandocLatexArgs(markdownPath: string, latexPath: string, markdown: string) {
+/**
+ * Fonts for the LaTeX step. Naming one overrides the font set ctex already picks for the platform on
+ * its own (Songti/STSong on macOS, SimSun/SinHei on Windows, Fandol - shipped with TeX Live - on
+ * Linux), and whatever is named has to exist on the machine. Naming SimSun unconditionally is what
+ * broke PDF export off Windows: xelatex aborts on a font it cannot find, after a kpathsea mktextfm
+ * flood, and no PDF is written.
+ */
+export interface PaperExportFonts {
+  cjk?: string
+  latin?: string
+}
+
+/** A caller names a font through the pipeline input or PAPERCODE_EXPORT_{CJK,LATIN}_FONT; otherwise ctex decides. */
+export function exportFonts(
+  env: Record<string, string | undefined> = process.env,
+  override?: PaperExportFonts,
+): PaperExportFonts {
+  const cjk = override?.cjk?.trim() || env.PAPERCODE_EXPORT_CJK_FONT?.trim()
+  const latin = override?.latin?.trim() || env.PAPERCODE_EXPORT_LATIN_FONT?.trim()
+  return { ...(cjk ? { cjk } : {}), ...(latin ? { latin } : {}) }
+}
+
+function fontArgs(fonts: PaperExportFonts) {
+  const args: string[] = []
+  if (fonts.cjk) args.push("-V", `CJKmainfont=${fonts.cjk}`)
+  if (fonts.latin) args.push("-V", `mainfont=${fonts.latin}`)
+  return args
+}
+
+function pandocLatexArgs(markdownPath: string, latexPath: string, markdown: string, fonts: PaperExportFonts) {
   const args = [markdownPath, "-s", "-t", "latex", "--wrap=none"]
   if (hasCjk(markdown)) {
     args.push(
@@ -234,10 +268,7 @@ function pandocLatexArgs(markdownPath: string, latexPath: string, markdown: stri
       "geometry:margin=25mm",
       "-V",
       "pagestyle=plain",
-      "-V",
-      "CJKmainfont=SimSun",
-      "-V",
-      "mainfont=Times New Roman",
+      ...fontArgs(fonts),
     )
   }
   args.push("-o", latexPath)
@@ -261,6 +292,7 @@ async function renderLatex(input: {
   outputName: string
   tools: PaperExportToolPaths
   command: PaperExportCommandRunner
+  fonts: PaperExportFonts
   renderer?: ExportRenderer["latex"]
 }) {
   if (input.renderer) {
@@ -292,7 +324,7 @@ async function renderLatex(input: {
   return commandFile({
     command: input.command,
     tool: pandoc,
-    args: pandocLatexArgs(markdownPath, latexPath, input.markdown),
+    args: pandocLatexArgs(markdownPath, latexPath, input.markdown, input.fonts),
     cwd: outputDir(input.runDir, input.bundleID),
     output: latexPath,
     format: "latex",
@@ -300,6 +332,35 @@ async function renderLatex(input: {
     runDir: input.runDir,
     missingDiagnostic: "pandoc did not produce LaTeX output.",
   })
+}
+
+/** xelatex reports the cause on stdout as a line starting with "!"; the mktextfm flood goes to stderr. */
+function firstErrorLine(stdout: string) {
+  const lines = stdout.split("\n")
+  const index = lines.findIndex((line) => line.startsWith("!"))
+  if (index === -1) return undefined
+  const context = lines[index + 1]?.trim()
+  const line = lines[index].trim()
+  return context && !context.startsWith("!") && !context.startsWith("l.") ? `${line} ${context}` : line
+}
+
+const CJK_FONT_HINT =
+  "字体缺失：ctex 会自行按平台选字体，若通过 PAPERCODE_EXPORT_CJK_FONT / PAPERCODE_EXPORT_LATIN_FONT 指定了字体，请确认该字体已安装。"
+
+/**
+ * A failed TeX run dumps a kpathsea/mktextfm flood on stderr that buries the actual cause, which
+ * xelatex prints on stdout. Lead with that line, keep only an excerpt of stderr, and spell out the
+ * font case - the one the user can act on.
+ */
+function latexFailureDiagnostic(engine: string, result: PaperExportCommandResult) {
+  const error = firstErrorLine(result.stdout)
+  const excerpt = result.stderr.trim().slice(-DIAGNOSTIC_EXCERPT_LIMIT)
+  const parts = [`${engine} failed with exit code ${result.exit_code}.`]
+  if (error) parts.push(error)
+  if (excerpt) parts.push(`${error ? "stderr" : "output"}: ${excerpt}`)
+  if (!error && !excerpt) parts.push(`${engine} did not produce PDF output.`)
+  if (error && /font/i.test(error)) parts.push(CJK_FONT_HINT)
+  return parts.join(" ")
 }
 
 async function renderPdf(input: {
@@ -349,11 +410,7 @@ async function renderPdf(input: {
   for (const engine of engines) {
     const result = await input.command({ tool: engine.path, args: pdfArgs(engine.name, cwd, texPath), cwd })
     if (result.exit_code !== 0) {
-      diagnostics.push(
-        `${engine.name} failed with exit code ${result.exit_code}. ${
-          result.stderr || result.stdout || `${engine.name} did not produce PDF output.`
-        }`.trim(),
-      )
+      diagnostics.push(latexFailureDiagnostic(engine.name, result))
       continue
     }
     const exists = await Bun.file(pdfPath).exists()
@@ -444,6 +501,7 @@ export async function renderPaperExportPipeline(
   const command = input.command ?? defaultCommand
   const markdown = exportMarkdown(input.draft, input.mode === "forced_draft" ? failedChecks : [])
   const outputName = input.bundle_id
+  const fonts = exportFonts(process.env, input.fonts)
 
   const markdownFile = await renderMarkdown(runDir, input.bundle_id, markdown)
   const latexFile = await renderLatex({
@@ -454,6 +512,7 @@ export async function renderPaperExportPipeline(
     outputName,
     tools,
     command,
+    fonts,
     renderer: input.renderers?.latex,
   })
   const pdfFile = await renderPdf({

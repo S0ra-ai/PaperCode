@@ -72,6 +72,7 @@
           <tbody>
             <tr><td><code>preview.ts</code></td><td>把 draft、claim、citation、review、cost、agent 诊断转成 Preview snapshot。</td></tr>
             <tr><td><code>export-pipeline.ts</code></td><td>渲染 Markdown/LaTeX/PDF/DOCX，发现 Pandoc/LaTeX 工具。</td></tr>
+            <tr><td>导出字体</td><td>中文稿件交给 ctex 按平台自选字体集，不写死平台专有字体；需要固定字体时用 <code>PAPERCODE_EXPORT_CJK_FONT</code> / <code>PAPERCODE_EXPORT_LATIN_FONT</code> 覆盖。</td></tr>
             <tr><td><code>research/export/recording.ts</code></td><td>记录 export facts、manifest 和 export.bundle.completed 事件。</td></tr>
             <tr><td><code>run.ts</code></td><td>聚合 <code>export_state</code>，对格式、artifact_ids 和文件路径去重。</td></tr>
           </tbody>

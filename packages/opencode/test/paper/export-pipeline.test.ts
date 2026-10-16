@@ -232,11 +232,101 @@ describe("PaperRun export renderer pipeline", () => {
     expect(pandocCall?.args).toContain("--wrap=none")
     expect(pandocCall?.args).toContain("documentclass=ctexart")
     expect(pandocCall?.args).toContain("pagestyle=plain")
-    expect(pandocCall?.args).toContain("CJKmainfont=SimSun")
+    // ctex resolves a per-platform font set on its own; naming a font is opt-in, because a name the
+    // machine does not have (SimSun outside Windows) aborts the TeX run and produces no PDF.
+    expect(pandocCall?.args.some((arg) => arg.startsWith("CJKmainfont="))).toBe(false)
+    expect(pandocCall?.args.some((arg) => arg.startsWith("mainfont="))).toBe(false)
     const engineCalls = calls.filter((call) => call.tool !== "pandoc")
     expect(engineCalls[0]?.tool).toBe("xelatex")
     expect(engineCalls.map((call) => call.tool)).not.toContain("latexmk")
     expect(result.bundle.files.find((file) => file.format === "pdf")?.status).toBe("written")
+  })
+
+  test("passes the requested CJK and Latin fonts to pandoc", async () => {
+    const run = await newRun()
+    const calls: Array<{ tool: string; args: string[] }> = []
+    const command: PaperExportCommandRunner = async (input) => {
+      calls.push({ tool: input.tool, args: input.args })
+      const outputIndex = input.args.findIndex((arg) => arg === "-o")
+      const output = outputIndex >= 0 ? input.args[outputIndex + 1] : undefined
+      if (input.tool === "pandoc" && output?.endsWith(".tex")) {
+        await Bun.write(output, "\\documentclass{ctexart}\n\\begin{document}\n中文\n\\end{document}\n")
+        return { exit_code: 0, stdout: "", stderr: "" }
+      }
+      if (input.tool === "pandoc" && output?.endsWith(".docx")) {
+        await Bun.write(output, validDocxBytes)
+        return { exit_code: 0, stdout: "", stderr: "" }
+      }
+      if (input.tool === "xelatex") {
+        const outdir = input.args.find((arg) => arg.startsWith("-output-directory="))?.slice("-output-directory=".length)
+        await Bun.write(path.join(outdir!, "bundle-font.pdf"), validPdfBytes)
+        return { exit_code: 0, stdout: "", stderr: "" }
+      }
+      return { exit_code: 1, stdout: "", stderr: `unexpected command ${input.tool}` }
+    }
+
+    const result = await renderPaperExportPipeline(
+      run.run_dir,
+      {
+        mode: "final",
+        bundle_id: "bundle-font",
+        draft: { ...run.draft, markdown: "# 中文标题\n\n## 1 引言\n\n正文。" },
+        final_gate: passedGate,
+        source_artifact_ids: [],
+        tools: { pandoc: "pandoc", xelatex: "xelatex" },
+        command,
+        fonts: { cjk: "Songti SC", latin: "Times New Roman" },
+        now,
+      },
+      run.options,
+    )
+
+    const pandocCall = calls.find((call) => call.tool === "pandoc" && call.args.includes("-t"))
+    expect(pandocCall?.args).toContain("CJKmainfont=Songti SC")
+    expect(pandocCall?.args).toContain("mainfont=Times New Roman")
+    expect(result.bundle.files.find((file) => file.format === "pdf")?.status).toBe("written")
+  })
+
+  test("leads the PDF diagnostic with the TeX error instead of the kpathsea flood", async () => {
+    const run = await newRun()
+    const command: PaperExportCommandRunner = async (input) => {
+      const outputIndex = input.args.findIndex((arg) => arg === "-o")
+      const output = outputIndex >= 0 ? input.args[outputIndex + 1] : undefined
+      if (input.tool === "pandoc" && output?.endsWith(".tex")) {
+        await Bun.write(output, "\\documentclass{ctexart}\n")
+        return { exit_code: 0, stdout: "", stderr: "" }
+      }
+      if (input.tool === "pandoc" && output?.endsWith(".docx")) {
+        await Bun.write(output, validDocxBytes)
+        return { exit_code: 0, stdout: "", stderr: "" }
+      }
+      return {
+        exit_code: 1,
+        stdout: 'This is XeTeX\n! Package fontspec Error: The font "SimSun" cannot be found.\n\nl.12 \\setCJKmainfont\n',
+        stderr: "kpathsea: Running mktextfm SimSun/OT\nmktextfm: failed to make OT.tfm.\n",
+      }
+    }
+
+    const result = await renderPaperExportPipeline(
+      run.run_dir,
+      {
+        mode: "final",
+        bundle_id: "bundle-font-missing",
+        draft: { ...run.draft, markdown: "# 中文标题\n\n正文。" },
+        final_gate: passedGate,
+        source_artifact_ids: [],
+        tools: { pandoc: "pandoc", xelatex: "xelatex" },
+        command,
+        now,
+      },
+      run.options,
+    )
+
+    const diagnostic = result.bundle.manifest.tool_diagnostics.join("\n")
+    expect(diagnostic).toContain('Package fontspec Error: The font "SimSun" cannot be found.')
+    expect(diagnostic).toContain("PAPERCODE_EXPORT_CJK_FONT")
+    expect(diagnostic.indexOf("fontspec")).toBeLessThan(diagnostic.indexOf("kpathsea"))
+    expect(result.bundle.files.find((file) => file.format === "pdf")?.status).toBe("failed")
   })
 
   test("returns actionable diagnostics when pandoc or a LaTeX engine is missing", async () => {
