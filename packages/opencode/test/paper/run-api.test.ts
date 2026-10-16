@@ -145,6 +145,54 @@ describe("PaperRun HttpApi", () => {
     expect(body.routing.every((decision: { source: string }) => decision.source === "blocked")).toBe(true)
   })
 
+  test("model inventory surfaces providers declared in config as registered candidates", async () => {
+    await using tmp = await tmpdir({
+      git: true,
+      config: {
+        formatter: false,
+        lsp: false,
+        providers: {
+          fjbdg: {
+            displayName: "fjbdg",
+            apiKeyEnv: "FJBDG_API_KEY",
+            api: "openai-completions",
+            baseURL: "https://newapi.example.test:10443/v1",
+            reasoning: "max",
+            models: [
+              {
+                id: "deepseek-v4-flash-vision-exp",
+                contextWindow: 1000000,
+                maxTokens: 384000,
+                input: ["text", "image"],
+              },
+            ],
+          },
+        },
+      },
+    })
+    previousPaperHome = process.env.PAPER_FUCKER_TEST_HOME
+    process.env.PAPER_FUCKER_TEST_HOME = tmp.path
+    Flag.OPENCODE_EXPERIMENTAL_HTTPAPI = false
+
+    const response = await Server.Legacy().app.request(PaperPaths.modelInventory, {
+      headers: { "x-paper-fucker-directory": tmp.path },
+    })
+
+    expect(response.status).toBe(200)
+    const body = await response.json()
+    expect(body.inventory.provider_registrations.fjbdg).toMatchObject({
+      kind: "manual",
+      status: "registered",
+      model_count: 1,
+    })
+    const candidate = body.inventory.candidates.find(
+      (item: { model_ref: string }) => item.model_ref === "fjbdg/deepseek-v4-flash-vision-exp",
+    )
+    expect(candidate).toMatchObject({ source: "manual", context_hint: "long", allowed: false })
+    // Declared providers are registered but their models still require an explicit allowlist choice.
+    expect(body.inventory.allowlist).toEqual([])
+  })
+
   test("registers OpenAI-compatible providers with all discovered models enabled by default", async () => {
     await using tmp = await tmpdir({ git: true, config: { formatter: false, lsp: false } })
     previousPaperHome = process.env.PAPER_FUCKER_TEST_HOME

@@ -25,8 +25,10 @@ import {
 import { discoverOpenAICompatibleModels, saveProviderEndpointConfig } from "@/paper/model-discovery"
 import {
   candidatesFromBuiltinProviders,
+  candidatesFromConfigProviders,
   isConfiguredPaperProviderRegistration,
   loadPaperModelInventory,
+  mergeConfigProviderCandidates,
   mergeModelCandidates,
   modelRolesFromInventory,
   type PaperProviderRegistration,
@@ -35,6 +37,7 @@ import {
   updatePaperModelAllowlist,
   upsertDiscoveredModels,
 } from "@/paper/model-inventory"
+import { Config } from "@/config/config"
 import { PAPER_MODEL_ROLES, type PaperModelRole } from "@/paper/model-router"
 import { resolveAllModelRoleAssignments } from "@/paper/model-roles"
 import { Effect, Queue } from "effect"
@@ -352,6 +355,10 @@ export const paperHandlers = HttpApiBuilder.group(InstanceHttpApi, "paper", (han
       const connected = yield* Provider.Service.use((service) => service.list()).pipe(
         Effect.catch(() => Effect.succeed({})),
       )
+      const configProviderIDs = yield* Config.Service.use((service) => service.get()).pipe(
+        Effect.map((cfg) => Object.keys({ ...(cfg.providers ?? {}), ...(cfg.provider ?? {}) })),
+        Effect.catch(() => Effect.succeed([] as string[])),
+      )
       return yield* Effect.promise(async () => {
         const state = await paperModelWorkbench(paperGlobalOptions())
         const connectedProviderIDs = new Set(Object.keys(connected))
@@ -368,9 +375,13 @@ export const paperHandlers = HttpApiBuilder.group(InstanceHttpApi, "paper", (han
             .map(([providerID]) => providerID),
         )
         const builtinCandidates = candidatesFromBuiltinProviders(providers)
-        const inventory = mergeModelCandidates(
-          state.inventory,
-          builtinCandidates.filter((candidate) => registeredProviders.has(candidate.provider_id)),
+        const configCandidates = candidatesFromConfigProviders(connected, configProviderIDs)
+        const inventory = mergeConfigProviderCandidates(
+          mergeModelCandidates(
+            state.inventory,
+            builtinCandidates.filter((candidate) => registeredProviders.has(candidate.provider_id)),
+          ),
+          configCandidates,
         )
         return {
           ...state,
@@ -399,6 +410,10 @@ export const paperHandlers = HttpApiBuilder.group(InstanceHttpApi, "paper", (han
       const connected = yield* Provider.Service.use((service) => service.list()).pipe(
         Effect.catch(() => Effect.succeed({})),
       )
+      const configProviderIDs = yield* Config.Service.use((service) => service.get()).pipe(
+        Effect.map((cfg) => Object.keys({ ...(cfg.providers ?? {}), ...(cfg.provider ?? {}) })),
+        Effect.catch(() => Effect.succeed([] as string[])),
+      )
       return yield* Effect.tryPromise({
         try: async () => {
           const storedInventory = await loadPaperModelInventory(paperGlobalOptions())
@@ -412,6 +427,10 @@ export const paperHandlers = HttpApiBuilder.group(InstanceHttpApi, "paper", (han
           const builtinCandidates = candidatesFromBuiltinProviders(providers).filter((candidate) =>
             subscriptionProviderIDs.has(candidate.provider_id),
           )
+          const configCandidates = candidatesFromConfigProviders(connected, configProviderIDs)
+          // A registration may point at any candidate the workbench can show, including the ones
+          // derived from providers declared in config.
+          const candidatePool = [...storedInventory.candidates, ...builtinCandidates, ...configCandidates]
           const providerRegistrations: Record<string, PaperProviderRegistration> = {}
           const providerRecord = providers as Record<string, { name?: string; models?: Record<string, unknown> }>
           for (const providerID of subscriptionProviderIDs) {
@@ -437,12 +456,7 @@ export const paperHandlers = HttpApiBuilder.group(InstanceHttpApi, "paper", (han
               ([providerID, registration]) => {
                 if (registration.kind === "openai_compatible") return registration.status === "registered"
                 if (registration.kind === "manual") {
-                  return isConfiguredPaperProviderRegistration(
-                    providerID,
-                    registration,
-                    storedInventory.candidates,
-                    connectedProviderIDs,
-                  )
+                  return isConfiguredPaperProviderRegistration(providerID, registration, candidatePool, connectedProviderIDs)
                 }
                 return subscriptionProviderIDs.has(providerID)
               },
@@ -458,7 +472,7 @@ export const paperHandlers = HttpApiBuilder.group(InstanceHttpApi, "paper", (han
               ...providerRegistrations,
             },
             stage_model_policies: ctx.payload.stage_model_policies as Partial<Record<PaperModelRole, PaperStageModelPolicy>> | undefined,
-            candidates: builtinCandidates,
+            candidates: [...builtinCandidates, ...configCandidates],
           })
           return { inventory, roles: modelRolesFromInventory(inventory) }
         },

@@ -12,6 +12,8 @@ import {
 import {
   candidatesFromDiscovery,
   candidatesFromBuiltinProviders,
+  candidatesFromConfigProviders,
+  mergeConfigProviderCandidates,
   loadPaperModelInventory,
   mergeModelCandidates,
   modelInventoryPath,
@@ -794,5 +796,62 @@ describe("paper model role assignment", () => {
       model_id: "claude-sonnet-4-5",
       source: "subagent_override",
     })
+  })
+})
+
+describe("providers declared in config", () => {
+  const catalog = {
+    fjbdg: {
+      name: "fjbdg",
+      models: {
+        "deepseek-v4-flash-vision-exp": {
+          limit: { context: 1_000_000, output: 384_000 },
+          capabilities: { reasoning: true, input: { image: true } },
+        },
+      },
+    },
+    "not-declared": { name: "other", models: { "some-model": {} } },
+  }
+
+  test("candidates carry the declared metadata and only cover declared providers", () => {
+    const candidates = candidatesFromConfigProviders(catalog, ["fjbdg"])
+    expect(candidates).toHaveLength(1)
+    const [candidate] = candidates
+    expect(candidate).toMatchObject({
+      provider_id: "fjbdg",
+      model_id: "deepseek-v4-flash-vision-exp",
+      model_ref: "fjbdg/deepseek-v4-flash-vision-exp",
+      source: "manual",
+      context_hint: "long",
+      allowed: false,
+    })
+    expect(candidate.capabilities).toContain("planning")
+    expect(candidate.capabilities).toContain("review")
+  })
+
+  test("merging registers the provider but leaves its models un-allowed", async () => {
+    const home = await tmpHome()
+    const stored = await loadPaperModelInventory({ home })
+    const merged = mergeConfigProviderCandidates(stored, candidatesFromConfigProviders(catalog, ["fjbdg"]))
+    expect(merged.provider_registrations.fjbdg).toMatchObject({ kind: "manual", status: "registered", model_count: 1 })
+    expect(merged.allowlist).toEqual([])
+    expect(merged.candidates.every((candidate) => candidate.allowed === false)).toBe(true)
+  })
+
+  test("allowlisting a declared model unblocks routing for the paper roles", async () => {
+    const home = await tmpHome()
+    const stored = await loadPaperModelInventory({ home })
+    const merged = mergeConfigProviderCandidates(stored, candidatesFromConfigProviders(catalog, ["fjbdg"]))
+    const ref = "fjbdg/deepseek-v4-flash-vision-exp"
+    const inventory = await updatePaperModelAllowlist([ref], {
+      home,
+      candidates: merged.candidates,
+      provider_registrations: merged.provider_registrations,
+      decision_model: ref,
+    })
+    expect(inventory.allowlist).toEqual([ref])
+    const decision = routePaperModel(inventory, { role: "writer", budget_tier: "standard" })
+    expect(decision.source).not.toBe("blocked")
+    expect(decision.selected_model).toBe(ref)
   })
 })

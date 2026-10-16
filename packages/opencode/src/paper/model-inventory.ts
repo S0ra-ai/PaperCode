@@ -404,6 +404,99 @@ export function candidatesFromBuiltinProviders(providers: BuiltinProviderCatalog
   })
 }
 
+/**
+ * Providers declared by hand in config, read through the provider registry so the candidates carry
+ * the real limits and capabilities the user declared instead of id heuristics.
+ */
+export type ConfigProviderCatalog = Record<
+  string,
+  {
+    name?: string
+    models?: Record<
+      string,
+      {
+        name?: string
+        limit?: { context?: number; output?: number }
+        capabilities?: { reasoning?: boolean; input?: { image?: boolean } }
+        cost?: { input?: number; output?: number }
+      }
+    >
+  }
+>
+
+function configContextHint(context: number | undefined): PaperModelCandidate["context_hint"] {
+  if (context === undefined || context <= 0) return "unknown"
+  if (context >= 200_000) return "long"
+  if (context >= 32_000) return "standard"
+  return "short"
+}
+
+function configCostHint(cost: { input?: number; output?: number } | undefined): PaperModelCandidate["cost_hint"] {
+  if (!cost) return "unknown"
+  return (cost.input ?? 0) > 0 || (cost.output ?? 0) > 0 ? "standard" : "unknown"
+}
+
+export function candidatesFromConfigProviders(
+  providers: ConfigProviderCatalog,
+  providerIDs: readonly string[],
+): PaperModelCandidate[] {
+  const timestamp = now()
+  const wanted = new Set(providerIDs)
+  return Object.entries(providers)
+    .filter(([providerID]) => wanted.has(providerID))
+    .flatMap(([providerID, provider]) =>
+      Object.entries(provider.models ?? {}).map(([modelID, model]) => {
+        const capabilities = new Set(inferCapabilities(modelID))
+        if (model.capabilities?.reasoning) {
+          capabilities.add("planning")
+          capabilities.add("review")
+        }
+        return {
+          provider_id: providerID,
+          provider_name: provider.name,
+          model_id: modelID,
+          model_ref: `${providerID}/${modelID}`,
+          display_name: model.name ?? modelID,
+          source: "manual" as const,
+          capabilities: Array.from(capabilities),
+          cost_hint: configCostHint(model.cost),
+          context_hint: configContextHint(model.limit?.context),
+          smoke_status: "untested" as const,
+          allowed: false,
+          discovered_at: timestamp,
+        }
+      }),
+    )
+}
+
+/**
+ * Merge candidates for providers the user declared in config, registering them on the way. A config
+ * provider is an explicit user statement, so it should not require a second registration step in the
+ * workbench — but its models still start un-allowed, so the allowlist stays a deliberate choice.
+ */
+export function mergeConfigProviderCandidates(
+  inventory: PaperModelInventory,
+  candidates: PaperModelCandidate[],
+): PaperModelInventory {
+  const merged = mergeModelCandidates(inventory, candidates)
+  const missing = Array.from(new Set(candidates.map((candidate) => candidate.provider_id))).filter(
+    (providerID) => !merged.provider_registrations[providerID],
+  )
+  if (missing.length === 0) return merged
+  const allowlist = new Set(merged.allowlist)
+  return {
+    ...merged,
+    provider_registrations: {
+      ...merged.provider_registrations,
+      ...Object.fromEntries(
+        missing
+          .sort()
+          .map((providerID) => [providerID, summarizeProviderRegistration(providerID, merged.candidates, allowlist)]),
+      ),
+    },
+  }
+}
+
 export function mergeModelCandidates(
   inventory: PaperModelInventory,
   candidates: PaperModelCandidate[],
