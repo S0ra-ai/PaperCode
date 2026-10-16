@@ -101,7 +101,7 @@ export const ConfigRoutes = lazy(() =>
           const svc = yield* Provider.Service
           const providers = yield* svc.list()
           return {
-            providers: Object.values(providers),
+            providers: Object.values(providers).map((item) => Provider.redact(item)),
             default: Provider.defaultModelIDs(providers),
           }
         }),
