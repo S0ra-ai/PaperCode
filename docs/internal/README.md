@@ -10,6 +10,8 @@
 - `docs/project-structure.md`：目录结构与 release artifact 边界。
 - [实验执行与复现证据](experiment-execution.md)：显式实验协议、指标输出、隔离执行与正式导出验收。
 - [模型 provider 配置](model-providers.md)：`providers` 手写方言、密钥来源、论文管线的模型选择与验收命令。
+- [导出工具链与字体](export-toolchain.md)：四类产物的生成路径、ctex 的平台字体策略与字体覆盖方式。
+- [桌面端发布与自动更新](desktop-release.md)：渠道与产物命名、签名公证凭据、electron-updater 元数据与发布流程。
 - `docs/changelog/README.md`：历史 changelog 归档策略。
 - `reports/`：审计、验收、benchmark 证据，不进入 release artifact。
 

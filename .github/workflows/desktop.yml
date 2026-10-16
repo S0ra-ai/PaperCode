@@ -1,0 +1,152 @@
+name: desktop
+
+# Packages the Electron desktop app. This is dispatch-only on purpose: a push or a tag must not
+# publish installers by itself. `publish: true` uploads the artifacts and the electron-updater
+# metadata (`latest-mac.yml` / `beta-mac.yml` / `latest.yml`) to the GitHub release tagged
+# `v<version>`; without it the job only builds and uploads workflow artifacts.
+#
+# A distributable macOS build needs a Developer ID certificate (MAC_CERTIFICATE as a base64 .p12 plus
+# MAC_CERTIFICATE_PASSWORD) and, for notarization, APPLE_ID / APPLE_APP_SPECIFIC_PASSWORD /
+# APPLE_TEAM_ID. Without them electron-builder ad-hoc signs the bundle: it runs on the machine that
+# built it, but macOS refuses it elsewhere. See docs/internal/desktop-release.md.
+on:
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: Release channel (sets the app id, the product name and the updater channel)
+        required: true
+        default: dev
+        type: choice
+        options: [dev, beta, prod]
+      platform:
+        description: Which platform to package
+        required: true
+        default: all
+        type: choice
+        options: [all, mac, win, linux]
+      publish:
+        description: Upload installers and updater metadata to a GitHub release
+        required: true
+        default: false
+        type: boolean
+
+jobs:
+  mac:
+    if: inputs.platform == 'all' || inputs.platform == 'mac'
+    runs-on: macos-14
+    timeout-minutes: 120
+    permissions:
+      contents: write
+    env:
+      PAPERCODE_CHANNEL: ${{ inputs.channel }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      CSC_LINK: ${{ secrets.MAC_CERTIFICATE }}
+      CSC_KEY_PASSWORD: ${{ secrets.MAC_CERTIFICATE_PASSWORD }}
+      APPLE_ID: ${{ secrets.APPLE_ID }}
+      APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - name: Install
+        run: bun install --frozen-lockfile
+      # `build` runs prebuild, which renders the icons for the channel and builds the Node sidecar
+      # the main process spawns (packages/opencode/dist/node).
+      - name: Build desktop and sidecar
+        working-directory: packages/desktop
+        run: bun run build
+      # Both architectures in one invocation: electron-builder then writes a single latest-mac.yml
+      # listing arm64 and x64, which is what the updater expects. Two separate jobs would each write a
+      # same-named file and the last upload would win.
+      - name: Package
+        if: ${{ !inputs.publish }}
+        working-directory: packages/desktop
+        run: bunx electron-builder --mac --arm64 --x64 --config electron-builder.config.ts
+      - name: Package and publish
+        if: ${{ inputs.publish }}
+        working-directory: packages/desktop
+        run: bunx electron-builder --mac --arm64 --x64 --publish always --config electron-builder.config.ts
+      - name: Upload workflow artifacts
+        if: ${{ !inputs.publish }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: papercode-desktop-mac-${{ inputs.channel }}
+          path: |
+            packages/desktop/dist/*.dmg
+            packages/desktop/dist/*.zip
+          if-no-files-found: error
+
+  win:
+    if: inputs.platform == 'all' || inputs.platform == 'win'
+    runs-on: windows-latest
+    timeout-minutes: 120
+    permissions:
+      contents: write
+    env:
+      PAPERCODE_CHANNEL: ${{ inputs.channel }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - name: Install
+        run: bun install --frozen-lockfile
+      - name: Build desktop and sidecar
+        working-directory: packages/desktop
+        run: bun run build
+      - name: Package
+        if: ${{ !inputs.publish }}
+        working-directory: packages/desktop
+        run: bunx electron-builder --win --x64 --config electron-builder.config.ts
+      - name: Package and publish
+        if: ${{ inputs.publish }}
+        working-directory: packages/desktop
+        run: bunx electron-builder --win --x64 --publish always --config electron-builder.config.ts
+      - name: Upload workflow artifacts
+        if: ${{ !inputs.publish }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: papercode-desktop-win-${{ inputs.channel }}
+          path: packages/desktop/dist/*.exe
+          if-no-files-found: error
+
+  linux:
+    if: inputs.platform == 'all' || inputs.platform == 'linux'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    permissions:
+      contents: write
+    env:
+      PAPERCODE_CHANNEL: ${{ inputs.channel }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - name: Install
+        run: bun install --frozen-lockfile
+      - name: Build desktop and sidecar
+        working-directory: packages/desktop
+        run: bun run build
+      - name: Package
+        if: ${{ !inputs.publish }}
+        working-directory: packages/desktop
+        run: bunx electron-builder --linux --x64 --config electron-builder.config.ts
+      - name: Package and publish
+        if: ${{ inputs.publish }}
+        working-directory: packages/desktop
+        run: bunx electron-builder --linux --x64 --publish always --config electron-builder.config.ts
+      - name: Upload workflow artifacts
+        if: ${{ !inputs.publish }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: papercode-desktop-linux-${{ inputs.channel }}
+          path: |
+            packages/desktop/dist/*.AppImage
+            packages/desktop/dist/*.deb
+            packages/desktop/dist/*.rpm
+          if-no-files-found: error

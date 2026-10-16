@@ -33,6 +33,10 @@
             - fix(paper): 论文候选只取配置里显式声明的模型，旧 provider 键不再把 models.dev 全量模型带入工作台
             - fix(docs): 文档站 505 个文件 / 6331 处对齐真实配置路径、环境变量与 npm 包名，保留 @opencode-ai 作用域与上游链接
             - fix(test): 跑真实渲染的引擎测试集成预算统一到 300s
+            - fix(export): PDF 导出不再写死 Windows 专有字体 SimSun，改由 ctex 按平台自选字体集（macOS STSong / Windows SimSun / Linux Fandol），需要固定字体时用 PAPERCODE_EXPORT_CJK_FONT / PAPERCODE_EXPORT_LATIN_FONT 指定
+            - fix(export): LaTeX 失败诊断先给出首个 `!` 错误行并截断 kpathsea 的 mktextfm 噪声，字体缺失时附带覆盖变量的提示
+            - fix(paper): 同一 PaperRun 重复导出的 exports 主键冲突不再让索引重建失败，同 id 以最后一次导出为准
+            - fix(desktop): 自动更新通道跟随构建渠道，beta 构建不再去读 latest 元数据，也不再允许被更旧的 prod 版本降级替换
         :sdk
             - fix(sdk): 修复 fork 缺失的 generate 子命令导致的 SDK 生成断链，改用 Server.openapi() 产出 spec 并重新生成 v2 类型
         :config
@@ -44,12 +48,20 @@
         :ops
             - chore(env): 用 uv 建立 research-tools/.venv（Python 3.13）并加入 .gitignore，导出链路补齐 pandoc 依赖
             - chore(home): 本机状态目录迁移 ~/.paper_fucker -> ~/.papercode，含配置文件名与存储库文件名
+            - chore(desktop): 产物名带渠道（dev/beta/prod），避免同一版本多渠道构建互相覆盖
+            - chore(desktop): 删除 Tauri 时代的 finalize-latest-json/yml 脚本，桌面端更新元数据改由 electron-builder 生成
+            - chore(ci): 新增 desktop.yml，手动触发打包 mac（arm64+x64 单次构建）/win/linux，签名与公证凭据可选，缺失时退回 ad-hoc 签名
+            - docs(internal): 新增 export-toolchain.md（字体策略与失败诊断）与 desktop-release.md（渠道、命名、公证、更新）
         :checks
             - full suite: bun test --timeout 60000 --parallel=4 --max-concurrency=8 (2732 tests, 2713 pass, 5 fail；5 条均为满载下的时序竞争，隔离重跑对应文件 95 用例全绿)
             - typecheck: bun run --cwd packages/opencode typecheck passed（全仓 turbo typecheck 13 包）
             - build: bun run build --single 产出 papercode-darwin-arm64，smoke --version = 0.13.0.184-dev
             - live: fjbdg 端点真实请求抓包 max_tokens=384000 / reasoning_effort=max / stream；PaperRun 日志 service=llm providerID=fjbdg
             - cli smoke: papercode --version / models / providers list / runs list 通过，迁移后存储连续
+            - export: 对历史失败 run（run-0bee9fa6）重跑 `papercode runs export --forced`，Markdown/LaTeX/PDF/DOCX 四类全部 written；xelatex 日志落在 STSong，无 Missing character
+            - desktop: bun run build + package:mac 产出 dmg/zip 并挂载校验布局与签名；打包产物启动到 server ready（main/renderer/sidecar 正常）
+            - targeted: test/paper + test/research 249 pass / 1 skip / 0 fail；重复导出回归用例在撤销修复后确实失败（UNIQUE constraint failed: exports.export_id）
+            - typecheck: bun run typecheck 13/13 通过（含 desktop 与 opencode）
 
     0.13.0.183-dev - 2026/05/31 (8899d49d) [fix/mcp-tool-binding-test-isolation]
         :brief PaperCode 公开文案与 CLI 提示继续收口
