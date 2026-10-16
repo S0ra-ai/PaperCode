@@ -4,6 +4,7 @@ import { spawnSync } from "node:child_process"
 import os from "os"
 import path from "path"
 import { homeRunRoot } from "./research/runtime/paths"
+import { PYTHON_EXECUTABLES } from "@/paper/python"
 
 export type PaperEnvironmentCapabilityStatus = "available" | "missing" | "optional_missing" | "blocked" | "unknown"
 
@@ -91,7 +92,7 @@ const COMPILER_SPECS: ToolSpec[] = [
 ]
 
 const RUNTIME_SPECS: ToolSpec[] = [
-  { id: "python", label: "Python", executables: ["python", "python3", "py"], impact: "Python research-tools, notebooks, and data probes are unavailable." },
+  { id: "python", label: "Python", executables: [...PYTHON_EXECUTABLES], impact: "Python research-tools, notebooks, and data probes are unavailable." },
   { id: "uv", label: "uv", executables: ["uv"], impact: "Python environment bootstrap will use slower fallback tools." },
   { id: "pip", label: "pip", executables: ["pip", "pip3"], impact: "Python package installation needs a different frontend." },
   { id: "conda", label: "conda/mamba", executables: ["conda", "mamba"], impact: "Conda environment reproduction cannot be automated." },

@@ -1,6 +1,7 @@
 import { existsSync } from "fs"
 import os from "os"
 import path from "path"
+import { PYTHON_EXECUTABLES } from "@/paper/python"
 
 export type InitToolName =
   | "pandoc"
@@ -89,7 +90,7 @@ const SPECS: ToolSpec[] = [
   {
     name: "python",
     role: "Python research tools",
-    executables: ["python", "py"],
+    executables: [...PYTHON_EXECUTABLES],
     env: "PAPER_FUCKER_TOOL_PYTHON",
     common: ["C:/Windows/py.exe"],
   },

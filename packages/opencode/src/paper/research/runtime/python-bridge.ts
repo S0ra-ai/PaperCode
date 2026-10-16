@@ -4,6 +4,7 @@ import { appendResearchEvent, type ResearchRuntimeOptions } from "./run-store"
 import { writeResearchArtifact } from "./artifact-store"
 import type { ResearchArtifact, ResearchEvent } from "../contracts"
 import { withSpan } from "../telemetry"
+import { pythonExecutable } from "@/paper/python"
 
 export type PythonBridgeOptions = ResearchRuntimeOptions & {
   python?: string
@@ -76,7 +77,7 @@ function parseJson(text: string) {
 }
 
 export async function runPythonCommand(args: string[], options?: PythonBridgeOptions): Promise<PythonCommandResult> {
-  const command = [options?.python ?? "python", ...args]
+  const command = [pythonExecutable(options), ...args]
   return withSpan(
     "research.runtime.python_command",
     {
