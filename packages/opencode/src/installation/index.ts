@@ -225,7 +225,7 @@ export const layer: Layer.Layer<Service, never, HttpClient.HttpClient | ChildPro
           if (detectedMethod === "npm" || detectedMethod === "bun" || detectedMethod === "pnpm") {
             const response = yield* httpOk.execute(
               HttpClientRequest.get(
-                `${yield* NpmConfig.registry(process.cwd())}/papercode/${InstallationChannel}`,
+                `${yield* NpmConfig.registry(process.cwd())}/papercode-ai/${InstallationChannel}`,
               ).pipe(HttpClientRequest.acceptJson),
             )
             const data = yield* HttpClientResponse.schemaBodyJson(NpmPackage)(response)
@@ -267,13 +267,13 @@ export const layer: Layer.Layer<Service, never, HttpClient.HttpClient | ChildPro
               upgradeResult = yield* upgradeCurl(target)
               break
             case "npm":
-              upgradeResult = yield* run(["npm", "install", "-g", `papercode@${target}`])
+              upgradeResult = yield* run(["npm", "install", "-g", `papercode-ai@${target}`])
               break
             case "pnpm":
-              upgradeResult = yield* run(["pnpm", "install", "-g", `papercode@${target}`])
+              upgradeResult = yield* run(["pnpm", "install", "-g", `papercode-ai@${target}`])
               break
             case "bun":
-              upgradeResult = yield* run(["bun", "install", "-g", `papercode@${target}`])
+              upgradeResult = yield* run(["bun", "install", "-g", `papercode-ai@${target}`])
               break
             case "brew": {
               const formula = yield* getBrewFormula()

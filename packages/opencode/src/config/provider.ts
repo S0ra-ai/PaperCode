@@ -61,9 +61,11 @@ const ModelFields = {
   ),
   limit: Schema.optional(
     Schema.Struct({
-      context: Schema.Finite,
+      // Both halves are optional so a partial override keeps the value inherited from the registry
+      // instead of zero-filling it.
+      context: Schema.optional(Schema.Finite),
       input: Schema.optional(Schema.Finite),
-      output: Schema.Finite,
+      output: Schema.optional(Schema.Finite),
     }),
   ),
   modalities: Schema.optional(
@@ -247,7 +249,14 @@ function normalizeModel(
   return {
     ...input,
     id: input.id ?? modelID,
-    limit: context === undefined && output === undefined ? input.limit : { context: context ?? 0, output: output ?? 0 },
+    limit:
+      context === undefined && output === undefined
+        ? input.limit
+        : {
+            ...(input.limit ?? {}),
+            ...(context === undefined ? {} : { context }),
+            ...(output === undefined ? {} : { output }),
+          },
     modalities,
     reasoning,
     variants: seededVariants ? { ...seededVariants, ...(input.variants ?? {}) } : input.variants,

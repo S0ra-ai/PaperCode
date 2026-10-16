@@ -20,6 +20,15 @@
             - fix(test): PTY 票据测试改用路由常量（x-papercode-ticket），修掉上一次改名遗留的 4 个确定性 403 失败
             - fix(test): OpenAPI 路由清单补齐 experiment-starter/apply 与 experiments/run 两条论文路由
             - fix(test): 真跑渲染的引擎测试（material-index、observability-audit）改用集成预算，避免 60s 超时
+            - fix(server): effect-httpapi 的 root 分组（/global/*、/control/*）补上鉴权，修掉设置服务器密码时可绕过鉴权的漏洞，并新增两后端一致性测试
+            - fix(api): 脱敏覆盖 options 内的密钥字段（apiKey/token/secret/authorization 及其 headers）
+            - fix(config): 只声明 contextWindow 或 maxTokens 时保留另一半的继承值，不再把上下文清零
+            - fix(config): reasoningEfforts 支持模型级与 provider 级，并据此播种 effort 变体
+            - fix(ide): 扩展安装 id 还原为实际存在的 sst-dev.opencode（改名误改）
+            - fix(release): Homebrew 公式类名与文件名对齐，npm 自更新目标对齐发布名 papercode-ai
+            - fix(export): LaTeX 回退渲染头部不再输出旧品牌
+            - fix(theme): 主题与配色偏好一次性迁移旧 localStorage key，升级不丢设置
+            - fix(docs): 修正 model-providers.md 的配置与密钥优先级，补录 compat 与 reasoningEfforts
         :sdk
             - fix(sdk): 修复 fork 缺失的 generate 子命令导致的 SDK 生成断链，改用 Server.openapi() 产出 spec 并重新生成 v2 类型
         :config

@@ -18,6 +18,7 @@ import {
   mergeModelCandidates,
   modelInventoryPath,
   routePaperModel,
+  savePaperModelInventory,
   updatePaperModelAllowlist,
   upsertDiscoveredModels,
 } from "../../src/paper/model-inventory"
@@ -853,5 +854,44 @@ describe("providers declared in config", () => {
     const decision = routePaperModel(inventory, { role: "writer", budget_tier: "standard" })
     expect(decision.source).not.toBe("blocked")
     expect(decision.selected_model).toBe(ref)
+  })
+})
+
+describe("config provider lifecycle", () => {
+  const catalog = { fjbdg: { name: "fjbdg", models: { "m-1": { limit: { context: 1000, output: 100 } } } } }
+
+  test("a disabled registration is not resurrected by the next inventory read", async () => {
+    const home = await tmpHome()
+    const stored = await loadPaperModelInventory({ home })
+    const registered = mergeConfigProviderCandidates(stored, candidatesFromConfigProviders(catalog, ["fjbdg"]))
+    const disabled = {
+      ...registered,
+      provider_registrations: {
+        ...registered.provider_registrations,
+        fjbdg: { ...registered.provider_registrations.fjbdg, status: "disabled" as const },
+      },
+    }
+    await savePaperModelInventory(disabled, { home })
+    const reloaded = await loadPaperModelInventory({ home })
+    const again = mergeConfigProviderCandidates(reloaded, candidatesFromConfigProviders(catalog, ["fjbdg"]))
+    expect(again.provider_registrations.fjbdg?.status).toBe("disabled")
+  })
+
+  test("a client that omits provider_registrations does not lose config candidates", async () => {
+    const home = await tmpHome()
+    const stored = await loadPaperModelInventory({ home })
+    const merged = mergeConfigProviderCandidates(stored, candidatesFromConfigProviders(catalog, ["fjbdg"]))
+    const ref = "fjbdg/m-1"
+    const saved = await updatePaperModelAllowlist([ref], {
+      home,
+      candidates: merged.candidates,
+      provider_registrations: merged.provider_registrations,
+      decision_model: ref,
+    })
+    expect(saved.allowlist).toEqual([ref])
+    // 之后一个"只改允许列表、不带候选"的客户端写入
+    const after = await updatePaperModelAllowlist([ref], { home })
+    const candidates = after.candidates.filter((candidate) => candidate.provider_id === "fjbdg")
+    expect(candidates.length).toBeGreaterThan(0)
   })
 })

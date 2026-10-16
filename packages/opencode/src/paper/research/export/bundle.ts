@@ -31,7 +31,7 @@ function outputName(draft: DraftPaper) {
 }
 
 function latexFallback(markdown: string) {
-  return `\\section*{paper\\_fucker Export}\n\\begin{verbatim}\n${markdown}\n\\end{verbatim}\n`
+  return `\\section*{PaperCode Export}\n\\begin{verbatim}\n${markdown}\n\\end{verbatim}\n`
 }
 
 export function exportMarkdown(draft: DraftPaper, forcedChecks: string[]) {

@@ -85,10 +85,23 @@ function normalize(id: string | null | undefined) {
   return id === "oc-1" ? "oc-2" : id
 }
 
+// Preferences persisted before the brand rename keep working: these are the only places that know
+// the previous key names, mirroring how the CLI keeps OPENCODE_* env fallbacks.
+const LEGACY_STORAGE_KEYS: Record<string, string> = {
+  [STORAGE_KEYS.THEME_ID]: "paper_fucker-theme-id",
+  [STORAGE_KEYS.COLOR_SCHEME]: "paper_fucker-color-scheme",
+}
+
 function read(key: string) {
   if (typeof localStorage !== "object") return null
   try {
-    return localStorage.getItem(key)
+    const current = localStorage.getItem(key)
+    if (current !== null) return current
+    const legacyKey = LEGACY_STORAGE_KEYS[key]
+    if (!legacyKey) return null
+    const legacy = localStorage.getItem(legacyKey)
+    if (legacy !== null) localStorage.setItem(key, legacy)
+    return legacy
   } catch {
     return null
   }

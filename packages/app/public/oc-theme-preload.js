@@ -1,6 +1,17 @@
 ;(function () {
+  // Preferences saved before the brand rename live under paper_fucker-*; read them once and re-home
+  // them under the current keys so an upgrade does not reset the user's theme.
+  function readMigrated(key, legacyKey) {
+    var value = localStorage.getItem(key)
+    if (value === null) {
+      value = localStorage.getItem(legacyKey)
+      if (value !== null) localStorage.setItem(key, value)
+    }
+    return value
+  }
+
   var key = "papercode-theme-id"
-  var themeId = localStorage.getItem(key) || "oc-2"
+  var themeId = readMigrated(key, "paper_fucker-theme-id") || "oc-2"
 
   if (themeId === "oc-1") {
     themeId = "oc-2"
@@ -9,7 +20,7 @@
     localStorage.removeItem("papercode-theme-css-dark")
   }
 
-  var scheme = localStorage.getItem("papercode-color-scheme") || "system"
+  var scheme = readMigrated("papercode-color-scheme", "paper_fucker-color-scheme") || "system"
   var isDark = scheme === "dark" || (scheme === "system" && matchMedia("(prefers-color-scheme: dark)").matches)
   var mode = isDark ? "dark" : "light"
 

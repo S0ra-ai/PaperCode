@@ -4,7 +4,7 @@
 
 ## 两种写法
 
-配置读取顺序（后者覆盖前者）：项目 `papercode.json[c]` → `.papercode/` 目录 → `~/.papercode/papercode.json[c]` → `~/.papercode/config/{config.json,papercode.json,papercode.jsonc}`。可用 `PAPERCODE_CONFIG` 指定单个配置文件、`PAPERCODE_CONFIG_CONTENT` 直接注入内容、`PAPERCODE_CONFIG_DIR` 改配置目录。
+配置按固定顺序加载，**后加载者覆盖先加载者**：`~/.papercode/config/{config.json,papercode.json,papercode.jsonc}` → `PAPERCODE_CONFIG` 指定的单文件（或 `PAPERCODE_CONFIG_CONTENT` 注入内容）→ 项目目录逐级向上查找的 `papercode.json[c]` 与 `.papercode/` 目录。也就是说**项目级覆盖全局**；`PAPERCODE_CONFIG_DIR` 可改配置目录。
 
 ### `providers`：手写方言（推荐）
 
@@ -48,10 +48,13 @@
 | `models[].maxTokens`               | `limit.output`                                           | 每次请求的 `max_tokens`                             |
 | `models[].input: ["text","image"]` | `modalities.input`                                       | 图像输入能力开关                                    |
 | `models[].reasoning`               | 同 provider 级，模型级优先                               | 同上                                                |
+| `models[].reasoningEfforts`        | 变体 `variants[<档位>] = { reasoningEffort: <值> }`       | 声明该模型接受哪些档位、每档对应的厂商值            |
+| `reasoningEfforts`（provider 级）  | 同上，作为该 provider 所有模型的默认                     | 模型级声明优先                                      |
+| `compat.supportsDeveloperRole`     | 保留在归一化记录上                                       | 断言端点不接受 `developer` 角色（见"已知边界"）     |
 
 `providers.*` 内的未知字段会**报错**（`ConfigInvalidError`，带字段路径），不会静默丢弃；这是与旧 `provider` 键的主要差别（旧键沿用 effect 解码器的默认行为，嵌套未知字段被丢弃）。
 
-`contextWindow` 与 `maxTokens` 建议成对声明：只声明 `maxTokens` 时上下文预算按 0 处理，会话会持续判定为溢出并压缩；只声明 `contextWindow` 时输出上限回落到 `OUTPUT_TOKEN_MAX`（默认 32000）。
+`contextWindow` 与 `maxTokens` 可以只声明一个：**未声明的一半保留继承值**（覆盖 models.dev 里的已知模型时尤其重要，不会把上下文清零）。只声明 `contextWindow` 时输出上限除非另有声明，否则仍受 `OUTPUT_TOKEN_MAX`（默认 32000）约束；只声明 `maxTokens` 时它按原值下发。
 
 ### `provider`：models.dev 覆盖写法（兼容保留）
 
@@ -59,9 +62,9 @@
 
 ## 密钥来源
 
-优先级：`options.apiKey`（配置内联）> 环境变量（`env` / `apiKeyEnv`）> `~/.papercode/data/auth.json`（`papercode providers login`）。推荐只写 `apiKeyEnv`，把密钥留在环境变量里，避免进入版本库。
+优先级：`options.apiKey`（配置内联，最高）> `~/.papercode/data/auth.json`（`papercode providers login` 写入）> 环境变量（`env` / `apiKeyEnv`）。推荐只写 `apiKeyEnv`，把密钥留在环境变量里，避免进入版本库。
 
-`papercode providers list` 会把配置声明的 provider 的环境变量一并列在 `Environment` 段（仅显示变量名，不显示值）。HTTP API 返回的 provider 列表里 `key` 字段被替换为 `[redacted]`，客户端只用 `source` / `env` 判断连通性。
+`papercode providers list` 会把**全局配置**里声明的 provider 的环境变量一并列在 `Environment` 段（仅显示变量名，不显示值；该命令不依赖实例，所以项目级配置不参与）。HTTP API 返回的 provider 列表里 `key` 与 `options` 内的密钥字段（`apiKey`/`token`/`secret`/`authorization` 等）都会替换为 `[redacted]`，客户端只用 `source` / `env` 判断连通性。
 
 ## 让论文管线使用它
 
@@ -79,7 +82,7 @@
 - `api` 目前只映射 OpenAI 兼容传输（`openai-completions` / `openai-compatible`），其它形状未实现，枚举保持封闭以免静默降级。
 - 配置声明的 `maxTokens` 会按原值发送（绕过 `OUTPUT_TOKEN_MAX` 的 32000 默认上限）；注册表继承来的限额仍受该上限约束。
 - 配置声明的模型没有价格信息，`cost` 记 0；如需成本统计，在模型里补 `cost.{input,output}`。
-- 部分兼容端点不接受 OpenAI 的 `developer` 角色（例如本仓库验证过的 `fjbdg` 端点返回 422）。遇到这种端点请使用支持 `system` 角色的模型侧配置，或在兼容层改为发送 `system`。
+- 部分兼容端点不接受 OpenAI 的 `developer` 角色（本仓库验证过的 `fjbdg` 端点对该角色返回 422）。本 fork 使用的 openai-compatible 传输始终发送 `system`，因此 `compat.supportsDeveloperRole: false` 是一条"已被满足的断言"——保留它是为了让配置自解释，声明 `true` 也不会让传输改用 `developer`。
 - 修改配置后需要重启进程或让实例失效（配置按实例缓存）。
 
 ## 验收命令

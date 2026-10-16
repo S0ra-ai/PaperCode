@@ -1042,14 +1042,42 @@ function fromModelsDevModel(provider: ModelsDev.Provider, model: ModelsDev.Model
 
 const REDACTED_API_KEY = "[redacted]"
 
+// Provider options are an open record, so credentials can arrive under any of these spellings:
+// an inline `apiKey` from config, a plugin-issued `token`, or a custom auth header.
+const SECRET_OPTION_KEY = /(api[_-]?key|token|secret|password|authorization|credential)/i
+
+function redactSecretValues(options: Record<string, unknown>): Record<string, unknown> {
+  const next: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(options)) {
+    if (typeof value === "string" && SECRET_OPTION_KEY.test(key)) {
+      next[key] = value ? REDACTED_API_KEY : value
+      continue
+    }
+    if (key === "headers" && value !== null && typeof value === "object" && !Array.isArray(value)) {
+      next[key] = Object.fromEntries(
+        Object.entries(value as Record<string, unknown>).map(([header, headerValue]) => [
+          header,
+          typeof headerValue === "string" && SECRET_OPTION_KEY.test(header) ? REDACTED_API_KEY : headerValue,
+        ]),
+      )
+      continue
+    }
+    next[key] = value
+  }
+  return next
+}
+
 /**
- * Provider info as sent over the HTTP API. The resolved API key stays server-side: clients only need
- * to know that a key exists (the mask stays truthy) and where it came from (`source`, `env`), and
+ * Provider info as sent over the HTTP API. Credentials stay server-side: clients only need to know
+ * that a key exists (the mask stays truthy) and where it came from (`source`, `env`), and
  * `Provider.list()` already exposes the connected provider ids separately.
  */
 export function redact(provider: Info): Info {
-  if (!provider.key) return provider
-  return { ...provider, key: REDACTED_API_KEY }
+  return {
+    ...provider,
+    key: provider.key ? REDACTED_API_KEY : provider.key,
+    options: redactSecretValues(provider.options),
+  }
 }
 
 export function fromModelsDevProvider(provider: ModelsDev.Provider): Info {

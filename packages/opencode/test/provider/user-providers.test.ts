@@ -285,6 +285,31 @@ describe("provider api redaction", () => {
     expect(Boolean(redacted.key)).toBe(true)
   })
 
+  test("credentials inside options are masked, other options survive", () => {
+    const info = {
+      id: ProviderID.make("opts"),
+      name: "opts",
+      source: "config" as const,
+      env: [],
+      options: {
+        baseURL: "https://keep.example.test/v1",
+        apiKey: "sk-inline-secret",
+        token: "glpat-secret",
+        timeout: 30000,
+        headers: { Authorization: "Bearer secret", "x-custom": "keep" },
+      },
+      models: {},
+    }
+    const redacted = Provider.redact(info as never)
+    expect(redacted.options.baseURL).toBe("https://keep.example.test/v1")
+    expect(redacted.options.timeout).toBe(30000)
+    expect(redacted.options.apiKey).toBe("[redacted]")
+    expect(redacted.options.token).toBe("[redacted]")
+    expect(redacted.options.headers).toEqual({ Authorization: "[redacted]", "x-custom": "keep" })
+    expect(JSON.stringify(redacted)).not.toContain("sk-inline-secret")
+    expect(JSON.stringify(redacted)).not.toContain("glpat-secret")
+  })
+
   test("providers without a key are returned unchanged", () => {
     const info = {
       id: ProviderID.make("plain"),
@@ -371,5 +396,29 @@ describe("cost passthrough for config-declared models", () => {
         expect(model.cost.output).toBe(1.2)
       },
     )
+  })
+})
+
+describe("partial limit declarations", () => {
+  test("declaring only maxTokens leaves the context inherited, not zero", () => {
+    const normalized = ConfigProvider.normalizeUserProviders({
+      p: { models: [{ id: "m", maxTokens: 100 }] },
+    })
+    expect(normalized.p.models?.m.limit).toEqual({ output: 100 })
+    expect("context" in (normalized.p.models?.m.limit ?? {})).toBe(false)
+  })
+
+  test("declaring only contextWindow leaves the output inherited", () => {
+    const normalized = ConfigProvider.normalizeUserProviders({
+      p: { models: [{ id: "m", contextWindow: 500_000 }] },
+    })
+    expect(normalized.p.models?.m.limit).toEqual({ context: 500_000 })
+  })
+
+  test("an explicit limit keeps its other fields while the aliases win", () => {
+    const normalized = ConfigProvider.normalizeUserProviders({
+      p: { models: [{ id: "m", maxTokens: 10, limit: { context: 200, output: 20, input: 100 } }] },
+    })
+    expect(normalized.p.models?.m.limit).toEqual({ context: 200, output: 10, input: 100 })
   })
 })

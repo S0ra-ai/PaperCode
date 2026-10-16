@@ -97,7 +97,12 @@ const cors = (corsOptions?: CorsOptions) =>
     { global: true },
   )
 
-const rootApiRoutes = HttpApiBuilder.layer(RootHttpApi).pipe(Layer.provide([controlHandlers, globalHandlers]))
+const rootApiRoutes = HttpApiBuilder.layer(RootHttpApi).pipe(
+  Layer.provide([controlHandlers, globalHandlers]),
+  // The legacy backend applies auth globally; without this the root groups (global config, auth,
+  // control) were reachable without credentials whenever a server password was configured.
+  Layer.provide(authorizationLayer.pipe(Layer.provide(ServerAuth.Config.defaultLayer))),
+)
 const instanceRouterLayer = authorizationRouterMiddleware
   .combine(instanceRouterMiddleware)
   .combine(workspaceRouterMiddleware)

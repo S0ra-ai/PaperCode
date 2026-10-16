@@ -318,3 +318,23 @@ describe("HttpApi Server.listen", () => {
     })
   }
 })
+
+test("root routes require credentials on both backends when a password is set", async () => {
+  for (const backend of ["effect-httpapi", "hono"] as const) {
+    const listener = await startListener(backend)
+    try {
+      const anonymous = await fetch(new URL("/global/health", listener.url))
+      expect({ backend, status: anonymous.status }).toEqual({ backend, status: 401 })
+
+      const authorized = await fetch(new URL("/global/health", listener.url), {
+        headers: { authorization: authorization() },
+      })
+      expect({ backend, status: authorized.status }).toEqual({ backend, status: 200 })
+
+      const anonymousConfig = await fetch(new URL("/global/config", listener.url))
+      expect({ backend, status: anonymousConfig.status }).toEqual({ backend, status: 401 })
+    } finally {
+      await listener.stop?.()
+    }
+  }
+})
