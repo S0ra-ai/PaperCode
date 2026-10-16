@@ -6,6 +6,7 @@ import { PtyPaths } from "../../src/server/routes/instance/httpapi/groups/pty"
 import { withTimeout } from "../../src/util/timeout"
 import { resetDatabase } from "../fixture/db"
 import { disposeAllInstances, tmpdir } from "../fixture/fixture"
+import { PTY_CONNECT_TOKEN_HEADER } from "../../src/server/shared/pty-ticket"
 
 void Log.init({ print: false })
 
@@ -73,7 +74,7 @@ async function requestTicket(
     headers: {
       authorization: authorization(),
       "x-opencode-directory": dir,
-      ...(options?.ticketHeader === false ? {} : { "x-opencode-ticket": "1" }),
+      ...(options?.ticketHeader === false ? {} : { [PTY_CONNECT_TOKEN_HEADER]: "1" }),
       ...(options?.origin ? { origin: options.origin } : {}),
     },
   })
@@ -274,7 +275,7 @@ describe("HttpApi Server.listen", () => {
       // Mint without directory — server uses its own cwd, can't find the PTY.
       const ambiguous = await fetch(new URL(PtyPaths.connectToken.replace(":ptyID", info.id), listener.url), {
         method: "POST",
-        headers: { authorization: authorization(), "x-opencode-ticket": "1" },
+        headers: { authorization: authorization(), [PTY_CONNECT_TOKEN_HEADER]: "1" },
       })
       expect(ambiguous.status).toBe(404)
 
@@ -286,7 +287,7 @@ describe("HttpApi Server.listen", () => {
         ),
         {
           method: "POST",
-          headers: { authorization: authorization(), "x-opencode-ticket": "1" },
+          headers: { authorization: authorization(), [PTY_CONNECT_TOKEN_HEADER]: "1" },
         },
       )
       expect(scoped.status).toBe(200)

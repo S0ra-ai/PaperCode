@@ -248,6 +248,8 @@ describe("HttpApi server", () => {
       "POST /paper/providers/discover",
       "POST /paper/runs",
       "POST /paper/runs/{runID}/control",
+      "POST /paper/runs/{runID}/experiment-starter/apply",
+      "POST /paper/runs/{runID}/experiments/run",
       "POST /paper/runs/{runID}/export",
       "POST /paper/runs/{runID}/guidance",
       "POST /paper/runs/{runID}/resume",
