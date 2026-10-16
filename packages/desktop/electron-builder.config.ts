@@ -43,11 +43,6 @@ const getBase = (): Configuration => ({
   },
   files: ["out/**/*", "resources/**/*"],
   extraResources: [
-    {
-      from: "native/",
-      to: "native/",
-      filter: ["index.js", "index.d.ts", "build/Release/mac_window.node", "swift-build/**"],
-    },
     // The main process loads its window and dock icons from process.resourcesPath/icons when
     // packaged, so the icon set has to leave the asar and land in Contents/Resources.
     {
