@@ -5,9 +5,13 @@ export type ClientOptions = {
 }
 
 export type Event =
+  | EventTuiPromptAppend
+  | EventTuiCommandExecute
+  | EventTuiToastShow1
+  | EventTuiSessionSelect
+  | EventServerConnected
+  | EventGlobalDisposed
   | EventServerInstanceDisposed
-  | EventFileEdited
-  | EventFileWatcherUpdated
   | EventLspClientDiagnostics
   | EventLspUpdated
   | EventMessagePartDelta
@@ -17,21 +21,19 @@ export type Event =
   | EventSessionError
   | EventInstallationUpdated
   | EventInstallationUpdateAvailable
-  | EventQuestionAsked
-  | EventQuestionReplied
-  | EventQuestionRejected
-  | EventTodoUpdated
-  | EventSessionStatus
-  | EventSessionIdle
-  | EventSessionCompacted
-  | EventTuiPromptAppend
-  | EventTuiCommandExecute
-  | EventTuiToastShow1
-  | EventTuiSessionSelect
   | EventMcpToolsChanged
   | EventMcpBrowserOpenFailed
   | EventCommandExecuted
   | EventProjectUpdated
+  | EventSessionStatus
+  | EventSessionIdle
+  | EventQuestionAsked
+  | EventQuestionReplied
+  | EventQuestionRejected
+  | EventSessionCompacted
+  | EventFileEdited
+  | EventFileWatcherUpdated
+  | EventTodoUpdated
   | EventVcsBranchUpdated
   | EventWorkspaceReady
   | EventWorkspaceFailed
@@ -75,8 +77,6 @@ export type Event =
   | EventSessionNextCompactionStarted
   | EventSessionNextCompactionDelta
   | EventSessionNextCompactionEnded
-  | EventServerConnected
-  | EventGlobalDisposed
 
 export type OAuth = {
   type: "oauth"
@@ -102,6 +102,61 @@ export type WellKnownAuth = {
 }
 
 export type Auth = OAuth | ApiAuth | WellKnownAuth
+
+export type EventTuiPromptAppend = {
+  id: string
+  type: "tui.prompt.append"
+  properties: {
+    text: string
+  }
+}
+
+export type EventTuiCommandExecute = {
+  id: string
+  type: "tui.command.execute"
+  properties: {
+    command:
+      | "session.list"
+      | "session.new"
+      | "session.share"
+      | "session.interrupt"
+      | "session.compact"
+      | "session.page.up"
+      | "session.page.down"
+      | "session.line.up"
+      | "session.line.down"
+      | "session.half.page.up"
+      | "session.half.page.down"
+      | "session.first"
+      | "session.last"
+      | "prompt.clear"
+      | "prompt.submit"
+      | "agent.cycle"
+      | string
+  }
+}
+
+export type EventTuiToastShow = {
+  id: string
+  type: "tui.toast.show"
+  properties: {
+    title?: string
+    message: string
+    variant: "info" | "success" | "warning" | "error"
+    duration?: number
+  }
+}
+
+export type EventTuiSessionSelect = {
+  id: string
+  type: "tui.session.select"
+  properties: {
+    /**
+     * Session ID to navigate to
+     */
+    sessionID: string
+  }
+}
 
 export type PermissionRequest = {
   id: string
@@ -187,6 +242,44 @@ export type ApiError = {
   }
 }
 
+export type Project = {
+  id: string
+  worktree: string
+  vcs?: "git"
+  name?: string
+  icon?: {
+    url?: string
+    override?: string
+    color?: string
+  }
+  commands?: {
+    /**
+     * Startup script to run when creating a new workspace (worktree)
+     */
+    start?: string
+  }
+  time: {
+    created: number
+    updated: number
+    initialized?: number
+  }
+  sandboxes: Array<string>
+}
+
+export type SessionStatus =
+  | {
+      type: "idle"
+    }
+  | {
+      type: "retry"
+      attempt: number
+      message: string
+      next: number
+    }
+  | {
+      type: "busy"
+    }
+
 export type QuestionOption = {
   /**
    * Display text (1-5 words, concise)
@@ -256,99 +349,6 @@ export type Todo = {
    * Priority level of the task: high, medium, low
    */
   priority: string
-}
-
-export type SessionStatus =
-  | {
-      type: "idle"
-    }
-  | {
-      type: "retry"
-      attempt: number
-      message: string
-      next: number
-    }
-  | {
-      type: "busy"
-    }
-
-export type EventTuiPromptAppend = {
-  id: string
-  type: "tui.prompt.append"
-  properties: {
-    text: string
-  }
-}
-
-export type EventTuiCommandExecute = {
-  id: string
-  type: "tui.command.execute"
-  properties: {
-    command:
-      | "session.list"
-      | "session.new"
-      | "session.share"
-      | "session.interrupt"
-      | "session.compact"
-      | "session.page.up"
-      | "session.page.down"
-      | "session.line.up"
-      | "session.line.down"
-      | "session.half.page.up"
-      | "session.half.page.down"
-      | "session.first"
-      | "session.last"
-      | "prompt.clear"
-      | "prompt.submit"
-      | "agent.cycle"
-      | string
-  }
-}
-
-export type EventTuiToastShow = {
-  id: string
-  type: "tui.toast.show"
-  properties: {
-    title?: string
-    message: string
-    variant: "info" | "success" | "warning" | "error"
-    duration?: number
-  }
-}
-
-export type EventTuiSessionSelect = {
-  id: string
-  type: "tui.session.select"
-  properties: {
-    /**
-     * Session ID to navigate to
-     */
-    sessionID: string
-  }
-}
-
-export type Project = {
-  id: string
-  worktree: string
-  vcs?: "git"
-  name?: string
-  icon?: {
-    url?: string
-    override?: string
-    color?: string
-  }
-  commands?: {
-    /**
-     * Startup script to run when creating a new workspace (worktree)
-     */
-    start?: string
-  }
-  time: {
-    created: number
-    updated: number
-    initialized?: number
-  }
-  sandboxes: Array<string>
 }
 
 export type Pty = {
@@ -770,9 +770,13 @@ export type GlobalEvent = {
   project?: string
   workspace?: string
   payload:
+    | EventTuiPromptAppend
+    | EventTuiCommandExecute
+    | EventTuiToastShow
+    | EventTuiSessionSelect
+    | EventServerConnected
+    | EventGlobalDisposed
     | EventServerInstanceDisposed
-    | EventFileEdited
-    | EventFileWatcherUpdated
     | EventLspClientDiagnostics
     | EventLspUpdated
     | EventMessagePartDelta
@@ -782,21 +786,19 @@ export type GlobalEvent = {
     | EventSessionError
     | EventInstallationUpdated
     | EventInstallationUpdateAvailable
-    | EventQuestionAsked
-    | EventQuestionReplied
-    | EventQuestionRejected
-    | EventTodoUpdated
-    | EventSessionStatus
-    | EventSessionIdle
-    | EventSessionCompacted
-    | EventTuiPromptAppend
-    | EventTuiCommandExecute
-    | EventTuiToastShow
-    | EventTuiSessionSelect
     | EventMcpToolsChanged
     | EventMcpBrowserOpenFailed
     | EventCommandExecuted
     | EventProjectUpdated
+    | EventSessionStatus
+    | EventSessionIdle
+    | EventQuestionAsked
+    | EventQuestionReplied
+    | EventQuestionRejected
+    | EventSessionCompacted
+    | EventFileEdited
+    | EventFileWatcherUpdated
+    | EventTodoUpdated
     | EventVcsBranchUpdated
     | EventWorkspaceReady
     | EventWorkspaceFailed
@@ -840,8 +842,6 @@ export type GlobalEvent = {
     | EventSessionNextCompactionStarted
     | EventSessionNextCompactionDelta
     | EventSessionNextCompactionEnded
-    | EventServerConnected
-    | EventGlobalDisposed
     | SyncEventMessageUpdated
     | SyncEventMessageRemoved
     | SyncEventMessagePartUpdated
@@ -980,6 +980,9 @@ export type ProviderConfig = {
   npm?: string
   whitelist?: Array<string>
   blacklist?: Array<string>
+  compat?: {
+    supportsDeveloperRole?: boolean
+  }
   options?: {
     apiKey?: string
     baseURL?: string
@@ -996,10 +999,10 @@ export type ProviderConfig = {
     [key: string]: {
       id?: string
       name?: string
+      reasoning?: boolean
       family?: string
       release_date?: string
       attachment?: boolean
-      reasoning?: boolean
       temperature?: boolean
       tool_call?: boolean
       interleaved?:
@@ -1162,6 +1165,167 @@ export type Config = {
   provider?: {
     [key: string]: ProviderConfig
   }
+  providers?: {
+    [key: string]: {
+      displayName?: string
+      apiKeyEnv?: string
+      baseURL?: string
+      api?: "openai-completions" | "openai-compatible"
+      reasoning?: boolean | "minimal" | "low" | "medium" | "high" | "xhigh" | "max"
+      reasoningEfforts?: {
+        [key: string]: string
+      }
+      compat?: {
+        supportsDeveloperRole?: boolean
+      }
+      models?:
+        | Array<{
+            id?: string
+            name?: string
+            contextWindow?: number
+            maxTokens?: number
+            input?: Array<"text" | "audio" | "image" | "video" | "pdf">
+            output?: Array<"text" | "audio" | "image" | "video" | "pdf">
+            reasoning?: boolean | "minimal" | "low" | "medium" | "high" | "xhigh" | "max"
+            reasoningEfforts?: {
+              [key: string]: string
+            }
+            family?: string
+            release_date?: string
+            attachment?: boolean
+            temperature?: boolean
+            tool_call?: boolean
+            interleaved?:
+              | true
+              | {
+                  field: "reasoning_content" | "reasoning_details"
+                }
+            cost?: {
+              input: number
+              output: number
+              cache_read?: number
+              cache_write?: number
+              context_over_200k?: {
+                input: number
+                output: number
+                cache_read?: number
+                cache_write?: number
+              }
+            }
+            limit?: {
+              context: number
+              input?: number
+              output: number
+            }
+            modalities?: {
+              input: Array<"text" | "audio" | "image" | "video" | "pdf">
+              output: Array<"text" | "audio" | "image" | "video" | "pdf">
+            }
+            experimental?: boolean
+            status?: "alpha" | "beta" | "deprecated"
+            provider?: {
+              npm?: string
+              api?: string
+            }
+            options?: {
+              [key: string]: unknown
+            }
+            headers?: {
+              [key: string]: string
+            }
+            /**
+             * Variant-specific configuration
+             */
+            variants?: {
+              [key: string]: {
+                disabled?: boolean
+              }
+            }
+          }>
+        | {
+            [key: string]: {
+              id?: string
+              name?: string
+              contextWindow?: number
+              maxTokens?: number
+              input?: Array<"text" | "audio" | "image" | "video" | "pdf">
+              output?: Array<"text" | "audio" | "image" | "video" | "pdf">
+              reasoning?: boolean | "minimal" | "low" | "medium" | "high" | "xhigh" | "max"
+              reasoningEfforts?: {
+                [key: string]: string
+              }
+              family?: string
+              release_date?: string
+              attachment?: boolean
+              temperature?: boolean
+              tool_call?: boolean
+              interleaved?:
+                | true
+                | {
+                    field: "reasoning_content" | "reasoning_details"
+                  }
+              cost?: {
+                input: number
+                output: number
+                cache_read?: number
+                cache_write?: number
+                context_over_200k?: {
+                  input: number
+                  output: number
+                  cache_read?: number
+                  cache_write?: number
+                }
+              }
+              limit?: {
+                context: number
+                input?: number
+                output: number
+              }
+              modalities?: {
+                input: Array<"text" | "audio" | "image" | "video" | "pdf">
+                output: Array<"text" | "audio" | "image" | "video" | "pdf">
+              }
+              experimental?: boolean
+              status?: "alpha" | "beta" | "deprecated"
+              provider?: {
+                npm?: string
+                api?: string
+              }
+              options?: {
+                [key: string]: unknown
+              }
+              headers?: {
+                [key: string]: string
+              }
+              /**
+               * Variant-specific configuration
+               */
+              variants?: {
+                [key: string]: {
+                  disabled?: boolean
+                }
+              }
+            }
+          }
+      name?: string
+      env?: Array<string>
+      id?: string
+      npm?: string
+      whitelist?: Array<string>
+      blacklist?: Array<string>
+      options?: {
+        apiKey?: string
+        baseURL?: string
+        enterpriseUrl?: string
+        setCacheKey?: boolean
+        /**
+         * Timeout in milliseconds for requests to this provider. Default is 300000 (5 minutes). Set to false to disable timeout.
+         */
+        timeout?: number | false
+        chunkTimeout?: number
+      }
+    }
+  }
   mcp?: {
     [key: string]:
       | McpLocalConfig
@@ -1292,6 +1456,7 @@ export type Model = {
     context: number
     input?: number
     output: number
+    source?: "config"
   }
   status: "alpha" | "beta" | "deprecated" | "active"
   options: {
@@ -2280,28 +2445,27 @@ export type SyncEventSessionNextCompactionEnded = {
   }
 }
 
+export type EventServerConnected = {
+  id: string
+  type: "server.connected"
+  properties: {
+    [key: string]: unknown
+  }
+}
+
+export type EventGlobalDisposed = {
+  id: string
+  type: "global.disposed"
+  properties: {
+    [key: string]: unknown
+  }
+}
+
 export type EventServerInstanceDisposed = {
   id: string
   type: "server.instance.disposed"
   properties: {
     directory: string
-  }
-}
-
-export type EventFileEdited = {
-  id: string
-  type: "file.edited"
-  properties: {
-    file: string
-  }
-}
-
-export type EventFileWatcherUpdated = {
-  id: string
-  type: "file.watcher.updated"
-  properties: {
-    file: string
-    event: "add" | "change" | "unlink"
   }
 }
 
@@ -2391,58 +2555,6 @@ export type EventInstallationUpdateAvailable = {
   }
 }
 
-export type EventQuestionAsked = {
-  id: string
-  type: "question.asked"
-  properties: QuestionRequest
-}
-
-export type EventQuestionReplied = {
-  id: string
-  type: "question.replied"
-  properties: QuestionReplied
-}
-
-export type EventQuestionRejected = {
-  id: string
-  type: "question.rejected"
-  properties: QuestionRejected
-}
-
-export type EventTodoUpdated = {
-  id: string
-  type: "todo.updated"
-  properties: {
-    sessionID: string
-    todos: Array<Todo>
-  }
-}
-
-export type EventSessionStatus = {
-  id: string
-  type: "session.status"
-  properties: {
-    sessionID: string
-    status: SessionStatus
-  }
-}
-
-export type EventSessionIdle = {
-  id: string
-  type: "session.idle"
-  properties: {
-    sessionID: string
-  }
-}
-
-export type EventSessionCompacted = {
-  id: string
-  type: "session.compacted"
-  properties: {
-    sessionID: string
-  }
-}
-
 export type EventMcpToolsChanged = {
   id: string
   type: "mcp.tools.changed"
@@ -2475,6 +2587,75 @@ export type EventProjectUpdated = {
   id: string
   type: "project.updated"
   properties: Project
+}
+
+export type EventSessionStatus = {
+  id: string
+  type: "session.status"
+  properties: {
+    sessionID: string
+    status: SessionStatus
+  }
+}
+
+export type EventSessionIdle = {
+  id: string
+  type: "session.idle"
+  properties: {
+    sessionID: string
+  }
+}
+
+export type EventQuestionAsked = {
+  id: string
+  type: "question.asked"
+  properties: QuestionRequest
+}
+
+export type EventQuestionReplied = {
+  id: string
+  type: "question.replied"
+  properties: QuestionReplied
+}
+
+export type EventQuestionRejected = {
+  id: string
+  type: "question.rejected"
+  properties: QuestionRejected
+}
+
+export type EventSessionCompacted = {
+  id: string
+  type: "session.compacted"
+  properties: {
+    sessionID: string
+  }
+}
+
+export type EventFileEdited = {
+  id: string
+  type: "file.edited"
+  properties: {
+    file: string
+  }
+}
+
+export type EventFileWatcherUpdated = {
+  id: string
+  type: "file.watcher.updated"
+  properties: {
+    file: string
+    event: "add" | "change" | "unlink"
+  }
+}
+
+export type EventTodoUpdated = {
+  id: string
+  type: "todo.updated"
+  properties: {
+    sessionID: string
+    todos: Array<Todo>
+  }
 }
 
 export type EventVcsBranchUpdated = {
@@ -2991,22 +3172,6 @@ export type EventSessionNextCompactionEnded = {
     sessionID: string
     text: string
     include?: string
-  }
-}
-
-export type EventServerConnected = {
-  id: string
-  type: "server.connected"
-  properties: {
-    [key: string]: unknown
-  }
-}
-
-export type EventGlobalDisposed = {
-  id: string
-  type: "global.disposed"
-  properties: {
-    [key: string]: unknown
   }
 }
 
@@ -4466,6 +4631,620 @@ export type McpDisconnectResponses = {
 }
 
 export type McpDisconnectResponse = McpDisconnectResponses[keyof McpDisconnectResponses]
+
+export type PaperRunsListData = {
+  body?: never
+  path?: never
+  query?: {
+    directory?: string
+    workspace?: string
+  }
+  url: "/paper/runs"
+}
+
+export type PaperRunsListErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+}
+
+export type PaperRunsListError = PaperRunsListErrors[keyof PaperRunsListErrors]
+
+export type PaperRunsListResponses = {
+  /**
+   * PaperRun history entries
+   */
+  200: unknown
+}
+
+export type PaperRunsCreateData = {
+  body?: {
+    topic: string
+    workspace_path?: string
+    code_paths?: Array<string>
+    paper_files?: Array<string>
+    dataset_paths?: Array<string>
+    experiment_logs?: Array<string>
+    target_profile?: string
+    target_journal?: string
+    target_journal_url?: string
+    language?: string
+    model_roles?: {
+      [key: string]: string
+    }
+    budget_tier?: "quick" | "standard" | "deep" | "submission" | "custom"
+    quality_mode?: "reviewable_bundle" | "submission_candidate"
+    storage_scope?: "home" | "workspace"
+    data_egress_policy?: {
+      mode?: "private_first" | "allow_summaries" | "allow_authorized_paths"
+      allowed_paths?: Array<string>
+      denied_patterns?: Array<string>
+      external_model_full_text?: boolean
+    }
+  }
+  path?: never
+  query?: {
+    directory?: string
+    workspace?: string
+  }
+  url: "/paper/runs"
+}
+
+export type PaperRunsCreateErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+}
+
+export type PaperRunsCreateError = PaperRunsCreateErrors[keyof PaperRunsCreateErrors]
+
+export type PaperRunsCreateResponses = {
+  /**
+   * Created PaperRun snapshot
+   */
+  200: unknown
+}
+
+export type PaperRunsGetData = {
+  body?: never
+  path: {
+    runID: string
+  }
+  query?: {
+    directory?: string
+    workspace?: string
+  }
+  url: "/paper/runs/{runID}"
+}
+
+export type PaperRunsGetErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type PaperRunsGetError = PaperRunsGetErrors[keyof PaperRunsGetErrors]
+
+export type PaperRunsGetResponses = {
+  /**
+   * PaperRun snapshot
+   */
+  200: unknown
+}
+
+export type PaperRunsResumeData = {
+  body?: never
+  path: {
+    runID: string
+  }
+  query?: {
+    directory?: string
+    workspace?: string
+  }
+  url: "/paper/runs/{runID}/resume"
+}
+
+export type PaperRunsResumeErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type PaperRunsResumeError = PaperRunsResumeErrors[keyof PaperRunsResumeErrors]
+
+export type PaperRunsResumeResponses = {
+  /**
+   * Resumed PaperRun snapshot
+   */
+  200: unknown
+}
+
+export type PaperRunsEventsData = {
+  body?: never
+  path: {
+    runID: string
+  }
+  query?: {
+    directory?: string
+    workspace?: string
+  }
+  url: "/paper/runs/{runID}/events"
+}
+
+export type PaperRunsEventsErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type PaperRunsEventsError = PaperRunsEventsErrors[keyof PaperRunsEventsErrors]
+
+export type PaperRunsEventsResponses = {
+  /**
+   * Success
+   */
+  200: string
+}
+
+export type PaperRunsEventsResponse = PaperRunsEventsResponses[keyof PaperRunsEventsResponses]
+
+export type PaperRunsGuidanceData = {
+  body?: {
+    message: string
+  }
+  path: {
+    runID: string
+  }
+  query?: {
+    directory?: string
+    workspace?: string
+  }
+  url: "/paper/runs/{runID}/guidance"
+}
+
+export type PaperRunsGuidanceErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type PaperRunsGuidanceError = PaperRunsGuidanceErrors[keyof PaperRunsGuidanceErrors]
+
+export type PaperRunsGuidanceResponses = {
+  /**
+   * Guidance response
+   */
+  200: unknown
+}
+
+export type PaperRunsControlData = {
+  body?: {
+    action: "resume" | "retry" | "cancel"
+    stage?: string
+  }
+  path: {
+    runID: string
+  }
+  query?: {
+    directory?: string
+    workspace?: string
+  }
+  url: "/paper/runs/{runID}/control"
+}
+
+export type PaperRunsControlErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type PaperRunsControlError = PaperRunsControlErrors[keyof PaperRunsControlErrors]
+
+export type PaperRunsControlResponses = {
+  /**
+   * PaperRun controller state
+   */
+  200: unknown
+}
+
+export type PaperRunsPreviewData = {
+  body?: never
+  path: {
+    runID: string
+  }
+  query?: {
+    directory?: string
+    workspace?: string
+  }
+  url: "/paper/runs/{runID}/preview"
+}
+
+export type PaperRunsPreviewErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type PaperRunsPreviewError = PaperRunsPreviewErrors[keyof PaperRunsPreviewErrors]
+
+export type PaperRunsPreviewResponses = {
+  /**
+   * Read-only PaperRun preview payload
+   */
+  200: unknown
+}
+
+export type PaperRunsExportData = {
+  body?: {
+    forced?: boolean
+  }
+  path: {
+    runID: string
+  }
+  query?: {
+    directory?: string
+    workspace?: string
+  }
+  url: "/paper/runs/{runID}/export"
+}
+
+export type PaperRunsExportErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type PaperRunsExportError = PaperRunsExportErrors[keyof PaperRunsExportErrors]
+
+export type PaperRunsExportResponses = {
+  /**
+   * Paper export bundle status
+   */
+  200: unknown
+}
+
+export type PaperRunsExperimentStarterApplyData = {
+  body?: {
+    workspace_path?: string
+    dry_run?: boolean
+    overwrite?: boolean
+    file_paths?: Array<string>
+    update_package_json?: boolean
+  }
+  path: {
+    runID: string
+  }
+  query?: {
+    directory?: string
+    workspace?: string
+  }
+  url: "/paper/runs/{runID}/experiment-starter/apply"
+}
+
+export type PaperRunsExperimentStarterApplyErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type PaperRunsExperimentStarterApplyError =
+  PaperRunsExperimentStarterApplyErrors[keyof PaperRunsExperimentStarterApplyErrors]
+
+export type PaperRunsExperimentStarterApplyResponses = {
+  /**
+   * Experiment starter workspace apply result
+   */
+  200: unknown
+}
+
+export type PaperRunsExperimentsRunData = {
+  body?: {
+    workspace_path?: string
+    dry_run?: boolean
+    timeout_seconds?: number | "NaN" | "Infinity" | "-Infinity" | "Infinity" | "-Infinity" | "NaN"
+  }
+  path: {
+    runID: string
+  }
+  query?: {
+    directory?: string
+    workspace?: string
+  }
+  url: "/paper/runs/{runID}/experiments/run"
+}
+
+export type PaperRunsExperimentsRunErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type PaperRunsExperimentsRunError = PaperRunsExperimentsRunErrors[keyof PaperRunsExperimentsRunErrors]
+
+export type PaperRunsExperimentsRunResponses = {
+  /**
+   * Experiment protocol run result
+   */
+  200: unknown
+}
+
+export type PaperCapabilitiesData = {
+  body?: never
+  path?: never
+  query?: {
+    directory?: string
+    workspace?: string
+  }
+  url: "/paper/capabilities"
+}
+
+export type PaperCapabilitiesResponses = {
+  /**
+   * Registered paper research capabilities
+   */
+  200: unknown
+}
+
+export type PaperDoctorData = {
+  body?: never
+  path?: never
+  query?: {
+    directory?: string
+    workspace?: string
+  }
+  url: "/paper/doctor"
+}
+
+export type PaperDoctorResponses = {
+  /**
+   * Paper doctor diagnostics
+   */
+  200: unknown
+}
+
+export type PaperProvidersDiscoverData = {
+  body?: never
+  path?: never
+  query?: {
+    directory?: string
+    workspace?: string
+  }
+  url: "/paper/providers/discover"
+}
+
+export type PaperProvidersDiscoverResponses = {
+  /**
+   * Provider/model discovery
+   */
+  200: unknown
+}
+
+export type PaperProvidersDiscoverOpenAiData = {
+  body?: {
+    provider_id: string
+    provider_name?: string
+    base_url: string
+    api_key: string
+    compatibility: "openai-compatible"
+    timeout_ms?: number | "NaN" | "Infinity" | "-Infinity" | "Infinity" | "-Infinity" | "NaN"
+    persist?: boolean
+    allow_models?: Array<string>
+    decision_model?: string
+  }
+  path?: never
+  query?: {
+    directory?: string
+    workspace?: string
+  }
+  url: "/paper/providers/discover"
+}
+
+export type PaperProvidersDiscoverOpenAiErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+}
+
+export type PaperProvidersDiscoverOpenAiError =
+  PaperProvidersDiscoverOpenAiErrors[keyof PaperProvidersDiscoverOpenAiErrors]
+
+export type PaperProvidersDiscoverOpenAiResponses = {
+  /**
+   * OpenAI-compatible provider/model discovery
+   */
+  200: unknown
+}
+
+export type PaperModelRolesData = {
+  body?: never
+  path?: never
+  query?: {
+    directory?: string
+    workspace?: string
+  }
+  url: "/paper/model-roles"
+}
+
+export type PaperModelRolesResponses = {
+  /**
+   * Paper model role assignment
+   */
+  200: unknown
+}
+
+export type PaperModelRolesAssignData = {
+  body?: {
+    default_model: string
+    roles?: {
+      [key: string]: string
+    }
+    subagents?: {
+      [key: string]: string
+    }
+  }
+  path?: never
+  query?: {
+    directory?: string
+    workspace?: string
+  }
+  url: "/paper/model-roles"
+}
+
+export type PaperModelRolesAssignErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+}
+
+export type PaperModelRolesAssignError = PaperModelRolesAssignErrors[keyof PaperModelRolesAssignErrors]
+
+export type PaperModelRolesAssignResponses = {
+  /**
+   * Resolved paper model role assignment
+   */
+  200: unknown
+}
+
+export type PaperModelInventoryData = {
+  body?: never
+  path?: never
+  query?: {
+    directory?: string
+    workspace?: string
+  }
+  url: "/paper/model-inventory"
+}
+
+export type PaperModelInventoryResponses = {
+  /**
+   * Paper model inventory and allowlist
+   */
+  200: unknown
+}
+
+export type PaperModelInventoryAllowlistData = {
+  body?: {
+    allowlist: Array<string>
+    decision_model?: string
+    backup_decision_model?: string
+    roles?: {
+      [key: string]: string
+    }
+    registered_provider_ids?: Array<string>
+    provider_registrations?: {
+      [key: string]: unknown
+    }
+    stage_model_policies?: {
+      [key: string]: unknown
+    }
+  }
+  path?: never
+  query?: {
+    directory?: string
+    workspace?: string
+  }
+  url: "/paper/model-inventory"
+}
+
+export type PaperModelInventoryAllowlistErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+}
+
+export type PaperModelInventoryAllowlistError =
+  PaperModelInventoryAllowlistErrors[keyof PaperModelInventoryAllowlistErrors]
+
+export type PaperModelInventoryAllowlistResponses = {
+  /**
+   * Updated paper model allowlist
+   */
+  200: unknown
+}
+
+export type PaperModelRoutingDecisionData = {
+  body?: {
+    role: string
+    stage?: string
+    difficulty?: "low" | "medium" | "high"
+    task_scale?: "small" | "medium" | "large"
+    budget_tier?: "quick" | "standard" | "deep" | "submission" | "custom"
+    required_capabilities?: Array<string>
+    forced_model?: string
+  }
+  path?: never
+  query?: {
+    directory?: string
+    workspace?: string
+  }
+  url: "/paper/model-routing/decision"
+}
+
+export type PaperModelRoutingDecisionErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+}
+
+export type PaperModelRoutingDecisionError = PaperModelRoutingDecisionErrors[keyof PaperModelRoutingDecisionErrors]
+
+export type PaperModelRoutingDecisionResponses = {
+  /**
+   * Paper model routing decision
+   */
+  200: unknown
+}
 
 export type ProjectListData = {
   body?: never

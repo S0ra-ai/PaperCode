@@ -73,6 +73,41 @@ import type {
   McpRemoteConfig,
   McpStatusResponses,
   OutputFormat,
+  PaperCapabilitiesResponses,
+  PaperDoctorResponses,
+  PaperModelInventoryAllowlistErrors,
+  PaperModelInventoryAllowlistResponses,
+  PaperModelInventoryResponses,
+  PaperModelRolesAssignErrors,
+  PaperModelRolesAssignResponses,
+  PaperModelRolesResponses,
+  PaperModelRoutingDecisionErrors,
+  PaperModelRoutingDecisionResponses,
+  PaperProvidersDiscoverOpenAiErrors,
+  PaperProvidersDiscoverOpenAiResponses,
+  PaperProvidersDiscoverResponses,
+  PaperRunsControlErrors,
+  PaperRunsControlResponses,
+  PaperRunsCreateErrors,
+  PaperRunsCreateResponses,
+  PaperRunsEventsErrors,
+  PaperRunsEventsResponses,
+  PaperRunsExperimentsRunErrors,
+  PaperRunsExperimentsRunResponses,
+  PaperRunsExperimentStarterApplyErrors,
+  PaperRunsExperimentStarterApplyResponses,
+  PaperRunsExportErrors,
+  PaperRunsExportResponses,
+  PaperRunsGetErrors,
+  PaperRunsGetResponses,
+  PaperRunsGuidanceErrors,
+  PaperRunsGuidanceResponses,
+  PaperRunsListErrors,
+  PaperRunsListResponses,
+  PaperRunsPreviewErrors,
+  PaperRunsPreviewResponses,
+  PaperRunsResumeErrors,
+  PaperRunsResumeResponses,
   Part as Part2,
   PartDeleteErrors,
   PartDeleteResponses,
@@ -2097,6 +2132,872 @@ export class Mcp extends HeyApiClient {
   private _auth?: Auth2
   get auth(): Auth2 {
     return (this._auth ??= new Auth2({ client: this.client }))
+  }
+}
+
+export class ExperimentStarter extends HeyApiClient {
+  /**
+   * Apply experiment starter files
+   *
+   * Dry-run or write ExperimentProtocolStarterPack files into the selected workspace without overwriting by default.
+   */
+  public apply<ThrowOnError extends boolean = false>(
+    parameters: {
+      runID: string
+      directory?: string
+      workspace?: string
+      workspace_path?: string
+      dry_run?: boolean
+      overwrite?: boolean
+      file_paths?: Array<string>
+      update_package_json?: boolean
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "runID" },
+            { in: "query", key: "directory" },
+            { in: "query", key: "workspace" },
+            { in: "body", key: "workspace_path" },
+            { in: "body", key: "dry_run" },
+            { in: "body", key: "overwrite" },
+            { in: "body", key: "file_paths" },
+            { in: "body", key: "update_package_json" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<
+      PaperRunsExperimentStarterApplyResponses,
+      PaperRunsExperimentStarterApplyErrors,
+      ThrowOnError
+    >({
+      url: "/paper/runs/{runID}/experiment-starter/apply",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
+    })
+  }
+}
+
+export class Experiments extends HeyApiClient {
+  /**
+   * Run experiment protocol
+   *
+   * Dry-run or execute the current PaperRun ExperimentPlan/ExperimentProtocol in the selected workspace.
+   */
+  public run<ThrowOnError extends boolean = false>(
+    parameters: {
+      runID: string
+      directory?: string
+      workspace?: string
+      workspace_path?: string
+      dry_run?: boolean
+      timeout_seconds?: number | "NaN" | "Infinity" | "-Infinity" | "Infinity" | "-Infinity" | "NaN"
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "runID" },
+            { in: "query", key: "directory" },
+            { in: "query", key: "workspace" },
+            { in: "body", key: "workspace_path" },
+            { in: "body", key: "dry_run" },
+            { in: "body", key: "timeout_seconds" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<
+      PaperRunsExperimentsRunResponses,
+      PaperRunsExperimentsRunErrors,
+      ThrowOnError
+    >({
+      url: "/paper/runs/{runID}/experiments/run",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
+    })
+  }
+}
+
+export class Runs extends HeyApiClient {
+  /**
+   * List PaperRuns
+   *
+   * List home and workspace PaperRun history entries for resume and audit workflows.
+   */
+  public list<ThrowOnError extends boolean = false>(
+    parameters?: {
+      directory?: string
+      workspace?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "query", key: "directory" },
+            { in: "query", key: "workspace" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).get<PaperRunsListResponses, PaperRunsListErrors, ThrowOnError>({
+      url: "/paper/runs",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Create PaperRun
+   *
+   * Create a first-class PaperCode PaperRun from topic, code, data, logs, or paper materials.
+   */
+  public create<ThrowOnError extends boolean = false>(
+    parameters?: {
+      directory?: string
+      workspace?: string
+      topic?: string
+      workspace_path?: string
+      code_paths?: Array<string>
+      paper_files?: Array<string>
+      dataset_paths?: Array<string>
+      experiment_logs?: Array<string>
+      target_profile?: string
+      target_journal?: string
+      target_journal_url?: string
+      language?: string
+      model_roles?: {
+        [key: string]: string
+      }
+      budget_tier?: "quick" | "standard" | "deep" | "submission" | "custom"
+      quality_mode?: "reviewable_bundle" | "submission_candidate"
+      storage_scope?: "home" | "workspace"
+      data_egress_policy?: {
+        mode?: "private_first" | "allow_summaries" | "allow_authorized_paths"
+        allowed_paths?: Array<string>
+        denied_patterns?: Array<string>
+        external_model_full_text?: boolean
+      }
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "query", key: "directory" },
+            { in: "query", key: "workspace" },
+            { in: "body", key: "topic" },
+            { in: "body", key: "workspace_path" },
+            { in: "body", key: "code_paths" },
+            { in: "body", key: "paper_files" },
+            { in: "body", key: "dataset_paths" },
+            { in: "body", key: "experiment_logs" },
+            { in: "body", key: "target_profile" },
+            { in: "body", key: "target_journal" },
+            { in: "body", key: "target_journal_url" },
+            { in: "body", key: "language" },
+            { in: "body", key: "model_roles" },
+            { in: "body", key: "budget_tier" },
+            { in: "body", key: "quality_mode" },
+            { in: "body", key: "storage_scope" },
+            { in: "body", key: "data_egress_policy" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<PaperRunsCreateResponses, PaperRunsCreateErrors, ThrowOnError>({
+      url: "/paper/runs",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
+    })
+  }
+
+  /**
+   * Get PaperRun
+   *
+   * Get PaperRun state, ledgers, agent tree, diagnostics, preview state, and export state.
+   */
+  public get<ThrowOnError extends boolean = false>(
+    parameters: {
+      runID: string
+      directory?: string
+      workspace?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "runID" },
+            { in: "query", key: "directory" },
+            { in: "query", key: "workspace" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).get<PaperRunsGetResponses, PaperRunsGetErrors, ThrowOnError>({
+      url: "/paper/runs/{runID}",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Resume PaperRun
+   *
+   * Resume a previous PaperRun from the PaperCode home/workspace run index.
+   */
+  public resume<ThrowOnError extends boolean = false>(
+    parameters: {
+      runID: string
+      directory?: string
+      workspace?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "runID" },
+            { in: "query", key: "directory" },
+            { in: "query", key: "workspace" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<PaperRunsResumeResponses, PaperRunsResumeErrors, ThrowOnError>({
+      url: "/paper/runs/{runID}/resume",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Subscribe to PaperRun events
+   *
+   * Stream PaperRun snapshots as server-sent events.
+   */
+  public events<ThrowOnError extends boolean = false>(
+    parameters: {
+      runID: string
+      directory?: string
+      workspace?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "runID" },
+            { in: "query", key: "directory" },
+            { in: "query", key: "workspace" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).sse.get<PaperRunsEventsResponses, PaperRunsEventsErrors, ThrowOnError>({
+      url: "/paper/runs/{runID}/events",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Record PaperRun guidance
+   *
+   * Attach Chinese user guidance to a running paper workflow.
+   */
+  public guidance<ThrowOnError extends boolean = false>(
+    parameters: {
+      runID: string
+      directory?: string
+      workspace?: string
+      message?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "runID" },
+            { in: "query", key: "directory" },
+            { in: "query", key: "workspace" },
+            { in: "body", key: "message" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<PaperRunsGuidanceResponses, PaperRunsGuidanceErrors, ThrowOnError>({
+      url: "/paper/runs/{runID}/guidance",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
+    })
+  }
+
+  /**
+   * Control PaperRun
+   *
+   * Resume, retry, or cancel a PaperRun controller without requiring shell commands.
+   */
+  public control<ThrowOnError extends boolean = false>(
+    parameters: {
+      runID: string
+      directory?: string
+      workspace?: string
+      action?: "resume" | "retry" | "cancel"
+      stage?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "runID" },
+            { in: "query", key: "directory" },
+            { in: "query", key: "workspace" },
+            { in: "body", key: "action" },
+            { in: "body", key: "stage" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<PaperRunsControlResponses, PaperRunsControlErrors, ThrowOnError>({
+      url: "/paper/runs/{runID}/control",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
+    })
+  }
+
+  /**
+   * Get PaperRun preview
+   *
+   * Return the read-only preview data bound to PaperRun artifacts and ledgers.
+   */
+  public preview<ThrowOnError extends boolean = false>(
+    parameters: {
+      runID: string
+      directory?: string
+      workspace?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "runID" },
+            { in: "query", key: "directory" },
+            { in: "query", key: "workspace" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).get<PaperRunsPreviewResponses, PaperRunsPreviewErrors, ThrowOnError>({
+      url: "/paper/runs/{runID}/preview",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Export PaperRun bundle
+   *
+   * Create final or forced-draft export status. Final exports remain blocked until gates pass.
+   */
+  public export<ThrowOnError extends boolean = false>(
+    parameters: {
+      runID: string
+      directory?: string
+      workspace?: string
+      forced?: boolean
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "runID" },
+            { in: "query", key: "directory" },
+            { in: "query", key: "workspace" },
+            { in: "body", key: "forced" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<PaperRunsExportResponses, PaperRunsExportErrors, ThrowOnError>({
+      url: "/paper/runs/{runID}/export",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
+    })
+  }
+
+  private _experimentStarter?: ExperimentStarter
+  get experimentStarter(): ExperimentStarter {
+    return (this._experimentStarter ??= new ExperimentStarter({ client: this.client }))
+  }
+
+  private _experiments?: Experiments
+  get experiments(): Experiments {
+    return (this._experiments ??= new Experiments({ client: this.client }))
+  }
+}
+
+export class Providers extends HeyApiClient {
+  /**
+   * Discover providers and models
+   *
+   * Return provider/model discovery data for paper model role assignment.
+   */
+  public discover<ThrowOnError extends boolean = false>(
+    parameters?: {
+      directory?: string
+      workspace?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "query", key: "directory" },
+            { in: "query", key: "workspace" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).get<PaperProvidersDiscoverResponses, unknown, ThrowOnError>({
+      url: "/paper/providers/discover",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Discover OpenAI-compatible models
+   *
+   * Discover models from a user-supplied OpenAI-compatible endpoint without persisting the API key.
+   */
+  public discoverOpenAi<ThrowOnError extends boolean = false>(
+    parameters?: {
+      directory?: string
+      workspace?: string
+      provider_id?: string
+      provider_name?: string
+      base_url?: string
+      api_key?: string
+      compatibility?: "openai-compatible"
+      timeout_ms?: number | "NaN" | "Infinity" | "-Infinity" | "Infinity" | "-Infinity" | "NaN"
+      persist?: boolean
+      allow_models?: Array<string>
+      decision_model?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "query", key: "directory" },
+            { in: "query", key: "workspace" },
+            { in: "body", key: "provider_id" },
+            { in: "body", key: "provider_name" },
+            { in: "body", key: "base_url" },
+            { in: "body", key: "api_key" },
+            { in: "body", key: "compatibility" },
+            { in: "body", key: "timeout_ms" },
+            { in: "body", key: "persist" },
+            { in: "body", key: "allow_models" },
+            { in: "body", key: "decision_model" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<
+      PaperProvidersDiscoverOpenAiResponses,
+      PaperProvidersDiscoverOpenAiErrors,
+      ThrowOnError
+    >({
+      url: "/paper/providers/discover",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
+    })
+  }
+}
+
+export class ModelRoles extends HeyApiClient {
+  /**
+   * Resolve model roles
+   *
+   * Resolve default, per-role, and subagent model overrides for paper agents.
+   */
+  public assign<ThrowOnError extends boolean = false>(
+    parameters?: {
+      directory?: string
+      workspace?: string
+      default_model?: string
+      roles?: {
+        [key: string]: string
+      }
+      subagents?: {
+        [key: string]: string
+      }
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "query", key: "directory" },
+            { in: "query", key: "workspace" },
+            { in: "body", key: "default_model" },
+            { in: "body", key: "roles" },
+            { in: "body", key: "subagents" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<
+      PaperModelRolesAssignResponses,
+      PaperModelRolesAssignErrors,
+      ThrowOnError
+    >({
+      url: "/paper/model-roles",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
+    })
+  }
+}
+
+export class ModelInventory extends HeyApiClient {
+  /**
+   * Update model allowlist
+   *
+   * Persist the models that the PaperCode decision model and agent team may use.
+   */
+  public allowlist<ThrowOnError extends boolean = false>(
+    parameters?: {
+      directory?: string
+      workspace?: string
+      allowlist?: Array<string>
+      decision_model?: string
+      backup_decision_model?: string
+      roles?: {
+        [key: string]: string
+      }
+      registered_provider_ids?: Array<string>
+      provider_registrations?: {
+        [key: string]: unknown
+      }
+      stage_model_policies?: {
+        [key: string]: unknown
+      }
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "query", key: "directory" },
+            { in: "query", key: "workspace" },
+            { in: "body", key: "allowlist" },
+            { in: "body", key: "decision_model" },
+            { in: "body", key: "backup_decision_model" },
+            { in: "body", key: "roles" },
+            { in: "body", key: "registered_provider_ids" },
+            { in: "body", key: "provider_registrations" },
+            { in: "body", key: "stage_model_policies" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<
+      PaperModelInventoryAllowlistResponses,
+      PaperModelInventoryAllowlistErrors,
+      ThrowOnError
+    >({
+      url: "/paper/model-inventory",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
+    })
+  }
+}
+
+export class ModelRouting extends HeyApiClient {
+  /**
+   * Preview model routing
+   *
+   * Ask the PaperCode model router which allowlisted model would be used for a stage or role.
+   */
+  public decision<ThrowOnError extends boolean = false>(
+    parameters?: {
+      directory?: string
+      workspace?: string
+      role?: string
+      stage?: string
+      difficulty?: "low" | "medium" | "high"
+      task_scale?: "small" | "medium" | "large"
+      budget_tier?: "quick" | "standard" | "deep" | "submission" | "custom"
+      required_capabilities?: Array<string>
+      forced_model?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "query", key: "directory" },
+            { in: "query", key: "workspace" },
+            { in: "body", key: "role" },
+            { in: "body", key: "stage" },
+            { in: "body", key: "difficulty" },
+            { in: "body", key: "task_scale" },
+            { in: "body", key: "budget_tier" },
+            { in: "body", key: "required_capabilities" },
+            { in: "body", key: "forced_model" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<
+      PaperModelRoutingDecisionResponses,
+      PaperModelRoutingDecisionErrors,
+      ThrowOnError
+    >({
+      url: "/paper/model-routing/decision",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
+    })
+  }
+}
+
+export class Paper extends HeyApiClient {
+  /**
+   * List paper capabilities
+   *
+   * List MCP, skill, built-in, first-party, and Python capabilities available to paper stages.
+   */
+  public capabilities<ThrowOnError extends boolean = false>(
+    parameters?: {
+      directory?: string
+      workspace?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "query", key: "directory" },
+            { in: "query", key: "workspace" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).get<PaperCapabilitiesResponses, unknown, ThrowOnError>({
+      url: "/paper/capabilities",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Run paper doctor
+   *
+   * Inspect PaperCode runtime health, defaults, storage, language, MCP, and skill readiness.
+   */
+  public doctor<ThrowOnError extends boolean = false>(
+    parameters?: {
+      directory?: string
+      workspace?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "query", key: "directory" },
+            { in: "query", key: "workspace" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).get<PaperDoctorResponses, unknown, ThrowOnError>({
+      url: "/paper/doctor",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Get model roles
+   *
+   * Return the provider-agnostic model role routing defaults for paper agents.
+   */
+  public modelRoles<ThrowOnError extends boolean = false>(
+    parameters?: {
+      directory?: string
+      workspace?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "query", key: "directory" },
+            { in: "query", key: "workspace" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).get<PaperModelRolesResponses, unknown, ThrowOnError>({
+      url: "/paper/model-roles",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Get model inventory
+   *
+   * Return discovered models, user allowlist, the main decision model, and dynamic routing preview.
+   */
+  public modelInventory<ThrowOnError extends boolean = false>(
+    parameters?: {
+      directory?: string
+      workspace?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "query", key: "directory" },
+            { in: "query", key: "workspace" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).get<PaperModelInventoryResponses, unknown, ThrowOnError>({
+      url: "/paper/model-inventory",
+      ...options,
+      ...params,
+    })
+  }
+
+  private _runs?: Runs
+  get runs(): Runs {
+    return (this._runs ??= new Runs({ client: this.client }))
+  }
+
+  private _providers?: Providers
+  get providers(): Providers {
+    return (this._providers ??= new Providers({ client: this.client }))
+  }
+
+  private _modelRoles?: ModelRoles
+  get modelRoles2(): ModelRoles {
+    return (this._modelRoles ??= new ModelRoles({ client: this.client }))
+  }
+
+  private _modelInventory?: ModelInventory
+  get modelInventory2(): ModelInventory {
+    return (this._modelInventory ??= new ModelInventory({ client: this.client }))
+  }
+
+  private _modelRouting?: ModelRouting
+  get modelRouting(): ModelRouting {
+    return (this._modelRouting ??= new ModelRouting({ client: this.client }))
   }
 }
 
@@ -4858,6 +5759,11 @@ export class OpencodeClient extends HeyApiClient {
   private _mcp?: Mcp
   get mcp(): Mcp {
     return (this._mcp ??= new Mcp({ client: this.client }))
+  }
+
+  private _paper?: Paper
+  get paper(): Paper {
+    return (this._paper ??= new Paper({ client: this.client }))
   }
 
   private _project?: Project

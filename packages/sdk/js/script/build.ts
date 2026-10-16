@@ -12,13 +12,10 @@ import { createClient } from "@hey-api/openapi-ts"
 const openapiSource = process.env.OPENCODE_SDK_OPENAPI === "hono" ? "hono" : "httpapi"
 const opencode = path.resolve(dir, "../../opencode")
 
-// `bun dev generate` now derives the spec from the Effect HttpApi contract by
-// default; pass `--hono` to fall back to the legacy Hono spec for parity diffs.
-if (openapiSource === "httpapi") {
-  await $`bun dev generate > ${dir}/openapi.json`.cwd(opencode)
-} else {
-  await $`bun dev generate --hono > ${dir}/openapi.json`.cwd(opencode)
-}
+// This fork has no `generate` subcommand, so the spec is produced through the server's own
+// generator: `Server.openapi()` derives it from the Effect HttpApi contract, and
+// `Server.openapiHono()` returns the legacy Hono spec for parity diffs.
+await $`bun run --conditions=browser script/generate-openapi.ts ${openapiSource} > ${dir}/openapi.json`.cwd(opencode)
 
 await createClient({
   input: "./openapi.json",
