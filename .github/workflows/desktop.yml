@@ -63,7 +63,7 @@ jobs:
       - name: Package
         if: ${{ !inputs.publish }}
         working-directory: packages/desktop
-        run: bunx electron-builder --mac --arm64 --x64 --config electron-builder.config.ts
+        run: bunx electron-builder --mac --arm64 --x64 --publish never --config electron-builder.config.ts
       - name: Package and publish
         if: ${{ inputs.publish }}
         working-directory: packages/desktop
@@ -100,7 +100,7 @@ jobs:
       - name: Package
         if: ${{ !inputs.publish }}
         working-directory: packages/desktop
-        run: bunx electron-builder --win --x64 --config electron-builder.config.ts
+        run: bunx electron-builder --win --x64 --publish never --config electron-builder.config.ts
       - name: Package and publish
         if: ${{ inputs.publish }}
         working-directory: packages/desktop
@@ -135,7 +135,7 @@ jobs:
       - name: Package
         if: ${{ !inputs.publish }}
         working-directory: packages/desktop
-        run: bunx electron-builder --linux --x64 --config electron-builder.config.ts
+        run: bunx electron-builder --linux --x64 --publish never --config electron-builder.config.ts
       - name: Package and publish
         if: ${{ inputs.publish }}
         working-directory: packages/desktop
