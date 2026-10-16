@@ -17,6 +17,14 @@
             - fix(api): provider 列表接口（/provider、/config/providers）不再回传解析后的密钥，改为 [redacted]
             - fix(paper): Python 桥不再硬编码 python，优先 research-tools venv 与 >=3.11 解释器，支持 PAPERCODE_TOOL_PYTHON 覆盖
             - fix(test): authoring 环境断言跟随 process.platform，不再写死 Windows
+            - fix(test): PTY 票据测试改用路由常量（x-papercode-ticket），修掉上一次改名遗留的 4 个确定性 403 失败
+            - fix(test): OpenAPI 路由清单补齐 experiment-starter/apply 与 experiments/run 两条论文路由
+            - fix(test): 真跑渲染的引擎测试（material-index、observability-audit）改用集成预算，避免 60s 超时
+        :sdk
+            - fix(sdk): 修复 fork 缺失的 generate 子命令导致的 SDK 生成断链，改用 Server.openapi() 产出 spec 并重新生成 v2 类型
+        :config
+            - feat(config): providers 接受 compat.supportsDeveloperRole 与模型的 reasoningEfforts 映射（播种变体并决定默认 effort）
+            - test(config): 覆盖声明式 cost 透传（不再恒为 0）
         :brand
             - refactor(brand): paper_fucker 全仓库收尾为 PaperCode，覆盖配置目录与文件名、环境变量、Python 包、主题 id、CLI 启动器与历史文档
             - chore(bin): 合并重复的 bin 条目为单一 bin/papercode 启动器，删除 bin/paper_fucker
