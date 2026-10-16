@@ -2,14 +2,21 @@ import { sentryVitePlugin } from "@sentry/vite-plugin"
 import { defineConfig } from "electron-vite"
 import appPlugin from "@opencode-ai/app/vite"
 import * as fs from "node:fs/promises"
+import * as path from "node:path"
+import { createRequire } from "node:module"
 
 const channel = (() => {
-  const raw = process.env.PAPER_FUCKER_CHANNEL ?? process.env.OPENCODE_CHANNEL
+  const raw = process.env.PAPERCODE_CHANNEL ?? process.env.OPENCODE_CHANNEL
   if (raw === "dev" || raw === "beta" || raw === "prod") return raw
   return "dev"
 })()
 
-const PAPER_FUCKER_SERVER_DIST = "../opencode/dist/node"
+const PAPERCODE_SERVER_DIST = "../opencode/dist/node"
+// The main process is bundled as ESM, which cannot load jsonc-parser's UMD build; point the import at
+// the ESM entry instead. jsonc-parser is a dependency of the opencode package, so it is resolved
+// through that package rather than by path, which keeps the store layout out of this file.
+const resolveFromOpencode = createRequire(path.resolve("../opencode/package.json"))
+const JSONC_PARSER_ESM = resolveFromOpencode.resolve("jsonc-parser/lib/esm/main.js")
 
 const nodePtyPkg = `@lydell/node-pty-${process.platform}-${process.arch}`
 
@@ -33,36 +40,44 @@ const sentry =
 export default defineConfig({
   main: {
     define: {
-      "import.meta.env.PAPER_FUCKER_CHANNEL": JSON.stringify(channel),
+      "import.meta.env.PAPERCODE_CHANNEL": JSON.stringify(channel),
       "import.meta.env.OPENCODE_CHANNEL": JSON.stringify(channel),
     },
     build: {
       rollupOptions: {
         input: { index: "src/main/index.ts", sidecar: "src/main/sidecar.ts" },
+        external: ["opencode-web-ui.gen.ts"],
       },
       externalizeDeps: { include: [nodePtyPkg] },
     },
     plugins: [
       {
-        name: "paper_fucker:node-pty-narrower",
+        name: "papercode:jsonc-parser-esm",
+        enforce: "pre",
+        resolveId(id) {
+          if (id === "jsonc-parser") return JSONC_PARSER_ESM
+        },
+      },
+      {
+        name: "papercode:node-pty-narrower",
         enforce: "pre",
         resolveId(s) {
           if (s === "@lydell/node-pty") return nodePtyPkg
         },
       },
       {
-        name: "paper_fucker:virtual-server-module",
+        name: "papercode:virtual-server-module",
         enforce: "pre",
         resolveId(id) {
-          if (id === "virtual:opencode-server") return this.resolve(`${PAPER_FUCKER_SERVER_DIST}/node.js`)
+          if (id === "virtual:opencode-server") return this.resolve(`${PAPERCODE_SERVER_DIST}/node.js`)
         },
       },
       {
-        name: "paper_fucker:copy-server-assets",
+        name: "papercode:copy-server-assets",
         async writeBundle() {
-          for (const l of await fs.readdir(PAPER_FUCKER_SERVER_DIST)) {
+          for (const l of await fs.readdir(PAPERCODE_SERVER_DIST)) {
             if (!l.endsWith(".wasm")) continue
-            await fs.writeFile(`./out/main/chunks/${l}`, await fs.readFile(`${PAPER_FUCKER_SERVER_DIST}/${l}`))
+            await fs.writeFile(`./out/main/chunks/${l}`, await fs.readFile(`${PAPERCODE_SERVER_DIST}/${l}`))
           }
         },
       },
@@ -84,7 +99,7 @@ export default defineConfig({
     publicDir: "../../../app/public",
     root: "src/renderer",
     define: {
-      "import.meta.env.VITE_PAPER_FUCKER_CHANNEL": JSON.stringify(channel),
+      "import.meta.env.VITE_PAPERCODE_CHANNEL": JSON.stringify(channel),
       "import.meta.env.VITE_OPENCODE_CHANNEL": JSON.stringify(channel),
     },
     build: {

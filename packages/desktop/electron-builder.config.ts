@@ -20,14 +20,23 @@ async function signWindows(configuration: { path: string }) {
   )
 }
 
+const hasAppleCredentials = Boolean(
+  process.env.APPLE_ID && process.env.APPLE_APP_SPECIFIC_PASSWORD && process.env.APPLE_TEAM_ID,
+)
+
 const channel = (() => {
   const raw = process.env.PAPERCODE_CHANNEL ?? process.env.OPENCODE_CHANNEL
   if (raw === "dev" || raw === "beta" || raw === "prod") return raw
   return "dev"
 })()
 
+// Packaging normally downloads the Electron distribution; ELECTRON_DIST points it at an already
+// unpacked one (node_modules/electron/dist) so a machine behind a slow or blocked GitHub can build.
+const electronDist = process.env.ELECTRON_DIST
+
 const getBase = (): Configuration => ({
   artifactName: "papercode-desktop-${os}-${arch}.${ext}",
+  ...(electronDist ? { electronDist } : {}),
   directories: {
     output: "dist",
     buildResources: "resources",
@@ -39,6 +48,13 @@ const getBase = (): Configuration => ({
       to: "native/",
       filter: ["index.js", "index.d.ts", "build/Release/mac_window.node", "swift-build/**"],
     },
+    // The main process loads its window and dock icons from process.resourcesPath/icons when
+    // packaged, so the icon set has to leave the asar and land in Contents/Resources.
+    {
+      from: "resources/icons",
+      to: "icons",
+      filter: ["icon.png", "icon.icns", "icon.ico", "dock.png"],
+    },
   ],
   mac: {
     category: "public.app-category.developer-tools",
@@ -47,11 +63,15 @@ const getBase = (): Configuration => ({
     gatekeeperAssess: false,
     entitlements: "resources/entitlements.plist",
     entitlementsInherit: "resources/entitlements.plist",
-    notarize: true,
+    // Notarization needs an Apple Developer ID plus APPLE_ID/APPLE_APP_SPECIFIC_PASSWORD/APPLE_TEAM_ID.
+    // Without them a local `package:mac` must still produce a runnable (ad-hoc signed) app instead of
+    // failing, so it is only requested when the credentials are present.
+    notarize: hasAppleCredentials,
     target: ["dmg", "zip"],
   },
   dmg: {
-    sign: true,
+    // A DMG can only be signed with a Developer ID; unsigned local builds keep the default.
+    sign: hasAppleCredentials,
   },
   protocols: {
     name: "papercode",
