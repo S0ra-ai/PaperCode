@@ -297,3 +297,79 @@ describe("provider api redaction", () => {
     expect(Provider.redact(info)).toEqual(info)
   })
 })
+
+describe("the provider block a user actually pastes", () => {
+  // The shape below is the one the user supplied for their endpoint: provider-level compat plus a
+  // per-model effort map. Both used to be rejected as unknown keys.
+  // Typed as the decoded config shape: the literal below is what a user writes in the file.
+  const config: { $schema: string; providers: Record<string, ConfigProvider.UserProvider> } = {
+    $schema: "https://papercode.local/config.json",
+    providers: {
+      fjbdg: {
+        displayName: "fjbdg",
+        apiKeyEnv: "FJBDG_API_KEY",
+        api: "openai-completions",
+        baseURL: "https://newapi.example.test:10443/v1",
+        reasoning: "max",
+        models: [
+          {
+            id: "deepseek-v4-flash-vision-exp",
+            contextWindow: 1000000,
+            maxTokens: 384000,
+            input: ["text", "image"],
+            reasoningEfforts: { max: "max" },
+          },
+        ],
+        compat: { supportsDeveloperRole: false },
+      },
+    },
+  }
+
+  test("validates without unknown-key errors", () => {
+    expect(ConfigProvider.validateUserProviders(config.providers)).toEqual([])
+  })
+
+  test("registers with the declared metadata and effort map", async () => {
+    await withConfig(config, { FJBDG_API_KEY: "test-fjbdg-key" }, async () => {
+      const provider = (await list())[ProviderID.make("fjbdg")]
+      const model = provider.models[ModelID.make("deepseek-v4-flash-vision-exp")]
+
+      expect(model.limit).toMatchObject({ context: 1_000_000, output: 384_000 })
+      expect(ProviderTransform.maxOutputTokens(model)).toBe(384_000)
+      expect(model.capabilities.input.image).toBe(true)
+      expect(model.capabilities.reasoning).toBe(true)
+      // `reasoning: "max"` names the tier, the model's map supplies the value the endpoint expects.
+      expect(model.options.reasoningEffort).toBe("max")
+      expect(model.variants?.max).toEqual({ reasoningEffort: "max" })
+    })
+  })
+
+  test("keeps the compat assertion on the normalized record", () => {
+    const normalized = ConfigProvider.normalizeUserProviders(config.providers)
+    expect(normalized.fjbdg.compat).toEqual({ supportsDeveloperRole: false })
+  })
+})
+
+describe("cost passthrough for config-declared models", () => {
+  test("a declared cost reaches the registry instead of the 0 default", async () => {
+    await withConfig(
+      {
+        $schema: "https://papercode.local/config.json",
+        providers: {
+          priced: {
+            api: "openai-completions",
+            baseURL: "https://priced.example.test/v1",
+            apiKeyEnv: "PRICED_API_KEY",
+            models: [{ id: "priced-model", contextWindow: 128000, maxTokens: 8000, cost: { input: 0.3, output: 1.2 } }],
+          },
+        },
+      },
+      { PRICED_API_KEY: "k" },
+      async () => {
+        const model = (await list())[ProviderID.make("priced")].models[ModelID.make("priced-model")]
+        expect(model.cost.input).toBe(0.3)
+        expect(model.cost.output).toBe(1.2)
+      },
+    )
+  })
+})

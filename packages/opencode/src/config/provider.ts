@@ -10,6 +10,16 @@ const ReasoningEffort = Schema.Literals(["minimal", "low", "medium", "high", "xh
 
 const ReasoningSetting = Schema.Union([Schema.Boolean, ReasoningEffort])
 
+export const ProviderCompat = Schema.Struct({
+  /**
+   * Whether the endpoint accepts the OpenAI `developer` role. Declaring `false` asserts the model
+   * must be reached with `system` messages; the OpenAI-compatible transport this config maps to
+   * always sends `system`, so the assertion holds by construction (the sibling wire test pins it).
+   */
+  supportsDeveloperRole: Schema.optional(Schema.Boolean),
+})
+export type ProviderCompat = Schema.Schema.Type<typeof ProviderCompat>
+
 // Shape of the vendor API. Only OpenAI-compatible transports are mapped today; the closed set keeps
 // an unknown shape from silently falling back to a transport that cannot speak the endpoint.
 const ApiShape = Schema.Literals(["openai-completions", "openai-compatible"])
@@ -98,6 +108,7 @@ export const Info = Schema.Struct({
   npm: Schema.optional(Schema.String),
   whitelist: Schema.optional(Schema.mutable(Schema.Array(Schema.String))),
   blacklist: Schema.optional(Schema.mutable(Schema.Array(Schema.String))),
+  compat: Schema.optional(ProviderCompat),
   options: Schema.optional(
     Schema.StructWithRest(
       Schema.Struct({
@@ -154,9 +165,16 @@ export const UserModel = Schema.Struct({
   input: Schema.optional(Schema.mutable(Schema.Array(Modality))),
   output: Schema.optional(Schema.mutable(Schema.Array(Modality))),
   reasoning: Schema.optional(ReasoningSetting),
+  /**
+   * Effort tiers this model accepts, mapped to the value the endpoint expects, e.g.
+   * `{ "max": "max", "high": "high" }`. Each entry becomes a selectable variant and the tier named
+   * by `reasoning` (or the provider default) is what requests send by default.
+   */
+  reasoningEfforts: Schema.optional(Schema.Record(Schema.String, Schema.String)),
   ...ModelFields,
 }).pipe(withStatics((s) => ({ zod: zod(s) })))
 export type UserModel = Schema.Schema.Type<typeof UserModel>
+
 
 export const UserProvider = Schema.Struct({
   displayName: Schema.optional(Schema.String),
@@ -164,6 +182,9 @@ export const UserProvider = Schema.Struct({
   baseURL: Schema.optional(Schema.String),
   api: Schema.optional(ApiShape),
   reasoning: Schema.optional(ReasoningSetting),
+  /** Default effort map for every model of this provider; a model-level map wins. */
+  reasoningEfforts: Schema.optional(Schema.Record(Schema.String, Schema.String)),
+  compat: Schema.optional(ProviderCompat),
   models: Schema.optional(
     Schema.Union([Schema.mutable(Schema.Array(UserModel)), Schema.Record(Schema.String, UserModel)]),
   ),
@@ -203,11 +224,14 @@ function normalizeModel(
   input: UserModel,
   modelID: string,
   providerReasoning: Schema.Schema.Type<typeof ReasoningSetting> | undefined,
+  providerEfforts: Record<string, string> | undefined,
 ): Model {
   // A model-level setting wins over the provider-level default.
   const setting = input.reasoning ?? providerReasoning
-  const effort = effortOf(setting)
-  const reasoning = reasoningOf(setting)
+  const efforts = input.reasoningEfforts ?? providerEfforts
+  // The declared tier names the value the endpoint expects, e.g. reasoning: "max" + { max: "max" }.
+  const effort = effortOf(setting) ? (efforts?.[effortOf(setting)!] ?? effortOf(setting)) : undefined
+  const reasoning = reasoningOf(setting) ?? (efforts && Object.keys(efforts).length > 0 ? true : undefined)
   const context = input.contextWindow ?? input.limit?.context
   const output = input.maxTokens ?? input.limit?.output
   const modalities =
@@ -217,12 +241,16 @@ function normalizeModel(
           output: input.output ?? input.modalities?.output ?? ["text"],
         }
       : undefined
+  const seededVariants = efforts
+    ? Object.fromEntries(Object.entries(efforts).map(([level, value]) => [level, { reasoningEffort: value }]))
+    : undefined
   return {
     ...input,
     id: input.id ?? modelID,
     limit: context === undefined && output === undefined ? input.limit : { context: context ?? 0, output: output ?? 0 },
     modalities,
     reasoning,
+    variants: seededVariants ? { ...seededVariants, ...(input.variants ?? {}) } : input.variants,
     options: {
       ...(input.options ?? {}),
       ...(effort ? { reasoningEffort: effort } : {}),
@@ -234,11 +262,15 @@ function normalizeModels(
   models: NonNullable<UserProvider["models"]> | undefined,
   providerID: string,
   providerReasoning: Schema.Schema.Type<typeof ReasoningSetting> | undefined,
+  providerEfforts: Record<string, string> | undefined,
 ): Record<string, Model> | undefined {
   if (!models) return undefined
   if (!Array.isArray(models)) {
     return Object.fromEntries(
-      Object.entries(models).map(([modelID, model]) => [modelID, normalizeModel(model, modelID, providerReasoning)]),
+      Object.entries(models).map(([modelID, model]) => [
+        modelID,
+        normalizeModel(model, modelID, providerReasoning, providerEfforts),
+      ]),
     )
   }
   const out: Record<string, Model> = {}
@@ -249,7 +281,7 @@ function normalizeModels(
     if (out[model.id]) {
       throw new UserProviderConfigError(`duplicate model id "${model.id}"`, [providerID, "models"])
     }
-    out[model.id] = normalizeModel(model, model.id, providerReasoning)
+    out[model.id] = normalizeModel(model, model.id, providerReasoning, providerEfforts)
   }
   return out
 }
@@ -268,10 +300,11 @@ export function normalizeUserProviders(input: Record<string, UserProvider> | und
         name: provider.displayName ?? provider.name,
         env,
         npm,
+        compat: provider.compat,
         whitelist: provider.whitelist,
         blacklist: provider.blacklist,
         options: Object.keys(options).length ? options : undefined,
-        models: normalizeModels(provider.models, providerID, provider.reasoning),
+        models: normalizeModels(provider.models, providerID, provider.reasoning, provider.reasoningEfforts),
       }
       return [providerID, normalized]
     }),
