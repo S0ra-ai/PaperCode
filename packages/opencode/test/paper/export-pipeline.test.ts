@@ -287,6 +287,98 @@ describe("PaperRun export renderer pipeline", () => {
     expect(result.bundle.files.find((file) => file.format === "pdf")?.status).toBe("written")
   })
 
+  test("applies a named Latin font to a manuscript without CJK", async () => {
+    const run = await newRun()
+    const calls: Array<{ tool: string; args: string[] }> = []
+    const command: PaperExportCommandRunner = async (input) => {
+      calls.push({ tool: input.tool, args: input.args })
+      const outputIndex = input.args.findIndex((arg) => arg === "-o")
+      const output = outputIndex >= 0 ? input.args[outputIndex + 1] : undefined
+      if (input.tool === "pandoc" && output?.endsWith(".tex")) {
+        await Bun.write(output, "\\documentclass{article}\n")
+        return { exit_code: 0, stdout: "", stderr: "" }
+      }
+      if (input.tool === "pandoc" && output?.endsWith(".docx")) {
+        await Bun.write(output, validDocxBytes)
+        return { exit_code: 0, stdout: "", stderr: "" }
+      }
+      if (input.tool === "xelatex") {
+        const outdir = input.args.find((arg) => arg.startsWith("-output-directory="))?.slice("-output-directory=".length)
+        await Bun.write(path.join(outdir!, "bundle-latin.pdf"), validPdfBytes)
+        return { exit_code: 0, stdout: "", stderr: "" }
+      }
+      return { exit_code: 1, stdout: "", stderr: `unexpected command ${input.tool}` }
+    }
+
+    await renderPaperExportPipeline(
+      run.run_dir,
+      {
+        mode: "final",
+        bundle_id: "bundle-latin",
+        draft: { ...run.draft, markdown: "# Retrieval Augmented Evaluation\n\n## 1 Introduction\n\nText." },
+        final_gate: passedGate,
+        source_artifact_ids: [],
+        tools: { pandoc: "pandoc", xelatex: "xelatex" },
+        command,
+        fonts: { latin: "Times New Roman" },
+        now,
+      },
+      run.options,
+    )
+
+    const pandocCall = calls.find((call) => call.tool === "pandoc" && call.args.includes("-t"))
+    expect(pandocCall?.args).toContain("mainfont=Times New Roman")
+    expect(pandocCall?.args).not.toContain("documentclass=ctexart")
+  })
+
+  test("reports characters the engine rendered as blank", async () => {
+    const run = await newRun()
+    const command: PaperExportCommandRunner = async (input) => {
+      const outputIndex = input.args.findIndex((arg) => arg === "-o")
+      const output = outputIndex >= 0 ? input.args[outputIndex + 1] : undefined
+      if (input.tool === "pandoc" && output?.endsWith(".tex")) {
+        await Bun.write(output, "\\documentclass{ctexart}\n")
+        return { exit_code: 0, stdout: "", stderr: "" }
+      }
+      if (input.tool === "pandoc" && output?.endsWith(".docx")) {
+        await Bun.write(output, validDocxBytes)
+        return { exit_code: 0, stdout: "", stderr: "" }
+      }
+      if (input.tool === "xelatex") {
+        const outdir = input.args.find((arg) => arg.startsWith("-output-directory="))?.slice("-output-directory=".length)
+        await Bun.write(
+          path.join(outdir!, "bundle-blank.log"),
+          "Missing character: There is no 한 (U+D55C) in font STSong/OT!\nMissing character: There is no 한 (U+D55C) in font STSong/OT!\n",
+        )
+        await Bun.write(path.join(outdir!, "bundle-blank.pdf"), validPdfBytes)
+        return { exit_code: 0, stdout: "", stderr: "" }
+      }
+      return { exit_code: 1, stdout: "", stderr: `unexpected command ${input.tool}` }
+    }
+
+    const result = await renderPaperExportPipeline(
+      run.run_dir,
+      {
+        mode: "final",
+        bundle_id: "bundle-blank",
+        draft: { ...run.draft, markdown: "# 中文标题\n\n한국어 텍스트。" },
+        final_gate: passedGate,
+        source_artifact_ids: [],
+        tools: { pandoc: "pandoc", xelatex: "xelatex" },
+        command,
+        now,
+      },
+      run.options,
+    )
+
+    const pdf = result.bundle.files.find((file) => file.format === "pdf")
+    // The PDF is still usable, so it stays written - the blanks are reported, not hidden.
+    expect(pdf?.status).toBe("written")
+    expect(pdf?.diagnostics.join("\n")).toContain("한")
+    expect(pdf?.diagnostics.join("\n")).toContain("STSong")
+    expect(result.bundle.manifest.tool_diagnostics.join("\n")).toContain("PAPERCODE_EXPORT_CJK_FONT")
+  })
+
   test("leads the PDF diagnostic with the TeX error instead of the kpathsea flood", async () => {
     const run = await newRun()
     const command: PaperExportCommandRunner = async (input) => {

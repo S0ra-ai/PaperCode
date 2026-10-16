@@ -268,9 +268,10 @@ function pandocLatexArgs(markdownPath: string, latexPath: string, markdown: stri
       "geometry:margin=25mm",
       "-V",
       "pagestyle=plain",
-      ...fontArgs(fonts),
     )
   }
+  // A named Latin font applies to any manuscript, not only to the ones that need ctex.
+  args.push(...fontArgs(fonts))
   args.push("-o", latexPath)
   return args
 }
@@ -334,14 +335,24 @@ async function renderLatex(input: {
   })
 }
 
-/** xelatex reports the cause on stdout as a line starting with "!"; the mktextfm flood goes to stderr. */
-function firstErrorLine(stdout: string) {
+/**
+ * xelatex reports the cause on stdout as a line starting with "!", followed by the offending source
+ * line ("l.28 \setCJKmainfont"). Both matter: the message names the problem, the location says which
+ * line of the generated .tex produced it.
+ */
+function texErrorExcerpt(stdout: string) {
   const lines = stdout.split("\n")
   const index = lines.findIndex((line) => line.startsWith("!"))
   if (index === -1) return undefined
-  const context = lines[index + 1]?.trim()
-  const line = lines[index].trim()
-  return context && !context.startsWith("!") && !context.startsWith("l.") ? `${line} ${context}` : line
+  const parts = [lines[index].trim()]
+  const continuation = lines[index + 1]?.trim()
+  if (continuation && !continuation.startsWith("!")) parts.push(continuation)
+  const location = lines
+    .slice(index, index + 6)
+    .map((line) => line.trim())
+    .find((line) => /^l\.\d+/.test(line))
+  if (location) parts.push(location)
+  return parts.join(" ")
 }
 
 const CJK_FONT_HINT =
@@ -353,14 +364,41 @@ const CJK_FONT_HINT =
  * font case - the one the user can act on.
  */
 function latexFailureDiagnostic(engine: string, result: PaperExportCommandResult) {
-  const error = firstErrorLine(result.stdout)
-  const excerpt = result.stderr.trim().slice(-DIAGNOSTIC_EXCERPT_LIMIT)
+  const error = texErrorExcerpt(result.stdout)
+  // kpathsea floods stderr; when it is empty the engine's own output is the only context left.
+  const stderr = result.stderr.trim()
+  const context = stderr || result.stdout.trim()
   const parts = [`${engine} failed with exit code ${result.exit_code}.`]
   if (error) parts.push(error)
-  if (excerpt) parts.push(`${error ? "stderr" : "output"}: ${excerpt}`)
-  if (!error && !excerpt) parts.push(`${engine} did not produce PDF output.`)
+  if (context) parts.push(`${stderr ? "stderr" : "output"}: ${context.slice(-DIAGNOSTIC_EXCERPT_LIMIT)}`)
+  if (!error && !context) parts.push(`${engine} did not produce PDF output.`)
   if (error && /font/i.test(error)) parts.push(CJK_FONT_HINT)
   return parts.join(" ")
+}
+
+/** How many distinct missing characters a diagnostic names before it only counts the rest. */
+const MISSING_GLYPH_LIMIT = 5
+
+/**
+ * TeX drops characters it has no font for and still exits 0 - "Missing character: There is no X in
+ * font Y" goes to the log and nowhere else. ctex resolves a Chinese font set, so a manuscript that
+ * quotes Japanese, Korean or a rare Han character loses those glyphs while the export reports
+ * success; the log is the only record.
+ */
+async function missingGlyphDiagnostics(texPath: string) {
+  const log = Bun.file(`${texPath.replace(/\.tex$/, "")}.log`)
+  if (!(await log.exists())) return []
+  const missing = new Map<string, string>()
+  for (const line of (await log.text()).split("\n")) {
+    const match = line.trim().match(/^Missing character: There is no (.+?) in font (.+?)!$/)
+    if (match) missing.set(match[1].trim(), match[2].trim())
+  }
+  if (missing.size === 0) return []
+  const listed = [...missing].slice(0, MISSING_GLYPH_LIMIT).map(([glyph, font]) => `${glyph}（字体 ${font}）`)
+  const rest = missing.size > MISSING_GLYPH_LIMIT ? `，以及其余 ${missing.size - MISSING_GLYPH_LIMIT} 个字符` : ""
+  return [
+    `PDF 已生成，但有字符没有对应字体、被渲染为空白：${listed.join("，")}${rest}。可用 PAPERCODE_EXPORT_CJK_FONT 指定覆盖该语种的字体后重新导出。`,
+  ]
 }
 
 async function renderPdf(input: {
@@ -423,7 +461,7 @@ async function renderPdf(input: {
       bundleID: input.bundleID,
       format: "pdf",
       bytes: new Uint8Array(await readFile(pdfPath)),
-      diagnostics: [],
+      diagnostics: await missingGlyphDiagnostics(texPath),
     })
   }
   return failedFile(input.bundleID, "pdf", diagnostics.length > 0 ? diagnostics : ["No LaTeX engine produced PDF output."])
