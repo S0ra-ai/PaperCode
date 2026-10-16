@@ -34,8 +34,16 @@ const channel = (() => {
 // unpacked one (node_modules/electron/dist) so a machine behind a slow or blocked GitHub can build.
 const electronDist = process.env.ELECTRON_DIST
 
+// The channel belongs in the file name. dev, beta and prod builds of the same version otherwise emit
+// identical names, and the GitHub publisher overwrites same-named assets of a release, so the last
+// channel built would replace the others - and every channel's update metadata would point at it.
+// Production keeps the plain name: it is the one users download by name.
+const artifactName = ["papercode-desktop", ...(channel === "prod" ? [] : [channel]), "${os}-${arch}.${ext}"].join(
+  "-",
+)
+
 const getBase = (): Configuration => ({
-  artifactName: "papercode-desktop-${os}-${arch}.${ext}",
+  artifactName,
   ...(electronDist ? { electronDist } : {}),
   directories: {
     output: "dist",
