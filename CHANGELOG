@@ -19,7 +19,7 @@
             - feat(paper): 实验协议执行支持 repetitions（1–20），每次执行注入种子，结果保留样本并在结果表渲染 mean ± std (n=N)，离散度不再只能手写
             - feat(paper): proposed 与基线的重复样本自动做 Welch t 检验，t/df/双侧 p 写入 ResultReport.significance 与结果章节的统计解释段
             - feat(paper): 样本足够时同时给出 Wilcoxon 秩和检验，多基线比较按检验族做 Holm–Bonferroni 校正，结果章节报告校正后的 p
-            - feat(paper): 导出时自动生成主指标柱状图（PNG，含误差棒）到 figures/primary-metric.png，结果章节引用它，一区图件不再依赖作者手写
+            - feat(paper): 导出时自动生成主指标柱状图（PNG，含误差棒与轴/系列标签）到 figures/primary-metric.png，结果章节引用它，一区图件不再依赖作者手写
             - feat(paper): 配置 PAPERCODE_TRANSLATE_{BASE_URL,API_KEY,MODEL} 后，国际一区稿件会自动把叙事章节翻译成英文并持久化为章节覆盖；翻译全有或全无，失败保持原稿由闸门拦截
         :fix
             - fix(paper): 统计、表格、图只统计结果章节，附录里的 p 值或声明表不再顶替结果

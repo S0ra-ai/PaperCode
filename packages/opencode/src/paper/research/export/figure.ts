@@ -56,6 +56,32 @@ const MARGIN = { left: 90, right: 40, top: 50, bottom: 110 }
 
 /** 5x7 glyphs for the characters a metric axis needs; other characters are drawn as spaces. */
 const GLYPHS: Record<string, string[]> = {
+  A: ["01110", "10001", "10001", "11111", "10001", "10001", "10001"],
+  B: ["11110", "10001", "10001", "11110", "10001", "10001", "11110"],
+  C: ["01110", "10001", "10000", "10000", "10000", "10001", "01110"],
+  D: ["11110", "10001", "10001", "10001", "10001", "10001", "11110"],
+  E: ["11111", "10000", "10000", "11110", "10000", "10000", "11111"],
+  F: ["11111", "10000", "10000", "11110", "10000", "10000", "10000"],
+  G: ["01110", "10001", "10000", "10111", "10001", "10001", "01111"],
+  H: ["10001", "10001", "10001", "11111", "10001", "10001", "10001"],
+  I: ["01110", "00100", "00100", "00100", "00100", "00100", "01110"],
+  J: ["00111", "00010", "00010", "00010", "00010", "10010", "01100"],
+  K: ["10001", "10010", "10100", "11000", "10100", "10010", "10001"],
+  L: ["10000", "10000", "10000", "10000", "10000", "10000", "11111"],
+  M: ["10001", "11011", "10101", "10101", "10001", "10001", "10001"],
+  N: ["10001", "11001", "10101", "10011", "10001", "10001", "10001"],
+  O: ["01110", "10001", "10001", "10001", "10001", "10001", "01110"],
+  P: ["11110", "10001", "10001", "11110", "10000", "10000", "10000"],
+  Q: ["01110", "10001", "10001", "10001", "10101", "10010", "01101"],
+  R: ["11110", "10001", "10001", "11110", "10100", "10010", "10001"],
+  S: ["01111", "10000", "10000", "01110", "00001", "00001", "11110"],
+  T: ["11111", "00100", "00100", "00100", "00100", "00100", "00100"],
+  U: ["10001", "10001", "10001", "10001", "10001", "10001", "01110"],
+  V: ["10001", "10001", "10001", "10001", "10001", "01010", "00100"],
+  W: ["10001", "10001", "10001", "10101", "10101", "11011", "10001"],
+  X: ["10001", "10001", "01010", "00100", "01010", "10001", "10001"],
+  Y: ["10001", "10001", "01010", "00100", "00100", "00100", "00100"],
+  Z: ["11111", "00001", "00010", "00100", "01000", "10000", "11111"],
   "0": ["01110", "10001", "10011", "10101", "11001", "10001", "01110"],
   "1": ["00100", "01100", "00100", "00100", "00100", "00100", "01110"],
   "2": ["01110", "10001", "00001", "00010", "00100", "01000", "11111"],
@@ -70,6 +96,13 @@ const GLYPHS: Record<string, string[]> = {
   "-": ["00000", "00000", "00000", "11111", "00000", "00000", "00000"],
   "+": ["00000", "00100", "00100", "11111", "00100", "00100", "00000"],
   "%": ["11001", "11010", "00100", "00100", "01000", "01011", "10011"],
+  "_": ["00000", "00000", "00000", "00000", "00000", "00000", "11111"],
+  "/": ["00001", "00010", "00010", "00100", "01000", "01000", "10000"],
+  ":": ["00000", "01100", "01100", "00000", "01100", "01100", "00000"],
+  "(": ["00010", "00100", "01000", "01000", "01000", "00100", "00010"],
+  ")": ["01000", "00100", "00010", "00010", "00010", "00100", "01000"],
+  "=": ["00000", "00000", "11111", "00000", "11111", "00000", "00000"],
+  "@": ["01110", "10001", "10111", "10101", "10111", "10000", "01110"],
   " ": ["00000", "00000", "00000", "00000", "00000", "00000", "00000"],
 }
 
@@ -116,7 +149,7 @@ function drawLine(
 
 function drawText(image: Rgba, x: number, y: number, text: string, scale: number, color: [number, number, number]) {
   let cursor = x
-  for (const character of text) {
+  for (const character of text.toUpperCase()) {
     const glyph = GLYPHS[character] ?? GLYPHS[" "]
     for (let row = 0; row < glyph.length; row++) {
       for (let column = 0; column < glyph[row].length; column++) {
@@ -127,6 +160,17 @@ function drawText(image: Rgba, x: number, y: number, text: string, scale: number
     }
     cursor += 6 * scale
   }
+}
+
+function textWidth(text: string, scale: number) {
+  return text.length * 6 * scale
+}
+
+/** Fit a label into `columns` glyphs, marking truncation with two dots (no ellipsis glyph exists). */
+function fitLabel(label: string, columns: number) {
+  if (label.length <= columns) return label
+  if (columns <= 2) return label.slice(0, columns)
+  return `${label.slice(0, columns - 2)}..`
 }
 
 const CRC_TABLE = (() => {
@@ -216,13 +260,19 @@ export function renderMetricChartPng(spec: PaperFigureSpec) {
 
   const slot = plot.width / spec.series.length
   const barWidth = Math.min(120, slot * 0.5)
+  const labelColumns = Math.max(3, Math.floor((slot - 8) / (6 * 2)))
+  // Metric name at the top, so the figure is self-describing in the PDF.
+  drawText(image, plot.x, 16, fitLabel(spec.metric, Math.floor(plot.width / (6 * 2))), 2, axis)
   spec.series.forEach((item, index) => {
     const center = plot.x + slot * (index + 0.5)
     const top = toY(Math.max(item.value, 0))
     const bottom = toY(Math.min(item.value, 0))
     const color: [number, number, number] = index === 0 ? [31, 90, 166] : [150, 150, 150]
     fillRect(image, center - barWidth / 2, top, barWidth, Math.max(bottom - top, 2), color)
-    drawText(image, center - formatValue(item.value).length * 6, top - 22, formatValue(item.value), 2, axis)
+    const valueText = formatValue(item.value)
+    drawText(image, center - textWidth(valueText, 2) / 2, top - 22, valueText, 2, axis)
+    const label = fitLabel(item.label, labelColumns)
+    drawText(image, center - textWidth(label, 2) / 2, plot.y + plot.height + 18, label, 2, axis)
     if (item.std !== undefined && item.std > 0) {
       const upper = toY(item.value + item.std)
       const lower = toY(item.value - item.std)
