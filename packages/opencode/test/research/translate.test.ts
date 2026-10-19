@@ -83,6 +83,15 @@ describe("draft translation", () => {
     expect(overrides?.every((override) => !/[一-鿿]/.test(override.markdown))).toBe(true)
   })
 
+  test("refuses a translation that drops a table", async () => {
+    const draft = chineseDraft()
+    const overrides = await translateDraftSections(draft, async ({ section_id }) => {
+      if (section_id === "declarations") return "Funding: none. Competing interests: none."
+      return englishBySection[section_id] ?? ""
+    })
+    expect(overrides).toBeUndefined()
+  })
+
   test("refuses a translation that is still Chinese", async () => {
     const draft = chineseDraft()
     const overrides = await translateDraftSections(draft, async () => "这仍然是一段中文。")

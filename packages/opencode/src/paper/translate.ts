@@ -42,6 +42,13 @@ function stripFence(value: string) {
   return (fenced ? fenced[1] : trimmed).trim()
 }
 
+/** Tables and image references carry the results; a translation that drops them is not usable. */
+function structurePreserved(source: string, translated: string) {
+  const tables = (text: string) => (text.match(/^\s*\|?\s*:?-{3,}/gm) ?? []).length
+  const images = (text: string) => (text.match(/!\[[^\]]*\]\([^)]+\)/g) ?? []).length
+  return tables(translated) >= tables(source) && images(translated) >= images(source)
+}
+
 const SYSTEM_PROMPT = [
   "You translate academic manuscript sections into publication-quality English.",
   "Preserve Markdown structure exactly: headings, tables, pipes, alignment rows, image links, numbers, units and citations.",
@@ -105,6 +112,7 @@ export async function translateDraftSections(
       return undefined
     }
     if (translated.length === 0 || cjkRatio(translated) > 0.02) return undefined
+    if (!structurePreserved(section.markdown, translated)) return undefined
     overrides.push({ section_id: sectionId, markdown: translated })
   }
   return overrides.length > 0 ? overrides : undefined
