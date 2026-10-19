@@ -64,6 +64,8 @@ export type ComposeDraftPaperInput = {
   figure?: PaperFigureSpec
   /** Named authors and affiliations; absent means the anonymous placeholder. */
   authors?: PaperAuthor[]
+  /** Reference-list convention; GB/T 7714 unless a venue profile says otherwise. */
+  reference_style?: PaperReferenceStyle
   code_metadata?: CodeAvailabilityMetadata
   now?: string
 }
@@ -172,6 +174,9 @@ function buildPlainSection(sectionId: string, title: string, markdown: string): 
     source_ranges: [],
   }
 }
+
+/** Reference-list conventions the generator can format. */
+export type PaperReferenceStyle = "gb7714" | "elsevier" | "ieee" | "acm"
 
 /** An author's metadata. A submission with the anonymous placeholder is not acceptable anywhere. */
 export type PaperAuthor = {
@@ -957,15 +962,33 @@ function referenceDate(value?: string) {
   return isoDate?.[1] ?? trimmed
 }
 
-function referenceEntry(source: LiteratureMap["sources"][number], index: number) {
+function referenceEntry(
+  source: LiteratureMap["sources"][number],
+  index: number,
+  style: PaperReferenceStyle = "gb7714",
+) {
   const publishedDate = referenceDate(source.version.published_at)
   const retrievedDate = referenceDate(source.version.retrieved_at)
   const title = literatureDisplayTitle(source)
   const authors = referenceAuthors(source)
+  const locator = referenceLocator(source)
+  const year = publishedDate?.slice(0, 4) ?? retrievedDate?.slice(0, 4)
+  const provider = source.provider?.trim()
+  const container = provider ? (provider.toLowerCase() === "arxiv" ? "arXiv" : provider) : "arXiv"
+  const prefix = `[${index + 1}] `
+  if (style === "ieee") {
+    return `${prefix}${authors ? `${authors}, ` : ""}"${title}," ${container}${year ? `, ${year}` : ""}. [Online]. Available: ${locator}`
+  }
+  if (style === "acm") {
+    return `${prefix}${authors ? `${authors}. ` : ""}${year ? `${year}. ` : ""}${title}. ${container}. ${locator}`
+  }
+  if (style === "elsevier") {
+    return `${prefix}${authors ? `${authors}. ` : ""}${title}. ${container}${year ? `, ${year}` : ""}. ${locator}`
+  }
   const head = authors ? `${authors}. ${title}` : title
   const documentType = source.doi ? "J/OL" : "EB/OL"
   const date = publishedDate ? `${publishedDate}${retrievedDate ? `[${retrievedDate}]` : ""}. ` : retrievedDate ? `[${retrievedDate}]. ` : ""
-  return `[${index + 1}] ${head}[${documentType}]. ${date}${referenceLocator(source)}.`
+  return `${prefix}${head}[${documentType}]. ${date}${locator}.`
 }
 
 /** Upper bound on references rendered into the draft; above an international venue's usual bar. */
@@ -989,7 +1012,7 @@ function referencesSummary(input: ComposeDraftPaperInput) {  const map = input.l
   return joinBlocks([
     // Enough headroom for an international venue's reference bar; the manuscript gate refuses fewer
     // than the target profile asks for, so a lower cap here would make that bar unsatisfiable.
-    verified.slice(0, MAX_FORMAL_REFERENCES).map(referenceEntry).join("\n"),
+    verified.slice(0, MAX_FORMAL_REFERENCES).map((source, index) => referenceEntry(source, index, input.reference_style)).join("\n"),
     unverifiedCount > 0
       ? `另有 ${unverifiedCount} 条候选文献尚未验证，未列入正式参考文献。`
       : undefined,

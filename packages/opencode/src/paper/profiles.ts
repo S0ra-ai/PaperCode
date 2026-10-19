@@ -1,3 +1,5 @@
+import type { PaperReferenceStyle } from "./research/writing"
+
 export const BUILTIN_PAPER_PROFILE_IDS = [
   "nature-paper",
   "cjc-paper",
@@ -161,6 +163,15 @@ export function paperDocumentClass(profile?: string): string | undefined {
   if (id === "ieee-paper") return "IEEEtran"
   if (id === "acm-paper") return "acmart"
   return undefined
+}
+
+/** Reference-list convention for the venue, defaulting to GB/T 7714 (the Chinese profile). */
+export function paperReferenceStyle(profile?: string): PaperReferenceStyle {
+  const id = profile ?? "cjc-paper"
+  if (id === "international-q1") return "elsevier"
+  if (id === "ieee-paper") return "ieee"
+  if (id === "acm-paper") return "acm"
+  return "gb7714"
 }
 
 export function isPaperProfileId(value: string | undefined): value is PaperProfileId {

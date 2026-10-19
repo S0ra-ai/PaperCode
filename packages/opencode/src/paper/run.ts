@@ -117,7 +117,7 @@ import type { ResearchWikiDigest } from "./research-wiki"
 import type { PaperSpine } from "./paper-spine"
 import type { GlobalFigureSpec } from "./global-figure"
 import { formatDraftPaperForProfile, type PaperAuthoringInputs } from "./authoring"
-import { paperDocumentClass } from "./profiles"
+import { paperDocumentClass, paperReferenceStyle } from "./profiles"
 
 import {
   applyPaperRunControl,
@@ -1249,6 +1249,7 @@ async function refreshDraftPaperForFinalExport(input: {
     literature_map: literatureMap,
     declarations: authoredInputs?.declarations,
     authors: authoredInputs?.authors,
+    reference_style: paperReferenceStyle(intakeFromRun(input.run).target_profile),
     figure: figureSpecFromReport(resultReport),
     experiment_plan: experimentPlan,
     experiment_protocol: experimentProtocol,

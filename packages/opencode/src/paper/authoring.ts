@@ -6,7 +6,7 @@ import {
   type ExportBundle,
   type ExportRenderer,
 } from "./research/export"
-import { paperDocumentClass } from "./profiles"
+import { paperDocumentClass, paperReferenceStyle } from "./profiles"
 import { translateDraftSections, type Translator } from "./translate"
 import type { ResearchArtifact } from "./research/contracts"
 import type { ExperimentPlan, ResultReport } from "./research/experiments"
@@ -724,6 +724,7 @@ export async function runPaperAuthoringLoop(
         literature_map: input.literature_map,
         declarations: input.declarations,
         authors: input.authors,
+        reference_style: paperReferenceStyle(input.target_profile),
         figure,
         experiment_plan: input.experiment_plan,
         experiment_protocol: input.experiment_protocol,
