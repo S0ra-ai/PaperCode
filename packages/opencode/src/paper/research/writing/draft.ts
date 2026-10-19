@@ -1395,7 +1395,13 @@ function experimentRunSummary(input: ComposeDraftPaperInput) {
   const runs = input.experiment_runs
   if (!runs) return "尚未登记具体实验执行结果。"
   const rows = [...sortExperimentRunsForDisplay(runs.host_runs), ...sortExperimentRunsForDisplay(runs.container_runs)].slice(0, 12).map((run) => {
-    const metrics = run.metrics.length > 0 ? run.metrics.map((metric) => `${displayMetricName(metric.name)}=${displayMetricValue(metric.name, metric.value)}${displayMetricUnit(metric.name, metric.unit)}`).join(", ") : "无指标"
+    // The column header names the metric; repeating its long name overflows the narrow column.
+    const metrics =
+      run.metrics.length > 0
+        ? run.metrics
+            .map((metric) => `${displayMetricValue(metric.name, metric.value)}${displayMetricUnit(metric.name, metric.unit)}`)
+            .join(", ")
+        : "无指标"
     const mode = run.environment.mode
     const environment = mode === "container" ? "container:repro-env" : `${mode}:${run.environment.platform}`
     return [
@@ -1404,7 +1410,9 @@ function experimentRunSummary(input: ComposeDraftPaperInput) {
       displayExperimentRole(run.role),
       displayRunStatus(run.status, run.execution?.kind),
       metrics,
-      run.execution?.kind !== "process" ? "未采集" : `${run.resource_usage.wall_time_seconds}s`,
+      run.execution?.kind !== "process"
+        ? "未采集"
+        : `${formatDuration(run.resource_usage.wall_time_seconds)}s`,
       displayMemoryUsage(run.resource_usage.peak_memory_mb),
       displayGpuUsage(run.resource_usage.gpu_hours),
     ]
@@ -1417,6 +1425,12 @@ function experimentRunSummary(input: ComposeDraftPaperInput) {
         markdownTable(["环境", "实验", "角色", "状态", "指标", "耗时", "峰值内存", "GPU 用量"], rows),
       ].join("\n")
     : "没有可展示的实验执行摘要。"
+}
+
+/** Wall-clock values are JS floats; a table needs a readable number, not 0.10400000000000001. */
+function formatDuration(value: number) {
+  if (!Number.isFinite(value) || value < 0) return "n/a"
+  return String(Math.round(value * 100) / 100)
 }
 
 function displayMemoryUsage(value: number | undefined) {

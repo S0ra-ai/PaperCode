@@ -67,6 +67,8 @@
             - fix(paper): final export 刷新在替换标题后重新渲染 markdown，导出稿标题不再退回中文 topic
             - fix(paper): 统计检验表去掉冗余的自由度/样本量列，统计量与 df 合并，基线使用可读名称（BM25/random），避免 8 列在正文宽度内重叠
             - fix(export): 表格内 p 值去掉多余的 "=" 前缀；图片按 85% 文本宽度排版
+            - fix(export): CamelCase 标识符按词段断行（不再被 TeX 加连字符），行内代码在标点处可断行；执行摘要表的耗时按两位小数、指标列只放数值，消除 40pt 级 overfull
+            - fix(export): 作者单位识别兼容 Institution/Organisation 译法；正文行距加入 emergencystretch 与更紧的 tabcolsep
         :fix
             - fix(paper): 统计、表格、图只统计结果章节，附录里的 p 值或声明表不再顶替结果
             - fix(paper): 声明按"标签列→值列"解析并支持列表/段落写法；"未提供/not provided"等说法同样判定为未声明

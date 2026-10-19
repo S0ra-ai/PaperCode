@@ -383,9 +383,9 @@ function parseAuthorInformation(body: string) {
     .filter((line) => /^\|.*\|$/.test(line))
     .map((line) => line.slice(1, -1).split("|").map((cell) => cell.trim()))
   const value = (label: RegExp) => rows.find((row) => label.test(row[0] ?? ""))?.[1]?.trim()
-  const name = value(/^(author|作者)$/i)
+  const name = value(/^(authors?|作者)$/i)
   if (!name) return undefined
-  return { name, affiliation: value(/^(affiliation|机构|单位)$/i) }
+  return { name, affiliation: value(/^(affiliation|institution|organisation|organization|机构|单位)$/i) }
 }
 
 /**
@@ -567,6 +567,27 @@ function hangLatexReferences(latex: string, title?: string) {
   )
 }
 
+/** TeX hyphenates CamelCase identifiers (rank-AgentTeamPapers); keep them unbroken. */
+function protectLatexIdentifiers(latex: string) {
+  const start = latex.indexOf("\\begin{document}")
+  const end = latex.indexOf("\\end{document}", Math.max(start, 0))
+  if (start < 0 || end < 0) return latex
+  const body = latex
+    .slice(start + "\\begin{document}".length, end)
+    // Never touch control sequences such as \ifPDFTeX. Break between CamelCase parts without
+    // hyphenating them: each part stays in an \mbox, and \allowbreak provides the breakpoint.
+    .replace(/(?<![\w\\])([a-z][a-z0-9]*(?:[A-Z][A-Za-z0-9]*)+)\b/g, (token) =>
+      token
+        .split(/(?=[A-Z])/)
+        .map((part) => `\\mbox{${part}}`)
+        .join("\\allowbreak{}"),
+    )
+    .replace(/\\texttt\{([^{}]*)\}/g, (_, code: string) =>
+      `\\texttt{${code.replace(/([,(.:/=<>])/g, "$1\\allowbreak{}")}}`,
+    )
+  return latex.slice(0, start + "\\begin{document}".length) + body + latex.slice(end)
+}
+
 /** Pandoc's template has no keyword block and no address line; add what the selected class uses. */
 function injectLatexFrontMatter(latex: string, source: LatexSource, documentclass?: string) {
   let output = latex
@@ -592,7 +613,12 @@ function injectLatexFrontMatter(latex: string, source: LatexSource, documentclas
             : `\\noindent\\textbf{${hasCjk(source.keywords.join("")) ? "关键词：" : "Keywords:"}} ${keywords.join(", ")}`
     output = output.replace("\\end{abstract}", `\\end{abstract}\n\n${block}`)
   }
+  output = output.replace(
+    "\\begin{document}",
+    "\\setlength{\\emergencystretch}{3em}\\setlength{\\tabcolsep}{4.5pt}\n\\begin{document}",
+  )
   output = shrinkWideLatexTables(output)
+  output = protectLatexIdentifiers(output)
   output = unnumberLatexHeadings(output, [
     ...(source.referencesTitle ? [source.referencesTitle] : []),
     ...source.appendixTitles,

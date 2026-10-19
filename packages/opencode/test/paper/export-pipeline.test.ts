@@ -760,7 +760,7 @@ describe("venue LaTeX structure", () => {
       section(
         "author_information",
         "Author Information",
-        "| Item | Content |\n| --- | --- |\n| Author | Ada Lovelace |\n| Affiliation | Example University |",
+        "| Item | Content |\n| --- | --- |\n| Author | Ada Lovelace |\n| Institution | Example University |",
       ),
       section("abstract", "Abstract", "This abstract describes a reproducible ranking evaluation."),
       section("keywords", "Keywords", "ranking; evaluation; reproducibility"),
@@ -791,7 +791,7 @@ describe("venue LaTeX structure", () => {
         const output = input.args[input.args.indexOf("-o") + 1]!
         await Bun.write(
           output,
-          "\\documentclass{elsarticle}\\title{T}\\author{A}\\begin{document}\n\\maketitle\n\\begin{abstract}Abstract text.\\end{abstract}\n\\section{Introduction}\nBody.\n",
+          "\\documentclass{elsarticle}\\ifPDFTeX\\fi\\title{T}\\author{A}\\begin{document}\n\\maketitle\n\\begin{abstract}Abstract text with rankAgentTeamPapers.\\end{abstract}\n\\section{Introduction}\nBody.\n\\end{document}\n",
         )
         latexWritten = output
         return { exit_code: 0, stdout: "", stderr: "" }
@@ -832,8 +832,12 @@ describe("venue LaTeX structure", () => {
     expect(metadata[0]).toContain("abstract:")
     const tex = await readFile(latexWritten, "utf8")
     expect(tex).toContain("\\begin{frontmatter}")
+    expect(tex).toContain("\\address{Example University}")
     expect(tex).toContain("\\begin{keyword}")
     expect(tex).toContain("\\end{frontmatter}")
+    expect(tex).toContain("\\ifPDFTeX")
+    expect(tex).not.toContain("\\mbox{ifPDFTeX}")
+    expect(tex).toContain("\\mbox{rank}\\allowbreak{}\\mbox{Agent}")
     expect(result.bundle.files.find((file) => file.format === "pdf")?.status).toBe("written")
   })
 })
