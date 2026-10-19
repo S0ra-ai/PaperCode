@@ -46,7 +46,10 @@ export type ComposeDraftPaperInput = {
     host_runs: Pick<ExperimentRun, "experiment_id" | "role" | "status" | "command" | "environment" | "metrics" | "stdout" | "stderr" | "exit_code" | "resource_usage" | "execution">[]
     container_runs: Pick<ExperimentRun, "experiment_id" | "role" | "status" | "command" | "environment" | "metrics" | "stdout" | "stderr" | "exit_code" | "resource_usage" | "execution">[]
   }
-  result_report?: Pick<ResultReport, "best_baseline" | "blockers" | "final_claims_allowed" | "primary_metric" | "proposed" | "recommendation" | "reproduction">
+  result_report?: Pick<
+    ResultReport,
+    "best_baseline" | "blockers" | "final_claims_allowed" | "primary_metric" | "proposed" | "recommendation" | "reproduction" | "statistics"
+  >
   code_metadata?: CodeAvailabilityMetadata
   now?: string
 }
@@ -2376,6 +2379,13 @@ function experimentResultTable(input: ComposeDraftPaperInput) {
     .filter((run) => run.metrics.some((item) => item.name === metric))
     .map((run) => {
       const value = run.metrics.find((item) => item.name === metric)?.value
+      // Repeated trials: report the spread next to the mean, which is what a reviewer checks.
+      const statistic = report.statistics?.find(
+        (item) =>
+          item.experiment_id === run.experiment_id &&
+          item.metric === metric &&
+          item.environment === (run.environment.mode === "container" ? "container" : "host"),
+      )
       const reproduced =
         reproductionVerified(input) &&
         runs.container_runs.some(
@@ -2384,7 +2394,9 @@ function experimentResultTable(input: ComposeDraftPaperInput) {
       return [
         contextualExperimentLabel(input, run.experiment_id, run.role),
         displayExperimentRole(run.role),
-        typeof value === "number" ? displayMetricValue(metric, value) : "无",
+        typeof value === "number"
+          ? `${displayMetricValue(metric, value)}${statistic ? ` ± ${displayMetricValue(metric, statistic.std)} (n=${statistic.n})` : ""}`
+          : "无",
         displayRunStatus(run.status, run.execution?.kind),
         reproduced ? "是" : "否",
       ]

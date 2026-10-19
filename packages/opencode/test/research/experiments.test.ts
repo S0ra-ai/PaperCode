@@ -6,12 +6,14 @@ import path from "path"
 import { createResearchRun, getResearchRunStatus, type ResearchRuntimeOptions } from "@/paper/research/runtime"
 import {
   analyzeExperimentResults,
+  mergeTrialResults,
   planExperiments,
   recordExperimentLoop,
   runContainerReproduction,
   runHostExploration,
   type ExperimentRunner,
 } from "@/paper/research/experiments"
+import { composeClaimLedger, composeDraftPaper } from "@/paper/research/writing"
 
 const now = "2026-05-09T00:00:00Z"
 
@@ -84,6 +86,82 @@ function metricRunner(scores: Record<string, number>, status: "succeeded" | "fai
 }
 
 describe("experiment loop", () => {
+  test("repeated trials are summarised as mean ± std in the report and the draft", async () => {
+    const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-repeated-trials-test-"))
+    try {
+      const workspace = path.join(dir, "workspace")
+      const home = path.join(dir, "home")
+      await mkdir(workspace, { recursive: true })
+      await mkdir(home, { recursive: true })
+      const options = runtimeOptions(workspace, home)
+      const handle = await createResearchRun({ topic: "LLM retrieval evaluation" }, options)
+      const plan = planExperiments({
+        topic: "LLM retrieval evaluation",
+        method_name: "claim-aware reranker",
+        dataset_ids: ["ms-marco-fixture"],
+        ...protocols,
+        now,
+      })
+      const trials: Record<string, number[]> = {
+        proposed: [0.9, 0.92, 0.94],
+        "baseline-bm25": [0.66, 0.67, 0.65],
+        "baseline-dense": [0.74, 0.75, 0.73],
+        "baseline-rag": [0.78, 0.79, 0.77],
+        "ablation-no-claim-ledger": [0.79, 0.8, 0.78],
+      }
+      const repeated: ExperimentRunner = async (spec, environment) =>
+        mergeTrialResults(
+          (trials[spec.experiment_id] ?? [0.7]).map((value) => ({
+            status: "succeeded" as const,
+            execution: {
+              kind: "process" as const,
+              command: spec.command,
+              exit_code: 0,
+              container:
+                environment.mode === "container"
+                  ? {
+                      runtime: "docker",
+                      container_id: `fixture-${spec.experiment_id}`,
+                      image_digest: `sha256:${"a".repeat(64)}`,
+                      isolated: true,
+                    }
+                  : undefined,
+            },
+            metrics: [{ name: "accuracy", value, direction: "higher_better" as const }],
+            stdout: `${environment.mode}:${spec.experiment_id}`,
+            stderr: "",
+            exit_code: 0,
+          })),
+        )
+
+      const recorded = await recordExperimentLoop(
+        handle.run_dir,
+        { plan, host_runner: repeated, container_runner: repeated },
+        options,
+      )
+      const proposed = recorded.report.statistics?.find(
+        (item) => item.experiment_id === "proposed" && item.environment === "host",
+      )
+      expect(proposed?.n).toBe(3)
+      expect(proposed?.mean).toBeCloseTo(0.92, 6)
+      expect(proposed?.std).toBeCloseTo(0.02, 6)
+
+      const ledger = composeClaimLedger({ topic: "Repeated trials", claims: [], now })
+      const draft = composeDraftPaper({
+        title: "Repeated trials",
+        ledger,
+        experiment_plan: plan,
+        experiment_runs: { host_runs: recorded.host_runs, container_runs: recorded.container_runs },
+        result_report: recorded.report,
+        now,
+      })
+      expect(draft.markdown).toContain("±")
+      expect(draft.markdown).toContain("(n=3)")
+    } finally {
+      await clean(dir)
+    }
+  })
+
   test("plans baselines, records successful host exploration, and passes container reproduction", async () => {
     const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-experiment-test-"))
     try {

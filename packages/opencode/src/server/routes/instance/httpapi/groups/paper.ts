@@ -79,6 +79,7 @@ export const PaperExperimentProtocolRunPayload = Schema.Struct({
   workspace_path: Schema.optional(Schema.String),
   dry_run: Schema.optional(Schema.Boolean),
   timeout_seconds: Schema.optional(Schema.Number),
+  repetitions: Schema.optional(Schema.Number),
 })
 
 export const ProviderDiscoverPayload = Schema.Struct({

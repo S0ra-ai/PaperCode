@@ -5,6 +5,18 @@ export type ExperimentMetric = {
   value: number
   direction: ExperimentMetricDirection
   unit?: string
+  /** Per-trial values behind `value` (the mean), when the command was repeated. */
+  samples?: number[]
+}
+
+/** Repeated-trial summary for one experiment and metric, bound to the environment it ran in. */
+export type ExperimentStatistic = {
+  experiment_id: string
+  environment: "host" | "container"
+  metric: string
+  n: number
+  mean: number
+  std: number
 }
 
 export type ExperimentResourceUsage = {
@@ -196,6 +208,8 @@ export type ResultReport = {
   findings: ExperimentFinding[]
   blockers: string[]
   recommendation: "accept" | "revise" | "block"
+  /** Present when any experiment ran more than once; the manuscript reports mean ± std from it. */
+  statistics?: ExperimentStatistic[]
   reproduction: {
     status: "not_run" | "passed" | "failed"
     container_run_ids: string[]

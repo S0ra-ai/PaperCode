@@ -7,6 +7,7 @@ import type {
   ExperimentRun,
   ExperimentRunStatus,
   ExperimentRunner,
+  ExperimentRunnerResult,
   ExperimentSpec,
 } from "./schemas"
 
@@ -153,4 +154,44 @@ export async function runContainerReproduction(
       return runs
     },
   )
+}
+
+/** Sample standard deviation (n-1). A single sample has no spread. */
+export function standardDeviation(samples: number[]) {
+  if (samples.length < 2) return 0
+  const mean = samples.reduce((sum, value) => sum + value, 0) / samples.length
+  const variance = samples.reduce((sum, value) => sum + (value - mean) ** 2, 0) / (samples.length - 1)
+  return Math.sqrt(variance)
+}
+
+/**
+ * Fold repeated executions of one command into the single run the analysis expects. Each metric keeps
+ * its samples and reports the mean, so the manuscript can print mean ± std and a reviewer can check
+ * the spread; a failed trial makes the merged run failed rather than hiding it in the average.
+ */
+export function mergeTrialResults(results: ExperimentRunnerResult[]) {
+  if (results.length === 1) return results[0]
+  const base = results[0]
+  const failed = results.find((result) => result.status !== "succeeded" || result.exit_code !== 0)
+  const metrics = base.metrics.map((metric) => {
+    const samples = results
+      .map((result) => result.metrics.find((candidate) => candidate.name === metric.name)?.value)
+      .filter((value): value is number => typeof value === "number")
+    if (samples.length < 2) return { ...metric, samples }
+    return { ...metric, value: samples.reduce((sum, value) => sum + value, 0) / samples.length, samples }
+  })
+  return {
+    ...base,
+    status: failed ? failed.status : base.status,
+    exit_code: failed ? failed.exit_code : base.exit_code,
+    metrics,
+    stdout: results.map((result) => result.stdout).join("\n"),
+    stderr: results
+      .map((result) => result.stderr)
+      .filter(Boolean)
+      .join("\n"),
+    resource_usage: {
+      wall_time_seconds: results.reduce((sum, result) => sum + (result.resource_usage?.wall_time_seconds ?? 0), 0),
+    },
+  }
 }

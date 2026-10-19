@@ -32,6 +32,8 @@
 - **声明**：`runPaperAuthoringLoop` 接受 `declarations: { funding, author_contributions, competing_interests, ethics, llm_disclosure }`，HTTP 创建 PaperRun 时传同名的 `declarations` 字段；不传就是"未声明"，闸门会拦。伦理声明有默认的"不涉及人类/动物受试者"文本，仍可覆盖。
 - **代码可用性**：`code_metadata.repository_url` 或 `package_name` 至少有一个，稿件才会写出"代码可用性"小节。闸门要求该节同时出现代码主题与定位信息——URL、GitHub/GitLab/Zenodo/DOI，或生成表格里的"代码包"行都算定位。
 - **统计**：结果章节必须同时出现离散度（`0.910 ± 0.004`、`0.910 (0.004)`、`95% CI` 或"标准差："）和显著性依据（`p = 0.003` 或 Wilcoxon/t-test/ANOVA 等具体检验名），只有其一仍会被拦。
+  - 离散度可以由工具生成：调用实验协议执行时传 `repetitions: N`（HTTP payload 同名字段，1–20），每次执行会注入 `PAPERCODE_SEED`/`PYTHONHASHSEED`，运行结果保留每个指标的样本，`ResultReport.statistics` 给出 `n/mean/std`，结果表渲染为 `0.910 ± 0.004 (n=5)`。
+  - 显著性检验仍需要实验脚本或作者提供 p 值/检验名；工具不会替作者选择检验方法。
 - **图表**：统计只算结果章节。中文期刊要求至少 1 张表；国际一区要求至少 2 张表、1 张图。
 - 非 `cjc-paper` 的稿件不再追加中文"投稿准备度"附录（该附录是给中文期刊自查用的）。
 

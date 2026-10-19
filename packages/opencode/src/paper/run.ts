@@ -96,6 +96,7 @@ import {
 } from "./machine"
 import {
   analyzeExperimentResults,
+  mergeTrialResults,
   planExperiments,
   plannedExperimentSpecs,
   recordExperimentLoop,
@@ -107,6 +108,7 @@ import {
   type ExperimentProtocolStarterPack,
   type ExperimentRun,
   type ExperimentRunner,
+  type ExperimentRunnerResult,
   type ExperimentSpec,
   type ResultReport,
 } from "./research/experiments"
@@ -429,6 +431,8 @@ export interface PaperExperimentProtocolRunRequest {
   workspace_path?: string
   dry_run?: boolean
   timeout_seconds?: number
+  /** How many times to execute each command; >1 records per-trial samples for mean ± std. */
+  repetitions?: number
 }
 
 export interface PaperExperimentProtocolRunSummary {
@@ -3022,6 +3026,8 @@ export async function runPaperRunExperimentProtocol(
   const workspace = path.resolve(input.workspace_path ?? snapshot.workspace ?? normalized.workspace ?? process.cwd())
   const dryRun = input.dry_run !== false
   const timeoutSeconds = timeoutForProtocolRun(input)
+  // Repeated trials are what make a mean ± std meaningful; cap them so a run cannot explode.
+  const repetitions = Math.min(20, Math.max(1, Math.floor(input.repetitions ?? 1)))
 
   if (!plan) {
     return {
@@ -3116,8 +3122,14 @@ export async function runPaperRunExperimentProtocol(
 
   const terminalTraces: PaperExperimentTerminalTraceSummary[] = []
   let terminalTraceIndex = 0
-  const runner: ExperimentRunner = async (spec, environment) => {
-    const command = commandForProtocolRun(spec, environment, effectiveProtocol)
+  let trial = 1
+  const singleRun: ExperimentRunner = async (spec, environment) => {
+    const baseCommand = commandForProtocolRun(spec, environment, effectiveProtocol)
+    // Each repetition gets its own seed so the samples are independent trials rather than copies.
+    const command =
+      repetitions > 1
+        ? { ...baseCommand, env: { ...baseCommand.env, PAPERCODE_SEED: String(trial), PYTHONHASHSEED: String(trial) } }
+        : baseCommand
     const shellCommand = experimentCommandText(command)
     const traceID = `terminal-trace-${++terminalTraceIndex}`
     const timeoutMs = Math.min(command.timeout_seconds ?? timeoutSeconds, effectivePlan.resource_budget.max_wall_time_seconds) * 1000
@@ -3249,6 +3261,14 @@ export async function runPaperRunExperimentProtocol(
       exit_code: result.exitCode,
       resource_usage: { wall_time_seconds: result.wallTimeSeconds },
     }
+  }
+  const runner: ExperimentRunner = async (spec, environment) => {
+    const results: ExperimentRunnerResult[] = []
+    for (let index = 1; index <= repetitions; index++) {
+      trial = index
+      results.push(await singleRun(spec, environment))
+    }
+    return mergeTrialResults(results)
   }
   const loop = await recordExperimentLoop(
     runDir,

@@ -1,7 +1,7 @@
 import { withSpan } from "../telemetry"
 import { plannedExperimentSpecs } from "./planning"
-import { hasIsolatedContainerExecution, hasProcessExecution } from "./runner"
-import type { ExperimentFinding, ExperimentPlan, ExperimentRun, ResultReport } from "./schemas"
+import { hasIsolatedContainerExecution, hasProcessExecution, standardDeviation } from "./runner"
+import type { ExperimentFinding, ExperimentPlan, ExperimentRun, ExperimentStatistic, ResultReport } from "./schemas"
 
 export type ExperimentAnalysisInput = {
   plan: ExperimentPlan
@@ -99,6 +99,18 @@ export function analyzeExperimentResults(input: ExperimentAnalysisInput): Result
         ...blockingRunFindings(input.host_runs),
         ...blockingRunFindings(input.container_runs),
       ]
+      const statistics: ExperimentStatistic[] = [...input.host_runs, ...input.container_runs].flatMap((run) =>
+        run.metrics
+          .filter((metric) => (metric.samples?.length ?? 0) > 1)
+          .map((metric) => ({
+            experiment_id: run.experiment_id,
+            environment: run.environment.mode === "container" ? ("container" as const) : ("host" as const),
+            metric: metric.name,
+            n: metric.samples!.length,
+            mean: metric.value,
+            std: standardDeviation(metric.samples!),
+          })),
+      )
       if (new Set(specs.map((spec) => spec.experiment_id)).size !== specs.length) {
         findings.push({
           category: "experiment_protocol_incomplete",
@@ -273,6 +285,7 @@ export function analyzeExperimentResults(input: ExperimentAnalysisInput): Result
           status: reproductionStatus,
           container_run_ids: input.container_runs.map((run) => run.experiment_run_id),
         },
+        ...(statistics.length > 0 ? { statistics } : {}),
         final_claims_allowed: finalClaimsAllowed,
       }
     },

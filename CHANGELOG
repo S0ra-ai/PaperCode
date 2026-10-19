@@ -16,6 +16,7 @@
             - feat(paper): 新增章节覆盖入口（HTTP 的 draft_sections / authoring 的 section_overrides），作者或 agent 可替换生成正文，国际一区要求英文时这是唯一通路
             - feat(paper): 参考文献渲染上限从 20 提到 60，使国际一区的 40 条要求可满足
             - feat(paper): HTTP 创建 PaperRun 支持 declarations 与 draft_sections，桌面端/TUI 也能提供声明与正文
+            - feat(paper): 实验协议执行支持 repetitions（1–20），每次执行注入种子，结果保留样本并在结果表渲染 mean ± std (n=N)，离散度不再只能手写
         :fix
             - fix(paper): 统计、表格、图只统计结果章节，附录里的 p 值或声明表不再顶替结果
             - fix(paper): 声明按"标签列→值列"解析并支持列表/段落写法；"未提供/not provided"等说法同样判定为未声明
