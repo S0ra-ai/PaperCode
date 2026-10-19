@@ -1217,7 +1217,7 @@ function displayDatasetDiagnostic(value: string) {
       return "标签由检索词重合、来源元数据完整度和发表时间确定，不是人工相关性标注"
     }
     if (/\bllm\b|silver|judge/i.test(policy)) {
-      return "标签由独立大模型按统一量规评定的银标相关性，不是人工相关性标注"
+      return "标签由独立大模型按统一量规评定的银标相关性（单一模型，边界判断未经人工复核），不是人工相关性标注"
     }
     return `标签策略为${paperProseText(policy)}`
   }
@@ -2396,7 +2396,7 @@ function rankingLabelPolicySummary(input: ComposeDraftPaperInput) {
     .find((diagnostic) => diagnostic.startsWith("label_policy:"))
   const value = policy?.slice("label_policy:".length) ?? ""
   if (/\bllm\b|silver|judge/i.test(value))
-    return "标签由独立大模型按统一量规评定的银标相关性，不是人工相关性标注"
+    return "标签由独立大模型按统一量规评定的银标相关性（单一模型，边界判断未经人工复核），不是人工相关性标注"
   if (/live arXiv search rank/i.test(value))
     return "标签由实时 arXiv 检索排序、主题匹配、元数据完整度和发表时间派生，不是人工相关性标注"
   if (/query-term overlap/i.test(value))
@@ -2552,7 +2552,7 @@ function resultStatisticalScopeSummary(input: ComposeDraftPaperInput) {
     const correction = (input.result_report?.significance?.length ?? 1) > 1 ? "（Holm 校正）" : ""
     const effect = primary.effect_size
     const effectText = effect
-      ? `，${effect.name === "cohens_d" ? "Cohen's d" : "Cliff's δ"}=${formatStatisticValue(effect.value)}（${effect.magnitude}）`
+      ? `，${effect.name === "cohens_d" ? "Cohen's d" : "Cliff's delta"}=${formatStatisticValue(effect.value)}（${effect.magnitude}）`
       : ""
     return `统计解释：${runsText}；结果表报告均值、标准差与样本量。以最强基线 ${comparison.baseline_experiment_id} 为对照，${label} ${details}，双侧 p ${formatPValue(primary.p_adjusted)}${correction}${effectText}。`
   }
@@ -2577,7 +2577,7 @@ function significanceTable(input: ComposeDraftPaperInput) {
       formatPValue(test.p),
       formatPValue(test.p_adjusted),
       test.effect_size
-        ? `${test.effect_size.name === "cohens_d" ? "Cohen's d" : "Cliff's δ"}=${formatStatisticValue(test.effect_size.value)}（${test.effect_size.magnitude}）`
+        ? `${test.effect_size.name === "cohens_d" ? "Cohen's d" : "Cliff's delta"}=${formatStatisticValue(test.effect_size.value)}（${test.effect_size.magnitude}）`
         : "—",
       `n=${comparison.n_proposed}/${comparison.n_baseline}`,
     ]),
@@ -2681,17 +2681,39 @@ function rankingDiscussionSummary(
     const ablationDelta = typeof ablationValue === "number" ? report.proposed.value - ablationValue : undefined
     const beatsBaseline = baselineDelta > 0
     const beatsAblation = typeof ablationDelta === "number" && ablationDelta > 0
+    const baselinePhrase =
+      baselineDelta > 0
+        ? `高于最强基线（${baselineLabel}）`
+        : baselineDelta < 0
+          ? `低于最强基线（${baselineLabel}）`
+          : `与最强基线（${baselineLabel}）持平`
+    const ablationPhrase =
+      typeof ablationDelta !== "number"
+        ? ""
+        : ablationDelta > 0
+          ? "高于无证据覆盖消融"
+          : ablationDelta < 0
+            ? "低于无证据覆盖消融"
+            : "与无证据覆盖消融持平"
     if (typeof ablationDelta === "number") {
+      const limitation =
+        !beatsBaseline && !beatsAblation
+          ? "完整排序既没有超过最强基线，消融也没有低于完整排序"
+          : !beatsBaseline
+            ? "完整排序没有超过最强基线"
+            : "消融没有低于完整排序"
       rows.push(
         beatsBaseline && beatsAblation
           ? `在候选论文排序任务中，在${metricLabel} 上，完整排序高于最强基线（${baselineLabel}）和无证据覆盖消融：相对最强基线的差值为 ${formatMetricValue(baselineDelta)}，相对消融的差值为 ${formatMetricValue(ablationDelta)}。这说明当前候选集的前三位排序不只来自查询词重合，证据覆盖特征也参与了排序差异。`
-          : `在候选论文排序任务中，在${metricLabel} 上，完整排序相对最强基线（${baselineLabel}）的差值为 ${formatMetricValue(baselineDelta)}，相对无证据覆盖消融的差值为 ${formatMetricValue(ablationDelta)}。${beatsBaseline ? "完整排序高于最强基线" : "完整排序没有高于最强基线"}，${beatsAblation ? "且高于消融" : "消融也没有低于完整排序"}；因此当前结果不足以支持“完整排序优于基线或消融”的表述。`,
+          : `在候选论文排序任务中，在${metricLabel} 上，完整排序${baselinePhrase}，差值为 ${formatMetricValue(baselineDelta)}；${ablationPhrase}，差值为 ${formatMetricValue(ablationDelta)}。${limitation}；因此当前结果不足以支持“完整排序优于基线或消融”的表述。`,
       )
     } else {
       rows.push(
-        beatsBaseline
+        baselineDelta > 0
           ? `在候选论文排序任务中，完整排序高于最强基线（${baselineLabel}），差值为 ${formatMetricValue(baselineDelta)}；该差异说明本文评分与该基线在当前候选集上表现不同。`
-          : `在候选论文排序任务中，完整排序低于最强基线（${baselineLabel}），差值为 ${formatMetricValue(baselineDelta)}；该结果不支持“完整排序优于基线”的表述，只能作为流程可复现性与观测性的证据。`,
+          : baselineDelta < 0
+            ? `在候选论文排序任务中，完整排序低于最强基线（${baselineLabel}），差值为 ${formatMetricValue(baselineDelta)}；该结果不支持“完整排序优于基线”的表述，只能作为流程可复现性与观测性的证据。`
+            : `在候选论文排序任务中，完整排序与最强基线（${baselineLabel}）持平，差值为 0；当前协议下没有观察到性能差异。`,
       )
     }
   }
@@ -2966,6 +2988,15 @@ function conclusionSummary(input: ComposeDraftPaperInput, ready: boolean) {
       result?.proposed && result.best_baseline
         ? `${metric} 为 ${displayMetricValue(result.primary_metric, result.proposed.value)}，与最强基线（${bestBaselineLabel(input)}）的差值为 ${formatMetricValue(Math.abs(result.proposed.value - result.best_baseline.value))}。`
         : `${primaryMetricPhrase(metric)}的比较结果仍需补齐。`
+    const ablationValue = rankingNoCoverageAblationValue(input, result?.primary_metric ?? "ranking_ndcg_at_3")
+    const featureObservation =
+      result?.proposed && typeof ablationValue === "number"
+        ? result.proposed.value > ablationValue
+          ? "claim_coverage 项与当前候选集上的排序差异相关。"
+          : result.proposed.value === ablationValue
+            ? "无证据覆盖消融与完整排序持平，当前结果不支持 claim_coverage 项带来排序差异的表述。"
+            : "无证据覆盖消融没有低于完整排序，当前结果不支持 claim_coverage 项带来排序差异的表述。"
+        : "当前没有可用的无证据覆盖消融记录，不能判断 claim_coverage 项与排序差异的关系。"
     const table = markdownTable(
       ["结论项", "证据", "边界"],
       [
@@ -2973,7 +3004,7 @@ function conclusionSummary(input: ComposeDraftPaperInput, ready: boolean) {
         ["主结果", resultEvidence, "当前标签来自自动筛选协议，不等同于人工相关性标注。"],
         [
           "特征观察",
-          ready ? "claim_coverage 项与当前候选集上的排序差异相关。" : "当前证据仍不足以确认 claim_coverage 项的排序差异。",
+          ready ? featureObservation : "当前证据仍不足以确认 claim_coverage 项的排序差异。",
           "该观察需要更多主题、人工标注和跨数据集重复实验验证。",
         ],
       ],
@@ -3034,7 +3065,7 @@ function limitationsSummary(input: ComposeDraftPaperInput, unsupported: string[]
           "基线强度",
           input.result_report?.proposed && input.result_report.best_baseline
             ? input.result_report.proposed.value > input.result_report.best_baseline.value
-              ? "词项匹配基线属于弱基线；完整排序高于它只说明查询词重合不足以解释排序，不能说明方法强于其他基线。"
+              ? `最强基线（${bestBaselineLabel(input)}）属于弱基线；完整排序高于它只能说明当前评分优于该基线，不能说明方法强于其他基线。`
               : `词项匹配基线属于弱基线；即便如此，完整排序仍未超过最强基线（${bestBaselineLabel(input)}），因此结果不支持方法优势的表述。`
             : "基线强度有限，当前结果不足以支持方法优势的表述。",
           "加入 BM25、向量检索、学习排序和人工标注基线。",

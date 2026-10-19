@@ -1791,11 +1791,11 @@ describe("paper authoring loop", () => {
     expect(threatsToValidity).not.toContain("证据范围")
     expect(limitations).toContain("候选数 5")
     expect(limitations).toContain("不是人工相关性标注")
-    expect(limitations).toContain("词项匹配基线属于弱基线")
-    expect(limitations).toContain("完整排序高于它只说明查询词重合不足以解释排序")
+    expect(limitations).toContain("最强基线（词项匹配基线）属于弱基线")
+    expect(limitations).toContain("完整排序高于它只能说明当前评分优于该基线")
     expect(limitations).toContain("| 限制 | 影响 | 后续处理 |")
     expect(limitations).toContain("| 评测集规模与标注 | 候选数 5；标签由实时 arXiv 检索排序、主题匹配、元数据完整度和发表时间派生，不是人工相关性标注。 | 引入更大候选池、跨主题验证和人工相关性标注。 |")
-    expect(limitations).toContain("| 基线强度 | 词项匹配基线属于弱基线；完整排序高于它只说明查询词重合不足以解释排序，不能说明方法强于其他基线。 | 加入 BM25、向量检索、学习排序和人工标注基线。 |")
+    expect(limitations).toContain("| 基线强度 | 最强基线（词项匹配基线）属于弱基线；完整排序高于它只能说明当前评分优于该基线，不能说明方法强于其他基线。 | 加入 BM25、向量检索、学习排序和人工标注基线。 |")
     expect(limitations).toContain("| 外部推广 | 当前结论限于单一主题和当前候选集合。 | 扩展到更多主题、更大候选池和更多随机种子重复。 |")
     expect(limitations).not.toContain("当前实验的主要限制来自评测集规模和标注方式：")
     expect(limitations).not.toContain("完整排序优于简单查询词重合")
@@ -2698,11 +2698,7 @@ describe("paper authoring loop", () => {
       ]
 
       const englishBySection = new Map(englishSections.map((item) => [item.section_id, item.markdown]))
-      const countStructure = (text: string) => ({
-        tables: (text.match(/^\s*\|?\s*:?-{3,}/gm) ?? []).length,
-        images: (text.match(/!\[[^\]]*\]\([^)]+\)/g) ?? []).length,
-      })
-      // Same structure-preserving contract as the real translator: keep every table and image.
+      // Same contract as the real translator: exact table rows/image targets, numbers, locators and commands.
       const translator = async ({ section_id, text }: { section_id: string; text: string }) => {
         if (section_id.startsWith("heading:")) return "Translated heading"
         if (section_id.startsWith("section_title:")) {
@@ -2712,16 +2708,45 @@ describe("paper authoring loop", () => {
         const base =
           englishBySection.get(section_id) ??
           `English text for the ${section_id} section, translated for the venue. It repeats enough words to count as substantive prose.`
-        const sourceCounts = countStructure(text)
-        const baseCounts = countStructure(base)
-        const preserved = text.match(/--[A-Za-z][\w-]*=\S+|\bsrc\/[\w./-]+|https?:\/\/[^\s)]+|\b(?:bun|docker|podman)\s+\S+/g) ?? []
-        const blocks = [base, ...preserved]
-        for (let index = baseCounts.tables; index < sourceCounts.tables; index++) {
-          blocks.push("| A | B |\n| --- | --- |\n| x | y |")
+        const sourceTableLines = text.split("\n").map((line) => line.trim()).filter((line) => /^\|.*\|$/.test(line))
+        const baseTableLines = base.split("\n").map((line) => line.trim()).filter((line) => /^\|.*\|$/.test(line))
+        const keepTables = baseTableLines.length === sourceTableLines.length && sourceTableLines.length > 0
+        const body = base
+          .split("\n")
+          .filter((line) => keepTables || !/^\s*\|.*\|\s*$/.test(line))
+          .join("\n")
+          .replace(/!\[[^\]]*\]\([^)]+\)/g, "")
+          .trim()
+        const blocks = [body]
+        const numbers = text.match(/(?<![\w.])\d+(?:[.,]\d+)*(?:%|‰)?(?![\w])/g) ?? []
+        const locators = text.match(/--[A-Za-z][\w-]*=\S+|\bsrc\/[\w./-]+|https?:\/\/[^\s)]+/g) ?? []
+        const commands = text
+          .split("\n")
+          .flatMap((line) => (line.includes("|") ? line.split("|") : []))
+          .map((cell) => cell.trim().replace(/^`+|`+$/g, ""))
+          .filter((cell) =>
+            /^(?:bun|docker|podman|python3?|pip3?|npm|npx|pnpm|yarn|git|make|bash|sh|node|deno|uv|go|cargo|java|mvn|gradle|\.\/|~\/)\b/.test(
+              cell,
+            ),
+          )
+        blocks.push([...numbers, ...locators, ...commands].join("\n"))
+        const tableRows = text
+          .split("\n")
+          .map((line) => line.trim())
+          .filter((line) => /^\|.*\|$/.test(line))
+        if (tableRows.length > 0 && !keepTables) {
+          blocks.push(
+            tableRows
+              .map((row) => {
+                const cells = row.slice(1, -1).split("|").map((cell) => cell.trim())
+                return `| ${cells
+                  .map((cell, index) => (/^:?-{3,}:?$/.test(cell) ? "---" : `English ${index + 1}`))
+                  .join(" | ")} |`
+              })
+              .join("\n"),
+          )
         }
-        for (let index = baseCounts.images; index < sourceCounts.images; index++) {
-          blocks.push("![Figure](figures/primary-metric.png)")
-        }
+        for (const match of text.matchAll(/!\[[^\]]*\]\(([^)]+)\)/g)) blocks.push(`![Figure](${match[1]})`)
         return blocks.join("\n\n")
       }
       const authoringRun = (id: string, role: "proposed" | "baseline" | "ablation", mode: "host" | "container"): ExperimentRun => ({
@@ -2750,7 +2775,34 @@ describe("paper authoring loop", () => {
           title: "Evidence-Constrained Retrieval",
           ledger,
           data_plan: dataPlan(),
-          result_report: resultReport(),
+          result_report: {
+            ...resultReport(),
+            statistics: [
+              { experiment_id: "proposed", environment: "host", metric: "accuracy", n: 5, mean: 0.91, std: 0.01, ci95: { low: 0.9, high: 0.92 } },
+              { experiment_id: "baseline-a", environment: "host", metric: "accuracy", n: 5, mean: 0.88, std: 0.012, ci95: { low: 0.865, high: 0.895 } },
+              { experiment_id: "baseline-b", environment: "host", metric: "accuracy", n: 5, mean: 0.87, std: 0.014, ci95: { low: 0.853, high: 0.887 } },
+              { experiment_id: "ablation-no-gate", environment: "host", metric: "accuracy", n: 5, mean: 0.89, std: 0.011, ci95: { low: 0.876, high: 0.904 } },
+            ],
+            significance: [
+              {
+                experiment_id: "proposed",
+                baseline_experiment_id: "baseline-a",
+                metric: "accuracy",
+                n_proposed: 5,
+                n_baseline: 5,
+                tests: [
+                  {
+                    name: "welch_t",
+                    statistic: 3.1,
+                    df: 8,
+                    p: 0.014,
+                    p_adjusted: 0.014,
+                    effect_size: { name: "cohens_d", value: 1.2, magnitude: "large" },
+                  },
+                ],
+              },
+            ],
+          },
           available_source_ids: ["paper-a", "source-dataset-open-retrieval"],
           source_records: [
             sources[0],
@@ -3215,20 +3267,28 @@ describe("command entry point labels", () => {
 })
 
 describe("ranking result narration", () => {
-  const rankingRun = (experiment_id: string, role: "proposed" | "baseline" | "ablation", value: number) => ({
+  const rankingRun = (
+    experiment_id: string,
+    role: "proposed" | "baseline" | "ablation",
+    value: number,
+    mode: "host" | "container" = "host",
+  ) => ({
     experiment_id,
     role,
     status: "succeeded" as const,
     command: { argv: ["bun", "experiments/evaluate-agent-ranking.ts"] },
-    environment: { mode: "host" as const, platform: process.platform },
-    execution: fixtureExecution("host", experiment_id),
+    environment:
+      mode === "container"
+        ? { mode: "container" as const, image: "papercode/research-runner:test", platform: "container" as const }
+        : { mode: "host" as const, platform: process.platform },
+    execution: fixtureExecution(mode, experiment_id),
     metrics: [{ name: "ranking_ndcg_at_3", value, direction: "higher_better" as const }],
     stdout: "",
     stderr: "",
     exit_code: 0,
     resource_usage: { wall_time_seconds: 0.1 },
   })
-  const rankingDraft = (proposed: number, baseline: number, ablation: number) => {
+  const rankingDraft = (proposed: number, baseline: number, ablation: number, includeLexical = true) => {
     const ledger = composeClaimLedger({ topic: "Candidate ranking", claims: [], now })
     const command = (variant: string) => ({
       argv: ["bun", "experiments/evaluate-agent-ranking.ts", `--variant=${variant}`],
@@ -3249,7 +3309,10 @@ describe("ranking result narration", () => {
         objective: "fixture",
         metrics: [{ name: "ranking_ndcg_at_3", direction: "higher_better", primary: true }],
         proposed: planSpec("proposed:eval", "proposed", "proposed"),
-        baselines: [planSpec("baseline:lexical", "baseline", "baseline"), planSpec("baseline:random", "baseline", "random")],
+        baselines: [
+          ...(includeLexical ? [planSpec("baseline:lexical", "baseline", "baseline")] : []),
+          planSpec("baseline:random", "baseline", "random"),
+        ],
         ablations: [planSpec("ablation:no-coverage", "ablation", "ablation")],
         resource_budget: { max_wall_time_seconds: 60, max_memory_mb: 1024, max_gpu_hours: 0 },
         downgrade_policy: [],
@@ -3257,11 +3320,16 @@ describe("ranking result narration", () => {
       experiment_runs: {
         host_runs: [
           rankingRun("proposed:eval", "proposed", proposed),
-          rankingRun("baseline:lexical", "baseline", baseline - 0.02),
+          ...(includeLexical ? [rankingRun("baseline:lexical", "baseline", baseline - 0.02)] : []),
           rankingRun("baseline:random", "baseline", baseline),
           rankingRun("ablation:no-coverage", "ablation", ablation),
         ],
-        container_runs: [],
+        container_runs: [
+          rankingRun("proposed:eval", "proposed", proposed, "container"),
+          ...(includeLexical ? [rankingRun("baseline:lexical", "baseline", baseline - 0.02, "container")] : []),
+          rankingRun("baseline:random", "baseline", baseline, "container"),
+          rankingRun("ablation:no-coverage", "ablation", ablation, "container"),
+        ],
       },
       result_report: {
         ...resultReport(),
@@ -3278,12 +3346,27 @@ describe("ranking result narration", () => {
     const discussion = markdownSection(draft.markdown, "讨论")
     expect(discussion).not.toContain("完整排序高于最强基线")
     expect(discussion).not.toContain("同时高于")
-    expect(discussion).toContain("没有高于最强基线")
+    expect(discussion).toContain("没有超过最强基线")
     expect(discussion).toContain("消融也没有低于完整排序")
     expect(discussion).toContain("random")
     const abstract = markdownSection(draft.markdown, "摘要")
     expect(abstract).toContain("最强基线（random）")
     expect(abstract).not.toContain("词项匹配基线为")
+    const conclusion = markdownSection(draft.markdown, "结论")
+    expect(conclusion).not.toContain("claim_coverage 项与当前候选集上的排序差异相关")
+    expect(conclusion).toContain("消融没有低于完整排序")
+  })
+
+  test("reports a tie as a tie rather than a loss", () => {
+    const discussion = markdownSection(rankingDraft(0.82, 0.82, 0.8).markdown, "讨论")
+    expect(discussion).toContain("与最强基线（random）持平")
+    expect(discussion).not.toContain("完整排序低于最强基线（random）")
+  })
+
+  test("names the actual strongest baseline when the method wins", () => {
+    const limitations = markdownSection(rankingDraft(0.9, 0.82, 0.85, false).markdown, "限制")
+    expect(limitations).toContain("最强基线（random）属于弱基线")
+    expect(limitations).not.toContain("词项匹配基线属于弱基线")
   })
 
   test("states the comparison when the method wins", () => {

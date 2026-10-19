@@ -38,11 +38,63 @@ function stripFence(value: string) {
   return (fenced ? fenced[1] : trimmed).trim()
 }
 
-/** Tables and image references carry the results; a translation that drops them is not usable. */
+/** Tables and image references carry the results; row counts and image targets must survive. */
 function structurePreserved(source: string, translated: string) {
-  const tables = (text: string) => (text.match(/^\s*\|?\s*:?-{3,}/gm) ?? []).length
-  const images = (text: string) => (text.match(/!\[[^\]]*\]\([^)]+\)/g) ?? []).length
-  return tables(translated) >= tables(source) && images(translated) >= images(source)
+  const rows = (text: string) => (text.match(/^\s*\|.*\|\s*$/gm) ?? []).length
+  const separators = (text: string) => (text.match(/^\s*\|?\s*:?-{3,}/gm) ?? []).length
+  const images = (text: string) => [...text.matchAll(/!\[[^\]]*\]\(([^)]+)\)/g)].map((match) => match[1]!).sort()
+  return (
+    rows(translated) === rows(source) &&
+    separators(translated) === separators(source) &&
+    JSON.stringify(images(translated)) === JSON.stringify(images(source))
+  )
+}
+
+/** Numbers and units are claims; a translation may not round, drop or alter them. */
+function numbersPreserved(source: string, translated: string) {
+  const numbers = source.match(/(?<![\w.])\d+(?:[.,]\d+)*(?:%|‰)?(?![\w])/g) ?? []
+  return numbers.every((number) => translated.includes(number))
+}
+
+/** Full command cells and fenced blocks must survive verbatim, not just their first token. */
+const COMMAND_HEAD =
+  /^(?:\$ )?(?:bun|docker|podman|python3?|pip3?|npm|npx|pnpm|yarn|git|make|bash|sh|node|deno|uv|go|cargo|java|mvn|gradle|\.\/|~\/)\b/
+function commandLines(markdown: string) {
+  const commands: string[] = []
+  let fence: string[] | undefined
+  for (const line of markdown.split("\n")) {
+    if (/^\s*```/.test(line)) {
+      if (fence) {
+        const block = fence.join("\n").trim()
+        if (block) commands.push(block)
+        fence = undefined
+      } else fence = []
+      continue
+    }
+    if (fence) {
+      fence.push(line)
+      continue
+    }
+    if (!line.includes("|")) continue
+    for (const cell of line.split("|")) {
+      const text = cell.trim().replace(/^`+|`+$/g, "").trim()
+      if (COMMAND_HEAD.test(text)) commands.push(text)
+    }
+  }
+  return commands
+}
+
+function commandsPreserved(source: string, translated: string) {
+  const target = translated.replace(/\s+/g, " ")
+  return commandLines(source).every((command) => target.includes(command.replace(/\s+/g, " ")))
+}
+
+/** URLs, source paths and flag assignments are locators; a translated locator cannot be followed. */
+function locatorsPreserved(source: string, translated: string) {
+  const patterns = [/--[A-Za-z][\w-]*=\S+/g, /\bsrc\/[\w./-]+/g, /https?:\/\/[^\s)]+/g]
+  return patterns.every((pattern) =>
+    (source.match(pattern) ?? []).every((token) => translated.includes(token.replace(/\s+/g, " "))),
+  )
 }
 
 const SYSTEM_PROMPT = [
@@ -79,8 +131,16 @@ export function translatorFromEnv(env: Record<string, string | undefined> = proc
         signal: controller.signal,
       })
       if (!response.ok) throw new Error(`translation endpoint returned ${response.status}`)
-      const body = (await response.json()) as { choices?: Array<{ message?: { content?: string } }> }
-      return body.choices?.[0]?.message?.content ?? ""
+      const body = (await response.json()) as {
+        choices?: Array<{ message?: { content?: string }; finish_reason?: string }>
+      }
+      const choice = body.choices?.[0]
+      if (!choice) throw new Error("translation endpoint returned no choices")
+      if (choice.finish_reason === "length")
+        throw new Error("translation was truncated by the provider token limit")
+      if (typeof choice.message?.content !== "string")
+        throw new Error("translation endpoint returned no text content")
+      return choice.message.content
     } finally {
       clearTimeout(timer)
     }
@@ -130,6 +190,7 @@ async function translateValidated(
     if (!invalid) return { value }
     reason = invalid
   }
+  if (process.env.PAPERCODE_DEBUG_TRANSLATE) console.error(`[translate] rejected ${section_id}: ${reason}`)
   return { reason }
 }
 
@@ -163,20 +224,6 @@ function validatedEnglish(value: string, emptyReason: string, chineseReason: str
   if (value.length === 0) return emptyReason
   if (cjkRatio(value) > 0.02) return `${chineseReason}: ${value.slice(0, 80)}`
   return undefined
-}
-
-/** Flags, paths and command heads must survive translation; a translated command is not runnable. */
-function commandsPreserved(source: string, translated: string) {
-  const patterns = [
-    /--[A-Za-z][\w-]*=\S+/g,
-    /\bsrc\/[\w./-]+/g,
-    /https?:\/\/[^\s)]+/g,
-    /\b(?:bun|docker|podman)\s+\S+/g,
-  ]
-  const target = translated.replace(/\s+/g, " ")
-  return patterns.every((pattern) =>
-    (source.match(pattern) ?? []).every((token) => target.includes(token.replace(/\s+/g, " "))),
-  )
 }
 
 /** Translate Markdown headings inside kept-verbatim sections without touching citations or commands. */
@@ -244,6 +291,9 @@ export async function translateDraftSections(
       if (comment) return comment
       if (!structurePreserved(section.markdown, value))
         return "translation changed the table or image structure"
+      if (!numbersPreserved(section.markdown, value)) return "translation changed or dropped a number"
+      if (!commandsPreserved(section.markdown, value)) return "translation changed a command"
+      if (!locatorsPreserved(section.markdown, value)) return "translation changed a URL or source path"
       return undefined
     })
     if (!result.value) return fail(sectionId, result.reason ?? "empty translation")
@@ -296,7 +346,9 @@ export async function translateDraftSections(
         if (comment) return comment
         if (!structurePreserved(section.markdown, value))
           return "translation changed the table or image structure"
+        if (!numbersPreserved(section.markdown, value)) return "translation changed or dropped a number"
         if (!commandsPreserved(section.markdown, value)) return "translation changed a command or path"
+        if (!locatorsPreserved(section.markdown, value)) return "translation changed a URL or source path"
         return undefined
       })
       if (!body.value) return fail(section.section_id, body.reason ?? "empty translation")

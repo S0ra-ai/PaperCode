@@ -426,9 +426,19 @@ async function missingGlyphDiagnostics(texPath: string) {
   const log = Bun.file(`${texPath.replace(/\.tex$/, "")}.log`)
   if (!(await log.exists())) return []
   const missing = new Map<string, string>()
-  for (const line of (await log.text()).split("\n")) {
-    const match = line.trim().match(/^Missing character: There is no (.+?) in font (.+?)!$/)
-    if (match) missing.set(match[1].trim(), match[2].trim())
+  const lines = (await log.text()).split(/\r?\n/)
+  for (let index = 0; index < lines.length; index++) {
+    let line = lines[index]!.trim()
+    if (!line.startsWith("Missing character: There is no ")) continue
+    // XeTeX wraps log lines at ~79 columns, which can split the message before its final "!".
+    for (let joined = 0; !line.endsWith("!") && index + 1 < lines.length && joined < 3; joined++) {
+      const next = lines[index + 1]!.trim()
+      if (next.startsWith("Missing character:")) break
+      index += 1
+      line += next
+    }
+    const match = line.match(/^Missing character: There is no (.+?) in font (.+?)!$/)
+    if (match) missing.set(match[1]!.trim(), match[2]!.trim())
   }
   if (missing.size === 0) return []
   const listed = [...missing].slice(0, MISSING_GLYPH_LIMIT).map(([glyph, font]) => `${glyph}（字体 ${font}）`)

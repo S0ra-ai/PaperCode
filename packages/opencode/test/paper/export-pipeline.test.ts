@@ -348,7 +348,9 @@ describe("PaperRun export renderer pipeline", () => {
         const outdir = input.args.find((arg) => arg.startsWith("-output-directory="))?.slice("-output-directory=".length)
         await Bun.write(
           path.join(outdir!, "bundle-blank.log"),
-          "Missing character: There is no 한 (U+D55C) in font STSong/OT!\nMissing character: There is no 한 (U+D55C) in font STSong/OT!\n",
+          "Missing character: There is no 한 (U+D55C) in font STSong/OT!\n" +
+            "Missing character: There is no δ (U+03B4) in font [lmroman10-regular]:mapping=t\n" +
+            "ex-text;!\n",
         )
         await Bun.write(path.join(outdir!, "bundle-blank.pdf"), validPdfBytes)
         return { exit_code: 0, stdout: "", stderr: "" }
@@ -376,6 +378,8 @@ describe("PaperRun export renderer pipeline", () => {
     expect(pdf?.status).toBe("written")
     expect(pdf?.diagnostics.join("\n")).toContain("한")
     expect(pdf?.diagnostics.join("\n")).toContain("STSong")
+    // XeTeX wraps long log lines; a wrapped "Missing character" message must still be reported.
+    expect(pdf?.diagnostics.join("\n")).toContain("δ")
     expect(result.bundle.manifest.tool_diagnostics.join("\n")).toContain("PAPERCODE_EXPORT_CJK_FONT")
   })
 

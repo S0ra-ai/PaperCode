@@ -69,27 +69,45 @@ const englishBySection: Record<string, string> = {
   data_availability: "The dataset is available at https://zenodo.org/record/1 and the code at https://github.com/example/repo.",
 }
 
-/** A stub that keeps the table/figure skeleton so the structure guard accepts it. */
-function countStructure(text: string) {
-  return {
-    tables: (text.match(/^\s*\|?\s*:?-{3,}/gm) ?? []).length,
-    images: (text.match(/!\[[^\]]*\]\([^)]+\)/g) ?? []).length,
-  }
-}
-
-/** Keep at least as much structure as the source so the translation guard accepts the stub. */
+/** Keep the exact table row/image skeleton, numbers, locators and commands the guard requires. */
 function padStructure(source: string, translated: string) {
-  const sourceCounts = countStructure(source)
-  const translatedCounts = countStructure(translated)
-  // Keep commands and paths verbatim, as the real translator must.
-  const preserved = source.match(/--[A-Za-z][\w-]*=\S+|\bsrc\/[\w./-]+|https?:\/\/[^\s)]+|\b(?:bun|docker|podman)\s+\S+/g) ?? []
-  const blocks = [translated, ...preserved]
-  for (let index = translatedCounts.tables; index < sourceCounts.tables; index++) {
-    blocks.push("| A | B |\n| --- | --- |\n| x | y |")
+  const rows = (text: string) => (text.match(/^\s*\|.*\|\s*$/gm) ?? []).length
+  // Keep an English table the canned text already provides; otherwise rebuild the source skeleton.
+  const sourceTableLines = source.split("\n").map((line) => line.trim()).filter((line) => /^\|.*\|$/.test(line))
+  const baseTableLines = translated.split("\n").map((line) => line.trim()).filter((line) => /^\|.*\|$/.test(line))
+  const keepTables = baseTableLines.length === sourceTableLines.length && sourceTableLines.length > 0
+  let body = translated
+    .split("\n")
+    .filter((line) => keepTables || !/^\s*\|.*\|\s*$/.test(line))
+    .join("\n")
+    .replace(/!\[[^\]]*\]\([^)]+\)/g, "")
+    .trim()
+  const blocks = [body]
+  const numbers = source.match(/(?<![\w.])\d+(?:[.,]\d+)*(?:%|‰)?(?![\w])/g) ?? []
+  const locators = source.match(/--[A-Za-z][\w-]*=\S+|\bsrc\/[\w./-]+|https?:\/\/[^\s)]+/g) ?? []
+  const commands = source
+    .split("\n")
+    .flatMap((line) => (line.includes("|") ? line.split("|") : []))
+    .map((cell) => cell.trim().replace(/^`+|`+$/g, ""))
+    .filter((cell) =>
+      /^(?:bun|docker|podman|python3?|pip3?|npm|npx|pnpm|yarn|git|make|bash|sh|node|deno|uv|go|cargo|java|mvn|gradle|\.\/|~\/)\b/.test(
+        cell,
+      ),
+    )
+  blocks.push([...numbers, ...locators, ...commands].join("\n"))
+  if (rows(source) > 0 && !keepTables) {
+    const skeleton = source
+      .split("\n")
+      .map((line) => line.trim())
+      .filter((line) => /^\|.*\|$/.test(line))
+      .map((row) => {
+        const cells = row.slice(1, -1).split("|").map((cell) => cell.trim())
+        return `| ${cells.map((cell, index) => (/^:?-{3,}:?$/.test(cell) ? "---" : `English ${index + 1}`)).join(" | ")} |`
+      })
+    blocks.push(skeleton.join("\n"))
   }
-  for (let index = translatedCounts.images; index < sourceCounts.images; index++) {
-    blocks.push("![Figure](figures/primary-metric.png)")
-  }
+  const sourceImages = [...source.matchAll(/!\[[^\]]*\]\(([^)]+)\)/g)].map((match) => match[1]!)
+  for (const target of sourceImages) blocks.push(`![Figure](${target})`)
   return blocks.join("\n\n")
 }
 
@@ -318,5 +336,41 @@ describe("appendix and reference handling", () => {
     const references = result?.overrides.find((override) => override.section_id === "references")
     const source = draft.sections.find((section) => section.section_id === "references")?.markdown
     expect(references?.markdown).toBe(source)
+  })
+})
+
+describe("structure and value guards", () => {
+  test("rejects a translation that drops table rows", async () => {
+    const base = stubTranslator()
+    const translator = async (input: { section_id: string; text: string }) => {
+      const value = await base(input)
+      return input.section_id === "declarations"
+        ? value
+            .split("\n")
+            .filter((line) => !/^\|.*\|$/.test(line) || /^\|(\s*:?-{3,}:?\s*\|)+\s*$/.test(line))
+            .join("\n")
+            .trim()
+        : value
+    }
+    const failures: Array<{ section_id: string; reason: string }> = []
+    const result = await translateDraftSections(chineseDraft(), translator, {
+      onFailure: (failure) => failures.push(failure),
+    })
+    expect(result).toBeUndefined()
+    expect(failures[0]?.reason).toContain("table or image structure")
+  })
+
+  test("rejects a translation that drops reported numbers", async () => {
+    const base = stubTranslator()
+    const translator = async (input: { section_id: string; text: string }) => {
+      if (input.section_id === "results") return "The results show an improvement without reporting any values."
+      return base(input)
+    }
+    const failures: Array<{ section_id: string; reason: string }> = []
+    const result = await translateDraftSections(chineseDraft(), translator, {
+      onFailure: (failure) => failures.push(failure),
+    })
+    expect(result).toBeUndefined()
+    expect(failures[0]?.reason).toContain("number")
   })
 })
