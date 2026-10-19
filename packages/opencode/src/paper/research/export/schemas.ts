@@ -70,6 +70,8 @@ export type RecordExportBundleInput = {
   ablation_figure?: PaperFigureSpec
   /** Venue LaTeX class; the pipeline falls back when the class is not installed. */
   documentclass?: string
+  /** Blocking findings and their required actions; appended to a forced draft. */
+  readiness?: Array<{ category: string; message: string; action: string }>
   renderers?: ExportRenderer
   now?: string
 }

@@ -683,4 +683,60 @@ describe("PaperRun export renderer pipeline", () => {
     expect(manifest.forced).toBe(true)
     expect(manifest.failed_checks).toEqual(["unsupported_claim", "reproduction_failure"])
   })
+
+  test("adds gate blockers and required actions to a forced draft", async () => {
+    const run = await newRun()
+
+    const result = await renderPaperExportPipeline(
+      run.run_dir,
+      {
+        mode: "forced_draft",
+        bundle_id: "bundle-readiness",
+        draft: run.draft,
+        final_gate: blockedGate,
+        source_artifact_ids: [],
+        readiness: [
+          {
+            category: "unsupported_claim",
+            message: 'Claim "retrieval improves nDCG" has no experiment evidence.',
+            action: "Run the experiment or weaken the claim.",
+          },
+          { category: "reproduction_failure", message: "Container exited 1.", action: "Fix the entrypoint and rerun." },
+        ],
+        tools: { pandoc: "pandoc", xelatex: "xelatex" },
+        command: stubCommand,
+        now,
+      },
+      run.options,
+    )
+
+    const markdown = result.bundle.files.find((file) => file.format === "markdown")
+    const text = await readFile(path.join(run.run_dir, markdown!.path), "utf8")
+    expect(text).toContain("Submission Readiness (internal, not part of the manuscript)")
+    expect(text).toContain('| `unsupported_claim` | Claim "retrieval improves nDCG" has no experiment evidence. | Run the experiment or weaken the claim. |')
+    expect(text).toContain("| `reproduction_failure` | Container exited 1. | Fix the entrypoint and rerun. |")
+  })
+
+  test("does not add the readiness table to a final export", async () => {
+    const run = await newRun()
+
+    const result = await renderPaperExportPipeline(
+      run.run_dir,
+      {
+        mode: "final",
+        bundle_id: "bundle-final-no-readiness",
+        draft: run.draft,
+        final_gate: { status: "passed", blockers: [], updated_at: now },
+        source_artifact_ids: [],
+        readiness: [{ category: "unsupported_claim", message: "stale", action: "stale" }],
+        tools: { pandoc: "pandoc", xelatex: "xelatex" },
+        command: stubCommand,
+        now,
+      },
+      run.options,
+    )
+
+    const markdown = result.bundle.files.find((file) => file.format === "markdown")
+    expect(await readFile(path.join(run.run_dir, markdown!.path), "utf8")).not.toContain("Submission Readiness")
+  })
 })

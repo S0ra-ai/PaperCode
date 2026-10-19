@@ -52,6 +52,6 @@
 
 ## 拦截之后
 
-被拦下时不会丢东西：`runPaperAuthoringLoop` 会把稿件按 `forced_draft` 导出。未通过的检查逐条记在 `verification/blocking-report.json` artifact 与预览快照的 blockers 里；导出 manifest 的 `tool_diagnostics` 记录的是导出工具链自身的诊断，两者不要混读。补齐后重新运行即可转为 `final`。
+被拦下时不会丢东西：`runPaperAuthoringLoop` 会把稿件按 `forced_draft` 导出。未通过的检查逐条记在 `verification/blocking-report.json` artifact 与预览快照的 blockers 里，并作为 "Submission Readiness" 表追加到导出稿末尾——每行给出检查项、发现和要求的修复动作，打开 forced draft 就知道下一步要补什么。该表只出现在 forced draft，`final` 导出不会带上。导出 manifest 的 `tool_diagnostics` 记录的是导出工具链自身的诊断，两者不要混读。补齐后重新运行即可转为 `final`。
 
 需求定义集中在 `CJC_MANUSCRIPT_REQUIREMENTS` 与 `Q1_MANUSCRIPT_REQUIREMENTS`，新增期刊 profile 时在 `manuscriptRequirementsForProfile` 里补一条映射即可，不需要改检查逻辑。

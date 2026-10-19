@@ -74,6 +74,15 @@ export type PaperAvailabilityBundle = {
 }
 
 /** What the author supplied beyond the generated draft, persisted so a refresh can reapply it. */
+/** Flatten the gate's blockers into the checklist a forced draft carries. */
+export function readinessFromVerification(result: VerificationGateResult) {
+  return result.blocking_report.blockers.map((finding) => ({
+    category: finding.category,
+    message: finding.message,
+    action: finding.required_action,
+  }))
+}
+
 export type PaperAuthoringInputs = {
   schema_version: "PaperAuthoringInputs.v1"
   declarations?: PaperDeclarations
@@ -837,6 +846,7 @@ export async function runPaperAuthoringLoop(
             figure,
             ablation_figure: ablationFigure,
             documentclass: paperDocumentClass(input.target_profile),
+            readiness: readinessFromVerification(verification),
             renderers: input.renderers,
             now: input.now,
           },
@@ -854,6 +864,7 @@ export async function runPaperAuthoringLoop(
             figure,
             ablation_figure: ablationFigure,
             documentclass: paperDocumentClass(input.target_profile),
+            readiness: readinessFromVerification(verification),
             renderers: input.renderers,
             now: input.now,
           },

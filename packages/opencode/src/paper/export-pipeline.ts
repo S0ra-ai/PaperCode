@@ -56,6 +56,8 @@ export interface RenderPaperExportPipelineInput {
   ablation_figure?: PaperFigureSpec
   /** Venue LaTeX class (elsarticle, IEEEtran, acmart...). Used only when kpsewhich finds it. */
   documentclass?: string
+  /** Gate blockers and their required actions, appended to a forced draft as a checklist. */
+  readiness?: Array<{ category: string; message: string; action: string }>
   now?: string
 }
 
@@ -352,6 +354,18 @@ async function renderLatex(input: {
   })
 }
 
+/** A forced draft carries what still has to be fixed, so the export is a to-do list, not just a rejection. */
+function readinessSection(readiness: NonNullable<RenderPaperExportPipelineInput["readiness"]>) {
+  const rows = readiness.map((item) => `| \`${item.category}\` | ${item.message.replaceAll("|", "\\|")} | ${item.action.replaceAll("|", "\\|")} |`)
+  return [
+    "## Submission Readiness (internal, not part of the manuscript)",
+    "",
+    "| Check | Finding | Required action |",
+    "| --- | --- | --- |",
+    ...rows,
+  ].join("\n")
+}
+
 /** Only use a venue class the TeX installation actually has; otherwise pandoc's default applies. */
 async function availableDocumentClass(command: PaperExportCommandRunner, cwd: string, name: string) {
   const result = await command({ tool: "kpsewhich", args: [`${name}.cls`], cwd })
@@ -564,7 +578,10 @@ export async function renderPaperExportPipeline(
   const documentclass = input.documentclass
     ? await availableDocumentClass(command, runDir, input.documentclass)
     : undefined
-  const markdown = exportMarkdown(input.draft, input.mode === "forced_draft" ? failedChecks : [])
+  let markdown = exportMarkdown(input.draft, input.mode === "forced_draft" ? failedChecks : [])
+  if (input.mode === "forced_draft" && input.readiness?.length) {
+    markdown = [markdown, readinessSection(input.readiness)].join("\n\n")
+  }
   const outputName = input.bundle_id
   const fonts = exportFonts(process.env, input.fonts)
   if (input.figure || input.ablation_figure) {

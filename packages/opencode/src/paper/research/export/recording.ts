@@ -59,6 +59,7 @@ export async function recordExportBundle(
           figure: input.figure,
           ablation_figure: input.ablation_figure,
           documentclass: input.documentclass,
+          readiness: input.readiness,
           renderers: input.renderers,
           now: input.now,
         },
