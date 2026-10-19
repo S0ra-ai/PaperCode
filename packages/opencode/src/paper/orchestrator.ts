@@ -27,6 +27,7 @@ import { discoverAndRecordLiteratureData } from "./research/sources"
 import { planExperiments } from "./research/experiments/planning"
 import { recordExperimentLoop } from "./research/experiments/recording"
 import { applySectionOverrides, composeClaimLedger, composeDraftPaper } from "./research/writing"
+import { translatorFromEnv } from "./translate"
 import type { DataPlan, DatasetCandidate, LiteratureMap, SourceCandidate, SourceRecord } from "./research/sources"
 import type {
   ExperimentCommand,
@@ -1725,6 +1726,7 @@ async function defaultAuthoring(runDir: string, request: ResearchIntakeRequest, 
       target_profile: targetProfile(request),
       section_overrides: request.draft_sections,
       declarations: request.declarations,
+      translator: translatorFromEnv(),
       code_artifact_ids: result.evidenceArtifactIds,
       source_artifact_ids: result.evidenceArtifactIds,
       now: nowIso(options),

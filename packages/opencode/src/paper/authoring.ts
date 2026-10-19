@@ -1,5 +1,6 @@
 import type { PreviewDiagnostics, PreviewSnapshot } from "../../../preview/src/protocol"
 import { figureSpecFromReport, recordExportBundle, type ExportBundle, type ExportRenderer } from "./research/export"
+import { translateDraftSections, type Translator } from "./translate"
 import type { ResearchArtifact } from "./research/contracts"
 import type { ExperimentPlan, ResultReport } from "./research/experiments"
 import {
@@ -89,6 +90,8 @@ export type RunPaperAuthoringLoopInput = {
   declarations?: PaperDeclarations
   /** Section bodies authored or translated by the caller; replaces the generated text. */
   section_overrides?: DraftSectionOverride[]
+  /** Supplies English prose when the target venue requires it; absent leaves the generated language. */
+  translator?: Translator
   code_artifact_ids?: string[]
   code_metadata?: Parameters<typeof composeDraftPaper>[0]["code_metadata"]
   source_artifact_ids?: string[]
@@ -712,9 +715,17 @@ export async function runPaperAuthoringLoop(
         code_metadata: input.code_metadata,
         now: input.now,
       })
-      const composed = input.section_overrides?.length
+      const composedBase = input.section_overrides?.length
         ? applySectionOverrides(baseDraft, input.section_overrides)
         : baseDraft
+      // An English venue cannot read the generated Chinese scaffold; translate it when a translator
+      // is available and keep the result as overrides so a later export refresh reproduces it.
+      const translated =
+        manuscriptRequirementsForProfile(input.target_profile).language === "en" && input.translator
+          ? await translateDraftSections(composedBase, input.translator)
+          : undefined
+      const effectiveOverrides = [...(input.section_overrides ?? []), ...(translated ?? [])]
+      const composed = effectiveOverrides.length ? applySectionOverrides(baseDraft, effectiveOverrides) : baseDraft
       const revision = createProfileAwareDraftRevision({ draft: composed, authoring: input, now: input.now })
       const draft = applyRevision(composed, revision)
       const writing = await recordDraftWriting(
@@ -726,13 +737,13 @@ export async function runPaperAuthoringLoop(
         },
         options,
       )
-      // Persist the author's own text so a later final-export refresh recomposes the same manuscript
-      // instead of silently reverting to the generated sections.
-      if (input.declarations || input.section_overrides?.length) {
+      // Persist the author's own text (and any translation) so a later final-export refresh
+      // recomposes the same manuscript instead of silently reverting to the generated sections.
+      if (input.declarations || effectiveOverrides.length) {
         const authored: PaperAuthoringInputs = {
           schema_version: "PaperAuthoringInputs.v1",
           declarations: input.declarations,
-          section_overrides: input.section_overrides,
+          section_overrides: effectiveOverrides.length ? effectiveOverrides : undefined,
         }
         await writeResearchArtifact(
           runDir,

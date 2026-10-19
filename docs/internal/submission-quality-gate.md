@@ -25,10 +25,10 @@
 ## 如何满足
 
 - **参考文献**：`literature_map` 里放足量的 `verification.status = "verified"` 且非占位 URL 的来源。生成稿最多渲染 60 条（`MAX_FORMAL_REFERENCES`）；中文期刊要求 20 条，国际一区要求 40 条。
-- **正文语言**：脚手架的所有生成器都写中文，国际一区要求英文，所以必须由作者/agent 提供正文。两条入口：
-  - HTTP `POST` 创建 PaperRun 时传 `draft_sections: [{ section_id, markdown }]`；
-  - 直接调用 `runPaperAuthoringLoop` 时传 `section_overrides`。
-  覆盖发生在生成之后、闸门之前，`section_id` 用脚手架已有的 id（`abstract`、`introduction`、`related_work`、`method`、`experimental_setup`、`results`、`discussion`、`conclusion`、`keywords` 等）。语言检查只采样目标 profile 的叙事章节，不把内部审计附录和参考文献算进去。
+- **正文语言**：脚手架的所有生成器都写中文，国际一区要求英文。三条通路，按优先级：
+  1. 配置 `PAPERCODE_TRANSLATE_BASE_URL`、`PAPERCODE_TRANSLATE_API_KEY`、`PAPERCODE_TRANSLATE_MODEL` 后，authoring 会自动把叙事章节翻译成英文（OpenAI chat-completions 方言），翻译结果作为章节覆盖写入 `AuthoringInputs`，最终导出刷新也会重放。翻译是**全有或全无**：任一章失败或返回仍是中文，就保持原稿，由闸门如实拦截，不会产出半中半英的稿件。
+  2. 显式传入 `section_overrides`（程序化）或 `draft_sections`（HTTP 创建 PaperRun），由作者/agent 直接提供英文正文。
+  3. 翻译只覆盖叙事章节（摘要、关键词、引言、相关工作、方法、实验设置、结果、讨论、结论、声明、可用性）；内部审计附录不进英文稿。
 - **声明**：`runPaperAuthoringLoop` 接受 `declarations: { funding, author_contributions, competing_interests, ethics, llm_disclosure }`，HTTP 创建 PaperRun 时传同名的 `declarations` 字段；不传就是"未声明"，闸门会拦。伦理声明有默认的"不涉及人类/动物受试者"文本，仍可覆盖。
 - **代码可用性**：`code_metadata.repository_url` 或 `package_name` 至少有一个，稿件才会写出"代码可用性"小节。闸门要求该节同时出现代码主题与定位信息——URL、GitHub/GitLab/Zenodo/DOI，或生成表格里的"代码包"行都算定位。
 - **统计**：结果章节必须同时出现离散度（`0.910 ± 0.004`、`0.910 (0.004)`、`95% CI` 或"标准差："）和显著性依据（`p = 0.003` 或 Wilcoxon/t-test/ANOVA 等具体检验名），只有其一仍会被拦。
