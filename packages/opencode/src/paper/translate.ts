@@ -91,7 +91,12 @@ function commandsPreserved(source: string, translated: string) {
 
 /** URLs, source paths and flag assignments are locators; a translated locator cannot be followed. */
 function locatorsPreserved(source: string, translated: string) {
-  const patterns = [/--[A-Za-z][\w-]*=\S+/g, /\bsrc\/[\w./-]+/g, /https?:\/\/[^\s)]+/g]
+  // Stop at separators: "--a=1、--b=2" is two flags, not one token containing "、".
+  const patterns = [
+    /--[A-Za-z][\w-]*=[A-Za-z0-9_.:/@{}~-]+/g,
+    /\bsrc\/[\w./-]+/g,
+    /https?:\/\/[^\s)\]）】，。；、]+/g,
+  ]
   return patterns.every((pattern) =>
     (source.match(pattern) ?? []).every((token) => translated.includes(token.replace(/\s+/g, " "))),
   )
