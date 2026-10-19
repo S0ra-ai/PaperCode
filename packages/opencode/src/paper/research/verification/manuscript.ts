@@ -90,6 +90,7 @@ export const CJC_MANUSCRIPT_REQUIREMENTS: ManuscriptRequirements = {
     { id: "author-contributions", severity: "warning" },
   ],
   require_statistics: "warning",
+  require_effect_size: false,
   min_tables: 1,
   min_figures: 0,
 }
@@ -128,6 +129,7 @@ export const Q1_MANUSCRIPT_REQUIREMENTS: ManuscriptRequirements = {
     { id: "llm-disclosure", severity: "blocker" },
   ],
   require_statistics: "blocker",
+  require_effect_size: true,
   min_tables: 2,
   min_figures: 1,
 }
@@ -256,6 +258,10 @@ function reportsDispersion(markdown: string) {
     /\b95%\s*(CI|confidence interval)\b[^.]{0,40}\d/i.test(markdown) ||
     /置信区间[^。]{0,30}\d/.test(markdown)
   )
+}
+
+function reportsEffectSize(markdown: string) {
+  return /(cohen'?s d|cliff'?s (δ|delta)|\betas?\s*(squared|²)|η²|effect size|效果量)[^.]{0,40}\d/i.test(markdown)
 }
 
 function reportsSignificance(markdown: string) {
@@ -434,6 +440,19 @@ export function checkManuscriptQuality(input: VerificationGateInput): Verificati
               source_ids: [],
               artifact_ids: [],
               required_action: "Run repeated trials and report dispersion and a significance test.",
+            }),
+          )
+        }
+        if (requirements.require_effect_size && !reportsEffectSize(results)) {
+          findings.push(
+            finding({
+              category: "missing_effect_size",
+              severity: "blocker",
+              message: "The baseline comparison reports no effect size (Cohen's d or Cliff's delta).",
+              claim_ids: [],
+              source_ids: [],
+              artifact_ids: [],
+              required_action: "Report the effect size next to the significance test.",
             }),
           )
         }

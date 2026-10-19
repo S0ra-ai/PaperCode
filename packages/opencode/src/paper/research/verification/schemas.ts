@@ -25,6 +25,7 @@ export type VerificationFindingCategory =
   | "insufficient_references"
   | "stale_references"
   | "missing_statistics"
+  | "missing_effect_size"
   | "missing_table"
   | "missing_figure"
   | "manuscript_language"
@@ -55,6 +56,8 @@ export type ManuscriptRequirements = {
   required_statements: ManuscriptStatementRequirement[]
   /** Whether a comparison against a baseline has to report dispersion and a significance test. */
   require_statistics: "off" | "warning" | "blocker"
+  /** Whether a baseline comparison also has to report an effect size (Cohen's d / Cliff's delta). */
+  require_effect_size: boolean
   min_tables: number
   min_figures: number
 }

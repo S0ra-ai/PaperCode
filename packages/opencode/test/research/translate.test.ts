@@ -59,7 +59,7 @@ const englishBySection: Record<string, string> = {
     "| Baseline | 0.880 |",
     "| Ours | 0.910 |",
     "",
-    "Accuracy is 0.910 ± 0.004 over five seeds (p = 0.003, Wilcoxon).",
+    "Accuracy is 0.910 ± 0.004 over five seeds (p = 0.003, Wilcoxon); the effect size is large (Cliff's delta = 1.0).",
     "![Figure 1](figures/primary-metric.png)",
   ].join("\n"),
   discussion: "The discussion separates supported from unsupported claims.",

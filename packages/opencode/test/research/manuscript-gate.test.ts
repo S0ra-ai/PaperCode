@@ -78,6 +78,7 @@ const submissionSections: Record<string, string> = {
     "| full | 0.910 |",
     "",
     "Accuracy is 0.910 ± 0.004 over five seeds and the difference is significant (p = 0.003, Wilcoxon signed-rank).",
+    "The effect size is large (Cohen's d = 6.2).",
     "![Figure 1: primary result](figures/result.png)",
   ].join("\n"),
   discussion: prose("The discussion separates what the evidence supports from what it does not."),
@@ -143,6 +144,14 @@ describe("manuscript quality gate", () => {
     const missing = findings.find((finding) => finding.category === "missing_statement")
     expect(missing?.severity).toBe("blocker")
     expect(missing?.message).toContain("利益冲突")
+  })
+
+  test("blocks a baseline comparison without an effect size", () => {
+    const draft = draftWith({
+      ...submissionSections,
+      results: submissionSections.results.replace(/The effect size is large.*\n/, ""),
+    })
+    expect(categories(gateInput({ draft }))).toContain("missing_effect_size")
   })
 
   test("blocks a baseline comparison without statistics", () => {
