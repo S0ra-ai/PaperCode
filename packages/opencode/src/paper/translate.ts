@@ -101,6 +101,37 @@ export type TranslationFailure = {
   reason: string
 }
 
+/** One retry absorbs a model that occasionally echoes the source language on short inputs. */
+const MAX_ATTEMPTS = 2
+
+async function translateValidated(
+  translator: Translator,
+  section_id: string,
+  text: string,
+  validate: (value: string) => string | undefined,
+): Promise<{ value?: string; reason?: string }> {
+  let reason = "empty translation"
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    let value: string
+    try {
+      value = stripFence(await translator({ section_id, text, language: "en" }))
+    } catch (error) {
+      reason = `request failed: ${error instanceof Error ? error.message : String(error)}`
+      continue
+    }
+    const invalid = validate(value)
+    if (!invalid) return { value }
+    reason = invalid
+  }
+  return { reason }
+}
+
+function validatedEnglish(value: string, emptyReason: string, chineseReason: string) {
+  if (value.length === 0) return emptyReason
+  if (cjkRatio(value) > 0.02) return chineseReason
+  return undefined
+}
+
 export async function translateDraftSections(
   draft: DraftPaper,
   translator: Translator,
@@ -111,48 +142,40 @@ export async function translateDraftSections(
     options?.onFailure?.({ section_id, reason })
     return undefined
   }
-  const message = (error: unknown) => (error instanceof Error ? error.message : String(error))
   let title: string | undefined
   if (cjkRatio(draft.title) > 0.02) {
-    let translatedTitle: string
-    try {
-      translatedTitle = stripFence(await translator({ section_id: "title", text: draft.title, language: "en" }))
-    } catch (error) {
-      return fail("title", `request failed: ${message(error)}`)
-    }
-    if (translatedTitle.length === 0) return fail("title", "empty translation")
-    if (cjkRatio(translatedTitle) > 0.02) return fail("title", "translation still contains Chinese")
-    title = translatedTitle
+    const result = await translateValidated(translator, "title", draft.title, (value) =>
+      validatedEnglish(value, "empty translation", "translation still contains Chinese"),
+    )
+    if (!result.value) return fail("title", result.reason ?? "empty translation")
+    title = result.value
   }
   for (const sectionId of translatableSections(draft)) {
     const section = draft.sections.find((item) => item.section_id === sectionId)
     if (!section || section.markdown.trim().length === 0) continue
     // Already English: nothing to do (author-supplied overrides may cover some sections).
     if (cjkRatio(section.markdown) < 0.02) continue
-    let translated: string
-    try {
-      translated = stripFence(await translator({ section_id: sectionId, text: section.markdown, language: "en" }))
-    } catch (error) {
-      return fail(sectionId, `request failed: ${message(error)}`)
-    }
-    if (translated.length === 0) return fail(sectionId, "empty translation")
-    if (cjkRatio(translated) > 0.02) return fail(sectionId, "translation still contains Chinese")
-    if (!structurePreserved(section.markdown, translated))
-      return fail(sectionId, "translation changed the table or image structure")
+    const result = await translateValidated(translator, sectionId, section.markdown, (value) => {
+      const basic = validatedEnglish(value, "empty translation", "translation still contains Chinese")
+      if (basic) return basic
+      if (!structurePreserved(section.markdown, value))
+        return "translation changed the table or image structure"
+      return undefined
+    })
+    if (!result.value) return fail(sectionId, result.reason ?? "empty translation")
     let translatedTitle: string | undefined
     if (cjkRatio(section.title) > 0.02) {
-      try {
-        const value = stripFence(
-          await translator({ section_id: `section_title:${sectionId}`, text: section.title, language: "en" }),
-        )
-        if (value.length === 0) return fail(sectionId, "empty section title translation")
-        if (cjkRatio(value) > 0.02) return fail(sectionId, "section title still contains Chinese")
-        translatedTitle = value
-      } catch (error) {
-        return fail(sectionId, `section title request failed: ${message(error)}`)
-      }
+      const titleResult = await translateValidated(translator, `section_title:${sectionId}`, section.title, (value) =>
+        validatedEnglish(value, "empty section title translation", "section title still contains Chinese"),
+      )
+      if (!titleResult.value) return fail(sectionId, titleResult.reason ?? "empty section title translation")
+      translatedTitle = titleResult.value
     }
-    overrides.push({ section_id: sectionId, markdown: translated, ...(translatedTitle ? { title: translatedTitle } : {}) })
+    overrides.push({
+      section_id: sectionId,
+      markdown: result.value,
+      ...(translatedTitle ? { title: translatedTitle } : {}),
+    })
   }
   if (overrides.length === 0 && !title) return undefined
   return { overrides, ...(title ? { title } : {}) }

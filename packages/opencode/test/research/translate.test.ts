@@ -207,6 +207,21 @@ describe("draft translation", () => {
 })
 
 describe("translation diagnostics", () => {
+  test("retries once when the model echoes the source language", async () => {
+    let firstTitle = true
+    const base = stubTranslator()
+    const flaky = async (input: { section_id: string; text: string }) => {
+      if (firstTitle && input.section_id === "title") {
+        firstTitle = false
+        return "证据约束检索"
+      }
+      return base(input)
+    }
+    const result = await translateDraftSections(chineseDraft(), flaky)
+    expect(result?.title).toBe("Evidence-Constrained Retrieval")
+    expect(result?.overrides.length).toBeGreaterThan(5)
+  })
+
   test("reports why a translation was abandoned instead of only returning undefined", async () => {
     const failures: Array<{ section_id: string; reason: string }> = []
     const result = await translateDraftSections(
