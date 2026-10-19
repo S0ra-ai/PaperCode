@@ -19,17 +19,23 @@ export type ExperimentStatistic = {
   std: number
 }
 
-/** Two-sample test between the proposed method and one baseline, from their trial samples. */
+/** Two-sample tests between the proposed method and one baseline, from their trial samples. */
+export type SignificanceTestName = "welch_t" | "wilcoxon_rank_sum"
+
 export type ExperimentSignificance = {
   experiment_id: string
   baseline_experiment_id: string
   metric: string
-  test: "welch_t"
-  statistic: number
-  df: number
-  p: number
   n_proposed: number
   n_baseline: number
+  /** Both tests when the samples allow them; `p_adjusted` is Holm-adjusted across baselines. */
+  tests: Array<{
+    name: SignificanceTestName
+    statistic: number
+    df?: number
+    p: number
+    p_adjusted: number
+  }>
 }
 
 export type ExperimentResourceUsage = {

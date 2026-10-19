@@ -11,7 +11,9 @@ import {
   recordExperimentLoop,
   runContainerReproduction,
   runHostExploration,
+  holmAdjust,
   welchTTest,
+  wilcoxonRankSum,
   type ExperimentRunner,
 } from "@/paper/research/experiments"
 import { composeClaimLedger, composeDraftPaper } from "@/paper/research/writing"
@@ -94,6 +96,20 @@ describe("experiment loop", () => {
     expect(different?.p).toBeLessThan(0.001)
   })
 
+  test("wilcoxon rank-sum separates identical from different samples", () => {
+    const same = wilcoxonRankSum([0.9, 0.91, 0.89], [0.9, 0.91, 0.89])
+    expect(same?.p).toBeCloseTo(1, 2)
+    const different = wilcoxonRankSum([0.9, 0.91, 0.92, 0.93, 0.94], [0.6, 0.61, 0.62, 0.63, 0.64])
+    expect(different?.p).toBeLessThan(0.05)
+    // Too few observations for the normal approximation.
+    expect(wilcoxonRankSum([0.9, 0.91], [0.66, 0.67])).toBeUndefined()
+  })
+
+  test("holm adjustment controls the family of baseline comparisons", () => {
+    expect(holmAdjust([0.01, 0.04, 0.03])).toEqual([0.03, 0.06, 0.06])
+    expect(holmAdjust([0.5])).toEqual([0.5])
+  })
+
   test("repeated trials are summarised as mean ± std in the report and the draft", async () => {
     const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-repeated-trials-test-"))
     try {
@@ -154,7 +170,14 @@ describe("experiment loop", () => {
       expect(proposed?.mean).toBeCloseTo(0.92, 6)
       expect(proposed?.std).toBeCloseTo(0.02, 6)
       expect(recorded.report.significance?.length).toBe(3)
-      expect(recorded.report.significance?.every((item) => item.test === "welch_t" && item.p < 0.01)).toBe(true)
+      expect(
+        recorded.report.significance?.every((item) =>
+          item.tests.some((test) => test.name === "welch_t" && test.p_adjusted < 0.01),
+        ),
+      ).toBe(true)
+      expect(
+        recorded.report.significance?.every((item) => item.tests.some((test) => test.name === "wilcoxon_rank_sum")),
+      ).toBe(true)
 
       const ledger = composeClaimLedger({ topic: "Repeated trials", claims: [], now })
       const draft = composeDraftPaper({
@@ -168,6 +191,7 @@ describe("experiment loop", () => {
       expect(draft.markdown).toContain("±")
       expect(draft.markdown).toContain("(n=3)")
       expect(draft.markdown).toContain("Welch")
+      expect(draft.markdown).toContain("Holm")
       expect(draft.markdown).toMatch(/p [<=]/)
     } finally {
       await clean(dir)

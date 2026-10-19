@@ -106,3 +106,76 @@ export function welchTTest(sampleA: number[], sampleB: number[]): WelchTestResul
       (varianceB / sampleB.length) ** 2 / (sampleB.length - 1))
   return { statistic, df, p: studentTTwoSidedP(statistic, df) }
 }
+
+/**
+ * Wilcoxon rank-sum (Mann-Whitney U), two-sided, normal approximation with tie and continuity
+ * correction. Non-parametric metrics and small samples are common in systems papers, and a t-test
+ * alone would overstate significance there.
+ */
+export function wilcoxonRankSum(sampleA: number[], sampleB: number[]): WelchTestResult | undefined {
+  if (sampleA.length < 3 || sampleB.length < 3) return undefined
+  const combined = [
+    ...sampleA.map((value) => ({ value, group: "a" as const })),
+    ...sampleB.map((value) => ({ value, group: "b" as const })),
+  ].sort((left, right) => left.value - right.value)
+
+  const ranks = new Map<number, number>()
+  const ties: number[] = []
+  let index = 0
+  while (index < combined.length) {
+    let end = index
+    while (end + 1 < combined.length && combined[end + 1].value === combined[index].value) end++
+    const tied = end - index + 1
+    if (tied > 1) ties.push(tied)
+    const averageRank = (index + 1 + end + 1) / 2
+    for (let cursor = index; cursor <= end; cursor++) ranks.set(cursor, averageRank)
+    index = end + 1
+  }
+
+  let rankSumA = 0
+  combined.forEach((item, position) => {
+    if (item.group === "a") rankSumA += ranks.get(position)!
+  })
+  const nA = sampleA.length
+  const nB = sampleB.length
+  const total = nA + nB
+  const uA = rankSumA - (nA * (nA + 1)) / 2
+  const u = Math.min(uA, nA * nB - uA)
+  const meanU = (nA * nB) / 2
+  const tieCorrection = ties.reduce((sum, size) => sum + size ** 3 - size, 0) / (total * (total - 1))
+  const varianceU = ((nA * nB) / 12) * (total + 1 - tieCorrection)
+  if (varianceU <= 0) return undefined
+  // The continuity correction can push |U - E[U]| below zero, which would make z negative and the
+  // two-sided p exceed 1; clamp at zero.
+  const z = Math.max(0, (Math.abs(u - meanU) - 0.5) / Math.sqrt(varianceU))
+  return { statistic: u, df: total, p: Math.min(1, 2 * (1 - normalCdf(z))) }
+}
+
+/** Standard normal CDF via the complementary error function. */
+function normalCdf(value: number) {
+  // Abramowitz & Stegun 7.1.26 on erf; accuracy ~1e-7, ample for a p-value.
+  const x = Math.abs(value) / Math.SQRT2
+  const t = 1 / (1 + 0.3275911 * x)
+  const erf =
+    1 -
+    (((((1.061405429 * t - 1.453152027) * t + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t) *
+      Math.exp(-x * x)
+  const signed = value >= 0 ? erf : -erf
+  return 0.5 * (1 + signed)
+}
+
+/**
+ * Holm–Bonferroni adjustment. Comparing the proposed method against several baselines without it
+ * inflates the chance of a false positive, which reviewers check for.
+ */
+export function holmAdjust(pValues: number[]) {
+  const indexed = pValues.map((p, index) => ({ p, index })).sort((left, right) => left.p - right.p)
+  const adjusted = new Array<number>(pValues.length)
+  let running = 0
+  indexed.forEach((item, rank) => {
+    // Enforce monotonicity so an earlier, smaller p cannot end up less adjusted than a later one.
+    running = Math.max(running, Math.min(1, (indexed.length - rank) * item.p))
+    adjusted[item.index] = running
+  })
+  return adjusted
+}

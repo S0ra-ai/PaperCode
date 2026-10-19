@@ -2455,13 +2455,18 @@ function resultStatisticalScopeSummary(input: ComposeDraftPaperInput) {
   const frequencyText = roles.length > 1 ? `${roleText}各在${environmentText}执行` : `${roleText}在${environmentText}执行`
   const trialCount = Math.max(0, ...(input.result_report?.statistics ?? []).map((item) => item.n))
   const runsText = trialCount > 1 ? `${frequencyText} ${trialCount} 次` : `${frequencyText}一次`
-  const significance = input.result_report?.significance?.find(
+  const comparison = input.result_report?.significance?.find(
     (item) => item.baseline_experiment_id === input.result_report?.best_baseline?.experiment_id,
   )
-  if (significance) {
-    return `统计解释：${runsText}；结果表报告均值、标准差与样本量。以最强基线 ${significance.baseline_experiment_id} 为对照，Welch t 检验 t=${formatStatisticValue(
-      significance.statistic,
-    )}，df=${formatStatisticValue(significance.df)}，双侧 p ${formatPValue(significance.p)}。`
+  const primary = comparison?.tests.find((test) => test.name === "welch_t") ?? comparison?.tests[0]
+  if (comparison && primary) {
+    const label = primary.name === "welch_t" ? "Welch t 检验" : "Wilcoxon 秩和检验"
+    const details =
+      primary.name === "welch_t"
+        ? `t=${formatStatisticValue(primary.statistic)}，df=${formatStatisticValue(primary.df ?? 0)}`
+        : `U=${formatStatisticValue(primary.statistic)}`
+    const correction = (input.result_report?.significance?.length ?? 1) > 1 ? "（Holm 校正）" : ""
+    return `统计解释：${runsText}；结果表报告均值、标准差与样本量。以最强基线 ${comparison.baseline_experiment_id} 为对照，${label} ${details}，双侧 p ${formatPValue(primary.p_adjusted)}${correction}。`
   }
   if (trialCount > 1) {
     return `统计解释：${runsText}；结果表报告均值、标准差与样本量，未进行显著性检验。`

@@ -1,7 +1,7 @@
 import { withSpan } from "../telemetry"
 import { plannedExperimentSpecs } from "./planning"
 import { hasIsolatedContainerExecution, hasProcessExecution, standardDeviation } from "./runner"
-import { welchTTest } from "./statistics"
+import { holmAdjust, welchTTest, wilcoxonRankSum } from "./statistics"
 import type {
   ExperimentFinding,
   ExperimentPlan,
@@ -128,27 +128,53 @@ export function analyzeExperimentResults(input: ExperimentAnalysisInput): Result
         if (samples && samples.length > 1) samplesByExperiment.set(run.experiment_id, samples)
       }
       const proposedSamples = samplesByExperiment.get(input.plan.proposed.experiment_id)
-      const significance: ExperimentSignificance[] = proposedSamples
+      const comparisons: ExperimentSignificance[] = proposedSamples
         ? input.plan.baselines.flatMap((baseline) => {
             const baselineSamples = samplesByExperiment.get(baseline.experiment_id)
             if (!baselineSamples) return []
-            const test = welchTTest(proposedSamples, baselineSamples)
-            if (!test) return []
+            const tests: ExperimentSignificance["tests"] = []
+            const welch = welchTTest(proposedSamples, baselineSamples)
+            if (welch) {
+              tests.push({
+                name: "welch_t",
+                statistic: welch.statistic,
+                df: welch.df,
+                p: welch.p,
+                p_adjusted: welch.p,
+              })
+            }
+            const wilcoxon = wilcoxonRankSum(proposedSamples, baselineSamples)
+            if (wilcoxon) {
+              tests.push({
+                name: "wilcoxon_rank_sum",
+                statistic: wilcoxon.statistic,
+                p: wilcoxon.p,
+                p_adjusted: wilcoxon.p,
+              })
+            }
+            if (tests.length === 0) return []
             return [
               {
                 experiment_id: input.plan.proposed.experiment_id,
                 baseline_experiment_id: baseline.experiment_id,
                 metric: metric.name,
-                test: "welch_t" as const,
-                statistic: test.statistic,
-                df: test.df,
-                p: test.p,
                 n_proposed: proposedSamples.length,
                 n_baseline: baselineSamples.length,
+                tests,
               },
             ]
           })
         : []
+      // Holm within each test family: comparing against several baselines inflates false positives
+      // unless the family is corrected, and reviewers check that it was.
+      for (const name of ["welch_t", "wilcoxon_rank_sum"] as const) {
+        const family = comparisons.flatMap((comparison) => comparison.tests.filter((test) => test.name === name))
+        const adjusted = holmAdjust(family.map((test) => test.p))
+        family.forEach((test, index) => {
+          test.p_adjusted = adjusted[index]
+        })
+      }
+      const significance: ExperimentSignificance[] = comparisons
       if (new Set(specs.map((spec) => spec.experiment_id)).size !== specs.length) {
         findings.push({
           category: "experiment_protocol_incomplete",
