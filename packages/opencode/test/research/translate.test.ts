@@ -344,11 +344,13 @@ describe("structure and value guards", () => {
     const base = stubTranslator()
     const translator = async (input: { section_id: string; text: string }) => {
       const value = await base(input)
-      return input.section_id === "results" ? `${value} [来源 1]` : value
+      return input.section_id === "results" ? `${value} [来源 1] ［来源 2］ 来源 3` : value
     }
     const result = await translateDraftSections(chineseDraft(), translator)
     const results = result?.overrides.find((override) => override.section_id === "results")
     expect(results?.markdown).toContain("[Source 1]")
+    expect(results?.markdown).toContain("[Source 2]")
+    expect(results?.markdown).toContain("Source 3")
     expect(results?.markdown).not.toContain("来源")
 
     const chinese = async (input: { section_id: string; text: string }) =>

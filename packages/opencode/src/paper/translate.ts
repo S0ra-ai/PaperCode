@@ -40,7 +40,12 @@ function stripFence(value: string) {
 
 /** Scaffold markers have a fixed English form; leaving them Chinese pollutes the venue copy. */
 function normalizeMarkers(value: string) {
-  return value.replace(/\[来源\s*(\d+)\]/g, "[Source $1]")
+  return value
+    .replace(/[\[［【]\s*来源\s*(\d+)\s*[\]］】]/g, "[Source $1]")
+    .replace(/[\[［【]\s*证据\s*(\d+)\s*[\]］】]/g, "[Evidence $1]")
+    // A model may drop the brackets but keep the scaffold word.
+    .replace(/来源/g, "Source")
+    .replace(/证据/g, "Evidence")
 }
 
 function cleanTranslation(value: string) {
