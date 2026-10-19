@@ -3406,3 +3406,24 @@ describe("ranking result narration", () => {
     expect(discussion).toContain("相对最强基线的差值为 0.1000")
   })
 })
+
+describe("prose conversion", () => {
+  test("does not rewrite commas inside inline code", () => {
+    const ledger = composeClaimLedger({
+      topic: "Code summary",
+      claims: [
+        {
+          text: "The helper returns `Math.max(claims.length, 1)` for the ratio.",
+          section_id: "method",
+          confidence: 0.8,
+          source_ids: [],
+          artifact_ids: [],
+        },
+      ],
+      now,
+    })
+    const draft = composeDraftPaper({ title: "Code Summary", ledger, now })
+    expect(draft.markdown).toContain("`Math.max(claims.length, 1)`")
+    expect(draft.markdown).not.toContain("claims.length、1")
+  })
+})

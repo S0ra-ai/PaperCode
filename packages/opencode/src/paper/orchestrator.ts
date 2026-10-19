@@ -1472,7 +1472,7 @@ function codeMethodClaimText(
       .map((method) => method.summary)
       .filter((summary) => summary.includes(" returns "))
     if (methodSummaries.length > 0) {
-      parts.push(`方法摘要：${methodSummaries.join(" ")}`)
+      parts.push(`方法摘要：${methodSummaries.map((summary) => `\`${summary}\``).join(" ")}`)
     }
   }
   if (tests.length > 0 || runnables.length > 0) {

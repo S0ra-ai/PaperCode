@@ -92,7 +92,14 @@ function normalizeCjkSpacing(value: string) {
 }
 
 function paperProseText(value: string) {
-  return normalizeCjkSpacing(value)
+  // Code spans and fenced blocks are not prose: their commas, spaces and operators must survive.
+  const protectedBlocks: string[] = []
+  const prose = normalizeCjkSpacing(
+    value.replace(/```[\s\S]*?```|`[^`\n]+`/g, (block) => {
+      protectedBlocks.push(block)
+      return `\u0000${protectedBlocks.length - 1}\u0000`
+    }),
+  )
     .replace(/The workflow links /g, "该证据链连接")
     .replace(/The proposed workflow matches the declared baseline on the primary reproducibility metric\./g, "本文方法在主复现指标上与已声明基线保持一致。")
     .replace(/declared baseline/g, "已声明基线")
@@ -128,6 +135,7 @@ function paperProseText(value: string) {
     .replace(/和证据链完整性约束\s+并在形成结果表述前完成/g, "，并在形成结果表述前完成证据链完整性约束")
     .replace(/完成\./g, "完成。")
     .replace(/检查\./g, "检查。")
+  return prose.replace(/\u0000(\d+)\u0000/g, (_, index) => protectedBlocks[Number(index)]!)
 }
 
 function claimMarkdown(entry: ClaimLedgerEntry) {
