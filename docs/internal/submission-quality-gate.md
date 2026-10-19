@@ -22,6 +22,8 @@
 | `insufficient_baselines` | blocker | 实验设计的独立基线少于要求（中文 1，一区 2） |
 | `missing_ablation` | blocker | 缺少消融实验（一区要求至少 1 个） |
 | `insufficient_trials` | blocker 或 warning | 统计量背后的重复次数少于要求（一区 5 次） |
+| `unreferenced_figure` | warning | 结果章节有图，但正文从未以"图 N / Figure N"引用（图片 alt 文本不算引用） |
+| `unreferenced_table` | warning | 结果章节有表，但正文从未以"表 N / Table N"引用 |
 | `missing_table` | blocker | 结果章节的表格数不足 |
 | `missing_figure` | blocker | 图数不足（国际一区要求至少 1 张） |
 | `manuscript_language` | blocker | 稿件语言与目标期刊不符（国际一区要求英文，CJK 占比 >5% 即拦截） |

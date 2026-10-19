@@ -2831,7 +2831,12 @@ function reproducibilitySummary(input: ComposeDraftPaperInput) {
 
 function resultsSectionMarkdown(input: ComposeDraftPaperInput, claimSections: DraftSection[]) {
   const blocks = [resultSummary(input, claimSections)]
-  if (input.figure) blocks.push(`![${input.figure.caption}](figures/primary-metric.png)`)
+  let figureNumber = 0
+  if (input.figure) {
+    figureNumber += 1
+    blocks.push(`图 ${figureNumber} 展示${input.figure.metric}的主指标对比。`)
+    blocks.push(`![${input.figure.caption}](figures/primary-metric.png)`)
+  }
   // The ablation chart is derived from the run records; the export pipeline renders the same spec.
   const metric = input.result_report?.primary_metric
   if (metric && input.experiment_runs) {
@@ -2840,7 +2845,12 @@ function resultsSectionMarkdown(input: ComposeDraftPaperInput, claimSections: Dr
       runs: [...input.experiment_runs.host_runs, ...input.experiment_runs.container_runs],
       statistics: input.result_report?.statistics,
     })
-    if (ablation) blocks.push(`![${ablation.caption}](figures/ablation.png)`)
+    if (ablation) {
+      // Number the ablation after the primary chart so the prose reference matches the file order.
+      const label = input.figure ? "图 2" : "图 1"
+      blocks.push(`${label} 展示消融实验的主指标对比。`)
+      blocks.push(`![${ablation.caption}](figures/ablation.png)`)
+    }
   }
   return blocks.join("\n\n")
 }

@@ -52,7 +52,7 @@ const englishBySection: Record<string, string> = {
   method: "The method section describes the proposed procedure.",
   experimental_setup: "The setup names the dataset, baselines and metrics.",
   results: [
-    "Results report the primary metric against the strongest baseline.",
+    "Results report the primary metric against the strongest baseline (Figure 1, Table 1).",
     "",
     "| Method | Accuracy |",
     "| --- | --- |",

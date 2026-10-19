@@ -541,7 +541,40 @@ export function checkManuscriptQuality(input: VerificationGateInput): Verificati
         }
       }
 
+      // Reviewers expect every figure and table to be cited in prose. Image alt text is stripped:
+      // a caption that says "Figure 1" is not a citation in the body.
+      const prose = markdown.replace(/!\[[^\]]*\]\([^)]+\)/g, "")
+      const mentions = (text: string) => (text.match(/(图|表|Figure|Table|Fig\.)\s*\d+/gi) ?? []).length
+      const figureMentions = mentions(prose)
+      const figuresInResults = figureCount(results)
+      if (figuresInResults > 0 && figureMentions === 0) {
+        findings.push(
+          finding({
+            category: "unreferenced_figure",
+            severity: "warning",
+            message: `The results section has ${figuresInResults} figure(s) but the manuscript never cites a figure.`,
+            claim_ids: [],
+            source_ids: [],
+            artifact_ids: [],
+            required_action: "Refer to each figure from the prose (Figure 1 / 图 1).",
+          }),
+        )
+      }
+      const tableMentions = mentions(prose)
       const tables = tableCount(results)
+      if (tables > 0 && tableMentions === 0) {
+        findings.push(
+          finding({
+            category: "unreferenced_table",
+            severity: "warning",
+            message: `The results section has ${tables} table(s) but the manuscript never cites a table.`,
+            claim_ids: [],
+            source_ids: [],
+            artifact_ids: [],
+            required_action: "Refer to each table from the prose (Table 1 / 表 1).",
+          }),
+        )
+      }
       if (tables < requirements.min_tables) {
         findings.push(
           finding({

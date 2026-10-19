@@ -31,6 +31,8 @@ export type VerificationFindingCategory =
   | "missing_ablation"
   | "insufficient_trials"
   | "novelty_not_clear"
+  | "unreferenced_figure"
+  | "unreferenced_table"
   | "missing_table"
   | "missing_figure"
   | "manuscript_language"

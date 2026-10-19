@@ -2672,6 +2672,7 @@ describe("paper authoring loop", () => {
             "",
             "Accuracy is 0.910 ± 0.004 over five seeds and the difference is significant (p = 0.003, Wilcoxon signed-rank).",
             "The effect size is large (Cliff's delta = 1.0).",
+            "Figure 1 shows the primary result and Table 1 reports the comparison.",
             "![Figure 1: primary result](figures/result.png)",
           ].join("\n"),
         },

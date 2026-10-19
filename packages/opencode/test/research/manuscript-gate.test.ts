@@ -80,6 +80,7 @@ const submissionSections: Record<string, string> = {
     "",
     "Accuracy is 0.910 ± 0.004 over five seeds and the difference is significant (p = 0.003, Wilcoxon signed-rank).",
     "The effect size is large (Cohen's d = 6.2).",
+    "Figure 1 shows the primary result and Table 1 reports the full comparison.",
     "![Figure 1: primary result](figures/result.png)",
   ].join("\n"),
   discussion: prose("The discussion separates what the evidence supports from what it does not."),
@@ -170,6 +171,19 @@ describe("manuscript quality gate", () => {
     expect(info).toContain("Example University")
     expect(info).toContain("ada@example.org")
     expect(info).not.toContain("匿名")
+  })
+
+  test("warns when figures and tables are not cited in prose", () => {
+    const draft = draftWith({
+      ...submissionSections,
+      results: submissionSections.results.replace(
+        "Figure 1 shows the primary result and Table 1 reports the full comparison.",
+        "The primary result is discussed below.",
+      ),
+    })
+    const categories = checkManuscriptQuality(gateInput({ draft })).map((finding) => finding.category)
+    expect(categories).toContain("unreferenced_figure")
+    expect(categories).toContain("unreferenced_table")
   })
 
   test("blocks a submission whose novelty decision is not clear", () => {
