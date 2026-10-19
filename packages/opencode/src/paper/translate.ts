@@ -243,7 +243,11 @@ function commentaryTitle(value: string, maxWords: number) {
 function validatedEnglish(value: string, emptyReason: string, chineseReason: string) {
   if (value.length === 0) return emptyReason
   // Narrative prose for an English venue must not retain any Chinese characters.
-  if (CJK.test(value)) return `${chineseReason}: ${value.slice(0, 80)}`
+  if (CJK.test(value)) {
+    const index = value.search(new RegExp(CJK.source))
+    const start = Math.max(0, index - 30)
+    return `${chineseReason}: …${value.slice(start, index + 50)}…`
+  }
   return undefined
 }
 
