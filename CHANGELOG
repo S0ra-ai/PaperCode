@@ -32,6 +32,7 @@
             - feat(paper): 有消融实验时再生成 figures/ablation.png 并在结果章节引用；图注与图内标签使用稿件措辞，不暴露原始实验 id
             - feat(paper): 配置 PAPERCODE_TRANSLATE_{BASE_URL,API_KEY,MODEL} 后，国际一区稿件会自动把叙事章节翻译成英文并持久化为章节覆盖；翻译全有或全无，失败或丢失表格/图片引用时保持原稿由闸门拦截
             - feat(export): forced draft 导出附带 "Submission Readiness" 表，逐条列出闸门 blocker 的检查项、发现与要求的修复动作，拦截结果变成可执行的待办清单
+            - fix(paper): 容器复现 guidance 不再建议把 docker build/docker run 写进 package.json script（那样只会以 bun 为 argv[0] 执行、永远不算容器证据），改为给出可直接落盘的 experiments/protocol.json 结构化 docker run 示例
         :fix
             - fix(paper): 统计、表格、图只统计结果章节，附录里的 p 值或声明表不再顶替结果
             - fix(paper): 声明按"标签列→值列"解析并支持列表/段落写法；"未提供/not provided"等说法同样判定为未声明

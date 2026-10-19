@@ -899,10 +899,41 @@ function experimentProtocolGuidance(input: {
         {
           gap,
           severity: "blocking",
-          recommended_script: "repro:container",
-          package_json_example: { "repro:container": "docker build -t papercode-repro . && docker run --rm papercode-repro" },
-          rationale: "final export 需要隔离环境复现通过，host-only 结果只能作为 exploratory。",
-          next_action: "构建真实评价镜像，在 experiments/protocol.json 登记绑定实验 ID 的结构化 docker/podman run 命令，并使用启用容器复现的预算档位执行。导入指标不能证明隔离复现。",
+          recommended_script: "experiments/protocol.json",
+          protocol_json_example: {
+            schema_version: "ExperimentProtocol.v1",
+            entries: [
+              {
+                protocol_id: "container:repro",
+                role: "container_reproduction",
+                label: "repro:container",
+                expected_metric: "container_reproduction_pass",
+                command: {
+                  argv: [
+                    "docker",
+                    "run",
+                    "--rm",
+                    "--network",
+                    "none",
+                    "-v",
+                    ".:/workspace",
+                    "-w",
+                    "/workspace",
+                    "-e",
+                    "EXPERIMENT_ID={experiment_id}",
+                    "<image>",
+                    "bun",
+                    "test",
+                  ],
+                  timeout_seconds: 600,
+                },
+              },
+            ],
+          },
+          rationale:
+            "final export 需要隔离环境复现通过，host-only 结果只能作为 exploratory。package.json 里的脚本最终仍以 bun/npm 作为 argv[0] 执行，不会被当作容器证据。",
+          next_action:
+            "构建真实评价镜像，把结构化 docker/podman run argv 写进 experiments/protocol.json（不是 package.json script），用 {experiment_id} 或 target_experiment_id 绑定实验，并使用 deep/submission 预算档位执行。导入指标不能证明隔离复现。",
         },
       ]
     }

@@ -109,6 +109,8 @@ export type ExperimentProtocolGuidanceItem = {
   severity: "blocking" | "warning"
   recommended_script: string
   package_json_example?: Record<string, string>
+  /** A valid experiments/protocol.json entry when a package script cannot satisfy the gap itself. */
+  protocol_json_example?: Record<string, unknown>
   rationale: string
   next_action: string
 }

@@ -280,9 +280,12 @@ describe("PaperRun default execution engine", () => {
       status: "needs_protocol",
       final_export_blocked: true,
     })
-    expect(run.snapshot.diagnostics.experiment_guidance?.suggestions.map((item) => item.recommended_script)).toContain(
-      "repro:container",
+    const containerGuidance = run.snapshot.diagnostics.experiment_guidance?.suggestions.find(
+      (item) => item.gap === "missing_container_reproduction_runner",
     )
+    expect(containerGuidance?.recommended_script).toBe("experiments/protocol.json")
+    expect(JSON.stringify(containerGuidance?.protocol_json_example)).toContain('"docker"')
+    expect(JSON.stringify(containerGuidance?.protocol_json_example)).toContain("{experiment_id}")
     expect(run.snapshot.diagnostics.experiment_starter_pack).toMatchObject({
       status: "ready",
     })
