@@ -24,11 +24,16 @@
 
 ## 如何满足
 
-- **参考文献**：`literature_map` 里放足量的 `verification.status = "verified"` 且非占位 URL 的来源。生成稿最多列出 20 条，国际一区要求 40 条，因此 40 条的稿子需要人工/agent 扩写参考文献章节。
+- **参考文献**：`literature_map` 里放足量的 `verification.status = "verified"` 且非占位 URL 的来源。生成稿最多渲染 60 条（`MAX_FORMAL_REFERENCES`）；中文期刊要求 20 条，国际一区要求 40 条。
+- **正文语言**：脚手架的所有生成器都写中文，国际一区要求英文，所以必须由作者/agent 提供正文。两条入口：
+  - HTTP `POST` 创建 PaperRun 时传 `draft_sections: [{ section_id, markdown }]`；
+  - 直接调用 `runPaperAuthoringLoop` 时传 `section_overrides`。
+  覆盖发生在生成之后、闸门之前，`section_id` 用脚手架已有的 id（`abstract`、`introduction`、`related_work`、`method`、`experimental_setup`、`results`、`discussion`、`conclusion`、`keywords` 等）。语言检查只采样目标 profile 的叙事章节，不把内部审计附录和参考文献算进去。
 - **声明**：`runPaperAuthoringLoop` 接受 `declarations: { funding, author_contributions, competing_interests, ethics, llm_disclosure }`；不传就是"未声明"，闸门会拦。伦理声明有默认的"不涉及人类/动物受试者"文本，仍可覆盖。
 - **代码可用性**：`code_metadata.repository_url` 或 `package_name` 至少有一个，稿件才会写出"代码可用性"小节；只有方法源码范围而没有任何定位信息不算可用。
 - **统计**：结果章节必须出现 `0.910 ± 0.004`、`95% CI`、`p = 0.003` 或具体检验名（Wilcoxon/t-test/ANOVA 等）。
 - **图表**：结果章节至少一张表；国际一区至少一张图。
+- 国际一区稿件的导出 markdown 不再追加中文"投稿准备度"附录（该附录只用于中文期刊的自查）。
 
 ## 拦截之后
 
