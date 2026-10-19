@@ -163,6 +163,98 @@ describe("manuscript quality gate", () => {
     expect(categories(gateInput({ draft }))).toContain("manuscript_language")
   })
 
+  test("does not count statistics reported outside the results section", () => {
+    const draft = draftWith({
+      ...submissionSections,
+      results: submissionSections.results.replace(/Accuracy is 0\.910.*\n/, ""),
+      discussion: `${submissionSections.discussion} Accuracy is 0.91 ± 0.01 (p = 0.004).`,
+    })
+    expect(categories(gateInput({ draft }))).toContain("missing_statistics")
+  })
+
+  test("does not accept a declaration whose value merely mentions the label", () => {
+    const draft = draftWith({
+      ...submissionSections,
+      declarations: submissionSections.declarations.replace(
+        "| Competing interests | The authors declare no competing interests. |",
+        "| Funding | Competing interests are described in the submission system. |",
+      ),
+    })
+    const missing = checkManuscriptQuality(gateInput({ draft }))
+      .filter((finding) => finding.category === "missing_statement")
+      .map((finding) => finding.message)
+    expect(missing.some((message) => message.includes("利益冲突"))).toBe(true)
+  })
+
+  test("treats an alternative undeclared phrasing as undeclared", () => {
+    const draft = draftWith({
+      ...submissionSections,
+      declarations: submissionSections.declarations.replace(
+        "| Competing interests | The authors declare no competing interests. |",
+        "| Competing interests | 未提供。 |",
+      ),
+    })
+    expect(categories(gateInput({ draft }))).toContain("missing_statement")
+  })
+
+  test("counts references written in the 1. style", () => {
+    const draft = draftWith({
+      ...submissionSections,
+      references: Array.from({ length: 40 }, (_, index) => `${index + 1}. Author ${index}. Study ${index}. 2024.`).join(
+        "\n",
+      ),
+    })
+    expect(checkManuscriptQuality(gateInput({ draft })).map((finding) => finding.category)).not.toContain(
+      "insufficient_references",
+    )
+  })
+
+  test("reads the publication year rather than a year in the title", () => {
+    const draft = draftWith({
+      ...submissionSections,
+      references: Array.from(
+        { length: 40 },
+        (_, index) => `[${index + 1}] A. A 2025 survey of systems ${index}[J/OL]. 2018-01-01[2026-10-19].`,
+      ).join("\n"),
+    })
+    expect(categories(gateInput({ draft }))).toContain("stale_references")
+  })
+
+  test("does not count boilerplate tables as result tables", () => {
+    const draft = draftWith({
+      ...submissionSections,
+      results: prose("Results without a table."),
+    })
+    expect(categories(gateInput({ draft }))).toContain("missing_table")
+  })
+
+  test("gives each missing statement its own finding id", () => {
+    const draft = draftWith({
+      ...submissionSections,
+      declarations: [
+        "| Item | Declaration |",
+        "| --- | --- |",
+        "| Funding | 未声明。 |",
+        "| Author contributions | 未声明。 |",
+        "| Competing interests | 未声明。 |",
+        "| Ethics | 未声明。 |",
+      ].join("\n"),
+    })
+    const ids = checkManuscriptQuality(gateInput({ draft }))
+      .filter((finding) => finding.category === "missing_statement")
+      .map((finding) => finding.finding_id)
+    expect(new Set(ids).size).toBe(ids.length)
+  })
+
+  test("counts kana and hangul as CJK for the language check", () => {
+    const draft = draftWith({
+      ...submissionSections,
+      abstract: "これは日本語の要旨です。".repeat(20),
+      introduction: "이것은 한국어 서론입니다.".repeat(20),
+    })
+    expect(categories(gateInput({ draft }))).toContain("manuscript_language")
+  })
+
   test("blocks a required section that carries no prose", () => {
     const draft = draftWith({ ...submissionSections, discussion: "Too short." })
     const findings = checkManuscriptQuality(gateInput({ draft }))

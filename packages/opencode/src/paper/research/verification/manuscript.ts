@@ -16,25 +16,29 @@ const SUBSTANTIVE_WORDS = 20
 
 const PLACEHOLDER = /\b(TODO|TBD|FIXME|XXX)\b|待补充|待完善|占位|lorem ipsum|\[citation needed\]|\?\?\?/i
 
-const UNDECLARED = /未声明|not declared|尚未声明|待补|not yet provided/i
+const UNDECLARED =
+  /^\s*(未声明|未提供|待定|待补|尚未(?:声明|提供)|not declared|not provided|not specified|to be (?:provided|added))/i
 
 const STATEMENT_RULES: Record<
   string,
-  { label: string; kind: "declaration"; pattern: RegExp } | { label: string; kind: "section"; section: string; pattern: RegExp }
+  | { label: string; kind: "declaration"; pattern: RegExp }
+  | { label: string; kind: "section"; section: string; pattern: RegExp; locator: RegExp }
 > = {
   "data-availability": {
     label: "数据可用性",
     kind: "section",
     section: "data_availability",
-    // An identifier or an explicit statement that no external data was used.
-    pattern: /https?:\/\/|doi\.org|zenodo|figshare|dataset|数据集|未使用外部数据|no external data/i,
+    // The section must name the data and give a locator (or an explicit "no external data").
+    pattern: /数据集|数据来源|dataset|data availability|data are (?:publicly )?available|no external data/i,
+    locator: /https?:\/\/|doi\.org|zenodo|figshare|未使用外部数据/i,
   },
   "code-availability": {
     label: "代码可用性",
     kind: "section",
     section: "data_availability",
     // Reviewers need a locator, not "the code lives in this workspace".
-    pattern: /https?:\/\/|github\.com|gitlab\.com|zenodo|doi\.org|package|仓库入口/i,
+    pattern: /代码|仓库|code availability|implementation|repository/i,
+    locator: /https?:\/\/|github\.com|gitlab\.com|zenodo|doi\.org|package\s*[:：]/i,
   },
   ethics: { label: "伦理审批", kind: "declaration", pattern: /伦理|ethics|IRB|informed consent/i },
   "competing-interests": {
@@ -131,9 +135,11 @@ export function manuscriptRequirementsForProfile(profile?: string): ManuscriptRe
   return profile === "cjc-paper" ? CJC_MANUSCRIPT_REQUIREMENTS : Q1_MANUSCRIPT_REQUIREMENTS
 }
 
-function finding(input: Omit<VerificationFinding, "finding_id">): VerificationFinding {
+function finding(input: Omit<VerificationFinding, "finding_id">, subject?: string): VerificationFinding {
   return {
-    finding_id: `${input.category}:${input.claim_ids[0] ?? input.source_ids[0] ?? input.artifact_ids[0] ?? "global"}`,
+    finding_id: `${input.category}:${
+      subject ?? input.claim_ids[0] ?? input.source_ids[0] ?? input.artifact_ids[0] ?? "global"
+    }`,
     ...input,
   }
 }
@@ -142,16 +148,25 @@ function sectionText(draft: DraftPaper, id: string) {
   return draft.sections.find((section) => section.section_id === id)?.markdown ?? ""
 }
 
+/** Han, kana, hangul and fullwidth forms all count as one word per character. */
+const CJK_CHAR = /[　-ヿ㐀-䶿一-鿿가-힯＀-￯]/
+
 function wordCount(text: string) {
-  const cjk = (text.match(/[㐀-鿿]/g) ?? []).length
-  const latin = text.replace(/[㐀-鿿]/g, " ").match(/[A-Za-z0-9][A-Za-z0-9'’-]*/g)?.length ?? 0
+  const prose = text
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/https?:\/\/\S+/g, " ")
+    .replace(/!\[[^\]]*\]\([^)]+\)/g, " ")
+    .replace(/\[([^\]]*)\]\([^)]+\)/g, "$1")
+    .replace(/[`*_#>|[\]]/g, " ")
+  const cjk = (prose.match(new RegExp(CJK_CHAR.source, "g")) ?? []).length
+  const latin = prose.replace(new RegExp(CJK_CHAR.source, "g"), " ").match(/[A-Za-z0-9][A-Za-z0-9'’-]*/g)?.length ?? 0
   return cjk + latin
 }
 
 function cjkRatio(text: string) {
   const meaningful = text.replace(/[\s\p{P}\p{S}]/gu, "")
   if (meaningful.length === 0) return 0
-  return (meaningful.match(/[㐀-鿿]/g) ?? []).length / meaningful.length
+  return (meaningful.match(new RegExp(CJK_CHAR.source, "g")) ?? []).length / meaningful.length
 }
 
 function keywords(text: string) {
@@ -162,12 +177,21 @@ function keywords(text: string) {
     .filter((item) => item.length > 0)
 }
 
+/** Numbered reference entries, in `[1] ...` or `1. ...` form, deduplicated by number. */
 function referenceEntries(text: string) {
-  return Array.from(text.matchAll(/^\s*\[(\d+)\]\s+(.+)$/gm)).map((match) => match[2].trim())
+  const byNumber = new Map<string, string>()
+  for (const line of text.split("\n")) {
+    const match = line.trim().match(/^\[?(\d+)\]?[.)]?\s+(.+)$/)
+    if (!match) continue
+    byNumber.set(match[1], match[2].trim())
+  }
+  return [...byNumber.values()]
 }
 
+/** The publication year follows the document-type marker; a year in the title is not the date. */
 function referenceYear(entry: string) {
-  const match = entry.match(/\b(19|20)\d{2}\b/)
+  const dated = entry.split(/\[(?:J|EB|M|C|D|R)\/OL\]\.?/i).pop() ?? entry
+  const match = dated.match(/\b(19|20)\d{2}\b/)
   return match ? Number(match[0]) : undefined
 }
 
@@ -176,18 +200,27 @@ function tableCount(markdown: string) {
 }
 
 function figureCount(markdown: string) {
-  return (markdown.match(/!\[[^\]]*\]\([^)]+\)/g) ?? []).length
+  return new Set(markdown.match(/!\[[^\]]*\]\(([^)]+)\)/g) ?? []).size
 }
 
-/** The last cell of the first table row whose label matches, i.e. a declaration's value. */
+/**
+ * A declaration's value: the second cell of the table row whose *label cell* matches, or the text
+ * after "Label:" in prose. Matching the label anywhere in the line would let a value that mentions
+ * the word satisfy the rule.
+ */
 function declarationValue(markdown: string, label: RegExp) {
   for (const line of markdown.split("\n")) {
-    if (!line.trim().startsWith("|") || !label.test(line)) continue
-    const cells = line
-      .split("|")
-      .map((cell) => cell.trim())
-      .filter((cell) => cell.length > 0)
-    if (cells.length >= 2) return cells[cells.length - 1]
+    const trimmed = line.trim()
+    if (trimmed.startsWith("|")) {
+      const cells = trimmed
+        .split(/(?<!\\)\|/)
+        .map((cell) => cell.replace(/\\\|/g, "|").trim())
+        .filter((cell) => cell.length > 0)
+      if (cells.length >= 2 && label.test(cells[0])) return cells[1]
+      continue
+    }
+    const prose = trimmed.match(/^(?:[-*]\s*)?(?:\*\*)?([^:：]{2,40})(?:\*\*)?[:：]\s*(.+)$/)
+    if (prose && label.test(prose[1])) return prose[2].trim()
   }
   return undefined
 }
@@ -201,9 +234,10 @@ function statementDeclared(draft: DraftPaper, id: string) {
     const value = declarationValue(text, rule.pattern)
     return value !== undefined && !UNDECLARED.test(value)
   }
-  return text
-    .split("\n")
-    .some((line) => rule.pattern.test(line) && !UNDECLARED.test(line))
+  // Both the subject and a locator have to appear somewhere in the availability section; requiring
+  // them on one line breaks the generated table layout, requiring only the locator lets a bare URL
+  // stand in for either statement.
+  return rule.pattern.test(text) && rule.locator.test(text)
 }
 
 /**
@@ -214,6 +248,7 @@ function statementDeclared(draft: DraftPaper, id: string) {
 function reportsDispersion(markdown: string) {
   return (
     /±\s*\d/.test(markdown) ||
+    /\b\d+\.\d+\s*\(\s*\d+\.\d+\s*\)/.test(markdown) ||
     /\b(std|s\.d\.|SD)\s*[=:]\s*\d/i.test(markdown) ||
     /\b95%\s*(CI|confidence interval)\b[^.]{0,40}\d/i.test(markdown) ||
     /置信区间[^。]{0,30}\d/.test(markdown)
@@ -250,15 +285,18 @@ export function checkManuscriptQuality(input: VerificationGateInput): Verificati
         const words = wordCount(sectionText(draft, id))
         if (words >= SUBSTANTIVE_WORDS) continue
         findings.push(
-          finding({
-            category: "missing_section_content",
-            severity: "blocker",
-            message: `Section "${id}" carries ${words} words; a submission needs substantive prose.`,
-            claim_ids: [],
-            source_ids: [],
-            artifact_ids: [],
-            required_action: `Write the ${id} section from evidence before final export.`,
-          }),
+          finding(
+            {
+              category: "missing_section_content",
+              severity: "blocker",
+              message: `Section "${id}" carries ${words} words; a submission needs substantive prose.`,
+              claim_ids: [],
+              source_ids: [],
+              artifact_ids: [],
+              required_action: `Write the ${id} section from evidence before final export.`,
+            },
+            id,
+          ),
         )
       }
 
@@ -312,15 +350,18 @@ export function checkManuscriptQuality(input: VerificationGateInput): Verificati
         if (statementDeclared(draft, requirement.id)) continue
         const label = STATEMENT_RULES[requirement.id]?.label ?? requirement.id
         findings.push(
-          finding({
-            category: "missing_statement",
-            severity: requirement.severity,
-            message: `The manuscript does not declare ${label}.`,
-            claim_ids: [],
-            source_ids: [],
-            artifact_ids: [],
-            required_action: `Add the ${label} declaration (or state explicitly that it does not apply).`,
-          }),
+          finding(
+            {
+              category: "missing_statement",
+              severity: requirement.severity,
+              message: `The manuscript does not declare ${label}.`,
+              claim_ids: [],
+              source_ids: [],
+              artifact_ids: [],
+              required_action: `Add the ${label} declaration (or state explicitly that it does not apply).`,
+            },
+            requirement.id,
+          ),
         )
       }
 
@@ -359,10 +400,13 @@ export function checkManuscriptQuality(input: VerificationGateInput): Verificati
         }
       }
 
+      // Statistics, tables and figures are claimed by the results section; counting them anywhere
+      // would let a boilerplate declaration table or an appendix figure stand in for a result.
+      const results = sectionText(draft, "results")
       if (requirements.require_statistics !== "off" && hasComparison(input)) {
         const missing: string[] = []
-        if (!reportsDispersion(markdown)) missing.push("dispersion (mean ± std or a confidence interval)")
-        if (!reportsSignificance(markdown)) missing.push("a significance test (p-value or named test)")
+        if (!reportsDispersion(results)) missing.push("dispersion (mean ± std or a confidence interval)")
+        if (!reportsSignificance(results)) missing.push("a significance test (p-value or named test)")
         if (missing.length > 0) {
           findings.push(
             finding({
@@ -378,7 +422,7 @@ export function checkManuscriptQuality(input: VerificationGateInput): Verificati
         }
       }
 
-      const tables = tableCount(markdown)
+      const tables = tableCount(results)
       if (tables < requirements.min_tables) {
         findings.push(
           finding({
@@ -393,7 +437,7 @@ export function checkManuscriptQuality(input: VerificationGateInput): Verificati
         )
       }
 
-      const figures = figureCount(markdown)
+      const figures = figureCount(results)
       if (figures < requirements.min_figures) {
         findings.push(
           finding({
