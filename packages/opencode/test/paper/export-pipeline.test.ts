@@ -744,3 +744,95 @@ describe("PaperRun export renderer pipeline", () => {
     expect(await readFile(path.join(run.run_dir, markdown!.path), "utf8")).not.toContain("Submission Readiness")
   })
 })
+
+describe("venue LaTeX structure", () => {
+  test("moves front matter into metadata, numbers sections and adds keywords", async () => {
+    const run = await newRun()
+    const section = (section_id: string, title: string, markdown: string) => ({
+      section_id,
+      title,
+      level: 2,
+      markdown,
+      claim_ids: [],
+      source_ranges: [],
+    })
+    const sections = [
+      section(
+        "author_information",
+        "Author Information",
+        "| Item | Content |\n| --- | --- |\n| Author | Ada Lovelace |\n| Affiliation | Example University |",
+      ),
+      section("abstract", "Abstract", "This abstract describes a reproducible ranking evaluation."),
+      section("keywords", "Keywords", "ranking; evaluation; reproducibility"),
+      section("introduction", "Introduction", "Introduction body."),
+    ]
+    const draft = {
+      schema_version: "DraftPaper.v1",
+      draft_id: "draft:venue",
+      title: "Venue Paper",
+      created_at: now,
+      version: 1,
+      sections,
+      markdown: `# Venue Paper\n\n${sections.map((item) => `## ${item.title}\n\n${item.markdown}`).join("\n\n")}`,
+      claim_ids: [],
+      applied_guidance_ids: [],
+    } as any
+    const latexInputs: string[] = []
+    const metadata: string[] = []
+    let latexWritten = ""
+    const command: PaperExportCommandRunner = async (input) => {
+      if (input.tool === "kpsewhich")
+        return { exit_code: 0, stdout: "/usr/share/texmf/elsarticle.cls\n", stderr: "" }
+      if (input.tool === "pandoc" && input.args.includes("-t")) {
+        latexInputs.push(await readFile(input.args[0]!, "utf8"))
+        const metadataIndex = input.args.indexOf("--metadata-file")
+        if (metadataIndex >= 0) metadata.push(await readFile(input.args[metadataIndex + 1]!, "utf8"))
+        expect(input.args).toContain("--number-sections")
+        const output = input.args[input.args.indexOf("-o") + 1]!
+        await Bun.write(
+          output,
+          "\\documentclass{elsarticle}\\title{T}\\author{A}\\begin{document}\n\\maketitle\n\\begin{abstract}Abstract text.\\end{abstract}\n\\section{Introduction}\nBody.\n",
+        )
+        latexWritten = output
+        return { exit_code: 0, stdout: "", stderr: "" }
+      }
+      if (input.tool === "pandoc" && input.args.some((arg) => arg.endsWith(".docx"))) {
+        await Bun.write(input.args[input.args.indexOf("-o") + 1]!, validDocxBytes)
+        return { exit_code: 0, stdout: "", stderr: "" }
+      }
+      if (input.tool === "xelatex") {
+        const outdir = input.args.find((arg) => arg.startsWith("-output-directory="))?.slice("-output-directory=".length)
+        await Bun.write(path.join(outdir!, `${path.basename(latexWritten, ".tex")}.pdf`), validPdfBytes)
+        return { exit_code: 0, stdout: "", stderr: "" }
+      }
+      return { exit_code: 1, stdout: "", stderr: "unexpected command" }
+    }
+
+    const result = await renderPaperExportPipeline(
+      run.run_dir,
+      {
+        mode: "final",
+        bundle_id: "bundle-venue",
+        draft,
+        final_gate: passedGate,
+        source_artifact_ids: [],
+        documentclass: "elsarticle",
+        tools: { pandoc: "pandoc", xelatex: "xelatex" },
+        command,
+        now,
+      },
+      run.options,
+    )
+
+    expect(latexInputs[0]).toContain("# Introduction")
+    expect(latexInputs[0]).not.toContain("# Author Information")
+    expect(latexInputs[0]).not.toContain("## Abstract")
+    expect(metadata[0]).toContain("title:")
+    expect(metadata[0]).toContain("abstract:")
+    const tex = await readFile(latexWritten, "utf8")
+    expect(tex).toContain("\\begin{frontmatter}")
+    expect(tex).toContain("\\begin{keyword}")
+    expect(tex).toContain("\\end{frontmatter}")
+    expect(result.bundle.files.find((file) => file.format === "pdf")?.status).toBe("written")
+  })
+})

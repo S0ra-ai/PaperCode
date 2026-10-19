@@ -62,6 +62,7 @@ import { ablationFigureSpec, figureSpecFromReport, recordExportBundle, type Expo
 import {
   applySectionOverrides,
   composeDraftPaper,
+  retitleDraft,
   streamMarkdownDraft,
   type ClaimLedger,
   type CodeAvailabilityMetadata,
@@ -1267,7 +1268,8 @@ async function refreshDraftPaperForFinalExport(input: {
   const overridden = authoredInputs?.section_overrides?.length
     ? applySectionOverrides(composed, authoredInputs.section_overrides)
     : composed
-  const draft = authoredInputs?.title_override ? { ...overridden, title: authoredInputs.title_override } : overridden
+  // Re-render as well as retitle: the markdown still carries the original topic as its H1.
+  const draft = authoredInputs?.title_override ? retitleDraft(overridden, authoredInputs.title_override) : overridden
   const markdown = formatDraftPaperForProfile(draft, {
     target_profile: intake.target_profile,
     ledger,

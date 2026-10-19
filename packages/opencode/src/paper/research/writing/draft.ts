@@ -2591,7 +2591,7 @@ function resultStatisticalScopeSummary(input: ComposeDraftPaperInput) {
     const effectText = effect
       ? `，${effect.name === "cohens_d" ? "Cohen's d" : "Cliff's delta"}=${formatStatisticValue(effect.value)}（${effect.magnitude}）`
       : ""
-    return `统计解释：${runsText}；结果表报告均值、标准差与样本量。以最强基线 ${comparison.baseline_experiment_id} 为对照，${label} ${details}，双侧 p ${formatPValue(primary.p_adjusted)}${correction}${effectText}。`
+    return `统计解释：${runsText}；结果表报告均值、标准差与样本量。以最强基线 ${displayExperimentLabel(comparison.baseline_experiment_id)} 为对照，${label} ${details}，双侧 p ${formatPValue(primary.p_adjusted)}${correction}${effectText}。`
   }
   if (trialCount > 1) {
     return `统计解释：${runsText}；结果表报告均值、标准差与样本量，未进行显著性检验。`
@@ -2605,22 +2605,21 @@ function significanceTable(input: ComposeDraftPaperInput) {
   if (!comparisons?.length) return undefined
   const rows = comparisons.flatMap((comparison) =>
     comparison.tests.map((test) => [
-      comparison.baseline_experiment_id,
+      displayExperimentLabel(comparison.baseline_experiment_id),
       test.name === "welch_t" ? "Welch t" : "Wilcoxon 秩和",
+      // Degrees of freedom belong to the statistic, not to a separate narrow column.
       test.name === "welch_t"
-        ? `t=${formatStatisticValue(test.statistic)}`
+        ? `t=${formatStatisticValue(test.statistic)}${test.df === undefined ? "" : `, df=${formatStatisticValue(test.df)}`}`
         : `U=${formatStatisticValue(test.statistic)}`,
-      test.df === undefined ? "—" : formatStatisticValue(test.df),
       formatPValue(test.p),
       formatPValue(test.p_adjusted),
       test.effect_size
         ? `${test.effect_size.name === "cohens_d" ? "Cohen's d" : "Cliff's delta"}=${formatStatisticValue(test.effect_size.value)}（${test.effect_size.magnitude}）`
         : "—",
-      `n=${comparison.n_proposed}/${comparison.n_baseline}`,
     ]),
   )
   if (rows.length === 0) return undefined
-  return markdownTable(["对照基线", "检验", "统计量", "自由度", "p", "Holm 校正 p", "效应量", "样本量"], rows)
+  return markdownTable(["对照基线", "检验", "统计量", "p", "Holm 校正 p", "效应量"], rows)
 }
 
 function formatStatisticValue(value: number) {
