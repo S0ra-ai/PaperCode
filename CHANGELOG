@@ -19,6 +19,7 @@
             - feat(paper): 实验协议执行支持 repetitions（1–20），每次执行注入种子，结果保留样本并在结果表渲染 mean ± std (n=N)，离散度不再只能手写
             - feat(paper): proposed 与基线的重复样本自动做 Welch t 检验，t/df/双侧 p 写入 ResultReport.significance 与结果章节的统计解释段
             - feat(paper): 样本足够时同时给出 Wilcoxon 秩和检验，多基线比较按检验族做 Holm–Bonferroni 校正，结果章节报告校正后的 p
+            - feat(paper): 每个检验附带效果量（Welch 配 Cohen's d、Wilcoxon 配 Cliff's δ），按常规阈值标注强度，结果章节一并报告
             - feat(paper): 导出时自动生成主指标柱状图（PNG，含误差棒与轴/系列标签）到 figures/primary-metric.png，结果章节引用它，一区图件不再依赖作者手写
             - feat(paper): 有消融实验时再生成 figures/ablation.png 并在结果章节引用；图注与图内标签使用稿件措辞，不暴露原始实验 id
             - feat(paper): 配置 PAPERCODE_TRANSLATE_{BASE_URL,API_KEY,MODEL} 后，国际一区稿件会自动把叙事章节翻译成英文并持久化为章节覆盖；翻译全有或全无，失败保持原稿由闸门拦截
@@ -34,7 +35,7 @@
             - fix(paper): 被闸门拦下的稿件仍以 forced_draft 导出，失败检查记录在 blocking-report artifact 与预览 blockers
             - fix(paper): 非中文期刊稿件不再追加中文"投稿准备度"附录
         :checks
-            - targeted: test/paper + test/research 289 pass / 1 skip / 0 fail；manuscript-gate 用例覆盖通过态与每一种拦截，重复实验用例覆盖样本聚合、Welch 检验与结果表渲染，figure 用例覆盖 PNG 编码与写出，translate 用例覆盖全有或全无与闸门联动
+            - targeted: test/paper + test/research 290 pass / 1 skip / 0 fail；manuscript-gate 用例覆盖通过态与每一种拦截，重复实验用例覆盖样本聚合、Welch 检验与结果表渲染，figure 用例覆盖 PNG 编码与写出，translate 用例覆盖全有或全无与闸门联动
             - typecheck: bun run typecheck 13/13 通过
             - e2e: CJC 与 international-q1 两条 authoring 端到端都能走到 final（一区用例含 40 条文献、英文正文、两张表、一张图、统计量与声明）
 

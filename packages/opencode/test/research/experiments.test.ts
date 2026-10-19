@@ -11,6 +11,8 @@ import {
   recordExperimentLoop,
   runContainerReproduction,
   runHostExploration,
+  cliffsDelta,
+  cohensD,
   holmAdjust,
   welchTTest,
   wilcoxonRankSum,
@@ -105,6 +107,15 @@ describe("experiment loop", () => {
     expect(wilcoxonRankSum([0.9, 0.91], [0.66, 0.67])).toBeUndefined()
   })
 
+  test("effect sizes accompany the tests", () => {
+    const d = cohensD([0.9, 0.92, 0.94], [0.66, 0.67, 0.65])
+    expect(d?.name).toBe("cohens_d")
+    expect(d?.magnitude).toBe("large")
+    expect(d?.value).toBeGreaterThan(0.8)
+    expect(cliffsDelta([0.9, 0.92, 0.94], [0.66, 0.67, 0.65])?.value).toBe(1)
+    expect(cliffsDelta([1, 2], [1, 2])?.value).toBe(0)
+  })
+
   test("holm adjustment controls the family of baseline comparisons", () => {
     expect(holmAdjust([0.01, 0.04, 0.03])).toEqual([0.03, 0.06, 0.06])
     expect(holmAdjust([0.5])).toEqual([0.5])
@@ -178,6 +189,11 @@ describe("experiment loop", () => {
       expect(
         recorded.report.significance?.every((item) => item.tests.some((test) => test.name === "wilcoxon_rank_sum")),
       ).toBe(true)
+      expect(
+        recorded.report.significance?.every((item) =>
+          item.tests.every((test) => test.effect_size && test.effect_size.magnitude === "large"),
+        ),
+      ).toBe(true)
 
       const ledger = composeClaimLedger({ topic: "Repeated trials", claims: [], now })
       const draft = composeDraftPaper({
@@ -192,6 +208,7 @@ describe("experiment loop", () => {
       expect(draft.markdown).toContain("(n=3)")
       expect(draft.markdown).toContain("Welch")
       expect(draft.markdown).toContain("Holm")
+      expect(draft.markdown).toContain("Cohen's d")
       expect(draft.markdown).toMatch(/p [<=]/)
     } finally {
       await clean(dir)

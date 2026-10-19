@@ -2467,7 +2467,11 @@ function resultStatisticalScopeSummary(input: ComposeDraftPaperInput) {
         ? `t=${formatStatisticValue(primary.statistic)}，df=${formatStatisticValue(primary.df ?? 0)}`
         : `U=${formatStatisticValue(primary.statistic)}`
     const correction = (input.result_report?.significance?.length ?? 1) > 1 ? "（Holm 校正）" : ""
-    return `统计解释：${runsText}；结果表报告均值、标准差与样本量。以最强基线 ${comparison.baseline_experiment_id} 为对照，${label} ${details}，双侧 p ${formatPValue(primary.p_adjusted)}${correction}。`
+    const effect = primary.effect_size
+    const effectText = effect
+      ? `，${effect.name === "cohens_d" ? "Cohen's d" : "Cliff's δ"}=${formatStatisticValue(effect.value)}（${effect.magnitude}）`
+      : ""
+    return `统计解释：${runsText}；结果表报告均值、标准差与样本量。以最强基线 ${comparison.baseline_experiment_id} 为对照，${label} ${details}，双侧 p ${formatPValue(primary.p_adjusted)}${correction}${effectText}。`
   }
   if (trialCount > 1) {
     return `统计解释：${runsText}；结果表报告均值、标准差与样本量，未进行显著性检验。`

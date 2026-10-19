@@ -1,3 +1,5 @@
+import type { EffectSize } from "./statistics"
+
 export type ExperimentMetricDirection = "higher_better" | "lower_better"
 
 export type ExperimentMetric = {
@@ -35,6 +37,8 @@ export type ExperimentSignificance = {
     df?: number
     p: number
     p_adjusted: number
+    /** Cohen's d for the t-test, Cliff's delta for the rank test. */
+    effect_size?: EffectSize
   }>
 }
 

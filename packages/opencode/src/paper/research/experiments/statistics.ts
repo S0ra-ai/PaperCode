@@ -179,3 +179,52 @@ export function holmAdjust(pValues: number[]) {
   })
   return adjusted
 }
+
+export type EffectMagnitude = "negligible" | "small" | "medium" | "large"
+
+export type EffectSize = {
+  name: "cohens_d" | "cliffs_delta"
+  value: number
+  magnitude: EffectMagnitude
+}
+
+/** Cohen's d with the pooled standard deviation. */
+export function cohensD(sampleA: number[], sampleB: number[]): EffectSize | undefined {
+  if (sampleA.length < 2 || sampleB.length < 2) return undefined
+  const pooledVariance =
+    ((sampleA.length - 1) * variance(sampleA) + (sampleB.length - 1) * variance(sampleB)) /
+    (sampleA.length + sampleB.length - 2)
+  if (pooledVariance <= 0) return undefined
+  const value = (mean(sampleA) - mean(sampleB)) / Math.sqrt(pooledVariance)
+  return { name: "cohens_d", value, magnitude: cohensMagnitude(Math.abs(value)) }
+}
+
+function cohensMagnitude(value: number): EffectMagnitude {
+  if (value >= 0.8) return "large"
+  if (value >= 0.5) return "medium"
+  if (value >= 0.2) return "small"
+  return "negligible"
+}
+
+/** Cliff's delta: non-parametric effect size, the natural companion to a rank test. */
+export function cliffsDelta(sampleA: number[], sampleB: number[]): EffectSize | undefined {
+  if (sampleA.length === 0 || sampleB.length === 0) return undefined
+  let greater = 0
+  let less = 0
+  for (const a of sampleA) {
+    for (const b of sampleB) {
+      if (a > b) greater++
+      else if (a < b) less++
+    }
+  }
+  const value = (greater - less) / (sampleA.length * sampleB.length)
+  return { name: "cliffs_delta", value, magnitude: cliffsMagnitude(Math.abs(value)) }
+}
+
+/** Romano et al. thresholds for Cliff's delta. */
+function cliffsMagnitude(value: number): EffectMagnitude {
+  if (value >= 0.474) return "large"
+  if (value >= 0.33) return "medium"
+  if (value >= 0.147) return "small"
+  return "negligible"
+}

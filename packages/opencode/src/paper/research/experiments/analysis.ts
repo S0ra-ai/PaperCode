@@ -1,7 +1,7 @@
 import { withSpan } from "../telemetry"
 import { plannedExperimentSpecs } from "./planning"
 import { hasIsolatedContainerExecution, hasProcessExecution, standardDeviation } from "./runner"
-import { holmAdjust, welchTTest, wilcoxonRankSum } from "./statistics"
+import { cliffsDelta, cohensD, holmAdjust, welchTTest, wilcoxonRankSum } from "./statistics"
 import type {
   ExperimentFinding,
   ExperimentPlan,
@@ -141,6 +141,7 @@ export function analyzeExperimentResults(input: ExperimentAnalysisInput): Result
                 df: welch.df,
                 p: welch.p,
                 p_adjusted: welch.p,
+                effect_size: cohensD(proposedSamples, baselineSamples),
               })
             }
             const wilcoxon = wilcoxonRankSum(proposedSamples, baselineSamples)
@@ -150,6 +151,7 @@ export function analyzeExperimentResults(input: ExperimentAnalysisInput): Result
                 statistic: wilcoxon.statistic,
                 p: wilcoxon.p,
                 p_adjusted: wilcoxon.p,
+                effect_size: cliffsDelta(proposedSamples, baselineSamples),
               })
             }
             if (tests.length === 0) return []
