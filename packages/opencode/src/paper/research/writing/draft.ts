@@ -1216,6 +1216,9 @@ function displayDatasetDiagnostic(value: string) {
     if (/Deterministic validation labels derived from query-term overlap/i.test(policy)) {
       return "标签由检索词重合、来源元数据完整度和发表时间确定，不是人工相关性标注"
     }
+    if (/\bllm\b|silver|judge/i.test(policy)) {
+      return "标签由独立大模型按统一量规评定的银标相关性，不是人工相关性标注"
+    }
     return `标签策略为${paperProseText(policy)}`
   }
   return ""
@@ -2386,17 +2389,26 @@ function rankingCandidateCount(input: ComposeDraftPaperInput) {
   return undefined
 }
 
+function rankingLabelPolicySummary(input: ComposeDraftPaperInput) {
+  const diagnostics = input.data_plan?.datasets.flatMap((dataset) => dataset.verification.diagnostics ?? []) ?? []
+  const policy = diagnostics
+    .map((diagnostic) => diagnostic.trim())
+    .find((diagnostic) => diagnostic.startsWith("label_policy:"))
+  const value = policy?.slice("label_policy:".length) ?? ""
+  if (/\bllm\b|silver|judge/i.test(value))
+    return "标签由独立大模型按统一量规评定的银标相关性，不是人工相关性标注"
+  if (/live arXiv search rank/i.test(value))
+    return "标签由实时 arXiv 检索排序、主题匹配、元数据完整度和发表时间派生，不是人工相关性标注"
+  if (/query-term overlap/i.test(value))
+    return "标签由检索词重合、来源元数据完整度和发表时间确定，不是人工相关性标注"
+  return "标签策略限定了结果解释范围"
+}
+
 function rankingDatasetScopeSummary(input: ComposeDraftPaperInput) {
   const candidateCount = rankingCandidateCount(input)
-  const diagnostics = input.data_plan?.datasets.flatMap((dataset) => dataset.verification.diagnostics ?? []) ?? []
-  const hasLiveArxivLabelPolicy = diagnostics.some((diagnostic) =>
-    /^label_policy:Deterministic validation labels derived from live arXiv search rank/i.test(diagnostic.trim()),
-  )
-  if (!candidateCount && !hasLiveArxivLabelPolicy) return undefined
+  const labelText = rankingLabelPolicySummary(input)
+  if (!candidateCount && labelText === "标签策略限定了结果解释范围") return undefined
   const countText = candidateCount ? `候选数 ${candidateCount}` : "候选集规模有限"
-  const labelText = hasLiveArxivLabelPolicy
-    ? "标签由实时 arXiv 检索排序、主题匹配、元数据完整度和发表时间派生，不是人工相关性标注"
-    : "标签策略限定了结果解释范围"
   return `评测集${countText}，${labelText}。`
 }
 
@@ -2418,7 +2430,7 @@ function rankingThreatsToValiditySummary(input: ComposeDraftPaperInput, metric: 
     [
       [
         "标注效度",
-        `当前评测集${candidateText}；标签由实时 arXiv 检索排序、主题匹配、元数据完整度和发表时间确定，不是人工相关性标注。`,
+        `当前评测集${candidateText}；${rankingLabelPolicySummary(input)}。`,
         "将结果解释为自动筛选协议观察，不等同于专家相关性判断。",
       ],
       [
@@ -2690,7 +2702,7 @@ function rankingDiscussionSummary(
       ? `无证据覆盖消融移除 claim_coverage 后，${metricLabel} 数值低于完整排序，说明 claim_coverage 项与当前前三位排序差异相关。这一结果与任务设定一致：候选论文不仅要与主题相关，还需要覆盖当前研究问题中的关键断言。`
       : `无证据覆盖消融移除 claim_coverage 后，${metricLabel} 数值没有低于完整排序；因此 claim_coverage 项与当前排序差异的关系仍未被消融结果支持，正文不据此声称该特征带来了提升。`,
   )
-  rows.push(`结果仍需要保守解释。${candidateText}，且标签不是人工相关性标注，而是由实时 arXiv 检索排序、主题匹配、元数据完整度和发表时间派生；因此当前结论更适合作为自动筛选协议的证据，而不是人工文献综述质量的最终证明。`)
+  rows.push(`结果仍需要保守解释。${candidateText}，且${rankingLabelPolicySummary(input)}；因此当前结论更适合作为自动筛选协议的证据，而不是人工文献综述质量的最终证明。`)
   if (reproductionVerified(input)) {
     rows.push("本机和容器结果一致，说明上述比较不是由当前宿主环境偶然触发；但复现一致性只验证同一协议可重复，不证明该评分函数已覆盖更多主题、更多候选规模或人工标注场景。")
   } else {
@@ -3015,12 +3027,16 @@ function limitationsSummary(input: ComposeDraftPaperInput, unsupported: string[]
       [
         [
           "评测集规模与标注",
-          `${candidateText}；标签由实时 arXiv 检索排序、主题匹配、元数据完整度和发表时间派生，不是人工相关性标注。`,
+          `${candidateText}；${rankingLabelPolicySummary(input)}。`,
           "引入更大候选池、跨主题验证和人工相关性标注。",
         ],
         [
           "基线强度",
-          "词项匹配基线偏弱，只能说明当前完整排序在 nDCG@3 上高于简单查询词重合。",
+          input.result_report?.proposed && input.result_report.best_baseline
+            ? input.result_report.proposed.value > input.result_report.best_baseline.value
+              ? "词项匹配基线属于弱基线；完整排序高于它只说明查询词重合不足以解释排序，不能说明方法强于其他基线。"
+              : `词项匹配基线属于弱基线；即便如此，完整排序仍未超过最强基线（${bestBaselineLabel(input)}），因此结果不支持方法优势的表述。`
+            : "基线强度有限，当前结果不足以支持方法优势的表述。",
           "加入 BM25、向量检索、学习排序和人工标注基线。",
         ],
         [
