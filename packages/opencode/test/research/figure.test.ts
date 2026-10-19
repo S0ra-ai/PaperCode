@@ -3,7 +3,7 @@ import { mkdir, mkdtemp, rm } from "fs/promises"
 import { setTimeout as sleep } from "node:timers/promises"
 import os from "os"
 import path from "path"
-import { figureSpecFromReport, renderMetricChartPng } from "@/paper/research/export"
+import { figureSpecFromReport, ablationFigureSpec, renderMetricChartPng } from "@/paper/research/export"
 import { renderPaperExportPipeline, type PaperExportCommandRunner } from "@/paper/export-pipeline"
 import { createResearchRun, type ResearchRuntimeOptions } from "@/paper/research/runtime"
 import { composeClaimLedger, composeDraftPaper } from "@/paper/research/writing"
@@ -34,11 +34,35 @@ describe("paper figure", () => {
       ],
     })
     expect(spec?.series).toEqual([
-      { label: "proposed", value: 0.91, std: 0.004 },
-      { label: "baseline-rag", value: 0.88, std: 0.003 },
+      { label: "Proposed", value: 0.91, std: 0.004 },
+      { label: "Baseline Rag", value: 0.88, std: 0.003 },
     ])
-    expect(spec?.caption).toContain("proposed, baseline-rag")
+    expect(spec?.caption).toContain("Proposed, Baseline Rag")
     expect(figureSpecFromReport({ primary_metric: "accuracy" })).toBeUndefined()
+  })
+
+  test("builds the ablation chart from the run records", () => {
+    const run = (experiment_id: string, role: string, value: number) => ({
+      experiment_id,
+      role,
+      environment: { mode: "host" },
+      metrics: [{ name: "accuracy", value }],
+    })
+    const spec = ablationFigureSpec({
+      metric: "accuracy",
+      runs: [
+        run("proposed", "proposed", 0.91),
+        run("ablation-no-gate", "ablation", 0.88),
+        run("ablation-no-ledger", "ablation", 0.86),
+      ],
+      statistics: [
+        { experiment_id: "proposed", environment: "host", metric: "accuracy", std: 0.004 },
+        { experiment_id: "ablation-no-gate", environment: "host", metric: "accuracy", std: 0.006 },
+      ],
+    })
+    expect(spec?.series.map((item) => item.label)).toEqual(["Proposed", "Ablation No Gate", "Ablation No Ledger"])
+    expect(spec?.series[0]?.std).toBe(0.004)
+    expect(ablationFigureSpec({ metric: "accuracy", runs: [run("proposed", "proposed", 0.91)] })).toBeUndefined()
   })
 
   test("encodes a real PNG with the expected dimensions", () => {
@@ -59,6 +83,45 @@ describe("paper figure", () => {
     expect(png.byteLength).toBeLessThan(900 * 520 * 4)
   })
 
+  test("the draft references the ablation chart when ablations were recorded", () => {
+    const ledger = composeClaimLedger({ topic: "Ablation", claims: [], now })
+    const run = (experiment_id: string, role: "proposed" | "baseline" | "ablation", value: number) => ({
+      experiment_run_id: `host:${experiment_id}`,
+      plan_id: "plan-1",
+      experiment_id,
+      role,
+      status: "succeeded" as const,
+      command: { argv: ["bun", "test"] },
+      environment: { mode: "host" as const, platform: "darwin" as const },
+      metrics: [{ name: "accuracy", value, direction: "higher_better" as const }],
+      stdout: "fixture",
+      stderr: "",
+      exit_code: 0,
+      resource_usage: { wall_time_seconds: 0 },
+    })
+    const draft = composeDraftPaper({
+      title: "Ablation",
+      ledger,
+      experiment_runs: {
+        host_runs: [run("proposed", "proposed", 0.91), run("ablation-a", "ablation", 0.88)],
+        container_runs: [],
+      },
+      result_report: {
+        primary_metric: "accuracy",
+        proposed: { experiment_id: "proposed", value: 0.91 },
+        best_baseline: { experiment_id: "baseline", value: 0.88 },
+        blockers: [],
+        recommendation: "accept",
+        reproduction: { status: "passed", container_run_ids: [] },
+        final_claims_allowed: true,
+      },
+      now,
+    })
+    const results = draft.sections.find((section) => section.section_id === "results")?.markdown ?? ""
+    expect(results).toContain("figures/ablation.png")
+    expect(results).toContain("Accuracy ablation")
+  })
+
   test("the export pipeline writes the figure next to the bundle", async () => {
     const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-figure-test-"))
     try {
@@ -73,6 +136,14 @@ describe("paper figure", () => {
         caption: "accuracy across methods (left to right: proposed)",
         metric: "accuracy",
         series: [{ label: "proposed", value: 0.91, std: 0.004 }],
+      }
+      const ablation = {
+        caption: "accuracy ablation (left to right: proposed, ablation-a)",
+        metric: "accuracy",
+        series: [
+          { label: "proposed", value: 0.91 },
+          { label: "ablation-a", value: 0.88 },
+        ],
       }
       const draft = composeDraftPaper({ title: "Figure", ledger, figure, now })
       expect(draft.sections.find((section) => section.section_id === "results")?.markdown).toContain(
@@ -91,6 +162,7 @@ describe("paper figure", () => {
           tools: {},
           command,
           figure,
+          ablation_figure: ablation,
           now,
         },
         options,
@@ -100,6 +172,10 @@ describe("paper figure", () => {
         path.join(handle.run_dir, "exports", "bundle-figure", "figures", "primary-metric.png"),
       ).bytes()
       expect(Array.from(png.slice(0, 8))).toEqual(PNG_SIGNATURE)
+      const ablationPng = await Bun.file(
+        path.join(handle.run_dir, "exports", "bundle-figure", "figures", "ablation.png"),
+      ).bytes()
+      expect(Array.from(ablationPng.slice(0, 8))).toEqual(PNG_SIGNATURE)
     } finally {
       await clean(dir)
     }

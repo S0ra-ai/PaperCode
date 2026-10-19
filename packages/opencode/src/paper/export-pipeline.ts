@@ -52,6 +52,8 @@ export interface RenderPaperExportPipelineInput {
   fonts?: PaperExportFonts
   /** Rendered next to the bundle as figures/primary-metric.png; the draft markdown references it. */
   figure?: PaperFigureSpec
+  /** Rendered as figures/ablation.png when the run recorded ablation experiments. */
+  ablation_figure?: PaperFigureSpec
   now?: string
 }
 
@@ -543,10 +545,15 @@ export async function renderPaperExportPipeline(
   const markdown = exportMarkdown(input.draft, input.mode === "forced_draft" ? failedChecks : [])
   const outputName = input.bundle_id
   const fonts = exportFonts(process.env, input.fonts)
-  if (input.figure) {
+  if (input.figure || input.ablation_figure) {
     const figures = path.join(outputDir(runDir, input.bundle_id), "figures")
     await mkdir(figures, { recursive: true })
-    await writeFile(path.join(figures, "primary-metric.png"), renderMetricChartPng(input.figure))
+    if (input.figure) {
+      await writeFile(path.join(figures, "primary-metric.png"), renderMetricChartPng(input.figure))
+    }
+    if (input.ablation_figure) {
+      await writeFile(path.join(figures, "ablation.png"), renderMetricChartPng(input.ablation_figure))
+    }
   }
 
   const markdownFile = await renderMarkdown(runDir, input.bundle_id, markdown)

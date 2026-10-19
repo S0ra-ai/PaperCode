@@ -13,6 +13,19 @@ export type PaperFigureSpec = {
   series: PaperFigureSeries[]
 }
 
+/** Turn an experiment id or metric name into the words a manuscript would print. */
+export function figureLabel(value: string) {
+  return value
+    .split(/[-_:.\s]+/)
+    .filter(Boolean)
+    .map((part) => {
+      // Acronyms (BM25, nDCG) have no lowercase vowels; ordinary words keep sentence case.
+      const acronym = /[a-z]/.test(part) && !/[aeiou]/.test(part)
+      return acronym ? part.toUpperCase() : `${part[0].toUpperCase()}${part.slice(1)}`
+    })
+    .join(" ")
+}
+
 /** Build the figure the manuscript shows: the primary metric, proposed first, then baselines. */
 export function figureSpecFromReport(report: Pick<ResultReport, "primary_metric" | "proposed" | "best_baseline" | "statistics">) {
   if (!report.proposed) return undefined
@@ -26,21 +39,74 @@ export function figureSpecFromReport(report: Pick<ResultReport, "primary_metric"
     : undefined
   const series: PaperFigureSeries[] = [
     {
-      label: report.proposed.experiment_id,
+      label: figureLabel(report.proposed.experiment_id),
       value: report.proposed.value,
       std: proposedStatistics?.std,
     },
   ]
   if (report.best_baseline) {
     series.push({
-      label: report.best_baseline.experiment_id,
+      label: figureLabel(report.best_baseline.experiment_id),
       value: report.best_baseline.value,
       std: baselineStatistics?.std,
     })
   }
   return {
-    caption: `${report.primary_metric} across methods (left to right: ${series.map((item) => item.label).join(", ")})`,
-    metric: report.primary_metric,
+    caption: `${figureLabel(report.primary_metric)} across methods (left to right: ${series.map((item) => item.label).join(", ")})`,
+    metric: figureLabel(report.primary_metric),
+    series,
+  }
+}
+
+/** The shape both the draft composer and the export pipeline can supply. */
+export type AblationFigureInput = {
+  metric: string
+  runs: Array<{
+    experiment_id: string
+    role: string
+    environment: { mode: string }
+    metrics: Array<{ name: string; value: number; samples?: number[] }>
+  }>
+  statistics?: Array<{ experiment_id: string; environment: string; metric: string; std: number }>
+}
+
+function metricValue(run: AblationFigureInput["runs"][number], metric: string) {
+  return run.metrics.find((item) => item.name === metric)?.value
+}
+
+function standardDeviationFor(input: AblationFigureInput, experimentId: string, metric: string) {
+  return input.statistics?.find(
+    (item) => item.experiment_id === experimentId && item.metric === metric && item.environment === "host",
+  )?.std
+}
+
+/**
+ * A second chart for the ablation study. Reviewers expect the full method next to its ablated
+ * variants; without it the results table only shows the proposed-vs-baseline comparison.
+ */
+export function ablationFigureSpec(input: AblationFigureInput): PaperFigureSpec | undefined {
+  const hostRuns = input.runs.filter((run) => run.environment.mode !== "container")
+  const proposed = hostRuns.find((run) => run.role === "proposed" && metricValue(run, input.metric) !== undefined)
+  const ablations = hostRuns.filter((run) => run.role === "ablation" && metricValue(run, input.metric) !== undefined)
+  if (ablations.length === 0) return undefined
+  const series: PaperFigureSeries[] = []
+  if (proposed) {
+    series.push({
+      label: figureLabel(proposed.experiment_id),
+      value: metricValue(proposed, input.metric)!,
+      std: standardDeviationFor(input, proposed.experiment_id, input.metric),
+    })
+  }
+  for (const run of ablations) {
+    series.push({
+      label: figureLabel(run.experiment_id),
+      value: metricValue(run, input.metric)!,
+      std: standardDeviationFor(input, run.experiment_id, input.metric),
+    })
+  }
+  return {
+    caption: `${figureLabel(input.metric)} ablation (left to right: ${series.map((item) => item.label).join(", ")})`,
+    metric: figureLabel(input.metric),
     series,
   }
 }

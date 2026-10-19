@@ -11,6 +11,7 @@ import type {
 import type { DataPlan, LiteratureMap } from "../sources"
 import type { CheckpointGuidance, ClaimLedger, ClaimLedgerEntry, DraftPaper, DraftSection } from "./schemas"
 import type { PaperFigureSpec } from "../export/figure"
+import { ablationFigureSpec } from "../export/figure"
 
 export type CodeAvailabilityMetadata = {
   package_name?: string
@@ -2761,9 +2762,19 @@ function reproducibilitySummary(input: ComposeDraftPaperInput) {
 }
 
 function resultsSectionMarkdown(input: ComposeDraftPaperInput, claimSections: DraftSection[]) {
-  const base = resultSummary(input, claimSections)
-  if (!input.figure) return base
-  return [base, `![${input.figure.caption}](figures/primary-metric.png)`].join("\n\n")
+  const blocks = [resultSummary(input, claimSections)]
+  if (input.figure) blocks.push(`![${input.figure.caption}](figures/primary-metric.png)`)
+  // The ablation chart is derived from the run records; the export pipeline renders the same spec.
+  const metric = input.result_report?.primary_metric
+  if (metric && input.experiment_runs) {
+    const ablation = ablationFigureSpec({
+      metric,
+      runs: [...input.experiment_runs.host_runs, ...input.experiment_runs.container_runs],
+      statistics: input.result_report?.statistics,
+    })
+    if (ablation) blocks.push(`![${ablation.caption}](figures/ablation.png)`)
+  }
+  return blocks.join("\n\n")
 }
 
 function resultSummary(input: ComposeDraftPaperInput, claimSections: DraftSection[]) {

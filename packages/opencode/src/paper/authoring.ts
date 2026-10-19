@@ -1,5 +1,11 @@
 import type { PreviewDiagnostics, PreviewSnapshot } from "../../../preview/src/protocol"
-import { figureSpecFromReport, recordExportBundle, type ExportBundle, type ExportRenderer } from "./research/export"
+import {
+  ablationFigureSpec,
+  figureSpecFromReport,
+  recordExportBundle,
+  type ExportBundle,
+  type ExportRenderer,
+} from "./research/export"
 import { translateDraftSections, type Translator } from "./translate"
 import type { ResearchArtifact } from "./research/contracts"
 import type { ExperimentPlan, ResultReport } from "./research/experiments"
@@ -699,6 +705,13 @@ export async function runPaperAuthoringLoop(
     async (span) => {
       const run = await loadResearchRun(runDir)
       const figure = figureSpecFromReport(input.result_report)
+      const ablationFigure = input.experiment_runs
+        ? ablationFigureSpec({
+            metric: input.result_report.primary_metric,
+            runs: [...input.experiment_runs.host_runs, ...input.experiment_runs.container_runs],
+            statistics: input.result_report.statistics,
+          })
+        : undefined
       const baseDraft = composeDraftPaper({
         title: input.title,
         ledger: input.ledger,
@@ -798,6 +811,7 @@ export async function runPaperAuthoringLoop(
             final_gate: finalGate,
             source_artifact_ids: sourceArtifactIds,
             figure,
+            ablation_figure: ablationFigure,
             renderers: input.renderers,
             now: input.now,
           },
@@ -813,6 +827,7 @@ export async function runPaperAuthoringLoop(
             final_gate: finalGate,
             source_artifact_ids: sourceArtifactIds,
             figure,
+            ablation_figure: ablationFigure,
             renderers: input.renderers,
             now: input.now,
           },

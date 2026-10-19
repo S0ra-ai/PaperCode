@@ -66,6 +66,8 @@ export type RecordExportBundleInput = {
   source_artifact_ids: string[]
   /** Primary-metric chart written next to the bundle; the draft references it when present. */
   figure?: PaperFigureSpec
+  /** Ablation chart, written as figures/ablation.png. */
+  ablation_figure?: PaperFigureSpec
   renderers?: ExportRenderer
   now?: string
 }

@@ -58,7 +58,7 @@ import {
 } from "./orchestrator"
 import { budgetTierPolicy } from "./budget"
 import { executeContainerExperiment, executeHostExperiment, loadExperimentProtocol, parseExperimentMetrics, selectContainerCommand } from "./research/experiments/execution"
-import { figureSpecFromReport, recordExportBundle, type ExportBundle } from "./research/export"
+import { ablationFigureSpec, figureSpecFromReport, recordExportBundle, type ExportBundle } from "./research/export"
 import {
   applySectionOverrides,
   composeDraftPaper,
@@ -3395,6 +3395,23 @@ export async function exportPaperRun(
       message: "没有真实草稿 artifact，不能生成 final export 或 forced draft。",
     }
   }
+  const hostRuns = await readArtifactJson<ExperimentRun[]>(
+    runDir,
+    reportArtifacts.filter((artifact) => artifact.path.includes("host-runs")).at(-1),
+  )
+  const containerRuns = await readArtifactJson<ExperimentRun[]>(
+    runDir,
+    reportArtifacts.filter((artifact) => artifact.path.includes("container-runs")).at(-1),
+  )
+  const experimentRuns = [...(Array.isArray(hostRuns) ? hostRuns : []), ...(Array.isArray(containerRuns) ? containerRuns : [])]
+  const ablationFigure =
+    resultReport && experimentRuns.length > 0
+      ? ablationFigureSpec({
+          metric: resultReport.primary_metric,
+          runs: experimentRuns,
+          statistics: resultReport.statistics,
+        })
+      : undefined
   const exported = await recordExportBundle(
     runDir,
     {
@@ -3403,6 +3420,7 @@ export async function exportPaperRun(
       final_gate: finalGate,
       source_artifact_ids: latest.sourceArtifactIDs,
       figure: resultReport ? figureSpecFromReport(resultReport) : undefined,
+      ablation_figure: ablationFigure,
     },
     options,
   )
