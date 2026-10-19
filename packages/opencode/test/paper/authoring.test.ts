@@ -2704,6 +2704,10 @@ describe("paper authoring loop", () => {
       })
       // Same structure-preserving contract as the real translator: keep every table and image.
       const translator = async ({ section_id, text }: { section_id: string; text: string }) => {
+        if (section_id.startsWith("section_title:")) {
+          const id = section_id.slice("section_title:".length)
+          return id === "method" ? "Methods" : `Translated ${id.replaceAll("_", " ")}`
+        }
         const base =
           englishBySection.get(section_id) ??
           `English text for the ${section_id} section, translated for the venue. It repeats enough words to count as substantive prose.`

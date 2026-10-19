@@ -109,12 +109,13 @@ async function translateValidated(
   section_id: string,
   text: string,
   validate: (value: string) => string | undefined,
+  clean: (value: string) => string = stripFence,
 ): Promise<{ value?: string; reason?: string }> {
   let reason = "empty translation"
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
     let value: string
     try {
-      value = stripFence(await translator({ section_id, text, language: "en" }))
+      value = clean(await translator({ section_id, text, language: "en" }))
     } catch (error) {
       reason = `request failed: ${error instanceof Error ? error.message : String(error)}`
       continue
@@ -124,6 +125,30 @@ async function translateValidated(
     reason = invalid
   }
   return { reason }
+}
+
+/** Titles come back with Markdown hashes or quotes often enough to normalize them. */
+function cleanTitle(value: string) {
+  return stripFence(value)
+    .replace(/^#{1,6}\s*/, "")
+    .replace(/^["'`]+|["'`]+$/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/[.。]$/, "")
+}
+
+/** A model occasionally answers a heading request with commentary instead of a translation. */
+function refusal(value: string) {
+  return /^\s*(it looks like|please (paste|provide)|i'?m sorry|as an ai|i cannot|there'?s no manuscript)/i.test(value)
+    ? "translation returned commentary instead of the text"
+    : undefined
+}
+
+function commentaryTitle(value: string, maxWords: number) {
+  if (refusal(value)) return "translation returned commentary instead of the text"
+  if (/[.!?。！？]\s/.test(value)) return "translation returned commentary instead of the text"
+  if (value.split(/\s+/).length > maxWords) return "translation returned commentary instead of the text"
+  return undefined
 }
 
 function validatedEnglish(value: string, emptyReason: string, chineseReason: string) {
@@ -144,8 +169,14 @@ export async function translateDraftSections(
   }
   let title: string | undefined
   if (cjkRatio(draft.title) > 0.02) {
-    const result = await translateValidated(translator, "title", draft.title, (value) =>
-      validatedEnglish(value, "empty translation", "translation still contains Chinese"),
+    const result = await translateValidated(
+      translator,
+      "title",
+      draft.title,
+      (value) =>
+        validatedEnglish(value, "empty translation", "translation still contains Chinese") ??
+        commentaryTitle(value, 40),
+      cleanTitle,
     )
     if (!result.value) return fail("title", result.reason ?? "empty translation")
     title = result.value
@@ -158,6 +189,8 @@ export async function translateDraftSections(
     const result = await translateValidated(translator, sectionId, section.markdown, (value) => {
       const basic = validatedEnglish(value, "empty translation", "translation still contains Chinese")
       if (basic) return basic
+      const comment = refusal(value)
+      if (comment) return comment
       if (!structurePreserved(section.markdown, value))
         return "translation changed the table or image structure"
       return undefined
@@ -165,8 +198,14 @@ export async function translateDraftSections(
     if (!result.value) return fail(sectionId, result.reason ?? "empty translation")
     let translatedTitle: string | undefined
     if (cjkRatio(section.title) > 0.02) {
-      const titleResult = await translateValidated(translator, `section_title:${sectionId}`, section.title, (value) =>
-        validatedEnglish(value, "empty section title translation", "section title still contains Chinese"),
+      const titleResult = await translateValidated(
+        translator,
+        `section_title:${sectionId}`,
+        section.title,
+        (value) =>
+          validatedEnglish(value, "empty section title translation", "section title still contains Chinese") ??
+          commentaryTitle(value, 20),
+        cleanTitle,
       )
       if (!titleResult.value) return fail(sectionId, titleResult.reason ?? "empty section title translation")
       translatedTitle = titleResult.value
@@ -176,6 +215,24 @@ export async function translateDraftSections(
       markdown: result.value,
       ...(translatedTitle ? { title: translatedTitle } : {}),
     })
+  }
+  // References and appendices keep their bodies (citations, commands) but their headings should not
+  // stay Chinese in an English manuscript; translate the titles only.
+  const translated = new Set(translatableSections(draft))
+  for (const section of draft.sections) {
+    if (translated.has(section.section_id)) continue
+    if (cjkRatio(section.title) <= 0.02) continue
+    const titleResult = await translateValidated(
+      translator,
+      `section_title:${section.section_id}`,
+      section.title,
+      (value) =>
+        validatedEnglish(value, "empty section title translation", "section title still contains Chinese") ??
+        commentaryTitle(value, 20),
+      cleanTitle,
+    )
+    if (!titleResult.value) return fail(section.section_id, titleResult.reason ?? "empty section title translation")
+    overrides.push({ section_id: section.section_id, markdown: section.markdown, title: titleResult.value })
   }
   if (overrides.length === 0 && !title) return undefined
   return { overrides, ...(title ? { title } : {}) }

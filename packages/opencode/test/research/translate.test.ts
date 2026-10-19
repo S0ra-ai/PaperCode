@@ -93,6 +93,10 @@ function padStructure(source: string, translated: string) {
 
 function stubTranslator(overrides: Record<string, string> = englishBySection) {
   return async ({ section_id, text }: { section_id: string; text: string }) => {
+    if (section_id.startsWith("section_title:")) {
+      const id = section_id.slice("section_title:".length)
+      return id === "method" ? "Methods" : `Translated ${id.replaceAll("_", " ")}`
+    }
     const canned = overrides[section_id] ?? `English text for the ${section_id} section, translated for the venue. It repeats enough words to count as substantive prose.`
     return padStructure(text, canned)
   }
@@ -111,7 +115,11 @@ describe("draft translation", () => {
     expect(result?.title).toBe("Evidence-Constrained Retrieval")
     const abstract = result?.overrides.find((override) => override.section_id === "abstract")
     expect(abstract?.markdown).toContain("evidence-constrained retrieval")
-    expect(result?.overrides.every((override) => !/[一-鿿]/.test(override.markdown))).toBe(true)
+    const retranslated = result?.overrides.filter(
+      (override) => draft.sections.find((section) => section.section_id === override.section_id)?.markdown !== override.markdown,
+    )
+    expect(retranslated?.length).toBeGreaterThan(5)
+    expect(retranslated?.every((override) => !/[一-鿿]/.test(override.markdown))).toBe(true)
   })
 
   test("refuses a translation that drops a table", async () => {
@@ -244,5 +252,26 @@ describe("translation diagnostics", () => {
     )
     expect(result).toBeUndefined()
     expect(failures).toEqual([{ section_id: "title", reason: "request failed: translation endpoint returned 401" }])
+  })
+})
+
+describe("translated titles", () => {
+  test("strips heading markers and retries commentary instead of writing it into the manuscript", async () => {
+    const base = stubTranslator()
+    let commentarySent = false
+    const translator = async (input: { section_id: string; text: string }) => {
+      if (input.section_id === "section_title:data_availability") return "## Data and Code Availability"
+      if (input.section_id === "section_title:limitations" && !commentarySent) {
+        commentarySent = true
+        return "It looks like only the word “限制” was provided. Please paste the section you want translated."
+      }
+      return base(input)
+    }
+    const result = await translateDraftSections(chineseDraft(), translator)
+    const dataAvailability = result?.overrides.find((override) => override.section_id === "data_availability")
+    expect(dataAvailability?.title).toBe("Data and Code Availability")
+    const limitations = result?.overrides.find((override) => override.section_id === "limitations")
+    expect(limitations?.title).not.toContain("looks like")
+    expect(limitations?.title).toBe("Translated limitations")
   })
 })
