@@ -3288,7 +3288,13 @@ describe("ranking result narration", () => {
     exit_code: 0,
     resource_usage: { wall_time_seconds: 0.1 },
   })
-  const rankingDraft = (proposed: number, baseline: number, ablation: number, includeLexical = true) => {
+  const rankingDraft = (
+    proposed: number,
+    baseline: number,
+    ablation: number,
+    includeLexical = true,
+    diagnostics: string[] = [],
+  ) => {
     const ledger = composeClaimLedger({ topic: "Candidate ranking", claims: [], now })
     const command = (variant: string) => ({
       argv: ["bun", "experiments/evaluate-agent-ranking.ts", `--variant=${variant}`],
@@ -3305,6 +3311,17 @@ describe("ranking result narration", () => {
     return composeDraftPaper({
       title: "Candidate Ranking",
       ledger,
+      ...(diagnostics.length > 0
+        ? {
+            data_plan: {
+              ...dataPlan(),
+              datasets: dataPlan().datasets.map((dataset) => ({
+                ...dataset,
+                verification: { ...dataset.verification, diagnostics },
+              })),
+            },
+          }
+        : {}),
       experiment_plan: {
         objective: "fixture",
         metrics: [{ name: "ranking_ndcg_at_3", direction: "higher_better", primary: true }],
@@ -3367,6 +3384,19 @@ describe("ranking result narration", () => {
     const limitations = markdownSection(rankingDraft(0.9, 0.82, 0.85, false).markdown, "限制")
     expect(limitations).toContain("最强基线（random）属于弱基线")
     expect(limitations).not.toContain("词项匹配基线属于弱基线")
+  })
+
+  test("reports multi-query scope and reviewer agreement from dataset diagnostics", () => {
+    const draft = rankingDraft(0.9, 0.8, 0.85, true, [
+      "candidate_count:200",
+      "query_count:5",
+      "label_policy:Silver relevance labels (0-3) from two independent LLM judges with fixed rubrics (quadratic weighted kappa 0.87); not human relevance annotation.",
+    ])
+    const abstract = markdownSection(draft.markdown, "摘要")
+    expect(abstract).toContain("候选数 200")
+    expect(abstract).toContain("覆盖 5 个查询")
+    expect(abstract).toContain("两个独立评审配置")
+    expect(abstract).toContain("加权一致性")
   })
 
   test("states the comparison when the method wins", () => {

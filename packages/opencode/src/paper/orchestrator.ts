@@ -452,12 +452,22 @@ async function datasetMetadataDiagnostics(absolutePath: string): Promise<string[
       provenance?: unknown
       label_policy?: unknown
       candidates?: unknown
+      queries?: unknown
     }
+    const queryGroups = Array.isArray(parsed.queries)
+      ? parsed.queries.filter((item): item is { candidates?: unknown } => Boolean(item && typeof item === "object"))
+      : []
+    const candidateCount = Array.isArray(parsed.candidates)
+      ? parsed.candidates.length
+      : queryGroups.length > 0
+        ? queryGroups.reduce((sum, item) => sum + (Array.isArray(item.candidates) ? item.candidates.length : 0), 0)
+        : undefined
     return [
       typeof parsed.schema_version === "string" ? `schema_version:${parsed.schema_version}` : undefined,
       typeof parsed.provenance === "string" ? `provenance:${parsed.provenance}` : undefined,
       typeof parsed.label_policy === "string" ? `label_policy:${parsed.label_policy}` : undefined,
-      Array.isArray(parsed.candidates) ? `candidate_count:${parsed.candidates.length}` : undefined,
+      candidateCount !== undefined ? `candidate_count:${candidateCount}` : undefined,
+      queryGroups.length > 0 ? `query_count:${queryGroups.length}` : undefined,
     ].filter((item): item is string => Boolean(item))
   } catch {
     return []

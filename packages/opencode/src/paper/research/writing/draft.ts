@@ -2395,6 +2395,8 @@ function rankingLabelPolicySummary(input: ComposeDraftPaperInput) {
     .map((diagnostic) => diagnostic.trim())
     .find((diagnostic) => diagnostic.startsWith("label_policy:"))
   const value = policy?.slice("label_policy:".length) ?? ""
+  if (/two independent|kappa|agreement/i.test(value))
+    return "标签由两个独立评审配置按统一量规评定的银标相关性（同一模型、不同提示，已报告加权一致性），不是人工相关性标注"
   if (/\bllm\b|silver|judge/i.test(value))
     return "标签由独立大模型按统一量规评定的银标相关性（单一模型，边界判断未经人工复核），不是人工相关性标注"
   if (/live arXiv search rank/i.test(value))
@@ -2406,10 +2408,15 @@ function rankingLabelPolicySummary(input: ComposeDraftPaperInput) {
 
 function rankingDatasetScopeSummary(input: ComposeDraftPaperInput) {
   const candidateCount = rankingCandidateCount(input)
+  const diagnostics = input.data_plan?.datasets.flatMap((dataset) => dataset.verification.diagnostics ?? []) ?? []
+  const queryCount = diagnostics
+    .map((diagnostic) => diagnostic.trim().match(/^query_count:(\d+)$/i)?.[1])
+    .find((value): value is string => Boolean(value))
   const labelText = rankingLabelPolicySummary(input)
   if (!candidateCount && labelText === "标签策略限定了结果解释范围") return undefined
   const countText = candidateCount ? `候选数 ${candidateCount}` : "候选集规模有限"
-  return `评测集${countText}，${labelText}。`
+  const scopeText = queryCount ? `，覆盖 ${queryCount} 个查询` : ""
+  return `评测集${countText}${scopeText}，${labelText}。`
 }
 
 function rankingNoCoverageAblationValue(input: ComposeDraftPaperInput, metric: string) {
