@@ -1241,6 +1241,9 @@ function displayDatasetDiagnostic(value: string) {
     if (/Deterministic validation labels derived from query-term overlap/i.test(policy)) {
       return "标签由检索词重合、来源元数据完整度和发表时间确定，不是人工相关性标注"
     }
+    if (/human (relevance )?annotations?/i.test(policy) && !/not human/i.test(policy)) {
+      return "标签由人工相关性标注确定"
+    }
     if (/\bllm\b|silver|judge/i.test(policy)) {
       return "标签由独立大模型按统一量规评定的银标相关性（单一模型，边界判断未经人工复核），不是人工相关性标注"
     }
@@ -2420,6 +2423,8 @@ function rankingLabelPolicySummary(input: ComposeDraftPaperInput) {
     .map((diagnostic) => diagnostic.trim())
     .find((diagnostic) => diagnostic.startsWith("label_policy:"))
   const value = policy?.slice("label_policy:".length) ?? ""
+  if (/human (relevance )?annotations?/i.test(value) && !/not human/i.test(value))
+    return "标签由人工相关性标注确定，可用于投稿级结果解释"
   if (/two independent|kappa|agreement/i.test(value))
     return "标签由两个独立评审配置按统一量规评定的银标相关性（同一模型、不同提示，已报告加权一致性），不是人工相关性标注"
   if (/\bllm\b|silver|judge/i.test(value))

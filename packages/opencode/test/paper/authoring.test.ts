@@ -3401,6 +3401,17 @@ describe("ranking result narration", () => {
     expect(abstract).toContain("加权一致性")
   })
 
+  test("describes a fully human-annotated dataset as such", () => {
+    const draft = rankingDraft(0.9, 0.8, 0.85, true, [
+      "candidate_count:200",
+      "query_count:5",
+      "label_policy:Human relevance annotations (0-3) for all 200 candidates; model judgments retained as label_b for comparison.",
+    ])
+    const abstract = markdownSection(draft.markdown, "摘要")
+    expect(abstract).toContain("人工相关性标注")
+    expect(abstract).not.toContain("银标")
+  })
+
   test("does not list BM25 as future work when it is already a baseline", () => {
     const limitations = markdownSection(rankingDraft(0.9, 0.8, 0.85, true, [], true).markdown, "限制")
     expect(limitations).not.toContain("加入 BM25")
