@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test"
-import { composeClaimLedger } from "@/paper/research/writing"
+import { composeClaimLedger, composeDraftPaper } from "@/paper/research/writing"
 import type { DraftPaper } from "@/paper/research/writing"
 import { discoverDatasets } from "@/paper/research/sources"
 import type { ResultReport } from "@/paper/research/experiments"
@@ -186,5 +186,36 @@ describe("manuscript quality gate", () => {
     expect(manuscriptRequirementsForProfile("cjc-paper")).toBe(CJC_MANUSCRIPT_REQUIREMENTS)
     expect(manuscriptRequirementsForProfile("international-q1")).toBe(Q1_MANUSCRIPT_REQUIREMENTS)
     expect(manuscriptRequirementsForProfile(undefined).language).toBe("en")
+  })
+
+  test("renders enough references for the international bar", () => {
+    const sources = Array.from({ length: 45 }, (_, index) => ({
+      schema_version: "SourceRecord.v1" as const,
+      source_id: `paper-${index + 1}`,
+      kind: "paper" as const,
+      title: `Study ${index + 1}`,
+      url: `https://arxiv.org/abs/2402.${String(10000 + index).padStart(5, "0")}`,
+      provider: "arxiv",
+      license: { status: "clear" as const, expression: "arXiv" },
+      version: { value: "v1", retrieved_at: now, published_at: "2024-02-01" },
+      verification: { status: "verified" as const, method: "unit-test", checked_at: now },
+      retrieved_at: now,
+    }))
+    const draft = composeDraftPaper({
+      title: "Reference Bar",
+      ledger: composeClaimLedger({ topic: "Reference Bar", claims: [], now }),
+      literature_map: {
+        schema_version: "LiteratureMap.v1",
+        topic: "Reference Bar",
+        created_at: now,
+        sources,
+        clusters: [],
+        summary: { total_sources: sources.length, verified_sources: sources.length, open_license_sources: sources.length },
+        diagnostics: { verification_failures: [], gaps: [] },
+      },
+      now,
+    })
+    const findings = checkManuscriptQuality(gateInput({ draft }))
+    expect(findings.map((finding) => finding.category)).not.toContain("insufficient_references")
   })
 })

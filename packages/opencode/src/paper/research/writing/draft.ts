@@ -920,8 +920,10 @@ function referenceEntry(source: LiteratureMap["sources"][number], index: number)
   return `[${index + 1}] ${head}[${documentType}]. ${date}${referenceLocator(source)}.`
 }
 
-function referencesSummary(input: ComposeDraftPaperInput) {
-  const map = input.literature_map
+/** Upper bound on references rendered into the draft; above an international venue's usual bar. */
+const MAX_FORMAL_REFERENCES = 60
+
+function referencesSummary(input: ComposeDraftPaperInput) {  const map = input.literature_map
   if (!map || map.sources.length === 0) {
     return "当前运行没有登记可验证参考文献。进入投稿前必须补充 DOI、arXiv、出版社页面或其他可复核来源。"
   }
@@ -937,7 +939,9 @@ function referencesSummary(input: ComposeDraftPaperInput) {
     return `当前没有可进入正式参考文献的已验证来源；${placeholderText}进入投稿前必须完成 DOI、arXiv 元数据或出版社页面核验。`
   }
   return joinBlocks([
-    verified.slice(0, 20).map(referenceEntry).join("\n"),
+    // Enough headroom for an international venue's reference bar; the manuscript gate refuses fewer
+    // than the target profile asks for, so a lower cap here would make that bar unsatisfiable.
+    verified.slice(0, MAX_FORMAL_REFERENCES).map(referenceEntry).join("\n"),
     unverifiedCount > 0
       ? `另有 ${unverifiedCount} 条候选文献尚未验证，未列入正式参考文献。`
       : undefined,
