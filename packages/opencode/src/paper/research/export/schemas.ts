@@ -68,6 +68,8 @@ export type RecordExportBundleInput = {
   figure?: PaperFigureSpec
   /** Ablation chart, written as figures/ablation.png. */
   ablation_figure?: PaperFigureSpec
+  /** Venue LaTeX class; the pipeline falls back when the class is not installed. */
+  documentclass?: string
   renderers?: ExportRenderer
   now?: string
 }

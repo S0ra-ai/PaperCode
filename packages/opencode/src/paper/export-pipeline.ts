@@ -54,6 +54,8 @@ export interface RenderPaperExportPipelineInput {
   figure?: PaperFigureSpec
   /** Rendered as figures/ablation.png when the run recorded ablation experiments. */
   ablation_figure?: PaperFigureSpec
+  /** Venue LaTeX class (elsarticle, IEEEtran, acmart...). Used only when kpsewhich finds it. */
+  documentclass?: string
   now?: string
 }
 
@@ -261,9 +263,16 @@ function fontArgs(fonts: PaperExportFonts) {
   return args
 }
 
-function pandocLatexArgs(markdownPath: string, latexPath: string, markdown: string, fonts: PaperExportFonts) {
+function pandocLatexArgs(
+  markdownPath: string,
+  latexPath: string,
+  markdown: string,
+  fonts: PaperExportFonts,
+  documentclass?: string,
+) {
   const args = [markdownPath, "-s", "-t", "latex", "--wrap=none"]
   if (hasCjk(markdown)) {
+    // ctex is what carries CJK typesetting, so a venue class cannot replace it here.
     args.push(
       "-V",
       "documentclass=ctexart",
@@ -274,6 +283,8 @@ function pandocLatexArgs(markdownPath: string, latexPath: string, markdown: stri
       "-V",
       "pagestyle=plain",
     )
+  } else if (documentclass) {
+    args.push("-V", `documentclass=${documentclass}`)
   }
   // A named Latin font applies to any manuscript, not only to the ones that need ctex.
   args.push(...fontArgs(fonts))
@@ -299,6 +310,7 @@ async function renderLatex(input: {
   tools: PaperExportToolPaths
   command: PaperExportCommandRunner
   fonts: PaperExportFonts
+  documentclass?: string
   renderer?: ExportRenderer["latex"]
 }) {
   if (input.renderer) {
@@ -330,7 +342,7 @@ async function renderLatex(input: {
   return commandFile({
     command: input.command,
     tool: pandoc,
-    args: pandocLatexArgs(markdownPath, latexPath, input.markdown, input.fonts),
+    args: pandocLatexArgs(markdownPath, latexPath, input.markdown, input.fonts, input.documentclass),
     cwd: outputDir(input.runDir, input.bundleID),
     output: latexPath,
     format: "latex",
@@ -338,6 +350,12 @@ async function renderLatex(input: {
     runDir: input.runDir,
     missingDiagnostic: "pandoc did not produce LaTeX output.",
   })
+}
+
+/** Only use a venue class the TeX installation actually has; otherwise pandoc's default applies. */
+async function availableDocumentClass(command: PaperExportCommandRunner, cwd: string, name: string) {
+  const result = await command({ tool: "kpsewhich", args: [`${name}.cls`], cwd })
+  return result.exit_code === 0 && result.stdout.trim().length > 0 ? name : undefined
 }
 
 /**
@@ -542,6 +560,9 @@ export async function renderPaperExportPipeline(
   const failedChecks = input.final_gate.status === "passed" ? [] : input.final_gate.blockers
   const tools = await discoveredTools(input.tools, options?.home)
   const command = input.command ?? defaultCommand
+  const documentclass = input.documentclass
+    ? await availableDocumentClass(command, outputDir(runDir, input.bundle_id), input.documentclass)
+    : undefined
   const markdown = exportMarkdown(input.draft, input.mode === "forced_draft" ? failedChecks : [])
   const outputName = input.bundle_id
   const fonts = exportFonts(process.env, input.fonts)
@@ -566,6 +587,7 @@ export async function renderPaperExportPipeline(
     tools,
     command,
     fonts,
+    documentclass,
     renderer: input.renderers?.latex,
   })
   const pdfFile = await renderPdf({

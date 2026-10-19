@@ -117,6 +117,7 @@ import type { ResearchWikiDigest } from "./research-wiki"
 import type { PaperSpine } from "./paper-spine"
 import type { GlobalFigureSpec } from "./global-figure"
 import { formatDraftPaperForProfile, type PaperAuthoringInputs } from "./authoring"
+import { paperDocumentClass } from "./profiles"
 
 import {
   applyPaperRunControl,
@@ -3422,6 +3423,7 @@ export async function exportPaperRun(
       source_artifact_ids: latest.sourceArtifactIDs,
       figure: resultReport ? figureSpecFromReport(resultReport) : undefined,
       ablation_figure: ablationFigure,
+      documentclass: paperDocumentClass(intakeFromRun(status.run).target_profile),
     },
     options,
   )

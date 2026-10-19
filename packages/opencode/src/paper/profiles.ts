@@ -30,6 +30,8 @@ export interface PaperProfileRequiredCheck {
 export interface PaperProfile {
   schema_version: "PaperProfile.v1"
   id: PaperProfileId
+  /** LaTeX class for the export when it is installed; the pipeline falls back when it is not. */
+  latex_documentclass?: string
   title: string
   skill_id: string
   guidance_refresh_policy: "fetch_current_official_guidance" | "static_local_guidance"
@@ -149,6 +151,16 @@ export class PaperProfileRegistry {
 
 export function createPaperProfileRegistry(profiles: PaperProfile[] = []) {
   return new PaperProfileRegistry(profiles)
+}
+
+/** The venue's LaTeX class, or undefined when the repository has no mapping for it. */
+export function paperDocumentClass(profile?: string): string | undefined {
+  const id = profile ?? "cjc-paper"
+  if (id === "cjc-paper") return "ctexart"
+  if (id === "international-q1") return "elsarticle"
+  if (id === "ieee-paper") return "IEEEtran"
+  if (id === "acm-paper") return "acmart"
+  return undefined
 }
 
 export function isPaperProfileId(value: string | undefined): value is PaperProfileId {

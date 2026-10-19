@@ -6,6 +6,7 @@ import {
   type ExportBundle,
   type ExportRenderer,
 } from "./research/export"
+import { paperDocumentClass } from "./profiles"
 import { translateDraftSections, type Translator } from "./translate"
 import type { ResearchArtifact } from "./research/contracts"
 import type { ExperimentPlan, ResultReport } from "./research/experiments"
@@ -818,6 +819,7 @@ export async function runPaperAuthoringLoop(
             source_artifact_ids: sourceArtifactIds,
             figure,
             ablation_figure: ablationFigure,
+            documentclass: paperDocumentClass(input.target_profile),
             renderers: input.renderers,
             now: input.now,
           },
@@ -834,6 +836,7 @@ export async function runPaperAuthoringLoop(
             source_artifact_ids: sourceArtifactIds,
             figure,
             ablation_figure: ablationFigure,
+            documentclass: paperDocumentClass(input.target_profile),
             renderers: input.renderers,
             now: input.now,
           },

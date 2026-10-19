@@ -444,6 +444,117 @@ describe("PaperRun export renderer pipeline", () => {
     expect(result.bundle.files.filter((file) => file.status === "failed").map((file) => file.format)).toContain("pdf")
   })
 
+  test("uses the venue document class when TeX has it", async () => {
+    const run = await newRun()
+    // The venue class applies to non-CJK manuscripts; CJK keeps ctexart for typesetting.
+    const englishDraft = {
+      schema_version: "DraftPaper.v1" as const,
+      draft_id: "draft:english",
+      title: "Evidence-constrained retrieval",
+      created_at: now,
+      version: 1,
+      sections: [
+        { section_id: "results", title: "Results", level: 2, markdown: "The results are reproducible.", claim_ids: [], source_ranges: [] },
+      ],
+      markdown: "# Evidence-constrained retrieval\n\n## Results\n\nThe results are reproducible.",
+      claim_ids: [],
+      applied_guidance_ids: [],
+    }
+    const calls: Array<{ tool: string; args: string[] }> = []
+    const command: PaperExportCommandRunner = async (input) => {
+      calls.push({ tool: input.tool, args: input.args })
+      if (input.tool === "kpsewhich") return { exit_code: 0, stdout: "/texmf/elsarticle.cls\n", stderr: "" }
+      const outputIndex = input.args.findIndex((arg) => arg === "-o")
+      const output = outputIndex >= 0 ? input.args[outputIndex + 1] : undefined
+      if (input.tool === "pandoc" && output?.endsWith(".tex")) {
+        await Bun.write(output, "\\documentclass{elsarticle}\n")
+        return { exit_code: 0, stdout: "", stderr: "" }
+      }
+      if (input.tool === "pandoc" && output?.endsWith(".docx")) {
+        await Bun.write(output, validDocxBytes)
+        return { exit_code: 0, stdout: "", stderr: "" }
+      }
+      if (input.tool === "xelatex") {
+        const outdir = input.args.find((arg) => arg.startsWith("-output-directory="))?.slice("-output-directory=".length)
+        await Bun.write(path.join(outdir!, "bundle-venue.pdf"), validPdfBytes)
+        return { exit_code: 0, stdout: "", stderr: "" }
+      }
+      return { exit_code: 1, stdout: "", stderr: `unexpected command ${input.tool}` }
+    }
+
+    await renderPaperExportPipeline(
+      run.run_dir,
+      {
+        mode: "final",
+        bundle_id: "bundle-venue",
+        draft: englishDraft,
+        final_gate: passedGate,
+        source_artifact_ids: [],
+        tools: { pandoc: "pandoc", xelatex: "xelatex" },
+        command,
+        documentclass: "elsarticle",
+        now,
+      },
+      run.options,
+    )
+
+    const pandocCall = calls.find((call) => call.tool === "pandoc" && call.args.includes("-t"))
+    expect(pandocCall?.args).toContain("documentclass=elsarticle")
+  })
+
+  test("falls back when the venue class is not installed", async () => {
+    const run = await newRun()
+    const englishDraft = {
+      schema_version: "DraftPaper.v1" as const,
+      draft_id: "draft:english",
+      title: "Evidence-constrained retrieval",
+      created_at: now,
+      version: 1,
+      sections: [
+        { section_id: "results", title: "Results", level: 2, markdown: "The results are reproducible.", claim_ids: [], source_ranges: [] },
+      ],
+      markdown: "# Evidence-constrained retrieval\n\n## Results\n\nThe results are reproducible.",
+      claim_ids: [],
+      applied_guidance_ids: [],
+    }
+    const calls: Array<{ tool: string; args: string[] }> = []
+    const command: PaperExportCommandRunner = async (input) => {
+      calls.push({ tool: input.tool, args: input.args })
+      if (input.tool === "kpsewhich") return { exit_code: 1, stdout: "", stderr: "not found" }
+      const outputIndex = input.args.findIndex((arg) => arg === "-o")
+      const output = outputIndex >= 0 ? input.args[outputIndex + 1] : undefined
+      if (input.tool === "pandoc" && output?.endsWith(".tex")) {
+        await Bun.write(output, "\\documentclass{article}\n")
+        return { exit_code: 0, stdout: "", stderr: "" }
+      }
+      if (input.tool === "pandoc" && output?.endsWith(".docx")) {
+        await Bun.write(output, validDocxBytes)
+        return { exit_code: 0, stdout: "", stderr: "" }
+      }
+      return { exit_code: 1, stdout: "", stderr: `unexpected command ${input.tool}` }
+    }
+
+    const result = await renderPaperExportPipeline(
+      run.run_dir,
+      {
+        mode: "final",
+        bundle_id: "bundle-no-venue",
+        draft: englishDraft,
+        final_gate: passedGate,
+        source_artifact_ids: [],
+        tools: { pandoc: "pandoc", xelatex: "xelatex" },
+        command,
+        documentclass: "elsarticle",
+        now,
+      },
+      run.options,
+    )
+
+    const pandocCall = calls.find((call) => call.tool === "pandoc" && call.args.includes("-t"))
+    expect(pandocCall?.args.some((arg) => arg.includes("documentclass="))).toBe(false)
+    expect(result.bundle.files.find((file) => file.format === "latex")?.status).toBe("written")
+  })
+
   test("falls back to the next LaTeX engine when XeLaTeX fails", async () => {
     const run = await newRun()
     const calls: Array<{ tool: string; args: string[] }> = []
