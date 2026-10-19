@@ -214,15 +214,18 @@ describe("container execution provenance", () => {
       })
       return child
     }) as any)
+    process.env.PAPERCODE_SEED = "4"
     const result = await executeContainerExperiment(
-      { argv: ["docker", "run", "--rm", "example:latest"], env: { PAPERCODE_SEED: "3" } },
+      { argv: ["docker", "run", "--rm", "example:latest"], env: { PAPERCODE_EXECUTION_TEST: "fixture" } },
       process.cwd(),
       1000,
     )
+    delete process.env.PAPERCODE_SEED
     expect(result.execution?.container.container_id).toBe(id)
     expect(result.execution?.container.isolated).toBe(true)
     expect(calls[0]).not.toContain("--rm")
     expect(calls[0]).toContain("-e")
+    expect(calls[0]).toContain("PAPERCODE_EXECUTION_TEST")
     expect(calls[0]).toContain("PAPERCODE_SEED")
     expect(calls[0]!.indexOf("PAPERCODE_SEED")).toBeLessThan(calls[0]!.indexOf("example:latest"))
     expect(calls.at(-1)).toEqual(["docker", "rm", "-f", id])

@@ -2543,6 +2543,30 @@ function resultStatisticalScopeSummary(input: ComposeDraftPaperInput) {
   return `统计解释：${runsText}一次；当前数值是确定性协议观测，不计算置信区间或显著性检验。若后续引入随机采样、模型生成或更大候选集，应报告重复次数、方差和置信区间。`
 }
 
+/** A table of tests and effect sizes, so the results section reports statistics legibly, not only in prose. */
+function significanceTable(input: ComposeDraftPaperInput) {
+  const comparisons = input.result_report?.significance
+  if (!comparisons?.length) return undefined
+  const rows = comparisons.flatMap((comparison) =>
+    comparison.tests.map((test) => [
+      comparison.baseline_experiment_id,
+      test.name === "welch_t" ? "Welch t" : "Wilcoxon 秩和",
+      test.name === "welch_t"
+        ? `t=${formatStatisticValue(test.statistic)}`
+        : `U=${formatStatisticValue(test.statistic)}`,
+      test.df === undefined ? "—" : formatStatisticValue(test.df),
+      formatPValue(test.p),
+      formatPValue(test.p_adjusted),
+      test.effect_size
+        ? `${test.effect_size.name === "cohens_d" ? "Cohen's d" : "Cliff's δ"}=${formatStatisticValue(test.effect_size.value)}（${test.effect_size.magnitude}）`
+        : "—",
+      `n=${comparison.n_proposed}/${comparison.n_baseline}`,
+    ]),
+  )
+  if (rows.length === 0) return undefined
+  return markdownTable(["对照基线", "检验", "统计量", "自由度", "p", "Holm 校正 p", "效应量", "样本量"], rows)
+}
+
 function formatStatisticValue(value: number) {
   if (!Number.isFinite(value)) return "n/a"
   return Math.abs(value) >= 10 ? value.toFixed(2) : value.toFixed(3)
@@ -2859,6 +2883,8 @@ function resultSummary(input: ComposeDraftPaperInput, claimSections: DraftSectio
   const table = experimentResultTable(input)
   const ablation = rankingAblationInterpretation(input)
   const statisticalScope = resultStatisticalScopeSummary(input)
+  const statistics = significanceTable(input)
+  const statisticsCaption = `表 ${table ? 2 : 1} 汇总各基线对照的检验统计量、Holm 校正后的 p 值和效应量。`
   const resultClaim = claimSections.find((section) => section.section_id === "results")?.markdown
   if (isRankingContext(input)) {
     return joinBlocks([
@@ -2867,6 +2893,7 @@ function resultSummary(input: ComposeDraftPaperInput, claimSections: DraftSectio
       table ? joinBlocks(["### 结果表", `表 1 汇总本文方法、基线和消融在主指标、运行状态和容器复现上的结果。\n\n${table}`]) : undefined,
       ablation ? joinBlocks(["### 消融分析", ablation.replace(/^消融分析显示，/, "")]) : undefined,
       statisticalScope ? joinBlocks(["### 统计解释", statisticalScope.replace(/^统计解释：/, "")]) : undefined,
+      statistics ? joinBlocks(["### 统计检验", `${statisticsCaption}\n\n${statistics}`]) : undefined,
     ])
   }
   return [
@@ -2875,6 +2902,7 @@ function resultSummary(input: ComposeDraftPaperInput, claimSections: DraftSectio
     table ? `\n\n表 1 汇总本文方法、基线和消融在主指标、运行状态和容器复现上的结果。\n\n${table}` : "",
     ablation ? `\n\n${ablation}` : "",
     statisticalScope ? `\n\n${statisticalScope}` : "",
+    statistics ? `\n\n${statisticsCaption}\n\n${statistics}` : "",
   ]
     .filter(Boolean)
     .join("")

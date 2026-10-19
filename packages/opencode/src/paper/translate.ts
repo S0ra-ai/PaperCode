@@ -96,20 +96,32 @@ export type TranslatedDraft = {
   title?: string
 }
 
+export type TranslationFailure = {
+  section_id: string
+  reason: string
+}
+
 export async function translateDraftSections(
   draft: DraftPaper,
   translator: Translator,
+  options?: { onFailure?: (failure: TranslationFailure) => void },
 ): Promise<TranslatedDraft | undefined> {
   const overrides: DraftSectionOverride[] = []
+  const fail = (section_id: string, reason: string) => {
+    options?.onFailure?.({ section_id, reason })
+    return undefined
+  }
+  const message = (error: unknown) => (error instanceof Error ? error.message : String(error))
   let title: string | undefined
   if (cjkRatio(draft.title) > 0.02) {
     let translatedTitle: string
     try {
       translatedTitle = stripFence(await translator({ section_id: "title", text: draft.title, language: "en" }))
-    } catch {
-      return undefined
+    } catch (error) {
+      return fail("title", `request failed: ${message(error)}`)
     }
-    if (translatedTitle.length === 0 || cjkRatio(translatedTitle) > 0.02) return undefined
+    if (translatedTitle.length === 0) return fail("title", "empty translation")
+    if (cjkRatio(translatedTitle) > 0.02) return fail("title", "translation still contains Chinese")
     title = translatedTitle
   }
   for (const sectionId of translatableSections(draft)) {
@@ -120,21 +132,24 @@ export async function translateDraftSections(
     let translated: string
     try {
       translated = stripFence(await translator({ section_id: sectionId, text: section.markdown, language: "en" }))
-    } catch {
-      return undefined
+    } catch (error) {
+      return fail(sectionId, `request failed: ${message(error)}`)
     }
-    if (translated.length === 0 || cjkRatio(translated) > 0.02) return undefined
-    if (!structurePreserved(section.markdown, translated)) return undefined
+    if (translated.length === 0) return fail(sectionId, "empty translation")
+    if (cjkRatio(translated) > 0.02) return fail(sectionId, "translation still contains Chinese")
+    if (!structurePreserved(section.markdown, translated))
+      return fail(sectionId, "translation changed the table or image structure")
     let translatedTitle: string | undefined
     if (cjkRatio(section.title) > 0.02) {
       try {
         const value = stripFence(
           await translator({ section_id: `section_title:${sectionId}`, text: section.title, language: "en" }),
         )
-        if (value.length === 0 || cjkRatio(value) > 0.02) return undefined
+        if (value.length === 0) return fail(sectionId, "empty section title translation")
+        if (cjkRatio(value) > 0.02) return fail(sectionId, "section title still contains Chinese")
         translatedTitle = value
-      } catch {
-        return undefined
+      } catch (error) {
+        return fail(sectionId, `section title request failed: ${message(error)}`)
       }
     }
     overrides.push({ section_id: sectionId, markdown: translated, ...(translatedTitle ? { title: translatedTitle } : {}) })

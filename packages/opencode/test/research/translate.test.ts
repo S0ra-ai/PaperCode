@@ -205,3 +205,29 @@ describe("draft translation", () => {
     }
   })
 })
+
+describe("translation diagnostics", () => {
+  test("reports why a translation was abandoned instead of only returning undefined", async () => {
+    const failures: Array<{ section_id: string; reason: string }> = []
+    const result = await translateDraftSections(
+      chineseDraft(),
+      async () => "这仍然是中文。",
+      { onFailure: (failure) => failures.push(failure) },
+    )
+    expect(result).toBeUndefined()
+    expect(failures).toEqual([{ section_id: "title", reason: "translation still contains Chinese" }])
+  })
+
+  test("reports endpoint errors with the failing section", async () => {
+    const failures: Array<{ section_id: string; reason: string }> = []
+    const result = await translateDraftSections(
+      chineseDraft(),
+      async () => {
+        throw new Error("translation endpoint returned 401")
+      },
+      { onFailure: (failure) => failures.push(failure) },
+    )
+    expect(result).toBeUndefined()
+    expect(failures).toEqual([{ section_id: "title", reason: "request failed: translation endpoint returned 401" }])
+  })
+})

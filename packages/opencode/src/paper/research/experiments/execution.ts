@@ -357,14 +357,18 @@ export async function executeContainerExperiment(
     clean.push(key, value)
   }
   if (!imageFound) return rejected("Container run image is missing.")
-  // docker run does not inherit the CLI's environment; forward command.env explicitly so seeds and
-  // protocol variables reach the container instead of silently varying only on the host side.
-  const environment = Object.entries(command.env ?? {})
-  for (const [name] of environment) {
+  // docker run does not inherit the CLI's environment; forward command.env explicitly so protocol
+  // variables reach the container. Trial seeds are set on the host process by the repetition
+  // wrapper, so forward those names too; nothing else leaks into the container.
+  const environment = new Set([
+    ...Object.keys(command.env ?? {}),
+    ...["PAPERCODE_SEED", "PYTHONHASHSEED"].filter((name) => process.env[name] !== undefined),
+  ])
+  for (const name of environment) {
     if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(name))
       return rejected(`Unsupported container environment variable: ${name}`)
   }
-  const forwarded = environment.flatMap(([name]) => ["-e", name])
+  const forwarded = [...environment].flatMap((name) => ["-e", name])
   const dir = await mkdtemp(path.join(tmpdir(), "papercode-container-"))
   const cidfile = path.join(dir, "container.cid")
   let id: string | undefined

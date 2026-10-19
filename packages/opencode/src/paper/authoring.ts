@@ -7,7 +7,7 @@ import {
   type ExportRenderer,
 } from "./research/export"
 import { paperDocumentClass, paperReferenceStyle } from "./profiles"
-import { translateDraftSections, type Translator } from "./translate"
+import { translateDraftSections, type TranslationFailure, type Translator } from "./translate"
 import type { ResearchArtifact } from "./research/contracts"
 import type { ExperimentPlan, ResultReport } from "./research/experiments"
 import {
@@ -753,10 +753,29 @@ export async function runPaperAuthoringLoop(
         : baseDraft
       // An English venue cannot read the generated Chinese scaffold; translate it when a translator
       // is available and keep the result as overrides so a later export refresh reproduces it.
+      const requirements = manuscriptRequirementsForProfile(input.target_profile)
+      const translationFailures: TranslationFailure[] = []
       const translated =
-        manuscriptRequirementsForProfile(input.target_profile).language === "en" && input.translator
-          ? await translateDraftSections(composedBase, input.translator)
+        requirements.language === "en" && input.translator
+          ? await translateDraftSections(composedBase, input.translator, {
+              onFailure: (failure) => translationFailures.push(failure),
+            })
           : undefined
+      if (requirements.language === "en" && input.translator) {
+        await appendResearchEvent(
+          runDir,
+          {
+            type: translated ? "paper.translation.completed" : "paper.translation.skipped",
+            actor: "agent",
+            payload: {
+              sections: translated?.overrides.length ?? 0,
+              title_translated: Boolean(translated?.title),
+              failures: translationFailures.slice(0, 8),
+            },
+          },
+          options,
+        )
+      }
       const effectiveOverrides = [...(input.section_overrides ?? []), ...(translated?.overrides ?? [])]
       const composed = effectiveOverrides.length ? applySectionOverrides(baseDraft, effectiveOverrides) : baseDraft
       const titled = translated?.title ? retitleDraft(composed, translated.title) : composed
