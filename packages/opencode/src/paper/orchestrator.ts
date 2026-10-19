@@ -42,6 +42,7 @@ import type {
 } from "./research/experiments"
 import type { ClaimLedger, CodeAvailabilityMetadata } from "./research/writing"
 import { createExperimentNoveltyGate, createNoveltyCheckpoint, type NoveltyCheckpoint } from "./novelty"
+import { mergeTrialResults } from "./research/experiments"
 import { createResearchWikiDigest } from "./research-wiki"
 import { createPaperSpine, type PaperSpineClaim } from "./paper-spine"
 import { createGlobalFigureSpec } from "./global-figure"
@@ -347,6 +348,28 @@ type SourceEvidenceManifest = {
 }
 
 const defaultExecutionCache = new Map<string, DefaultExecutionCache>()
+
+/** Run each command `repetitions` times with a per-trial seed and merge the samples. */
+function repeatedTrialRunner(runner: ExperimentRunner, repetitions?: number): ExperimentRunner {
+  const trials = Math.min(20, Math.max(1, Math.floor(repetitions ?? 1)))
+  if (trials <= 1) return runner
+  return async (spec, environment) => {
+    const results = []
+    for (let index = 1; index <= trials; index++) {
+      const previousSeed = process.env.PAPERCODE_SEED
+      const previousHash = process.env.PYTHONHASHSEED
+      process.env.PAPERCODE_SEED = String(index)
+      process.env.PYTHONHASHSEED = String(index)
+      const result = await runner(spec, environment)
+      if (previousSeed === undefined) delete process.env.PAPERCODE_SEED
+      else process.env.PAPERCODE_SEED = previousSeed
+      if (previousHash === undefined) delete process.env.PYTHONHASHSEED
+      else process.env.PYTHONHASHSEED = previousHash
+      results.push(result)
+    }
+    return mergeTrialResults(results)
+  }
+}
 
 function defaultCache(runDir: string) {
   const existing = defaultExecutionCache.get(runDir)
@@ -1540,16 +1563,18 @@ async function defaultExperimentLoop(
     )
   }
   const localRunner = code ? automaticCodeExperimentRunner({ request, code, protocol }) : undefined
+  // Repeated trials are what make the reported mean ± std real; imported evidence is not re-run.
+  const executable = localRunner ? repeatedTrialRunner(localRunner, request.repetitions) : undefined
   const loop = await recordExperimentLoop(
     runDir,
     {
       plan,
       host_runner: evidence
         ? experimentEvidenceRunner(plan, evidence, "host")
-        : localRunner ?? defaultExperimentRunner("no approved experiment command or container runner was attached to this PaperRun"),
+        : executable ?? defaultExperimentRunner("no approved experiment command or container runner was attached to this PaperRun"),
       container_runner: evidence
         ? experimentEvidenceRunner(plan, evidence, "container")
-        : localRunner ?? defaultExperimentRunner("host exploration did not produce runnable successful experiments"),
+        : executable ?? defaultExperimentRunner("host exploration did not produce runnable successful experiments"),
       container_reproduction: budgetTierPolicy((await loadResearchRun(runDir)).metadata?.paper_budget_tier as BudgetTier || "standard").container_reproduction,
       run_options: {
         now: nowIso(options),

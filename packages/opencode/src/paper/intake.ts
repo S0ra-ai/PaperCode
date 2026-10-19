@@ -28,6 +28,8 @@ export interface ResearchIntakeRequest {
   declarations?: PaperDeclarations
   /** Named authors and affiliations; absent leaves the anonymous placeholder. */
   authors?: PaperAuthor[]
+  /** How often each experiment command runs; >1 records trial samples for mean ± std. */
+  repetitions?: number
 }
 
 export interface ResearchBriefRisk {
