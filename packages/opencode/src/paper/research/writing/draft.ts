@@ -1838,7 +1838,9 @@ function commandPurposeLabel(command?: { argv: string[] }) {
   const raw = command?.argv.at(-1)
   const token = raw?.trim().split(/\s+/).at(-1)
   if (!token || /^(proposed|baseline|ablation)$/i.test(token)) return undefined
-  return token ? paperProseText(token) : undefined
+  // Flags are evidence: translating --variant=baseline into --variant=基线 fabricates an invalid command.
+  if (token.startsWith("-")) return token
+  return paperProseText(token)
 }
 
 function experimentEntrypointLabels(input: ComposeDraftPaperInput) {

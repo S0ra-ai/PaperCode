@@ -161,6 +161,35 @@ function validatedEnglish(value: string, emptyReason: string, chineseReason: str
   return undefined
 }
 
+/** Translate Markdown headings inside kept-verbatim sections without touching citations or commands. */
+async function translateHeadings(
+  markdown: string,
+  section_id: string,
+  translator: Translator,
+): Promise<{ markdown?: string; reason?: string }> {
+  const lines = markdown.split("\n")
+  const output: string[] = []
+  for (const [index, line] of lines.entries()) {
+    const heading = line.match(/^(#{1,6})\s+(.*)$/)
+    if (!heading || cjkRatio(heading[2]!) <= 0.02) {
+      output.push(line)
+      continue
+    }
+    const result = await translateValidated(
+      translator,
+      `heading:${section_id}:${index}`,
+      heading[2]!,
+      (value) =>
+        validatedEnglish(value, "empty heading translation", "heading still contains Chinese") ??
+        commentaryTitle(value, 20),
+      cleanTitle,
+    )
+    if (!result.value) return { reason: result.reason ?? "heading translation failed" }
+    output.push(`${heading[1]} ${result.value}`)
+  }
+  return { markdown: output.join("\n") }
+}
+
 export async function translateDraftSections(
   draft: DraftPaper,
   translator: Translator,
@@ -221,22 +250,27 @@ export async function translateDraftSections(
     })
   }
   // References and appendices keep their bodies (citations, commands) but their headings should not
-  // stay Chinese in an English manuscript; translate the titles only.
+  // stay Chinese in an English manuscript; translate the section title and Markdown headings only.
   const translated = new Set(translatableSections(draft))
   for (const section of draft.sections) {
     if (translated.has(section.section_id)) continue
-    if (cjkRatio(section.title) <= 0.02) continue
-    const titleResult = await translateValidated(
-      translator,
-      `section_title:${section.section_id}`,
-      section.title,
-      (value) =>
-        validatedEnglish(value, "empty section title translation", "section title still contains Chinese") ??
-        commentaryTitle(value, 20),
-      cleanTitle,
-    )
+    const titleResult =
+      cjkRatio(section.title) > 0.02
+        ? await translateValidated(
+            translator,
+            `section_title:${section.section_id}`,
+            section.title,
+            (value) =>
+              validatedEnglish(value, "empty section title translation", "section title still contains Chinese") ??
+              commentaryTitle(value, 20),
+            cleanTitle,
+          )
+        : { value: section.title }
     if (!titleResult.value) return fail(section.section_id, titleResult.reason ?? "empty section title translation")
-    overrides.push({ section_id: section.section_id, markdown: section.markdown, title: titleResult.value })
+    const headings = await translateHeadings(section.markdown, section.section_id, translator)
+    if (headings.markdown === undefined)
+      return fail(section.section_id, headings.reason ?? "heading translation failed")
+    overrides.push({ section_id: section.section_id, markdown: headings.markdown, title: titleResult.value })
   }
   if (overrides.length === 0 && !title) return undefined
   return { overrides, ...(title ? { title } : {}) }

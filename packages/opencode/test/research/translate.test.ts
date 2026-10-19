@@ -93,6 +93,7 @@ function padStructure(source: string, translated: string) {
 
 function stubTranslator(overrides: Record<string, string> = englishBySection) {
   return async ({ section_id, text }: { section_id: string; text: string }) => {
+    if (section_id.startsWith("heading:")) return "Translated heading"
     if (section_id.startsWith("section_title:")) {
       const id = section_id.slice("section_title:".length)
       return id === "method" ? "Methods" : `Translated ${id.replaceAll("_", " ")}`
@@ -115,9 +116,10 @@ describe("draft translation", () => {
     expect(result?.title).toBe("Evidence-Constrained Retrieval")
     const abstract = result?.overrides.find((override) => override.section_id === "abstract")
     expect(abstract?.markdown).toContain("evidence-constrained retrieval")
-    const retranslated = result?.overrides.filter(
-      (override) => draft.sections.find((section) => section.section_id === override.section_id)?.markdown !== override.markdown,
+    const translatable = new Set(
+      draft.sections.map((section) => section.section_id).filter((id) => id !== "references" && !id.startsWith("appendix_")),
     )
+    const retranslated = result?.overrides.filter((override) => translatable.has(override.section_id))
     expect(retranslated?.length).toBeGreaterThan(5)
     expect(retranslated?.every((override) => !/[一-鿿]/.test(override.markdown))).toBe(true)
   })
@@ -285,5 +287,16 @@ describe("translated titles", () => {
     const limitations = result?.overrides.find((override) => override.section_id === "limitations")
     expect(limitations?.title).not.toContain("looks like")
     expect(limitations?.title).toBe("Translated limitations")
+  })
+})
+
+describe("headings in kept sections", () => {
+  test("translates appendix headings without translating the kept body", async () => {
+    const result = await translateDraftSections(chineseDraft(), stubTranslator())
+    const appendix = result?.overrides.find(
+      (override) => override.section_id === "appendix_operational_reproducibility_checklist",
+    )
+    expect(appendix?.markdown).toContain("### Translated heading")
+    expect(appendix?.markdown).not.toContain("### 复现实验入口")
   })
 })

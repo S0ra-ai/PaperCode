@@ -2704,6 +2704,7 @@ describe("paper authoring loop", () => {
       })
       // Same structure-preserving contract as the real translator: keep every table and image.
       const translator = async ({ section_id, text }: { section_id: string; text: string }) => {
+        if (section_id.startsWith("heading:")) return "Translated heading"
         if (section_id.startsWith("section_title:")) {
           const id = section_id.slice("section_title:".length)
           return id === "method" ? "Methods" : `Translated ${id.replaceAll("_", " ")}`
@@ -3173,5 +3174,41 @@ describe("paper authoring loop", () => {
     expect(literature.summary.total_sources).toBe(0)
     expect(literature.summary.verified_sources).toBe(0)
     expect(literature.diagnostics.gaps).toContain("insufficient_verified_literature")
+  })
+})
+
+describe("command entry point labels", () => {
+  test("keeps flag values verbatim instead of translating them into prose", () => {
+    const ledger = composeClaimLedger({ topic: "Command flags", claims: [], now })
+    const command = (variant: string) => ({
+      argv: ["bun", "experiments/evaluate-agent-ranking.ts", `--variant=${variant}`],
+    })
+    const spec = (id: string, role: "proposed" | "baseline" | "ablation", variant: string) => ({
+      experiment_id: id,
+      label: id,
+      role,
+      dataset_ids: [],
+      command: command(variant),
+      expected_metric: "ranking_ndcg_at_3",
+      rationale: "fixture",
+    })
+    const draft = composeDraftPaper({
+      title: "Command Flags",
+      ledger,
+      experiment_plan: {
+        objective: "fixture",
+        metrics: [{ name: "ranking_ndcg_at_3", direction: "higher_better", primary: true }],
+        proposed: spec("proposed:eval", "proposed", "proposed"),
+        baselines: [spec("baseline:lexical", "baseline", "baseline"), spec("baseline:random", "baseline", "random")],
+        ablations: [spec("ablation:no-coverage", "ablation", "ablation")],
+        resource_budget: { max_wall_time_seconds: 60, max_memory_mb: 1024, max_gpu_hours: 0 },
+        downgrade_policy: [],
+      },
+      now,
+    })
+    expect(draft.markdown).toContain("--variant=baseline")
+    expect(draft.markdown).toContain("--variant=ablation")
+    expect(draft.markdown).not.toContain("--variant=基线")
+    expect(draft.markdown).not.toContain("--variant=消融")
   })
 })
