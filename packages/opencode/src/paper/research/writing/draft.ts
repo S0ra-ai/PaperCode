@@ -2407,7 +2407,15 @@ function experimentResultTable(input: ComposeDraftPaperInput) {
         contextualExperimentLabel(input, run.experiment_id, run.role),
         displayExperimentRole(run.role),
         typeof value === "number"
-          ? `${displayMetricValue(metric, value)}${statistic ? ` ± ${displayMetricValue(metric, statistic.std)} (n=${statistic.n})` : ""}`
+          ? `${displayMetricValue(metric, value)}${
+              statistic
+                ? ` ± ${displayMetricValue(metric, statistic.std)} (n=${statistic.n}${
+                    statistic.ci95
+                      ? `, 95% CI [${displayMetricValue(metric, statistic.ci95.low)}, ${displayMetricValue(metric, statistic.ci95.high)}]`
+                      : ""
+                  })`
+                : ""
+            }`
           : "无",
         displayRunStatus(run.status, run.execution?.kind),
         reproduced ? "是" : "否",

@@ -14,6 +14,7 @@ import {
   cliffsDelta,
   cohensD,
   holmAdjust,
+  meanConfidenceInterval,
   welchTTest,
   wilcoxonRankSum,
   type ExperimentRunner,
@@ -107,6 +108,14 @@ describe("experiment loop", () => {
     expect(wilcoxonRankSum([0.9, 0.91], [0.66, 0.67])).toBeUndefined()
   })
 
+  test("confidence intervals bracket the mean and narrow with more trials", () => {
+    const wide = meanConfidenceInterval([0.9, 0.92, 0.94])!
+    expect(wide.low).toBeLessThan(0.92)
+    expect(wide.high).toBeGreaterThan(0.92)
+    const narrow = meanConfidenceInterval([0.9, 0.91, 0.92, 0.93, 0.94])!
+    expect(narrow.high - narrow.low).toBeLessThan(wide.high - wide.low)
+  })
+
   test("effect sizes accompany the tests", () => {
     const d = cohensD([0.9, 0.92, 0.94], [0.66, 0.67, 0.65])
     expect(d?.name).toBe("cohens_d")
@@ -180,6 +189,8 @@ describe("experiment loop", () => {
       expect(proposed?.n).toBe(3)
       expect(proposed?.mean).toBeCloseTo(0.92, 6)
       expect(proposed?.std).toBeCloseTo(0.02, 6)
+      expect(proposed?.ci95?.low).toBeLessThan(0.92)
+      expect(proposed?.ci95?.high).toBeGreaterThan(0.92)
       expect(recorded.report.significance?.length).toBe(3)
       expect(
         recorded.report.significance?.every((item) =>
@@ -205,7 +216,8 @@ describe("experiment loop", () => {
         now,
       })
       expect(draft.markdown).toContain("±")
-      expect(draft.markdown).toContain("(n=3)")
+      expect(draft.markdown).toContain("(n=3")
+      expect(draft.markdown).toContain("95% CI")
       expect(draft.markdown).toContain("Welch")
       expect(draft.markdown).toContain("Holm")
       expect(draft.markdown).toContain("Cohen's d")

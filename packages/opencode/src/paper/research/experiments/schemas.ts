@@ -19,6 +19,8 @@ export type ExperimentStatistic = {
   n: number
   mean: number
   std: number
+  /** 95% confidence interval for the mean, when n >= 2. */
+  ci95?: { low: number; high: number }
 }
 
 /** Two-sample tests between the proposed method and one baseline, from their trial samples. */

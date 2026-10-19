@@ -1,7 +1,7 @@
 import { withSpan } from "../telemetry"
 import { plannedExperimentSpecs } from "./planning"
 import { hasIsolatedContainerExecution, hasProcessExecution, standardDeviation } from "./runner"
-import { cliffsDelta, cohensD, holmAdjust, welchTTest, wilcoxonRankSum } from "./statistics"
+import { cliffsDelta, cohensD, holmAdjust, meanConfidenceInterval, welchTTest, wilcoxonRankSum } from "./statistics"
 import type {
   ExperimentFinding,
   ExperimentPlan,
@@ -117,6 +117,7 @@ export function analyzeExperimentResults(input: ExperimentAnalysisInput): Result
             n: metric.samples!.length,
             mean: metric.value,
             std: standardDeviation(metric.samples!),
+            ci95: meanConfidenceInterval(metric.samples!),
           })),
       )
       // A baseline comparison with repeated trials gets the standard unequal-variance test, so the

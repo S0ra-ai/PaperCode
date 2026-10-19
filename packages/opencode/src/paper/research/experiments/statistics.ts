@@ -180,6 +180,29 @@ export function holmAdjust(pValues: number[]) {
   return adjusted
 }
 
+/** Two-sided critical value of Student's t, found by bisection on the CDF (adequate for df <= 30). */
+export function studentTCritical(alpha: number, df: number) {
+  if (df <= 0) return undefined
+  let low = 0
+  let high = 100
+  for (let iteration = 0; iteration < 80; iteration++) {
+    const middle = (low + high) / 2
+    if (studentTTwoSidedP(middle, df) > alpha) low = middle
+    else high = middle
+  }
+  return (low + high) / 2
+}
+
+/** 95% confidence interval for the mean of a sample. */
+export function meanConfidenceInterval(samples: number[], alpha = 0.05) {
+  if (samples.length < 2) return undefined
+  const average = mean(samples)
+  const standardError = Math.sqrt(variance(samples) / samples.length)
+  const critical = studentTCritical(alpha, samples.length - 1)
+  if (critical === undefined || standardError === 0) return undefined
+  return { low: average - critical * standardError, high: average + critical * standardError }
+}
+
 export type EffectMagnitude = "negligible" | "small" | "medium" | "large"
 
 export type EffectSize = {
