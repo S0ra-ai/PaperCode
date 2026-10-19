@@ -101,8 +101,9 @@ export type TranslationFailure = {
   reason: string
 }
 
-/** One retry absorbs a model that occasionally echoes the source language on short inputs. */
-const MAX_ATTEMPTS = 2
+/** Retries absorb transient endpoint failures and models that occasionally echo the source. */
+const MAX_ATTEMPTS = 3
+const RETRY_DELAY_MS = 750
 
 async function translateValidated(
   translator: Translator,
@@ -120,6 +121,9 @@ async function translateValidated(
       value = clean(await translator({ section_id, text: prompt, language: "en" }))
     } catch (error) {
       reason = `request failed: ${error instanceof Error ? error.message : String(error)}`
+      // A dropped socket needs a moment before the next request; an echoed translation does not.
+      if (attempt + 1 < MAX_ATTEMPTS)
+        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS * (attempt + 1)))
       continue
     }
     const invalid = validate(value)

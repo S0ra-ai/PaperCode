@@ -234,6 +234,21 @@ describe("translation diagnostics", () => {
     expect(result?.overrides.length).toBeGreaterThan(5)
   })
 
+  test("retries transient endpoint failures before giving up", async () => {
+    let failures = 0
+    const base = stubTranslator()
+    const flaky = async (input: { section_id: string; text: string }) => {
+      if (failures < 2) {
+        failures += 1
+        throw new Error("The socket connection was closed unexpectedly.")
+      }
+      return base(input)
+    }
+    const result = await translateDraftSections(chineseDraft(), flaky)
+    expect(failures).toBe(2)
+    expect(result?.title).toBe("Evidence-Constrained Retrieval")
+  })
+
   test("reports why a translation was abandoned instead of only returning undefined", async () => {
     const failures: Array<{ section_id: string; reason: string }> = []
     const result = await translateDraftSections(
