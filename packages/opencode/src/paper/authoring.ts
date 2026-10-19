@@ -232,9 +232,11 @@ function cjcEnglishAbstract(draft: DraftPaper, abstract: string) {
 function cjcRankingEnglishAbstract(abstract: string) {
   const metric = englishMetricName(abstract.match(/实验以([^，。]+)为主指标/)?.[1]?.trim() ?? "ranking nDCG@3")
   const proposed = abstract.match(/本文方法达到\s*([0-9.]+)/)?.[1]
-  const baseline = abstract.match(/词项匹配基线为\s*([0-9.]+)/)?.[1]
-  const baselineDelta = abstract.match(/较词项匹配基线的绝对差值为\s*([0-9.]+)/)?.[1]
+  const baselineLabel = abstract.match(/最强基线（([^）]+)）为/)?.[1]
+  const baseline = abstract.match(/最强基线（[^）]+）为\s*([0-9.]+)/)?.[1]
+  const baselineDelta = abstract.match(/与最强基线（[^）]+）的差值为\s*([0-9.]+)/)?.[1]
   const ablationDelta = abstract.match(/无证据覆盖消融的[^。]*绝对差值为\s*([0-9.]+)/)?.[1]
+  const ablationLower = /无证据覆盖消融的[^。]*数值低于本文方法/.test(abstract)
   const candidateCount = abstract.match(/候选数\s*([0-9]+)/)?.[1]
   const labelBoundary = abstract.includes("不是人工相关性标注")
     ? "The evaluation labels are derived from live arXiv search rank, topic matching, metadata completeness, and publication time, rather than manual relevance annotation."
@@ -242,12 +244,19 @@ function cjcRankingEnglishAbstract(abstract: string) {
   const reproduction = abstract.includes("容器复现通过")
     ? "Container reproduction passes, indicating that the current protocol can be repeated in the controlled environment."
     : "Container reproduction has not passed, so the results should be interpreted as exploratory observations."
+  const baselineName = baselineLabel
+    ? baselineLabel.includes("词项")
+      ? "the lexical matching baseline"
+      : `the ${baselineLabel} baseline`
+    : "the best baseline"
   const result =
     proposed && baseline && baselineDelta
-      ? `The proposed method reaches ${proposed} on ${metric}, compared with ${baseline} for the lexical matching baseline, with an absolute difference of ${baselineDelta}.`
+      ? `The proposed method reaches ${proposed} on ${metric}, compared with ${baseline} for ${baselineName}, with an absolute difference of ${baselineDelta}.`
       : `The experiment uses ${metric} as the primary metric.`
   const ablation = ablationDelta
-    ? `The no-claim-coverage ablation is lower than the proposed method by ${ablationDelta}, suggesting that the claim-coverage term is associated with the observed ranking difference on the current candidate set.`
+    ? ablationLower
+      ? `The no-claim-coverage ablation is lower than the proposed method by ${ablationDelta}, suggesting that the claim-coverage term is associated with the observed ranking difference on the current candidate set.`
+      : `The no-claim-coverage ablation is not lower than the proposed method (absolute difference ${ablationDelta}); the claim-coverage term is therefore not supported as the source of a ranking improvement on the current candidate set.`
     : "The ablation study is used to separate lexical matching from the claim-coverage component."
   const dataset = candidateCount ? `The benchmark contains ${candidateCount} candidate papers.` : "The benchmark has a limited candidate set."
   return [

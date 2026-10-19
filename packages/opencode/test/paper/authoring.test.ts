@@ -1522,7 +1522,7 @@ describe("paper authoring loop", () => {
     expect(abstract).toContain("排名测试、词项匹配基线、无证据覆盖消融和容器复现")
     expect(abstract).toContain("候选数 5")
     expect(abstract).toContain("不是人工相关性标注")
-    expect(abstract).toContain("较词项匹配基线的绝对差值为 0.1341")
+    expect(abstract).toContain("与最强基线（词项匹配基线）的差值为 0.1341")
     expect(abstract).toContain("无证据覆盖消融的排序 nDCG@3 数值低于本文方法，绝对差值为 0.2682")
     expect(abstract).not.toContain("无证据覆盖消融低于本文方法")
     expect(abstract).not.toContain("无证据覆盖消融与本文方法的绝对差值")
@@ -1761,9 +1761,9 @@ describe("paper authoring loop", () => {
     expect(reproducibility).not.toContain("支撑证据")
     expect(discussion).toContain("候选论文排序任务")
     expect(discussion).toContain("前三位排序")
-    expect(discussion).toContain("在排序 nDCG@3 上，完整排序数值同时高于词项匹配基线和无证据覆盖消融")
-    expect(discussion).toContain("相对词项匹配基线的绝对差值为 0.1341")
-    expect(discussion).toContain("相对无证据覆盖消融的绝对差值为 0.2682")
+    expect(discussion).toContain("在排序 nDCG@3 上，完整排序高于最强基线（词项匹配基线）和无证据覆盖消融")
+    expect(discussion).toContain("相对最强基线的差值为 0.1341")
+    expect(discussion).toContain("相对消融的差值为 0.2682")
     expect(discussion).toContain("无证据覆盖消融移除 claim_coverage 后，排序 nDCG@3 数值低于完整排序")
     expect(discussion).not.toContain("排名下降")
     expect(discussion).not.toContain("相对词项匹配基线提升")
@@ -1804,11 +1804,11 @@ describe("paper authoring loop", () => {
     expect(limitations).not.toContain("待修复")
     expect(conclusion).toContain("rankAgentTeamPapers 和 scorePaper")
     expect(conclusion).toContain("候选论文排序方法")
-    expect(conclusion).toContain("较词项匹配基线的绝对差值为 0.1341")
+    expect(conclusion).toContain("与最强基线（词项匹配基线）的差值为 0.1341")
     expect(conclusion).toContain("claim_coverage 项与当前候选集上的排序差异相关")
     expect(conclusion).toContain("| 结论项 | 证据 | 边界 |")
     expect(conclusion).toContain("| 排序接口 | rankAgentTeamPapers 和 scorePaper 构成候选论文排序方法。 | 仅覆盖当前代码实现和候选论文排序任务。 |")
-    expect(conclusion).toContain("| 主结果 | 排序 nDCG@3 为 1.0000，较词项匹配基线的绝对差值为 0.1341。 | 当前标签来自自动筛选协议，不等同于人工相关性标注。 |")
+    expect(conclusion).toContain("| 主结果 | 排序 nDCG@3 为 1.0000，与最强基线（词项匹配基线）的差值为 0.1341。 | 当前标签来自自动筛选协议，不等同于人工相关性标注。 |")
     expect(conclusion).toContain("| 特征观察 | claim_coverage 项与当前候选集上的排序差异相关。 | 该观察需要更多主题、人工标注和跨数据集重复实验验证。 |")
     expect(conclusion).not.toContain("证据覆盖特征能够改善当前候选集")
     expect(conclusion).not.toContain("较词项匹配基线高 0.1341")
@@ -3040,7 +3040,7 @@ describe("paper authoring loop", () => {
       "**Title**: An Evidence-Constrained Candidate Paper Ranking Method with Baselines, Ablation, and Container Reproduction",
     )
     expect(formatted).toContain("This study addresses candidate paper ranking under an evidence-constrained setting.")
-    expect(formatted).toContain("The proposed method reaches 1.0000 on ranking nDCG@3, compared with 0.9500 for the lexical matching baseline")
+    expect(formatted).toContain("The proposed method reaches 1.0000 on ranking nDCG@3, compared with 0.9500 for the lexical baseline")
     expect(formatted).toContain("The no-claim-coverage ablation is lower than the proposed method by 0.0900")
     expect(formatted).toContain("The benchmark contains 5 candidate papers.")
     expect(formatted).toContain("Container reproduction passes")
@@ -3211,5 +3211,85 @@ describe("command entry point labels", () => {
     expect(draft.markdown).toContain("--variant=ablation")
     expect(draft.markdown).not.toContain("--variant=基线")
     expect(draft.markdown).not.toContain("--variant=消融")
+  })
+})
+
+describe("ranking result narration", () => {
+  const rankingRun = (experiment_id: string, role: "proposed" | "baseline" | "ablation", value: number) => ({
+    experiment_id,
+    role,
+    status: "succeeded" as const,
+    command: { argv: ["bun", "experiments/evaluate-agent-ranking.ts"] },
+    environment: { mode: "host" as const, platform: process.platform },
+    execution: fixtureExecution("host", experiment_id),
+    metrics: [{ name: "ranking_ndcg_at_3", value, direction: "higher_better" as const }],
+    stdout: "",
+    stderr: "",
+    exit_code: 0,
+    resource_usage: { wall_time_seconds: 0.1 },
+  })
+  const rankingDraft = (proposed: number, baseline: number, ablation: number) => {
+    const ledger = composeClaimLedger({ topic: "Candidate ranking", claims: [], now })
+    const command = (variant: string) => ({
+      argv: ["bun", "experiments/evaluate-agent-ranking.ts", `--variant=${variant}`],
+    })
+    const planSpec = (id: string, role: "proposed" | "baseline" | "ablation", variant: string) => ({
+      experiment_id: id,
+      label: id,
+      role,
+      dataset_ids: [],
+      command: command(variant),
+      expected_metric: "ranking_ndcg_at_3",
+      rationale: "fixture",
+    })
+    return composeDraftPaper({
+      title: "Candidate Ranking",
+      ledger,
+      experiment_plan: {
+        objective: "fixture",
+        metrics: [{ name: "ranking_ndcg_at_3", direction: "higher_better", primary: true }],
+        proposed: planSpec("proposed:eval", "proposed", "proposed"),
+        baselines: [planSpec("baseline:lexical", "baseline", "baseline"), planSpec("baseline:random", "baseline", "random")],
+        ablations: [planSpec("ablation:no-coverage", "ablation", "ablation")],
+        resource_budget: { max_wall_time_seconds: 60, max_memory_mb: 1024, max_gpu_hours: 0 },
+        downgrade_policy: [],
+      },
+      experiment_runs: {
+        host_runs: [
+          rankingRun("proposed:eval", "proposed", proposed),
+          rankingRun("baseline:lexical", "baseline", baseline - 0.02),
+          rankingRun("baseline:random", "baseline", baseline),
+          rankingRun("ablation:no-coverage", "ablation", ablation),
+        ],
+        container_runs: [],
+      },
+      result_report: {
+        ...resultReport(),
+        primary_metric: "ranking_ndcg_at_3",
+        proposed: { experiment_id: "proposed:eval", value: proposed },
+        best_baseline: { experiment_id: "baseline:random", value: baseline },
+      },
+      now,
+    })
+  }
+
+  test("does not claim superiority when the method loses", () => {
+    const draft = rankingDraft(0.75, 0.82, 0.79)
+    const discussion = markdownSection(draft.markdown, "讨论")
+    expect(discussion).not.toContain("完整排序高于最强基线")
+    expect(discussion).not.toContain("同时高于")
+    expect(discussion).toContain("没有高于最强基线")
+    expect(discussion).toContain("消融也没有低于完整排序")
+    expect(discussion).toContain("random")
+    const abstract = markdownSection(draft.markdown, "摘要")
+    expect(abstract).toContain("最强基线（random）")
+    expect(abstract).not.toContain("词项匹配基线为")
+  })
+
+  test("states the comparison when the method wins", () => {
+    const draft = rankingDraft(0.9, 0.8, 0.85)
+    const discussion = markdownSection(draft.markdown, "讨论")
+    expect(discussion).toContain("完整排序高于最强基线（random）")
+    expect(discussion).toContain("相对最强基线的差值为 0.1000")
   })
 })

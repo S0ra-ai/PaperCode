@@ -408,6 +408,11 @@ function contextualExperimentLabel(input: ComposeDraftPaperInput, experimentId: 
   return displayExperimentLabel(experimentId)
 }
 
+function bestBaselineLabel(input: ComposeDraftPaperInput) {
+  const id = input.result_report?.best_baseline?.experiment_id
+  return id ? contextualExperimentLabel(input, id, "baseline") : "最佳基线"
+}
+
 function displayExperimentRole(value: string) {
   if (value === "proposed") return "本文方法"
   if (value === "baseline") return "基线"
@@ -2657,18 +2662,34 @@ function rankingDiscussionSummary(
   const candidateCount = rankingCandidateCount(input)
   const candidateText = candidateCount ? `候选数 ${candidateCount}` : "当前候选集"
   const rows: string[] = []
+  const baselineLabel = bestBaselineLabel(input)
   if (report.proposed && report.best_baseline) {
     const baselineDelta = report.proposed.value - report.best_baseline.value
     const ablationValue = rankingNoCoverageAblationValue(input, metric)
     const ablationDelta = typeof ablationValue === "number" ? report.proposed.value - ablationValue : undefined
+    const beatsBaseline = baselineDelta > 0
+    const beatsAblation = typeof ablationDelta === "number" && ablationDelta > 0
     if (typeof ablationDelta === "number") {
-      rows.push(`在候选论文排序任务中，在${metricLabel} 上，完整排序数值同时高于词项匹配基线和无证据覆盖消融：相对词项匹配基线的绝对差值为 ${formatMetricValue(Math.abs(baselineDelta))}，相对无证据覆盖消融的绝对差值为 ${formatMetricValue(Math.abs(ablationDelta))}。这说明当前候选集的前三位排序不只来自查询词重合，证据覆盖特征也参与了排序差异。`)
+      rows.push(
+        beatsBaseline && beatsAblation
+          ? `在候选论文排序任务中，在${metricLabel} 上，完整排序高于最强基线（${baselineLabel}）和无证据覆盖消融：相对最强基线的差值为 ${formatMetricValue(baselineDelta)}，相对消融的差值为 ${formatMetricValue(ablationDelta)}。这说明当前候选集的前三位排序不只来自查询词重合，证据覆盖特征也参与了排序差异。`
+          : `在候选论文排序任务中，在${metricLabel} 上，完整排序相对最强基线（${baselineLabel}）的差值为 ${formatMetricValue(baselineDelta)}，相对无证据覆盖消融的差值为 ${formatMetricValue(ablationDelta)}。${beatsBaseline ? "完整排序高于最强基线" : "完整排序没有高于最强基线"}，${beatsAblation ? "且高于消融" : "消融也没有低于完整排序"}；因此当前结果不足以支持“完整排序优于基线或消融”的表述。`,
+      )
     } else {
-      rows.push(`在候选论文排序任务中，完整排序相对词项匹配基线的绝对差值为 ${formatMetricValue(Math.abs(baselineDelta))}；该差异说明本文评分与只看查询词重合的排序在当前候选集上表现不同。`)
+      rows.push(
+        beatsBaseline
+          ? `在候选论文排序任务中，完整排序高于最强基线（${baselineLabel}），差值为 ${formatMetricValue(baselineDelta)}；该差异说明本文评分与该基线在当前候选集上表现不同。`
+          : `在候选论文排序任务中，完整排序低于最强基线（${baselineLabel}），差值为 ${formatMetricValue(baselineDelta)}；该结果不支持“完整排序优于基线”的表述，只能作为流程可复现性与观测性的证据。`,
+      )
     }
   }
-  rows.push("词项匹配基线提供了一个低成本检索对照：当前结果显示，完整排序与词项匹配基线存在可观测差异；该差异提示 relevance、claim_coverage 和 recency 的组合需要在更强基线和更大候选集上继续验证。")
-  rows.push(`无证据覆盖消融移除 claim_coverage 后，${metricLabel} 数值低于完整排序，说明 claim_coverage 项与当前前三位排序差异相关。这一结果与任务设定一致：候选论文不仅要与主题相关，还需要覆盖当前研究问题中的关键断言。`)
+  rows.push(`最强基线（${baselineLabel}）提供了一个检索对照；当前结果只说明完整排序与它在当前候选集上是否存在可观测差异，差异本身不构成优势证据，仍需要在更强基线和更大候选集上验证。`)
+  rows.push(
+    typeof rankingNoCoverageAblationValue(input, metric) === "number" &&
+      (rankingNoCoverageAblationValue(input, metric) as number) < (report.proposed?.value ?? Number.NEGATIVE_INFINITY)
+      ? `无证据覆盖消融移除 claim_coverage 后，${metricLabel} 数值低于完整排序，说明 claim_coverage 项与当前前三位排序差异相关。这一结果与任务设定一致：候选论文不仅要与主题相关，还需要覆盖当前研究问题中的关键断言。`
+      : `无证据覆盖消融移除 claim_coverage 后，${metricLabel} 数值没有低于完整排序；因此 claim_coverage 项与当前排序差异的关系仍未被消融结果支持，正文不据此声称该特征带来了提升。`,
+  )
   rows.push(`结果仍需要保守解释。${candidateText}，且标签不是人工相关性标注，而是由实时 arXiv 检索排序、主题匹配、元数据完整度和发表时间派生；因此当前结论更适合作为自动筛选协议的证据，而不是人工文献综述质量的最终证明。`)
   if (reproductionVerified(input)) {
     rows.push("本机和容器结果一致，说明上述比较不是由当前宿主环境偶然触发；但复现一致性只验证同一协议可重复，不证明该评分函数已覆盖更多主题、更多候选规模或人工标注场景。")
@@ -2727,7 +2748,7 @@ function rankingAbstractSummary(input: ComposeDraftPaperInput) {
   const baseline = result?.best_baseline ? displayMetricValue(result.primary_metric, result.best_baseline.value) : undefined
   const delta =
     result?.proposed && result.best_baseline
-      ? `，较词项匹配基线的绝对差值为 ${formatMetricValue(Math.abs(result.proposed.value - result.best_baseline.value))}`
+      ? `，与最强基线（${bestBaselineLabel(input)}）的差值为 ${formatMetricValue(Math.abs(result.proposed.value - result.best_baseline.value))}`
       : ""
   const ablation = rankingAblationInterpretation(input)
   return [
@@ -2735,7 +2756,7 @@ function rankingAbstractSummary(input: ComposeDraftPaperInput) {
     "候选论文排序接口由 rankAgentTeamPapers 和 scorePaper 组成：rankAgentTeamPapers 对候选集合排序，scorePaper 将 relevance、claim_coverage 和 recency 合成为统一评分。",
     `实验以${metric} 为主指标，并设置排名测试、词项匹配基线、无证据覆盖消融和容器复现。`,
     proposed && baseline
-      ? `结果显示，本文方法达到 ${proposed}，词项匹配基线为 ${baseline}${delta}。`
+      ? `结果显示，本文方法达到 ${proposed}，最强基线（${bestBaselineLabel(input)}）为 ${baseline}${delta}。`
       : resultMetricSummary(input),
     ablation ? ablation.replace(/消融分析显示，/, "") : undefined,
     rankingDatasetScopeSummary(input),
@@ -2775,7 +2796,7 @@ function rankingIntroductionSummary(input: ComposeDraftPaperInput) {
   const result = input.result_report
   const resultEvidence =
     result?.proposed && result.best_baseline
-      ? `当前结果显示，本文方法为 ${displayMetricValue(result.primary_metric, result.proposed.value)}，词项匹配基线为 ${displayMetricValue(result.primary_metric, result.best_baseline.value)}，绝对差值为 ${formatMetricValue(Math.abs(result.proposed.value - result.best_baseline.value))}。`
+      ? `当前结果显示，本文方法为 ${displayMetricValue(result.primary_metric, result.proposed.value)}，最强基线（${bestBaselineLabel(input)}）为 ${displayMetricValue(result.primary_metric, result.best_baseline.value)}，差值为 ${formatMetricValue(Math.abs(result.proposed.value - result.best_baseline.value))}。`
       : resultEvidenceText(input)
   return [
     "候选论文排序常用于文献检索、综述准备和研究选题：研究者需要在有限候选集内判断哪些论文最能支持当前研究问题。仅依赖词项匹配的排序容易忽略候选论文是否覆盖关键断言，单独报告排序结果又难以解释差异来自何处。",
@@ -2927,11 +2948,11 @@ function conclusionSummary(input: ComposeDraftPaperInput, ready: boolean) {
     const result = input.result_report
     const comparison =
       result?.proposed && result.best_baseline
-        ? `在${metric} 上，本文方法达到 ${displayMetricValue(result.primary_metric, result.proposed.value)}，较词项匹配基线的绝对差值为 ${formatMetricValue(Math.abs(result.proposed.value - result.best_baseline.value))}。`
+        ? `在${metric} 上，本文方法达到 ${displayMetricValue(result.primary_metric, result.proposed.value)}，与最强基线（${bestBaselineLabel(input)}）的差值为 ${formatMetricValue(Math.abs(result.proposed.value - result.best_baseline.value))}。`
         : `${primaryMetricPhrase(metric)}的比较结果仍需补齐。`
     const resultEvidence =
       result?.proposed && result.best_baseline
-        ? `${metric} 为 ${displayMetricValue(result.primary_metric, result.proposed.value)}，较词项匹配基线的绝对差值为 ${formatMetricValue(Math.abs(result.proposed.value - result.best_baseline.value))}。`
+        ? `${metric} 为 ${displayMetricValue(result.primary_metric, result.proposed.value)}，与最强基线（${bestBaselineLabel(input)}）的差值为 ${formatMetricValue(Math.abs(result.proposed.value - result.best_baseline.value))}。`
         : `${primaryMetricPhrase(metric)}的比较结果仍需补齐。`
     const table = markdownTable(
       ["结论项", "证据", "边界"],
