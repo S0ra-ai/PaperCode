@@ -2714,7 +2714,8 @@ describe("paper authoring loop", () => {
           `English text for the ${section_id} section, translated for the venue. It repeats enough words to count as substantive prose.`
         const sourceCounts = countStructure(text)
         const baseCounts = countStructure(base)
-        const blocks = [base]
+        const preserved = text.match(/--[A-Za-z][\w-]*=\S+|\bsrc\/[\w./-]+|https?:\/\/[^\s)]+|\b(?:bun|docker|podman)\s+\S+/g) ?? []
+        const blocks = [base, ...preserved]
         for (let index = baseCounts.tables; index < sourceCounts.tables; index++) {
           blocks.push("| A | B |\n| --- | --- |\n| x | y |")
         }

@@ -43,6 +43,7 @@
             - fix(paper): 标题翻译剥离模型附带的"English（中文）"括注；重试时追加"只返回英文、不要包含原文"提示，失败原因附带原文片段便于定位
             - fix(paper): 命令入口标签不再把 flag 值翻成中文（此前 --variant=baseline 会变成 --variant=基线，等于伪造无效命令）
             - fix(paper): 参考文献与附录正文保持原样时，仍翻译其内部 Markdown 标题，英文稿不再残留中文小节标题
+            - feat(paper): 附录正文随正文一起翻译；校验器要求 flag、src/ 路径、URL 与 bun/docker/podman 命令头逐字保留，翻译后的命令仍可执行；参考文献仍保持原文
         :fix
             - fix(paper): 统计、表格、图只统计结果章节，附录里的 p 值或声明表不再顶替结果
             - fix(paper): 声明按"标签列→值列"解析并支持列表/段落写法；"未提供/not provided"等说法同样判定为未声明

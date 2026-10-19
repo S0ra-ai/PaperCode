@@ -161,6 +161,20 @@ function validatedEnglish(value: string, emptyReason: string, chineseReason: str
   return undefined
 }
 
+/** Flags, paths and command heads must survive translation; a translated command is not runnable. */
+function commandsPreserved(source: string, translated: string) {
+  const patterns = [
+    /--[A-Za-z][\w-]*=\S+/g,
+    /\bsrc\/[\w./-]+/g,
+    /https?:\/\/[^\s)]+/g,
+    /\b(?:bun|docker|podman)\s+\S+/g,
+  ]
+  const target = translated.replace(/\s+/g, " ")
+  return patterns.every((pattern) =>
+    (source.match(pattern) ?? []).every((token) => target.includes(token.replace(/\s+/g, " "))),
+  )
+}
+
 /** Translate Markdown headings inside kept-verbatim sections without touching citations or commands. */
 async function translateHeadings(
   markdown: string,
@@ -267,10 +281,29 @@ export async function translateDraftSections(
           )
         : { value: section.title }
     if (!titleResult.value) return fail(section.section_id, titleResult.reason ?? "empty section title translation")
-    const headings = await translateHeadings(section.markdown, section.section_id, translator)
-    if (headings.markdown === undefined)
-      return fail(section.section_id, headings.reason ?? "heading translation failed")
-    overrides.push({ section_id: section.section_id, markdown: headings.markdown, title: titleResult.value })
+    let markdown = section.markdown
+    // Appendix prose is part of the manuscript, so translate it; references are citations and stay
+    // verbatim. Both keep their commands and paths, which the validator checks.
+    if (section.section_id.startsWith("appendix_") && cjkRatio(section.markdown) >= 0.02) {
+      const body = await translateValidated(translator, section.section_id, section.markdown, (value) => {
+        const basic = validatedEnglish(value, "empty translation", "translation still contains Chinese")
+        if (basic) return basic
+        const comment = refusal(value)
+        if (comment) return comment
+        if (!structurePreserved(section.markdown, value))
+          return "translation changed the table or image structure"
+        if (!commandsPreserved(section.markdown, value)) return "translation changed a command or path"
+        return undefined
+      })
+      if (!body.value) return fail(section.section_id, body.reason ?? "empty translation")
+      markdown = body.value
+    } else {
+      const headings = await translateHeadings(section.markdown, section.section_id, translator)
+      if (headings.markdown === undefined)
+        return fail(section.section_id, headings.reason ?? "heading translation failed")
+      markdown = headings.markdown
+    }
+    overrides.push({ section_id: section.section_id, markdown, title: titleResult.value })
   }
   if (overrides.length === 0 && !title) return undefined
   return { overrides, ...(title ? { title } : {}) }

@@ -81,7 +81,9 @@ function countStructure(text: string) {
 function padStructure(source: string, translated: string) {
   const sourceCounts = countStructure(source)
   const translatedCounts = countStructure(translated)
-  const blocks = [translated]
+  // Keep commands and paths verbatim, as the real translator must.
+  const preserved = source.match(/--[A-Za-z][\w-]*=\S+|\bsrc\/[\w./-]+|https?:\/\/[^\s)]+|\b(?:bun|docker|podman)\s+\S+/g) ?? []
+  const blocks = [translated, ...preserved]
   for (let index = translatedCounts.tables; index < sourceCounts.tables; index++) {
     blocks.push("| A | B |\n| --- | --- |\n| x | y |")
   }
@@ -290,13 +292,16 @@ describe("translated titles", () => {
   })
 })
 
-describe("headings in kept sections", () => {
-  test("translates appendix headings without translating the kept body", async () => {
-    const result = await translateDraftSections(chineseDraft(), stubTranslator())
+describe("appendix and reference handling", () => {
+  test("translates appendix bodies but keeps reference citations verbatim", async () => {
+    const draft = chineseDraft()
+    const result = await translateDraftSections(draft, stubTranslator())
     const appendix = result?.overrides.find(
       (override) => override.section_id === "appendix_operational_reproducibility_checklist",
     )
-    expect(appendix?.markdown).toContain("### Translated heading")
-    expect(appendix?.markdown).not.toContain("### 复现实验入口")
+    expect(appendix?.markdown).not.toMatch(/[一-鿿]/)
+    const references = result?.overrides.find((override) => override.section_id === "references")
+    const source = draft.sections.find((section) => section.section_id === "references")?.markdown
+    expect(references?.markdown).toBe(source)
   })
 })
