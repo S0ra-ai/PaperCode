@@ -12,7 +12,7 @@ import {
 } from "@/paper"
 import { type ExportRenderer } from "@/paper/research/export"
 import { createResearchRun, type ResearchRuntimeOptions } from "@/paper/research/runtime"
-import { discoverLiterature, type DataPlan } from "@/paper/research/sources"
+import { discoverLiterature, type DataPlan, type SourceRecord } from "@/paper/research/sources"
 import {
   planExperiments,
   type ExperimentExecutionEvidence,
@@ -2405,6 +2405,61 @@ describe("paper authoring loop", () => {
   test("runs ClaimLedger-first authoring through final export with CJC front matter and supplementary bundles", async () => {
     const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-authoring-"))
     try {
+      // A submission-grade run: enough verified references for the CJC reference minimum, a results
+      // table from real run records, a code locator, and the declarations a venue expects.
+      const literatureSources: SourceRecord[] = Array.from({ length: 20 }, (_, index) => ({
+        schema_version: "SourceRecord.v1",
+        source_id: index === 0 ? "paper-a" : `paper-verified-${index + 1}`,
+        kind: "paper",
+        title: `Verified Study ${index + 1}`,
+        url: `https://arxiv.org/abs/2402.${String(10000 + index).padStart(5, "0")}`,
+        provider: "arxiv",
+        license: { status: "clear", expression: "arXiv non-exclusive distribution" },
+        version: { value: "v1", retrieved_at: now, published_at: `${2021 + (index % 5)}-02-0${(index % 9) + 1}` },
+        verification: { status: "verified", method: "unit-test-arxiv", checked_at: now },
+        topics: ["retrieval"],
+        arxiv_id: `2402.${10000 + index}`,
+        retrieved_at: now,
+      }))
+      const literatureMap = {
+        schema_version: "LiteratureMap.v1" as const,
+        topic: "Claim-aware retrieval",
+        created_at: now,
+        sources: literatureSources,
+        clusters: [],
+        summary: {
+          total_sources: literatureSources.length,
+          verified_sources: literatureSources.length,
+          open_license_sources: literatureSources.length,
+        },
+        diagnostics: { verification_failures: [], gaps: [] },
+      }
+      const authoringRun = (id: string, role: "proposed" | "baseline", mode: "host" | "container"): ExperimentRun => ({
+        schema_version: "ExperimentRun.v1",
+        experiment_run_id: `${mode}:${id}`,
+        plan_id: "plan-1",
+        experiment_id: id,
+        role,
+        status: "succeeded",
+        command: { argv: ["bun", "test", id] },
+        environment: { mode, platform: mode === "container" ? "container" : process.platform },
+        execution: fixtureExecution(mode, id),
+        metrics: [{ name: "accuracy", value: role === "proposed" ? 0.83 : 0.71, direction: "higher_better" }],
+        stdout: "fixture",
+        stderr: "",
+        exit_code: 0,
+        resource_usage: { wall_time_seconds: 0 },
+        started_at: now,
+        finished_at: now,
+        reproduction: { container_reproduced: mode === "container" },
+      })
+      const experimentRuns = {
+        host_runs: [authoringRun("proposed", "proposed", "host"), authoringRun("baseline", "baseline", "host")],
+        container_runs: [
+          authoringRun("proposed", "proposed", "container"),
+          authoringRun("baseline", "baseline", "container"),
+        ],
+      }
       const workspace = path.join(dir, "workspace")
       const home = path.join(dir, "home")
       await mkdir(workspace, { recursive: true })
@@ -2467,6 +2522,22 @@ describe("paper authoring loop", () => {
             { model: "reviewer-model", verdict: "pass" },
           ],
           target_profile: "cjc-paper",
+          literature_map: literatureMap,
+          experiment_runs: experimentRuns,
+          declarations: {
+            funding: "National Key R&D Program 2024AAA123.",
+            author_contributions: "A.B. designed the study; C.D. ran the experiments.",
+            competing_interests: "The authors declare no competing interests.",
+            llm_disclosure: "An LLM assisted with language editing; the authors verified all content.",
+          },
+          code_metadata: {
+            package_name: "claim-aware-retrieval",
+            repository_url: "https://github.com/example/claim-aware-retrieval",
+            version: "0.1.0",
+            commit_hash: "abc1234",
+            worktree_dirty: false,
+            license: "MPL-2.0",
+          },
           code_artifact_ids: ["artifact-codebase-map"],
           renderers,
           now,

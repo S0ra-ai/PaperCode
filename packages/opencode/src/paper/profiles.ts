@@ -1,6 +1,7 @@
 export const BUILTIN_PAPER_PROFILE_IDS = [
   "nature-paper",
   "cjc-paper",
+  "international-q1",
   "ieee-paper",
   "acm-paper",
   "springer-paper",
@@ -10,7 +11,7 @@ export const BUILTIN_PAPER_PROFILE_IDS = [
 
 export type PaperProfileId = (typeof BUILTIN_PAPER_PROFILE_IDS)[number]
 
-export const ACTIVE_PAPER_PROFILE_IDS = ["cjc-paper"] as const
+export const ACTIVE_PAPER_PROFILE_IDS = ["cjc-paper", "international-q1"] as const
 
 export interface PaperProfileGuidanceSource {
   name: string
@@ -184,6 +185,17 @@ export function resolvePaperProfileSelection(input?: {
     return { profile_id: "cjc-paper", journal_name: rawJournal || "中国计算机学报" }
   }
 
+  if (
+    key === "international-q1" ||
+    key === "国际一区" ||
+    key === "sci 一区" ||
+    key === "sci一区" ||
+    key === "sci q1" ||
+    key === "q1"
+  ) {
+    return { profile_id: "international-q1", journal_name: rawJournal || "国际 SCI 一区期刊" }
+  }
+
   return { profile_id: "cjc-paper", journal_name: "中国计算机学报" }
 }
 
@@ -288,6 +300,41 @@ export function defaultPaperProfiles(): PaperProfile[] {
         { id: "chinese-title-abstract-keywords", title: "中文题名、摘要与关键词", required: true, evidence: "statement" },
         { id: "english-title-abstract-keywords", title: "英文题名、摘要与关键词", required: true, evidence: "statement" },
         { id: "official-cjc-template", title: "计算机学报官方模板", required: true, evidence: "artifact" },
+      ],
+    ),
+    profile(
+      "international-q1",
+      "国际 SCI 一区期刊",
+      [
+        {
+          name: "Elsevier author policies and guidelines",
+          url: "https://www.elsevier.com/researcher/author/policies-and-guidelines",
+          trust: "official",
+          refresh: "runtime",
+        },
+        {
+          name: "ICMJE recommendations (declarations and reporting)",
+          url: "https://www.icmje.org/recommendations/",
+          trust: "official",
+          refresh: "runtime",
+        },
+      ],
+      "official_template_first",
+      [
+        {
+          id: "english-title-abstract-keywords",
+          title: "英文题名、摘要与关键词",
+          required: true,
+          evidence: "statement",
+        },
+        {
+          id: "statistical-reporting",
+          title: "统计报告（重复次数、离散度、显著性检验）",
+          required: true,
+          evidence: "artifact",
+        },
+        { id: "author-contributions", title: "作者贡献（CRediT）", required: true, evidence: "statement" },
+        { id: "llm-disclosure", title: "生成式 AI 使用声明", required: true, evidence: "statement" },
       ],
     ),
     profile(

@@ -13,6 +13,7 @@ describe("paper profile registry", () => {
     expect(BUILTIN_PAPER_PROFILE_IDS).toEqual([
       "nature-paper",
       "cjc-paper",
+      "international-q1",
       "ieee-paper",
       "acm-paper",
       "springer-paper",
@@ -98,8 +99,8 @@ describe("paper profile registry", () => {
     )
   })
 
-  test("uses CJC as the only active journal profile while discovery is disabled", () => {
-    expect(ACTIVE_PAPER_PROFILE_IDS).toEqual(["cjc-paper"])
+  test("offers the Chinese and the international Q1 profile", () => {
+    expect(ACTIVE_PAPER_PROFILE_IDS).toEqual(["cjc-paper", "international-q1"])
 
     expect(resolvePaperProfileSelection({})).toMatchObject({
       profile_id: "cjc-paper",

@@ -1,5 +1,6 @@
 export * from "./checks"
 export * from "./gate"
+export * from "./manuscript"
 export * from "./recording"
 export * from "./review"
 export * from "./schemas"

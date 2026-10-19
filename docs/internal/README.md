@@ -11,6 +11,7 @@
 - [实验执行与复现证据](experiment-execution.md)：显式实验协议、指标输出、隔离执行与正式导出验收。
 - [模型 provider 配置](model-providers.md)：`providers` 手写方言、密钥来源、论文管线的模型选择与验收命令。
 - [导出工具链与字体](export-toolchain.md)：四类产物的生成路径、ctex 的平台字体策略与字体覆盖方式。
+- [投稿质量闸门](submission-quality-gate.md)：一区级稿件的结构、声明、参考文献、统计报告与语言检查，以及如何满足。
 - [桌面端发布与自动更新](desktop-release.md)：渠道与产物命名、签名公证凭据、electron-updater 元数据与发布流程。
 - `docs/changelog/README.md`：历史 changelog 归档策略。
 - `reports/`：审计、验收、benchmark 证据，不进入 release artifact。

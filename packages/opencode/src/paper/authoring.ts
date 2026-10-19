@@ -20,8 +20,14 @@ import {
   type ClaimLedger,
   type DraftPaper,
   type DraftRevision,
+  type PaperDeclarations,
 } from "./research/writing"
-import { recordVerificationGate, type ModelReviewInput, type VerificationGateResult } from "./research/verification"
+import {
+  manuscriptRequirementsForProfile,
+  recordVerificationGate,
+  type ModelReviewInput,
+  type VerificationGateResult,
+} from "./research/verification"
 import { createRunBoundPreviewSnapshot } from "./preview"
 
 export type PaperSupplementaryBundle = {
@@ -70,6 +76,8 @@ export type RunPaperAuthoringLoopInput = {
   source_records?: SourceRecord[]
   model_reviews: ModelReviewInput[]
   target_profile?: string
+  /** Funding, contributions, competing interests, ethics and AI-use text. Absent means "undeclared". */
+  declarations?: PaperDeclarations
   code_artifact_ids?: string[]
   code_metadata?: Parameters<typeof composeDraftPaper>[0]["code_metadata"]
   source_artifact_ids?: string[]
@@ -121,6 +129,7 @@ function displaySubmissionProfile(value: string) {
   if (value === "generic-preprint") return "通用预印本"
   if (value === "nature-paper") return "Nature 投稿配置"
   if (value === "cjc-paper") return "计算机学报投稿配置"
+  if (value === "international-q1") return "国际 SCI 一区投稿配置"
   if (value === "acm-paper" || value === "acm") return "ACM 论文配置"
   if (value === "custom-journal") return "自定义期刊投稿配置"
   return value.replace(/[-_]+/g, " ")
@@ -679,6 +688,7 @@ export async function runPaperAuthoringLoop(
         ledger: input.ledger,
         data_plan: input.data_plan,
         literature_map: input.literature_map,
+        declarations: input.declarations,
         experiment_plan: input.experiment_plan,
         experiment_protocol: input.experiment_protocol,
         experiment_guidance: input.experiment_guidance,
@@ -709,6 +719,7 @@ export async function runPaperAuthoringLoop(
           available_source_ids: input.available_source_ids,
           source_records: input.source_records,
           model_reviews: input.model_reviews,
+          manuscript_requirements: manuscriptRequirementsForProfile(input.target_profile),
           now: input.now,
         },
         options,

@@ -17,6 +17,47 @@ export type VerificationFindingCategory =
   | "missing_model_review"
   | "review_conflict"
   | "reviewer_authenticity_failure"
+  | "missing_section_content"
+  | "abstract_length"
+  | "missing_keywords"
+  | "placeholder_text"
+  | "missing_statement"
+  | "insufficient_references"
+  | "stale_references"
+  | "missing_statistics"
+  | "missing_table"
+  | "missing_figure"
+  | "manuscript_language"
+
+/** One statement a submission must carry, and whether its absence blocks the final export. */
+export type ManuscriptStatementRequirement = {
+  id: string
+  severity: "warning" | "blocker"
+}
+
+/**
+ * What a target venue expects of the manuscript itself, as opposed to the evidence behind it. The
+ * integrity checks (references resolve, claims are supported, experiments reproduce) say the paper is
+ * honest; these say whether the result is submission-grade.
+ */
+export type ManuscriptRequirements = {
+  profile: string
+  language: "zh" | "en" | "any"
+  /** Section ids that must carry real prose rather than only a heading. */
+  required_sections: string[]
+  abstract_words: { min: number; max: number }
+  min_keywords: number
+  /** References that must appear in the formatted reference list. */
+  min_references: number
+  /** Share of dated references published within `recency_years`. Ignored when no reference is dated. */
+  recent_reference_ratio: number
+  recency_years: number
+  required_statements: ManuscriptStatementRequirement[]
+  /** Whether a comparison against a baseline has to report dispersion and a significance test. */
+  require_statistics: "off" | "warning" | "blocker"
+  min_tables: number
+  min_figures: number
+}
 
 export type VerificationFinding = {
   finding_id: string
@@ -63,6 +104,8 @@ export type VerificationGateInput = {
   available_source_ids: string[]
   source_records?: SourceRecord[]
   model_reviews: ModelReviewInput[]
+  /** Omitted by callers that only want the integrity checks (tests, preview). */
+  manuscript_requirements?: ManuscriptRequirements
   now?: string
 }
 

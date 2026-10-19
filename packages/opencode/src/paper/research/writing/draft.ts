@@ -20,11 +20,21 @@ export type CodeAvailabilityMetadata = {
   license?: string
 }
 
+export type PaperDeclarations = {
+  funding?: string
+  author_contributions?: string
+  competing_interests?: string
+  ethics?: string
+  llm_disclosure?: string
+}
+
 export type ComposeDraftPaperInput = {
   title: string
   ledger: ClaimLedger
   data_plan?: Pick<DataPlan, "datasets" | "license_conflicts" | "access_constraints" | "diagnostics" | "recommendation">
   literature_map?: LiteratureMap
+  /** Facts only the author can supply; a venue rejects a submission that leaves them undeclared. */
+  declarations?: PaperDeclarations
   experiment_plan?: Pick<ExperimentPlan, "objective" | "metrics" | "proposed" | "baselines" | "ablations" | "resource_budget" | "downgrade_policy" | "reproduction_tolerance">
   experiment_protocol?: Pick<ExperimentProtocol, "entries" | "gaps" | "discovered_from">
   experiment_guidance?: Pick<ExperimentProtocolGuidance, "status" | "summary" | "suggestions" | "final_export_blocked">
@@ -157,14 +167,21 @@ function authorInformationSummary() {
   )
 }
 
-function declarationsSummary() {
+function declarationsSummary(declarations?: PaperDeclarations) {
   return markdownTable(
     ["项目", "声明"],
     [
-      ["基金项目", "未声明。"],
-      ["作者贡献", "未声明。"],
-      ["利益冲突", "未声明。"],
-      ["伦理审批", "本研究材料未包含人类受试者、动物实验、个人敏感数据或受限数据；若后续纳入此类材料，应在投稿前补充伦理审批和数据授权信息。"],
+      ["基金项目", declarations?.funding?.trim() || "未声明。"],
+      ["作者贡献", declarations?.author_contributions?.trim() || "未声明。"],
+      ["利益冲突", declarations?.competing_interests?.trim() || "未声明。"],
+      [
+        "伦理审批",
+        declarations?.ethics?.trim() ||
+          "本研究材料未包含人类受试者、动物实验、个人敏感数据或受限数据；若后续纳入此类材料，应在投稿前补充伦理审批和数据授权信息。",
+      ],
+      ...(declarations?.llm_disclosure?.trim()
+        ? [["生成式 AI 使用声明", declarations.llm_disclosure.trim()]]
+        : []),
     ],
   )
 }
@@ -1058,7 +1075,11 @@ function dataAvailabilitySummary(input: ComposeDraftPaperInput) {
 function codeAvailabilitySummary(input: ComposeDraftPaperInput) {
   const ranges = methodSourceRangeSummaries(input)
   const entrypoints = experimentEntrypointLabels(input)
-  if (ranges.length === 0 && entrypoints.length === 0) return undefined
+  // A supplied repository is itself a code-availability statement; a venue needs the locator even
+  // when the ledger did not register method source ranges.
+  if (ranges.length === 0 && entrypoints.length === 0 && !input.code_metadata?.repository_url && !input.code_metadata?.package_name) {
+    return undefined
+  }
   const implementation = ranges.length > 0 ? `方法实现包括 ${ranges.join("、")}。` : "方法实现入口尚未登记。"
   const reproduction = entrypoints.length > 0 ? `复现实验入口包括${chineseList(entrypoints)}。` : "复现实验入口尚未登记。"
   const packageName = input.code_metadata?.package_name
@@ -2847,7 +2868,7 @@ function scaffoldSections(input: ComposeDraftPaperInput, claimSections: DraftSec
       "结论",
       conclusionSummary(input, ready),
     ),
-    buildPlainSection("declarations", "声明", declarationsSummary()),
+    buildPlainSection("declarations", "声明", declarationsSummary(input.declarations)),
     buildPlainSection("references", "参考文献", referencesSummary(input)),
     buildPlainSection("appendix_evidence_trace", appendixEvidenceTraceTitle(input), implementationTraceSummary(input)),
     buildPlainSection(

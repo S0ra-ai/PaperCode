@@ -1,5 +1,6 @@
 import { withSpan } from "../telemetry"
 import { checkClaimSupport, checkDataAndExperiments, checkReferences, checkSourceAuthenticity } from "./checks"
+import { checkManuscriptQuality } from "./manuscript"
 import { runMultiModelReview } from "./review"
 import type { BlockingReport, VerificationGateInput, VerificationGateResult, VerificationFinding } from "./schemas"
 
@@ -37,6 +38,7 @@ export function evaluateVerificationGate(input: VerificationGateInput): Verifica
         ...checkSourceAuthenticity(input),
         ...checkClaimSupport(input),
         ...checkDataAndExperiments(input),
+        ...checkManuscriptQuality(input),
         ...reviewReport.findings,
       ]
       const report = blockingReport(findings, createdAt)
