@@ -23,6 +23,7 @@ import { withSpan } from "./research/telemetry"
 import {
   applySectionOverrides,
   composeDraftPaper,
+  retitleDraft,
   createDraftRevision,
   recordDraftWriting,
   streamMarkdownDraft,
@@ -77,6 +78,7 @@ export type PaperAuthoringInputs = {
   schema_version: "PaperAuthoringInputs.v1"
   declarations?: PaperDeclarations
   authors?: PaperAuthor[]
+  title_override?: string
   section_overrides?: DraftSectionOverride[]
 }
 
@@ -746,10 +748,11 @@ export async function runPaperAuthoringLoop(
         manuscriptRequirementsForProfile(input.target_profile).language === "en" && input.translator
           ? await translateDraftSections(composedBase, input.translator)
           : undefined
-      const effectiveOverrides = [...(input.section_overrides ?? []), ...(translated ?? [])]
+      const effectiveOverrides = [...(input.section_overrides ?? []), ...(translated?.overrides ?? [])]
       const composed = effectiveOverrides.length ? applySectionOverrides(baseDraft, effectiveOverrides) : baseDraft
-      const revision = createProfileAwareDraftRevision({ draft: composed, authoring: input, now: input.now })
-      const draft = applyRevision(composed, revision)
+      const titled = translated?.title ? retitleDraft(composed, translated.title) : composed
+      const revision = createProfileAwareDraftRevision({ draft: titled, authoring: input, now: input.now })
+      const draft = applyRevision(titled, revision)
       const writing = await recordDraftWriting(
         runDir,
         {
@@ -761,11 +764,12 @@ export async function runPaperAuthoringLoop(
       )
       // Persist the author's own text (and any translation) so a later final-export refresh
       // recomposes the same manuscript instead of silently reverting to the generated sections.
-      if (input.declarations || input.authors?.length || effectiveOverrides.length) {
+      if (input.declarations || input.authors?.length || effectiveOverrides.length || translated?.title) {
         const authored: PaperAuthoringInputs = {
           schema_version: "PaperAuthoringInputs.v1",
           declarations: input.declarations,
           authors: input.authors,
+          title_override: translated?.title,
           section_overrides: effectiveOverrides.length ? effectiveOverrides : undefined,
         }
         await writeResearchArtifact(

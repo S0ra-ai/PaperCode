@@ -45,6 +45,7 @@ function chineseDraft() {
 }
 
 const englishBySection: Record<string, string> = {
+  title: "Evidence-Constrained Retrieval",
   abstract: "This paper studies evidence-constrained retrieval and reports a reproducible evaluation.",
   keywords: "retrieval, evaluation, reproducibility",
   introduction: "The introduction states the problem and the contribution of this work.",
@@ -68,6 +69,35 @@ const englishBySection: Record<string, string> = {
   data_availability: "The dataset is available at https://zenodo.org/record/1 and the code at https://github.com/example/repo.",
 }
 
+/** A stub that keeps the table/figure skeleton so the structure guard accepts it. */
+function countStructure(text: string) {
+  return {
+    tables: (text.match(/^\s*\|?\s*:?-{3,}/gm) ?? []).length,
+    images: (text.match(/!\[[^\]]*\]\([^)]+\)/g) ?? []).length,
+  }
+}
+
+/** Keep at least as much structure as the source so the translation guard accepts the stub. */
+function padStructure(source: string, translated: string) {
+  const sourceCounts = countStructure(source)
+  const translatedCounts = countStructure(translated)
+  const blocks = [translated]
+  for (let index = translatedCounts.tables; index < sourceCounts.tables; index++) {
+    blocks.push("| A | B |\n| --- | --- |\n| x | y |")
+  }
+  for (let index = translatedCounts.images; index < sourceCounts.images; index++) {
+    blocks.push("![Figure](figures/primary-metric.png)")
+  }
+  return blocks.join("\n\n")
+}
+
+function stubTranslator(overrides: Record<string, string> = englishBySection) {
+  return async ({ section_id, text }: { section_id: string; text: string }) => {
+    const canned = overrides[section_id] ?? `English text for the ${section_id} section, translated for the venue. It repeats enough words to count as substantive prose.`
+    return padStructure(text, canned)
+  }
+}
+
 describe("draft translation", () => {
   test("is disabled without a configured endpoint", () => {
     expect(translatorFromEnv({})).toBeUndefined()
@@ -76,18 +106,21 @@ describe("draft translation", () => {
 
   test("replaces the Chinese narrative with English and leaves English sections alone", async () => {
     const draft = chineseDraft()
-    const overrides = await translateDraftSections(draft, async ({ section_id }) => englishBySection[section_id] ?? "")
-    expect(overrides?.length).toBeGreaterThan(5)
-    const abstract = overrides?.find((override) => override.section_id === "abstract")
+    const result = await translateDraftSections(draft, stubTranslator())
+    expect(result?.overrides.length).toBeGreaterThan(5)
+    expect(result?.title).toBe("Evidence-Constrained Retrieval")
+    const abstract = result?.overrides.find((override) => override.section_id === "abstract")
     expect(abstract?.markdown).toContain("evidence-constrained retrieval")
-    expect(overrides?.every((override) => !/[一-鿿]/.test(override.markdown))).toBe(true)
+    expect(result?.overrides.every((override) => !/[一-鿿]/.test(override.markdown))).toBe(true)
   })
 
   test("refuses a translation that drops a table", async () => {
     const draft = chineseDraft()
-    const overrides = await translateDraftSections(draft, async ({ section_id }) => {
-      if (section_id === "declarations") return "Funding: none. Competing interests: none."
-      return englishBySection[section_id] ?? ""
+    const padded = stubTranslator()
+    const overrides = await translateDraftSections(draft, async (request) => {
+      // This section loses its table on purpose; every other one keeps its structure.
+      if (request.section_id === "declarations") return "Funding: none. Competing interests: none."
+      return padded(request)
     })
     expect(overrides).toBeUndefined()
   })
@@ -108,11 +141,8 @@ describe("draft translation", () => {
 
   test("strips markdown fences from the model output", async () => {
     const draft = chineseDraft()
-    const overrides = await translateDraftSections(draft, async ({ section_id }) => {
-      if (section_id === "introduction") return "```markdown\nThe introduction in English.\n```"
-      return englishBySection[section_id] ?? ""
-    })
-    expect(overrides?.find((override) => override.section_id === "introduction")?.markdown).toBe(
+    const result = await translateDraftSections(draft, stubTranslator({ ...englishBySection, introduction: "```markdown\nThe introduction in English.\n```" }))
+    expect(result?.overrides.find((override) => override.section_id === "introduction")?.markdown).toBe(
       "The introduction in English.",
     )
   })
@@ -158,11 +188,12 @@ describe("draft translation", () => {
           available_source_ids: [],
           model_reviews: [],
           target_profile: "international-q1",
-          translator: async ({ section_id }) => englishBySection[section_id] ?? "",
+          translator: stubTranslator(),
           now,
         },
         options,
       )
+      expect(result.draft.title).toBe("Evidence-Constrained Retrieval")
       expect(result.draft.sections.find((section) => section.section_id === "abstract")?.markdown).toContain(
         "evidence-constrained retrieval",
       )

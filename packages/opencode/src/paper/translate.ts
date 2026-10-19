@@ -13,20 +13,16 @@ import type { DraftSectionOverride } from "./research/writing"
  */
 export type Translator = (request: { section_id: string; text: string; language: "en" }) => Promise<string>
 
-/** Sections a translation has to cover; the rest of the scaffold is bookkeeping the venue never sees. */
-const TRANSLATABLE_SECTIONS = [
-  "abstract",
-  "keywords",
-  "introduction",
-  "related_work",
-  "method",
-  "experimental_setup",
-  "results",
-  "discussion",
-  "conclusion",
-  "declarations",
-  "data_availability",
-] as const
+/**
+ * Every body section is translated; the reference list keeps its bibliography as-is and the internal
+ * audit appendices never reach the venue. The title is translated separately and replaces the draft
+ * title, because a Chinese title in front of an English manuscript is an immediate desk reject.
+ */
+function translatableSections(draft: DraftPaper) {
+  return draft.sections
+    .map((section) => section.section_id)
+    .filter((id) => id !== "references" && !id.startsWith("appendix_"))
+}
 
 const CJK = /[　-〿぀-ヿ㐀-䶿一-鿿가-힯＀-￯]/
 
@@ -95,12 +91,28 @@ export function translatorFromEnv(env: Record<string, string | undefined> = proc
  * Translate the narrative sections of a Chinese manuscript. Returns undefined when translation cannot
  * be completed or comes back still in Chinese; the caller then keeps the generated draft.
  */
+export type TranslatedDraft = {
+  overrides: DraftSectionOverride[]
+  title?: string
+}
+
 export async function translateDraftSections(
   draft: DraftPaper,
   translator: Translator,
-): Promise<DraftSectionOverride[] | undefined> {
+): Promise<TranslatedDraft | undefined> {
   const overrides: DraftSectionOverride[] = []
-  for (const sectionId of TRANSLATABLE_SECTIONS) {
+  let title: string | undefined
+  if (cjkRatio(draft.title) > 0.02) {
+    let translatedTitle: string
+    try {
+      translatedTitle = stripFence(await translator({ section_id: "title", text: draft.title, language: "en" }))
+    } catch {
+      return undefined
+    }
+    if (translatedTitle.length === 0 || cjkRatio(translatedTitle) > 0.02) return undefined
+    title = translatedTitle
+  }
+  for (const sectionId of translatableSections(draft)) {
     const section = draft.sections.find((item) => item.section_id === sectionId)
     if (!section || section.markdown.trim().length === 0) continue
     // Already English: nothing to do (author-supplied overrides may cover some sections).
@@ -113,7 +125,20 @@ export async function translateDraftSections(
     }
     if (translated.length === 0 || cjkRatio(translated) > 0.02) return undefined
     if (!structurePreserved(section.markdown, translated)) return undefined
-    overrides.push({ section_id: sectionId, markdown: translated })
+    let translatedTitle: string | undefined
+    if (cjkRatio(section.title) > 0.02) {
+      try {
+        const value = stripFence(
+          await translator({ section_id: `section_title:${sectionId}`, text: section.title, language: "en" }),
+        )
+        if (value.length === 0 || cjkRatio(value) > 0.02) return undefined
+        translatedTitle = value
+      } catch {
+        return undefined
+      }
+    }
+    overrides.push({ section_id: sectionId, markdown: translated, ...(translatedTitle ? { title: translatedTitle } : {}) })
   }
-  return overrides.length > 0 ? overrides : undefined
+  if (overrides.length === 0 && !title) return undefined
+  return { overrides, ...(title ? { title } : {}) }
 }

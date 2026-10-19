@@ -2646,9 +2646,25 @@ describe("paper authoring loop", () => {
       }))
 
       const prose = (sentence: string) => Array.from({ length: 8 }, () => sentence).join(" ")
-      const sectionOverrides = [
+      const englishSections = [
         { section_id: "abstract", markdown: Array.from({ length: 180 }, (_, index) => `token${index}`).join(" ") },
+        {
+          section_id: "data_availability",
+          markdown: "The dataset is available at https://zenodo.org/record/123 and the code at https://github.com/example/repo.",
+        },
         { section_id: "keywords", markdown: "retrieval, evaluation, reproducibility, statistics, benchmark" },
+        {
+          section_id: "declarations",
+          markdown: [
+            "| Item | Declaration |",
+            "| --- | --- |",
+            "| Funding | Grant 2024AAA123. |",
+            "| Author contributions | A.B. designed the study; C.D. ran the experiments. |",
+            "| Competing interests | The authors declare no competing interests. |",
+            "| Ethics | Not applicable; no human or animal subjects were involved. |",
+            "| Generative AI disclosure | An LLM assisted with language editing; the authors verified all content. |",
+          ].join("\n"),
+        },
         { section_id: "introduction", markdown: prose("The introduction states the problem and the contribution.") },
         { section_id: "related_work", markdown: prose("Prior work is compared along a shared dimension.") },
         { section_id: "method", markdown: prose("The method section describes the proposed procedure.") },
@@ -2673,13 +2689,35 @@ describe("paper authoring loop", () => {
             "Accuracy is 0.910 ± 0.004 over five seeds and the difference is significant (p = 0.003, Wilcoxon signed-rank).",
             "The effect size is large (Cliff's delta = 1.0).",
             "Figure 1 shows the primary result and Table 1 reports the comparison.",
-            "![Figure 1: primary result](figures/result.png)",
+            "![Figure 1: primary result](figures/primary-metric.png)",
+            "![Figure 2: ablation](figures/ablation.png)",
           ].join("\n"),
         },
         { section_id: "discussion", markdown: prose("The discussion separates supported from unsupported claims.") },
         { section_id: "conclusion", markdown: prose("The conclusion restates the supported claim.") },
       ]
 
+      const englishBySection = new Map(englishSections.map((item) => [item.section_id, item.markdown]))
+      const countStructure = (text: string) => ({
+        tables: (text.match(/^\s*\|?\s*:?-{3,}/gm) ?? []).length,
+        images: (text.match(/!\[[^\]]*\]\([^)]+\)/g) ?? []).length,
+      })
+      // Same structure-preserving contract as the real translator: keep every table and image.
+      const translator = async ({ section_id, text }: { section_id: string; text: string }) => {
+        const base =
+          englishBySection.get(section_id) ??
+          `English text for the ${section_id} section, translated for the venue. It repeats enough words to count as substantive prose.`
+        const sourceCounts = countStructure(text)
+        const baseCounts = countStructure(base)
+        const blocks = [base]
+        for (let index = baseCounts.tables; index < sourceCounts.tables; index++) {
+          blocks.push("| A | B |\n| --- | --- |\n| x | y |")
+        }
+        for (let index = baseCounts.images; index < sourceCounts.images; index++) {
+          blocks.push("![Figure](figures/primary-metric.png)")
+        }
+        return blocks.join("\n\n")
+      }
       const authoringRun = (id: string, role: "proposed" | "baseline" | "ablation", mode: "host" | "container"): ExperimentRun => ({
         schema_version: "ExperimentRun.v1",
         experiment_run_id: `${mode}:${id}`,
@@ -2759,7 +2797,7 @@ describe("paper authoring loop", () => {
               authoringRun("ablation-no-gate", "ablation", "container"),
             ],
           },
-          section_overrides: sectionOverrides,
+          translator,
           declarations: {
             funding: "This work was supported by grant 2024AAA123.",
             author_contributions: "A.B. designed the study; C.D. ran the experiments.",

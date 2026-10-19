@@ -1264,9 +1264,10 @@ async function refreshDraftPaperForFinalExport(input: {
     now: input.options?.clock?.().toISOString(),
   })
   const intake = intakeFromRun(input.run)
-  const draft = authoredInputs?.section_overrides?.length
+  const overridden = authoredInputs?.section_overrides?.length
     ? applySectionOverrides(composed, authoredInputs.section_overrides)
     : composed
+  const draft = authoredInputs?.title_override ? { ...overridden, title: authoredInputs.title_override } : overridden
   const markdown = formatDraftPaperForProfile(draft, {
     target_profile: intake.target_profile,
     ledger,

@@ -38,7 +38,7 @@ const STATEMENT_RULES: Record<
     kind: "section",
     section: "data_availability",
     // Reviewers need a locator, not "the code lives in this workspace".
-    pattern: /代码|仓库|code availability|implementation|repository/i,
+    pattern: /代码|仓库|\bcode\b|implementation|repository/i,
     // A package name is a locator too; the generated table labels that row 代码包.
     locator: /https?:\/\/|github\.com|gitlab\.com|zenodo|doi\.org|代码包|code package/i,
   },
@@ -605,11 +605,12 @@ export function checkManuscriptQuality(input: VerificationGateInput): Verificati
       }
 
       if (requirements.language !== "any") {
-        // Judge the narrative the venue reads, not internal bookkeeping sections (audit appendices,
-        // the availability table) or the reference list, which may legitimately mix languages.
-        const body = requirements.required_sections
-          .filter((id) => id !== "references")
-          .map((id) => sectionText(draft, id))
+        // Judge everything the venue reads: every body section, excluding only the bibliography and
+        // the internal audit appendices. Sampling just the required sections let a mixed-language
+        // manuscript (Chinese research questions and limitations) pass as English.
+        const body = draft.sections
+          .filter((section) => section.section_id !== "references" && !section.section_id.startsWith("appendix_"))
+          .map((section) => section.markdown)
           .join("\n")
         const ratio = cjkRatio(body)
         const wrong =

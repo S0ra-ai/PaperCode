@@ -3128,6 +3128,8 @@ export function applyCheckpointGuidance(draft: DraftPaper, guidance: CheckpointG
 export type DraftSectionOverride = {
   section_id: string
   markdown: string
+  /** Translated section heading; omitted when the heading stays as generated. */
+  title?: string
 }
 
 /**
@@ -3138,10 +3140,11 @@ export type DraftSectionOverride = {
  */
 export function applySectionOverrides(draft: DraftPaper, overrides: DraftSectionOverride[]): DraftPaper {
   if (overrides.length === 0) return draft
-  const byId = new Map(overrides.map((override) => [override.section_id, override.markdown]))
+  const byId = new Map(overrides.map((override) => [override.section_id, override]))
   const sections = draft.sections.map((section) => {
-    const markdown = byId.get(section.section_id)
-    return markdown === undefined ? section : { ...section, markdown }
+    const override = byId.get(section.section_id)
+    if (!override) return section
+    return { ...section, markdown: override.markdown, ...(override.title ? { title: override.title } : {}) }
   })
   return {
     ...draft,
@@ -3149,4 +3152,9 @@ export function applySectionOverrides(draft: DraftPaper, overrides: DraftSection
     sections,
     markdown: render(draft.title, sections),
   }
+}
+
+/** Replace the manuscript title and re-render, so the exported markdown carries the new one. */
+export function retitleDraft(draft: DraftPaper, title: string): DraftPaper {
+  return { ...draft, title, markdown: render(title, draft.sections) }
 }
