@@ -99,7 +99,8 @@ function locatorsPreserved(source: string, translated: string) {
 
 const SYSTEM_PROMPT = [
   "You translate academic manuscript sections into publication-quality English.",
-  "Preserve Markdown structure exactly: headings, tables, pipes, alignment rows, image links, numbers, units and citations.",
+  "Preserve Markdown structure exactly: headings, tables, pipes, alignment rows and image links.",
+  "Keep URLs, file paths, commands, flags, numbers, units and citations exactly as written; never translate or reformat them.",
   "Do not add, remove or weaken any claim, value or reference. Translate prose and labels only.",
   "Return only the translated Markdown, without code fences or commentary.",
 ].join(" ")
