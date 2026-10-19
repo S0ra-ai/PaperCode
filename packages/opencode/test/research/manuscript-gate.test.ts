@@ -172,6 +172,36 @@ describe("manuscript quality gate", () => {
     expect(info).not.toContain("匿名")
   })
 
+  test("blocks a design with too few baselines or ablations", () => {
+    const findings = checkManuscriptQuality(
+      gateInput({ experiment_design: { baselines: 1, ablations: 0 } }),
+    )
+    expect(findings.map((finding) => finding.category)).toContain("insufficient_baselines")
+    expect(findings.map((finding) => finding.category)).toContain("missing_ablation")
+  })
+
+  test("accepts a design that meets the Q1 bar", () => {
+    const categories = checkManuscriptQuality(gateInput({ experiment_design: { baselines: 3, ablations: 1 } })).map(
+      (finding) => finding.category,
+    )
+    expect(categories).not.toContain("insufficient_baselines")
+    expect(categories).not.toContain("missing_ablation")
+  })
+
+  test("blocks statistics built from too few trials", () => {
+    const findings = checkManuscriptQuality(
+      gateInput({
+        result_report: {
+          ...resultReport,
+          statistics: [
+            { experiment_id: "experiment-proposed", environment: "host", metric: "accuracy", n: 3, mean: 0.91, std: 0.004 },
+          ],
+        },
+      }),
+    )
+    expect(findings.map((finding) => finding.category)).toContain("insufficient_trials")
+  })
+
   test("blocks a baseline comparison without an effect size", () => {
     const draft = draftWith({
       ...submissionSections,

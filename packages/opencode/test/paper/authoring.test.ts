@@ -2434,7 +2434,7 @@ describe("paper authoring loop", () => {
         },
         diagnostics: { verification_failures: [], gaps: [] },
       }
-      const authoringRun = (id: string, role: "proposed" | "baseline", mode: "host" | "container"): ExperimentRun => ({
+      const authoringRun = (id: string, role: "proposed" | "baseline" | "ablation", mode: "host" | "container"): ExperimentRun => ({
         schema_version: "ExperimentRun.v1",
         experiment_run_id: `${mode}:${id}`,
         plan_id: "plan-1",
@@ -2679,7 +2679,7 @@ describe("paper authoring loop", () => {
         { section_id: "conclusion", markdown: prose("The conclusion restates the supported claim.") },
       ]
 
-      const authoringRun = (id: string, role: "proposed" | "baseline", mode: "host" | "container"): ExperimentRun => ({
+      const authoringRun = (id: string, role: "proposed" | "baseline" | "ablation", mode: "host" | "container"): ExperimentRun => ({
         schema_version: "ExperimentRun.v1",
         experiment_run_id: `${mode}:${id}`,
         plan_id: "plan-1",
@@ -2747,11 +2747,15 @@ describe("paper authoring loop", () => {
           experiment_runs: {
             host_runs: [
               authoringRun("proposed", "proposed", "host"),
-              authoringRun("baseline", "baseline", "host"),
+              authoringRun("baseline-a", "baseline", "host"),
+              authoringRun("baseline-b", "baseline", "host"),
+              authoringRun("ablation-no-gate", "ablation", "host"),
             ],
             container_runs: [
               authoringRun("proposed", "proposed", "container"),
-              authoringRun("baseline", "baseline", "container"),
+              authoringRun("baseline-a", "baseline", "container"),
+              authoringRun("baseline-b", "baseline", "container"),
+              authoringRun("ablation-no-gate", "ablation", "container"),
             ],
           },
           section_overrides: sectionOverrides,

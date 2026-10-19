@@ -18,6 +18,9 @@
 | `missing_statistics` | blocker 或 warning | 论文与基线比较，但没有报告离散度（±/置信区间）或显著性检验（p 值/检验名） |
 | `missing_effect_size` | blocker | 一区 profile 要求基线比较同时报告效果量（Cohen's d / Cliff's δ / η² / 效果量） |
 | `missing_author_metadata` | blocker 或 warning | 稿件仍是"匿名作者"占位；一区要求作者、机构与通信作者 |
+| `insufficient_baselines` | blocker | 实验设计的独立基线少于要求（中文 1，一区 2） |
+| `missing_ablation` | blocker | 缺少消融实验（一区要求至少 1 个） |
+| `insufficient_trials` | blocker 或 warning | 统计量背后的重复次数少于要求（一区 5 次） |
 | `missing_table` | blocker | 结果章节的表格数不足 |
 | `missing_figure` | blocker | 图数不足（国际一区要求至少 1 张） |
 | `manuscript_language` | blocker | 稿件语言与目标期刊不符（国际一区要求英文，CJK 占比 >5% 即拦截） |
@@ -33,6 +36,7 @@
   3. 翻译只覆盖叙事章节（摘要、关键词、引言、相关工作、方法、实验设置、结果、讨论、结论、声明、可用性）；内部审计附录不进英文稿。
 - **声明**：`runPaperAuthoringLoop` 接受 `declarations: { funding, author_contributions, competing_interests, ethics, llm_disclosure }`，HTTP 创建 PaperRun 时传同名的 `declarations` 字段；不传就是"未声明"，闸门会拦。伦理声明有默认的"不涉及人类/动物受试者"文本，仍可覆盖。
 - **代码可用性**：`code_metadata.repository_url` 或 `package_name` 至少有一个，稿件才会写出"代码可用性"小节。闸门要求该节同时出现代码主题与定位信息——URL、GitHub/GitLab/Zenodo/DOI，或生成表格里的"代码包"行都算定位。
+- **实验设计**：一区要求至少 2 个独立基线、至少 1 个消融，统计量来自至少 5 次重复；这些由运行记录统计，缺一项即拦截。
 - **统计**：结果章节必须同时出现离散度（`0.910 ± 0.004`、`0.910 (0.004)`、`95% CI` 或"标准差："）和显著性依据（`p = 0.003` 或 Wilcoxon/t-test/ANOVA 等具体检验名），只有其一仍会被拦。
   - 离散度可以由工具生成：调用实验协议执行时传 `repetitions: N`（HTTP payload 同名字段，1–20），每次执行会注入 `PAPERCODE_SEED`/`PYTHONHASHSEED`，运行结果保留每个指标的样本，`ResultReport.statistics` 给出 `n/mean/std/ci95`，结果表渲染为 `0.910 ± 0.004 (n=5, 95% CI [0.905, 0.915])`。
   - 显著性也由工具计算：proposed 与某个基线各有 ≥2 个样本时做 Welch t 检验（不等方差、双侧）；各 ≥3 个样本时同时做 Wilcoxon 秩和检验（Mann–Whitney，带结校正与连续性校正的正态近似）。与多个基线比较时，按检验族做 Holm–Bonferroni 校正，结果章节报告校正后的 `p` 与效果量（Welch 配 Cohen's d、Wilcoxon 配 Cliff's δ，按常规阈值标注 negligible/small/medium/large），并注明校正。`ResultReport.significance` 保留每个比较的两种检验、校正后的 p 与效果量。

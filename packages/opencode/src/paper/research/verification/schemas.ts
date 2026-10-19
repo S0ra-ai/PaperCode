@@ -27,6 +27,9 @@ export type VerificationFindingCategory =
   | "missing_statistics"
   | "missing_effect_size"
   | "missing_author_metadata"
+  | "insufficient_baselines"
+  | "missing_ablation"
+  | "insufficient_trials"
   | "missing_table"
   | "missing_figure"
   | "manuscript_language"
@@ -61,6 +64,12 @@ export type ManuscriptRequirements = {
   require_effect_size: boolean
   /** Whether the manuscript has to name its authors instead of the anonymous placeholder. */
   require_authors: "off" | "warning" | "blocker"
+  /** How many independent baselines the experiment design has to compare against. */
+  min_baselines: number
+  /** How many ablation experiments the design has to include. */
+  min_ablations: number
+  /** Minimum trials behind a reported statistic (multiple seeds). */
+  min_trials: number
   min_tables: number
   min_figures: number
 }
@@ -112,6 +121,8 @@ export type VerificationGateInput = {
   model_reviews: ModelReviewInput[]
   /** Omitted by callers that only want the integrity checks (tests, preview). */
   manuscript_requirements?: ManuscriptRequirements
+  /** Baseline and ablation counts from the run records; absent skips the design checks. */
+  experiment_design?: { baselines: number; ablations: number }
   now?: string
 }
 

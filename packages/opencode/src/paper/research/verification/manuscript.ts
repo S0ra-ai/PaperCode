@@ -92,6 +92,9 @@ export const CJC_MANUSCRIPT_REQUIREMENTS: ManuscriptRequirements = {
   require_statistics: "warning",
   require_effect_size: false,
   require_authors: "warning",
+  min_baselines: 1,
+  min_ablations: 0,
+  min_trials: 1,
   min_tables: 1,
   min_figures: 0,
 }
@@ -132,6 +135,9 @@ export const Q1_MANUSCRIPT_REQUIREMENTS: ManuscriptRequirements = {
   require_statistics: "blocker",
   require_effect_size: true,
   require_authors: "blocker",
+  min_baselines: 2,
+  min_ablations: 1,
+  min_trials: 5,
   min_tables: 2,
   min_figures: 1,
 }
@@ -391,6 +397,48 @@ export function checkManuscriptQuality(input: VerificationGateInput): Verificati
             },
             requirement.id,
           ),
+        )
+      }
+
+      const design = input.experiment_design
+      if (design && design.baselines < requirements.min_baselines) {
+        findings.push(
+          finding({
+            category: "insufficient_baselines",
+            severity: "blocker",
+            message: `The experiment design has ${design.baselines} baselines; ${requirements.profile} expects at least ${requirements.min_baselines}.`,
+            claim_ids: [],
+            source_ids: [],
+            artifact_ids: [],
+            required_action: "Compare against more independent baselines before final export.",
+          }),
+        )
+      }
+      if (design && design.ablations < requirements.min_ablations) {
+        findings.push(
+          finding({
+            category: "missing_ablation",
+            severity: "blocker",
+            message: `The experiment design has ${design.ablations} ablations; ${requirements.profile} expects at least ${requirements.min_ablations}.`,
+            claim_ids: [],
+            source_ids: [],
+            artifact_ids: [],
+            required_action: "Add an ablation that isolates the proposed contribution.",
+          }),
+        )
+      }
+      const trials = Math.max(0, ...(input.result_report.statistics ?? []).map((item) => item.n))
+      if (trials > 0 && trials < requirements.min_trials) {
+        findings.push(
+          finding({
+            category: "insufficient_trials",
+            severity: requirements.require_statistics === "blocker" ? "blocker" : "warning",
+            message: `Statistics come from ${trials} trials; ${requirements.profile} expects at least ${requirements.min_trials}.`,
+            claim_ids: [],
+            source_ids: [],
+            artifact_ids: [],
+            required_action: "Re-run the experiment protocol with more repetitions.",
+          }),
         )
       }
 

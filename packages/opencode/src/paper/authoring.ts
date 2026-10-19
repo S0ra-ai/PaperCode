@@ -777,6 +777,9 @@ export async function runPaperAuthoringLoop(
           options,
         )
       }
+      const designRuns = input.experiment_runs
+        ? [...input.experiment_runs.host_runs, ...input.experiment_runs.container_runs]
+        : undefined
       const verification = await recordVerificationGate(
         runDir,
         {
@@ -788,6 +791,12 @@ export async function runPaperAuthoringLoop(
           source_records: input.source_records,
           model_reviews: input.model_reviews,
           manuscript_requirements: manuscriptRequirementsForProfile(input.target_profile),
+          experiment_design: designRuns
+            ? {
+                baselines: new Set(designRuns.filter((run) => run.role === "baseline").map((run) => run.experiment_id)).size,
+                ablations: new Set(designRuns.filter((run) => run.role === "ablation").map((run) => run.experiment_id)).size,
+              }
+            : undefined,
           now: input.now,
         },
         options,
