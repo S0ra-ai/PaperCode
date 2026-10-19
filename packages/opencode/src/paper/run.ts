@@ -59,7 +59,14 @@ import {
 import { budgetTierPolicy } from "./budget"
 import { executeContainerExperiment, executeHostExperiment, loadExperimentProtocol, parseExperimentMetrics, selectContainerCommand } from "./research/experiments/execution"
 import { recordExportBundle, type ExportBundle } from "./research/export"
-import { composeDraftPaper, streamMarkdownDraft, type ClaimLedger, type CodeAvailabilityMetadata, type DraftPaper } from "./research/writing"
+import {
+  applySectionOverrides,
+  composeDraftPaper,
+  streamMarkdownDraft,
+  type ClaimLedger,
+  type CodeAvailabilityMetadata,
+  type DraftPaper,
+} from "./research/writing"
 import type { DataPlan, LiteratureMap } from "./research/sources"
 import {
   paperObservabilityAuditFromEvents,
@@ -107,7 +114,7 @@ import type { NoveltyCheckpoint, ExperimentNoveltyGate } from "./novelty"
 import type { ResearchWikiDigest } from "./research-wiki"
 import type { PaperSpine } from "./paper-spine"
 import type { GlobalFigureSpec } from "./global-figure"
-import { formatDraftPaperForProfile } from "./authoring"
+import { formatDraftPaperForProfile, type PaperAuthoringInputs } from "./authoring"
 
 import {
   applyPaperRunControl,
@@ -1225,11 +1232,17 @@ async function refreshDraftPaperForFinalExport(input: {
   ])
   const finalClaimsAllowed = resultReport.final_claims_allowed === true
   const experimentRuns = latestExperimentRuns(experimentRunGroups.flat())
-  const draft = composeDraftPaper({
+  const authoredInputs = await readLatestArtifactBySchema<PaperAuthoringInputs>(
+    input.runDir,
+    input.artifacts,
+    "PaperAuthoringInputs.v1",
+  )
+  const composed = composeDraftPaper({
     title: input.run.topic,
     ledger,
     data_plan: dataPlan,
     literature_map: literatureMap,
+    declarations: authoredInputs?.declarations,
     experiment_plan: experimentPlan,
     experiment_protocol: experimentProtocol,
     experiment_guidance: finalClaimsAllowed ? undefined : experimentGuidance,
@@ -1243,6 +1256,9 @@ async function refreshDraftPaperForFinalExport(input: {
     now: input.options?.clock?.().toISOString(),
   })
   const intake = intakeFromRun(input.run)
+  const draft = authoredInputs?.section_overrides?.length
+    ? applySectionOverrides(composed, authoredInputs.section_overrides)
+    : composed
   const markdown = formatDraftPaperForProfile(draft, {
     target_profile: intake.target_profile,
     ledger,

@@ -255,6 +255,26 @@ describe("manuscript quality gate", () => {
     expect(categories(gateInput({ draft }))).toContain("manuscript_language")
   })
 
+  test("accepts a package name as the code-availability locator", () => {
+    const draft = draftWith({
+      ...submissionSections,
+      data_availability:
+        "The dataset is available at https://zenodo.org/record/123.\n\n| 代码包 | claim-aware-retrieval |",
+    })
+    const missing = checkManuscriptQuality(gateInput({ draft }))
+      .filter((finding) => finding.category === "missing_statement")
+      .map((finding) => finding.message)
+    expect(missing.some((message) => message.includes("代码可用性"))).toBe(false)
+  })
+
+  test("does not treat the scaffold's placeholder explanation as a placeholder", () => {
+    const draft = draftWith({
+      ...submissionSections,
+      data_availability: `${submissionSections.data_availability}\n\n另有 1 个数据集使用测试或占位 URL，已从数据可用性表排除。`,
+    })
+    expect(categories(gateInput({ draft }))).not.toContain("placeholder_text")
+  })
+
   test("blocks a required section that carries no prose", () => {
     const draft = draftWith({ ...submissionSections, discussion: "Too short." })
     const findings = checkManuscriptQuality(gateInput({ draft }))
@@ -274,10 +294,11 @@ describe("manuscript quality gate", () => {
     expect(gate.blocking_report.blockers.map((finding) => finding.category)).toContain("insufficient_references")
   })
 
-  test("maps CJC to the Chinese profile and everything else to the international one", () => {
+  test("maps the default and cjc to the Chinese profile, other profiles to the international one", () => {
     expect(manuscriptRequirementsForProfile("cjc-paper")).toBe(CJC_MANUSCRIPT_REQUIREMENTS)
+    expect(manuscriptRequirementsForProfile(undefined)).toBe(CJC_MANUSCRIPT_REQUIREMENTS)
     expect(manuscriptRequirementsForProfile("international-q1")).toBe(Q1_MANUSCRIPT_REQUIREMENTS)
-    expect(manuscriptRequirementsForProfile(undefined).language).toBe("en")
+    expect(manuscriptRequirementsForProfile("nature-paper").language).toBe("en")
   })
 
   test("renders enough references for the international bar", () => {

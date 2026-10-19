@@ -14,7 +14,8 @@ import type { ManuscriptRequirements, VerificationFinding, VerificationGateInput
 /** A section with fewer words than this is a heading with filler, not a section. */
 const SUBSTANTIVE_WORDS = 20
 
-const PLACEHOLDER = /\b(TODO|TBD|FIXME|XXX)\b|待补充|待完善|占位|lorem ipsum|\[citation needed\]|\?\?\?/i
+// "占位" alone would match the scaffold's own sentence explaining that placeholder URLs were excluded.
+const PLACEHOLDER = /\b(TODO|TBD|FIXME|XXX)\b|待补充|待完善|占位符|placeholder|lorem ipsum|\[citation needed\]|\?\?\?/i
 
 const UNDECLARED =
   /^\s*(未声明|未提供|待定|待补|尚未(?:声明|提供)|not declared|not provided|not specified|to be (?:provided|added))/i
@@ -38,7 +39,8 @@ const STATEMENT_RULES: Record<
     section: "data_availability",
     // Reviewers need a locator, not "the code lives in this workspace".
     pattern: /代码|仓库|code availability|implementation|repository/i,
-    locator: /https?:\/\/|github\.com|gitlab\.com|zenodo|doi\.org|package\s*[:：]/i,
+    // A package name is a locator too; the generated table labels that row 代码包.
+    locator: /https?:\/\/|github\.com|gitlab\.com|zenodo|doi\.org|代码包|code package/i,
   },
   ethics: { label: "伦理审批", kind: "declaration", pattern: /伦理|ethics|IRB|informed consent/i },
   "competing-interests": {
@@ -130,9 +132,10 @@ export const Q1_MANUSCRIPT_REQUIREMENTS: ManuscriptRequirements = {
   min_figures: 1,
 }
 
-/** Chinese venue for `cjc-paper`, international Q1 for every other profile. */
+/** The Chinese venue is the repository default; every other profile is an international submission. */
 export function manuscriptRequirementsForProfile(profile?: string): ManuscriptRequirements {
-  return profile === "cjc-paper" ? CJC_MANUSCRIPT_REQUIREMENTS : Q1_MANUSCRIPT_REQUIREMENTS
+  const selected = profile?.trim() || "cjc-paper"
+  return selected === "cjc-paper" ? CJC_MANUSCRIPT_REQUIREMENTS : Q1_MANUSCRIPT_REQUIREMENTS
 }
 
 function finding(input: Omit<VerificationFinding, "finding_id">, subject?: string): VerificationFinding {
@@ -172,7 +175,7 @@ function cjkRatio(text: string) {
 function keywords(text: string) {
   return text
     .replace(/^\s*\*\*?关键词\*\*?\s*[:：]\s*/i, "")
-    .split(/[;；,，、]/)
+    .split(/[;；,，、\n]/)
     .map((item) => item.trim())
     .filter((item) => item.length > 0)
 }
@@ -397,6 +400,20 @@ export function checkManuscriptQuality(input: VerificationGateInput): Verificati
               }),
             )
           }
+        } else {
+          // Without dates the recency rule cannot run, which would otherwise let an undated
+          // bibliography pass the check silently.
+          findings.push(
+            finding({
+              category: "stale_references",
+              severity: "warning",
+              message: `Only ${years.length} of ${references.length} references carry a publication year; recency cannot be verified.`,
+              claim_ids: [],
+              source_ids: [],
+              artifact_ids: [],
+              required_action: "Give every reference a publication date.",
+            }),
+          )
         }
       }
 

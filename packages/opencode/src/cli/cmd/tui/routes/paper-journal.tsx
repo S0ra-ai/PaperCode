@@ -139,7 +139,7 @@ export function PaperJournalWorkbenchPage() {
       <box flexDirection="row" justifyContent="space-between">
         <box flexDirection="column">
           <text fg={theme.text} attributes={TextAttributes.BOLD}>PaperCode 期刊工作台</text>
-          <text fg={theme.textMuted}>当前仅启用中国计算机学报格式；其他期刊入口暂不开放。</text>
+          <text fg={theme.textMuted}>已启用中国计算机学报与国际 SCI 一区两种投稿格式；其余期刊入口暂不开放。</text>
         </box>
         <text fg={theme.textMuted}>Esc 返回首页</text>
       </box>

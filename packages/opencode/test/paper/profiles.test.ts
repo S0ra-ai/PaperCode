@@ -115,6 +115,13 @@ describe("paper profile registry", () => {
     expect(selection.profile_id).toBe("cjc-paper")
     expect(selection.journal_name).toBe("中国计算机学报")
     expect(selection.generated_profile).toBeUndefined()
+
+    expect(resolvePaperProfileSelection({ target_profile: "international-q1" })).toMatchObject({
+      profile_id: "international-q1",
+    })
+    expect(resolvePaperProfileSelection({ target_journal: "国际 SCI 一区期刊" })).toMatchObject({
+      profile_id: "international-q1",
+    })
   })
 
   test("installs a first-party nature-paper skill with runtime official-source refresh instructions", async () => {

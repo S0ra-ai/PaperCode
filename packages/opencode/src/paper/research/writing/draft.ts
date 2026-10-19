@@ -1046,7 +1046,15 @@ function dataAvailabilitySummary(input: ComposeDraftPaperInput) {
         .filter(Boolean)
         .join("\n\n")
     }
-    return `当前没有可进入数据可用性章节的已验证数据集；${placeholderText}${gaps}因此实验结果只能依赖用户提供的显式实验记录；若缺少实验记录，结论性表述必须保持阻断。`
+    // A supplied repository is still a code-availability statement even when no verified dataset
+    // and no ledger code source exist.
+    const orphanCodeAvailability = codeAvailabilitySummary(input)
+    return [
+      `当前没有可进入数据可用性章节的已验证数据集；${placeholderText}${gaps}因此实验结果只能依赖用户提供的显式实验记录；若缺少实验记录，结论性表述必须保持阻断。`,
+      orphanCodeAvailability,
+    ]
+      .filter(Boolean)
+      .join("\n\n")
   }
   const datasetLines = formalDatasets.slice(0, 5).map((dataset) => {
     const license = displayDatasetLicense(dataset.license.expression ?? dataset.license.status)

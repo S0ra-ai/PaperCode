@@ -63,6 +63,13 @@ export type PaperAvailabilityBundle = {
   notes: string[]
 }
 
+/** What the author supplied beyond the generated draft, persisted so a refresh can reapply it. */
+export type PaperAuthoringInputs = {
+  schema_version: "PaperAuthoringInputs.v1"
+  declarations?: PaperDeclarations
+  section_overrides?: DraftSectionOverride[]
+}
+
 export type RunPaperAuthoringLoopInput = {
   title: string
   ledger: ClaimLedger
@@ -502,9 +509,8 @@ export function formatDraftPaperForProfile(draft: DraftPaper, input: ProfileForm
 
 function appendProfileAppendix(markdown: string, input: ProfileFormattingInput) {
   const profile = input.target_profile ?? "cjc-paper"
-  // The appendix is internal readiness prose in Chinese; neither a preprint nor an international
-  // submission should carry it into the manuscript.
-  if (profile === "generic-preprint" || profile === "international-q1") return markdown
+  // The readiness appendix is Chinese internal prose; only the Chinese venue's manuscript carries it.
+  if (profile !== "cjc-paper") return markdown
   const appendixLabel = nextAppendixLabel(markdown)
   const datasetCount = input.data_plan?.datasets.length ?? 0
   const failedChecks = [
@@ -718,6 +724,25 @@ export async function runPaperAuthoringLoop(
         },
         options,
       )
+      // Persist the author's own text so a later final-export refresh recomposes the same manuscript
+      // instead of silently reverting to the generated sections.
+      if (input.declarations || input.section_overrides?.length) {
+        const authored: PaperAuthoringInputs = {
+          schema_version: "PaperAuthoringInputs.v1",
+          declarations: input.declarations,
+          section_overrides: input.section_overrides,
+        }
+        await writeResearchArtifact(
+          runDir,
+          {
+            kind: "draft",
+            logical_path: "authoring/inputs.json",
+            data: authored,
+            metadata: { artifact_schema: "PaperAuthoringInputs.v1" },
+          },
+          options,
+        )
+      }
       const verification = await recordVerificationGate(
         runDir,
         {

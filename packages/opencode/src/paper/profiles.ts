@@ -187,6 +187,8 @@ export function resolvePaperProfileSelection(input?: {
 
   if (
     key === "international-q1" ||
+    key === "国际 sci 一区期刊" ||
+    key === "国际 sci 一区" ||
     key === "国际一区" ||
     key === "sci 一区" ||
     key === "sci一区" ||

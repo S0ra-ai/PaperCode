@@ -6,7 +6,7 @@ import {
 import type { ResearchArtifact, ResearchEvent } from "./research/contracts"
 import type { ModelRoleConfig } from "./model-router"
 import { resolvePaperProfileSelection, type PaperGeneratedJournalProfile, type PaperProfileId } from "./profiles"
-import type { DraftSectionOverride } from "./research/writing"
+import type { DraftSectionOverride, PaperDeclarations } from "./research/writing"
 
 export type ResearchWorkflow = "topic_to_paper" | "code_to_paper" | "data_to_paper" | "materials_to_paper"
 
@@ -24,6 +24,8 @@ export interface ResearchIntakeRequest {
   model_roles?: Partial<ModelRoleConfig["roles"]>
   /** Section bodies written or translated by the caller, replacing the generated text. */
   draft_sections?: DraftSectionOverride[]
+  /** Declarations only the author can supply; absent values are reported as undeclared. */
+  declarations?: PaperDeclarations
 }
 
 export interface ResearchBriefRisk {

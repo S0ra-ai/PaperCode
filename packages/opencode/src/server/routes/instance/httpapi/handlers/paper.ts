@@ -159,6 +159,7 @@ function normalizeCreatePayload(payload: typeof PaperRunCreatePayload.Type): Pap
     draft_sections: payload.draft_sections
       ? payload.draft_sections.map((section) => ({ section_id: section.section_id, markdown: section.markdown }))
       : undefined,
+    declarations: payload.declarations ? { ...payload.declarations } : undefined,
     budget_tier: payload.budget_tier,
     quality_mode: payload.quality_mode,
     storage_scope: payload.storage_scope,

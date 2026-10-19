@@ -11,7 +11,7 @@ import {
   type PaperSupplementaryBundle,
 } from "@/paper"
 import { type ExportRenderer } from "@/paper/research/export"
-import { createResearchRun, type ResearchRuntimeOptions } from "@/paper/research/runtime"
+import { createResearchRun, getResearchRunStatus, type ResearchRuntimeOptions } from "@/paper/research/runtime"
 import { discoverLiterature, type DataPlan, type SourceRecord } from "@/paper/research/sources"
 import {
   planExperiments,
@@ -2778,6 +2778,11 @@ describe("paper authoring loop", () => {
       )
       expect(result.final_export_blocked).toBe(false)
       expect(result.export.bundle.status).toBe("final")
+      // The refresh that runs on a later final export recomposes from artifacts; the authored text
+      // has to be on disk for it to reproduce this manuscript.
+      expect((await getResearchRunStatus(handle.run_dir)).artifact_versions.map((item) => item.logical_path)).toContain(
+        "authoring/inputs.json",
+      )
     } finally {
       await clean(dir)
     }

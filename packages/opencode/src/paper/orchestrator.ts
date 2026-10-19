@@ -26,7 +26,7 @@ import { indexResearchMaterials, recordMaterialIndex } from "./material-index"
 import { discoverAndRecordLiteratureData } from "./research/sources"
 import { planExperiments } from "./research/experiments/planning"
 import { recordExperimentLoop } from "./research/experiments/recording"
-import { composeClaimLedger, composeDraftPaper } from "./research/writing"
+import { applySectionOverrides, composeClaimLedger, composeDraftPaper } from "./research/writing"
 import type { DataPlan, DatasetCandidate, LiteratureMap, SourceCandidate, SourceRecord } from "./research/sources"
 import type {
   ExperimentCommand,
@@ -1687,6 +1687,12 @@ async function defaultResultReport(
   return cache.result
 }
 
+/** Compose with the caller's declarations and section overrides so stage artifacts match the manuscript. */
+function requestDraft(input: Parameters<typeof composeDraftPaper>[0], request: ResearchIntakeRequest) {
+  const composed = composeDraftPaper({ ...input, declarations: request.declarations })
+  return request.draft_sections?.length ? applySectionOverrides(composed, request.draft_sections) : composed
+}
+
 async function defaultAuthoring(runDir: string, request: ResearchIntakeRequest, options?: ResearchRuntimeOptions) {
   const cache = defaultCache(runDir)
   if (cache.authoring) return cache.authoring
@@ -1718,6 +1724,7 @@ async function defaultAuthoring(runDir: string, request: ResearchIntakeRequest, 
       ],
       target_profile: targetProfile(request),
       section_overrides: request.draft_sections,
+      declarations: request.declarations,
       code_artifact_ids: result.evidenceArtifactIds,
       source_artifact_ids: result.evidenceArtifactIds,
       now: nowIso(options),
@@ -1962,7 +1969,7 @@ const DEFAULT_STAGE_HANDLERS: Partial<Record<PaperResearchStageId, PaperStageHan
     const claims = await defaultClaimLedger(run_dir, request, options)
     const result = await defaultResultReport(run_dir, request, options)
     const codeMetadata = await workspaceCodeMetadata(request, options)
-    const draft = composeDraftPaper({
+    const draft = requestDraft({
       title: normalizeResearchIntake(request).topic,
       ledger: claims.ledger,
       literature_map: result.literatureMap,
@@ -1974,7 +1981,7 @@ const DEFAULT_STAGE_HANDLERS: Partial<Record<PaperResearchStageId, PaperStageHan
       result_report: result.resultReport,
       code_metadata: codeMetadata,
       now: nowIso(options),
-    })
+    }, request)
     await writeStageLog(
       run_dir,
       {
@@ -2043,7 +2050,7 @@ const DEFAULT_STAGE_HANDLERS: Partial<Record<PaperResearchStageId, PaperStageHan
     const claims = await defaultClaimLedger(run_dir, request, options)
     const result = await defaultResultReport(run_dir, request, options)
     const codeMetadata = await workspaceCodeMetadata(request, options)
-    const draft = composeDraftPaper({
+    const draft = requestDraft({
       title: normalizeResearchIntake(request).topic,
       ledger: claims.ledger,
       data_plan: result.dataPlan,
@@ -2055,7 +2062,7 @@ const DEFAULT_STAGE_HANDLERS: Partial<Record<PaperResearchStageId, PaperStageHan
       result_report: result.resultReport,
       code_metadata: codeMetadata,
       now: nowIso(options),
-    })
+    }, request)
     await writeStageLog(
       run_dir,
       {
