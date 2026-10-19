@@ -460,9 +460,9 @@ describe("PaperRun export renderer pipeline", () => {
       claim_ids: [],
       applied_guidance_ids: [],
     }
-    const calls: Array<{ tool: string; args: string[] }> = []
+    const calls: Array<{ tool: string; args: string[]; cwd: string }> = []
     const command: PaperExportCommandRunner = async (input) => {
-      calls.push({ tool: input.tool, args: input.args })
+      calls.push({ tool: input.tool, args: input.args, cwd: input.cwd })
       if (input.tool === "kpsewhich") return { exit_code: 0, stdout: "/texmf/elsarticle.cls\n", stderr: "" }
       const outputIndex = input.args.findIndex((arg) => arg === "-o")
       const output = outputIndex >= 0 ? input.args[outputIndex + 1] : undefined
@@ -500,6 +500,9 @@ describe("PaperRun export renderer pipeline", () => {
 
     const pandocCall = calls.find((call) => call.tool === "pandoc" && call.args.includes("-t"))
     expect(pandocCall?.args).toContain("documentclass=elsarticle")
+    // The probe must run in a directory that exists; the export directory is created later.
+    const probe = calls.find((call) => call.tool === "kpsewhich")
+    expect(probe?.cwd).toBe(run.run_dir)
   })
 
   test("falls back when the venue class is not installed", async () => {

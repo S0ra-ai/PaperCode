@@ -560,8 +560,9 @@ export async function renderPaperExportPipeline(
   const failedChecks = input.final_gate.status === "passed" ? [] : input.final_gate.blockers
   const tools = await discoveredTools(input.tools, options?.home)
   const command = input.command ?? defaultCommand
+  // Probe in the run directory: the export directory does not exist until the first file is written.
   const documentclass = input.documentclass
-    ? await availableDocumentClass(command, outputDir(runDir, input.bundle_id), input.documentclass)
+    ? await availableDocumentClass(command, runDir, input.documentclass)
     : undefined
   const markdown = exportMarkdown(input.draft, input.mode === "forced_draft" ? failedChecks : [])
   const outputName = input.bundle_id
