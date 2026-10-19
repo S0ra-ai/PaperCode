@@ -15,14 +15,22 @@
             - feat(paper): 提供 repository_url/package_name 时，代码可用性小节不再因为缺少方法源码范围而消失
             - feat(paper): 新增章节覆盖入口（HTTP 的 draft_sections / authoring 的 section_overrides），作者或 agent 可替换生成正文，国际一区要求英文时这是唯一通路
             - feat(paper): 参考文献渲染上限从 20 提到 60，使国际一区的 40 条要求可满足
+            - feat(paper): HTTP 创建 PaperRun 支持 declarations 与 draft_sections，桌面端/TUI 也能提供声明与正文
         :fix
-            - fix(paper): 统计检查识别的是数值形态（±/置信区间/p 值/检验名），不会把"不计算置信区间"的说明当成已报告统计量
-            - fix(paper): 被闸门拦下的稿件仍以 forced_draft 导出，失败检查逐条写入 manifest 与预览
-            - fix(paper): 国际一区稿件不再追加中文"投稿准备度"附录；语言检查只采样叙事章节，不受内部附录与参考文献影响
+            - fix(paper): 统计、表格、图只统计结果章节，附录里的 p 值或声明表不再顶替结果
+            - fix(paper): 声明按"标签列→值列"解析并支持列表/段落写法；"未提供/not provided"等说法同样判定为未声明
+            - fix(paper): 参考文献同时识别 [1] 与 1. 两种编号并去重；时效按文献类型标记之后的出版年计算，不再读标题里的年份
+            - fix(paper): 语言检查覆盖假名/谚文/全角字符，且只对叙事章节采样
+            - fix(paper): 未指定 profile 时与全仓默认一致使用中文期刊基线（此前会误用英文一区基线）
+            - fix(paper): 最终导出刷新会重放作者提供的正文与声明（持久化为 AuthoringInputs artifact），不再退回中文脚手架
+            - fix(paper): 代码可用性接受"代码包"行作为定位；占位检查不再误伤脚手架"占位 URL 已排除"的说明
+            - fix(paper): "国际 SCI 一区期刊"等期刊名能正确解析到 international-q1，期刊页文案同步
+            - fix(paper): 被闸门拦下的稿件仍以 forced_draft 导出，失败检查记录在 blocking-report artifact 与预览 blockers
+            - fix(paper): 非中文期刊稿件不再追加中文"投稿准备度"附录
         :checks
-            - targeted: test/paper + test/research 262 pass / 1 skip / 0 fail，新增 manuscript-gate 用例覆盖通过态与每一种拦截
+            - targeted: test/paper + test/research 274 pass / 1 skip / 0 fail；manuscript-gate 用例覆盖通过态与每一种拦截
             - typecheck: bun run typecheck 13/13 通过
-            - e2e: CJC authoring 端到端在补齐 20 条已验证文献、实验运行记录、代码地址与声明后仍能走到 final（未被闸门误伤）
+            - e2e: CJC 与 international-q1 两条 authoring 端到端都能走到 final（一区用例含 40 条文献、英文正文、两张表、一张图、统计量与声明）
 
     0.13.0.184-dev - 2026/10/16 (e608e5b) [fix/mcp-tool-binding-test-isolation]
         :brief 模型配置支持自定义 provider，论文模型选择打通配置声明，品牌收尾为 PaperCode
