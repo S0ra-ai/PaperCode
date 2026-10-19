@@ -57,6 +57,7 @@
             - fix(paper): flag/URL 的 locator 提取不再吞掉中文顿号等分隔符；`--a=1、--b=2` 按两个 flag 校验，避免正常翻译被误判
             - fix(paper): 翻译把脚手架引用标记 `[来源 N]` 归一化为 `[Source N]`，并拒绝叙事段落中残留的任何中文（此前长段落里 6 个中文字符能躲过 2% 阈值）
             - feat(paper): 数据集元数据支持多查询结构（queries[]），正文报告候选总数、查询数与双评审加权一致性；标签策略识别两个独立评审配置
+            - fix(paper): 伦理声明识别支持 "Ethical Approval" 等 ethic/ethical 拼写；译文使用 Ethical Approval 时不再被误报未声明
         :fix
             - fix(paper): 统计、表格、图只统计结果章节，附录里的 p 值或声明表不再顶替结果
             - fix(paper): 声明按"标签列→值列"解析并支持列表/段落写法；"未提供/not provided"等说法同样判定为未声明

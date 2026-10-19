@@ -270,6 +270,17 @@ describe("manuscript quality gate", () => {
     expect(missing.some((message) => message.includes("利益冲突"))).toBe(true)
   })
 
+  test("accepts the Ethical Approval label used in translated manuscripts", () => {
+    const draft = draftWith({
+      ...submissionSections,
+      declarations: submissionSections.declarations.replace("| Ethics |", "| Ethical Approval |"),
+    })
+    const missing = checkManuscriptQuality(gateInput({ draft }))
+      .filter((finding) => finding.category === "missing_statement")
+      .map((finding) => finding.message)
+    expect(missing.some((message) => message.includes("伦理审批"))).toBe(false)
+  })
+
   test("treats an alternative undeclared phrasing as undeclared", () => {
     const draft = draftWith({
       ...submissionSections,

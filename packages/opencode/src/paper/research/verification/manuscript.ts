@@ -42,7 +42,7 @@ const STATEMENT_RULES: Record<
     // A package name is a locator too; the generated table labels that row 代码包.
     locator: /https?:\/\/|github\.com|gitlab\.com|zenodo|doi\.org|代码包|code package/i,
   },
-  ethics: { label: "伦理审批", kind: "declaration", pattern: /伦理|ethics|IRB|informed consent/i },
+  ethics: { label: "伦理审批", kind: "declaration", pattern: /伦理|ethic(s|al)?|IRB|informed consent/i },
   "competing-interests": {
     label: "利益冲突",
     kind: "declaration",
