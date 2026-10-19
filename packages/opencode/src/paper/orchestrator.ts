@@ -298,6 +298,7 @@ function targetProfile(request: ResearchIntakeRequest): PaperProfileId {
 
 type DefaultExecutionCache = {
   source?: DefaultSourceDiscoveryResult
+  novelty_status?: "clear" | "needs_review" | "redirect_required" | "blocked"
   code?: DefaultCodeAnalysisResult
   experiment?: DefaultExperimentLoopResult
   claims?: Awaited<ReturnType<typeof defaultClaimLedger>>
@@ -481,6 +482,7 @@ async function recordNoveltyCheckpoint(
     sources: input.sources ?? [],
     now: nowIso(options),
   })
+  defaultCache(runDir).novelty_status = checkpoint.status
   const artifact = await writeStageLog(
     runDir,
     {
@@ -1727,6 +1729,7 @@ async function defaultAuthoring(runDir: string, request: ResearchIntakeRequest, 
       section_overrides: request.draft_sections,
       declarations: request.declarations,
       authors: request.authors,
+      novelty_status: defaultCache(runDir).novelty_status,
       translator: translatorFromEnv(),
       code_artifact_ids: result.evidenceArtifactIds,
       source_artifact_ids: result.evidenceArtifactIds,

@@ -95,6 +95,7 @@ export const CJC_MANUSCRIPT_REQUIREMENTS: ManuscriptRequirements = {
   min_baselines: 1,
   min_ablations: 0,
   min_trials: 1,
+  require_novelty: "warning",
   min_tables: 1,
   min_figures: 0,
 }
@@ -138,6 +139,7 @@ export const Q1_MANUSCRIPT_REQUIREMENTS: ManuscriptRequirements = {
   min_baselines: 2,
   min_ablations: 1,
   min_trials: 5,
+  require_novelty: "blocker",
   min_tables: 2,
   min_figures: 1,
 }
@@ -400,6 +402,19 @@ export function checkManuscriptQuality(input: VerificationGateInput): Verificati
         )
       }
 
+      if (requirements.require_novelty !== "off" && input.novelty_status && input.novelty_status !== "clear") {
+        findings.push(
+          finding({
+            category: "novelty_not_clear",
+            severity: requirements.require_novelty,
+            message: `The novelty checkpoint is ${input.novelty_status}; a submission needs a clear decision.`,
+            claim_ids: [],
+            source_ids: [],
+            artifact_ids: [],
+            required_action: "Resolve the novelty conflicts or reposition the contribution.",
+          }),
+        )
+      }
       const design = input.experiment_design
       if (design && design.baselines < requirements.min_baselines) {
         findings.push(

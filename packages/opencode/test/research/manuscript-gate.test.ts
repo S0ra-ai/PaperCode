@@ -172,6 +172,11 @@ describe("manuscript quality gate", () => {
     expect(info).not.toContain("匿名")
   })
 
+  test("blocks a submission whose novelty decision is not clear", () => {
+    expect(categories(gateInput({ novelty_status: "needs_review" }))).toContain("novelty_not_clear")
+    expect(categories(gateInput({ novelty_status: "clear" }))).not.toContain("novelty_not_clear")
+  })
+
   test("blocks a design with too few baselines or ablations", () => {
     const findings = checkManuscriptQuality(
       gateInput({ experiment_design: { baselines: 1, ablations: 0 } }),

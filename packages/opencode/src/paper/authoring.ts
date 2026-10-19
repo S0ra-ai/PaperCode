@@ -101,6 +101,8 @@ export type RunPaperAuthoringLoopInput = {
   authors?: PaperAuthor[]
   /** Section bodies authored or translated by the caller; replaces the generated text. */
   section_overrides?: DraftSectionOverride[]
+  /** Latest novelty decision from the orchestrator; absent skips the novelty gate. */
+  novelty_status?: "clear" | "needs_review" | "redirect_required" | "blocked"
   /** Supplies English prose when the target venue requires it; absent leaves the generated language. */
   translator?: Translator
   code_artifact_ids?: string[]
@@ -791,6 +793,7 @@ export async function runPaperAuthoringLoop(
           source_records: input.source_records,
           model_reviews: input.model_reviews,
           manuscript_requirements: manuscriptRequirementsForProfile(input.target_profile),
+          novelty_status: input.novelty_status,
           experiment_design: designRuns
             ? {
                 baselines: new Set(designRuns.filter((run) => run.role === "baseline").map((run) => run.experiment_id)).size,

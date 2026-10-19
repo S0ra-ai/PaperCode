@@ -30,6 +30,7 @@ export type VerificationFindingCategory =
   | "insufficient_baselines"
   | "missing_ablation"
   | "insufficient_trials"
+  | "novelty_not_clear"
   | "missing_table"
   | "missing_figure"
   | "manuscript_language"
@@ -70,6 +71,8 @@ export type ManuscriptRequirements = {
   min_ablations: number
   /** Minimum trials behind a reported statistic (multiple seeds). */
   min_trials: number
+  /** Whether the novelty checkpoint has to be clear before final export. */
+  require_novelty: "off" | "warning" | "blocker"
   min_tables: number
   min_figures: number
 }
@@ -123,6 +126,8 @@ export type VerificationGateInput = {
   manuscript_requirements?: ManuscriptRequirements
   /** Baseline and ablation counts from the run records; absent skips the design checks. */
   experiment_design?: { baselines: number; ablations: number }
+  /** Latest novelty decision from the orchestrator's checkpoints; absent skips the novelty check. */
+  novelty_status?: "clear" | "needs_review" | "redirect_required" | "blocked"
   now?: string
 }
 
