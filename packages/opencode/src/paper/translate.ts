@@ -115,7 +115,9 @@ async function translateValidated(
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
     let value: string
     try {
-      value = clean(await translator({ section_id, text, language: "en" }))
+      // Retry with an explicit instruction; an identical prompt can reproduce the same echo.
+      const prompt = attempt === 0 ? text : `${text}\n\nReturn the English translation only. Do not include the original Chinese text.`
+      value = clean(await translator({ section_id, text: prompt, language: "en" }))
     } catch (error) {
       reason = `request failed: ${error instanceof Error ? error.message : String(error)}`
       continue
@@ -132,6 +134,8 @@ function cleanTitle(value: string) {
   return stripFence(value)
     .replace(/^#{1,6}\s*/, "")
     .replace(/^["'`]+|["'`]+$/g, "")
+    // Models sometimes return "Reproducibility（可复现性）"; the parenthetical is not the title.
+    .replace(/\s*[（(][^）)]*[\u4e00-\u9fff][^）)]*[）)]/g, "")
     .replace(/\s+/g, " ")
     .trim()
     .replace(/[.。]$/, "")
@@ -153,7 +157,7 @@ function commentaryTitle(value: string, maxWords: number) {
 
 function validatedEnglish(value: string, emptyReason: string, chineseReason: string) {
   if (value.length === 0) return emptyReason
-  if (cjkRatio(value) > 0.02) return chineseReason
+  if (cjkRatio(value) > 0.02) return `${chineseReason}: ${value.slice(0, 80)}`
   return undefined
 }
 

@@ -238,7 +238,9 @@ describe("translation diagnostics", () => {
       { onFailure: (failure) => failures.push(failure) },
     )
     expect(result).toBeUndefined()
-    expect(failures).toEqual([{ section_id: "title", reason: "translation still contains Chinese" }])
+    expect(failures).toHaveLength(1)
+    expect(failures[0]?.section_id).toBe("title")
+    expect(failures[0]?.reason).toContain("translation still contains Chinese")
   })
 
   test("reports endpoint errors with the failing section", async () => {
@@ -256,6 +258,16 @@ describe("translation diagnostics", () => {
 })
 
 describe("translated titles", () => {
+  test("drops a Chinese parenthetical the model appends to an English title", async () => {
+    const base = stubTranslator()
+    const translator = async (input: { section_id: string; text: string }) =>
+      input.section_id === "section_title:reproducibility" ? "Reproducibility（可复现性）" : base(input)
+    const result = await translateDraftSections(chineseDraft(), translator)
+    expect(result?.overrides.find((override) => override.section_id === "reproducibility")?.title).toBe(
+      "Reproducibility",
+    )
+  })
+
   test("strips heading markers and retries commentary instead of writing it into the manuscript", async () => {
     const base = stubTranslator()
     let commentarySent = false
