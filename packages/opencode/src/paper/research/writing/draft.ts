@@ -2611,8 +2611,8 @@ function significanceTable(input: ComposeDraftPaperInput) {
       test.name === "welch_t"
         ? `t=${formatStatisticValue(test.statistic)}${test.df === undefined ? "" : `, df=${formatStatisticValue(test.df)}`}`
         : `U=${formatStatisticValue(test.statistic)}`,
-      formatPValue(test.p),
-      formatPValue(test.p_adjusted),
+      formatTablePValue(test.p),
+      formatTablePValue(test.p_adjusted),
       test.effect_size
         ? `${test.effect_size.name === "cohens_d" ? "Cohen's d" : "Cliff's delta"}=${formatStatisticValue(test.effect_size.value)}（${test.effect_size.magnitude}）`
         : "—",
@@ -2625,6 +2625,12 @@ function significanceTable(input: ComposeDraftPaperInput) {
 function formatStatisticValue(value: number) {
   if (!Number.isFinite(value)) return "n/a"
   return Math.abs(value) >= 10 ? value.toFixed(2) : value.toFixed(3)
+}
+
+/** Table cells carry the header "p", so the value needs no leading equals sign and no wrap. */
+function formatTablePValue(value: number) {
+  if (!Number.isFinite(value)) return "n/a"
+  return value < 0.001 ? "< 0.001" : value.toFixed(4)
 }
 
 function formatPValue(value: number) {

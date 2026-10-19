@@ -764,7 +764,7 @@ describe("venue LaTeX structure", () => {
       ),
       section("abstract", "Abstract", "This abstract describes a reproducible ranking evaluation."),
       section("keywords", "Keywords", "ranking; evaluation; reproducibility"),
-      section("introduction", "Introduction", "Introduction body."),
+      section("introduction", "Introduction", "Introduction body.\n\n![Figure 1: result](figures/result.png)"),
     ]
     const draft = {
       schema_version: "DraftPaper.v1",
@@ -827,6 +827,7 @@ describe("venue LaTeX structure", () => {
     expect(latexInputs[0]).toContain("# Introduction")
     expect(latexInputs[0]).not.toContain("# Author Information")
     expect(latexInputs[0]).not.toContain("## Abstract")
+    expect(latexInputs[0]).toContain("figures/result.png){width=85%}")
     expect(metadata[0]).toContain("title:")
     expect(metadata[0]).toContain("abstract:")
     const tex = await readFile(latexWritten, "utf8")

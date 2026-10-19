@@ -66,6 +66,7 @@
             - feat(export): LaTeX/PDF 按期刊类重排：标题/作者/单位/摘要/关键词进入 frontmatter，章节恢复编号，References 与附录不编号、参考文献逐条悬挂缩进；表格由正文"Table N"生成 caption，按内容分配列宽，≥6 列或长标识符表格缩小并加断行点
             - fix(paper): final export 刷新在替换标题后重新渲染 markdown，导出稿标题不再退回中文 topic
             - fix(paper): 统计检验表去掉冗余的自由度/样本量列，统计量与 df 合并，基线使用可读名称（BM25/random），避免 8 列在正文宽度内重叠
+            - fix(export): 表格内 p 值去掉多余的 "=" 前缀；图片按 85% 文本宽度排版
         :fix
             - fix(paper): 统计、表格、图只统计结果章节，附录里的 p 值或声明表不再顶替结果
             - fix(paper): 声明按"标签列→值列"解析并支持列表/段落写法；"未提供/not provided"等说法同样判定为未声明

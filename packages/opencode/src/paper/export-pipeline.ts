@@ -361,6 +361,11 @@ function captionLatexTables(body: string) {
   return output.join("\n\n")
 }
 
+/** Bare images render at their pixel size; a manuscript figure should use the text width. */
+function sizeLatexFigures(body: string) {
+  return body.replace(/(!\[[^\]]*\]\([^)]+\))(?!\{)/g, "$1{width=85%}")
+}
+
 /** Reference entries are adjacent lines in markdown; pandoc joins them into one paragraph. */
 function separateReferenceEntries(body: string) {
   const output: string[] = []
@@ -415,7 +420,7 @@ function latexSource(markdown: string, draft: DraftPaper): LatexSource {
     .filter((section) => !frontMatter.has(section.title))
     .map((section) => {
       const body = section.title === byId.get("references") ? separateReferenceEntries(section.body) : section.body
-      return `# ${section.title}\n\n${captionLatexTables(shiftLatexHeadings(body))}`
+      return `# ${section.title}\n\n${captionLatexTables(sizeLatexFigures(shiftLatexHeadings(body)))}`
     })
     .join("\n\n")
   const metadataLines = [
