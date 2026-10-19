@@ -421,6 +421,23 @@ function bestBaselineLabel(input: ComposeDraftPaperInput) {
   return id ? contextualExperimentLabel(input, id, "baseline") : "最佳基线"
 }
 
+/** Name only the baselines the experiment has not already run. */
+function baselineFollowUp(input: ComposeDraftPaperInput, conjunction: "或" | "和") {
+  const declared = (input.experiment_plan?.baselines ?? []).map((item) =>
+    `${item.experiment_id} ${item.label}`.toLowerCase(),
+  )
+  const missing = [
+    { pattern: /bm25/, label: "BM25" },
+    { pattern: /vector|embedding|dense/, label: "向量检索" },
+    { pattern: /learning[-_\s]?to[-_\s]?rank|\bltr\b|lambda[-_\s]?mart|learned?[-_\s]?rank/, label: "学习排序" },
+    { pattern: /human|manual/, label: "人工标注基线" },
+  ]
+    .filter((item) => !declared.some((value) => item.pattern.test(value)))
+    .map((item) => item.label)
+  if (missing.length === 0) return "进一步扩展更强的检索与排序基线"
+  return `加入 ${missing.slice(0, -1).join("、")}${missing.length > 1 ? conjunction : ""}${missing.at(-1)}`
+}
+
 function displayExperimentRole(value: string) {
   if (value === "proposed") return "本文方法"
   if (value === "baseline") return "基线"
@@ -2456,7 +2473,7 @@ function rankingThreatsToValiditySummary(input: ComposeDraftPaperInput, metric: 
       [
         "基线效度",
         "词项匹配基线偏弱，主要检验查询词重合是否能解释当前排序差异。",
-        "后续加入 BM25、向量检索、学习排序或人工标注基线。",
+        `后续${baselineFollowUp(input, "或")}。`,
       ],
       [
         "消融效度",
@@ -3083,7 +3100,7 @@ function limitationsSummary(input: ComposeDraftPaperInput, unsupported: string[]
               ? `最强基线（${bestBaselineLabel(input)}）属于弱基线；完整排序高于它只能说明当前评分优于该基线，不能说明方法强于其他基线。`
               : `词项匹配基线属于弱基线；即便如此，完整排序仍未超过最强基线（${bestBaselineLabel(input)}），因此结果不支持方法优势的表述。`
             : "基线强度有限，当前结果不足以支持方法优势的表述。",
-          "加入 BM25、向量检索、学习排序和人工标注基线。",
+          `${baselineFollowUp(input, "和")}。`,
         ],
         [
           "外部推广",

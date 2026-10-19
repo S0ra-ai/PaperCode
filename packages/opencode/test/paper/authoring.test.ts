@@ -3294,6 +3294,7 @@ describe("ranking result narration", () => {
     ablation: number,
     includeLexical = true,
     diagnostics: string[] = [],
+    includeBm25 = false,
   ) => {
     const ledger = composeClaimLedger({ topic: "Candidate ranking", claims: [], now })
     const command = (variant: string) => ({
@@ -3327,6 +3328,7 @@ describe("ranking result narration", () => {
         metrics: [{ name: "ranking_ndcg_at_3", direction: "higher_better", primary: true }],
         proposed: planSpec("proposed:eval", "proposed", "proposed"),
         baselines: [
+          ...(includeBm25 ? [planSpec("baseline:bm25", "baseline", "bm25")] : []),
           ...(includeLexical ? [planSpec("baseline:lexical", "baseline", "baseline")] : []),
           planSpec("baseline:random", "baseline", "random"),
         ],
@@ -3397,6 +3399,12 @@ describe("ranking result narration", () => {
     expect(abstract).toContain("覆盖 5 个查询")
     expect(abstract).toContain("两个独立评审配置")
     expect(abstract).toContain("加权一致性")
+  })
+
+  test("does not list BM25 as future work when it is already a baseline", () => {
+    const limitations = markdownSection(rankingDraft(0.9, 0.8, 0.85, true, [], true).markdown, "限制")
+    expect(limitations).not.toContain("加入 BM25")
+    expect(limitations).toContain("向量检索")
   })
 
   test("states the comparison when the method wins", () => {
