@@ -38,6 +38,15 @@ function stripFence(value: string) {
   return (fenced ? fenced[1] : trimmed).trim()
 }
 
+/** Scaffold markers have a fixed English form; leaving them Chinese pollutes the venue copy. */
+function normalizeMarkers(value: string) {
+  return value.replace(/\[来源\s*(\d+)\]/g, "[Source $1]")
+}
+
+function cleanTranslation(value: string) {
+  return normalizeMarkers(stripFence(value))
+}
+
 /** Tables and image references carry the results; row counts and image targets must survive. */
 function structurePreserved(source: string, translated: string) {
   const rows = (text: string) => (text.match(/^\s*\|.*\|\s*$/gm) ?? []).length
@@ -176,7 +185,7 @@ async function translateValidated(
   section_id: string,
   text: string,
   validate: (value: string) => string | undefined,
-  clean: (value: string) => string = stripFence,
+  clean: (value: string) => string = cleanTranslation,
 ): Promise<{ value?: string; reason?: string }> {
   let reason = "empty translation"
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
@@ -202,7 +211,7 @@ async function translateValidated(
 
 /** Titles come back with Markdown hashes or quotes often enough to normalize them. */
 function cleanTitle(value: string) {
-  return stripFence(value)
+  return normalizeMarkers(stripFence(value))
     .replace(/^#{1,6}\s*/, "")
     .replace(/^["'`]+|["'`]+$/g, "")
     // Models sometimes return "Reproducibility（可复现性）"; the parenthetical is not the title.
@@ -228,7 +237,8 @@ function commentaryTitle(value: string, maxWords: number) {
 
 function validatedEnglish(value: string, emptyReason: string, chineseReason: string) {
   if (value.length === 0) return emptyReason
-  if (cjkRatio(value) > 0.02) return `${chineseReason}: ${value.slice(0, 80)}`
+  // Narrative prose for an English venue must not retain any Chinese characters.
+  if (CJK.test(value)) return `${chineseReason}: ${value.slice(0, 80)}`
   return undefined
 }
 

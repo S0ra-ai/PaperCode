@@ -340,6 +340,27 @@ describe("appendix and reference handling", () => {
 })
 
 describe("structure and value guards", () => {
+  test("normalizes scaffold citation markers and rejects any residual Chinese", async () => {
+    const base = stubTranslator()
+    const translator = async (input: { section_id: string; text: string }) => {
+      const value = await base(input)
+      return input.section_id === "results" ? `${value} [来源 1]` : value
+    }
+    const result = await translateDraftSections(chineseDraft(), translator)
+    const results = result?.overrides.find((override) => override.section_id === "results")
+    expect(results?.markdown).toContain("[Source 1]")
+    expect(results?.markdown).not.toContain("来源")
+
+    const chinese = async (input: { section_id: string; text: string }) =>
+      input.section_id === "results" ? `${await base(input)} 中文残留` : base(input)
+    const failures: Array<{ section_id: string; reason: string }> = []
+    const rejected = await translateDraftSections(chineseDraft(), chinese, {
+      onFailure: (failure) => failures.push(failure),
+    })
+    expect(rejected).toBeUndefined()
+    expect(failures[0]?.reason).toContain("still contains Chinese")
+  })
+
   test("rejects a translation that drops table rows", async () => {
     const base = stubTranslator()
     const translator = async (input: { section_id: string; text: string }) => {
