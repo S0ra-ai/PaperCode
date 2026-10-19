@@ -1,10 +1,25 @@
 :project       PaperCode - 可验证论文研究自动化系统
 :repo
 :desc          记录项目的重大变更和版本历史
-:version       0.13.0.184-dev
-:last_update   2026/10/16
+:version       0.13.0.185-dev
+:last_update   2026/10/19
 
 :history
+
+    0.13.0.185-dev - 2026/10/19 (29e2793) [main]
+        :brief 新增投稿质量闸门与国际一区 profile，按一区标准拦截不达标的稿件
+        :feat
+            - feat(paper): 新增稿件质量闸门，检查章节实质内容、摘要长度、关键词、占位符、声明、参考文献数量与时效、统计报告、图表与语言；需求以 CJC/Q1 两套数据定义，按 profile 选择
+            - feat(paper): 新增 international-q1 论文 profile 并加入可选 profile；非 cjc 的 profile 一律使用国际一区基线
+            - feat(paper): runPaperAuthoringLoop 接受 declarations（基金、作者贡献、利益冲突、伦理、生成式 AI 使用），写入声明章节
+            - feat(paper): 提供 repository_url/package_name 时，代码可用性小节不再因为缺少方法源码范围而消失
+        :fix
+            - fix(paper): 统计检查识别的是数值形态（±/置信区间/p 值/检验名），不会把"不计算置信区间"的说明当成已报告统计量
+            - fix(paper): 被闸门拦下的稿件仍以 forced_draft 导出，失败检查逐条写入 manifest 与预览
+        :checks
+            - targeted: test/paper + test/research 262 pass / 1 skip / 0 fail，新增 manuscript-gate 用例覆盖通过态与每一种拦截
+            - typecheck: bun run typecheck 13/13 通过
+            - e2e: CJC authoring 端到端在补齐 20 条已验证文献、实验运行记录、代码地址与声明后仍能走到 final（未被闸门误伤）
 
     0.13.0.184-dev - 2026/10/16 (e608e5b) [fix/mcp-tool-binding-test-isolation]
         :brief 模型配置支持自定义 provider，论文模型选择打通配置声明，品牌收尾为 PaperCode
