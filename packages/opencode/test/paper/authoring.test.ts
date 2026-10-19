@@ -2728,6 +2728,9 @@ describe("paper authoring loop", () => {
             { model: "reviewer-two", verdict: "pass" },
           ],
           target_profile: "international-q1",
+          authors: [
+            { name: "Ada Lovelace", affiliation: "Example University", email: "ada@example.org", corresponding: true },
+          ],
           literature_map: {
             schema_version: "LiteratureMap.v1",
             topic: "Retrieval evaluation",

@@ -17,6 +17,7 @@
 | `stale_references` | warning | 有年份的参考文献中，近五年占比低于 50% |
 | `missing_statistics` | blocker 或 warning | 论文与基线比较，但没有报告离散度（±/置信区间）或显著性检验（p 值/检验名） |
 | `missing_effect_size` | blocker | 一区 profile 要求基线比较同时报告效果量（Cohen's d / Cliff's δ / η² / 效果量） |
+| `missing_author_metadata` | blocker 或 warning | 稿件仍是"匿名作者"占位；一区要求作者、机构与通信作者 |
 | `missing_table` | blocker | 结果章节的表格数不足 |
 | `missing_figure` | blocker | 图数不足（国际一区要求至少 1 张） |
 | `manuscript_language` | blocker | 稿件语言与目标期刊不符（国际一区要求英文，CJK 占比 >5% 即拦截） |

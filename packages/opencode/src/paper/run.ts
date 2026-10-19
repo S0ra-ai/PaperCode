@@ -1247,6 +1247,7 @@ async function refreshDraftPaperForFinalExport(input: {
     data_plan: dataPlan,
     literature_map: literatureMap,
     declarations: authoredInputs?.declarations,
+    authors: authoredInputs?.authors,
     figure: figureSpecFromReport(resultReport),
     experiment_plan: experimentPlan,
     experiment_protocol: experimentProtocol,

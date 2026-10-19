@@ -26,6 +26,7 @@ export type VerificationFindingCategory =
   | "stale_references"
   | "missing_statistics"
   | "missing_effect_size"
+  | "missing_author_metadata"
   | "missing_table"
   | "missing_figure"
   | "manuscript_language"
@@ -58,6 +59,8 @@ export type ManuscriptRequirements = {
   require_statistics: "off" | "warning" | "blocker"
   /** Whether a baseline comparison also has to report an effect size (Cohen's d / Cliff's delta). */
   require_effect_size: boolean
+  /** Whether the manuscript has to name its authors instead of the anonymous placeholder. */
+  require_authors: "off" | "warning" | "blocker"
   min_tables: number
   min_figures: number
 }

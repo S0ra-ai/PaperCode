@@ -6,7 +6,7 @@ import {
 import type { ResearchArtifact, ResearchEvent } from "./research/contracts"
 import type { ModelRoleConfig } from "./model-router"
 import { resolvePaperProfileSelection, type PaperGeneratedJournalProfile, type PaperProfileId } from "./profiles"
-import type { DraftSectionOverride, PaperDeclarations } from "./research/writing"
+import type { DraftSectionOverride, PaperAuthor, PaperDeclarations } from "./research/writing"
 
 export type ResearchWorkflow = "topic_to_paper" | "code_to_paper" | "data_to_paper" | "materials_to_paper"
 
@@ -26,6 +26,8 @@ export interface ResearchIntakeRequest {
   draft_sections?: DraftSectionOverride[]
   /** Declarations only the author can supply; absent values are reported as undeclared. */
   declarations?: PaperDeclarations
+  /** Named authors and affiliations; absent leaves the anonymous placeholder. */
+  authors?: PaperAuthor[]
 }
 
 export interface ResearchBriefRisk {

@@ -62,6 +62,8 @@ export type ComposeDraftPaperInput = {
   >
   /** Chart written by the export pipeline next to the bundle; the results section references it. */
   figure?: PaperFigureSpec
+  /** Named authors and affiliations; absent means the anonymous placeholder. */
+  authors?: PaperAuthor[]
   code_metadata?: CodeAvailabilityMetadata
   now?: string
 }
@@ -171,13 +173,44 @@ function buildPlainSection(sectionId: string, title: string, markdown: string): 
   }
 }
 
-function authorInformationSummary() {
+/** An author's metadata. A submission with the anonymous placeholder is not acceptable anywhere. */
+export type PaperAuthor = {
+  name: string
+  affiliation?: string
+  email?: string
+  corresponding?: boolean
+}
+
+function authorInformationSummary(authors?: PaperAuthor[]) {
+  const named = (authors ?? []).filter((author) => author.name.trim().length > 0)
+  if (named.length === 0) {
+    return markdownTable(
+      ["项目", "内容"],
+      [
+        ["作者", "匿名作者"],
+        ["机构", "匿名单位"],
+        ["通信作者", "匿名通信作者"],
+      ],
+    )
+  }
+  const affiliations = Array.from(
+    new Set(named.map((author) => author.affiliation?.trim()).filter((value): value is string => Boolean(value))),
+  )
+  const corresponding = named.find((author) => author.corresponding)
   return markdownTable(
     ["项目", "内容"],
     [
-      ["作者", "匿名作者"],
-      ["机构", "匿名单位"],
-      ["通信作者", "匿名通信作者"],
+      ["作者", named.map((author) => author.name.trim()).join("、")],
+      ["机构", affiliations.length > 0 ? affiliations.join("；") : "未提供"],
+      [
+        "通信作者",
+        corresponding
+          ? `${corresponding.name}${corresponding.email ? `（${corresponding.email}）` : ""}`
+          : "未指定",
+      ],
+      ...(named.some((author) => author.email)
+        ? [["联系方式", named.filter((author) => author.email).map((author) => `${author.name}（${author.email}）`).join("；")]]
+        : []),
     ],
   )
 }
@@ -2933,7 +2966,7 @@ function scaffoldSections(input: ComposeDraftPaperInput, claimSections: DraftSec
   const ranking = isRankingContext(input)
   const methodFrame = methodPaperFrame(input)
   return [
-    buildPlainSection("author_information", "作者信息", authorInformationSummary()),
+    buildPlainSection("author_information", "作者信息", authorInformationSummary(input.authors)),
     buildPlainSection("abstract", "摘要", abstractSummary(input)),
     buildPlainSection("keywords", "关键词", keywordsSummary(input)),
     buildPlainSection("introduction", "引言", introductionSummary(input)),

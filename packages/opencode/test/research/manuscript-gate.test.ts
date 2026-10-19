@@ -59,6 +59,7 @@ const references = Array.from(
 ).join("\n")
 
 const submissionSections: Record<string, string> = {
+  author_information: "| 项目 | 内容 |\n| --- | --- |\n| 作者 | Ada Lovelace、Alan Turing |\n| 机构 | Example University |",
   abstract: words(180),
   keywords: "retrieval, evaluation, reproducibility, statistics, benchmark",
   introduction: prose("The introduction states the problem and the contribution."),
@@ -144,6 +145,31 @@ describe("manuscript quality gate", () => {
     const missing = findings.find((finding) => finding.category === "missing_statement")
     expect(missing?.severity).toBe("blocker")
     expect(missing?.message).toContain("利益冲突")
+  })
+
+  test("blocks the anonymous author placeholder for an international venue", () => {
+    const draft = draftWith({
+      ...submissionSections,
+      author_information: "| 项目 | 内容 |\n| --- | --- |\n| 作者 | 匿名作者 |",
+    })
+    expect(categories(gateInput({ draft }))).toContain("missing_author_metadata")
+  })
+
+  test("renders named authors instead of the anonymous placeholder", () => {
+    const draft = composeDraftPaper({
+      title: "Authors",
+      ledger: composeClaimLedger({ topic: "Authors", claims: [], now }),
+      authors: [
+        { name: "Ada Lovelace", affiliation: "Example University", email: "ada@example.org", corresponding: true },
+        { name: "Alan Turing", affiliation: "Example University" },
+      ],
+      now,
+    })
+    const info = draft.sections.find((section) => section.section_id === "author_information")?.markdown ?? ""
+    expect(info).toContain("Ada Lovelace")
+    expect(info).toContain("Example University")
+    expect(info).toContain("ada@example.org")
+    expect(info).not.toContain("匿名")
   })
 
   test("blocks a baseline comparison without an effect size", () => {

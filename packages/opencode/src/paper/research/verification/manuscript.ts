@@ -91,6 +91,7 @@ export const CJC_MANUSCRIPT_REQUIREMENTS: ManuscriptRequirements = {
   ],
   require_statistics: "warning",
   require_effect_size: false,
+  require_authors: "warning",
   min_tables: 1,
   min_figures: 0,
 }
@@ -130,6 +131,7 @@ export const Q1_MANUSCRIPT_REQUIREMENTS: ManuscriptRequirements = {
   ],
   require_statistics: "blocker",
   require_effect_size: true,
+  require_authors: "blocker",
   min_tables: 2,
   min_figures: 1,
 }
@@ -323,6 +325,24 @@ export function checkManuscriptQuality(input: VerificationGateInput): Verificati
             required_action: "Tighten or expand the abstract to the venue's range.",
           }),
         )
+      }
+
+      if (requirements.require_authors !== "off") {
+        const authorInfo = sectionText(draft, "author_information")
+        const anonymous = authorInfo.trim().length === 0 || /匿名|anonymous|作者待定|author tbd/i.test(authorInfo)
+        if (anonymous) {
+          findings.push(
+            finding({
+              category: "missing_author_metadata",
+              severity: requirements.require_authors,
+              message: "The manuscript has no named authors or affiliations.",
+              claim_ids: [],
+              source_ids: [],
+              artifact_ids: [],
+              required_action: "Supply authors, affiliations and a corresponding author before submission.",
+            }),
+          )
+        }
       }
 
       const keywordCount = keywords(sectionText(draft, "keywords")).length

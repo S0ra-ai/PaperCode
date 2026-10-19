@@ -48,6 +48,16 @@ export const PaperRunCreatePayload = Schema.Struct({
       llm_disclosure: Schema.optional(Schema.String),
     }),
   ),
+  authors: Schema.optional(
+    Schema.Array(
+      Schema.Struct({
+        name: Schema.String,
+        affiliation: Schema.optional(Schema.String),
+        email: Schema.optional(Schema.String),
+        corresponding: Schema.optional(Schema.Boolean),
+      }),
+    ),
+  ),
   budget_tier: Schema.optional(BudgetTier),
   quality_mode: Schema.optional(QualityMode),
   storage_scope: Schema.optional(StorageScope),

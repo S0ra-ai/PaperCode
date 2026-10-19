@@ -29,6 +29,7 @@ import {
   type DraftPaper,
   type DraftRevision,
   type DraftSectionOverride,
+  type PaperAuthor,
   type PaperDeclarations,
 } from "./research/writing"
 import {
@@ -74,6 +75,7 @@ export type PaperAvailabilityBundle = {
 export type PaperAuthoringInputs = {
   schema_version: "PaperAuthoringInputs.v1"
   declarations?: PaperDeclarations
+  authors?: PaperAuthor[]
   section_overrides?: DraftSectionOverride[]
 }
 
@@ -94,6 +96,8 @@ export type RunPaperAuthoringLoopInput = {
   target_profile?: string
   /** Funding, contributions, competing interests, ethics and AI-use text. Absent means "undeclared". */
   declarations?: PaperDeclarations
+  /** Named authors and affiliations; absent leaves the anonymous placeholder. */
+  authors?: PaperAuthor[]
   /** Section bodies authored or translated by the caller; replaces the generated text. */
   section_overrides?: DraftSectionOverride[]
   /** Supplies English prose when the target venue requires it; absent leaves the generated language. */
@@ -718,6 +722,7 @@ export async function runPaperAuthoringLoop(
         data_plan: input.data_plan,
         literature_map: input.literature_map,
         declarations: input.declarations,
+        authors: input.authors,
         figure,
         experiment_plan: input.experiment_plan,
         experiment_protocol: input.experiment_protocol,
@@ -752,10 +757,11 @@ export async function runPaperAuthoringLoop(
       )
       // Persist the author's own text (and any translation) so a later final-export refresh
       // recomposes the same manuscript instead of silently reverting to the generated sections.
-      if (input.declarations || effectiveOverrides.length) {
+      if (input.declarations || input.authors?.length || effectiveOverrides.length) {
         const authored: PaperAuthoringInputs = {
           schema_version: "PaperAuthoringInputs.v1",
           declarations: input.declarations,
+          authors: input.authors,
           section_overrides: effectiveOverrides.length ? effectiveOverrides : undefined,
         }
         await writeResearchArtifact(
