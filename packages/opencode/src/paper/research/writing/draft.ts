@@ -10,6 +10,7 @@ import type {
 } from "../experiments"
 import type { DataPlan, LiteratureMap } from "../sources"
 import type { CheckpointGuidance, ClaimLedger, ClaimLedgerEntry, DraftPaper, DraftSection } from "./schemas"
+import type { PaperFigureSpec } from "../export/figure"
 
 export type CodeAvailabilityMetadata = {
   package_name?: string
@@ -48,8 +49,18 @@ export type ComposeDraftPaperInput = {
   }
   result_report?: Pick<
     ResultReport,
-    "best_baseline" | "blockers" | "final_claims_allowed" | "primary_metric" | "proposed" | "recommendation" | "reproduction" | "statistics"
+    | "best_baseline"
+    | "blockers"
+    | "final_claims_allowed"
+    | "primary_metric"
+    | "proposed"
+    | "recommendation"
+    | "reproduction"
+    | "statistics"
+    | "significance"
   >
+  /** Chart written by the export pipeline next to the bundle; the results section references it. */
+  figure?: PaperFigureSpec
   code_metadata?: CodeAvailabilityMetadata
   now?: string
 }
@@ -2441,8 +2452,31 @@ function resultStatisticalScopeSummary(input: ComposeDraftPaperInput) {
       : hasContainer
       ? "容器环境"
       : "当前环境"
-  const frequencyText = roles.length > 1 ? `${roleText}各在${environmentText}执行一次` : `${roleText}在${environmentText}执行一次`
-  return `统计解释：${frequencyText}；当前数值是确定性协议观测，不计算置信区间或显著性检验。若后续引入随机采样、模型生成或更大候选集，应报告重复次数、方差和置信区间。`
+  const frequencyText = roles.length > 1 ? `${roleText}各在${environmentText}执行` : `${roleText}在${environmentText}执行`
+  const trialCount = Math.max(0, ...(input.result_report?.statistics ?? []).map((item) => item.n))
+  const runsText = trialCount > 1 ? `${frequencyText} ${trialCount} 次` : `${frequencyText}一次`
+  const significance = input.result_report?.significance?.find(
+    (item) => item.baseline_experiment_id === input.result_report?.best_baseline?.experiment_id,
+  )
+  if (significance) {
+    return `统计解释：${runsText}；结果表报告均值、标准差与样本量。以最强基线 ${significance.baseline_experiment_id} 为对照，Welch t 检验 t=${formatStatisticValue(
+      significance.statistic,
+    )}，df=${formatStatisticValue(significance.df)}，双侧 p ${formatPValue(significance.p)}。`
+  }
+  if (trialCount > 1) {
+    return `统计解释：${runsText}；结果表报告均值、标准差与样本量，未进行显著性检验。`
+  }
+  return `统计解释：${runsText}一次；当前数值是确定性协议观测，不计算置信区间或显著性检验。若后续引入随机采样、模型生成或更大候选集，应报告重复次数、方差和置信区间。`
+}
+
+function formatStatisticValue(value: number) {
+  if (!Number.isFinite(value)) return "n/a"
+  return Math.abs(value) >= 10 ? value.toFixed(2) : value.toFixed(3)
+}
+
+function formatPValue(value: number) {
+  if (!Number.isFinite(value)) return "= n/a"
+  return value < 0.001 ? "< 0.001" : `= ${value.toFixed(4)}`
 }
 
 function recommendationLabel(value: ResultReport["recommendation"]) {
@@ -2721,6 +2755,12 @@ function reproducibilitySummary(input: ComposeDraftPaperInput) {
   ])
 }
 
+function resultsSectionMarkdown(input: ComposeDraftPaperInput, claimSections: DraftSection[]) {
+  const base = resultSummary(input, claimSections)
+  if (!input.figure) return base
+  return [base, `![${input.figure.caption}](figures/primary-metric.png)`].join("\n\n")
+}
+
 function resultSummary(input: ComposeDraftPaperInput, claimSections: DraftSection[]) {
   const table = experimentResultTable(input)
   const ablation = rankingAblationInterpretation(input)
@@ -2878,7 +2918,7 @@ function scaffoldSections(input: ComposeDraftPaperInput, claimSections: DraftSec
     ...claimSections.filter((section) => section.section_id !== "method" && section.section_id !== "results"),
     buildPlainSection("data_availability", "数据与代码可用性", dataAvailabilitySummary(input)),
     buildPlainSection("experimental_setup", "实验设置", experimentProtocolSummary(input)),
-    buildPlainSection("results", "结果", resultSummary(input, claimSections)),
+    buildPlainSection("results", "结果", resultsSectionMarkdown(input, claimSections)),
     buildPlainSection("reproducibility", "可复现性", reproducibilitySummary(input)),
     buildPlainSection("discussion", "讨论", discussionSummary(input)),
     buildPlainSection("threats_to_validity", "效度威胁", threatsToValiditySummary(input)),

@@ -7,7 +7,8 @@ import { initPaths, loadToolLinks } from "./init/config"
 import type { ResearchFinalGateState, ResearchRuntimeOptions } from "./research/runtime"
 import type { DraftPaper } from "./research/writing"
 import { exportMarkdown } from "./research/export/bundle"
-import type { ExportBundle, ExportFile, ExportFormat, ExportManifest, ExportRenderer } from "./research/export"
+import type { ExportBundle, ExportFile, ExportFormat, ExportManifest, ExportRenderer, PaperFigureSpec } from "./research/export"
+import { renderMetricChartPng } from "./research/export/figure"
 import { recordPaperObservabilityAudit } from "./observability"
 
 export type PaperExportToolName = Extract<
@@ -49,6 +50,8 @@ export interface RenderPaperExportPipelineInput {
   tools?: PaperExportToolPaths
   command?: PaperExportCommandRunner
   fonts?: PaperExportFonts
+  /** Rendered next to the bundle as figures/primary-metric.png; the draft markdown references it. */
+  figure?: PaperFigureSpec
   now?: string
 }
 
@@ -540,6 +543,11 @@ export async function renderPaperExportPipeline(
   const markdown = exportMarkdown(input.draft, input.mode === "forced_draft" ? failedChecks : [])
   const outputName = input.bundle_id
   const fonts = exportFonts(process.env, input.fonts)
+  if (input.figure) {
+    const figures = path.join(outputDir(runDir, input.bundle_id), "figures")
+    await mkdir(figures, { recursive: true })
+    await writeFile(path.join(figures, "primary-metric.png"), renderMetricChartPng(input.figure))
+  }
 
   const markdownFile = await renderMarkdown(runDir, input.bundle_id, markdown)
   const latexFile = await renderLatex({

@@ -56,6 +56,7 @@ export async function recordExportBundle(
           draft: input.draft,
           final_gate: input.final_gate,
           source_artifact_ids: input.source_artifact_ids,
+          figure: input.figure,
           renderers: input.renderers,
           now: input.now,
         },

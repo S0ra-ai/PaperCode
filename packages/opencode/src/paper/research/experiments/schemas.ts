@@ -19,6 +19,19 @@ export type ExperimentStatistic = {
   std: number
 }
 
+/** Two-sample test between the proposed method and one baseline, from their trial samples. */
+export type ExperimentSignificance = {
+  experiment_id: string
+  baseline_experiment_id: string
+  metric: string
+  test: "welch_t"
+  statistic: number
+  df: number
+  p: number
+  n_proposed: number
+  n_baseline: number
+}
+
 export type ExperimentResourceUsage = {
   wall_time_seconds: number
   peak_memory_mb?: number
@@ -210,6 +223,8 @@ export type ResultReport = {
   recommendation: "accept" | "revise" | "block"
   /** Present when any experiment ran more than once; the manuscript reports mean ± std from it. */
   statistics?: ExperimentStatistic[]
+  /** Present when a baseline comparison has enough samples for a Welch t-test. */
+  significance?: ExperimentSignificance[]
   reproduction: {
     status: "not_run" | "passed" | "failed"
     container_run_ids: string[]

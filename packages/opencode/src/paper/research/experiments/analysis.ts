@@ -1,7 +1,15 @@
 import { withSpan } from "../telemetry"
 import { plannedExperimentSpecs } from "./planning"
 import { hasIsolatedContainerExecution, hasProcessExecution, standardDeviation } from "./runner"
-import type { ExperimentFinding, ExperimentPlan, ExperimentRun, ExperimentStatistic, ResultReport } from "./schemas"
+import { welchTTest } from "./statistics"
+import type {
+  ExperimentFinding,
+  ExperimentPlan,
+  ExperimentRun,
+  ExperimentSignificance,
+  ExperimentStatistic,
+  ResultReport,
+} from "./schemas"
 
 export type ExperimentAnalysisInput = {
   plan: ExperimentPlan
@@ -111,6 +119,36 @@ export function analyzeExperimentResults(input: ExperimentAnalysisInput): Result
             std: standardDeviation(metric.samples!),
           })),
       )
+      // A baseline comparison with repeated trials gets the standard unequal-variance test, so the
+      // manuscript reports a p-value the tool actually computed rather than one the author typed.
+      const samplesByExperiment = new Map<string, number[]>()
+      for (const run of input.host_runs) {
+        if (run.status !== "succeeded") continue
+        const samples = run.metrics.find((item) => item.name === metric.name)?.samples
+        if (samples && samples.length > 1) samplesByExperiment.set(run.experiment_id, samples)
+      }
+      const proposedSamples = samplesByExperiment.get(input.plan.proposed.experiment_id)
+      const significance: ExperimentSignificance[] = proposedSamples
+        ? input.plan.baselines.flatMap((baseline) => {
+            const baselineSamples = samplesByExperiment.get(baseline.experiment_id)
+            if (!baselineSamples) return []
+            const test = welchTTest(proposedSamples, baselineSamples)
+            if (!test) return []
+            return [
+              {
+                experiment_id: input.plan.proposed.experiment_id,
+                baseline_experiment_id: baseline.experiment_id,
+                metric: metric.name,
+                test: "welch_t" as const,
+                statistic: test.statistic,
+                df: test.df,
+                p: test.p,
+                n_proposed: proposedSamples.length,
+                n_baseline: baselineSamples.length,
+              },
+            ]
+          })
+        : []
       if (new Set(specs.map((spec) => spec.experiment_id)).size !== specs.length) {
         findings.push({
           category: "experiment_protocol_incomplete",
@@ -286,6 +324,7 @@ export function analyzeExperimentResults(input: ExperimentAnalysisInput): Result
           container_run_ids: input.container_runs.map((run) => run.experiment_run_id),
         },
         ...(statistics.length > 0 ? { statistics } : {}),
+        ...(significance.length > 0 ? { significance } : {}),
         final_claims_allowed: finalClaimsAllowed,
       }
     },

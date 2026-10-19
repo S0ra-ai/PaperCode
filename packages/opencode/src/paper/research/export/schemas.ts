@@ -1,5 +1,6 @@
 import type { ResearchFinalGateState } from "../runtime"
 import type { DraftPaper } from "../writing"
+import type { PaperFigureSpec } from "./figure"
 
 export type ExportFormat = "markdown" | "latex" | "pdf" | "docx"
 
@@ -63,6 +64,8 @@ export type RecordExportBundleInput = {
   draft: DraftPaper
   final_gate: ResearchFinalGateState
   source_artifact_ids: string[]
+  /** Primary-metric chart written next to the bundle; the draft references it when present. */
+  figure?: PaperFigureSpec
   renderers?: ExportRenderer
   now?: string
 }

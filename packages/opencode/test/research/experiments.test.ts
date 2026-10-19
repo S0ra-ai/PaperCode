@@ -11,6 +11,7 @@ import {
   recordExperimentLoop,
   runContainerReproduction,
   runHostExploration,
+  welchTTest,
   type ExperimentRunner,
 } from "@/paper/research/experiments"
 import { composeClaimLedger, composeDraftPaper } from "@/paper/research/writing"
@@ -86,6 +87,13 @@ function metricRunner(scores: Record<string, number>, status: "succeeded" | "fai
 }
 
 describe("experiment loop", () => {
+  test("welch t-test separates identical from different samples", () => {
+    const same = welchTTest([0.9, 0.91, 0.89], [0.9, 0.91, 0.89])
+    expect(same?.p).toBeCloseTo(1, 6)
+    const different = welchTTest([0.9, 0.92, 0.94], [0.66, 0.67, 0.65])
+    expect(different?.p).toBeLessThan(0.001)
+  })
+
   test("repeated trials are summarised as mean ± std in the report and the draft", async () => {
     const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-repeated-trials-test-"))
     try {
@@ -145,6 +153,8 @@ describe("experiment loop", () => {
       expect(proposed?.n).toBe(3)
       expect(proposed?.mean).toBeCloseTo(0.92, 6)
       expect(proposed?.std).toBeCloseTo(0.02, 6)
+      expect(recorded.report.significance?.length).toBe(3)
+      expect(recorded.report.significance?.every((item) => item.test === "welch_t" && item.p < 0.01)).toBe(true)
 
       const ledger = composeClaimLedger({ topic: "Repeated trials", claims: [], now })
       const draft = composeDraftPaper({
@@ -157,6 +167,8 @@ describe("experiment loop", () => {
       })
       expect(draft.markdown).toContain("±")
       expect(draft.markdown).toContain("(n=3)")
+      expect(draft.markdown).toContain("Welch")
+      expect(draft.markdown).toMatch(/p [<=]/)
     } finally {
       await clean(dir)
     }

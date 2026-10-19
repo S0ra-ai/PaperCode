@@ -58,7 +58,7 @@ import {
 } from "./orchestrator"
 import { budgetTierPolicy } from "./budget"
 import { executeContainerExperiment, executeHostExperiment, loadExperimentProtocol, parseExperimentMetrics, selectContainerCommand } from "./research/experiments/execution"
-import { recordExportBundle, type ExportBundle } from "./research/export"
+import { figureSpecFromReport, recordExportBundle, type ExportBundle } from "./research/export"
 import {
   applySectionOverrides,
   composeDraftPaper,
@@ -1247,6 +1247,7 @@ async function refreshDraftPaperForFinalExport(input: {
     data_plan: dataPlan,
     literature_map: literatureMap,
     declarations: authoredInputs?.declarations,
+    figure: figureSpecFromReport(resultReport),
     experiment_plan: experimentPlan,
     experiment_protocol: experimentProtocol,
     experiment_guidance: finalClaimsAllowed ? undefined : experimentGuidance,
@@ -3380,6 +3381,8 @@ export async function exportPaperRun(
         options,
       })) ?? latest
   }
+  const reportArtifacts = await readJsonlFacts(runDir, "artifact")
+  const resultReport = await readLatestArtifactBySchema<ResultReport>(runDir, reportArtifacts, "ResultReport.v1")
   if (!latest.draft) {
     const snapshot = await getPaperRunSnapshotFromDir(runDir)
     await publishPaperRunSnapshot(snapshot, runDir)
@@ -3399,6 +3402,7 @@ export async function exportPaperRun(
       draft: latest.draft,
       final_gate: finalGate,
       source_artifact_ids: latest.sourceArtifactIDs,
+      figure: resultReport ? figureSpecFromReport(resultReport) : undefined,
     },
     options,
   )

@@ -1,5 +1,5 @@
 import type { PreviewDiagnostics, PreviewSnapshot } from "../../../preview/src/protocol"
-import { recordExportBundle, type ExportBundle, type ExportRenderer } from "./research/export"
+import { figureSpecFromReport, recordExportBundle, type ExportBundle, type ExportRenderer } from "./research/export"
 import type { ResearchArtifact } from "./research/contracts"
 import type { ExperimentPlan, ResultReport } from "./research/experiments"
 import {
@@ -695,12 +695,14 @@ export async function runPaperAuthoringLoop(
     },
     async (span) => {
       const run = await loadResearchRun(runDir)
+      const figure = figureSpecFromReport(input.result_report)
       const baseDraft = composeDraftPaper({
         title: input.title,
         ledger: input.ledger,
         data_plan: input.data_plan,
         literature_map: input.literature_map,
         declarations: input.declarations,
+        figure,
         experiment_plan: input.experiment_plan,
         experiment_protocol: input.experiment_protocol,
         experiment_guidance: input.experiment_guidance,
@@ -784,6 +786,7 @@ export async function runPaperAuthoringLoop(
             draft,
             final_gate: finalGate,
             source_artifact_ids: sourceArtifactIds,
+            figure,
             renderers: input.renderers,
             now: input.now,
           },
@@ -798,6 +801,7 @@ export async function runPaperAuthoringLoop(
             draft,
             final_gate: finalGate,
             source_artifact_ids: sourceArtifactIds,
+            figure,
             renderers: input.renderers,
             now: input.now,
           },
