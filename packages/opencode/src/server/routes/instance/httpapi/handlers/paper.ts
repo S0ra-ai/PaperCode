@@ -156,6 +156,9 @@ function normalizeCreatePayload(payload: typeof PaperRunCreatePayload.Type): Pap
     target_journal_url: payload.target_journal_url,
     language: payload.language,
     model_roles: payload.model_roles as PaperRunCreateRequest["model_roles"],
+    draft_sections: payload.draft_sections
+      ? payload.draft_sections.map((section) => ({ section_id: section.section_id, markdown: section.markdown }))
+      : undefined,
     budget_tier: payload.budget_tier,
     quality_mode: payload.quality_mode,
     storage_scope: payload.storage_scope,

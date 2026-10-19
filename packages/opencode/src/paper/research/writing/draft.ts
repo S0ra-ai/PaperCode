@@ -2969,3 +2969,30 @@ export function applyCheckpointGuidance(draft: DraftPaper, guidance: CheckpointG
     applied_guidance_ids: [...draft.applied_guidance_ids, guidance.guidance_id],
   }
 }
+
+/** A section body supplied by the author or the authoring agent instead of the generated one. */
+export type DraftSectionOverride = {
+  section_id: string
+  markdown: string
+}
+
+/**
+ * Replace generated section bodies with authored text. This is the seam for content the scaffold
+ * cannot produce - a translated manuscript, a venue-specific related-work section - and the only way
+ * a non-Chinese target profile can be satisfied, because every generator in this file writes Chinese.
+ * Unknown section ids are ignored rather than appended, so the venue's section order is preserved.
+ */
+export function applySectionOverrides(draft: DraftPaper, overrides: DraftSectionOverride[]): DraftPaper {
+  if (overrides.length === 0) return draft
+  const byId = new Map(overrides.map((override) => [override.section_id, override.markdown]))
+  const sections = draft.sections.map((section) => {
+    const markdown = byId.get(section.section_id)
+    return markdown === undefined ? section : { ...section, markdown }
+  })
+  return {
+    ...draft,
+    version: draft.version + 1,
+    sections,
+    markdown: render(draft.title, sections),
+  }
+}

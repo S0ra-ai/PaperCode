@@ -13,6 +13,7 @@ import type { DataPlan, LiteratureMap } from "./research/sources"
 import type { SourceRecord } from "./research/sources/schemas"
 import { withSpan } from "./research/telemetry"
 import {
+  applySectionOverrides,
   composeDraftPaper,
   createDraftRevision,
   recordDraftWriting,
@@ -20,6 +21,7 @@ import {
   type ClaimLedger,
   type DraftPaper,
   type DraftRevision,
+  type DraftSectionOverride,
   type PaperDeclarations,
 } from "./research/writing"
 import {
@@ -78,6 +80,8 @@ export type RunPaperAuthoringLoopInput = {
   target_profile?: string
   /** Funding, contributions, competing interests, ethics and AI-use text. Absent means "undeclared". */
   declarations?: PaperDeclarations
+  /** Section bodies authored or translated by the caller; replaces the generated text. */
+  section_overrides?: DraftSectionOverride[]
   code_artifact_ids?: string[]
   code_metadata?: Parameters<typeof composeDraftPaper>[0]["code_metadata"]
   source_artifact_ids?: string[]
@@ -498,7 +502,9 @@ export function formatDraftPaperForProfile(draft: DraftPaper, input: ProfileForm
 
 function appendProfileAppendix(markdown: string, input: ProfileFormattingInput) {
   const profile = input.target_profile ?? "cjc-paper"
-  if (profile === "generic-preprint") return markdown
+  // The appendix is internal readiness prose in Chinese; neither a preprint nor an international
+  // submission should carry it into the manuscript.
+  if (profile === "generic-preprint" || profile === "international-q1") return markdown
   const appendixLabel = nextAppendixLabel(markdown)
   const datasetCount = input.data_plan?.datasets.length ?? 0
   const failedChecks = [
@@ -698,8 +704,11 @@ export async function runPaperAuthoringLoop(
         code_metadata: input.code_metadata,
         now: input.now,
       })
-      const revision = createProfileAwareDraftRevision({ draft: baseDraft, authoring: input, now: input.now })
-      const draft = applyRevision(baseDraft, revision)
+      const composed = input.section_overrides?.length
+        ? applySectionOverrides(baseDraft, input.section_overrides)
+        : baseDraft
+      const revision = createProfileAwareDraftRevision({ draft: composed, authoring: input, now: input.now })
+      const draft = applyRevision(composed, revision)
       const writing = await recordDraftWriting(
         runDir,
         {

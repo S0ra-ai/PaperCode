@@ -31,6 +31,14 @@ export const PaperRunCreatePayload = Schema.Struct({
   target_journal_url: Schema.optional(Schema.String),
   language: Schema.optional(Schema.String),
   model_roles: Schema.optional(Schema.Record(Schema.String, Schema.String)),
+  draft_sections: Schema.optional(
+    Schema.Array(
+      Schema.Struct({
+        section_id: Schema.String,
+        markdown: Schema.String,
+      }),
+    ),
+  ),
   budget_tier: Schema.optional(BudgetTier),
   quality_mode: Schema.optional(QualityMode),
   storage_scope: Schema.optional(StorageScope),

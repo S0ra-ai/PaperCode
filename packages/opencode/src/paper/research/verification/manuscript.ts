@@ -409,9 +409,11 @@ export function checkManuscriptQuality(input: VerificationGateInput): Verificati
       }
 
       if (requirements.language !== "any") {
-        const body = draft.sections
-          .filter((section) => section.section_id !== "references" && section.section_id !== "author_information")
-          .map((section) => section.markdown)
+        // Judge the narrative the venue reads, not internal bookkeeping sections (audit appendices,
+        // the availability table) or the reference list, which may legitimately mix languages.
+        const body = requirements.required_sections
+          .filter((id) => id !== "references")
+          .map((id) => sectionText(draft, id))
           .join("\n")
         const ratio = cjkRatio(body)
         const wrong =

@@ -2607,6 +2607,182 @@ describe("paper authoring loop", () => {
     }
   })
 
+  test("reaches a final export for the international Q1 profile with authored English sections", async () => {
+    const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-q1-authoring-"))
+    try {
+      const workspace = path.join(dir, "workspace")
+      const home = path.join(dir, "home")
+      await mkdir(workspace, { recursive: true })
+      await mkdir(home, { recursive: true })
+      const options = runtimeOptions(workspace, home)
+      const handle = await createResearchRun({ topic: "Retrieval evaluation" }, options)
+      const ledger = composeClaimLedger({
+        topic: "Retrieval evaluation",
+        claims: [
+          {
+            text: "The method improves retrieval accuracy on the open benchmark.",
+            section_id: "results",
+            confidence: 0.82,
+            source_ids: ["paper-a", "source-dataset-open-retrieval"],
+            artifact_ids: ["artifact-result-report"],
+          },
+        ],
+        now,
+      })
+
+      const sources: SourceRecord[] = Array.from({ length: 40 }, (_, index) => ({
+        schema_version: "SourceRecord.v1",
+        source_id: index === 0 ? "paper-a" : `paper-q1-${index + 1}`,
+        kind: "paper",
+        title: `Verified Retrieval Study ${index + 1}`,
+        url: `https://arxiv.org/abs/2402.${String(10000 + index).padStart(5, "0")}`,
+        provider: "arxiv",
+        license: { status: "clear", expression: "arXiv non-exclusive distribution" },
+        version: { value: "v1", retrieved_at: now, published_at: `${2022 + (index % 4)}-03-01` },
+        verification: { status: "verified", method: "unit-test-arxiv", checked_at: now },
+        topics: ["retrieval"],
+        arxiv_id: `2402.${10000 + index}`,
+        retrieved_at: now,
+      }))
+
+      const prose = (sentence: string) => Array.from({ length: 8 }, () => sentence).join(" ")
+      const sectionOverrides = [
+        { section_id: "abstract", markdown: Array.from({ length: 180 }, (_, index) => `token${index}`).join(" ") },
+        { section_id: "keywords", markdown: "retrieval, evaluation, reproducibility, statistics, benchmark" },
+        { section_id: "introduction", markdown: prose("The introduction states the problem and the contribution.") },
+        { section_id: "related_work", markdown: prose("Prior work is compared along a shared dimension.") },
+        { section_id: "method", markdown: prose("The method section describes the proposed procedure.") },
+        {
+          section_id: "experimental_setup",
+          markdown: prose("The setup names the dataset, baselines and metrics."),
+        },
+        {
+          section_id: "results",
+          markdown: [
+            prose("Results report the primary metric against the strongest baseline."),
+            "| Method | Accuracy |",
+            "| --- | --- |",
+            "| Baseline | 0.880 |",
+            "| Ours | 0.910 |",
+            "",
+            "| Ablation | Accuracy |",
+            "| --- | --- |",
+            "| w/o module | 0.890 |",
+            "| full | 0.910 |",
+            "",
+            "Accuracy is 0.910 ± 0.004 over five seeds and the difference is significant (p = 0.003, Wilcoxon signed-rank).",
+            "![Figure 1: primary result](figures/result.png)",
+          ].join("\n"),
+        },
+        { section_id: "discussion", markdown: prose("The discussion separates supported from unsupported claims.") },
+        { section_id: "conclusion", markdown: prose("The conclusion restates the supported claim.") },
+      ]
+
+      const authoringRun = (id: string, role: "proposed" | "baseline", mode: "host" | "container"): ExperimentRun => ({
+        schema_version: "ExperimentRun.v1",
+        experiment_run_id: `${mode}:${id}`,
+        plan_id: "plan-1",
+        experiment_id: id,
+        role,
+        status: "succeeded",
+        command: { argv: ["bun", "test", id] },
+        environment: { mode, platform: mode === "container" ? "container" : process.platform },
+        execution: fixtureExecution(mode, id),
+        metrics: [{ name: "accuracy", value: role === "proposed" ? 0.91 : 0.88, direction: "higher_better" }],
+        stdout: "fixture",
+        stderr: "",
+        exit_code: 0,
+        resource_usage: { wall_time_seconds: 0 },
+        started_at: now,
+        finished_at: now,
+        reproduction: { container_reproduced: mode === "container" },
+      })
+
+      const result = await runPaperAuthoringLoop(
+        handle.run_dir,
+        {
+          title: "Evidence-Constrained Retrieval",
+          ledger,
+          data_plan: dataPlan(),
+          result_report: resultReport(),
+          available_source_ids: ["paper-a", "source-dataset-open-retrieval"],
+          source_records: [
+            sources[0],
+            {
+              schema_version: "SourceRecord.v1",
+              source_id: "source-dataset-open-retrieval",
+              kind: "dataset",
+              title: "Open Retrieval Dataset",
+              url: "https://huggingface.co/datasets/mteb/msmarco",
+              provider: "huggingface",
+              license: { status: "clear", expression: "CC-BY-4.0" },
+              version: { value: "v1", retrieved_at: now },
+              verification: { status: "verified", method: "unit-test-huggingface-record", checked_at: now },
+              topics: ["retrieval"],
+              retrieved_at: now,
+            },
+          ],
+          model_reviews: [
+            { model: "reviewer-one", verdict: "pass" },
+            { model: "reviewer-two", verdict: "pass" },
+          ],
+          target_profile: "international-q1",
+          literature_map: {
+            schema_version: "LiteratureMap.v1",
+            topic: "Retrieval evaluation",
+            created_at: now,
+            sources,
+            clusters: [],
+            summary: {
+              total_sources: sources.length,
+              verified_sources: sources.length,
+              open_license_sources: sources.length,
+            },
+            diagnostics: { verification_failures: [], gaps: [] },
+          },
+          experiment_runs: {
+            host_runs: [
+              authoringRun("proposed", "proposed", "host"),
+              authoringRun("baseline", "baseline", "host"),
+            ],
+            container_runs: [
+              authoringRun("proposed", "proposed", "container"),
+              authoringRun("baseline", "baseline", "container"),
+            ],
+          },
+          section_overrides: sectionOverrides,
+          declarations: {
+            funding: "This work was supported by grant 2024AAA123.",
+            author_contributions: "A.B. designed the study; C.D. ran the experiments.",
+            competing_interests: "The authors declare no competing interests.",
+            llm_disclosure: "An LLM assisted with language editing; the authors verified all content.",
+          },
+          code_metadata: {
+            package_name: "evidence-constrained-retrieval",
+            repository_url: "https://github.com/example/evidence-constrained-retrieval",
+            version: "0.1.0",
+            commit_hash: "abc1234",
+            worktree_dirty: false,
+            license: "MPL-2.0",
+          },
+          code_artifact_ids: ["artifact-codebase-map"],
+          renderers,
+          now,
+        },
+        options,
+      )
+
+      expect(result.verification.blocking_report.blockers.map((item) => item.category)).toEqual([])
+      expect(result.verification.blocking_report.warnings.map((item) => item.category)).not.toContain(
+        "missing_section_content",
+      )
+      expect(result.final_export_blocked).toBe(false)
+      expect(result.export.bundle.status).toBe("final")
+    } finally {
+      await clean(dir)
+    }
+  })
+
   test("blocks final export and produces a clearly marked forced draft", async () => {
     const dir = await mkdtemp(path.join(os.tmpdir(), "papercode-authoring-forced-"))
     try {
