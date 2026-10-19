@@ -167,6 +167,13 @@ describe("container execution provenance", () => {
       expect(result.exitCode).toBe(2)
       expect(result.execution).toBeUndefined()
     }
+    const invalidEnvironment = await executeContainerExperiment(
+      { argv: ["docker", "run", "image"], env: { "BAD-NAME": "value" } },
+      process.cwd(),
+      1000,
+    )
+    expect(invalidEnvironment.exitCode).toBe(2)
+    expect(invalidEnvironment.stderr).toContain("Unsupported container environment variable")
   })
 
   test("verifies runtime inspection and removes only the observed container", async () => {
@@ -208,13 +215,16 @@ describe("container execution provenance", () => {
       return child
     }) as any)
     const result = await executeContainerExperiment(
-      { argv: ["docker", "run", "--rm", "example:latest"] },
+      { argv: ["docker", "run", "--rm", "example:latest"], env: { PAPERCODE_SEED: "3" } },
       process.cwd(),
       1000,
     )
     expect(result.execution?.container.container_id).toBe(id)
     expect(result.execution?.container.isolated).toBe(true)
     expect(calls[0]).not.toContain("--rm")
+    expect(calls[0]).toContain("-e")
+    expect(calls[0]).toContain("PAPERCODE_SEED")
+    expect(calls[0]!.indexOf("PAPERCODE_SEED")).toBeLessThan(calls[0]!.indexOf("example:latest"))
     expect(calls.at(-1)).toEqual(["docker", "rm", "-f", id])
     privileged = true
     const forged = await executeContainerExperiment({ argv: ["docker", "run", "example:latest"] }, process.cwd(), 1000)

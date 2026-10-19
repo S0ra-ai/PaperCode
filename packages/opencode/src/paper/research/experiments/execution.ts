@@ -357,11 +357,19 @@ export async function executeContainerExperiment(
     clean.push(key, value)
   }
   if (!imageFound) return rejected("Container run image is missing.")
+  // docker run does not inherit the CLI's environment; forward command.env explicitly so seeds and
+  // protocol variables reach the container instead of silently varying only on the host side.
+  const environment = Object.entries(command.env ?? {})
+  for (const [name] of environment) {
+    if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(name))
+      return rejected(`Unsupported container environment variable: ${name}`)
+  }
+  const forwarded = environment.flatMap(([name]) => ["-e", name])
   const dir = await mkdtemp(path.join(tmpdir(), "papercode-container-"))
   const cidfile = path.join(dir, "container.cid")
   let id: string | undefined
   try {
-    const actual = { ...command, argv: [runtime, "run", "--cidfile", cidfile, ...clean] }
+    const actual = { ...command, argv: [runtime, "run", "--cidfile", cidfile, ...forwarded, ...clean] }
     const result = await processCommand(actual.argv, cwd, timeoutMs, command.env)
     const candidate = (await readFile(cidfile, "utf8").catch(() => "")).trim()
     if (!/^[a-f0-9]{12,64}$/i.test(candidate))
