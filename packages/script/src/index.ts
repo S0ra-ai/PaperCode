@@ -27,7 +27,12 @@ const CHANNEL = await (async () => {
   if (env.OPENCODE_CHANNEL) return env.OPENCODE_CHANNEL
   if (env.OPENCODE_BUMP) return "latest"
   if (env.OPENCODE_VERSION && !env.OPENCODE_VERSION.startsWith("0.0.0-")) return "latest"
-  return await $`git branch --show-current`.text().then((x) => x.trim())
+  // A source tarball or zip has no .git; fall back to a local channel instead of failing the build.
+  return await $`git branch --show-current`
+    .text()
+    .then((x) => x.trim())
+    .catch(() => "local")
+    .then((x) => x || "local")
 })()
 const IS_PREVIEW = CHANNEL !== "latest"
 
