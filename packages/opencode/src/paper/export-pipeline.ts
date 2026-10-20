@@ -557,7 +557,7 @@ function hangLatexReferences(latex: string, title?: string) {
     .split(/\n{2,}/)
     .map((entry) => entry.trim())
     .filter(Boolean)
-    .map((entry) => `{\\sloppy\\noindent\\hangindent=1.5em\\hangafter=1 ${entry}\\par}`)
+    .map((entry) => `{\\raggedright\\noindent\\hangindent=1.5em\\hangafter=1 ${entry}\\par}`)
   if (entries.length === 0) return latex
   return (
     latex.slice(0, bodyStart) +
@@ -577,10 +577,12 @@ function protectLatexIdentifiers(latex: string) {
     // Never touch control sequences such as \ifPDFTeX. Break between CamelCase parts without
     // hyphenating them: each part stays in an \mbox, and \allowbreak provides the breakpoint.
     .replace(/(?<![\w\\])([a-z][a-z0-9]*(?:[A-Z][A-Za-z0-9]*)+)\b/g, (token) =>
-      token
-        .split(/(?=[A-Z])/)
-        .map((part) => `\\mbox{${part}}`)
-        .join("\\allowbreak{}"),
+      token.length <= 6
+        ? `\\mbox{${token}}`
+        : token
+            .split(/(?=[A-Z])/)
+            .map((part) => `\\mbox{${part}}`)
+            .join("\\allowbreak{}"),
     )
     .replace(/\\texttt\{([^{}]*)\}/g, (_, code: string) =>
       `\\texttt{${code.replace(/([,(.:/=<>])/g, "$1\\allowbreak{}")}}`,
@@ -618,8 +620,8 @@ function injectLatexFrontMatter(latex: string, source: LatexSource, documentclas
     [
       "\\makeatletter",
       "\\@ifundefined{UrlBreaks}{}{\\g@addto@macro\\UrlBreaks{\\do\\/\\do\\.\\do\\-\\do\\_\\do\\:}}",
+      "\\@ifundefined{Urlmuskip}{}{\\Urlmuskip=0mu plus 1mu\\relax}",
       "\\makeatother",
-      "\\@ifundefined{Urlmuskip}{}{\\setlength{\\Urlmuskip}{0mu plus 1mu}}",
       "\\setlength{\\emergencystretch}{3em}",
       "\\setlength{\\tabcolsep}{4.5pt}",
       "\\begin{document}",
