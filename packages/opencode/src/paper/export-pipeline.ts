@@ -557,7 +557,7 @@ function hangLatexReferences(latex: string, title?: string) {
     .split(/\n{2,}/)
     .map((entry) => entry.trim())
     .filter(Boolean)
-    .map((entry) => `{\\noindent\\hangindent=1.5em\\hangafter=1 ${entry}\\par}`)
+    .map((entry) => `{\\sloppy\\noindent\\hangindent=1.5em\\hangafter=1 ${entry}\\par}`)
   if (entries.length === 0) return latex
   return (
     latex.slice(0, bodyStart) +
@@ -615,7 +615,15 @@ function injectLatexFrontMatter(latex: string, source: LatexSource, documentclas
   }
   output = output.replace(
     "\\begin{document}",
-    "\\setlength{\\emergencystretch}{3em}\\setlength{\\tabcolsep}{4.5pt}\n\\begin{document}",
+    [
+      "\\makeatletter",
+      "\\@ifundefined{UrlBreaks}{}{\\g@addto@macro\\UrlBreaks{\\do\\/\\do\\.\\do\\-\\do\\_\\do\\:}}",
+      "\\makeatother",
+      "\\@ifundefined{Urlmuskip}{}{\\setlength{\\Urlmuskip}{0mu plus 1mu}}",
+      "\\setlength{\\emergencystretch}{3em}",
+      "\\setlength{\\tabcolsep}{4.5pt}",
+      "\\begin{document}",
+    ].join("\n"),
   )
   output = shrinkWideLatexTables(output)
   output = protectLatexIdentifiers(output)

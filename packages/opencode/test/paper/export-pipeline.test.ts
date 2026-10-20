@@ -838,6 +838,8 @@ describe("venue LaTeX structure", () => {
     expect(tex).toContain("\\ifPDFTeX")
     expect(tex).not.toContain("\\mbox{ifPDFTeX}")
     expect(tex).toContain("\\mbox{rank}\\allowbreak{}\\mbox{Agent}")
+    expect(tex).toContain("\\UrlBreaks")
+    expect(tex).toContain("\\@ifundefined{Urlmuskip}")
     expect(result.bundle.files.find((file) => file.format === "pdf")?.status).toBe("written")
   })
 })
