@@ -71,6 +71,10 @@
             - fix(export): 作者单位识别兼容 Institution/Organisation 译法；正文行距加入 emergencystretch 与更紧的 tabcolsep
             - fix(export): 参考文献允许在 URL 的 / . - _ : 处断行，并对悬挂缩进条目启用 \sloppy，减少长 arXiv 链接溢出
             - fix(export): 短混合大小写词（arXiv、nDCG）整体保持不拆；参考文献改为 ragged-right，避免 \sloppy 造成的大间隙
+            - feat(cli): 源码运行时的版本统一从 CHANGELOG 读取；`--version`、`debug info` 与 TUI 侧边栏显示同一版本，不再出现 "local"
+            - fix(paper): 缺少 ExportBundle artifact 时不再用仅含 written 格式的导出事实拼出 "final 成功"；改为 blocked + final_export_bundle_missing
+            - fix(export): longtable 单元格段落加入 \hspace{0pt}，首词也能断词，窄表头不再溢出 10–20pt
+            - fix(build): 源码 zip（无 .git）中构建脚本回退到 local channel，`bun run build` 不再因 git 失败
         :fix
             - fix(paper): 统计、表格、图只统计结果章节，附录里的 p 值或声明表不再顶替结果
             - fix(paper): 声明按"标签列→值列"解析并支持列表/段落写法；"未提供/not provided"等说法同样判定为未声明

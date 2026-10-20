@@ -468,6 +468,24 @@ function takeBracedCommand(latex: string, command: string) {
   return { text: latex.slice(start, index), latex: latex.slice(0, start) + latex.slice(index) }
 }
 
+/** TeX never hyphenates the first word of a paragraph, and pandoc makes every table cell one. */
+function breakLatexTableCells(latex: string) {
+  return latex.replace(/\\begin\{longtable\}[\s\S]*?\\end\{longtable\}/g, (block) => {
+    let output = block
+    for (const alignment of ["raggedright", "raggedleft", "centering"]) {
+      output = output.replaceAll(
+        `>{\\${alignment}\\arraybackslash}p{`,
+        `>{\\${alignment}\\arraybackslash\\hspace{0pt}}p{`,
+      )
+      output = output.replaceAll(
+        `\\begin{minipage}[b]{\\linewidth}\\${alignment}`,
+        `\\begin{minipage}[b]{\\linewidth}\\${alignment}\\hspace{0pt}`,
+      )
+    }
+    return output
+  })
+}
+
 /** Wide longtables cannot fit the text block at body size; shrink them inside the environment. */
 function shrinkWideLatexTables(latex: string) {
   return latex.replace(/\\begin\{longtable\}[\s\S]*?\\end\{longtable\}/g, (block) => {
@@ -628,6 +646,7 @@ function injectLatexFrontMatter(latex: string, source: LatexSource, documentclas
     ].join("\n"),
   )
   output = shrinkWideLatexTables(output)
+  output = breakLatexTableCells(output)
   output = protectLatexIdentifiers(output)
   output = unnumberLatexHeadings(output, [
     ...(source.referencesTitle ? [source.referencesTitle] : []),

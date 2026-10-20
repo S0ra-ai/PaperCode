@@ -17,7 +17,8 @@ import {
   type PaperModelRole,
   type PaperRunRuntimeOptions,
 } from "@/paper"
-import { createResearchRun, setResearchFinalGate, writeResearchArtifact } from "@/paper/research/runtime"
+import { appendResearchFact, createResearchRun, setResearchFinalGate, writeResearchArtifact } from "@/paper/research/runtime"
+import { RESEARCH_SCHEMA_VERSION } from "@/paper/research/contracts"
 import type { ExportBundle } from "@/paper/research/export"
 
 const now = "2026-05-10T00:00:00Z"
@@ -242,6 +243,32 @@ describe("PaperRun default execution engine", () => {
     expect(snapshot.export_state.files?.map((file) => `${file.format}:${file.status}`)).toEqual(["markdown:written", "pdf:failed"])
     expect(snapshot.export_state.tool_diagnostics).toEqual(["pdf: PDF renderer output is not a valid PDF file header."])
     expect(snapshot.export_state.message).toContain("pdf export failed")
+  })
+
+  test("does not report a clean final export when the bundle artifact is missing", async () => {
+    const { workspace, home } = await fixtureWorkspace()
+    const options = runtimeOptions(workspace, home)
+    const handle = await createResearchRun({ topic: "missing export bundle", workspace }, options)
+    await setResearchFinalGate(handle.run_dir, { status: "passed", blockers: [] }, options)
+    await appendResearchFact(
+      handle.run_dir,
+      "export",
+      {
+        schema_version: RESEARCH_SCHEMA_VERSION,
+        export_id: "export:bundle-final-missing:markdown",
+        run_id: handle.run.run_id,
+        draft_id: "draft-missing",
+        format: "markdown",
+        path: "exports/bundle-final-missing/bundle-final-missing.md",
+        artifact_ids: ["artifact-side"],
+        created_at: now,
+      } as any,
+    )
+
+    const snapshot = await getPaperRunSnapshot(handle.run.run_id, options)
+    expect(snapshot.export_state.status).toBe("blocked")
+    expect(snapshot.export_state.failed_checks).toContain("final_export_bundle_missing")
+    expect(snapshot.export_state.message).toContain("missing or unreadable")
   })
 
   test("creation drives the default paper stage graph without injected fixture handlers", async () => {

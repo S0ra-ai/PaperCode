@@ -1,5 +1,6 @@
 import { Global } from "@opencode-ai/core/global"
-import { InstallationVersion, ProductVersion } from "@opencode-ai/core/installation/version"
+import { InstallationVersion } from "@opencode-ai/core/installation/version"
+import { ProductVersion } from "../../../version"
 import { Flag } from "@opencode-ai/core/flag/flag"
 import os from "os"
 import { Duration, Effect } from "effect"

@@ -1038,28 +1038,16 @@ function exportState(input: {
       message: "Final gate passed, but no final export has been generated yet.",
     }
   }
-  const formats = [...new Set(finalExports.map((item) => item.format))]
-  const artifactIds = [...new Set(finalExports.flatMap((item) => item.artifact_ids))]
-  const files = Array.from(
-    new Map(
-      finalExports.map((item) => [
-        `${item.format}:${item.path}`,
-        {
-          format: item.format,
-          path: item.path,
-          status: "written" as const,
-        },
-      ]),
-    ).values(),
-  )
+  // Export facts only record written formats; without the bundle artifact the failed formats
+  // and their diagnostics are unknown, so this must not be reported as a clean final export.
   return {
     run_id: input.runID,
-    status: "final",
-    formats,
-    artifact_ids: artifactIds,
-    files,
-    failed_checks: [],
-    message: "Final export is available.",
+    status: "blocked",
+    formats: [],
+    artifact_ids: [...new Set(finalExports.flatMap((item) => item.artifact_ids))],
+    failed_checks: ["final_export_bundle_missing"],
+    message:
+      "Final export facts exist, but the export bundle artifact is missing or unreadable; run the export again to verify every format.",
   }
 }
 

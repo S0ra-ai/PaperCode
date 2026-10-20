@@ -791,7 +791,10 @@ describe("venue LaTeX structure", () => {
         const output = input.args[input.args.indexOf("-o") + 1]!
         await Bun.write(
           output,
-          "\\documentclass{elsarticle}\\ifPDFTeX\\fi\\title{T}\\author{A}\\begin{document}\n\\maketitle\n\\begin{abstract}Abstract text with rankAgentTeamPapers.\\end{abstract}\n\\section{Introduction}\nBody.\n\\end{document}\n",
+          "\\documentclass{elsarticle}\\ifPDFTeX\\fi\\title{T}\\author{A}\\begin{document}\n\\maketitle\n\\begin{abstract}Abstract text with rankAgentTeamPapers.\\end{abstract}\n\\section{Introduction}\nBody.\n" +
+            "\\begin{longtable}[]{@{}>{\\raggedright\\arraybackslash}p{(\\linewidth - 2\\tabcolsep) * \\real{1.0}}@{}}\n\\toprule\n" +
+            "\\begin{minipage}[b]{\\linewidth}\\raggedright Verification\\end{minipage} \\\\\n\\end{longtable}\n" +
+            "\\end{document}\n",
         )
         latexWritten = output
         return { exit_code: 0, stdout: "", stderr: "" }
@@ -840,6 +843,8 @@ describe("venue LaTeX structure", () => {
     expect(tex).toContain("\\mbox{rank}\\allowbreak{}\\mbox{Agent}")
     expect(tex).toContain("\\UrlBreaks")
     expect(tex).toContain("\\@ifundefined{Urlmuskip}")
+    expect(tex).toContain("\\arraybackslash\\hspace{0pt}}p{")
+    expect(tex).toContain("\\raggedright\\hspace{0pt}")
     expect(result.bundle.files.find((file) => file.format === "pdf")?.status).toBe("written")
   })
 })

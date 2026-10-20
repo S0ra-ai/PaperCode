@@ -1,4 +1,3 @@
-import { readFileSync } from "node:fs"
 import yargs from "yargs"
 import { hideBin } from "yargs/helpers"
 import { RunCommand } from "./cli/cmd/run"
@@ -8,7 +7,7 @@ import { ModelsCommand } from "./cli/cmd/models"
 import { UI } from "./cli/ui"
 import { Installation } from "./installation"
 import { InstallationVersion } from "@opencode-ai/core/installation/version"
-import { localChangelogPath, resolveProductVersion } from "./version"
+import { ProductVersion } from "./version"
 import { NamedError } from "@opencode-ai/core/util/error"
 import { FormatError } from "./cli/error"
 import { ServeCommand } from "./cli/cmd/serve"
@@ -56,23 +55,13 @@ function show(out: string) {
   process.stderr.write(out)
 }
 
-// A release binary carries PAPERCODE_VERSION; from source, read the repository CHANGELOG so
-// `--version` reports the product version instead of the placeholder "local".
-const Version = (() => {
-  try {
-    return resolveProductVersion(readFileSync(localChangelogPath(), "utf8"))
-  } catch {
-    return resolveProductVersion()
-  }
-})()
-
 const cli = yargs(args)
   .parserConfiguration({ "populate--": true })
   .scriptName("papercode")
   .wrap(100)
   .help("help", "show help")
   .alias("help", "h")
-  .version("version", "show version number", Version)
+  .version("version", "show version number", ProductVersion)
   .alias("version", "v")
   .option("print-logs", {
     describe: "print logs to stderr",
@@ -112,7 +101,7 @@ const cli = yargs(args)
     process.env.OPENCODE_PID = String(process.pid)
 
     Log.Default.info("papercode", {
-      version: Version,
+      version: ProductVersion,
       build_version: InstallationVersion,
       args: process.argv.slice(2),
       process_role: processMetadata.processRole,
